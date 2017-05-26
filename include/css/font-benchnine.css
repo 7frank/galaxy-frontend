@@ -1,0 +1,23 @@
+@font-face {
+  font-family: 'benchnine';
+  src: url("../fonts/benchnine/BenchNine-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'benchnine-light';
+  src: url("../fonts/benchnine/BenchNine-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'benchnine-bold';
+  src: url("../fonts/benchnine/BenchNine-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+
+.benchnine { font-family: 'benchnine';}
+.benchnine-light { font-family: 'benchnine-light';}
+.benchnine-bold { font-family: 'benchnine-bold';}

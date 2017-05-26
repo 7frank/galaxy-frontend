@@ -1,0 +1,40 @@
+<link href="include/css/layout.css" rel="stylesheet" type="text/css" />
+<link href="include/css/main.css" rel="stylesheet" type="text/css" >
+<link href="include/css/sol.css" rel="stylesheet" type="text/css" >
+<link href="include/css/scrollert.min.css" rel="stylesheet" type="text/css" >
+<link href="include/css/font-roboto.css" rel="stylesheet" type="text/css" />
+<link href="include/css/font-roboto-condense.css" rel="stylesheet" type="text/css" />
+<link href="include/css/font-benchnine.css" rel="stylesheet" type="text/css" />
+<link href="include/fonts/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+<script src="include/highstock/code/highstock.js"></script>
+<script src="include/highstock/code/js/themes/dark-unica.js"></script>
+<script src="include/highstock/code/modules/exporting.js"></script>
+<style>
+	#logo {
+	position: absolute;
+	top: 0px;
+	left: 30;
+	color: #ffffff;
+	z-index: 1;padding: 10px;
+}
+#starview {
+	position: absolute;
+	top: 0px;
+	right: 0;
+	color: #ffffff;
+	z-index: 1;padding: 5px 10px 10px 10px;
+}
+#sig_menu {
+	font-family:'roboto';
+	position: absolute;
+	top: 13px;
+	left: 650;
+	color: #0490cd;
+	z-index: 1;padding: 10px;
+	font-size:15px;
+	background: rgba(0, 0, 0, 0.51);
+	cursor:pointer;
+}
+
+</style>
