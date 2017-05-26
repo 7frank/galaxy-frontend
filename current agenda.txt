@@ -1,0 +1,191 @@
+BUG:
+	[]//FIXME this is only currently there for the search function to trigger text generation because the onComplete Mehthod might have a problem
+		
+	[]change how text nodes are selected
+	[] so that the current selection and points close to the center are prioritised?
+		
+
+		[]re-enable slider zoom-in/out with +- buttons
+
+
+	[] restrict 2d camera controls
+
+
+[] node pointclouds position based on mass center? problem changing when animating
+--would be nice to ahve for convex shape feature in 2d as well as 3d		
+		
+[]improve user interaction tools like clicking behaviour and different stated
+- also dbl click triggers click 		
+
+[]spend some time to generate some alternative node distributions for that
+[] so we can use alternative distribution functions and interchange them
+For 2D, We still have to make a bit of changes
+[] subclusters
+And for 3D, if we can do clusters within clusters
+The use case would be, we would group companies in each sector within a country
+Instead of randomly distributed currently 
+So we would strictly cluster it based on sector 
+
+	[]And each sector would have nice looking transparent wrapper around it
+And we can see interaction of that sector and other in that country
+As well as country sector to other country sector
+So a country would have transparent wrapper in that
+And inside a country would be wrappers of sectors as well
+We can try that with 2D first 
+And do for 3D as well
+
+------------------------------------------
+------------------------------------------
+------------------------------------------
+
+actually, If we can do 1D and 3D. instead of 2D and 3D as well. 
+I forgot that 2D and 1D are actually different :smile:
+so here are plans for next steps, Frank
+
+
+1. Sector clusters within the country cluster for 3D and 1D. 
+
+	For 3D. If we can put color transparent 
+
+	For 1D. it could look something like this.
+
+3. when search and select show, company name
+
+4. click to highlight then click to popup
+
+5, node color (From downdown list) connect to real time stock price from Intrio API. I have access to this API will next Monday. 
+
+6. dots - tooltip for news
+
+7. blinking node - for live news stored in my database
+
+
+
+------------------------------------------
+ see [image]
+------------------------------------------
+
+
+
+------------------------------------------
+------------------------------------------
+------------------------------------------
+
+
+--------------CURRENT-------------------
+
+[]2d/3d 
+
+
+(5) country texts
+-when clicking country update other text node thingies
+- Each country will also have its own text color and size from the data file.
+-have an optional sort flag/ method to hide country names that are not inside th frustum
+
+(6)  Let's use + and - control instead of the one we have
+- Better node distribution
+
+[] rest of nodes than n<40 elements gets own "Other" -group
+
+ 
+
+--------------ADDITIONAL-------------------
+-dynamic countrytext ranges from cluster infos
+-like minDistance = function ()....
+
+ [x50%] multiselect nodes via ctrl
+ 
+-[x]line texture 2d => animate direction
+
+- better autocomplete? https://select2.github.io/examples.html
+
+- better initial rand seed with sectors  cloud_count rt 3 => d  [d][d][d]
+- animation paths / idle animation
+-story modes from animations: country road/explore current cluster
+
+- cross fade
+- blend in/out clusters of nodes and simple effective geometry or reduced simple convex hull
+
+- real world company data for info, price, news ...
+- proper module structure / refactoring gui
+
+
+--------------test-------------------
+
+test http://keithwhor.github.io/multithread.js/
+test throttle where possible
+test check every for/each/map/filter call for perf impact
+use the f-ing performance tab
+
+
+Arrow helper seems bugged throws errors all the times or does it?
+
+[x] graph tick animate... FIXME edges are the proplem
+[] separate textnode draw and get with throttle //draw :10 calc: 100
+[] country text nodes filter invisible clouds frustum 
+[] numSkipEdgesRendered change reload
+
+--------------FEATURES-------------------
+
+a;
+smooth hull 
+skip for now takes too long atm
+
+b;
+arrow hover
+ does not look good for now just line color
+
+c/1;
+dots inside node (use case: each dot represent a story about company)
+-can be mouse over aswell
+
+
+--------------RANDOM-------------------
+[x?] performance
+ [x]ram usage!!!!
+ [x] pointclouds and textures!!
+ 
+
+- one light color for in and outgoing instead of red green 
+
+- change annie animation into the blue circle for exnandable nodes
+
+- invisible hull size equal sprite size 
+- //FIXME picking won't work inless spherehelper useDebugSphere was triggered once
+
+- potential bad initialisation of realdata compare "node group_data" vs "node.nodes.group_data"
+also "isGroupNode" vs "group_data"
+
+- text wont show if debug shpere isnt enabled see mesh onafterrender
+
+-----------------------------------------------------
+//FIXME create a solid node group particle system frist then add tetxt functionality to it
+- limit max amount of text nodes showing per rendering cycle
+by dividing screen into cells nXm  and limit amount of nodes displayed within cell
+also have a sorted list at the end of a render cycle of node distances to camera and select the top  x most
+as a presort mechanism
+hiding prev cycle only and so on
+-----------------------------------------------------
+- meshline only show strongest ties if line count > m => at least one per node 
+------------------------------------------------------
+- better behavoiur of small dots
+---
+- mockup as in screenshot
+-----------------------------------------
+- improve performance overall and in specific text nodes by sorting particle clouds from viewer position
+
+also check for redundant code that might get called often
+
+ eg.  use each with limit
+------------
+Test group line where only centers of groups are conected
+
+test reduction of group lines with only most relevant
+
+test individual force graphs
+
+test if meshes for ui and pointcloud raytracer interfere in some way
+
+
+
+
