@@ -1,0 +1,23 @@
+{"nodes": [
+
+{"id": "1", "group": 0,"shape" : "cube"}
+,{"id": "2", "group": 1, "shape" : "sphere"}
+,{"id": "3", "group": 2, "shape" : "cube"}
+,{"id": "4", "group": 3, "shape" : "cube"}
+,{"id": "5", "group": 2, "shape" : "cube"}
+,{"id": "6", "group": 3, "shape" : "cube"}
+,{"id": "7", "group": 3, "shape" : "cube"}
+,{"id": "8", "group": 3, "shape" : "cube"}
+
+], "links": [
+
+{"source": "1", "target": "3"},
+{"source": "1", "target": "4"},
+{"source": "1", "target": "5"},
+{"source": "2", "target": "6"},
+{"source": "3", "target": "7"},
+{"source": "4", "target": "2"},
+{"source": "2", "target": "8"},
+{"source": "5", "target": "1"}
+
+]}
