@@ -15,7 +15,16 @@ class Node extends THREE.Vector3{
 		
 }	
 
-// a set of nodes with some similarities
+/**
+ * a set of node objects
+ * the cluster itself also contains parts of the visual representation of the nodes
+ * TODO in which case the clster might rather inherit from THREE.Points (point cloud) ?
+ */
+
+
+
+
+
 class NodeCluster extends Array //List<Node>
 {
 
@@ -123,22 +132,22 @@ class Container extends THREE.Object3D{
  * TODO rewrite to be able t use sub-clusters
  *
  *
- * @param allNodes
+ * @param allNodes object containing all keys and values of current clusters
  * @param options
  * @returns {{container: {}, groupIdList, update: update, updateCrossFade: updateCrossFade, attachTo: attachTo, detach: detach, updateBoundingSpheres: updateBoundingSpheres}}
  */
-function createParticleSystemsByGroupAttrTODO(allNodes, options) {
+function createParticleSystemsForClusters(allNodes, options) {
 
     options = _.extend({
-        minGroupSize: 40
+       // minGroupSize: 40
     }, options)
 
     var groupContainer = {}
-    var groupIDs = allNodes.map((v) => v.group);
-    groupIDs = _.uniq(groupIDs)
+    var groupIDs =Object.keys( allNodes)
+
 
     for (var id of groupIDs) {
-        var nodes = globalNodes.filter((v) => v.group == id)
+        var nodes = allNodes[id]
 
         var elem = ParticleNodeGroup(nodes, {
             nodeDefaultSize: 10,
@@ -224,58 +233,187 @@ function createParticleSystemsByGroupAttrTODO(allNodes, options) {
 //----------------------------------------------------
 //----------------------------------------------------
 
+
+class ClusterLeaf
+{
+    constructor(nodes){
+        this.mNodes=nodes;
+        this.mParticles=this.createParticleCloud()
+
+    }
+
+
+    //TODO refactor
+    setDistributionHandler(distribution)
+    {
+        var that=this;
+        distribution.setNodes(this.mNodes,function(vec,i){
+           var n= that.mNodes[i];
+
+           n.x=vec.x;
+           n.y=vec.y;
+           n.z=vec.z;
+
+            that.mParticles.updateNodePosition(i)
+
+        });
+
+    }
+
+    createParticleCloud()
+    {
+
+        var elem = ParticleNodeGroup( this.mNodes, {
+            nodeDefaultSize: 10,
+            nodeDefaultScale: 10,
+            nodeTexture: "img/dot7.png"
+        })
+
+
+        return elem
+    }
+
+
+
+}
+
 //it's important that the clusters are dynamic
 //so if we want to reorder elements with a set of new generator functions
 
+
+
+
+
 class ClusterFactory{
 
-	static doSubdivideIntoClusters(allNodesClustersArray, actionsArray)
+	static doSubdivideIntoClusters(allNodesClustersObject, actionsArray)
 	{
 		
-		var entry=actionsArray.pop()
+		var entry=actionsArray.shift()
 		
 		var _g=entry.generator
         var _dist=entry.distribution
 
+        var options=_.extend({minClusterSize:10,defaultMergeGroupName:"other"},entry.options)
+
 
         //....
-    var clusters=[]
-    debugger
-      for (let allNodesCluster of allNodesClustersArray) {
+    var clusters={}
 
-          var _clusters = allNodesCluster.groupBy(_g)
+        _.each(allNodesClustersObject,function(nodeCluster, id) {
 
-          /*
+            var _clustersObj = {};
 
-           TODO position each node by using the distribution function
-           TODO also when clustering in a different manner... how to handle already applied distribution? we want the nodes to move to the new cluster instead of simply pop up there
-           if (_dist)
-           _dist => foreach _clusters
 
-           */
+            //post-process
+            //merge clusters that don'tmatch the criterian again
+            _.each(nodeCluster.groupBy(_g), function (_cluster, key) {
 
-          //TODO we want a tree structure for the nodes to be rendered but we might already have such a structure from another
-          // iteration so the nodes do have to be put into other groups dynamically
-          if (actionsArray.length > 0) {
+                if (_cluster.length < options.minClusterSize) {
 
-              _clusters.children = ClusterFactory.doSubdivideIntoClusters(_clusters, actionsArray)
-              clusters.push(_clusters)
-          }
-          else {
-              _clusters.children=[]  //empty array of NodeCluster
-          clusters.push(_clusters)
-        }
-      }
-        return _clusters
+                    var dMGN = options.defaultMergeGroupName
+                    if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new NodeCluster()
+
+                    _clustersObj[dMGN] = _clustersObj[dMGN].concat(_cluster)
+                }
+                else
+                    _clustersObj[key] = _cluster
+
+            })
+
+
+            /*
+
+             TODO position each node by using the distribution function
+             TODO also when clustering in a different manner... how to handle already applied distribution? we want the nodes to move to the new cluster instead of simply pop up there
+             if (_dist)
+             _dist => foreach _clustersObj
+
+             */
+
+            //TODO we want a tree structure for the nodes to be rendered but we might already have such a structure from another
+            // iteration so the nodes do have to be put into other groups dynamically
+
+            if (actionsArray.length > 0) {
+
+                    clusters[id] =  ClusterFactory.doSubdivideIntoClusters(_clustersObj, actionsArray);
+
+            }else {
+
+                //no more subdivisions for this branch
+
+               var res= _.map(_clustersObj,function(v,k){
+
+                   let leaf=new ClusterLeaf(v);
+                   leaf.setDistributionHandler(_dist)
+                   return  leaf
+
+                })
+
+                clusters[id] =  res;
+            }
+      })
+        return clusters
 
 
 	}
 	
 }
 
-//TODO stub
+
 class BaseDistribution
-{}
+{
+    constructor(){
+    this.dimensions=1 //TODO
+    }
+
+
+   setNodes(nodes,onNodePosition)
+   {
+       let len= nodes.length
+
+      let _len;
+       if (this.dimensions==1)
+           _len=len;
+       if (this.dimensions==1)
+           _len= len/Math.sqrt(len);
+       if (this.dimensions==1)
+           _len= len/Math.pow(len,1/3);
+
+
+       let step=1/_len
+
+       //1d/2d/3d helpers
+       //for (let i=0;i<=1;i+=step)
+       var i=0;
+       var c=0;
+        for (n of nodes)
+       {
+         let _vec3=  this.distribute(n, i,0,0);
+
+         //TODO set value in particle cloud
+           onNodePosition(_vec3,c)
+
+           i+=step
+            c++;
+       }
+
+
+   }
+
+  distribute(node,dx,dy,dz){
+     return new THREE.Vector3(dx,dy,0)
+  }
+}
+
+class RandomDistribution extends BaseDistribution
+{
+    distribute(node,dx,dy){
+        return new THREE.Vector3(_.random(-50,50),_.random(-50,50),_.random(-50,50))
+    }
+}
+
+
 //TODO stub
 class ForceGraphDistribution extends BaseDistribution
 {}
@@ -291,16 +429,23 @@ class GlobalNodesContainer
 	{
         this.mNodes=new NodeCluster(...nodes)
 
+        //TODO mClusters should work that way
+        this.root=new THREE.Object3D()
+
     }
 
 
 	
 	applyClustering(arr){
+    let res=ClusterFactory.doSubdivideIntoClusters({root:this.mNodes},arr)
+	    this.mClusters=	res.root
 
-	
-	ClusterFactory.doSubdivideIntoClusters([this.mNodes],arr)
-		
+        return this
 	}
+
+
+
+
 
 }
 
@@ -317,11 +462,11 @@ class MyGlobalNodesContainer extends GlobalNodesContainer
     }
 
     /**
-     * pseudo code below for sample clustering
+     * code below for sample clustering
      *
      * -allNodes
      * --sameCompany
-     * ---sameCategory
+     * ---sameIndustry
      *
      */
     createSample(nodes){
@@ -339,15 +484,16 @@ class MyGlobalNodesContainer extends GlobalNodesContainer
 			}
 
 			//others migh be .. RandomDistribution
-			let companyDistributionFunction = new ForceGraphDistribution
-			let categoryDistributionFunction = new SphericalDistribution
+			let companyDistributionFunction = new BaseDistribution()
+			let categoryDistributionFunction = new RandomDistribution()
 
 			//if a distribution parameter is set, the generated cluster will use it to position the nodes depending on it
-			// TODO is it of any ose to be able to apply multiple distributions per cluster? like spherical,force-graph?
+			// TODO is it of any use to be able to apply multiple distributions per cluster? like spherical,force-graph?
 			//or is it better to create the force graph "by hand"
 			this.applyClustering([
-				{generator:industrySetGenerator,distribution:companyDistributionFunction},
-				{generator:countrySetGenerator,distribution:categoryDistributionFunction}
+                {generator:countrySetGenerator,distribution:categoryDistributionFunction,options:{minClusterSize:15}},
+				{generator:industrySetGenerator,distribution:companyDistributionFunction,options:{minClusterSize:5}}
+
 			])
 
 
