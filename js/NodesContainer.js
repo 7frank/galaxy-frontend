@@ -232,13 +232,95 @@ function createParticleSystemsForClusters(allNodes, options) {
 //----------------------------------------------------
 //----------------------------------------------------
 //----------------------------------------------------
+class ClusterNodeElement extends THREE.Object3D{
+    constructor(children) {
+
+        super()
+        this.mClusters=children
+
+        var that=this;
+        var j=0;
+        var clusterDistanceX=1050;
+        var _len=Object.keys(this.mClusters).length
+        _.each(this.mClusters,function(arr,id) {
 
 
-class ClusterLeaf
+           // let _x=((j-(_len/2)))*clusterDistanceX
+
+            var container=new THREE.Group()
+         //   container.position.set(_x,0,0)
+
+
+            //add sphere as hint for the cluster
+            var geometry = new THREE.SphereGeometry(500, 8, 8 );
+            var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,transparent:true,opacity:0.1} );
+            var sphere = new THREE.Mesh( geometry, material );
+            container.add( sphere );
+
+
+
+            j++;
+
+            var nodeDistanceX=120;
+            for (let i=0,len=arr.length;i<len;i++) {
+
+                let el=arr[i];
+
+                let _x=((i-(len/2)))*nodeDistanceX
+
+                el.position.set(_x,-150,0)
+
+
+                //add another sphere as hint for the leaf
+                var geometry = new THREE.SphereGeometry(50, 16, 16 );
+                var material = new THREE.MeshBasicMaterial( {color: 0xff0000,wireframe:true,transparent:true,opacity:0.1} );
+                var sphere = new THREE.Mesh( geometry, material );
+                el.add( sphere );
+
+
+
+                container.add(el)
+
+
+            }
+
+            that.add(container)
+
+        })
+
+    }
+
+    //TODO refactor
+    setDistributionHandler(distribution)
+    {
+
+        var that=this;
+        distribution.setNodes(this.children,function(vec,i){
+            let n= that.children[i];
+
+            n.position.copy(vec)
+
+           // that.mParticles.updateNodePosition(i)
+
+        });
+
+
+
+    }
+
+
+}
+
+class ClusterLeafElement extends THREE.Object3D
 {
     constructor(nodes){
+        super();
+
         this.mNodes=nodes;
-        this.mParticles=this.createParticleCloud()
+        this.mParticles=this.createParticleCloud();
+
+        this.add( this.mParticles.pointCloud)
+
 
     }
 
@@ -246,13 +328,14 @@ class ClusterLeaf
     //TODO refactor
     setDistributionHandler(distribution)
     {
+
         var that=this;
         distribution.setNodes(this.mNodes,function(vec,i){
-           var n= that.mNodes[i];
+            var n= that.mNodes[i];
 
-           n.x=vec.x;
-           n.y=vec.y;
-           n.z=vec.z;
+            n.x=vec.x;
+            n.y=vec.y;
+            n.z=vec.z;
 
             that.mParticles.updateNodePosition(i)
 
@@ -336,7 +419,14 @@ class ClusterFactory{
 
             if (actionsArray.length > 0) {
 
-                    clusters[id] =  ClusterFactory.doSubdivideIntoClusters(_clustersObj, actionsArray);
+                let res= ClusterFactory.doSubdivideIntoClusters(_clustersObj, actionsArray);
+
+                   // clusters[id] = res
+
+                let nnn=new  ClusterNodeElement(res)
+                nnn.setDistributionHandler(_dist)
+                clusters[id]=nnn
+
 
             }else {
 
@@ -344,7 +434,7 @@ class ClusterFactory{
 
                var res= _.map(_clustersObj,function(v,k){
 
-                   let leaf=new ClusterLeaf(v);
+                   let leaf=new ClusterLeafElement(v);
                    leaf.setDistributionHandler(_dist)
                    return  leaf
 
@@ -402,14 +492,23 @@ class BaseDistribution
    }
 
   distribute(node,dx,dy,dz){
+      //TODO this should be called to distribute the elements of the country layer when finished
+      //TODO also it will be usefull to add rotation as well in th future
+
      return new THREE.Vector3(dx,dy,0)
   }
 }
 
 class RandomDistribution extends BaseDistribution
 {
+    constructor()
+    {
+        super();
+        this.maxDiameter=50;
+    }
     distribute(node,dx,dy){
-        return new THREE.Vector3(_.random(-50,50),_.random(-50,50),_.random(-50,50))
+    let min=this.maxDiameter/-2,max=this.maxDiameter/2
+        return new THREE.Vector3(_.random(min,max),_.random(min,max),_.random(min,max))
     }
 }
 
@@ -491,8 +590,8 @@ class MyGlobalNodesContainer extends GlobalNodesContainer
 			// TODO is it of any use to be able to apply multiple distributions per cluster? like spherical,force-graph?
 			//or is it better to create the force graph "by hand"
 			this.applyClustering([
-                {generator:countrySetGenerator,distribution:categoryDistributionFunction,options:{minClusterSize:15}},
-				{generator:industrySetGenerator,distribution:companyDistributionFunction,options:{minClusterSize:5}}
+                {generator:countrySetGenerator,distribution:companyDistributionFunction,options:{minClusterSize:15}},
+				{generator:industrySetGenerator,distribution:categoryDistributionFunction,options:{minClusterSize:5}}
 
 			])
 
