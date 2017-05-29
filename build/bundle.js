@@ -64,7 +64,7 @@ var clusters =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -140,27 +140,6 @@ class BaseDistribution
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(0);
-	
-/**
-*  TODO re-structure graph 
-* -into graph + subgraphs or simply multiple graphs
-* -each graph may have distribution class/function which handles the layouting of the node/edges
-* -for example a node-set might divided into different sub-sets depending on current assosiations 
-*  they may further contain sub-sets 
-* - for rendering, these sets are going to be put into a container class like the "nodeClouds" 
-* so a "nodesContainer" and a nodesClusterContainer will be needed which also have the distribution function 
-*/		
-
-
-
-
-
-//the basic node
-class Node extends THREE.Vector3{
-		
-}	
 
 /**
  * a set of node objects
@@ -176,26 +155,26 @@ class NodeCluster extends Array //List<Node>
 {
 
     //FIXME
-	/*push(el)
-	{
+    /*push(el)
+     {
 
-		if (! el instanceof Node  ) throw new Error("NodeCluster must only contain instanceof",Node)
-		return super.apply(this,arguments)
-	}*/
+     if (! el instanceof Node  ) throw new Error("NodeCluster must only contain instanceof",Node)
+     return super.apply(this,arguments)
+     }*/
 
 
     groupBy( filterFunction){
-      let container={}
+        let container={}
 
         function groupFunction(key,val)
         {
-           if (typeof container[key]=="undefined")   container[key]=new NodeCluster();
+            if (typeof container[key]=="undefined")   container[key]=new NodeCluster();
 
             container[key].push(val)
         }
 
-	    for (el of this)
-        filterFunction(groupFunction,el)
+        for (el of this)
+            filterFunction(groupFunction,el)
 
 
         return container
@@ -203,72 +182,343 @@ class NodeCluster extends Array //List<Node>
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = NodeCluster;
 
 
 
-//used to generate arbitrary subsets of nodes from the whole node data
-/*
-class ClusterFactory
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__NodeCluster__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ClusterLeafElement__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ClusterNodeElement__ = __webpack_require__(5);
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+
+
+
+
+
+//it's important that the clusters are dynamic
+//so if we want to reorder elements with a set of new generator functions
+
+
+
+
+class ClusterFactory{
+
+    static doSubdivideIntoClusters(allNodesClustersObject, actionsArray)
+    {
+
+        var entry=actionsArray.shift()
+
+        var _g=entry.generator
+        var _dist=entry.distribution
+
+        var options=_.extend({minClusterSize:10,defaultMergeGroupName:"other"},entry.options)
+
+
+        //....
+        var clusters={}
+
+        _.each(allNodesClustersObject,function(nodeCluster, id) {
+
+            var _clustersObj = {};
+
+
+            //post-process
+            //merge clusters that don'tmatch the criterian again
+            _.each(nodeCluster.groupBy(_g), function (_cluster, key) {
+
+                if (_cluster.length < options.minClusterSize) {
+
+                    var dMGN = options.defaultMergeGroupName
+                    if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new __WEBPACK_IMPORTED_MODULE_0__NodeCluster__["a" /* default */]()
+
+                    _clustersObj[dMGN] = _clustersObj[dMGN].concat(_cluster)
+                }
+                else
+                    _clustersObj[key] = _cluster
+
+            })
+
+
+            /*
+
+             TODO position each node by using the distribution function
+             TODO also when clustering in a different manner... how to handle already applied distribution? we want the nodes to move to the new cluster instead of simply pop up there
+             if (_dist)
+             _dist => foreach _clustersObj
+
+             */
+
+            //TODO we want a tree structure for the nodes to be rendered but we might already have such a structure from another
+            // iteration so the nodes do have to be put into other groups dynamically
+
+            if (actionsArray.length > 0) {
+
+                let res= ClusterFactory.doSubdivideIntoClusters(_clustersObj, actionsArray);
+
+                // clusters[id] = res
+
+                let nnn=new  __WEBPACK_IMPORTED_MODULE_2__ClusterNodeElement__["a" /* default */](res)
+                nnn.setDistributionHandler(_dist)
+                clusters[id]=nnn
+
+
+            }else {
+
+                //no more subdivisions for this branch
+
+                var res= _.map(_clustersObj,function(v,k){
+
+                    let leaf=new __WEBPACK_IMPORTED_MODULE_1__ClusterLeafElement__["a" /* default */](v);
+                    leaf.setDistributionHandler(_dist)
+                    return  leaf
+
+                })
+
+                clusters[id] =  res;
+            }
+        })
+        return clusters
+
+
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterFactory;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(0);
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+
+/**
+ * a simple random distribution function
+ *
+ */
+
+class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
 {
-	//ClusterFactory(GlobalNodeCluster nodes){}
-	
-	//ClusterFactory(GlobalNodeCluster[] clusters){}
-	
+    constructor(radius=25)
+    {
+        super();
+        this.maxDiameter=radius*2;
+    }
+    distribute(node,dx,dy){
+        let min=this.maxDiameter/-2,max=this.maxDiameter/2
+        return new THREE.Vector3(_.random(min,max),_.random(min,max),_.random(min,max))
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = RandomDistribution;
 
-	List<NodeCluster> groupBy(Function filterFunction){
-	}
-		
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+class ClusterLeafElement extends THREE.Object3D
+{
+    constructor(nodes){
+        super();
+
+        this.mNodes=nodes;
+        this.mParticles=this.createParticleCloud();
+
+        this.add( this.mParticles.pointCloud)
+
+
+    }
+
+
+    //TODO refactor
+    setDistributionHandler(distribution)
+    {
+
+        var that=this;
+        distribution.setNodes(this.mNodes,function(vec,i){
+            var n= that.mNodes[i];
+
+            n.x=vec.x;
+            n.y=vec.y;
+            n.z=vec.z;
+
+            that.mParticles.updateNodePosition(i)
+
+        });
+
+    }
+
+    createParticleCloud()
+    {
+
+        var elem = ParticleNodeGroup( this.mNodes, {
+            nodeDefaultSize: 10,
+            nodeDefaultScale: 10,
+            nodeTexture: "img/dot7.png"
+        })
+
+
+        return elem
+    }
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
+
+
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+class ClusterNodeElement extends THREE.Object3D{
+    constructor(children) {
+
+        super()
+        this.mClusters=children
+
+        var that=this;
+        var j=0;
+        var clusterDistanceX=1050;
+        var _len=Object.keys(this.mClusters).length
+        _.each(this.mClusters,function(arr,id) {
+
+
+            // let _x=((j-(_len/2)))*clusterDistanceX
+
+            var container=new THREE.Group()
+            //   container.position.set(_x,0,0)
+
+
+            //add sphere as hint for the cluster
+            var geometry = new THREE.SphereGeometry(500, 8, 8 );
+            var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,transparent:true,opacity:0.1} );
+            var sphere = new THREE.Mesh( geometry, material );
+            container.add( sphere );
+
+
+
+            j++;
+
+            var nodeDistanceX=120;
+            for (let i=0,len=arr.length;i<len;i++) {
+
+                let el=arr[i];
+
+                let _x=((i-(len/2)))*nodeDistanceX
+
+                el.position.set(_x,-150,0)
+
+
+                //add another sphere as hint for the leaf
+                var geometry = new THREE.SphereGeometry(50, 16, 16 );
+                var material = new THREE.MeshBasicMaterial( {color: 0xff0000,wireframe:true,transparent:true,opacity:0.1} );
+                var sphere = new THREE.Mesh( geometry, material );
+                el.add( sphere );
+
+
+
+                container.add(el)
+
+
+            }
+
+            that.add(container)
+
+        })
+
+    }
+
+    //TODO refactor
+    setDistributionHandler(distribution)
+    {
+
+        var that=this;
+        distribution.setNodes(this.children,function(vec,i){
+            let n= that.children[i];
+
+            n.position.copy(vec)
+
+            // that.mParticles.updateNodePosition(i)
+
+        });
+
+
+
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterNodeElement;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__NodeCluster__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ClusterFactory__ = __webpack_require__(2);
 	
-	List<NodeCluster> groupBy(NodeCluster nodes,Function filterFunction){
-		}	
+/**
+*  TODO re-structure graph 
+* -into graph + subgraphs or simply multiple graphs
+* -each graph may have distribution class/function which handles the layouting of the node/edges
+* -for example a node-set might divided into different sub-sets depending on current assosiations 
+*  they may further contain sub-sets 
+* - for rendering, these sets are going to be put into a container class like the "nodeClouds" 
+* so a "nodesContainer" and a nodesClusterContainer will be needed which also have the distribution function 
+*/		
+
+
+
+
+
+
+
+//TODO
+//the basic node
+class Node extends THREE.Vector3{
 		
-	
 }	
-	
-
-class DistributionHandler
-{
-	DistributionHandler(Function onNodeFunction)
-	//for animating nodes
-	setDestinations(){
-	}
-	
-	List<THREE.Vector3> computeDistribution(){
-	//@pseudo	
-		for (i)
-		onNodeFunction(n,i)
-			
-	return destinations
-	}
-	
-	update(){	
-	
-	
-	}
-}
-*/
-
-//recursive		
-class Container extends THREE.Object3D{
-  //position provided by inheritance
- constructor()
- {
-	 super();
- 	//NodeCluster nodes;
- 	//DistributionHandler distribution;
-
- }
-
-  
-  update(){
-	super.update();
-	this.distribution.update();
-  }
-  
-}
-
-
-
 
 //----------------------------------------------------
 //----------------------------------------------------
@@ -379,253 +629,31 @@ function createParticleSystemsForClusters(allNodes, options) {
 //----------------------------------------------------
 //----------------------------------------------------
 //----------------------------------------------------
-class ClusterNodeElement extends THREE.Object3D{
-    constructor(children) {
 
-        super()
-        this.mClusters=children
 
-        var that=this;
-        var j=0;
-        var clusterDistanceX=1050;
-        var _len=Object.keys(this.mClusters).length
-        _.each(this.mClusters,function(arr,id) {
 
 
-           // let _x=((j-(_len/2)))*clusterDistanceX
-
-            var container=new THREE.Group()
-         //   container.position.set(_x,0,0)
-
-
-            //add sphere as hint for the cluster
-            var geometry = new THREE.SphereGeometry(500, 8, 8 );
-            var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,transparent:true,opacity:0.1} );
-            var sphere = new THREE.Mesh( geometry, material );
-            container.add( sphere );
-
-
-
-            j++;
-
-            var nodeDistanceX=120;
-            for (let i=0,len=arr.length;i<len;i++) {
-
-                let el=arr[i];
-
-                let _x=((i-(len/2)))*nodeDistanceX
-
-                el.position.set(_x,-150,0)
-
-
-                //add another sphere as hint for the leaf
-                var geometry = new THREE.SphereGeometry(50, 16, 16 );
-                var material = new THREE.MeshBasicMaterial( {color: 0xff0000,wireframe:true,transparent:true,opacity:0.1} );
-                var sphere = new THREE.Mesh( geometry, material );
-                el.add( sphere );
-
-
-
-                container.add(el)
-
-
-            }
-
-            that.add(container)
-
-        })
-
-    }
-
-    //TODO refactor
-    setDistributionHandler(distribution)
-    {
-
-        var that=this;
-        distribution.setNodes(this.children,function(vec,i){
-            let n= that.children[i];
-
-            n.position.copy(vec)
-
-           // that.mParticles.updateNodePosition(i)
-
-        });
-
-
-
-    }
-
-
-}
-
-class ClusterLeafElement extends THREE.Object3D
-{
-    constructor(nodes){
-        super();
-
-        this.mNodes=nodes;
-        this.mParticles=this.createParticleCloud();
-
-        this.add( this.mParticles.pointCloud)
-
-
-    }
-
-
-    //TODO refactor
-    setDistributionHandler(distribution)
-    {
-
-        var that=this;
-        distribution.setNodes(this.mNodes,function(vec,i){
-            var n= that.mNodes[i];
-
-            n.x=vec.x;
-            n.y=vec.y;
-            n.z=vec.z;
-
-            that.mParticles.updateNodePosition(i)
-
-        });
-
-    }
-
-    createParticleCloud()
-    {
-
-        var elem = ParticleNodeGroup( this.mNodes, {
-            nodeDefaultSize: 10,
-            nodeDefaultScale: 10,
-            nodeTexture: "img/dot7.png"
-        })
-
-
-        return elem
-    }
-
-
-
-}
-
-//it's important that the clusters are dynamic
-//so if we want to reorder elements with a set of new generator functions
-
-
-
-
-
-class ClusterFactory{
-
-	static doSubdivideIntoClusters(allNodesClustersObject, actionsArray)
-	{
-		
-		var entry=actionsArray.shift()
-		
-		var _g=entry.generator
-        var _dist=entry.distribution
-
-        var options=_.extend({minClusterSize:10,defaultMergeGroupName:"other"},entry.options)
-
-
-        //....
-    var clusters={}
-
-        _.each(allNodesClustersObject,function(nodeCluster, id) {
-
-            var _clustersObj = {};
-
-
-            //post-process
-            //merge clusters that don'tmatch the criterian again
-            _.each(nodeCluster.groupBy(_g), function (_cluster, key) {
-
-                if (_cluster.length < options.minClusterSize) {
-
-                    var dMGN = options.defaultMergeGroupName
-                    if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new NodeCluster()
-
-                    _clustersObj[dMGN] = _clustersObj[dMGN].concat(_cluster)
-                }
-                else
-                    _clustersObj[key] = _cluster
-
-            })
-
-
-            /*
-
-             TODO position each node by using the distribution function
-             TODO also when clustering in a different manner... how to handle already applied distribution? we want the nodes to move to the new cluster instead of simply pop up there
-             if (_dist)
-             _dist => foreach _clustersObj
-
-             */
-
-            //TODO we want a tree structure for the nodes to be rendered but we might already have such a structure from another
-            // iteration so the nodes do have to be put into other groups dynamically
-
-            if (actionsArray.length > 0) {
-
-                let res= ClusterFactory.doSubdivideIntoClusters(_clustersObj, actionsArray);
-
-                   // clusters[id] = res
-
-                let nnn=new  ClusterNodeElement(res)
-                nnn.setDistributionHandler(_dist)
-                clusters[id]=nnn
-
-
-            }else {
-
-                //no more subdivisions for this branch
-
-               var res= _.map(_clustersObj,function(v,k){
-
-                   let leaf=new ClusterLeafElement(v);
-                   leaf.setDistributionHandler(_dist)
-                   return  leaf
-
-                })
-
-                clusters[id] =  res;
-            }
-      })
-        return clusters
-
-
-	}
-	
-}
-
-
-class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
-{
-    constructor()
-    {
-        super();
-        this.maxDiameter=50;
-    }
-    distribute(node,dx,dy){
-    let min=this.maxDiameter/-2,max=this.maxDiameter/2
-        return new THREE.Vector3(_.random(min,max),_.random(min,max),_.random(min,max))
-    }
-}
-
-
+//---------------------------
 //TODO stub
 class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
-{}
+{
+    setEdges(edges){
+        this.mEdges=edges
+    }
+
+}
+//---------------------------
 //TODO stub
 class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
 {}
 
 
-
+//---------------------------
 class GlobalNodesContainer
 {
 	constructor(nodes)
 	{
-        this.mNodes=new NodeCluster(...nodes)
+        this.mNodes=new __WEBPACK_IMPORTED_MODULE_2__NodeCluster__["a" /* default */](...nodes)
 
         //TODO mClusters should work that way
         this.root=new THREE.Object3D()
@@ -635,7 +663,7 @@ class GlobalNodesContainer
 
 	
 	applyClustering(arr){
-    let res=ClusterFactory.doSubdivideIntoClusters({root:this.mNodes},arr)
+    let res=__WEBPACK_IMPORTED_MODULE_3__ClusterFactory__["a" /* default */].doSubdivideIntoClusters({root:this.mNodes},arr)
 	    this.mClusters=	res.root
 
         return this
@@ -646,8 +674,7 @@ class GlobalNodesContainer
 
 
 }
-
-
+//---------------------------
 
 class MyGlobalNodesContainer extends GlobalNodesContainer
 {
@@ -683,7 +710,7 @@ class MyGlobalNodesContainer extends GlobalNodesContainer
 
 			//others migh be .. RandomDistribution
 			let companyDistributionFunction = new __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]()
-			let categoryDistributionFunction = new RandomDistribution()
+			let categoryDistributionFunction = new __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__["a" /* default */]()
 
 			//if a distribution parameter is set, the generated cluster will use it to position the nodes depending on it
 			// TODO is it of any use to be able to apply multiple distributions per cluster? like spherical,force-graph?

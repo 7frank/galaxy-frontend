@@ -2,13 +2,14 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	
-	<script src="./js/lodash.min.js"></script>
+	<script src="./js/lib/lodash.min.js"></script>
 	
-	<script src="./js/qwest.min.js"></script>
-	<script src="./js/papaparse.min.js"></script>
-	<script src="./js/d3-force-3d.bundle.min.js"></script>
-	<script src="./js/three.min.js"></script>
-	<script src="./js/threex.domevents.js"></script>
+	<script src="./js/lib/qwest.min.js"></script>
+	<script src="./js/lib/papaparse.min.js"></script>
+	<script src="./js/lib/d3-force-3d.bundle.min.js"></script>
+	<script src="./js/lib/three.min.js"></script>
+	<script src="./js/lib/threex.domevents.js"></script>
+
 	<script src="./js/THREE.MeshLine.js"></script>
 	<script src="./js/ConvexGeometry.js"></script>
 	<script src="./js/ConvexDynamicGeometry.js"></script>
@@ -30,19 +31,19 @@
 	
 	
 
-	<script src="./js/three-trackballcontrols.min.js"></script>
+	<script src="./js/lib/three-trackballcontrols.min.js"></script>
 	<script src="./js/data-set-loader.js"></script>
 	
 
 	
-	<script src="./js/jquery-3.2.0.min.js"></script>
-	<script src="./js/jquery.hotkeys.js"></script>
+	<script src="./js/lib/jquery-3.2.0.min.js"></script>
+	<script src="./js/lib/jquery.hotkeys.js"></script>
 	
 	
 	
-	<script src="./js/jquery-ui.min.js"></script>
+	<script src="./js/lib/jquery-ui.min.js"></script>
 	
-	<script src="./js/Tween.min.js"></script>
+	<script src="./js/lib/Tween.min.js"></script>
 	
 	<script src="./js/gpu-info.js"></script>
 	<script src="./js/CountryDistanceMetric.js"></script>
@@ -66,7 +67,7 @@
 	
 	
 
-	<script src="./js/dat.gui.min.js"></script>
+	<script src="./js/lib/dat.gui.min.js"></script>
 	<script>
 	
 	

@@ -1,5 +1,5 @@
 module.exports = {
-   entry: "./js/NodesContainer.js",
+   entry: "./js/cluster/NodesContainer.js",
    output: {
        path: __dirname + "/build",
        filename: "bundle.js",
