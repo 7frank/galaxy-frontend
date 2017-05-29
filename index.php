@@ -16,11 +16,13 @@
 	<script src="./js/SmoothConvexHullGeometry.js"></script>
 
 	<script src="./js/CameraObserverMode.js"></script>
-    <script src="./js/NodesContainer.js"></script>
 
 
-	
-	
+   <!-- <script src="./dist/js/NodesContainer.js"></script> -->
+	<script src="./build/bundle.js"></script>
+
+
+
 	<script src="./js/THREE.ArrowExt.js"></script>
 	<script src="./js/CustomAnimatedLineMesh.js"></script>
 	

@@ -1,0 +1,25 @@
+{
+  "name": "galaxy",
+  "version": "1.0.0",
+  "description": "TODO add proper descritipn for this project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/galaxystone/galaxy.git"
+  },
+  "keywords": [
+    "equity",
+    "rating"
+  ],
+  "author": "nat stone, frank reimann",
+  "license": "SEE LICENSE IN License.txt",
+  "homepage": "https://bitbucket.org/galaxystone/galaxy#readme",
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.5.1",
+    "webpack": "^2.6.1"
+  }
+}
