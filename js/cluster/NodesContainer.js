@@ -12,7 +12,7 @@
 
 import BaseDistribution from "./BaseDistribution"
 import RandomDistribution from "./RandomDistribution"
-import NodeCluster from "./NodeCluster"
+import ClusterNodeArray from "./ClusterNodeArray"
 import ClusterFactory from "./ClusterFactory"
 import ClusterLeafElement from "./ClusterLeafElement"
 
@@ -157,7 +157,7 @@ class GlobalNodesContainer
 {
 	constructor(nodes)
 	{
-        this.mNodes=new NodeCluster(...nodes)
+        this.mNodes=new ClusterNodeArray(...nodes)
 
         //TODO mClusters should work that way
         this.root=new THREE.Object3D()
@@ -236,7 +236,7 @@ export class MyGlobalNodesContainer extends GlobalNodesContainer
 
 
 //like cluster united states or united states+someindustry
-function getNodesFromCluster(clusters)
+export function getNodesFromCluster(clusters)
 {
    let _clusters=_.map(clusters, (c)=> c.mNodes);
 
@@ -299,11 +299,20 @@ return edges
 
 }
 
-/**
- * currently used for debugging purposes
- */
 
-export class MyMain{
+
+export
+
+//-----------------------------------------
+//-----------DEBUG-------------------------
+//-----------------------------------------
+
+    /**
+     * currently used for debugging purposes
+     */
+
+
+class MyMain{
 
     constructor() {
         var a = new MyGlobalNodesContainer(globalNodes);
@@ -330,15 +339,15 @@ export class MyMain{
         //TODO refactor a cluster should already have the reference for its nodes
         if ( typeof obj=="string" ) {
             mNodes = getNodesFromCluster(clusters[obj]);
-             pcbs=_.map(clusters[obj], (c)=> c.mParticles);
+            pcbs=_.map(clusters[obj], (c)=> c.mParticles);
 
 
         }
 
-       if (obj instanceof ClusterLeafElement) {
-           mNodes = obj.mNodes
+        if (obj instanceof ClusterLeafElement) {
+            mNodes = obj.mNodes
 
-           pcbs=[obj.mParticles]
+            pcbs=[obj.mParticles]
         }
 
 
@@ -382,11 +391,11 @@ export class MyMain{
 
     startForceGraphSampleOnContainers(obj="China")
     {
-       var foobar = _.map(this.clusters[obj], (v,k) => v)
-       var clusters=this.clusters
+        var foobar = _.map(this.clusters[obj], (v,k) => v)
+        var clusters=this.clusters
 
         let mNodes=foobar;
-    let XNodes;
+        let XNodes;
         //TODO refactor a cluster should already have the reference for its nodes
         if ( typeof obj=="string" ) {
             XNodes = getNodesFromCluster(clusters[obj]);
@@ -440,12 +449,12 @@ export class MyMain{
         // Add force-directed layout
         let layout = d3_force.forceSimulation();
 
-console.log(... arguments)
+        //   console.log(... arguments)
 
 
         //FIXME containers need links
         layout
-        .numDimensions(3)
+            .numDimensions(3)
             .nodes(nodes)
             .force('link', d3_force.forceLink().id(function (d) {
                 return d._id
@@ -475,7 +484,7 @@ console.log(... arguments)
     {
 
         // Add force-directed layout
-      let layout = d3_force.forceSimulation();
+        let layout = d3_force.forceSimulation();
 
 
 
@@ -486,11 +495,11 @@ console.log(... arguments)
 
             //console.error("tick tack", new Date() - startTickTime)
 
-          /*  if (cntTicks++ > env.maxConvergeFrames || (new Date()) - startTickTime > env.maxConvergeTime) {
-                layout.alpha(0); //trigger end
-                layout.stop(); // Stop ticking graph
-            }
-*/
+            /*  if (cntTicks++ > env.maxConvergeFrames || (new Date()) - startTickTime > env.maxConvergeTime) {
+             layout.alpha(0); //trigger end
+             layout.stop(); // Stop ticking graph
+             }
+             */
             // Update nodes position
 
             //TODO remove this when particle node groups work with picking and selecting
@@ -503,7 +512,7 @@ console.log(... arguments)
 
             });
 
-           // env.nodeClouds.update()
+            // env.nodeClouds.update()
 
             //todo animationg this will currently not work
             /*	// Update links position
@@ -516,7 +525,7 @@ console.log(... arguments)
              */
 
             if (onTICKComplete)
-            onTICKComplete()
+                onTICKComplete()
 
         }
 
@@ -524,7 +533,7 @@ console.log(... arguments)
 
 
         layout
-            //.numDimensions(env.numDimensions)
+        //.numDimensions(env.numDimensions)
             .nodes(nodes)
             .force('link', d3_force.forceLink().id(function (d) {
                 return d._id
@@ -556,16 +565,16 @@ console.log(... arguments)
 
 
         //
-       // handleConvexHullFeature()
+        // handleConvexHullFeature()
 
-     /*   for (let i = 0; i < env.initialEngineTicks; i++) {
-            layout.tick();
-        } // Initial ticks before starting to render
-*/
+        /*   for (let i = 0; i < env.initialEngineTicks; i++) {
+         layout.tick();
+         } // Initial ticks before starting to render
+         */
 
 
         //hide text overlay and show after layout finishes
-     //   env.textNode.hide()
+        //   env.textNode.hide()
 
 
         layout.on("tick", function () {
@@ -574,56 +583,56 @@ console.log(... arguments)
         }).on('end', function () {
 
             /*
-            // Run this when the layout has finished!
-            console.log("rendering graph finished.. use 'ctrl+s' to download result ")
+             // Run this when the layout has finished!
+             console.log("rendering graph finished.. use 'ctrl+s' to download result ")
 
-            //set link positions for final node/link positions
-            d3Links.forEach(link => {
+             //set link positions for final node/link positions
+             d3Links.forEach(link => {
 
-                link.setStartEnd(link.source, link.target)
+             link.setStartEnd(link.source, link.target)
 
-            });
+             });
 
 
-            //trigger coloring //TODO this should be done earlier
-            $(".cloudNodeColorSelect").val("group").trigger("change")
+             //trigger coloring //TODO this should be done earlier
+             $(".cloudNodeColorSelect").val("group").trigger("change")
 
-            //set update the cloud to be able to use it for text positioning
-            if (env.nodeClouds)
-                env.nodeClouds.updateBoundingSpheres();
+             //set update the cloud to be able to use it for text positioning
+             if (env.nodeClouds)
+             env.nodeClouds.updateBoundingSpheres();
 
-            //start the node particle effect
-            setTimeout(function () {
-                if (env.particles)
-                //env.particles.updateDestinations()
-                    env.particles.start()
+             //start the node particle effect
+             setTimeout(function () {
+             if (env.particles)
+             //env.particles.updateDestinations()
+             env.particles.start()
 
-            }, 1000)
+             }, 1000)
 
-            //set the text labels to the correct positions
+             //set the text labels to the correct positions
 
-            env.updateTextWhenCameraIsMoving()
-            env.textNode.fadeIn(200)
+             env.updateTextWhenCameraIsMoving()
+             env.textNode.fadeIn(200)
 
-            //createCloudCenterSphereForGroupsByID()
-            //globalEnv.particles.pointCloud.visible=false;setVisibleGroups(null,false);setVisibleGroups(["United States"],true);createCloudCenterSphereForGroups(["United States"])
+             //createCloudCenterSphereForGroupsByID()
+             //globalEnv.particles.pointCloud.visible=false;setVisibleGroups(null,false);setVisibleGroups(["United States"],true);createCloudCenterSphereForGroups(["United States"])
 
-                */
+             */
 
         }).restart();
 
         //
-      //  initDotParticles()
+        //  initDotParticles()
 
 
 
     }
 
 
+
+
+
 }
-
-
-
 
 
 

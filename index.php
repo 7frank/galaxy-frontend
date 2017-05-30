@@ -23,7 +23,6 @@
 	<script src="./build/bundle.js"></script>
 
 
-
 	<script src="./js/THREE.ArrowExt.js"></script>
 	<script src="./js/CustomAnimatedLineMesh.js"></script>
 	
@@ -64,10 +63,13 @@
 	
 	
 		<script src="./js/AppDataService.js"></script>
-	
-	
 
-	<script src="./js/lib/dat.gui.min.js"></script>
+
+    <script src="./js/debug.js"></script>
+
+
+
+    <script src="./js/lib/dat.gui.min.js"></script>
 	<script>
 	
 	

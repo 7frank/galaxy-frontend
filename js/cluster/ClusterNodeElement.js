@@ -2,7 +2,8 @@
  * Created by Frank on 30.05.2017.
  */
 
-
+//TODO this should be refactored to match the object structure better
+// clusters.china.others => ClusterNodeArray.ClusterNodeElement.ClusterNodeLeaf
 
 export default class ClusterNodeElement extends THREE.Object3D{
     constructor(children) {

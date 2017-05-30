@@ -9,14 +9,14 @@
 
 
 
-export default class NodeCluster extends Array //List<Node>
+export default class ClusterNodeArray extends Array //List<Node>
 {
 
     //FIXME
     /*push(el)
      {
 
-     if (! el instanceof Node  ) throw new Error("NodeCluster must only contain instanceof",Node)
+     if (! el instanceof Node  ) throw new Error("ClusterNodeArray must only contain instanceof",Node)
      return super.apply(this,arguments)
      }*/
 
@@ -26,7 +26,7 @@ export default class NodeCluster extends Array //List<Node>
 
         function groupFunction(key,val)
         {
-            if (typeof container[key]=="undefined")   container[key]=new NodeCluster();
+            if (typeof container[key]=="undefined")   container[key]=new ClusterNodeArray();
 
             container[key].push(val)
         }

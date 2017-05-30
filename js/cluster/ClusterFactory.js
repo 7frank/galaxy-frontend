@@ -2,7 +2,7 @@
  * Created by Frank on 30.05.2017.
  */
 
-import NodeCluster from "./NodeCluster"
+import ClusterNodeArray from "./ClusterNodeArray"
 
 import ClusterLeafElement from "./ClusterLeafElement"
 import ClusterNodeElement from "./ClusterNodeElement"
@@ -44,7 +44,7 @@ class ClusterFactory{
                 if (_cluster.length < options.minClusterSize) {
 
                     var dMGN = options.defaultMergeGroupName
-                    if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new NodeCluster()
+                    if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new ClusterNodeArray()
 
                     _clustersObj[dMGN] = _clustersObj[dMGN].concat(_cluster)
                 }
