@@ -14,7 +14,7 @@ export default class ClusterNodeElement extends THREE.Object3D{
         var j=0;
         var clusterDistanceX=1050;
         var _len=Object.keys(this.mClusters).length
-        _.each(this.mClusters,function(arr,id) {
+        _.each(this.mClusters,function(subObject,id) {
 
 
             // let _x=((j-(_len/2)))*clusterDistanceX
@@ -32,6 +32,8 @@ export default class ClusterNodeElement extends THREE.Object3D{
 
 
             j++;
+
+            var arr=Object.values(subObject)
 
             var nodeDistanceX=120;
             for (let i=0,len=arr.length;i<len;i++) {

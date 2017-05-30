@@ -81,13 +81,27 @@ class ClusterFactory{
 
                 //no more subdivisions for this branch
 
-                var res= _.map(_clustersObj,function(v,k){
+                //FIXME but we want to maintain the category each element is in. so we need an object instead of an array
+                //TODO refactor
+
+
+              /*  var res= _.map(_clustersObj,function(v,k){
 
                     let leaf=new ClusterLeafElement(v);
                     leaf.setDistributionHandler(_dist)
                     return  leaf
 
+                })*/
+
+                var res= {}
+                    _.each(_clustersObj,function(v,k){
+
+                    let leaf=new ClusterLeafElement(v);
+                    leaf.setDistributionHandler(_dist)
+                    res[k] =leaf
+
                 })
+        console.log(res)
 
                 clusters[id] =  res;
             }

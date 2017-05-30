@@ -140,6 +140,70 @@ class BaseDistribution
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+class ClusterLeafElement extends THREE.Object3D
+{
+    constructor(nodes){
+        super();
+
+        this.mNodes=nodes;
+        this.mParticles=this.createParticleCloud();
+
+        this.add( this.mParticles.pointCloud)
+
+
+    }
+
+
+    //TODO refactor
+    setDistributionHandler(distribution)
+    {
+
+        var that=this;
+        distribution.setNodes(this.mNodes,function(vec,i){
+            var n= that.mNodes[i];
+
+            n.x=vec.x;
+            n.y=vec.y;
+            n.z=vec.z;
+
+            that.mParticles.updateNodePosition(i)
+
+        });
+
+    }
+
+    createParticleCloud()
+    {
+
+        var elem = ParticleNodeGroup( this.mNodes, {
+            nodeDefaultSize: 10,
+            nodeDefaultScale: 10,
+            nodeTexture: "img/dot7.png"
+        })
+
+
+        return elem
+    }
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
+
+
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 
 /**
  * a set of node objects
@@ -188,12 +252,12 @@ class NodeCluster extends Array //List<Node>
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__NodeCluster__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ClusterLeafElement__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__NodeCluster__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ClusterLeafElement__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ClusterNodeElement__ = __webpack_require__(5);
 /**
  * Created by Frank on 30.05.2017.
@@ -277,13 +341,27 @@ class ClusterFactory{
 
                 //no more subdivisions for this branch
 
-                var res= _.map(_clustersObj,function(v,k){
+                //FIXME but we want to maintain the category each element is in. so we need an object instead of an array
+                //TODO refactor
 
-                    let leaf=new __WEBPACK_IMPORTED_MODULE_1__ClusterLeafElement__["a" /* default */](v);
+
+              /*  var res= _.map(_clustersObj,function(v,k){
+
+                    let leaf=new ClusterLeafElement(v);
                     leaf.setDistributionHandler(_dist)
                     return  leaf
 
+                })*/
+
+                var res= {}
+                    _.each(_clustersObj,function(v,k){
+
+                    let leaf=new __WEBPACK_IMPORTED_MODULE_1__ClusterLeafElement__["a" /* default */](v);
+                    leaf.setDistributionHandler(_dist)
+                    res[k] =leaf
+
                 })
+        console.log(res)
 
                 clusters[id] =  res;
             }
@@ -298,7 +376,7 @@ class ClusterFactory{
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -332,70 +410,6 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * Created by Frank on 30.05.2017.
- */
-
-
-
-class ClusterLeafElement extends THREE.Object3D
-{
-    constructor(nodes){
-        super();
-
-        this.mNodes=nodes;
-        this.mParticles=this.createParticleCloud();
-
-        this.add( this.mParticles.pointCloud)
-
-
-    }
-
-
-    //TODO refactor
-    setDistributionHandler(distribution)
-    {
-
-        var that=this;
-        distribution.setNodes(this.mNodes,function(vec,i){
-            var n= that.mNodes[i];
-
-            n.x=vec.x;
-            n.y=vec.y;
-            n.z=vec.z;
-
-            that.mParticles.updateNodePosition(i)
-
-        });
-
-    }
-
-    createParticleCloud()
-    {
-
-        var elem = ParticleNodeGroup( this.mNodes, {
-            nodeDefaultSize: 10,
-            nodeDefaultScale: 10,
-            nodeTexture: "img/dot7.png"
-        })
-
-
-        return elem
-    }
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
-
-
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -416,7 +430,7 @@ class ClusterNodeElement extends THREE.Object3D{
         var j=0;
         var clusterDistanceX=1050;
         var _len=Object.keys(this.mClusters).length
-        _.each(this.mClusters,function(arr,id) {
+        _.each(this.mClusters,function(subObject,id) {
 
 
             // let _x=((j-(_len/2)))*clusterDistanceX
@@ -434,6 +448,8 @@ class ClusterNodeElement extends THREE.Object3D{
 
 
             j++;
+
+            var arr=Object.values(subObject)
 
             var nodeDistanceX=120;
             for (let i=0,len=arr.length;i<len;i++) {
@@ -493,10 +509,12 @@ class ClusterNodeElement extends THREE.Object3D{
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (immutable) */ __webpack_exports__["getEdgesForNodes"] = getEdgesForNodes;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__NodeCluster__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ClusterFactory__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__NodeCluster__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ClusterFactory__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ClusterLeafElement__ = __webpack_require__(1);
 	
 /**
 *  TODO re-structure graph 
@@ -507,6 +525,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 * - for rendering, these sets are going to be put into a container class like the "nodeClouds" 
 * so a "nodesContainer" and a nodesClusterContainer will be needed which also have the distribution function 
 */		
+
 
 
 
@@ -533,6 +552,8 @@ class Node extends THREE.Vector3{
  * @param options
  * @returns {{container: {}, groupIdList, update: update, updateCrossFade: updateCrossFade, attachTo: attachTo, detach: detach, updateBoundingSpheres: updateBoundingSpheres}}
  */
+
+/*
 function createParticleSystemsForClusters(allNodes, options) {
 
     options = _.extend({
@@ -625,7 +646,7 @@ function createParticleSystemsForClusters(allNodes, options) {
 
 }
 
-
+*/
 //----------------------------------------------------
 //----------------------------------------------------
 //----------------------------------------------------
@@ -727,6 +748,399 @@ class MyGlobalNodesContainer extends GlobalNodesContainer
 
 }
 /* harmony export (immutable) */ __webpack_exports__["MyGlobalNodesContainer"] = MyGlobalNodesContainer;
+
+
+
+
+
+
+//like cluster united states or united states+someindustry
+function getNodesFromCluster(clusters)
+{
+   let _clusters=_.map(clusters, (c)=> c.mNodes);
+
+    return _.concat([],..._clusters)
+
+}
+
+//helper function should be part of utils probably
+//get relevant edges for a given (sub)set of nodes
+//by default it will return a set of edges that are limited to the subset itself (edges that leave the cluster are ignored)
+function getEdgesForNodes(nodes, bInternal=true, bExternal=false)
+{
+
+    if (nodes instanceof __WEBPACK_IMPORTED_MODULE_4__ClusterLeafElement__["a" /* default */]) nodes=nodes.mNodes
+
+    if (!bInternal && !bExternal) return []
+    //get relevant edges from
+    //a.clusters.mClusters.mClusters["United States"][0].mNodes
+
+    var edges=[];
+
+    _.each(nodes,function(node,id){
+
+        //check if it is a container element
+        if (node  instanceof __WEBPACK_IMPORTED_MODULE_4__ClusterLeafElement__["a" /* default */]) {
+            let _edges=getEdgesForNodes(node.mNodes,bInternal,bExternal)
+            edges = edges.concat(_edges);
+            edges = _.uniq(edges)
+            return
+        }
+
+        _.each(node.edges,function(edge,id){
+
+
+
+
+
+      let srcContained=nodes.indexOf(edge.source)>=0;
+      let trgContained=nodes.indexOf(edge.target)>=0;
+
+
+        let isInternalNode=srcContained&& trgContained;
+
+       // console.log(srcContained,trgContained,isInternalNode)
+        if (bInternal&& isInternalNode || bExternal && !isInternalNode ) {
+            edges = edges.concat(node.edges);
+            edges = _.uniq(edges)
+        }
+
+        })
+
+
+    })
+
+
+
+
+
+return edges
+
+}
+
+/**
+ * currently used for debugging purposes
+ */
+
+class MyMain{
+
+    constructor() {
+        var a = new MyGlobalNodesContainer(globalNodes);
+        globalEnv.scene.add(a.mClusters);
+        a.mClusters.position.set(0, 1000, 0);
+
+        this.clusters= a.mClusters.mClusters
+    }
+
+
+    startForceGraphSampleOnSubsets(obj)
+    {
+
+        let clusters=this.clusters;
+
+
+
+        if ( typeof obj=="undefined" )
+            obj="United States";
+
+
+        let mNodes;
+        var pcbs;
+        //TODO refactor a cluster should already have the reference for its nodes
+        if ( typeof obj=="string" ) {
+            mNodes = getNodesFromCluster(clusters[obj]);
+             pcbs=_.map(clusters[obj], (c)=> c.mParticles);
+
+
+        }
+
+       if (obj instanceof __WEBPACK_IMPORTED_MODULE_4__ClusterLeafElement__["a" /* default */]) {
+           mNodes = obj.mNodes
+
+           pcbs=[obj.mParticles]
+        }
+
+
+
+
+        let mEdges= getEdgesForNodes(mNodes,true,false);
+
+
+
+        this.startSimulation2(mNodes,mEdges,    function layoutTick(layout, d3Nodes, d3Links) {
+
+            // Update nodes position
+            //TODO remove this when particle node groups work with picking and selecting
+            d3Nodes.forEach(node => {
+
+                const sphere = node._bubble;
+                sphere.position.x = node.x;
+                sphere.position.y = node.y || 0;
+                sphere.position.z = node.z || 0;
+
+            });
+
+        },function(){
+
+            _.each(pcbs,function(pcElem){
+                //updates the array buffer for the point cloud
+                pcElem.update()
+
+            })
+
+        });
+
+        //start the force graph simulation
+        //TODO this has to be placed within another sub class
+
+    }
+
+
+//TODO apply changes so that it works with e.g.g c and c.china and c.china.others in the same way
+// for that the objects and arrays currently used should be THREE.Object3D at least
+
+    startForceGraphSampleOnContainers(obj="China")
+    {
+       var foobar = _.map(this.clusters[obj], (v,k) => v)
+       var clusters=this.clusters
+
+        let mNodes=foobar;
+    let XNodes;
+        //TODO refactor a cluster should already have the reference for its nodes
+        if ( typeof obj=="string" ) {
+            XNodes = getNodesFromCluster(clusters[obj]);
+
+        }
+
+        //todo not working this way
+        let mEdges= getEdgesForNodes(XNodes,true,false);
+
+
+
+        this.startSimulation2(mNodes,mEdges,    function layoutTick(layout, clusterContainers, d3Links) {
+
+
+            // Update nodes position
+
+            //TODO remove this when particle node groups work with picking and selecting
+            clusterContainers.forEach(node => {
+
+                const sphere = node;
+                sphere.position.x = node.x;
+                sphere.position.y = node.y || 0;
+                sphere.position.z = node.z || 0;
+
+            });
+
+
+        });
+
+        //start the force graph simulation
+        //TODO this has to be placed within another sub class
+
+    }
+
+
+
+    //---------------------------------
+
+    /**
+     * a reduced simulation (for testing)
+     *
+     *
+     * @param nodes
+     * @param edges
+     * @param onTick
+     * @param onTICKComplete
+     */
+    startSimulation2(nodes,edges=[],onTick,onTICKComplete)
+    {
+
+        // Add force-directed layout
+        let layout = d3_force.forceSimulation();
+
+console.log(... arguments)
+
+
+        //FIXME containers need links
+        layout
+        .numDimensions(3)
+            .nodes(nodes)
+            .force('link', d3_force.forceLink().id(function (d) {
+                return d._id
+            })
+                .distance(function computeLinkDistance()
+                {
+                    return 20;
+
+                })
+                .links(edges))
+            .force("collide", d3_force.forceCollide(60)
+                .iterations(1))
+            .force('charge',  (node) => -300)
+            .force('linkStrength',  (link) => 1)
+
+
+            .stop();
+
+        layout.on("tick", function () {
+            onTick(layout, nodes, edges)
+            if (onTICKComplete)   onTICKComplete()
+        }).on('end', function () { }).restart();
+
+    }
+    // --------------------------------
+    startSimulation(nodes,edges,onTICKComplete)
+    {
+
+        // Add force-directed layout
+      let layout = d3_force.forceSimulation();
+
+
+
+
+        let cntTicks = 0;
+        const startTickTime = new Date();
+        function layoutTick(layout, d3Nodes, d3Links) {
+
+            //console.error("tick tack", new Date() - startTickTime)
+
+          /*  if (cntTicks++ > env.maxConvergeFrames || (new Date()) - startTickTime > env.maxConvergeTime) {
+                layout.alpha(0); //trigger end
+                layout.stop(); // Stop ticking graph
+            }
+*/
+            // Update nodes position
+
+            //TODO remove this when particle node groups work with picking and selecting
+            d3Nodes.forEach(node => {
+
+                const sphere = node._bubble;
+                sphere.position.x = node.x;
+                sphere.position.y = node.y || 0;
+                sphere.position.z = node.z || 0;
+
+            });
+
+           // env.nodeClouds.update()
+
+            //todo animationg this will currently not work
+            /*	// Update links position
+             d3Links.forEach(link => {
+
+             link.setStartEnd(link.source, link.target)
+
+             });
+
+             */
+
+            if (onTICKComplete)
+            onTICKComplete()
+
+        }
+
+
+
+
+        layout
+            //.numDimensions(env.numDimensions)
+            .nodes(nodes)
+            .force('link', d3_force.forceLink().id(function (d) {
+                return d._id
+            })
+                .distance(function computeLinkDistance()
+                {
+                    return 20;
+
+                }).links(edges))
+            .force("collide", d3_force.forceCollide(60).iterations(1))
+            //.force('charge', d3_force.forceManyBody())
+            .force('charge', function (node) {
+
+                return -300
+
+            })
+            .force('linkStrength', function (link) {
+
+                return 1
+
+            })
+
+            //.force('gravity',function(){ return 0})
+            //.force('charge',function(){ return 0})
+
+            //.force('center', d3_force.forceCenter())
+
+            .stop();
+
+
+        //
+       // handleConvexHullFeature()
+
+     /*   for (let i = 0; i < env.initialEngineTicks; i++) {
+            layout.tick();
+        } // Initial ticks before starting to render
+*/
+
+
+        //hide text overlay and show after layout finishes
+     //   env.textNode.hide()
+
+
+        layout.on("tick", function () {
+
+            layoutTick(layout, nodes, edges)
+        }).on('end', function () {
+
+            /*
+            // Run this when the layout has finished!
+            console.log("rendering graph finished.. use 'ctrl+s' to download result ")
+
+            //set link positions for final node/link positions
+            d3Links.forEach(link => {
+
+                link.setStartEnd(link.source, link.target)
+
+            });
+
+
+            //trigger coloring //TODO this should be done earlier
+            $(".cloudNodeColorSelect").val("group").trigger("change")
+
+            //set update the cloud to be able to use it for text positioning
+            if (env.nodeClouds)
+                env.nodeClouds.updateBoundingSpheres();
+
+            //start the node particle effect
+            setTimeout(function () {
+                if (env.particles)
+                //env.particles.updateDestinations()
+                    env.particles.start()
+
+            }, 1000)
+
+            //set the text labels to the correct positions
+
+            env.updateTextWhenCameraIsMoving()
+            env.textNode.fadeIn(200)
+
+            //createCloudCenterSphereForGroupsByID()
+            //globalEnv.particles.pointCloud.visible=false;setVisibleGroups(null,false);setVisibleGroups(["United States"],true);createCloudCenterSphereForGroups(["United States"])
+
+                */
+
+        }).restart();
+
+        //
+      //  initDotParticles()
+
+
+
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["MyMain"] = MyMain;
 
 
 
