@@ -17,6 +17,8 @@ $(function(){
         setTimeout(() => a.startForceGraphSampleOnSubsets("United States"),4000)
 
 
+        b=a.betterSample()
+
 
     })
 

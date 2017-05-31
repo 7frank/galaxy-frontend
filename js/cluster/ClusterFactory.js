@@ -101,7 +101,7 @@ class ClusterFactory{
                     res[k] =leaf
 
                 })
-        console.log(res)
+
 
                 clusters[id] =  res;
             }
@@ -110,5 +110,7 @@ class ClusterFactory{
 
 
     }
+
+
 
 }
