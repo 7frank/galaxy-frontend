@@ -4,7 +4,7 @@
 
 
 
-export default class ClusterLeafElement extends THREE.Object3D
+export default class ClusterLeafElement extends THREE.Mesh
 {
     constructor(nodes){
         super();

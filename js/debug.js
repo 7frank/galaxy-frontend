@@ -12,10 +12,12 @@ $(function(){
     $(window).on("keyup",null,"ctrl+space",function(){
 
         a=new clusters.MyMain;
+
+        /*a.firstSample();
         setTimeout(() => a.startForceGraphSampleOnContainers("United States"),2000)
 
         setTimeout(() => a.startForceGraphSampleOnSubsets("United States"),4000)
-
+*/
 
         b=a.betterSample()
 

@@ -3,8 +3,8 @@
  */
 
 
-import ClusterFactory from "./ClusterFactory"
 
+import ClusterLeafElement from "./ClusterLeafElement"
 /**
  *
  * cluster=new BaseCluster3D(allNodes)
@@ -19,12 +19,12 @@ import ClusterFactory from "./ClusterFactory"
 
 //refactoring current cluster structure
 export default
-class BaseCluster3D extends THREE.Object3D {
+class BaseCluster3D extends THREE.Mesh {
 
     //TODO implement these stubs in sub class
     //createEdgeContainer(){}
-    //createParticlesIfLeafNode(){}
-    //createOrUpdateBoundingVolume(){} //can be convex hull in sub class
+
+
 
     /**
      *
@@ -35,17 +35,15 @@ class BaseCluster3D extends THREE.Object3D {
         super();
         this.addNodes(nodes);
         //by default the cluster is no leaf. TODO
-        this.isLeaf=false;
-        this.mClusters={}
+        this.isLeaf = false;
+        this.mClusters = {}
 
 
         //xCluster if present, use to cluster nodes into sub-clusters
-        if (_.isArray(clusteringHandlers) && clusteringHandlers.length>0) {
+        if (_.isArray(clusteringHandlers) && clusteringHandlers.length > 0) {
             this.applyClustering(clusteringHandlers);
-
         }
-
-
+        else this.updateCluster()
 
 
     }
@@ -81,22 +79,36 @@ class BaseCluster3D extends THREE.Object3D {
 
      */
 
-    applyClustering(clusteringHandlers) {
+    applyClustering(mClusteringSpeccsArray) {
 
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
 
+        var entry = mClusteringSpeccsArray[0]
 
-        this._clusterThis(clusteringHandlers[0])
-        console.log("_clusterThis",Object.keys(this.mClusters),this.mClusters)
-        this.doSubdivideIntoClustersNEW(this.mClusters, clusteringHandlers)
+        // this._clusterThis(mClusteringSpeccsArray[0])
+        this._clusterThis(entry)
+      //  console.log("_clusterThis", Object.keys(this.mClusters), this.mClusters)
 
-        this.addAllSubClustersToContainer();
+        _.each(this.mClusters, function (mCluster, key) {
+
+            var nextDepthSpeccsArray = [].concat(mClusteringSpeccsArray);
+            nextDepthSpeccsArray.shift();
+
+            if (nextDepthSpeccsArray.length > 0)
+                mCluster.applyClustering(nextDepthSpeccsArray);
+            else
+                mCluster.createParticlePointCloud(entry);
+
+
+        })
+
+        this.updateCluster()
+
 
     }
 
-    _clusterThis(entry)
-    {
+    _clusterThis(entry) {
 
         var options = _.extend({minClusterSize: 10, defaultMergeGroupName: "other"}, entry.options)
 
@@ -121,123 +133,14 @@ class BaseCluster3D extends THREE.Object3D {
         })
 
 
-        _.extend(this.mClusters,_clustersObj)
+        _.extend(this.mClusters, _clustersObj)
 
 
-    }
-
-
-    doSubdivideIntoClustersNEW(mBaseCluster3DContainerObject, mSpeccsArray) {
-
-        if (!mBaseCluster3DContainerObject) throw new Error("!!!")//mBaseCluster3DContainerObject = {root: this}
-
-        var speccsArray=[].concat(mSpeccsArray)
-
-        var entry = speccsArray.shift()
-
-        var _nextGeneratorFunction = entry.generator
-        var _nextDistributionHandler = entry.distribution
-
-        var options = _.extend({minClusterSize: 10, defaultMergeGroupName: "other"}, entry.options)
-
-
-        //....
-        var clusters ={}
-
-        _.each(mBaseCluster3DContainerObject, function (mBaseCluster, id) {
-
-          //  console.log("sub-cluster",id,mBaseCluster)
-
-            var _clustersObj = {};
-
-
-            //post-process
-            //merge clusters that don't match the criteria again
-            _.each(mBaseCluster.groupBy(_nextGeneratorFunction), function (_cluster, key) {
-
-                if (_cluster.getNodes().length < options.minClusterSize) {
-
-                    var dMGN = options.defaultMergeGroupName
-                    if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new BaseCluster3D()
-
-                    _clustersObj[dMGN].addNodes(_cluster.getNodes())
-                }
-                else
-                    _clustersObj[key] = _cluster
-
-            })
-
-
-            /*
-
-             TODO position each node by using the distribution function
-             TODO also when clustering in a different manner... how to handle already applied distribution? we want the nodes to move to the new cluster instead of simply pop up there
-             if (_nextDistributionHandler)
-             _nextDistributionHandler => foreach _clustersObj
-
-             */
-
-            //TODO we want a tree structure for the nodes to be rendered but we might already have such a structure from another
-            // iteration so the nodes do have to be put into other groups dynamically
-debugger
-            if (speccsArray.length > 0) {
-
-
-                // let res= ClusterFactory.doSubdivideIntoClusters(_clustersObj, speccsArray);
-
-                _.each(_clustersObj,function(cl,key){
-
-                    let res = new BaseCluster3D(cl.getNodes(), speccsArray)
-                    res.setDistributionHandler(_nextDistributionHandler)
-
-                    cl.mClusters[key]=res;
-
-                    clusters[id] =  cl;// res
-
-                })
-
-
-
-
-            } else {
-
-                //no more subdivisions for this branch
-
-                //FIXME but we want to maintain the category each element is in. so we need an object instead of an array
-                //TODO refactor
-
-
-                /*  var res= _.map(_clustersObj,function(v,k){
-
-                 let leaf=new ClusterLeafElement(v);
-                 leaf.setDistributionHandler(_nextDistributionHandler)
-                 return  leaf
-
-                 })*/
-
-               // var res = {}
-                _.each(_clustersObj, function (v, k) {
-
-                    v.isLeaf=true
-                    console.log(k,"isLeaf",v.isLeaf)
-                  //  let leaf = new ClusterLeafElement(v);
-                  //  leaf.setDistributionHandler(_nextDistributionHandler)
-                  //  res[k] = leaf
-
-                    clusters[id]=v
-                })
-
-
-            }
-        })
-
-
-debugger
-        _.extend(  this.mClusters,clusters)
-
-        //return clusters
+        this.setDistributionHandler(entry.distribution)
 
     }
+
+
 
     groupBy(filterFunction) {
         let container = {}
@@ -280,5 +183,68 @@ debugger
 
 
     }
+
+
+    createHull() {
+
+        let boundingSphere=new THREE.Sphere
+
+        let boundingBox=new THREE.Box3
+        boundingBox.setFromObject(this)
+
+
+//compute center
+        var _center=boundingBox.clone().min.add(boundingBox.max).multiplyScalar(0.5)
+        boundingSphere.center.set(_center)
+
+
+//compute radius
+        let upper=boundingBox.max.clone().sub(_center)
+        let lower=boundingBox.min.clone().sub(_center)
+
+        Math.max(upper.x,upper.y,upper.z)
+
+
+        boundingSphere.center.radius=
+
+
+
+
+        this.geometry.boundingBox=boundingBox;
+        this.geometry.boundingSphere=boundingSphere;
+
+        var geometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
+        var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
+        this.mHull = new THREE.Mesh(geometry, material);
+        this.mHull.position.set(boundingSphere.center)
+        this.add(this.mHull);
+
+
+    }
+
+
+    createParticlePointCloud(entry) {
+        console.log("reached leaf cluster", this)
+
+        let leaf=new ClusterLeafElement(this.mNodes);
+        this.mLeaf=leaf;
+        this.add(leaf);
+        leaf.setDistributionHandler(entry.distribution)
+
+    }
+
+//TODO  can be convex hull in sub class in which case override
+    updateCluster() {
+
+        this.addAllSubClustersToContainer();
+
+        if (!this.mHull)
+            this.createHull()
+
+        //TODO  re-calculate boundingsphere from time to time
+
+
+    }
+
 
 }

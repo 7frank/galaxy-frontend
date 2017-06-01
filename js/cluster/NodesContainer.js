@@ -290,6 +290,12 @@ export function getEdgesForNodes(nodes, bInternal = true, bExternal = false) {
 export class MyMain {
 
     constructor() {
+
+
+    }
+
+    firstSample(){
+
         var a = new MyGlobalNodesContainer(globalNodes);
         globalEnv.scene.add(a.mClusters);
         a.mClusters.position.set(0, 1000, 0);
@@ -297,9 +303,8 @@ export class MyMain {
         this.clusters = a.mClusters.mClusters
 
 
-
-
     }
+
 
     getClusterSpeccsArray()
     {
@@ -319,8 +324,8 @@ export class MyMain {
 
 
       return [
-            {generator: countrySetGenerator, distribution: companyDistributionFunction, options: {minClusterSize: 15}},
-            {generator: industrySetGenerator, distribution: categoryDistributionFunction, options: {minClusterSize: 5}}
+            {generator: countrySetGenerator, distribution: companyDistributionFunction, options: {minClusterSize: 15}}
+            ,{generator: industrySetGenerator, distribution: categoryDistributionFunction, options: {minClusterSize: 5}}
         ]
 
     }
@@ -329,6 +334,13 @@ export class MyMain {
     {
         let speccs=this.getClusterSpeccsArray();
         var res= new BaseCluster3D(globalNodes,speccs);
+
+
+        globalEnv.scene.add(res);
+        res.position.set(0, 1000, 0);
+
+        this.clusters = res;
+
 
       return res
 

@@ -11,8 +11,9 @@
 
 export default  class BaseDistribution
 {
-    constructor(){
-        this.dimensions=1 //TODO
+    constructor(scale=50,dimensions=1){
+        this.dimensions=dimensions //TODO
+        this.mScale=scale
     }
 
 
@@ -53,7 +54,7 @@ export default  class BaseDistribution
         //TODO this should be called to distribute the elements of the country layer when finished
         //TODO also it will be usefull to add rotation as well in th future
 
-        return new THREE.Vector3(dx,dy,0)
+        return new THREE.Vector3(dx,dy,0).multiplyScalar(this.mScale);
     }
 }
 
