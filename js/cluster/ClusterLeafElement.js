@@ -23,12 +23,7 @@ export default class ClusterLeafElement extends THREE.Mesh
     {
 
         var that=this;
-        distribution.setNodes(this.mNodes,function(vec,i){
-            var n= that.mNodes[i];
-
-            n.x=vec.x;
-            n.y=vec.y;
-            n.z=vec.z;
+        distribution.setNodes(this.mNodes,function onStep(vec,i){
 
             that.mParticles.updateNodePosition(i)
 

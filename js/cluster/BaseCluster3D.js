@@ -3,7 +3,6 @@
  */
 
 
-
 import ClusterLeafElement from "./ClusterLeafElement"
 import BaseNode from "./BaseNode"
 /**
@@ -24,7 +23,6 @@ class BaseCluster3D extends BaseNode {
 
     //TODO implement these stubs in sub class
     //createEdgeContainer(){}
-
 
 
     /**
@@ -87,9 +85,8 @@ class BaseCluster3D extends BaseNode {
 
         var entry = mClusteringSpeccsArray[0]
 
-        // this._clusterThis(mClusteringSpeccsArray[0])
+
         this._clusterThis(entry)
-      //  console.log("_clusterThis", Object.keys(this.mClusters), this.mClusters)
 
         _.each(this.mClusters, function (mCluster, key) {
 
@@ -142,7 +139,6 @@ class BaseCluster3D extends BaseNode {
     }
 
 
-
     groupBy(filterFunction) {
         let container = {}
 
@@ -172,74 +168,71 @@ class BaseCluster3D extends BaseNode {
 
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
-        distribution.setNodes(values, function (vecPosition, i) {
-            let n = values[i];
-
-            n.position.copy(vecPosition)
-
-
-            // that.mParticles.updateNodePosition(i)
-
+        distribution.setNodes(values, function onStep(vecPosition, i) {
+          //  let n = values[i];
+          //  n.position.copy(vecPosition)
         });
 
 
     }
 
 
+
+    //TODO  re-calculate boundingsphere from time to time
+    updateHull() {
+
+
+    }
+
     createHull() {
 
-        let boundingSphere=new THREE.Sphere;
+        let boundingSphere = new THREE.Sphere;
 
-        let boundingBox=new THREE.Box3;
-        boundingBox.setFromObject(this);
+        let boundingBox = new THREE.Box3;
+       // boundingBox.setFromObject(this);
+        boundingBox.setFromArray(this.children);
 
-//get center, radius
-        let _center=boundingBox.getCenter();
-        let radius=boundingBox.getSize().length()/2;
-
-        if (radius>0)
-        console.log("sphere",radius,_center)
+        //get center, radius
+        let _center = boundingBox.getCenter();
+        let radius = boundingBox.getSize().length() / 2;
 
 
 
         boundingSphere.center.copy(_center);
-        boundingSphere.radius=radius;
+        boundingSphere.radius = radius;
 
 
-
-
-        this.geometry.boundingBox=boundingBox;
-        this.geometry.boundingSphere=boundingSphere;
+        this.geometry.boundingBox = boundingBox;
+        this.geometry.boundingSphere = boundingSphere;
 
         var geometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
         var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
 
         if (this.geometry)
-        this.geometry.dispose();
+            this.geometry.dispose();
 
-        this.geometry=geometry
-
+        this.geometry = geometry
 
 
         if (this.material)
             this.material.dispose();
 
-        this.material=material
+        this.material = material
 
 
-      //  this.mHull = new THREE.Mesh(geometry, material);
-      //  this.mHull.position.copy(boundingSphere.center)
-      //  this.add(this.mHull);
+        //  this.mHull = new THREE.Mesh(geometry, material);
+        //  this.mHull.position.copy(boundingSphere.center)
+        //  this.add(this.mHull);
 
 
     }
 
 
     createParticlePointCloud(entry) {
-       // console.log("reached leaf cluster", this)
+        // console.log("reached leaf cluster", this)
 
-        let leaf=new ClusterLeafElement(this.mNodes);
-        this.mLeaf=leaf;
+        let leaf = new ClusterLeafElement(this.mNodes);
+        this.mLeaf = leaf;
         this.add(leaf);
         leaf.setDistributionHandler(entry.distribution)
 
@@ -250,10 +243,11 @@ class BaseCluster3D extends BaseNode {
 
         this.addAllSubClustersToContainer();
 
-        if (!this.mHull)
-            this.createHull()
+        //if (!this.mHull)
+            this.createHull();
+       // else
+        //    this.updateHull();
 
-        //TODO  re-calculate boundingsphere from time to time
 
 
     }

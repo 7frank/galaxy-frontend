@@ -3,6 +3,8 @@
  */
 
 
+import NodeUtil from "./NodeUtil"
+
 /**
  * simple node implementation for interaction and basic visualisation
  *
@@ -17,7 +19,7 @@ export default class BaseNode extends THREE.Mesh {
             color: 0xffff00,
             wireframe: true,
             visible: true,
-           opacity:1,
+            opacity: 1,
             // opacity: env.useDebugSphere ? 1 : 0,
             transparent: true,
             alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
@@ -26,7 +28,18 @@ export default class BaseNode extends THREE.Mesh {
 
         super(BaseNode.sphereGeometry, material);
 
+      //  this.addDefaultListeners();
 
+
+    }
+
+
+    addDefaultListeners() {
+
+        this.on("click", () =>
+            NodeUtil.zoomToNode(this, function complete() {
+            })
+        );
     }
 
 
@@ -51,19 +64,19 @@ export default class BaseNode extends THREE.Mesh {
     }
 
     on(eventName, eventhandler) {
-        BaseNode.domEvents.addEventListener(this, eventName, eventhandler, false)
+        BaseNode.domEvents.addEventListener(this, eventName, eventhandler, false);
+        return this;
     }
 
     off(eventName, eventhandler) {
-        BaseNode.domEvents.removeEventListener(this, eventName, eventhandler, false)
+        BaseNode.domEvents.removeEventListener(this, eventName, eventhandler, false);
+        return this;
     }
 
     trigger(eventName, origDomEvent, intersect) {
 
         BaseNode.domEvents._notify(eventName, this, origDomEvent, intersect);
-        //mDomEvents.triggerEvent(_mesh, eventName, args)
-
-
+        return this;
     }
 
 

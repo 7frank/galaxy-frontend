@@ -11,6 +11,8 @@
 
 import BaseDistribution from "./BaseDistribution"
 import RandomDistribution from "./RandomDistribution"
+import ForceGraphDistribution from "./ForceGraphDistribution"
+
 import ClusterNodeArray from "./ClusterNodeArray"
 import ClusterFactory from "./ClusterFactory"
 import ClusterLeafElement from "./ClusterLeafElement"
@@ -18,133 +20,6 @@ import ClusterLeafElement from "./ClusterLeafElement"
 import BaseCluster3D from "./BaseCluster3D"
 
 
-//TODO
-//the basic node
-class Node extends THREE.Vector3 {
-
-}
-
-//----------------------------------------------------
-//----------------------------------------------------
-//----------------------------------------------------
-
-/**
- * copy of current implementation
- * TODO rewrite to be able t use sub-clusters
- *
- *
- * @param allNodes object containing all keys and values of current clusters
- * @param options
- * @returns {{container: {}, groupIdList, update: update, updateCrossFade: updateCrossFade, attachTo: attachTo, detach: detach, updateBoundingSpheres: updateBoundingSpheres}}
- */
-
-/*
- function createParticleSystemsForClusters(allNodes, options) {
-
- options = _.extend({
- // minGroupSize: 40
- }, options)
-
- var groupContainer = {}
- var groupIDs =Object.keys( allNodes)
-
-
- for (var id of groupIDs) {
- var nodes = allNodes[id]
-
- var elem = ParticleNodeGroup(nodes, {
- nodeDefaultSize: 10,
- nodeDefaultScale: 10,
- nodeTexture: "img/dot7.png"
- })
-
- groupContainer["" + id] = {
- nodes: nodes,
- particles: elem,
- id: id
- }
-
- }
-
- function update() {
-
- _.each(groupContainer, function (el) {
- el.particles.update()
- })
-
- }
-
- function updateCrossFade() {
-
- _.each(groupContainer, function (el) {
- el.particles.updateCrossFade()
- })
-
- }
-
- function attachTo(object3d) {
-
- for (id of groupIDs) {
-
- object3d.add(groupContainer[id].particles.pointCloud)
-
- }
-
- }
-
- function detach() {
-
- for (id of groupIDs) {
- var pc = groupContainer[id].particles.pointCloud
- if (pc.parent)
- pc.parent.remove(pc)
-
- }
-
- }
-
- function updateBoundingSpheres() {
-
- for (id of groupIDs) {
- //var pc = groupContainer[id].particles.pointCloud.geometry.computeBoundingSphere()
- var pc = groupContainer[id].particles.pointCloud;
-
- var centerPos=getCenterOfMass(pc)
-
- pc.geometry.computeBoundingSphere()
- pc.geometry.boundingSphere.center.copy(centerPos)
-
-
- }
-
- }
-
- return {
- container: groupContainer,
- groupIdList: groupIDs,
- update,
- updateCrossFade,
- attachTo,
- detach,
- updateBoundingSpheres
- }
-
- }
-
- */
-//----------------------------------------------------
-//----------------------------------------------------
-//----------------------------------------------------
-
-
-//---------------------------
-//TODO stub
-class ForceGraphDistribution extends BaseDistribution {
-    setEdges(edges) {
-        this.mEdges = edges
-    }
-
-}
 //---------------------------
 //TODO stub
 class SphericalDistribution extends BaseDistribution {
@@ -234,6 +109,10 @@ export function getNodesFromCluster(clusters) {
 //helper function should be part of utils probably
 //get relevant edges for a given (sub)set of nodes
 //by default it will return a set of edges that are limited to the subset itself (edges that leave the cluster are ignored)
+/**
+ * @deprecated
+ */
+
 export function getEdgesForNodes(nodes, bInternal = true, bExternal = false) {
 
     if (nodes instanceof ClusterLeafElement) nodes = nodes.mNodes
@@ -306,7 +185,7 @@ export class MyMain {
     }
 
 
-    getClusterSpeccsArray()
+    getPossibleClusterSpeccsArray()
     {
 
         function countrySetGenerator(groupFunction, node) {
@@ -319,27 +198,57 @@ export class MyMain {
         }
 
 
-        let companyDistributionFunction = new BaseDistribution()
-        let categoryDistributionFunction = new RandomDistribution()
+        let companyDistributionFunction = new BaseDistribution(500)
+        let categoryDistributionFunction = new RandomDistribution(100)
 
 
-      return [
+        let forceFraphDistribution = new ForceGraphDistribution(100)
+
+        let rand2 = new RandomDistribution(200,2)
+        let rand3 = new RandomDistribution(300,3)
+
+
+
+        return [
             {generator: countrySetGenerator, distribution: companyDistributionFunction, options: {minClusterSize: 15}}
             ,{generator: industrySetGenerator, distribution: categoryDistributionFunction, options: {minClusterSize: 5}}
-        ]
+          ,{distribution: forceFraphDistribution}
+            ,{distribution: rand2}
+            ,{distribution: rand3}
+
+      ]
 
     }
 
     betterSample()
     {
-        let speccs=this.getClusterSpeccsArray();
-        var res= new BaseCluster3D(globalNodes,speccs);
+        let speccs=this.getPossibleClusterSpeccsArray();
+        var res= new BaseCluster3D(globalNodes,[speccs[0],speccs[1]]);
 
 
         globalEnv.scene.add(res);
         res.position.set(0, 1000, 0);
 
         this.clusters = res;
+
+//random distribution on click
+var curr=0
+        res.on("click",function(){
+
+
+
+            //var _dist=_.sample(speccs).distribution
+                var _dist=speccs[curr++%speccs.length].distribution
+
+            console.log("setting distribution function",_dist)
+            res.setDistributionHandler(   _dist  )
+
+            //FIXME add complete handler
+            setTimeout(() =>    res.updateCluster(),1000 )
+
+
+
+        })
 
 
       return res
