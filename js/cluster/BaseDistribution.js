@@ -17,8 +17,11 @@ export default  class BaseDistribution
     }
 
 
-    setNodes(nodes,onNodePosition)
+    setNodes(nodes,onNodePositionChange)
     {
+        //for canceling animation
+        var mTimeout;
+
         let len= nodes.length
 
         let _len;
@@ -36,25 +39,64 @@ export default  class BaseDistribution
         //for (let i=0;i<=1;i+=step)
         var i=0;
         var c=0;
-        for (n of nodes)
+        for (var n of nodes)
         {
-            let _vec3=  this.distribute(n, i,0,0);
+            var dist= this.distribute(n, i,0,0);
 
-            //TODO set value in particle cloud
-            onNodePosition(_vec3,c)
+
+
+           //  onNodePositionChange(dist.position,c)
+
+
+            //------------------------
+            //------------------------
+
+            //animating from current position to new one
+        var mc=c;
+        let origPos=(n.position)?n.position:n
+
+
+
+            let tween = new TWEEN.Tween(origPos)
+                .to(dist.position,400)
+                .onUpdate(function () {
+
+                    onNodePositionChange(origPos,mc)
+
+                }).onComplete(function(){
+
+                    cancelAnimationFrame(mTimeout)
+
+                })
+                .start();
+
+            //------------------------
+            //------------------------
+
 
             i+=step
             c++;
         }
 
 
+
+        requestAnimationFrame(animate);
+
+        function animate(time) {
+            mTimeout=    requestAnimationFrame(animate);
+            TWEEN.update(time);
+        }
+
+
     }
 
-    distribute(node,dx,dy,dz){
-        //TODO this should be called to distribute the elements of the country layer when finished
-        //TODO also it will be usefull to add rotation as well in th future
+    //TODO this should be called to distribute the elements of the country layer when finished
+    //TODO also it will be useful to add rotation as well in the future
 
-        return new THREE.Vector3(dx,dy,0).multiplyScalar(this.mScale);
+
+    distribute(node,dx,dy,dz){
+
+        return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
     }
 }
 
