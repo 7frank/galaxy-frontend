@@ -5,6 +5,7 @@
 
 
 import ClusterLeafElement from "./ClusterLeafElement"
+import BaseNode from "./BaseNode"
 /**
  *
  * cluster=new BaseCluster3D(allNodes)
@@ -19,7 +20,7 @@ import ClusterLeafElement from "./ClusterLeafElement"
 
 //refactoring current cluster structure
 export default
-class BaseCluster3D extends THREE.Mesh {
+class BaseCluster3D extends BaseNode {
 
     //TODO implement these stubs in sub class
     //createEdgeContainer(){}
@@ -187,25 +188,22 @@ class BaseCluster3D extends THREE.Mesh {
 
     createHull() {
 
-        let boundingSphere=new THREE.Sphere
+        let boundingSphere=new THREE.Sphere;
 
-        let boundingBox=new THREE.Box3
-        boundingBox.setFromObject(this)
+        let boundingBox=new THREE.Box3;
+        boundingBox.setFromObject(this);
 
+//get center, radius
+        let _center=boundingBox.getCenter();
+        let radius=boundingBox.getSize().length()/2;
 
-//compute center
-        var _center=boundingBox.clone().min.add(boundingBox.max).multiplyScalar(0.5)
-        boundingSphere.center.set(_center)
-
-
-//compute radius
-        let upper=boundingBox.max.clone().sub(_center)
-        let lower=boundingBox.min.clone().sub(_center)
-
-        Math.max(upper.x,upper.y,upper.z)
+        if (radius>0)
+        console.log("sphere",radius,_center)
 
 
-        boundingSphere.center.radius=
+
+        boundingSphere.center.copy(_center);
+        boundingSphere.radius=radius;
 
 
 
@@ -215,16 +213,30 @@ class BaseCluster3D extends THREE.Mesh {
 
         var geometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
         var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
-        this.mHull = new THREE.Mesh(geometry, material);
-        this.mHull.position.set(boundingSphere.center)
-        this.add(this.mHull);
+
+        if (this.geometry)
+        this.geometry.dispose();
+
+        this.geometry=geometry
+
+
+
+        if (this.material)
+            this.material.dispose();
+
+        this.material=material
+
+
+      //  this.mHull = new THREE.Mesh(geometry, material);
+      //  this.mHull.position.copy(boundingSphere.center)
+      //  this.add(this.mHull);
 
 
     }
 
 
     createParticlePointCloud(entry) {
-        console.log("reached leaf cluster", this)
+       // console.log("reached leaf cluster", this)
 
         let leaf=new ClusterLeafElement(this.mNodes);
         this.mLeaf=leaf;
