@@ -4,6 +4,7 @@
 
 
 import NodeUtil from "./NodeUtil"
+import EdgeUtil from "./EdgeUtil"
 
 /**
  * simple node implementation for interaction and basic visualisation
@@ -78,6 +79,7 @@ export default class BaseNode extends THREE.Mesh {
         BaseNode.domEvents._notify(eventName, this, origDomEvent, intersect);
         return this;
     }
+
 
 
 }

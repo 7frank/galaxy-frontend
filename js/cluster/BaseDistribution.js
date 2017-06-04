@@ -8,6 +8,8 @@
  *
  */
 
+import BaseCluster3D from "./BaseCluster3D"
+
 
 export default  class BaseDistribution
 {
@@ -19,10 +21,16 @@ export default  class BaseDistribution
 
     setNodes(nodes,onNodePositionChange)
     {
+        if (nodes instanceof BaseCluster3D)
+            nodes=nodes.mClusters
+        else
+        if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
+
+
         //for canceling animation
         var mTimeout;
 
-        let len= nodes.length
+        let len= nodes.length|Object.keys(nodes).length
 
         let _len;
         if (this.dimensions==1)
@@ -39,9 +47,10 @@ export default  class BaseDistribution
         //for (let i=0;i<=1;i+=step)
         var i=0;
         var c=0;
-        for (var n of nodes)
-        {
-            var dist= this.distribute(n, i,0,0);
+        var that=this;
+        _.each(nodes,function(n){
+
+            var dist= that.distribute(n, i,0,0);
 
 
 
@@ -76,7 +85,7 @@ export default  class BaseDistribution
 
             i+=step
             c++;
-        }
+        })
 
 
 

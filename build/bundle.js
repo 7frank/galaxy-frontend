@@ -72,325 +72,16 @@ var clusters =
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/**
- * Created by Frank on 29.05.2017.
- */
-
-/**
- * TODO  possible different ways to distribute elements => moveTo, goTo, stack?
- *
- *
- */
-
-
-class BaseDistribution
-{
-    constructor(scale=50,dimensions=1){
-        this.dimensions=dimensions //TODO
-        this.mScale=scale
-    }
-
-
-    setNodes(nodes,onNodePositionChange)
-    {
-        //for canceling animation
-        var mTimeout;
-
-        let len= nodes.length
-
-        let _len;
-        if (this.dimensions==1)
-            _len=len;
-        if (this.dimensions==1)
-            _len= len/Math.sqrt(len);
-        if (this.dimensions==1)
-            _len= len/Math.pow(len,1/3);
-
-
-        let step=1/_len
-
-        //1d/2d/3d helpers
-        //for (let i=0;i<=1;i+=step)
-        var i=0;
-        var c=0;
-        for (var n of nodes)
-        {
-            var dist= this.distribute(n, i,0,0);
-
-
-
-           //  onNodePositionChange(dist.position,c)
-
-
-            //------------------------
-            //------------------------
-
-            //animating from current position to new one
-        var mc=c;
-        let origPos=(n.position)?n.position:n
-
-
-
-            let tween = new TWEEN.Tween(origPos)
-                .to(dist.position,400)
-                .onUpdate(function () {
-
-                    onNodePositionChange(origPos,mc)
-
-                }).onComplete(function(){
-
-                    cancelAnimationFrame(mTimeout)
-
-                })
-                .start();
-
-            //------------------------
-            //------------------------
-
-
-            i+=step
-            c++;
-        }
-
-
-
-        requestAnimationFrame(animate);
-
-        function animate(time) {
-            mTimeout=    requestAnimationFrame(animate);
-            TWEEN.update(time);
-        }
-
-
-    }
-
-    //TODO this should be called to distribute the elements of the country layer when finished
-    //TODO also it will be useful to add rotation as well in the future
-
-
-    distribute(node,dx,dy,dz){
-
-        return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = BaseDistribution;
-
-
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(3);
 /**
  * Created by Frank on 30.05.2017.
  */
 
 
 
-class ClusterLeafElement extends THREE.Mesh
-{
-    constructor(nodes){
-        super();
 
-        this.mNodes=nodes;
-        this.mParticles=this.createParticleCloud();
-
-        this.add( this.mParticles.pointCloud)
-
-
-    }
-
-
-    //TODO refactor
-    setDistributionHandler(distribution)
-    {
-
-        var that=this;
-        distribution.setNodes(this.mNodes,function onStep(vec,i){
-
-            that.mParticles.updateNodePosition(i)
-
-        });
-
-    }
-
-    createParticleCloud()
-    {
-
-        var elem = ParticleNodeGroup( this.mNodes, {
-            nodeDefaultSize: 10,
-            nodeDefaultScale: 10,
-            nodeTexture: "img/dot7.png"
-        })
-
-
-        return elem
-    }
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
-
-
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-/**
- * a set of node objects
- * the cluster itself also contains parts of the visual representation of the nodes
- * TODO in which case the clster might rather inherit from THREE.Points (point cloud) ?
- */
-
-
-
-
-
-class ClusterNodeArray extends Array //List<Node>
-{
-
-    //FIXME
-    /*push(el)
-     {
-
-     if (! el instanceof Node  ) throw new Error("ClusterNodeArray must only contain instanceof",Node)
-     return super.apply(this,arguments)
-     }*/
-
-
-    groupBy( filterFunction){
-        let container={}
-
-        function groupFunction(key,val)
-        {
-            if (typeof container[key]=="undefined")   container[key]=new ClusterNodeArray();
-
-            container[key].push(val)
-        }
-
-        for (el of this)
-            filterFunction(groupFunction,el)
-
-
-        return container
-
-    }
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterNodeArray;
-
-
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__NodeUtil__ = __webpack_require__(10);
-/**
- * Created by Frank on 02.06.2017.
- */
-
-
-
-
-/**
- * simple node implementation for interaction and basic visualisation
- *
- */
-class BaseNode extends THREE.Mesh {
-
-    constructor(...args) {
-
-        BaseNode.initStatic()
-
-        var material = new THREE.MeshBasicMaterial({
-            color: 0xffff00,
-            wireframe: true,
-            visible: true,
-            opacity: 1,
-            // opacity: env.useDebugSphere ? 1 : 0,
-            transparent: true,
-            alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
-
-        });
-
-        super(BaseNode.sphereGeometry, material);
-
-      //  this.addDefaultListeners();
-
-
-    }
-
-
-    addDefaultListeners() {
-
-        this.on("click", () =>
-            __WEBPACK_IMPORTED_MODULE_0__NodeUtil__["a" /* default */].zoomToNode(this, function complete() {
-            })
-        );
-    }
-
-
-    static initStatic() {
-        if (BaseNode._static_initialised_) return
-
-        BaseNode.sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
-        BaseNode.emptyGeometry = new THREE.Geometry();
-        BaseNode.emptyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
-
-
-        BaseNode.lastSelectedNode = null;
-
-        //FIXME set camera and domElement not via env attribute ...
-        // BaseNode.domEvents = new THREEx.DomEvents(/*camera, renderer.domElement*/)
-        BaseNode.domEvents = globalEnv.domEvents
-
-
-        BaseNode._static_initialised_ = true
-
-
-    }
-
-    on(eventName, eventhandler) {
-        BaseNode.domEvents.addEventListener(this, eventName, eventhandler, false);
-        return this;
-    }
-
-    off(eventName, eventhandler) {
-        BaseNode.domEvents.removeEventListener(this, eventName, eventhandler, false);
-        return this;
-    }
-
-    trigger(eventName, origDomEvent, intersect) {
-
-        BaseNode.domEvents._notify(eventName, this, origDomEvent, intersect);
-        return this;
-    }
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = BaseNode;
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(3);
-/**
- * Created by Frank on 30.05.2017.
- */
 
 
 
@@ -557,7 +248,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
-        distribution.setNodes(values, function onStep(vecPosition, i) {
+
+        distribution.setNodes(this, function onStep(vecPosition, i) {
           //  let n = values[i];
           //  n.position.copy(vecPosition)
         });
@@ -642,8 +334,485 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
+  //returns some infos of the children of the the cluster relative to each other
+    getRelationInfo()
+    {
+        return __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__["a" /* default */].getClusterInfo(this.mClusters);
+
+    }
+
+    createEdgesForChildClusters(){
+
+     return  __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__["a" /* default */].createEdgesBetweenClustersFromMap(this.mClusters);
+
+    }
+
+
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BaseCluster3D;
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
+/**
+ * Created by Frank on 29.05.2017.
+ */
+
+/**
+ * TODO  possible different ways to distribute elements => moveTo, goTo, stack?
+ *
+ *
+ */
+
+
+
+
+class BaseDistribution
+{
+    constructor(scale=50,dimensions=1){
+        this.dimensions=dimensions //TODO
+        this.mScale=scale
+    }
+
+
+    setNodes(nodes,onNodePositionChange)
+    {
+        if (nodes instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */])
+            nodes=nodes.mClusters
+        else
+        if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
+
+
+        //for canceling animation
+        var mTimeout;
+
+        let len= nodes.length|Object.keys(nodes).length
+
+        let _len;
+        if (this.dimensions==1)
+            _len=len;
+        if (this.dimensions==1)
+            _len= len/Math.sqrt(len);
+        if (this.dimensions==1)
+            _len= len/Math.pow(len,1/3);
+
+
+        let step=1/_len
+
+        //1d/2d/3d helpers
+        //for (let i=0;i<=1;i+=step)
+        var i=0;
+        var c=0;
+        var that=this;
+        _.each(nodes,function(n){
+
+            var dist= that.distribute(n, i,0,0);
+
+
+
+           //  onNodePositionChange(dist.position,c)
+
+
+            //------------------------
+            //------------------------
+
+            //animating from current position to new one
+        var mc=c;
+        let origPos=(n.position)?n.position:n
+
+
+
+            let tween = new TWEEN.Tween(origPos)
+                .to(dist.position,400)
+                .onUpdate(function () {
+
+                    onNodePositionChange(origPos,mc)
+
+                }).onComplete(function(){
+
+                    cancelAnimationFrame(mTimeout)
+
+                })
+                .start();
+
+            //------------------------
+            //------------------------
+
+
+            i+=step
+            c++;
+        })
+
+
+
+        requestAnimationFrame(animate);
+
+        function animate(time) {
+            mTimeout=    requestAnimationFrame(animate);
+            TWEEN.update(time);
+        }
+
+
+    }
+
+    //TODO this should be called to distribute the elements of the country layer when finished
+    //TODO also it will be useful to add rotation as well in the future
+
+
+    distribute(node,dx,dy,dz){
+
+        return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = BaseDistribution;
+
+
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+class ClusterLeafElement extends THREE.Mesh
+{
+    constructor(nodes){
+        super();
+
+        this.mNodes=nodes;
+        this.mParticles=this.createParticleCloud();
+
+        this.add( this.mParticles.pointCloud)
+
+
+    }
+
+
+    //TODO refactor
+    setDistributionHandler(distribution)
+    {
+
+        var that=this;
+        distribution.setNodes(this.mNodes,function onStep(vec,i){
+
+            that.mParticles.updateNodePosition(i)
+
+        });
+
+    }
+
+    createParticleCloud()
+    {
+
+        var elem = ParticleNodeGroup( this.mNodes, {
+            nodeDefaultSize: 10,
+            nodeDefaultScale: 10,
+            nodeTexture: "img/dot7.png"
+        })
+
+
+        return elem
+    }
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
+
+
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
+/**
+ * Created by Frank on 02.06.2017.
+ */
+
+
+
+class EdgeUtil {
+
+    /**
+     *
+     *
+     */
+    static getConnectedClusters(){
+
+        //finds external nodes of a cluster
+
+        //look up what cluster the node is in?
+
+
+    }
+
+
+
+
+    /*
+    * takes a object containing BaseCluster3D as input and returns
+    * a set of edges
+    *
+    * */
+
+    static createEdgesBetweenClustersFromMap(clustersContainer){
+
+
+       let info= EdgeUtil.getClusterInfo(clustersContainer)
+
+        let clusterKeys= Object.keys(clustersContainer) ;
+
+
+        var edgesArray=[];
+       _.each(clusterKeys,function(key){
+
+           let otherClusterKeys= Object.keys(info[key].clustersConnectedTo) ;
+
+           _.each(otherClusterKeys,function(otherKey){
+
+               let otherClusters= info[key].clustersConnectedTo;
+               let edgesForCluster= info[key].edges;
+
+               let linkStrength=Object.keys(edgesForCluster).length
+
+               edgesArray.push({
+                       source:clustersContainer[key],
+                       target:otherClusters[otherKey],
+                       link_strength:linkStrength
+                   })
+
+
+           });
+
+
+
+       });
+
+        return edgesArray;
+    }
+
+    /**
+
+     * @param clustersContainer  ...  Map<name,cluster>
+     * @returns an object containing certain infos about clusters (what clusters are connected, with which edges and nodes within the cluster)
+     */
+    static getClusterInfo(clustersContainer){
+
+        //find connections between clusters from nodes contained
+
+        var relevantEdgesPerCluster={}
+            _.each(clustersContainer,function(cluster,id){
+                relevantEdgesPerCluster[id]={}
+                let nodes=cluster.getNodes()
+                //get only relevant nodes per cluster that link to/from other clusters
+                let edges=EdgeUtil.getEdgesForNodes(nodes,false,true)
+                relevantEdgesPerCluster[id]=edges
+
+            })
+
+
+
+        function isNodeOfCluster(node,cluster)
+        {
+          return cluster.getNodes().indexOf(node)>=0
+
+        }
+
+        //just in case clusters can overlap
+        //returns a map of the clusters that contain the node
+        function lookUpClustersOfNode(node){
+
+            var clustersForNode={};
+
+            _.each(clustersContainer,function(cluster,id){
+
+               if (  isNodeOfCluster(node,cluster))
+                   clustersForNode[id] = cluster;
+            });
+
+            return clustersForNode;
+
+        }
+
+        var clustersContainerRelationInfo={};
+
+
+        //get the clusters that connect to each other from the dges between them
+        _.each(relevantEdgesPerCluster,function(clusterExternalEdges,clusterID){
+
+            clustersContainerRelationInfo[clusterID]={
+                clustersConnectedTo:{},
+                edges:{},
+                nodes:{}
+
+            };
+
+            //for each edge of the current cluster that connects to another cluster
+            _.each(clusterExternalEdges,function(externalEdge){
+
+
+
+                //we can ignore the node that is contained within the current cluster
+
+               var testNode= isNodeOfCluster(externalEdge.source,clustersContainer[clusterID]);
+               let otherNode=testNode?externalEdge.target:externalEdge.source;
+
+
+               let clustersThatContainNode = lookUpClustersOfNode(otherNode);
+                delete (clustersThatContainNode[clusterID]) //undo self reference
+
+                _.extend(clustersContainerRelationInfo[clusterID].clustersConnectedTo,clustersThatContainNode);
+
+                var keys=Object.keys(clustersThatContainNode)
+
+
+                //have some additional infos
+                _.each(keys,function(key){
+
+                    //the edges that link to the specific cluster
+                   if (!clustersContainerRelationInfo[clusterID].edges[key]) clustersContainerRelationInfo[clusterID].edges[key]=[]
+                    clustersContainerRelationInfo[clusterID].edges[key].push(externalEdge)
+
+                    //the nodes the edges connect to
+                    if (!clustersContainerRelationInfo[clusterID].nodes[key]) clustersContainerRelationInfo[clusterID].nodes[key]=[]
+                    clustersContainerRelationInfo[clusterID].nodes[key].push(externalEdge)
+
+                })
+
+
+
+
+                //all clusters the node links to
+
+            })
+
+
+        });
+
+        return clustersContainerRelationInfo
+
+    }
+
+    /**
+     *  returns all edges for >>contained<< nodes within clusters
+     *  this would be suitable to do force-graph distribution on a cluster and all descendants
+     */
+
+    static getEdgesForNodes(nodes, bInternal = true, bExternal = false) {
+
+
+//a node can be a cluster that represents a set of nodes
+ //   if (nodes instanceof BaseCluster3D) nodes = nodes.mNodes
+
+    if (!bInternal && !bExternal) return []
+    //get relevant edges from
+
+    //a.clusters.mClusters.mClusters["United States"][0].mNodes
+
+    var edges = [];
+
+    _.each(nodes, function (node, id) {
+
+        //check if it is a container element
+        if (node instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */]) {
+            let _edges = EdgeUtil.getEdgesForNodes(node.mNodes, bInternal, bExternal)
+            edges = edges.concat(_edges);
+            edges = _.uniq(edges)
+            return
+        }
+
+        _.each(node.edges, function (edge, id) {
+
+
+            let srcContained = nodes.indexOf(edge.source) >= 0;
+            let trgContained = nodes.indexOf(edge.target) >= 0;
+
+
+            let isInternalNode = srcContained && trgContained;
+
+            // console.log(srcContained,trgContained,isInternalNode)
+            if (bInternal && isInternalNode || bExternal && !isInternalNode) {
+                edges = edges.concat(node.edges);
+                edges = _.uniq(edges)
+            }
+
+        })
+
+
+    })
+
+
+    return edges
+
+}
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = EdgeUtil;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+/**
+ * a set of node objects
+ * the cluster itself also contains parts of the visual representation of the nodes
+ * TODO in which case the clster might rather inherit from THREE.Points (point cloud) ?
+ */
+
+
+
+
+
+class ClusterNodeArray extends Array //List<Node>
+{
+
+    //FIXME
+    /*push(el)
+     {
+
+     if (! el instanceof Node  ) throw new Error("ClusterNodeArray must only contain instanceof",Node)
+     return super.apply(this,arguments)
+     }*/
+
+
+    groupBy( filterFunction){
+        let container={}
+
+        function groupFunction(key,val)
+        {
+            if (typeof container[key]=="undefined")   container[key]=new ClusterNodeArray();
+
+            container[key].push(val)
+        }
+
+        for (el of this)
+            filterFunction(groupFunction,el)
+
+
+        return container
+
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterNodeArray;
+
+
 
 
 /***/ }),
@@ -651,9 +820,104 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterNodeArray__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ClusterLeafElement__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ClusterNodeElement__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__NodeUtil__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(3);
+/**
+ * Created by Frank on 02.06.2017.
+ */
+
+
+
+
+
+/**
+ * simple node implementation for interaction and basic visualisation
+ *
+ */
+class BaseNode extends THREE.Mesh {
+
+    constructor(...args) {
+
+        BaseNode.initStatic()
+
+        var material = new THREE.MeshBasicMaterial({
+            color: 0xffff00,
+            wireframe: true,
+            visible: true,
+            opacity: 1,
+            // opacity: env.useDebugSphere ? 1 : 0,
+            transparent: true,
+            alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
+
+        });
+
+        super(BaseNode.sphereGeometry, material);
+
+      //  this.addDefaultListeners();
+
+
+    }
+
+
+    addDefaultListeners() {
+
+        this.on("click", () =>
+            __WEBPACK_IMPORTED_MODULE_0__NodeUtil__["a" /* default */].zoomToNode(this, function complete() {
+            })
+        );
+    }
+
+
+    static initStatic() {
+        if (BaseNode._static_initialised_) return
+
+        BaseNode.sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
+        BaseNode.emptyGeometry = new THREE.Geometry();
+        BaseNode.emptyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
+
+
+        BaseNode.lastSelectedNode = null;
+
+        //FIXME set camera and domElement not via env attribute ...
+        // BaseNode.domEvents = new THREEx.DomEvents(/*camera, renderer.domElement*/)
+        BaseNode.domEvents = globalEnv.domEvents
+
+
+        BaseNode._static_initialised_ = true
+
+
+    }
+
+    on(eventName, eventhandler) {
+        BaseNode.domEvents.addEventListener(this, eventName, eventhandler, false);
+        return this;
+    }
+
+    off(eventName, eventhandler) {
+        BaseNode.domEvents.removeEventListener(this, eventName, eventhandler, false);
+        return this;
+    }
+
+    trigger(eventName, origDomEvent, intersect) {
+
+        BaseNode.domEvents._notify(eventName, this, origDomEvent, intersect);
+        return this;
+    }
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = BaseNode;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterNodeArray__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ClusterLeafElement__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ClusterNodeElement__ = __webpack_require__(9);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -773,15 +1037,17 @@ class ClusterFactory{
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__ = __webpack_require__(0);
 /**
  * Created by Frank on 02.06.2017.
  */
+
 
 
 
@@ -851,22 +1117,43 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 
 
-    setNodes(nodes,onNodePositionChange)
-    {
+    //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
+    //in both cases we can determine the edges from it
+
+    setNodes(nodes,onNodePositionChange) {
 
 
-        //Note: might fail if nodes don't contain correct edges
-        let mEdges = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, true, false);
+        if (!nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */] && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
 
 
-        var mNodes=nodes.map(function(n){
+        let mEdges = []
 
-            (n.position)?n.position.copy(new THREE.Vector3(0,0,0)):_.extend(n,{x:0,y:0,z:0});
+        var mNodes = [];
+        //in case nodes are instance of BaseNode3D
+        if (nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */]) {
 
-            return (n.position)?n.position:n;
+            mNodes = Object.values(nodes.mClusters).map(function (n) {
+                n.position.copy(new THREE.Vector3(0, 0, 0));
+                return n.position;
+            });
 
 
-        })
+            mEdges = nodes.createEdgesForChildClusters();
+
+        }
+        else
+        if (_.isArray(nodes)) {
+        mNodes = nodes.map(function (n) {
+
+            //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
+            mEdges = mEdges.concat(n.edges);
+
+            _.extend(n,{x:0,y:0,z:0});
+            return n;
+
+        });
+
+    }
 
 
         this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {
@@ -916,11 +1203,11 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -958,7 +1245,7 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1053,77 +1340,11 @@ class ClusterNodeElement extends THREE.Object3D{
 
 
 /***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * Created by Frank on 02.06.2017.
- */
-
-
-class EdgeUtil {
-
-    static getEdgesForNodes(nodes, bInternal = true, bExternal = false) {
-
-        //FIXME
-        console.warn("TODO EdgeUtil.getEdgesForNodes")
-       return []
-
-
-    if (nodes instanceof ClusterLeafElement) nodes = nodes.mNodes
-
-    if (!bInternal && !bExternal) return []
-    //get relevant edges from
-    //a.clusters.mClusters.mClusters["United States"][0].mNodes
-
-    var edges = [];
-
-    _.each(nodes, function (node, id) {
-
-        //check if it is a container element
-        if (node instanceof ClusterLeafElement) {
-            let _edges = getEdgesForNodes(node.mNodes, bInternal, bExternal)
-            edges = edges.concat(_edges);
-            edges = _.uniq(edges)
-            return
-        }
-
-        _.each(node.edges, function (edge, id) {
-
-
-            let srcContained = nodes.indexOf(edge.source) >= 0;
-            let trgContained = nodes.indexOf(edge.target) >= 0;
-
-
-            let isInternalNode = srcContained && trgContained;
-
-            // console.log(srcContained,trgContained,isInternalNode)
-            if (bInternal && isInternalNode || bExternal && !isInternalNode) {
-                edges = edges.concat(node.edges);
-                edges = _.uniq(edges)
-            }
-
-        })
-
-
-    })
-
-
-    return edges
-
-}
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = EdgeUtil;
-
-
-/***/ }),
 /* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseNode__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseNode__ = __webpack_require__(5);
 /**
  * Created by Frank on 02.06.2017.
  */
@@ -1194,13 +1415,13 @@ class NodeUtil {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["getNodesFromCluster"] = getNodesFromCluster;
 /* harmony export (immutable) */ __webpack_exports__["getEdgesForNodes"] = getEdgesForNodes;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ForceGraphDistribution__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ClusterNodeArray__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ClusterFactory__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterLeafElement__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__BaseCluster3D__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ForceGraphDistribution__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ClusterNodeArray__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ClusterFactory__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterLeafElement__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__BaseCluster3D__ = __webpack_require__(0);
 /**
  *  TODO re-structure graph
  * -into graph + subgraphs or simply multiple graphs
@@ -1407,7 +1628,7 @@ class MyMain {
         let categoryDistributionFunction = new __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__["a" /* default */](100)
 
 
-        let forceFraphDistribution = new __WEBPACK_IMPORTED_MODULE_2__ForceGraphDistribution__["a" /* default */](100)
+        let forceFraphDistribution = new __WEBPACK_IMPORTED_MODULE_2__ForceGraphDistribution__["a" /* default */](100,3)
 
         let rand2 = new __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__["a" /* default */](200,2)
         let rand3 = new __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__["a" /* default */](300,3)

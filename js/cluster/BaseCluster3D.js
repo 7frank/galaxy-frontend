@@ -5,6 +5,10 @@
 
 import ClusterLeafElement from "./ClusterLeafElement"
 import BaseNode from "./BaseNode"
+import EdgeUtil from "./EdgeUtil"
+
+
+
 /**
  *
  * cluster=new BaseCluster3D(allNodes)
@@ -168,7 +172,8 @@ class BaseCluster3D extends BaseNode {
 
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
-        distribution.setNodes(values, function onStep(vecPosition, i) {
+
+        distribution.setNodes(this, function onStep(vecPosition, i) {
           //  let n = values[i];
           //  n.position.copy(vecPosition)
         });
@@ -249,6 +254,20 @@ class BaseCluster3D extends BaseNode {
         //    this.updateHull();
 
 
+
+    }
+
+
+  //returns some infos of the children of the the cluster relative to each other
+    getRelationInfo()
+    {
+        return EdgeUtil.getClusterInfo(this.mClusters);
+
+    }
+
+    createEdgesForChildClusters(){
+
+     return  EdgeUtil.createEdgesBetweenClustersFromMap(this.mClusters);
 
     }
 

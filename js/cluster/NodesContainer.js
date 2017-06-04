@@ -202,7 +202,7 @@ export class MyMain {
         let categoryDistributionFunction = new RandomDistribution(100)
 
 
-        let forceFraphDistribution = new ForceGraphDistribution(100)
+        let forceFraphDistribution = new ForceGraphDistribution(100,3)
 
         let rand2 = new RandomDistribution(200,2)
         let rand3 = new RandomDistribution(300,3)

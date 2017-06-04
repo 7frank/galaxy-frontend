@@ -6,6 +6,7 @@ import BaseDistribution from "./BaseDistribution"
 
 import EdgeUtil from "./EdgeUtil"
 
+import BaseCluster3D from "./BaseCluster3D"
 
 
 
@@ -71,22 +72,43 @@ class ForceGraphDistribution extends BaseDistribution
 
 
 
-    setNodes(nodes,onNodePositionChange)
-    {
+    //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
+    //in both cases we can determine the edges from it
+
+    setNodes(nodes,onNodePositionChange) {
 
 
-        //Note: might fail if nodes don't contain correct edges
-        let mEdges = EdgeUtil.getEdgesForNodes(nodes, true, false);
+        if (!nodes instanceof BaseCluster3D && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
 
 
-        var mNodes=nodes.map(function(n){
+        let mEdges = []
 
-            (n.position)?n.position.copy(new THREE.Vector3(0,0,0)):_.extend(n,{x:0,y:0,z:0});
+        var mNodes = [];
+        //in case nodes are instance of BaseNode3D
+        if (nodes instanceof BaseCluster3D) {
 
-            return (n.position)?n.position:n;
+            mNodes = Object.values(nodes.mClusters).map(function (n) {
+                n.position.copy(new THREE.Vector3(0, 0, 0));
+                return n.position;
+            });
 
 
-        })
+            mEdges = nodes.createEdgesForChildClusters();
+
+        }
+        else
+        if (_.isArray(nodes)) {
+        mNodes = nodes.map(function (n) {
+
+            //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
+            mEdges = mEdges.concat(n.edges);
+
+            _.extend(n,{x:0,y:0,z:0});
+            return n;
+
+        });
+
+    }
 
 
         this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {

@@ -20,7 +20,7 @@ $(function(){
 */
 
         b=a.betterSample()
-
+        b.mClusters["United States"].getRelationInfo()
 
     })
 
