@@ -45,6 +45,20 @@ export default class ClusterLeafElement extends THREE.Mesh
     }
 
 
+    updateHull(){
+
+        let pc=this.mParticles.pointCloud;
+        pc.geometry.center()
+return
+        //FIXME not working as intended
+
+
+
+        let box=new THREE.Box3;box.setFromObject(pc);
+        pc.geometry.boundingBox=box;
+
+    }
+
 
 }
 

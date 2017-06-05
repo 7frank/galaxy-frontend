@@ -197,8 +197,13 @@ export class MyMain {
             groupFunction(node.industry, node)
         }
 
+        //using these 2 we should have a 2d plane with 3d cubes on it
+        let sample1 = new BaseDistribution(1000,2)
+        let sample2 = new BaseDistribution(100,3)
 
-        let companyDistributionFunction = new BaseDistribution(500)
+
+
+        let companyDistributionFunction = new BaseDistribution(200,3)
         let categoryDistributionFunction = new RandomDistribution(100)
 
 
@@ -210,9 +215,13 @@ export class MyMain {
 
 
         return [
-            {generator: countrySetGenerator, distribution: companyDistributionFunction, options: {minClusterSize: 15}}
-            ,{generator: industrySetGenerator, distribution: categoryDistributionFunction, options: {minClusterSize: 5}}
-          ,{distribution: forceFraphDistribution}
+           // {generator: countrySetGenerator, distribution: companyDistributionFunction, options: {minClusterSize: 3}}
+           // ,{generator: industrySetGenerator, distribution: categoryDistributionFunction, options: {minClusterSize: 5}}
+
+             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 3}}
+             ,{generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 3}}
+
+            ,{distribution: forceFraphDistribution}
             ,{distribution: rand2}
             ,{distribution: rand3}
 
@@ -229,6 +238,14 @@ export class MyMain {
         globalEnv.scene.add(res);
         res.position.set(0, 1000, 0);
 
+        setTimeout(function()
+        {
+            //   res.updateCluster()
+            res.updateTest()
+
+        },1000 )
+
+
         this.clusters = res;
 
 //random distribution on click
@@ -244,7 +261,12 @@ var curr=0
             res.setDistributionHandler(   _dist  )
 
             //FIXME add complete handler
-            setTimeout(() =>    res.updateCluster(),1000 )
+            setTimeout(function()
+            {
+             //   res.updateCluster()
+                res.updateTest()
+
+            },1000 )
 
 
 

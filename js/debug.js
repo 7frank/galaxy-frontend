@@ -11,6 +11,14 @@ $(function(){
 
     $(window).on("keyup",null,"ctrl+space",function(){
 
+
+
+        //these four additional things should be put into toe ClusterExt class
+        globalEnv.nodeClouds.detach();
+        globalEnv.lineMesh.visible=false;
+        globalEnv.particles.pointCloud.visible=false
+        globalEnv.countryTextNodes.remove()
+
         a=new clusters.MyMain;
 
         /*a.firstSample();
@@ -18,9 +26,10 @@ $(function(){
 
         setTimeout(() => a.startForceGraphSampleOnSubsets("United States"),4000)
 */
+if (window["baseCluster"]) return
 
-        b=a.betterSample()
-        b.mClusters["United States"].getRelationInfo()
+        baseCluster=a.betterSample()
+        baseCluster.mClusters["United States"].getRelationInfo()
 
     })
 

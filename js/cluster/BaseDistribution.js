@@ -35,22 +35,33 @@ export default  class BaseDistribution
         let _len;
         if (this.dimensions==1)
             _len=len;
-        if (this.dimensions==1)
-            _len= len/Math.sqrt(len);
-        if (this.dimensions==1)
-            _len= len/Math.pow(len,1/3);
+        if (this.dimensions==2)
+            _len= Math.sqrt(len);
+        if (this.dimensions==3)
+            _len=Math.pow(len,1/3);
 
 
         let step=1/_len
 
         //1d/2d/3d helpers
         //for (let i=0;i<=1;i+=step)
-        var i=0;
+        var i=0,j=0,k=0;
         var c=0;
         var that=this;
         _.each(nodes,function(n){
 
-            var dist= that.distribute(n, i,0,0);
+            if (i>_len){
+                j++;
+                i=0;
+            }
+
+            if (j>_len){
+                k++;
+                j=0;
+            }
+
+
+            var dist= that.distribute(n, i,j,k);
 
 
 
@@ -83,7 +94,8 @@ export default  class BaseDistribution
             //------------------------
 
 
-            i+=step
+            //i+=step
+            i++;
             c++;
         })
 

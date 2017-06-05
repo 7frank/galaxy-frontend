@@ -191,16 +191,28 @@ class BaseCluster3D extends BaseNode {
 
     createHull() {
 
+        if (this.mHull&&this.mHull.geometry)
+            this.mHull.geometry.dispose();
+        if (this.mHull && this.mHull.material)
+            this.mHull.material.dispose();
+
+        if (this.mHull) this.remove(this.mHull)
+
+
+
         let boundingSphere = new THREE.Sphere;
 
         let boundingBox = new THREE.Box3;
        // boundingBox.setFromObject(this);
-        boundingBox.setFromArray(this.children);
+        boundingBox.setFromObject(this);
 
         //get center, radius
         let _center = boundingBox.getCenter();
         let radius = boundingBox.getSize().length() / 2;
 
+
+        //TODO
+        if (radius<40) radius=40
 
 
         boundingSphere.center.copy(_center);
@@ -210,22 +222,27 @@ class BaseCluster3D extends BaseNode {
         this.geometry.boundingBox = boundingBox;
         this.geometry.boundingSphere = boundingSphere;
 
-        var geometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
-        var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
 
-        if (this.geometry)
-            this.geometry.dispose();
-
-        this.geometry = geometry
+        var geometry = new THREE.RingGeometry( boundingSphere.radius*0.9, boundingSphere.radius, 32 );
+        var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, wireframe: false, transparent: true, opacity: 0.1});
 
 
-        if (this.material)
-            this.material.dispose();
-
-        this.material = material
+        //  var geometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
+      //  var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
 
 
-        //  this.mHull = new THREE.Mesh(geometry, material);
+
+        this.mHull=new THREE.Mesh(geometry,material)
+        this.geometry.boundingSphere=boundingSphere
+
+
+        this.add(this.mHull);
+        this.mHull.onBeforeRender=function(...args)
+        {
+            this.setRotationFromQuaternion( args[2].quaternion )
+
+        }
+
         //  this.mHull.position.copy(boundingSphere.center)
         //  this.add(this.mHull);
 
@@ -270,6 +287,45 @@ class BaseCluster3D extends BaseNode {
      return  EdgeUtil.createEdgesBetweenClustersFromMap(this.mClusters);
 
     }
+
+
+    getRadius(){
+
+        return this.geometry.boundingSphere?this.geometry.boundingSphere.radius:null;
+
+    }
+
+    updateTest(){
+        var clustersThatNeedHullUpdates=[]
+
+        var leafsThatNeedHullUpdates=[]
+
+        this.traverse(function(item){
+            if (item instanceof BaseCluster3D)
+                clustersThatNeedHullUpdates.push(item)
+
+            if (item instanceof ClusterLeafElement)
+                leafsThatNeedHullUpdates.push(item)
+
+        })
+
+        _.each( _.reverse(leafsThatNeedHullUpdates) ,function(cluster){
+            cluster.updateHull();
+        })
+
+
+       _.each( _.reverse(clustersThatNeedHullUpdates) ,function(cluster){
+           cluster.createHull();
+
+
+
+       })
+
+
+        this.createHull()
+
+    }
+
 
 
 }
