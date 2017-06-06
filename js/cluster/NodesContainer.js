@@ -18,12 +18,9 @@ import ClusterFactory from "./ClusterFactory"
 import ClusterLeafElement from "./ClusterLeafElement"
 
 import BaseCluster3D from "./BaseCluster3D"
+import Cluster3DExtended from "./Cluster3DExtended"
+import RootCluster from "./RootCluster"
 
-
-//---------------------------
-//TODO stub
-class SphericalDistribution extends BaseDistribution {
-}
 
 
 //---------------------------
@@ -64,6 +61,8 @@ export class MyGlobalNodesContainer extends GlobalNodesContainer {
      * ---sameIndustry
      *
      */
+
+    /*
     createSample(nodes) {
 
 
@@ -93,7 +92,7 @@ export class MyGlobalNodesContainer extends GlobalNodesContainer {
 
 
     }
-
+*/
 
 }
 
@@ -199,7 +198,7 @@ export class MyMain {
 
         //using these 2 we should have a 2d plane with 3d cubes on it
         let sample1 = new BaseDistribution(1000,2)
-        let sample2 = new BaseDistribution(100,3)
+        let sample2 = new BaseDistribution(50,3)
 
 
 
@@ -232,8 +231,8 @@ export class MyMain {
     betterSample()
     {
         let speccs=this.getPossibleClusterSpeccsArray();
-        var res= new BaseCluster3D(globalNodes,[speccs[0],speccs[1]]);
-
+//        var res= new BaseCluster3D(globalNodes,[speccs[0],speccs[1]]);
+        var res= new RootCluster(globalNodes,[speccs[0],speccs[1]]);
 
         globalEnv.scene.add(res);
         res.position.set(0, 1000, 0);
@@ -249,28 +248,52 @@ export class MyMain {
         this.clusters = res;
 
 //random distribution on click
-var curr=0
-        res.on("click",function(){
+
+
+      function onClickFactory(res,speccs){
+          var curr=0
+
+         return function clickAndSpeccHandler(){
 
 
 
-            //var _dist=_.sample(speccs).distribution
-                var _dist=speccs[curr++%speccs.length].distribution
+              var _dist=speccs[curr++%speccs.length].distribution
 
-            console.log("setting distribution function",_dist)
-            res.setDistributionHandler(   _dist  )
+              console.log("setting distribution function",_dist)
+              res.setDistributionHandler(   _dist  )
 
-            //FIXME add complete handler
-            setTimeout(function()
-            {
-             //   res.updateCluster()
-                res.updateTest()
+              //FIXME add complete handler
+              setTimeout(function()
+              {
 
-            },1000 )
+                  res.updateTest()
+
+              },1000 )
+
+
+
+          }
+
+
+      }
+
+
+       let speccsRoot=[ {distribution: new BaseDistribution(2500,1)},{distribution: new BaseDistribution(1000,2)},{distribution: new BaseDistribution(800,3)}]
+        res.on("click",onClickFactory(res,speccsRoot))
+
+        _.each(res.mClusters,function(res){
+
+            let speccsRoot=[ {distribution: new BaseDistribution(150,1)},{distribution: new BaseDistribution(100,2)},{distribution: new BaseDistribution(50,3)},{distribution: new ForceGraphDistribution(100,3)}]
+            res.on("click",onClickFactory(res,speccsRoot))
 
 
 
         })
+
+
+        //------------------------------
+
+
 
 
       return res

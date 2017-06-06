@@ -1587,13 +1587,25 @@ options=_.extend({onDrawNode:function(){}},options)
 				//FIXME but the onBeforeRender and onAfterRender code won't get executed
 				//NOTE the material is currently visible and the opacity ==0 but this still impacts performace
 				// so currently the material is set invisible only every x frames in the animation loop
-				var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,visible:true,opacity:env.useDebugSphere?1:0,transparent:true ,
+
+
+
+
+
+              var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,visible:true,opacity:env.useDebugSphere?1:0,transparent:true ,
 				alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
-				//blending:THREE.SubtractiveBlending
-				//depthTest:      false, //	depthTest:      false,
-				//						depthWrite: false
-				
+
 				} );
+
+
+/*
+
+    var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,visible:true,opacity:1,transparent:true ,
+        alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
+
+    } );*/
+
+
 				
 				if (!emptyGeometry.boundingSphere)
 				emptyGeometry.boundingSphere= new THREE.Sphere(new THREE.Vector3,1);

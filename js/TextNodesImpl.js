@@ -25,7 +25,12 @@ function TextNodes(env = globalEnv, options) {
 			},
 			getNodePosition: function (node) {
 				//should return a THREE.Vector3 represention the source nodes poistion in 3d space
-				return node._bubble.position
+
+                var vector = new THREE.Vector3();
+                vector.setFromMatrixPosition( node._bubble.matrixWorld );
+				return vector;
+
+				//return node._bubble.position
 			},
 			onAfterCreateTextField: function (node, el) {}, //gets called after a text label is generated to be able to make adjustments
 			onNodeText: function (node) {

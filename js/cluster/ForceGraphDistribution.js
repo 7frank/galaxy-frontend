@@ -40,6 +40,8 @@ class ForceGraphDistribution extends BaseDistribution
 
         //   console.log(... arguments)
 
+        var scale=this.mScale
+
 
         //FIXME containers need links
         layout
@@ -49,13 +51,13 @@ class ForceGraphDistribution extends BaseDistribution
                 return d._id
             })
                 .distance(function computeLinkDistance() {
-                    return 20;
+                    return scale/50;
 
                 })
                 .links(edges))
-            .force("collide", d3_force.forceCollide(60)
+            .force("collide", d3_force.forceCollide(scale/10)
                 .iterations(1))
-            .force('charge', (node) => -300)
+            .force('charge', (node) => -scale/50)
             .force('linkStrength', (link) => 1)
 
 

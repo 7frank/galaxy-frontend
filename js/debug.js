@@ -14,10 +14,18 @@ $(function(){
 
 
         //these four additional things should be put into toe ClusterExt class
-        globalEnv.nodeClouds.detach();
-        globalEnv.lineMesh.visible=false;
-        globalEnv.particles.pointCloud.visible=false
-        globalEnv.countryTextNodes.remove()
+
+     setTimeout(function(){
+
+          globalEnv.nodeClouds.detach();
+          globalEnv.lineMesh.visible = false;
+          globalEnv.particles.pointCloud.visible = false
+          globalEnv.tn.remove()
+
+          globalEnv.countryTextNodes.remove()
+
+     },1000)
+
 
         a=new clusters.MyMain;
 

@@ -77,7 +77,7 @@ function getParticleShaderMaterial()
 		function createParticleSystemForNodes(nodes,options)	
 		{
 			
-				options=_.extend({groupKeyName:"isGroupNode",groupValueName:"nodes",nodeKey:'itemCount'},options)
+				options=_.extend({groupKeyName:"isGroupNode",groupValueName:"nodes",nodeKey:'itemCount',increment:3},options)
 			
 			
 			function getNodeParticleCount(node)
@@ -107,7 +107,7 @@ function getParticleShaderMaterial()
             var values_size = new Float32Array( particles );
             var   geometry = new THREE.BufferGeometry();
 			
-			var v=0
+			var v=0;
             for (n in nodes) {
     
 			let count=particlesPerNode[n]
@@ -116,7 +116,7 @@ function getParticleShaderMaterial()
 				{
 				
 						
-						var color=(typeof nodes[i].color=="number")?new THREE.Color(nodes[i].color):new THREE.Color(0xffff00);
+						var color=(typeof n.color=="number")?new THREE.Color(n.color):new THREE.Color(0xffff00);
 
 					
 						  
@@ -179,9 +179,9 @@ function getParticleShaderMaterial()
 		
 
 		//-----------------
-		var increment=3	
+		var increment=options.increment
 		
-			function updateDestinations(inc=5)
+			function updateDestinations(inc=1)
 			{
 				increment=inc; 
 				
@@ -339,7 +339,7 @@ function animate(time) {
 								console.error("already disposed")
 								return
 							}
-						
+
 							updateDestinations();
 							 
 							//for now just have a huge bounding volume

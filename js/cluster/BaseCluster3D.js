@@ -38,10 +38,11 @@ class BaseCluster3D extends BaseNode {
         super();
         this.addNodes(nodes);
         //by default the cluster is no leaf. TODO
-        this.isLeaf = false;
+
         this.mClusters = {}
 
 
+        //FIXME an additional dist schould be called for leaf elements ...  >1 else ...
         //xCluster if present, use to cluster nodes into sub-clusters
         if (_.isArray(clusteringHandlers) && clusteringHandlers.length > 0) {
             this.applyClustering(clusteringHandlers);
@@ -75,6 +76,13 @@ class BaseCluster3D extends BaseNode {
     }
 
 
+
+    getChildClusterConstructor()
+    {
+        return this.constructor
+
+    }
+
     /**
      * this method can be re-run to change the sub-clusters
      -which will result in deleting old clusters
@@ -97,10 +105,10 @@ class BaseCluster3D extends BaseNode {
             var nextDepthSpeccsArray = [].concat(mClusteringSpeccsArray);
             nextDepthSpeccsArray.shift();
 
-            if (nextDepthSpeccsArray.length > 0)
+            if (nextDepthSpeccsArray.length > 1)
                 mCluster.applyClustering(nextDepthSpeccsArray);
             else
-                mCluster.createParticlePointCloud(entry);
+                mCluster.createParticlePointCloud(nextDepthSpeccsArray[0]);
 
 
         })
@@ -111,7 +119,7 @@ class BaseCluster3D extends BaseNode {
     }
 
     _clusterThis(entry) {
-
+    var clazz=this.getChildClusterConstructor();
         var options = _.extend({minClusterSize: 10, defaultMergeGroupName: "other"}, entry.options)
 
 
@@ -125,7 +133,7 @@ class BaseCluster3D extends BaseNode {
             if (_cluster.getNodes().length < options.minClusterSize) {
 
                 var dMGN = options.defaultMergeGroupName
-                if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new BaseCluster3D()
+                if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz;//new BaseCluster3D()
 
                 _clustersObj[dMGN].addNodes(_cluster.getNodes())
             }
@@ -144,10 +152,12 @@ class BaseCluster3D extends BaseNode {
 
 
     groupBy(filterFunction) {
+        var clazz=this.getChildClusterConstructor();
+
         let container = {}
 
         function groupFunction(key, val) {
-            if (typeof container[key] == "undefined") container[key] = new BaseCluster3D();
+            if (typeof container[key] == "undefined") container[key] =  new clazz;//new BaseCluster3D();
 
             container[key].addNodes(val)
         }
@@ -173,10 +183,13 @@ class BaseCluster3D extends BaseNode {
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
 
+        if (this.isLeaf())
+            this.mLeaf.setDistributionHandler(distribution);
+        else
         distribution.setNodes(this, function onStep(vecPosition, i) {
           //  let n = values[i];
           //  n.position.copy(vecPosition)
-        });
+        }/*,()=> this.updateTest()*/  ); //FIXME
 
 
     }
@@ -215,30 +228,31 @@ class BaseCluster3D extends BaseNode {
         if (radius<40) radius=40
 
 
-        boundingSphere.center.copy(_center);
+      //  boundingSphere.center.copy(_center);
         boundingSphere.radius = radius;
 
 
-        this.geometry.boundingBox = boundingBox;
+       // this.geometry.boundingBox = boundingBox;
         this.geometry.boundingSphere = boundingSphere;
 
 
-        var geometry = new THREE.RingGeometry( boundingSphere.radius*0.9, boundingSphere.radius, 32 );
-        var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, wireframe: false, transparent: true, opacity: 0.1});
+        var geometry = new THREE.RingGeometry( boundingSphere.radius*0.01, boundingSphere.radius, 32 );
+        var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, wireframe: false, transparent: true, opacity: 0.02});
 
 
         //  var geometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
       //  var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
-
-
-
         this.mHull=new THREE.Mesh(geometry,material)
+      // this.mHull.position.copy(_center);
+
         this.geometry.boundingSphere=boundingSphere
+
 
 
         this.add(this.mHull);
         this.mHull.onBeforeRender=function(...args)
         {
+            //billboard effect
             this.setRotationFromQuaternion( args[2].quaternion )
 
         }
@@ -249,6 +263,11 @@ class BaseCluster3D extends BaseNode {
 
     }
 
+
+    isLeaf()
+    {
+       return typeof this.mLeaf !="undefined"
+    }
 
     createParticlePointCloud(entry) {
         // console.log("reached leaf cluster", this)
@@ -323,6 +342,33 @@ class BaseCluster3D extends BaseNode {
 
 
         this.createHull()
+
+    }
+
+
+    getLeafs()
+    {
+        var leafElements=[]
+
+        this.traverse(function(item){
+            if (item instanceof __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */])
+                leafElements.push(item)
+
+        })
+      return leafElements;
+    }
+
+    //TODO see use case for potential implementation
+    findClusters(selector)
+    {
+        var clusters=[]
+
+        this.traverse(function(item){
+            if (item instanceof BaseCluster3D)
+                clusters.push(item)
+        })
+
+        return clusters
 
     }
 

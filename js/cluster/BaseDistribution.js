@@ -19,7 +19,7 @@ export default  class BaseDistribution
     }
 
 
-    setNodes(nodes,onNodePositionChange)
+    setNodes(nodes,onNodePositionChange,onEnd)
     {
         if (nodes instanceof BaseCluster3D)
             nodes=nodes.mClusters
@@ -32,6 +32,9 @@ export default  class BaseDistribution
 
         let len= nodes.length|Object.keys(nodes).length
 
+
+        var i=0,j=0,k=0;
+
         let _len;
         if (this.dimensions==1)
             _len=len;
@@ -40,12 +43,15 @@ export default  class BaseDistribution
         if (this.dimensions==3)
             _len=Math.pow(len,1/3);
 
+        if (this.dimensions<3)  k=0.5*_len
+        if (this.dimensions<2)  j=0.5*_len
+
 
         let step=1/_len
 
         //1d/2d/3d helpers
         //for (let i=0;i<=1;i+=step)
-        var i=0,j=0,k=0;
+
         var c=0;
         var that=this;
         _.each(nodes,function(n){
@@ -61,7 +67,7 @@ export default  class BaseDistribution
             }
 
 
-            var dist= that.distribute(n, i,j,k);
+            var dist= that.distribute(n, i/_len-0.5,j/_len-0.5,k/_len-0.5);
 
 
 
@@ -84,6 +90,10 @@ export default  class BaseDistribution
                     onNodePositionChange(origPos,mc)
 
                 }).onComplete(function(){
+
+
+                    //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
+                    if (onEnd)onEnd()
 
                     cancelAnimationFrame(mTimeout)
 

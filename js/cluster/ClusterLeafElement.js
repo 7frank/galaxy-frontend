@@ -9,10 +9,27 @@ export default class ClusterLeafElement extends THREE.Mesh
     constructor(nodes){
         super();
 
+
+        //FIXME wrong positions
+      //  this.appendNodes(nodes)
+
         this.mNodes=nodes;
         this.mParticles=this.createParticleCloud();
 
         this.add( this.mParticles.pointCloud)
+
+
+    }
+
+    appendNodes(nodes){
+
+        var that=this;
+        _.each(nodes,function(node){
+            if (node&& node._bubble)
+               that.add(node._bubble)
+
+
+        })
 
 
     }
@@ -26,6 +43,9 @@ export default class ClusterLeafElement extends THREE.Mesh
         distribution.setNodes(this.mNodes,function onStep(vec,i){
 
             that.mParticles.updateNodePosition(i)
+
+
+
 
         });
 
@@ -45,10 +65,12 @@ export default class ClusterLeafElement extends THREE.Mesh
     }
 
 
+
+
     updateHull(){
 
         let pc=this.mParticles.pointCloud;
-        pc.geometry.center()
+      //  pc.geometry.center()
 return
         //FIXME not working as intended
 

@@ -259,6 +259,8 @@ function ForceGraph() {
 
 	//----------------------------------------
 	function __digest() {
+
+
 		if (!env.initialised) {
 			return
 		}
@@ -304,6 +306,9 @@ function ForceGraph() {
 				})
 
 		}
+
+
+
 
 		//---------------------
 		//adding grouping feature
@@ -900,6 +905,7 @@ function ForceGraph() {
 		initTextNodeContainer(nodeElement)
 
 		initStatic();
+
 		digest();
 
 		resizeCanvas();
