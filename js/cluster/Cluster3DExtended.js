@@ -6,6 +6,11 @@
 
 import BaseCluster3D from "./BaseCluster3D"
 
+import BaseDistribution from "./BaseDistribution"
+import ForceGraphDistribution from "./ForceGraphDistribution"
+
+
+
 /**
  * extended cluster
 
@@ -26,12 +31,57 @@ class Cluster3DExtended extends BaseCluster3D {
 
     addListeners()
     {
-        var opacity;
+        var opacity=-1;
 
 
-        this.on("mouseover",function(){
-            opacity=this.material.opacity
-            this.material.opacity=1;
+
+        var curr=0
+        function onClickFactory(res,speccs){
+
+
+            return function clickAndSpeccHandler(){
+
+
+
+                var _dist=speccs[curr++%speccs.length].distribution
+
+                console.log("setting distribution function",_dist)
+                res.setDistributionHandler(   _dist  )
+
+                //FIXME add complete handler
+                setTimeout(function()
+                {
+
+                    res.updateTest()
+
+                },1000 )
+
+            }
+        }
+
+
+        this.on("click",function(e) {
+            e.stopPropagation()
+
+            var diameter=this.geometry.boundingSphere.radius*2
+            console.log("clicky clicky",diameter)
+            let speccsRoot=[
+                {distribution: new BaseDistribution(diameter,1)},
+                {distribution: new BaseDistribution(diameter*0.66,2)},
+                {distribution: new BaseDistribution(diameter*0.33,3)},
+                {distribution: new ForceGraphDistribution(diameter*0.66,3)}
+                ]
+
+
+            var fn= onClickFactory(this, speccsRoot)
+
+            fn()
+        })
+
+        this.on("mouseover mousemove",function(){
+            if (opacity==-1)
+            opacity=this.mHull.material.opacity
+            this.mHull.material.opacity=0.5;
 
         })
 
@@ -39,7 +89,7 @@ class Cluster3DExtended extends BaseCluster3D {
 
         this.on("mouseout",function(){
 
-            this.material.opacity=opacity;
+            this.mHull.material.opacity=opacity;
 
         })
 

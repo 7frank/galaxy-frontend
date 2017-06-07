@@ -17,14 +17,14 @@ export default class BaseNode extends THREE.Mesh {
         BaseNode.initStatic()
 
         var material = new THREE.MeshBasicMaterial({
-            color: 0xffff00,
+            color: 0xffffff,
            // wireframe: true,
             visible: true,
-            opacity: 0.1,
+            opacity: 0.01,
             side:THREE.BackSide,
             // opacity: env.useDebugSphere ? 1 : 0,
-            transparent: true//,
-          //  alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
+            transparent: true,
+           alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
 
         });
 
@@ -50,7 +50,7 @@ export default class BaseNode extends THREE.Mesh {
         if (BaseNode._static_initialised_) return
 
         //BaseNode.sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
-        BaseNode.sphereGeometry = new THREE.SphereGeometry(10, 16, 16);
+        BaseNode.sphereGeometry = new THREE.SphereGeometry(10, 10, 5);
         BaseNode.emptyGeometry = new THREE.Geometry();
         BaseNode.emptyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
 
@@ -67,13 +67,22 @@ export default class BaseNode extends THREE.Mesh {
 
     }
 
+
+
+
     on(eventName, eventhandler) {
-        BaseNode.domEvents.addEventListener(this, eventName, eventhandler.bind(this), false);
+
+      for (let eName of eventName.split(" "))
+        BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
+
+
         return this;
     }
 
     off(eventName, eventhandler) {
-        BaseNode.domEvents.removeEventListener(this, eventName, eventhandler, false);
+
+        for (let eName of eventName.split(" "))
+        BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
         return this;
     }
 

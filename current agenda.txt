@@ -1,3 +1,15 @@
+
+clusters
+-bug: node hover => multiple nodes are highlighted from different clusters
+-interference with search functinoality => not always zooms to correct result
+-todo per cluster line mesh
+-cluster texts (formally eg. country texts)
+-implement leaf text nodes so that relevant texts from multiple clusters with visibleTexts < xVal
+
+
+--------------------------------------
+
+
 BUG:
 	[]//FIXME this is only currently there for the search function to trigger text generation because the onComplete Mehthod might have a problem
 		

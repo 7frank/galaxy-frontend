@@ -280,6 +280,7 @@ export class MyMain {
 
       }
 
+/*
 
        let speccsRoot=[ {distribution: new BaseDistribution(2500,1)},{distribution: new BaseDistribution(1000,2)},{distribution: new BaseDistribution(800,3)},{distribution: new SphericalDistribution(800)}]
         res.on("click",onClickFactory(res,speccsRoot))
@@ -293,6 +294,8 @@ export class MyMain {
 
 
         })
+
+        */
 
 
         //------------------------------

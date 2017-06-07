@@ -204,8 +204,6 @@ class BaseCluster3D extends BaseNode {
 
     createHull() {
 
-      //FIXME the hull is getting bigger each time it gets re-created which will break stuff
-        return
 
         if (this.mHull&&this.mHull.geometry)
             this.mHull.geometry.dispose();
@@ -217,11 +215,11 @@ class BaseCluster3D extends BaseNode {
         this.geometry.dispose();
         this.geometry.boundingBox=null;
         this.geometry.boundingSphere=null;
+        delete(this.geometry);
 
         let boundingSphere = new THREE.Sphere;
 
         let boundingBox = new THREE.Box3;
-       // boundingBox.setFromObject(this);
         boundingBox.setFromObject(this);
 
         //get center, radius
@@ -232,7 +230,7 @@ class BaseCluster3D extends BaseNode {
         //TODO
         if (radius<40) radius=40
 
-console.log("sphere radius",radius)
+
 
 
       //  boundingSphere.center.copy(_center);
@@ -240,29 +238,21 @@ console.log("sphere radius",radius)
 
 
        // this.geometry.boundingBox = boundingBox;
-        this.geometry.boundingSphere = boundingSphere;
 
 
-        var geometry = new THREE.RingGeometry( boundingSphere.radius*0.01, boundingSphere.radius, 32 );
-        var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, wireframe: false, transparent: true, opacity: 0.02});
+
+        var geometry = new THREE.RingGeometry( boundingSphere.radius*0.95, boundingSphere.radius, 32 );
+        var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, wireframe: false, transparent: true, opacity: 0.05});
 
 
-          var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
+          var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
       //  var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
 
-     /*
+
         this.mHull=new THREE.Mesh(geometry,material)
-
-
       // this.mHull.position.copy(_center);
 
-
-
-
-        this.geometry.boundingSphere=boundingSphere
-
-
-
+       // this.geometry.boundingSphere=boundingSphere
        this.add(this.mHull);
         this.mHull.onBeforeRender=function(...args)
         {
@@ -270,9 +260,15 @@ console.log("sphere radius",radius)
             this.setRotationFromQuaternion( args[2].quaternion )
 
         }
-      */
+
 
      this.geometry=sphereGeometry;
+
+       /* this.geometry.copy(sphereGeometry)
+          this.geometry.needsUpdate=true;
+          this.geometry.boundingSphere=boundingSphere;
+        */
+
 
         //  this.mHull.position.copy(boundingSphere.center)
         //  this.add(this.mHull);
@@ -345,14 +341,14 @@ console.log("sphere radius",radius)
 
         })
 
-        _.each( leafsThatNeedHullUpdates ,function(cluster){
-      //  _.each( _.reverse(leafsThatNeedHullUpdates) ,function(cluster){
+      //  _.each( leafsThatNeedHullUpdates ,function(cluster){
+        _.each( _.reverse(leafsThatNeedHullUpdates) ,function(cluster){
             cluster.updateHull();
         })
 
-        _.each(clustersThatNeedHullUpdates ,function(cluster){
-       //_.each( _.reverse(clustersThatNeedHullUpdates) ,function(cluster){
-         //  cluster.createHull();
+      //  _.each(clustersThatNeedHullUpdates ,function(cluster){
+       _.each( _.reverse(clustersThatNeedHullUpdates) ,function(cluster){
+           cluster.createHull();
 
 
 

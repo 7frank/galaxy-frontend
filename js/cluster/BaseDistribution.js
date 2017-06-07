@@ -14,15 +14,29 @@ import BaseCluster3D from "./BaseCluster3D"
 export default  class BaseDistribution
 {
     constructor(scale=50,dimensions=1){
+
+        //TODO have some kind of dynamic width function as alternative to the static scale value
+        //this way it would be possible to have equal with child nodes for example
+        let defaults={scale:()=> 50 ,dimensions:1}
+
+
+
+
         this.dimensions=dimensions //TODO
         this.mScale=scale
     }
 
 
-    setNodes(nodes,onNodePositionChange,onEnd)
-    {
-        if (nodes instanceof BaseCluster3D)
-            nodes=nodes.mClusters
+    setNodes(nodes,onNodePositionChange,onEnd) {
+        if (nodes instanceof BaseCluster3D) {
+
+            //TODO
+         /*   if (nodes.isLeaf())
+                nodes =nodes.mNodes
+                else*/
+                nodes = nodes.mClusters
+
+        }
         else
         if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
 

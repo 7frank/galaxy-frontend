@@ -454,6 +454,9 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
 function doZoomToPos(vec3Position,distanceToPosition=500) {
 
+	console.warn("doZoomToPos: TODO wrong offset" )
+	//  var vec3End = new THREE.Vector3();  vec3End.setFromMatrixPosition( mesh.matrixWorld );
+
 	var env=globalEnv;
 
 		var vec3Start = env.camera.position
@@ -545,7 +548,12 @@ function doZoomToMesh(mesh,onEnd) {
 		var minMaxDistance=400
 
 		var vec3Start = mCamera.position
-		var vec3End = mesh.position //e.target.position
+
+
+    var vec3End = new THREE.Vector3();
+    vec3End.setFromMatrixPosition( mesh.matrixWorld );
+
+	//	var vec3End = mesh.position //e.target.position
 
 
 		//we want to have a fixed distance to a node when selecting
@@ -1598,13 +1606,13 @@ options=_.extend({onDrawNode:function(){}},options)
 				} );
 
 
-/*
 
+/*
     var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,visible:true,opacity:1,transparent:true ,
         alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
 
-    } );*/
-
+    } );
+*/
 
 				
 				if (!emptyGeometry.boundingSphere)

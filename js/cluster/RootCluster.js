@@ -30,7 +30,7 @@ class RootCluster extends Cluster3DExtended {
     //prevent multiple recursive  root clusters from being created by default
     getChildClusterConstructor()
     {
-        return this.__proto__.constructor;
+        return Cluster3DExtended;
 
     }
 
@@ -69,5 +69,11 @@ let env=undefined
     }
 
 
+    //@override
+  /*  createHull()
+    {
+
+    }
+*/
 
 }
