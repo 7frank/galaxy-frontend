@@ -18,14 +18,16 @@ export default class BaseNode extends THREE.Mesh {
 
         var material = new THREE.MeshBasicMaterial({
             color: 0xffff00,
-            wireframe: true,
+           // wireframe: true,
             visible: true,
-            opacity: 1,
+            opacity: 0.1,
+            side:THREE.BackSide,
             // opacity: env.useDebugSphere ? 1 : 0,
-            transparent: true,
-            alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
+            transparent: true//,
+          //  alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
 
         });
+
 
         super(BaseNode.sphereGeometry, material);
 
@@ -47,7 +49,8 @@ export default class BaseNode extends THREE.Mesh {
     static initStatic() {
         if (BaseNode._static_initialised_) return
 
-        BaseNode.sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
+        //BaseNode.sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
+        BaseNode.sphereGeometry = new THREE.SphereGeometry(10, 16, 16);
         BaseNode.emptyGeometry = new THREE.Geometry();
         BaseNode.emptyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
 
@@ -65,7 +68,7 @@ export default class BaseNode extends THREE.Mesh {
     }
 
     on(eventName, eventhandler) {
-        BaseNode.domEvents.addEventListener(this, eventName, eventhandler, false);
+        BaseNode.domEvents.addEventListener(this, eventName, eventhandler.bind(this), false);
         return this;
     }
 

@@ -204,6 +204,9 @@ class BaseCluster3D extends BaseNode {
 
     createHull() {
 
+      //FIXME the hull is getting bigger each time it gets re-created which will break stuff
+        return
+
         if (this.mHull&&this.mHull.geometry)
             this.mHull.geometry.dispose();
         if (this.mHull && this.mHull.material)
@@ -211,7 +214,9 @@ class BaseCluster3D extends BaseNode {
 
         if (this.mHull) this.remove(this.mHull)
 
-
+        this.geometry.dispose();
+        this.geometry.boundingBox=null;
+        this.geometry.boundingSphere=null;
 
         let boundingSphere = new THREE.Sphere;
 
@@ -227,6 +232,8 @@ class BaseCluster3D extends BaseNode {
         //TODO
         if (radius<40) radius=40
 
+console.log("sphere radius",radius)
+
 
       //  boundingSphere.center.copy(_center);
         boundingSphere.radius = radius;
@@ -240,22 +247,32 @@ class BaseCluster3D extends BaseNode {
         var material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, wireframe: false, transparent: true, opacity: 0.02});
 
 
-        //  var geometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
+          var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 16, 16);
       //  var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
+
+     /*
         this.mHull=new THREE.Mesh(geometry,material)
+
+
       // this.mHull.position.copy(_center);
+
+
+
 
         this.geometry.boundingSphere=boundingSphere
 
 
 
-        this.add(this.mHull);
+       this.add(this.mHull);
         this.mHull.onBeforeRender=function(...args)
         {
             //billboard effect
             this.setRotationFromQuaternion( args[2].quaternion )
 
         }
+      */
+
+     this.geometry=sphereGeometry;
 
         //  this.mHull.position.copy(boundingSphere.center)
         //  this.add(this.mHull);
@@ -328,13 +345,14 @@ class BaseCluster3D extends BaseNode {
 
         })
 
-        _.each( _.reverse(leafsThatNeedHullUpdates) ,function(cluster){
+        _.each( leafsThatNeedHullUpdates ,function(cluster){
+      //  _.each( _.reverse(leafsThatNeedHullUpdates) ,function(cluster){
             cluster.updateHull();
         })
 
-
-       _.each( _.reverse(clustersThatNeedHullUpdates) ,function(cluster){
-           cluster.createHull();
+        _.each(clustersThatNeedHullUpdates ,function(cluster){
+       //_.each( _.reverse(clustersThatNeedHullUpdates) ,function(cluster){
+         //  cluster.createHull();
 
 
 

@@ -20,8 +20,33 @@ class Cluster3DExtended extends BaseCluster3D {
     constructor(nodes, clusteringHandlers) {
         super(nodes, clusteringHandlers);
 
+    this.addListeners();
+    }
+
+
+    addListeners()
+    {
+        var opacity;
+
+
+        this.on("mouseover",function(){
+            opacity=this.material.opacity
+            this.material.opacity=1;
+
+        })
+
+
+
+        this.on("mouseout",function(){
+
+            this.material.opacity=opacity;
+
+        })
+
+
 
     }
+
 
 
     update()

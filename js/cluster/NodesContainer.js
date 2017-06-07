@@ -12,6 +12,7 @@
 import BaseDistribution from "./BaseDistribution"
 import RandomDistribution from "./RandomDistribution"
 import ForceGraphDistribution from "./ForceGraphDistribution"
+import SphericalDistribution from "./SphericalDistribution"
 
 import ClusterNodeArray from "./ClusterNodeArray"
 import ClusterFactory from "./ClusterFactory"
@@ -184,6 +185,8 @@ export class MyMain {
     }
 
 
+
+
     getPossibleClusterSpeccsArray()
     {
 
@@ -198,31 +201,31 @@ export class MyMain {
 
         //using these 2 we should have a 2d plane with 3d cubes on it
         let sample1 = new BaseDistribution(1000,2)
-        let sample2 = new BaseDistribution(50,3)
+        let sample2 = new BaseDistribution(200,2)
+
+
+        let sample3= new BaseDistribution(50,3)
 
 
 
-        let companyDistributionFunction = new BaseDistribution(200,3)
-        let categoryDistributionFunction = new RandomDistribution(100)
+       // let companyDistributionFunction = new BaseDistribution(200,3)
+       // let categoryDistributionFunction = new RandomDistribution(100)
 
 
-        let forceFraphDistribution = new ForceGraphDistribution(100,3)
+      //  let forceFraphDistribution = new ForceGraphDistribution(100,3)
 
         let rand2 = new RandomDistribution(200,2)
-        let rand3 = new RandomDistribution(300,3)
-
-
 
         return [
-           // {generator: countrySetGenerator, distribution: companyDistributionFunction, options: {minClusterSize: 3}}
-           // ,{generator: industrySetGenerator, distribution: categoryDistributionFunction, options: {minClusterSize: 5}}
+             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 3}},
+            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 3}},
+            {generator: industrySetGenerator, distribution: sample3, options: {minClusterSize: 3}},
 
-             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 3}}
-             ,{generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 3}}
+             ,{distribution: sample3}
 
-            ,{distribution: forceFraphDistribution}
-            ,{distribution: rand2}
-            ,{distribution: rand3}
+          //  ,{distribution: forceFraphDistribution}
+           // ,{distribution: rand2}
+
 
       ]
 
@@ -232,7 +235,7 @@ export class MyMain {
     {
         let speccs=this.getPossibleClusterSpeccsArray();
 //        var res= new BaseCluster3D(globalNodes,[speccs[0],speccs[1]]);
-        var res= new RootCluster(globalNodes,[speccs[0],speccs[1]]);
+        var res= new RootCluster(globalNodes,[speccs[0],speccs[1],speccs[2]]);
 
         globalEnv.scene.add(res);
         res.position.set(0, 1000, 0);
@@ -278,8 +281,9 @@ export class MyMain {
       }
 
 
-       let speccsRoot=[ {distribution: new BaseDistribution(2500,1)},{distribution: new BaseDistribution(1000,2)},{distribution: new BaseDistribution(800,3)}]
+       let speccsRoot=[ {distribution: new BaseDistribution(2500,1)},{distribution: new BaseDistribution(1000,2)},{distribution: new BaseDistribution(800,3)},{distribution: new SphericalDistribution(800)}]
         res.on("click",onClickFactory(res,speccsRoot))
+
 
         _.each(res.mClusters,function(res){
 
