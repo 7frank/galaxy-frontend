@@ -3,7 +3,6 @@
  */
 
 
-import NodeUtil from "./NodeUtil"
 import EdgeUtil from "./EdgeUtil"
 
 /**
@@ -18,31 +17,43 @@ export default class BaseNode extends THREE.Mesh {
 
         var material = new THREE.MeshBasicMaterial({
             color: 0xffffff,
-           // wireframe: true,
+            // wireframe: true,
             visible: true,
             opacity: 0.01,
-            side:THREE.BackSide,
+            side: THREE.BackSide,
             // opacity: env.useDebugSphere ? 1 : 0,
             transparent: true,
-           alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
+            alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
 
         });
 
 
         super(BaseNode.sphereGeometry, material);
 
-      //  this.addDefaultListeners();
+
+        this.addDefaultHandlers();
 
 
     }
 
 
-    addDefaultListeners() {
+    addDefaultHandlers() {
 
-        this.on("click", () =>
-            NodeUtil.zoomToNode(this, function complete() {
-            })
-        );
+        //FIXME something is off with ordering an nesting .. preventing the correct node to be used
+        //store the current cluster/node
+        this.on("mouseover", function (e) {
+            BaseNode.lastHoveredNode = e.target
+           // e.stopPropagation()
+
+        })
+        this.on("mouseout", function (e) {
+          //  BaseNode.lastHoveredNode =null;
+          //  e.stopPropagation()
+
+        })
+
+
+
     }
 
 
@@ -57,6 +68,8 @@ export default class BaseNode extends THREE.Mesh {
 
         BaseNode.lastSelectedNode = null;
 
+        BaseNode.lastHoveredNode = null;
+
         //FIXME set camera and domElement not via env attribute ...
         // BaseNode.domEvents = new THREEx.DomEvents(/*camera, renderer.domElement*/)
         BaseNode.domEvents = globalEnv.domEvents
@@ -68,12 +81,38 @@ export default class BaseNode extends THREE.Mesh {
     }
 
 
+    onKey(eventName, eventhandler) {
 
+
+        $(window).on("keyup", null, eventName, function (e) {
+            if (this != BaseNode.lastHoveredNode) return
+            e.stopPropagation();
+            e.preventDefault();
+
+            e.target=BaseNode.lastHoveredNode;
+
+            eventhandler.bind(BaseNode.lastHoveredNode)(e)
+
+        }.bind(this));
+
+
+    }
 
     on(eventName, eventhandler) {
 
-      for (let eName of eventName.split(" "))
-        BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
+
+        for (let eName of eventName.split(" ")) {
+
+            let isSpecialEvent = THREEx.DomEvents.eventNames.indexOf(eName) >= 0
+
+
+            if (isSpecialEvent)
+                BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
+            else
+                this.onKey(eName, eventhandler)
+
+        }
+        ;
 
 
         return this;
@@ -82,7 +121,7 @@ export default class BaseNode extends THREE.Mesh {
     off(eventName, eventhandler) {
 
         for (let eName of eventName.split(" "))
-        BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
+            BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
         return this;
     }
 
@@ -91,7 +130,6 @@ export default class BaseNode extends THREE.Mesh {
         BaseNode.domEvents._notify(eventName, this, origDomEvent, intersect);
         return this;
     }
-
 
 
 }

@@ -8,6 +8,7 @@ import BaseCluster3D from "./BaseCluster3D"
 
 import BaseDistribution from "./BaseDistribution"
 import ForceGraphDistribution from "./ForceGraphDistribution"
+import ZoomUtil from "./ZoomUtil"
 
 
 
@@ -59,9 +60,21 @@ class Cluster3DExtended extends BaseCluster3D {
             }
         }
 
+//FIXME click vs dbl click... both get triggered
+        this.on("space",function(e) {
+           // e.stopPropagation()
 
-        this.on("click",function(e) {
+
+           var distance=this.geometry.boundingSphere.radius*3
+
+            ZoomUtil.moveToMesh(this,function onComplete(){  },distance)
+
+        })
+
+            this.on("dblclick",function(e) {
             e.stopPropagation()
+
+
 
             var diameter=this.geometry.boundingSphere.radius*2
             console.log("clicky clicky",diameter)

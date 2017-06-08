@@ -543,9 +543,9 @@ var env=globalEnv
 
 }
 
-function doZoomToMesh(mesh,onEnd) {
+function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 
-		var minMaxDistance=400
+
 
 		var vec3Start = mCamera.position
 
@@ -768,11 +768,21 @@ function addArrow(d3LinkObj,color) {
 
 	//TODO set arrow to sphere radius not center
 	
-		//var from = lineMesh.geometry.vertices[0]
-		//var to = lineMesh.geometry.vertices[1]
-		var from0 = d3LinkObj.mStart
-		var to0 = d3LinkObj.mEnd
-		
+
+	//	var from0 = d3LinkObj.mStart
+	//	var to0 = d3LinkObj.mEnd
+
+
+
+    var from0 = new THREE.Vector3();
+    from0.setFromMatrixPosition( d3LinkObj.source._bubble.matrixWorld );
+
+
+    var to0 = new THREE.Vector3();
+    to0.setFromMatrixPosition( d3LinkObj.target._bubble.matrixWorld );
+
+
+
 		//TODO
 		if (!to0) return
 		

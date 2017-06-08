@@ -68,6 +68,7 @@ export default  class BaseDistribution
 
         var c=0;
         var that=this;
+        var fixmeOnce=true;
         _.each(nodes,function(n){
 
             if (i>_len){
@@ -107,7 +108,11 @@ export default  class BaseDistribution
 
 
                     //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
-                    if (onEnd)onEnd()
+
+                    if (fixmeOnce) {
+                        if (onEnd) onEnd()
+                        fixmeOnce=false
+                    }
 
                     cancelAnimationFrame(mTimeout)
 

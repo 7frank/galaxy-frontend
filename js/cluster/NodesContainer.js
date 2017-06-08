@@ -110,7 +110,7 @@ export function getNodesFromCluster(clusters) {
 //get relevant edges for a given (sub)set of nodes
 //by default it will return a set of edges that are limited to the subset itself (edges that leave the cluster are ignored)
 /**
- * @deprecated
+ * @deprecated use EdgeUtil.getEdgesForNodes
  */
 
 export function getEdgesForNodes(nodes, bInternal = true, bExternal = false) {

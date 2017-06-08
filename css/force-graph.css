@@ -12,6 +12,7 @@
     position: absolute;
     color: lavender;
     font-size: 18px;
+	pointer-events: none;
 }
 
 

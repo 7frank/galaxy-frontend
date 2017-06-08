@@ -1,10 +1,15 @@
 
 clusters
--bug: node hover => multiple nodes are highlighted from different clusters
+
 -interference with search functinoality => not always zooms to correct result
--todo per cluster line mesh
+[x]todo per cluster line mesh or at least matrixWorld property for nodes to be able to calc the position from that
 -cluster texts (formally eg. country texts)
 -implement leaf text nodes so that relevant texts from multiple clusters with visibleTexts < xVal
+-sort param for applyClustering(speccs)
+[]-re-cluster on the fly
+fix arrows for clusters
+keyboard events per cluster
+    per node also?
 
 
 --------------------------------------

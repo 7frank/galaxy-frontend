@@ -3,6 +3,8 @@
  */
 
 
+import EdgesContainer from "./EdgesContainer"
+
 
 export default class ClusterLeafElement extends THREE.Mesh
 {
@@ -20,7 +22,7 @@ export default class ClusterLeafElement extends THREE.Mesh
         //FIXME wrong positions
         this.appendNodes(nodes)
 
-
+        this.createEdgesFromNodes(nodes)
 
     }
 
@@ -38,6 +40,20 @@ export default class ClusterLeafElement extends THREE.Mesh
     }
 
 
+
+    createEdgesFromNodes(nodes){
+
+       this.mEdgesContainer=new EdgesContainer();
+
+        this.mEdgesContainer.setFromNodes(nodes);
+
+
+        this.add( this.mEdgesContainer)
+
+    }
+
+
+
     //TODO refactor
     setDistributionHandler(distribution)
     {
@@ -45,10 +61,16 @@ export default class ClusterLeafElement extends THREE.Mesh
         var that=this;
         distribution.setNodes(this.mNodes,function onStep(vec,i){
 
-            let n=that.mNodes[i]
-            if (n._bubble) n._bubble.position.set(n.x,n.y,n.z)
-            that.mParticles.updateNodePosition(i)
+            let n=that.mNodes[i];
+            if (n._bubble) n._bubble.position.set(n.x,n.y,n.z);
+            that.mParticles.updateNodePosition(i);
 
+
+            //TODO this currently will get triggerd per node not per node set so we do have to alter the distribution class a bit
+            that.mEdgesContainer.updateEdges();
+
+
+        },function onComplete(){
 
 
 

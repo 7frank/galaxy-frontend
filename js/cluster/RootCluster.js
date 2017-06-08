@@ -21,8 +21,6 @@ class RootCluster extends Cluster3DExtended {
 
         this.addNodeCaptions()
 
-
-
     }
 
 
