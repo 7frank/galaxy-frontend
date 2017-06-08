@@ -9,24 +9,18 @@ import EdgeUtil from "./EdgeUtil"
 
 
 /**
- *
- * cluster=new BaseCluster3D(allNodes)
+ * NOTE: possible future work flow/use case
+ *  cluster=new BaseCluster3D(allNodes)
  *  cluster.applyClustering(...) // copy existing stuff
- *
  *  _dist= new ForceGraphDistribution() // set nodes internally
  *
- * cluster.find("#other").setDistribution(_dist)
- * cluster.find("United States").applyClustering(...)
+ *  cluster.find("#other").setDistribution(_dist)
+ *  cluster.find("United States").applyClustering(...)
  */
 
 
-//refactoring current cluster structure
 export default
 class BaseCluster3D extends BaseNode {
-
-    //TODO implement these stubs in sub class
-    //createEdgeContainer(){}
-
 
     /**
      *
@@ -35,20 +29,25 @@ class BaseCluster3D extends BaseNode {
      */
     constructor(nodes, clusteringHandlers) {
         super();
+
         this.addNodes(nodes);
-        //by default the cluster is no leaf. TODO
 
         this.mClusters = {};
-
-
-        //FIXME an additional dist schould be called for leaf elements ...  >1 else ...
-        //xCluster if present, use to cluster nodes into sub-clusters
+          //Cluster if present, use to cluster nodes into sub-clusters
         if (_.isArray(clusteringHandlers) && clusteringHandlers.length > 0) {
             this.applyClustering(clusteringHandlers);
         }
         else this.updateCluster()
 
     }
+
+    /**
+     * add one or many nodes to the cluster
+     *
+     * TODO could this be used to dynamically add nodes an re-run the clustering
+     *
+     */
+
 
     addNodes(nodes) {
         if (!this.mNodes) this.mNodes = [];
@@ -62,10 +61,21 @@ class BaseCluster3D extends BaseNode {
 
     }
 
+
+    /**
+     * returns the nodes that where used to generate the current iteration of the cluster
+     * if the cluster has sub-clusters the node represent the sum of all nodes of the sub-clusters as well
+     */
+
     getNodes() {
         return this.mNodes;
     }
 
+
+    /**
+     * pushes the clusters to the mesh stack to render them
+     *
+     */
 
     addAllSubClustersToContainer() {
 
@@ -74,6 +84,10 @@ class BaseCluster3D extends BaseNode {
     }
 
 
+    /**
+    *  used for recursive cluster generation if class is used for inheritance
+    */
+
     getChildClusterConstructor() {
         return this.constructor
 
@@ -81,9 +95,10 @@ class BaseCluster3D extends BaseNode {
 
     /**
      * this method can be re-run to change the sub-clusters
-     -which will result in deleting old clusters
-     -adding new ones to the container
-
+     * -which will result in deleting old clusters
+     * -adding new ones to the container
+     * TODO this should re-build all child clusters if another ordering is provided
+     *
      */
 
     applyClustering(mClusteringSpeccsArray) {
@@ -94,7 +109,7 @@ class BaseCluster3D extends BaseNode {
         var entry = mClusteringSpeccsArray[0];
 
 
-        this._clusterThis(entry);
+        this.doClusteringForOnlyThis(entry);
 
         _.each(this.mClusters, function (mCluster, key) {
 
@@ -114,7 +129,14 @@ class BaseCluster3D extends BaseNode {
 
     }
 
-    _clusterThis(entry) {
+
+    /**
+     * based on the entry the clustering
+     * the  visible child clusters are generated
+     *
+     */
+
+    doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();
         var options = _.extend({minClusterSize: 10, defaultMergeGroupName: "other"}, entry.options);
 
@@ -146,7 +168,11 @@ class BaseCluster3D extends BaseNode {
 
     }
 
-
+    /**
+     * the current cluster gets subdivided into smaller clusters
+     * based on the result of the filterFunction
+     * the resulting groups are used by @see doClusteringForOnlyThis to create the actual visible child clusters
+     */
     groupBy(filterFunction) {
         var clazz = this.getChildClusterConstructor();
 
@@ -168,13 +194,12 @@ class BaseCluster3D extends BaseNode {
 
 
     /**
-     *   TODO should be overridden for ClusterLeaf
      *
      *  used only to change distribution of current cluster
-     *
+     *  there is a similar implementation for the ClusterLeafElement class
      * @param distribution instanceof BaseDistribution
      */
-    setDistributionHandler(distribution) {
+    setDistributionHandler(distribution,onComplete=function(){}) {
 
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
@@ -185,19 +210,18 @@ class BaseCluster3D extends BaseNode {
             distribution.setNodes(this, function onStep(vecPosition, i) {
                 //  let n = values[i];
                 //  n.position.copy(vecPosition)
-            }/*,()=> this.updateTest()*/); //FIXME
+            },function(){   onComplete()   });
 
 
     }
 
+    /**
+     *
+     *  current limenentation of the hull is a simle sphere with a border with the radius of the boundingSphere
+     *  TODO  could be convex hull in sub class in which case override
+     */
 
-    //TODO  re-calculate boundingsphere from time to time
-    updateHull() {
-
-
-    }
-
-    createHull() {
+    adjustHullSize() {
 
 
         if (this.mHull && this.mHull.geometry)
@@ -225,12 +249,9 @@ class BaseCluster3D extends BaseNode {
         //TODO
         if (radius < 40) radius = 40
 
-
-        //  boundingSphere.center.copy(_center);
         boundingSphere.radius = radius;
 
 
-        // this.geometry.boundingBox = boundingBox;
 
 
         var geometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
@@ -238,7 +259,8 @@ class BaseCluster3D extends BaseNode {
             color: 0xFFFFFF,
             wireframe: false,
             transparent: true,
-            opacity: 0.00
+            opacity: 0.3,
+            visible:false
         });
 
 
@@ -260,22 +282,29 @@ class BaseCluster3D extends BaseNode {
 
         this.geometry = sphereGeometry;
 
-        /* this.geometry.copy(sphereGeometry)
-         this.geometry.needsUpdate=true;
-         this.geometry.boundingSphere=boundingSphere;
-         */
-
-
-        //  this.mHull.position.copy(boundingSphere.center)
-        //  this.add(this.mHull);
-
 
     }
+
+
+    /**
+     *
+     * if true the cluster is the leaf cluster and contains mLeaf attribute
+     *
+     * @returns {boolean}
+     */
 
 
     isLeaf() {
         return typeof this.mLeaf != "undefined"
     }
+
+    /**
+     * create a inner particles for each leaf node element
+     *
+     *
+     * @param entry
+     */
+
 
     createParticlePointCloud(entry) {
         // console.log("reached leaf cluster", this)
@@ -287,25 +316,36 @@ class BaseCluster3D extends BaseNode {
 
     }
 
-//TODO  can be convex hull in sub class in which case override
+    /**
+    * updates hull and adds child clusters if necessary
+    *
+    *
+     */
     updateCluster() {
 
         this.addAllSubClustersToContainer();
 
-        //if (!this.mHull)
-        this.createHull();
-        // else
-        //    this.updateHull();
-
+        this.adjustHullSize();
 
     }
 
 
-    //returns some infos of the children of the the cluster relative to each other
+    /**
+     *  returns some infos of the children of the the cluster relative to each other
+     *  TODO make use of it meanwhile @deprecated
+     */
+
     getRelationInfo() {
         return EdgeUtil.getClusterInfo(this.mClusters);
 
     }
+
+
+    /**
+     * creates edegse from nodes
+     * the edges can be inner edges only from nodes within cluster to other nodes within
+     * or external edges leading into nodes from other clusters
+     */
 
     createEdgesForChildClusters() {
 
@@ -313,57 +353,58 @@ class BaseCluster3D extends BaseNode {
 
     }
 
-
+    /**
+     *
+     *
+     *
+     * @returns the radius of the cluster
+     */
     getRadius() {
 
         return this.geometry.boundingSphere ? this.geometry.boundingSphere.radius : null;
 
     }
 
-    updateTest() {
-        var clustersThatNeedHullUpdates = []
 
-        var leafsThatNeedHullUpdates = []
+    /**
+     * has to be called after initialisation to re-calculate dependent elements
+     * like dot clouds and cluster boder and hull
+     */
+    onAfterClusteredAndDistributed() {
 
-        this.traverse(function (item) {
-            if (item instanceof BaseCluster3D)
-                clustersThatNeedHullUpdates.push(item)
-
-            if (item instanceof ClusterLeafElement)
-                leafsThatNeedHullUpdates.push(item)
-
-        })
-
-        //  _.each( leafsThatNeedHullUpdates ,function(cluster){
-        _.each(_.reverse(leafsThatNeedHullUpdates), function (cluster) {
-            cluster.updateHull();
-        })
-
-        //  _.each(clustersThatNeedHullUpdates ,function(cluster){
-        _.each(_.reverse(clustersThatNeedHullUpdates), function (cluster) {
-            cluster.createHull();
+      _.each(_.reverse( this.findClusters("*")), function (cluster) {
+            cluster.adjustHullSize();
 
 
         })
 
 
-        this.createHull()
-
+        this.adjustHullSize()
     }
 
+
+    /**
+     * returns an array of the actual ClusterLeafElements
+     * that render the nodes itself
+     */
 
     getLeafs() {
         var leafElements = [];
 
         this.traverse(function (item) {
-            if (item instanceof __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */])
+            if (item instanceof ClusterLeafElement)
                 leafElements.push(item)
 
         })
         return leafElements;
     }
 
-    //TODO see use case for potential implementation
+    /**
+     * return an array of all sub clusters of the current cluster
+     *
+     * TODO make use of the selector attribute like #china or #other
+     *
+     */
     findClusters(selector) {
         var clusters = []
 

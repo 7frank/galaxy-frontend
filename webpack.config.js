@@ -2,7 +2,7 @@ var webpack = require('webpack');
 
 
 module.exports = {
-   entry: "./js/cluster/NodesContainer.js",
+   entry: "./js/cluster/SampleClusterApplication.js",
     devtool: 'source-map',
    output: {
        path: __dirname + "/build",

@@ -21,11 +21,19 @@ class RootCluster extends Cluster3DExtended {
 
         this.addNodeCaptions()
 
+
+        //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
+        setTimeout(()=> this.onAfterClusteredAndDistributed(),1000)
+
+
     }
 
 
+    /**
+     * @override
+     * prevent multiple recursive  root clusters from being created by default
+     */
 
-    //prevent multiple recursive  root clusters from being created by default
     getChildClusterConstructor()
     {
         return Cluster3DExtended;
@@ -33,12 +41,18 @@ class RootCluster extends Cluster3DExtended {
     }
 
 
-    addNodeCaptions(){
-        //TODO the root cluster manages the visibility of all of it's currently visible nodes
-        //we do have a hierarchical structure that we can use to speed up the rendering a bit
+    /**
+     *
+     * TODO the root cluster manages the visibility of all of it's currently visible nodes
+     * we do have a hierarchical structure that we can use to speed up the rendering a bit
+     *
+     */
 
-        //TODO
-let env=undefined
+
+    addNodeCaptions(){
+
+        //TODO remove global dependency
+        let env=undefined
 
         if (!this.tn)
             this.tn = TextNodes(env, {
@@ -66,12 +80,5 @@ let env=undefined
 
     }
 
-
-    //@override
-  /*  createHull()
-    {
-
-    }
-*/
 
 }

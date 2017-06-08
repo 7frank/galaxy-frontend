@@ -10,7 +10,7 @@ clusters
 fix arrows for clusters
 keyboard events per cluster
     per node also?
-
+color select/update for root cluster
 
 --------------------------------------
 

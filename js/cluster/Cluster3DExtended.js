@@ -30,10 +30,16 @@ class Cluster3DExtended extends BaseCluster3D {
     }
 
 
+    /**
+     * adds some listeners and actions
+     *  - zoom via keyboard default hotkey "space"
+     *  - show hide cluster border defaults to "mouseover"/"mouseout"
+     *  - change ordering/distibution of child clusters defaults to "dblclick"
+     */
+
+
     addListeners()
     {
-        var opacity=-1;
-
 
 
         var curr=0
@@ -53,18 +59,18 @@ class Cluster3DExtended extends BaseCluster3D {
                 setTimeout(function()
                 {
 
-                    res.updateTest()
+                    res.onAfterClusteredAndDistributed()
 
                 },1000 )
 
             }
         }
 
-//FIXME click vs dbl click... both get triggered
+        //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
         this.on("space",function(e) {
            // e.stopPropagation()
 
-
+            //have a dynamic distance based on the size of the cluster
            var distance=this.geometry.boundingSphere.radius*3
 
             ZoomUtil.moveToMesh(this,function onComplete(){  },distance)
@@ -92,17 +98,15 @@ class Cluster3DExtended extends BaseCluster3D {
         })
 
         this.on("mouseover mousemove",function(){
-            if (opacity==-1)
-            opacity=this.mHull.material.opacity
-            this.mHull.material.opacity=0.5;
 
+            this.mHull.material.visible=true;
         })
-
 
 
         this.on("mouseout",function(){
 
-            this.mHull.material.opacity=opacity;
+            this.mHull.material.visible=false;
+
 
         })
 
@@ -135,11 +139,12 @@ class Cluster3DExtended extends BaseCluster3D {
     }
 
 
-
-
-    //TODO
-    updateTest(){
-        super.updateTest();
+    /**
+     * has to be called after initialisation to re-calculate dependent elements
+     * like dot clouds and cluster boder and hull
+     */
+    onAfterClusteredAndDistributed(){
+        super.onAfterClusteredAndDistributed();
 
       _.each(this.getLeafs(),function(leaf){
 
