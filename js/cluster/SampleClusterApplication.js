@@ -27,6 +27,8 @@ import RootCluster from "./RootCluster"
 //-----------DEBUG-------------------------
 //-----------------------------------------
 
+
+export {Cluster3DExtended}
 /**
  * currently used for debugging purposes
  */

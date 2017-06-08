@@ -219,7 +219,11 @@ function TextNodes(env = globalEnv, options) {
 
 		for (var i = mNodes.length - 1; i >= 0 && maxVisibleTextNodes > nodesCurrentBatch.length; i--) {
 
+
+
 			let node = mNodes[i];
+
+            if (node instanceof clusters.Cluster3DExtended) debugger
 
 			var res = testIfRelevantNode(node);
 			if (res.addNodeToSet)

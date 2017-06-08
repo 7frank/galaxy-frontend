@@ -31,7 +31,7 @@ $(function () {
 
         if (window["baseCluster"]) return
         a = new clusters.MyMain;
-        baseCluster = a.cluster
+        baseCluster = a.clusters
         baseCluster.mClusters["United States"].getRelationInfo()
 
     })

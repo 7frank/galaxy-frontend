@@ -928,6 +928,25 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         super(nodes, clusteringHandlers);
 
     this.addListeners();
+
+    //TODO have a "cluster-ready" event
+    setTimeout( ()=> this.addNodeCaptions(),1000)
+
+
+    }
+
+    /**
+     *   have a dynamic distance based on the size of the cluster
+     *
+     */
+    zoomToCluster()
+    {
+
+
+        var distance=this.geometry.boundingSphere.radius*3
+
+        __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__["a" /* default */].moveToMesh(this,function onComplete(){  },distance)
+
     }
 
 
@@ -971,10 +990,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         this.on("space",function(e) {
            // e.stopPropagation()
 
-            //have a dynamic distance based on the size of the cluster
-           var distance=this.geometry.boundingSphere.radius*3
-
-            __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__["a" /* default */].moveToMesh(this,function onComplete(){  },distance)
+         this.zoomToCluster()
 
         })
 
@@ -1020,10 +1036,11 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     update()
     {
         super.update();
-
-
+        this.mTextNodes.update();
 
     }
+
+
 
 
     appendNodes(nodes){
@@ -1082,17 +1099,12 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     //potentially add them at specific time
     _initDotParticles() {
 
-     /*   if (this.mParticles) {
-            this.mParticles.remove();
-            delete(this.mParticles)
-        }*/
-
         if (this.mParticles)  this.mParticles.start()
 
 
             if (this.isLeaf() && !this.mParticles) {
 
-  var nodes=this.mLeaf.mNodes
+             var nodes=this.mLeaf.mNodes
             var demoOptions = {increment:1}
 
             if (!nodes) //FIXME this only works that way because to realData is not generated properly
@@ -1115,6 +1127,73 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     }
 
 
+    /**
+     * add some text to the sub-clusters providing informations
+     *
+     *
+     *
+     */
+
+
+    addNodeCaptions(){
+
+
+        function _getNodePosition(node) {
+
+            var mVec3 = new THREE.Vector3();
+            mVec3.setFromMatrixPosition( node.matrixWorld );
+
+
+            return mVec3; //node.position.clone()
+        }
+
+        var nodes=Object.values(this.mClusters)
+
+        //TODO remove global dependency
+        let env=undefined
+
+        if (!this.mTextNodes)
+        this.mTextNodes = TextNodes(env, {
+            maxVisibleCount: 50,
+            maxDistance: 30000,
+            minDistance: 3000,
+            getNodes: function () {
+
+                return nodes
+
+            },
+            onNodeText: function (node) {
+
+                return node.id
+
+            },
+            getCSSClasses: function () {
+                return 'graph-country-caption'
+
+            },
+            getNodePosition: _getNodePosition,
+            interactable: true,
+            onAfterCreateTextField: function (node, el) {
+
+                var newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
+
+                newSize = _.round(newSize / 12, 3) + "em";
+
+                el.css("font-size", newSize);
+
+                el.on("click", function () {
+                    node.zoomToCluster();
+                  //  doZoomToPos(_getNodePosition(node))
+                })
+
+            }
+        })
+
+
+
+
+
+    }
 
 
 
@@ -1517,7 +1596,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
     {
         super(...args)
 
-        this.addNodeCaptions()
+        this.addGlobalNodeCaptions()
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
@@ -1547,7 +1626,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
      */
 
 
-    addNodeCaptions(){
+    addGlobalNodeCaptions(){
 
         //TODO remove global dependency
         let env=undefined
@@ -1950,6 +2029,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__Cluster3DExtended__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__RootCluster__ = __webpack_require__(8);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_7__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
  * -into graph + subgraphs or simply multiple graphs
@@ -1978,6 +2058,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //-----------------------------------------
 //-----------DEBUG-------------------------
 //-----------------------------------------
+
+
 
 /**
  * currently used for debugging purposes

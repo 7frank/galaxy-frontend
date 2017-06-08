@@ -27,6 +27,25 @@ class Cluster3DExtended extends BaseCluster3D {
         super(nodes, clusteringHandlers);
 
     this.addListeners();
+
+    //TODO have a "cluster-ready" event
+    setTimeout( ()=> this.addNodeCaptions(),1000)
+
+
+    }
+
+    /**
+     *   have a dynamic distance based on the size of the cluster
+     *
+     */
+    zoomToCluster()
+    {
+
+
+        var distance=this.geometry.boundingSphere.radius*3
+
+        ZoomUtil.moveToMesh(this,function onComplete(){  },distance)
+
     }
 
 
@@ -70,10 +89,7 @@ class Cluster3DExtended extends BaseCluster3D {
         this.on("space",function(e) {
            // e.stopPropagation()
 
-            //have a dynamic distance based on the size of the cluster
-           var distance=this.geometry.boundingSphere.radius*3
-
-            ZoomUtil.moveToMesh(this,function onComplete(){  },distance)
+         this.zoomToCluster()
 
         })
 
@@ -119,10 +135,11 @@ class Cluster3DExtended extends BaseCluster3D {
     update()
     {
         super.update();
-
-
+        this.mTextNodes.update();
 
     }
+
+
 
 
     appendNodes(nodes){
@@ -181,17 +198,12 @@ class Cluster3DExtended extends BaseCluster3D {
     //potentially add them at specific time
     _initDotParticles() {
 
-     /*   if (this.mParticles) {
-            this.mParticles.remove();
-            delete(this.mParticles)
-        }*/
-
         if (this.mParticles)  this.mParticles.start()
 
 
             if (this.isLeaf() && !this.mParticles) {
 
-  var nodes=this.mLeaf.mNodes
+             var nodes=this.mLeaf.mNodes
             var demoOptions = {increment:1}
 
             if (!nodes) //FIXME this only works that way because to realData is not generated properly
@@ -214,6 +226,73 @@ class Cluster3DExtended extends BaseCluster3D {
     }
 
 
+    /**
+     * add some text to the sub-clusters providing informations
+     *
+     *
+     *
+     */
+
+
+    addNodeCaptions(){
+
+
+        function _getNodePosition(node) {
+
+            var mVec3 = new THREE.Vector3();
+            mVec3.setFromMatrixPosition( node.matrixWorld );
+
+
+            return mVec3; //node.position.clone()
+        }
+
+        var nodes=Object.values(this.mClusters)
+
+        //TODO remove global dependency
+        let env=undefined
+
+        if (!this.mTextNodes)
+        this.mTextNodes = TextNodes(env, {
+            maxVisibleCount: 50,
+            maxDistance: 30000,
+            minDistance: 3000,
+            getNodes: function () {
+
+                return nodes
+
+            },
+            onNodeText: function (node) {
+
+                return node.id
+
+            },
+            getCSSClasses: function () {
+                return 'graph-country-caption'
+
+            },
+            getNodePosition: _getNodePosition,
+            interactable: true,
+            onAfterCreateTextField: function (node, el) {
+
+                var newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
+
+                newSize = _.round(newSize / 12, 3) + "em";
+
+                el.css("font-size", newSize);
+
+                el.on("click", function () {
+                    node.zoomToCluster();
+                  //  doZoomToPos(_getNodePosition(node))
+                })
+
+            }
+        })
+
+
+
+
+
+    }
 
 
 

@@ -19,7 +19,7 @@ class RootCluster extends Cluster3DExtended {
     {
         super(...args)
 
-        this.addNodeCaptions()
+        this.addGlobalNodeCaptions()
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
@@ -49,7 +49,7 @@ class RootCluster extends Cluster3DExtended {
      */
 
 
-    addNodeCaptions(){
+    addGlobalNodeCaptions(){
 
         //TODO remove global dependency
         let env=undefined
