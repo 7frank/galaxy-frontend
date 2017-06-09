@@ -37,7 +37,10 @@
 	
 	<script src="./js/lib/jquery-3.2.0.min.js"></script>
 	<script src="./js/lib/jquery.hotkeys.js"></script>
-	
+
+
+    <script src="./js/lib/mousetrap.js"></script>
+
 	
 	
 	<script src="./js/lib/jquery-ui.min.js"></script>

@@ -11,6 +11,171 @@ import EdgeUtil from "./EdgeUtil"
  */
 export default class BaseNode extends THREE.Mesh {
 
+    /**
+     * there are 3 types of events handled for a node
+     * (1) mouse events via THREEx.domEvents
+     * (2) keyboard hotkeys that are bound to "keyup" via jQuery.hotkeys
+     * (3) any other custom event
+     * NOTE: customise in sub class as needed
+     */
+
+
+    getRegisteredCustomEvents()
+    {
+        return ['before-render']
+
+    }
+
+    isCustomEvent(eventName)
+    {
+        return this.getRegisteredCustomEvents().indexOf(eventName)>=0
+    }
+
+    isMouseEvent(eventName)
+    {
+        return  THREEx.DomEvents.eventNames.indexOf(eventName) >= 0
+    }
+
+
+
+    //------------------------------------------------
+    onCustomEvent(eventName,eventhandler)
+    {
+        this.mCustomEvents.on(eventName,eventhandler)
+    }
+
+    offCustomEvent(eventName,eventhandler)
+    {
+        this.mCustomEvents.off(eventName,eventhandler)
+    }
+
+
+    triggerCustomEvent(eventName, origDomEvent, intersect)
+    {
+        this.mCustomEvents.trigger(eventName, origDomEvent, intersect)
+    }
+    //------------------------------------------------
+
+
+    //FIXME we need a single window keyup listener that listens for keyevents and forwards/triggers
+    // them on the current element similar to how the mouse events do
+    onKey(eventName, eventhandler) {
+
+
+        this.mKeyboardEvents.bind(eventName, eventhandler.bind(this),'keydown');
+
+     /*   $(window).on("keyup", null, eventName, function (e) {
+            if (this != BaseNode.lastHoveredNode) return
+            e.stopPropagation();
+            e.preventDefault();
+
+            e.target=BaseNode.lastHoveredNode;
+
+            eventhandler.bind(BaseNode.lastHoveredNode)(e)
+
+        }.bind(this));
+*/
+
+    }
+    //FIXME see issue of onKey
+    offKey(eventName, eventhandler)
+    {
+        this.mKeyboardEvents.unbind(eventName, eventhandler);
+       // $(window).off(eventName, eventhandler);
+
+    }
+
+    triggerKey(eventName, origDomEvent, intersect)
+    {
+        this.mKeyboardEvents.trigger(eventName,  origDomEvent, intersect);
+       // $(window).trigger(eventName, origDomEvent, intersect);
+    }
+
+    /**
+     * gets called on the node that the mouse is hovering over
+     *
+     */
+    resolveKeyEvent(event){
+
+
+        this.mKeyboardEvents.handleKeyEvent(event)
+
+     }
+
+
+    //------------------------------------------------
+    on(eventName, eventhandler) {
+
+
+        for (let eName of eventName.split(" ")) {
+
+            if (this. isCustomEvent(eName))
+                this.onCustomEvent(eName,eventhandler);
+            else
+            if (this.isMouseEvent(eName))
+                BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
+            else
+                this.onKey(eName, eventhandler)
+
+        };
+
+        return this;
+    }
+
+    off(eventName, eventhandler) {
+
+        for (let eName of eventName.split(" "))
+
+
+        for (let eName of eventName.split(" ")) {
+
+            if (this. isCustomEvent(eName))
+                this.offCustomEvent(eName,eventhandler);
+            else
+            if (this.isMouseEvent(eName))
+                BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
+            else
+                this.offKey(eName, eventhandler)
+
+        };
+
+        return this;
+
+
+
+
+    }
+
+    trigger(eventName, origDomEvent, intersect) {
+
+
+
+
+
+        for (let eName of eventName.split(" ")) {
+
+
+
+            if (this. isCustomEvent(eName))
+                this.triggerCustomEvent(eName, origDomEvent, intersect);
+            else
+            if (this.isMouseEvent(eName))
+                BaseNode.domEvents._notify(eName, this, origDomEvent, intersect);
+            else
+                triggerKey(eName,origDomEvent, intersect)
+
+        };
+
+        return this;
+
+
+    }
+
+
+
+
+    //---------------end of event definition part----------------------
+
     constructor(...args) {
 
         BaseNode.initStatic()
@@ -33,8 +198,16 @@ export default class BaseNode extends THREE.Mesh {
 
         this.addDefaultHandlers();
 
+        //custom events container
+        this.mCustomEvents=$({})
+        //keyboard events container
+        // TODO to be able to use event bubbling we'd need to append the html elements to the one of the parent cluster
+        this.mKeyboardEvents= new Mousetrap(document.createElement("span"));
+
 
     }
+
+
 
 
     addDefaultHandlers() {
@@ -51,6 +224,26 @@ export default class BaseNode extends THREE.Mesh {
           //  e.stopPropagation()
 
         })
+
+        function onBeforeRender(){
+            this.trigger("before-render")
+
+        }
+
+        Object.defineProperty(this, "onBeforeRender", {
+            enumerable: false,
+            configurable: false,
+            get: function() { return onBeforeRender.bind(this); }.bind(this),
+            set: function(newValue) {
+
+                console.warn("onBeforeRender cannot be overridden use .on('before-render',function(){}) instead")
+
+
+            }
+
+        });
+
+
 
 
 
@@ -78,58 +271,17 @@ export default class BaseNode extends THREE.Mesh {
         BaseNode._static_initialised_ = true
 
 
-    }
 
+        //have one gloabal listener for all nodes and let them
+        $(window).on("keydown", function (e) {
+            if (!BaseNode.lastHoveredNode) return
 
-    onKey(eventName, eventhandler) {
+            BaseNode.lastHoveredNode.resolveKeyEvent(e)
 
+        });
 
-        $(window).on("keyup", null, eventName, function (e) {
-            if (this != BaseNode.lastHoveredNode) return
-            e.stopPropagation();
-            e.preventDefault();
-
-            e.target=BaseNode.lastHoveredNode;
-
-            eventhandler.bind(BaseNode.lastHoveredNode)(e)
-
-        }.bind(this));
 
 
     }
-
-    on(eventName, eventhandler) {
-
-
-        for (let eName of eventName.split(" ")) {
-
-            let isSpecialEvent = THREEx.DomEvents.eventNames.indexOf(eName) >= 0
-
-
-            if (isSpecialEvent)
-                BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
-            else
-                this.onKey(eName, eventhandler)
-
-        }
-        ;
-
-
-        return this;
-    }
-
-    off(eventName, eventhandler) {
-
-        for (let eName of eventName.split(" "))
-            BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
-        return this;
-    }
-
-    trigger(eventName, origDomEvent, intersect) {
-
-        BaseNode.domEvents._notify(eventName, this, origDomEvent, intersect);
-        return this;
-    }
-
 
 }
