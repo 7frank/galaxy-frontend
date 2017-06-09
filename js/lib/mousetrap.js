@@ -537,6 +537,11 @@
          * @returns {Array}
          */
         function _getMatches(character, modifiers, e, sequenceName, combination, level) {
+
+            //documented smaller change made to be compliant with the Apache 2.0 License @frank1147
+            // used to expose handleKeyEvent correctly Note: might interfere with static Mousetrap usage
+            if (this!=window) self=this
+
             var i;
             var callback;
             var matches = [];
@@ -562,7 +567,6 @@
                 if (!sequenceName && callback.seq && _sequenceLevels[callback.seq] != callback.level) {
                     continue;
                 }
-
                 // if the action we are looking for doesn't match the action we got
                 // then we should keep going
                 if (action != callback.action) {
@@ -628,7 +632,7 @@
          * @returns void
          */
         self._handleKey = function(character, modifiers, e) {
-            var callbacks = _getMatches(character, modifiers, e);
+            var callbacks = _getMatches.bind(this)(character, modifiers, e);
             var i;
             var doNotReset = {};
             var maxLevel = 0;
@@ -734,11 +738,15 @@
                 return;
             }
 
+            //documented smaller change mad eto be compliant with the Apache 2.0 License @frank1147
+            // self => this
+            this.handleKey(character, _eventModifiers(e), e);
+         }
 
-            self.handleKey(character, _eventModifiers(e), e);
-        }
+        //documented smaller change made to be compliant with the Apache 2.0 License @frank1147
+        // expose method
+        self.handleKeyEvent=_handleKeyEvent
 
-        
         /**
          * called to set a 1 second timeout on the specified sequence
          *
@@ -887,10 +895,14 @@
             }
         };
 
+
+        //documented smaller change madeto be compliant with the Apache 2.0 License @frank1147
+        // bind(this) to _handleKeyEvent
+
         // start!
-        _addEvent(targetElement, 'keypress', _handleKeyEvent);
-        _addEvent(targetElement, 'keydown', _handleKeyEvent);
-        _addEvent(targetElement, 'keyup', _handleKeyEvent);
+        _addEvent(targetElement, 'keypress', _handleKeyEvent.bind(this));
+        _addEvent(targetElement, 'keydown', _handleKeyEvent.bind(this));
+        _addEvent(targetElement, 'keyup', _handleKeyEvent.bind(this));
     }
 
     /**
