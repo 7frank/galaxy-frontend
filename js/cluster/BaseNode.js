@@ -41,7 +41,7 @@ export default class BaseNode extends THREE.Mesh {
     //------------------------------------------------
     onCustomEvent(eventName,eventhandler)
     {
-        this.mCustomEvents.on(eventName,eventhandler)
+        this.mCustomEvents.on(eventName,eventhandler.bind(this))
     }
 
     offCustomEvent(eventName,eventhandler)
@@ -57,27 +57,16 @@ export default class BaseNode extends THREE.Mesh {
     //------------------------------------------------
 
 
-    //FIXME we need a single window keyup listener that listens for keyevents and forwards/triggers
+    // we need a single window keyup listener that listens for keyevents and forwards/triggers
     // them on the current element similar to how the mouse events do
+    //Note: the current implementation only triggers keypresses every 300 ms
     onKey(eventName, eventhandler) {
+        let handler=_.throttle(eventhandler.bind(this),300)
 
-
-        this.mKeyboardEvents.bind(eventName, eventhandler.bind(this),'keydown');
-
-     /*   $(window).on("keyup", null, eventName, function (e) {
-            if (this != BaseNode.lastHoveredNode) return
-            e.stopPropagation();
-            e.preventDefault();
-
-            e.target=BaseNode.lastHoveredNode;
-
-            eventhandler.bind(BaseNode.lastHoveredNode)(e)
-
-        }.bind(this));
-*/
+        this.mKeyboardEvents.bind(eventName,handler ,'keydown');
 
     }
-    //FIXME see issue of onKey
+    //TODO wont work with debounced handler
     offKey(eventName, eventhandler)
     {
         this.mKeyboardEvents.unbind(eventName, eventhandler);
@@ -195,11 +184,13 @@ export default class BaseNode extends THREE.Mesh {
 
         super(BaseNode.sphereGeometry, material);
 
+        this.mCustomEvents=$({})
+
 
         this.addDefaultHandlers();
 
         //custom events container
-        this.mCustomEvents=$({})
+
         //keyboard events container
         // TODO to be able to use event bubbling we'd need to append the html elements to the one of the parent cluster
         this.mKeyboardEvents= new Mousetrap(document.createElement("span"));
@@ -225,6 +216,9 @@ export default class BaseNode extends THREE.Mesh {
 
         })
 
+
+        // adding before-render event
+
         function onBeforeRender(){
             this.trigger("before-render")
 
@@ -242,9 +236,13 @@ export default class BaseNode extends THREE.Mesh {
             }
 
         });
+        //------------------
 
+        // adding before-render event default handler
+        this.on("before-render",function(){
+            this.update()
 
-
+        })
 
 
     }
@@ -283,5 +281,13 @@ export default class BaseNode extends THREE.Mesh {
 
 
     }
+
+
+    /**
+     * update stub, override in descending class
+     *
+     *
+     */
+    update(){}
 
 }

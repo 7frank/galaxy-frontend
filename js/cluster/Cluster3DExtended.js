@@ -93,7 +93,7 @@ class Cluster3DExtended extends BaseCluster3D {
 
         })
 
-            this.on("dblclick",function(e) {
+            this.on("s dblclick",function(e) {
             e.stopPropagation()
 
 
@@ -132,9 +132,15 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
 
+    /**
+     *
+     *
+     */
     update()
     {
         super.update();
+
+        if (this.mTextNodes)
         this.mTextNodes.update();
 
     }
@@ -215,8 +221,8 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
 
-            //TDODO refactor force-graph-utils
-            console.log(nodes)
+            //TODO refactor force-graph-utils
+
             var particles = createParticleSystemForNodes(nodes, demoOptions);
             this.add(particles.pointCloud);
 
@@ -248,14 +254,19 @@ class Cluster3DExtended extends BaseCluster3D {
 
         var nodes=Object.values(this.mClusters)
 
-        //TODO remove global dependency
+        //TODO remove global dependency in TextNodes
         let env=undefined
+
+        //TODO make sure radius is dynamically changed when cluster radius changes
+
+        let minDistance=this.getRadius()/3
+        let maxDistance=minDistance*10
 
         if (!this.mTextNodes)
         this.mTextNodes = TextNodes(env, {
             maxVisibleCount: 50,
-            maxDistance: 30000,
-            minDistance: 3000,
+            maxDistance: maxDistance,//30000
+            minDistance: minDistance, //3000
             getNodes: function () {
 
                 return nodes
@@ -263,7 +274,9 @@ class Cluster3DExtended extends BaseCluster3D {
             },
             onNodeText: function (node) {
 
-                return node.id
+                if (node.name) return node.name;
+
+                return node.id;
 
             },
             getCSSClasses: function () {
@@ -274,7 +287,15 @@ class Cluster3DExtended extends BaseCluster3D {
             interactable: true,
             onAfterCreateTextField: function (node, el) {
 
-                var newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
+                var newSize;
+                if (node instanceof Cluster3DExtended)
+                {
+                    newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
+
+
+                }
+                else
+                newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
 
                 newSize = _.round(newSize / 12, 3) + "em";
 

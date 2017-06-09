@@ -152,12 +152,15 @@ class BaseCluster3D extends BaseNode {
 
                 var dMGN = options.defaultMergeGroupName
                 if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz;//new BaseCluster3D()
-
+                _clustersObj[dMGN].name=dMGN
                 _clustersObj[dMGN].addNodes(_cluster.getNodes())
             }
-            else
+            else {
+                _cluster.name=key
                 _clustersObj[key] = _cluster
 
+
+            }
         })
 
 

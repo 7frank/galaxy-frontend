@@ -223,7 +223,7 @@ function TextNodes(env = globalEnv, options) {
 
 			let node = mNodes[i];
 
-            if (node instanceof clusters.Cluster3DExtended) debugger
+
 
 			var res = testIfRelevantNode(node);
 			if (res.addNodeToSet)

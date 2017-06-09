@@ -228,12 +228,15 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
                 var dMGN = options.defaultMergeGroupName
                 if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz;//new BaseCluster3D()
-
+                _clustersObj[dMGN].name=dMGN
                 _clustersObj[dMGN].addNodes(_cluster.getNodes())
             }
-            else
+            else {
+                _cluster.name=key
                 _clustersObj[key] = _cluster
 
+
+            }
         })
 
 
@@ -994,7 +997,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
         })
 
-            this.on("dblclick",function(e) {
+            this.on("s dblclick",function(e) {
             e.stopPropagation()
 
 
@@ -1033,9 +1036,15 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
 
+    /**
+     *
+     *
+     */
     update()
     {
         super.update();
+
+        if (this.mTextNodes)
         this.mTextNodes.update();
 
     }
@@ -1116,8 +1125,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
 
-            //TDODO refactor force-graph-utils
-            console.log(nodes)
+            //TODO refactor force-graph-utils
+
             var particles = createParticleSystemForNodes(nodes, demoOptions);
             this.add(particles.pointCloud);
 
@@ -1149,14 +1158,19 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
         var nodes=Object.values(this.mClusters)
 
-        //TODO remove global dependency
+        //TODO remove global dependency in TextNodes
         let env=undefined
+
+        //TODO make sure radius is dynamically changed when cluster radius changes
+
+        let minDistance=this.getRadius()/3
+        let maxDistance=minDistance*10
 
         if (!this.mTextNodes)
         this.mTextNodes = TextNodes(env, {
             maxVisibleCount: 50,
-            maxDistance: 30000,
-            minDistance: 3000,
+            maxDistance: maxDistance,//30000
+            minDistance: minDistance, //3000
             getNodes: function () {
 
                 return nodes
@@ -1164,7 +1178,9 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
             },
             onNodeText: function (node) {
 
-                return node.id
+                if (node.name) return node.name;
+
+                return node.id;
 
             },
             getCSSClasses: function () {
@@ -1175,7 +1191,15 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
             interactable: true,
             onAfterCreateTextField: function (node, el) {
 
-                var newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
+                var newSize;
+                if (node instanceof Cluster3DExtended)
+                {
+                    newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
+
+
+                }
+                else
+                newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
 
                 newSize = _.round(newSize / 12, 3) + "em";
 
@@ -1779,6 +1803,160 @@ class BaseEdge {
  */
 class BaseNode extends THREE.Mesh {
 
+    /**
+     * there are 3 types of events handled for a node
+     * (1) mouse events via THREEx.domEvents
+     * (2) keyboard hotkeys that are bound to "keyup" via jQuery.hotkeys
+     * (3) any other custom event
+     * NOTE: customise in sub class as needed
+     */
+
+
+    getRegisteredCustomEvents()
+    {
+        return ['before-render']
+
+    }
+
+    isCustomEvent(eventName)
+    {
+        return this.getRegisteredCustomEvents().indexOf(eventName)>=0
+    }
+
+    isMouseEvent(eventName)
+    {
+        return  THREEx.DomEvents.eventNames.indexOf(eventName) >= 0
+    }
+
+
+
+    //------------------------------------------------
+    onCustomEvent(eventName,eventhandler)
+    {
+        this.mCustomEvents.on(eventName,eventhandler.bind(this))
+    }
+
+    offCustomEvent(eventName,eventhandler)
+    {
+        this.mCustomEvents.off(eventName,eventhandler)
+    }
+
+
+    triggerCustomEvent(eventName, origDomEvent, intersect)
+    {
+        this.mCustomEvents.trigger(eventName, origDomEvent, intersect)
+    }
+    //------------------------------------------------
+
+
+    // we need a single window keyup listener that listens for keyevents and forwards/triggers
+    // them on the current element similar to how the mouse events do
+    //Note: the current implementation only triggers keypresses every 300 ms
+    onKey(eventName, eventhandler) {
+        let handler=_.throttle(eventhandler.bind(this),300)
+
+        this.mKeyboardEvents.bind(eventName,handler ,'keydown');
+
+    }
+    //TODO wont work with debounced handler
+    offKey(eventName, eventhandler)
+    {
+        this.mKeyboardEvents.unbind(eventName, eventhandler);
+       // $(window).off(eventName, eventhandler);
+
+    }
+
+    triggerKey(eventName, origDomEvent, intersect)
+    {
+        this.mKeyboardEvents.trigger(eventName,  origDomEvent, intersect);
+       // $(window).trigger(eventName, origDomEvent, intersect);
+    }
+
+    /**
+     * gets called on the node that the mouse is hovering over
+     *
+     */
+    resolveKeyEvent(event){
+
+
+        this.mKeyboardEvents.handleKeyEvent(event)
+
+     }
+
+
+    //------------------------------------------------
+    on(eventName, eventhandler) {
+
+
+        for (let eName of eventName.split(" ")) {
+
+            if (this. isCustomEvent(eName))
+                this.onCustomEvent(eName,eventhandler);
+            else
+            if (this.isMouseEvent(eName))
+                BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
+            else
+                this.onKey(eName, eventhandler)
+
+        };
+
+        return this;
+    }
+
+    off(eventName, eventhandler) {
+
+        for (let eName of eventName.split(" "))
+
+
+        for (let eName of eventName.split(" ")) {
+
+            if (this. isCustomEvent(eName))
+                this.offCustomEvent(eName,eventhandler);
+            else
+            if (this.isMouseEvent(eName))
+                BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
+            else
+                this.offKey(eName, eventhandler)
+
+        };
+
+        return this;
+
+
+
+
+    }
+
+    trigger(eventName, origDomEvent, intersect) {
+
+
+
+
+
+        for (let eName of eventName.split(" ")) {
+
+
+
+            if (this. isCustomEvent(eName))
+                this.triggerCustomEvent(eName, origDomEvent, intersect);
+            else
+            if (this.isMouseEvent(eName))
+                BaseNode.domEvents._notify(eName, this, origDomEvent, intersect);
+            else
+                triggerKey(eName,origDomEvent, intersect)
+
+        };
+
+        return this;
+
+
+    }
+
+
+
+
+    //---------------end of event definition part----------------------
+
     constructor(...args) {
 
         BaseNode.initStatic()
@@ -1798,11 +1976,21 @@ class BaseNode extends THREE.Mesh {
 
         super(BaseNode.sphereGeometry, material);
 
+        this.mCustomEvents=$({})
+
 
         this.addDefaultHandlers();
 
+        //custom events container
+
+        //keyboard events container
+        // TODO to be able to use event bubbling we'd need to append the html elements to the one of the parent cluster
+        this.mKeyboardEvents= new Mousetrap(document.createElement("span"));
+
 
     }
+
+
 
 
     addDefaultHandlers() {
@@ -1820,6 +2008,33 @@ class BaseNode extends THREE.Mesh {
 
         })
 
+
+        // adding before-render event
+
+        function onBeforeRender(){
+            this.trigger("before-render")
+
+        }
+
+        Object.defineProperty(this, "onBeforeRender", {
+            enumerable: false,
+            configurable: false,
+            get: function() { return onBeforeRender.bind(this); }.bind(this),
+            set: function(newValue) {
+
+                console.warn("onBeforeRender cannot be overridden use .on('before-render',function(){}) instead")
+
+
+            }
+
+        });
+        //------------------
+
+        // adding before-render event default handler
+        this.on("before-render",function(){
+            this.update()
+
+        })
 
 
     }
@@ -1846,59 +2061,26 @@ class BaseNode extends THREE.Mesh {
         BaseNode._static_initialised_ = true
 
 
-    }
 
+        //have one gloabal listener for all nodes and let them
+        $(window).on("keydown", function (e) {
+            if (!BaseNode.lastHoveredNode) return
 
-    onKey(eventName, eventhandler) {
+            BaseNode.lastHoveredNode.resolveKeyEvent(e)
 
+        });
 
-        $(window).on("keyup", null, eventName, function (e) {
-            if (this != BaseNode.lastHoveredNode) return
-            e.stopPropagation();
-            e.preventDefault();
-
-            e.target=BaseNode.lastHoveredNode;
-
-            eventhandler.bind(BaseNode.lastHoveredNode)(e)
-
-        }.bind(this));
 
 
     }
 
-    on(eventName, eventhandler) {
 
-
-        for (let eName of eventName.split(" ")) {
-
-            let isSpecialEvent = THREEx.DomEvents.eventNames.indexOf(eName) >= 0
-
-
-            if (isSpecialEvent)
-                BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
-            else
-                this.onKey(eName, eventhandler)
-
-        }
-        ;
-
-
-        return this;
-    }
-
-    off(eventName, eventhandler) {
-
-        for (let eName of eventName.split(" "))
-            BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
-        return this;
-    }
-
-    trigger(eventName, origDomEvent, intersect) {
-
-        BaseNode.domEvents._notify(eventName, this, origDomEvent, intersect);
-        return this;
-    }
-
+    /**
+     * update stub, override in descending class
+     *
+     *
+     */
+    update(){}
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BaseNode;
@@ -2109,7 +2291,7 @@ class MyMain {
         var res = new __WEBPACK_IMPORTED_MODULE_8__RootCluster__["a" /* default */](globalNodes, [speccs[0], speccs[1], speccs[2]]);
 
         globalEnv.scene.add(res);
-        res.position.set(0, 1000, 0);
+        res.position.set(0, 10000, 0);
 
         return res
 

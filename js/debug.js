@@ -13,7 +13,9 @@ $(function () {
 
     $(window).on("keyup", null, "ctrl+space", function () {
 
-        //these four additional things should be put into toe ClusterExt class
+
+        if (window["baseCluster"]) return
+
 
         setTimeout(function () {
 
@@ -23,13 +25,16 @@ $(function () {
             globalEnv.tn.remove()
 
             globalEnv.countryTextNodes.remove()
+          //  globalEnv.useNodeTextFeature=false
+            baseCluster.zoomToCluster()
 
         }, 1000)
 
+        setTimeout(function () {
 
+            baseCluster.zoomToCluster()
+        },2000)
 
-
-        if (window["baseCluster"]) return
         a = new clusters.MyMain;
         baseCluster = a.clusters
         baseCluster.mClusters["United States"].getRelationInfo()
