@@ -734,8 +734,11 @@
                 return;
             }
 
+
+            self.handleKey(character, _eventModifiers(e), e);
         }
 
+        
         /**
          * called to set a 1 second timeout on the specified sequence
          *
