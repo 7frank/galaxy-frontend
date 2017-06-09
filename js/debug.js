@@ -11,7 +11,7 @@
 $(function () {
 
 
-    $(window).on("keyup", null, "ctrl+space", function () {
+    function runClusterSample() {
 
 
         if (window["baseCluster"]) return
@@ -25,7 +25,7 @@ $(function () {
             globalEnv.tn.remove()
 
             globalEnv.countryTextNodes.remove()
-          //  globalEnv.useNodeTextFeature=false
+            //  globalEnv.useNodeTextFeature=false
             baseCluster.zoomToCluster()
 
         }, 1000)
@@ -39,7 +39,12 @@ $(function () {
         baseCluster = a.clusters
         baseCluster.mClusters["United States"].getRelationInfo()
 
-    })
+    }
+
+
+  //  $(window).on("keyup", null, "mod+space",runClusterSample)
+
+    Mousetrap.bind( "mod+space",runClusterSample)
 
 })
 

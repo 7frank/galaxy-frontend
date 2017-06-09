@@ -77,7 +77,7 @@ export class MyMain {
         var res = new RootCluster(globalNodes, [speccs[0], speccs[1], speccs[2]]);
 
         globalEnv.scene.add(res);
-        res.position.set(0, 1000, 0);
+        res.position.set(0, 10000, 0);
 
         return res
 
