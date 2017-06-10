@@ -105,6 +105,13 @@ class BaseCluster3D extends BaseNode {
 
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
+        if (mClusteringSpeccsArray.length==1) {
+
+            this.createParticlePointCloud(mClusteringSpeccsArray[0]);
+            return false;
+        }
+
+
 
         var entry = mClusteringSpeccsArray[0];
 
@@ -359,12 +366,12 @@ class BaseCluster3D extends BaseNode {
     /**
      *
      *
-     *
+     * @params defaultRadius if the radius is not yet determined the fefault value is used instead
      * @returns the radius of the cluster
      */
-    getRadius() {
+    getRadius(defaultRadius=100) {
 
-        return this.geometry.boundingSphere ? this.geometry.boundingSphere.radius : null;
+        return this.geometry.boundingSphere ? this.geometry.boundingSphere.radius : defaultRadius;
 
     }
 
@@ -415,6 +422,8 @@ class BaseCluster3D extends BaseNode {
             if (item instanceof BaseCluster3D)
                 clusters.push(item)
         })
+
+        clusters.shift() //remove first elemn as it is "this"
 
         return clusters
 

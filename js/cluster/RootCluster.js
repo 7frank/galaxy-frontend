@@ -76,6 +76,7 @@ class RootCluster extends Cluster3DExtended {
     update(){
         super.update()
 
+        if (this.tn)
         this.tn.update();
 
     }

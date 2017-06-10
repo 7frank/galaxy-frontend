@@ -9,10 +9,10 @@
  */
 
 
-import BaseDistribution from "./BaseDistribution"
-import RandomDistribution from "./RandomDistribution"
-import ForceGraphDistribution from "./ForceGraphDistribution"
-import SphericalDistribution from "./SphericalDistribution"
+import BaseDistribution from "./distributions/BaseDistribution"
+import RandomDistribution from "./distributions/RandomDistribution"
+import ForceGraphDistribution from "./distributions/ForceGraphDistribution"
+import SphericalDistribution from "./distributions/SphericalDistribution"
 
 import ClusterNodeArray from "./ClusterNodeArray"
 
@@ -37,7 +37,7 @@ export class MyMain {
     constructor() {
 
         this.clusters = this.runSample1();
-
+       // this.clusters = this.runSample2();
     }
 
     getPossibleClusterSpeccsArray() {
@@ -78,6 +78,18 @@ export class MyMain {
 
         globalEnv.scene.add(res);
         res.position.set(0, 10000, 0);
+
+        return res
+
+    }
+
+
+    runSample2() {
+        let speccs = this.getPossibleClusterSpeccsArray();
+        var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
+
+        globalEnv.scene.add(res);
+        res.position.set(5000, 10000, 0);
 
         return res
 

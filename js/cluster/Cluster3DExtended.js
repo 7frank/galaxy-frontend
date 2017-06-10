@@ -6,8 +6,9 @@
 
 import BaseCluster3D from "./BaseCluster3D"
 
-import BaseDistribution from "./BaseDistribution"
-import ForceGraphDistribution from "./ForceGraphDistribution"
+import BaseDistribution from "./distributions/BaseDistribution"
+import DefaultDistribution from "./distributions/DefaultDistribution"
+import ForceGraphDistribution from "./distributions/ForceGraphDistribution"
 import ZoomUtil from "./ZoomUtil"
 
 
@@ -38,11 +39,11 @@ class Cluster3DExtended extends BaseCluster3D {
      *   have a dynamic distance based on the size of the cluster
      *
      */
-    zoomToCluster()
+    zoomToCluster(defaultDistance=400)
     {
 
 
-        var distance=this.geometry.boundingSphere.radius*3
+        var distance=this.getRadius(defaultDistance)*3
 
         ZoomUtil.moveToMesh(this,function onComplete(){  },distance)
 
@@ -314,6 +315,142 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
     }
+
+
+    getRoot()
+    {
+        var _root=this;
+        while ( true)
+        {
+           let r=_root.parent;
+           if (r==null) return _root;
+           if (! (r instanceof BaseCluster3D)) return _root;
+            _root=r;
+        }
+
+
+    }
+
+//-----------------------------------
+//-----------------------------------
+//-----------------------------------
+//-----------------------------------
+
+//TODO add clone crossfade etc functionality
+
+    /**
+     * we want to be able to re-run applyClustering
+     *
+     *   therefore ...
+     *  create new clusters with an initial distribution => with same root nodes which should set the nodes to the same position
+     *
+     *
+     *
+     *
+     *
+     *
+     * if we do have an existing c+ sc structure
+     * and take one sc and set a new group filter on it
+     * ?? "clone" the sub cluster to maintain node positions
+     *
+     * xxx
+     * add actual distribution functions afterwards to move nodes to the new positions relative to it's new clusters
+     *
+     *
+     */
+
+    // use within applyCluster
+    // ? already mClusters && entry!= mEntry
+    testIfClusterNeedsRestructuring(entry)
+    {
+        return this.mClusters&&this.mEntry!=entry
+    }
+
+    restructClusterBasedOnEntrys(entry)
+    {
+        cloneRoot()
+
+
+
+    }
+
+
+    cleanUpClusters(clusters)
+    {
+        _.each(clusters,function(cluster){
+
+            if (cluster.tn) {
+                cluster.tn.remove()
+                delete (cluster.tn)
+            }
+            if (cluster.mTextNodes) {
+                cluster.mTextNodes.remove()
+                delete (cluster.mTextNodes)
+            }
+
+            delete(cluster.parent.mClusters[cluster.name])
+            cluster.parent.remove(cluster)
+
+
+
+
+        })
+
+    }
+
+    cleanUpLeafs()
+    {
+        _.each(this.getLeafs(),function(leaf){
+
+        //TOO to leaf specific clean up
+
+            //for now at least remove the particle cloud
+            leaf.mLeaf.geometry.dispose()
+
+        })
+
+    }
+
+
+
+
+
+    cloneRoot(){
+
+        let defaultEntry={distribution:new DefaultDistribution()}
+
+        var that=this;
+
+       let prevClusters= this.findClusters("*");
+
+
+
+
+        this.applyClustering([defaultEntry])
+        this.cleanUpClusters(prevClusters)
+
+
+    }
+
+    cloneRoot2(){
+        let clazz= this.getChildClusterConstructor()
+
+    let defaultEntry={distribution:new DefaultDistribution()}
+
+
+        let clone =this.mClonedCluster = new clazz(this.mNodes)
+        clone.applyClustering([defaultEntry])
+
+
+        //TOD wrong offset ?wrong parent eg...
+        //clone.position.copy(this.position)
+        clone.position.add(new THREE.Vector3(0,0,1000));
+        this.parent.add(clone)
+
+      //  clone.zoomToCluster(1500)
+
+    }
+
 
 
 

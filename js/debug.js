@@ -33,11 +33,25 @@ $(function () {
         setTimeout(function () {
 
             baseCluster.zoomToCluster()
+
         },2000)
+
+
+
+        setTimeout(function () {
+
+            baseCluster.cloneRoot()
+
+
+        },3000)
+
+
 
         a = new clusters.MyMain;
         baseCluster = a.clusters
-        baseCluster.mClusters["United States"].getRelationInfo()
+
+        //baseClusters.find("United States")[0].getRelationInfo()
+        //baseCluster.mClusters["United States"].getRelationInfo()
 
     }
 

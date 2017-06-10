@@ -181,6 +181,13 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
+        if (mClusteringSpeccsArray.length==1) {
+
+            this.createParticlePointCloud(mClusteringSpeccsArray[0]);
+            return false;
+        }
+
+
 
         var entry = mClusteringSpeccsArray[0];
 
@@ -435,12 +442,12 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     /**
      *
      *
-     *
+     * @params defaultRadius if the radius is not yet determined the fefault value is used instead
      * @returns the radius of the cluster
      */
-    getRadius() {
+    getRadius(defaultRadius=100) {
 
-        return this.geometry.boundingSphere ? this.geometry.boundingSphere.radius : null;
+        return this.geometry.boundingSphere ? this.geometry.boundingSphere.radius : defaultRadius;
 
     }
 
@@ -491,6 +498,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             if (item instanceof BaseCluster3D)
                 clusters.push(item)
         })
+
+        clusters.shift() //remove first elemn as it is "this"
 
         return clusters
 
@@ -900,12 +909,14 @@ class EdgeUtil {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ForceGraphDistribution__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_DefaultDistribution__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ZoomUtil__ = __webpack_require__(14);
 /**
  * Created by Frank on 06.06.2017.
  */
+
 
 
 
@@ -942,13 +953,13 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
      *   have a dynamic distance based on the size of the cluster
      *
      */
-    zoomToCluster()
+    zoomToCluster(defaultDistance=400)
     {
 
 
-        var distance=this.geometry.boundingSphere.radius*3
+        var distance=this.getRadius(defaultDistance)*3
 
-        __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__["a" /* default */].moveToMesh(this,function onComplete(){  },distance)
+        __WEBPACK_IMPORTED_MODULE_4__ZoomUtil__["a" /* default */].moveToMesh(this,function onComplete(){  },distance)
 
     }
 
@@ -1005,10 +1016,10 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
             var diameter=this.geometry.boundingSphere.radius*2
             console.log("clicky clicky",diameter)
             let speccsRoot=[
-                {distribution: new __WEBPACK_IMPORTED_MODULE_1__BaseDistribution__["a" /* default */](diameter,1)},
-                {distribution: new __WEBPACK_IMPORTED_MODULE_1__BaseDistribution__["a" /* default */](diameter*0.66,2)},
-                {distribution: new __WEBPACK_IMPORTED_MODULE_1__BaseDistribution__["a" /* default */](diameter*0.33,3)},
-                {distribution: new __WEBPACK_IMPORTED_MODULE_2__ForceGraphDistribution__["a" /* default */](diameter*0.66,3)}
+                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter,1)},
+                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter*0.66,2)},
+                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter*0.33,3)},
+                {distribution: new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](diameter*0.66,3)}
                 ]
 
 
@@ -1218,6 +1229,142 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
     }
+
+
+    getRoot()
+    {
+        var _root=this;
+        while ( true)
+        {
+           let r=_root.parent;
+           if (r==null) return _root;
+           if (! (r instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */])) return _root;
+            _root=r;
+        }
+
+
+    }
+
+//-----------------------------------
+//-----------------------------------
+//-----------------------------------
+//-----------------------------------
+
+//TODO add clone crossfade etc functionality
+
+    /**
+     * we want to be able to re-run applyClustering
+     *
+     *   therefore ...
+     *  create new clusters with an initial distribution => with same root nodes which should set the nodes to the same position
+     *
+     *
+     *
+     *
+     *
+     *
+     * if we do have an existing c+ sc structure
+     * and take one sc and set a new group filter on it
+     * ?? "clone" the sub cluster to maintain node positions
+     *
+     * xxx
+     * add actual distribution functions afterwards to move nodes to the new positions relative to it's new clusters
+     *
+     *
+     */
+
+    // use within applyCluster
+    // ? already mClusters && entry!= mEntry
+    testIfClusterNeedsRestructuring(entry)
+    {
+        return this.mClusters&&this.mEntry!=entry
+    }
+
+    restructClusterBasedOnEntrys(entry)
+    {
+        cloneRoot()
+
+
+
+    }
+
+
+    cleanUpClusters(clusters)
+    {
+        _.each(clusters,function(cluster){
+
+            if (cluster.tn) {
+                cluster.tn.remove()
+                delete (cluster.tn)
+            }
+            if (cluster.mTextNodes) {
+                cluster.mTextNodes.remove()
+                delete (cluster.mTextNodes)
+            }
+
+            delete(cluster.parent.mClusters[cluster.name])
+            cluster.parent.remove(cluster)
+
+
+
+
+        })
+
+    }
+
+    cleanUpLeafs()
+    {
+        _.each(this.getLeafs(),function(leaf){
+
+        //TOO to leaf specific clean up
+
+            //for now at least remove the particle cloud
+            leaf.mLeaf.geometry.dispose()
+
+        })
+
+    }
+
+
+
+
+
+    cloneRoot(){
+
+        let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_2__distributions_DefaultDistribution__["a" /* default */]()}
+
+        var that=this;
+
+       let prevClusters= this.findClusters("*");
+
+
+
+
+        this.applyClustering([defaultEntry])
+        this.cleanUpClusters(prevClusters)
+
+
+    }
+
+    cloneRoot2(){
+        let clazz= this.getChildClusterConstructor()
+
+    let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_2__distributions_DefaultDistribution__["a" /* default */]()}
+
+
+        let clone =this.mClonedCluster = new clazz(this.mNodes)
+        clone.applyClustering([defaultEntry])
+
+
+        //TOD wrong offset ?wrong parent eg...
+        //clone.position.copy(this.position)
+        clone.position.add(new THREE.Vector3(0,0,1000));
+        this.parent.add(clone)
+
+      //  clone.zoomToCluster(1500)
+
+    }
+
 
 
 
@@ -1508,8 +1655,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 /**
  * a set of node objects
- * the cluster itself also contains parts of the visual representation of the nodes
- * TODO in which case the clster might rather inherit from THREE.Points (point cloud) ?
+ * the cluster itself doesn't contain any visual representation of the nodes
  */
 
 
@@ -1519,32 +1665,17 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 class ClusterNodeArray extends Array //List<Node>
 {
 
-    //FIXME
-    /*push(el)
-     {
+    constructor(...args){
+    super(...args)
+        // TODO extend every loaded  node data in a similar way like it is done
+        // currently by the default implementation
 
-     if (! el instanceof Node  ) throw new Error("ClusterNodeArray must only contain instanceof",Node)
-     return super.apply(this,arguments)
-     }*/
-
-
-    groupBy( filterFunction){
-        let container={}
-
-        function groupFunction(key,val)
-        {
-            if (typeof container[key]=="undefined")   container[key]=new ClusterNodeArray();
-
-            container[key].push(val)
-        }
-
-        for (el of this)
-            filterFunction(groupFunction,el)
-
-
-        return container
 
     }
+
+
+
+
 
 }
 /* unused harmony export default */
@@ -1554,48 +1685,6 @@ class ClusterNodeArray extends Array //List<Node>
 
 /***/ }),
 /* 7 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
-/**
- * Created by Frank on 30.05.2017.
- */
-
-
-
-
-/**
- * a simple random distribution function
- *
- */
-
-class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
-{
-    constructor(...args)
-    {
-        super(...args);
-        this.maxDiameter=this.mScale*2;
-    }
-    distribute(node,dx,dy){
-        let min=this.maxDiameter/-2,max=this.maxDiameter/2
-
-        let x=_.random(min,max);
-        let y=this.dimensions>1?_.random(min,max):0;
-        let z=this.dimensions>1?_.random(min,max):0;
-
-
-        return {
-            position:new THREE.Vector3(x,y,z)
-        }
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = RandomDistribution;
-
-
-
-/***/ }),
-/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1677,6 +1766,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
     update(){
         super.update()
 
+        if (this.tn)
         this.tn.update();
 
     }
@@ -1684,6 +1774,48 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = RootCluster;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+
+/**
+ * a simple random distribution function
+ *
+ */
+
+class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
+{
+    constructor(...args)
+    {
+        super(...args);
+        this.maxDiameter=this.mScale*2;
+    }
+    distribute(node,dx,dy){
+        let min=this.maxDiameter/-2,max=this.maxDiameter/2
+
+        let x=_.random(min,max);
+        let y=this.dimensions>1?_.random(min,max):0;
+        let z=this.dimensions>1?_.random(min,max):0;
+
+
+        return {
+            position:new THREE.Vector3(x,y,z)
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = RandomDistribution;
+
 
 
 /***/ }),
@@ -2202,15 +2334,15 @@ class EdgesContainer extends THREE.Object3D {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ForceGraphDistribution__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__SphericalDistribution__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_RandomDistribution__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_SphericalDistribution__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ClusterNodeArray__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterLeafElement__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__Cluster3DExtended__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__RootCluster__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__RootCluster__ = __webpack_require__(7);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_7__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
@@ -2251,7 +2383,7 @@ class MyMain {
     constructor() {
 
         this.clusters = this.runSample1();
-
+       // this.clusters = this.runSample2();
     }
 
     getPossibleClusterSpeccsArray() {
@@ -2266,13 +2398,13 @@ class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */](1000, 2)
-        let sample2 = new __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */](200, 2)
+        let sample1 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 2)
+        let sample2 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 2)
 
 
-        let sample3 = new __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */](50, 3)
+        let sample3 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 3)
 
-        let rand2 = new __WEBPACK_IMPORTED_MODULE_1__RandomDistribution__["a" /* default */](200, 2)
+        let rand2 = new __WEBPACK_IMPORTED_MODULE_1__distributions_RandomDistribution__["a" /* default */](200, 2)
 
         return [
             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 3}},
@@ -2292,6 +2424,18 @@ class MyMain {
 
         globalEnv.scene.add(res);
         res.position.set(0, 10000, 0);
+
+        return res
+
+    }
+
+
+    runSample2() {
+        let speccs = this.getPossibleClusterSpeccsArray();
+        var res = new __WEBPACK_IMPORTED_MODULE_8__RootCluster__["a" /* default */](globalNodes, [speccs[1],speccs[0], speccs[2]]);
+
+        globalEnv.scene.add(res);
+        res.position.set(5000, 10000, 0);
 
         return res
 
@@ -2372,6 +2516,76 @@ class ZoomUtil
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__ = __webpack_require__(0);
+/**
+ * Created by Frank on 29.05.2017.
+ */
+
+/**
+ * TODO  possible different ways to distribute elements => moveTo, goTo, stack?
+ *
+ *
+ */
+
+
+
+
+
+
+
+
+    class DefaultDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
+    {
+    constructor(scale=1,dimensions=3){
+
+        super(scale,dimensions)
+
+    }
+
+
+
+       
+
+//TODO this is quite redundant we want the same work flow but not at idle copy costs if possible
+    distribute(node,dx,dy,dz) {
+
+
+        var mesh = (node._bubble) ? node._bubble : node;
+        var absPos;
+        if (mesh) {
+            absPos = new THREE.Vector3();
+            absPos.setFromMatrixPosition(mesh.matrixWorld);
+
+        //TODO this is only working for specific cases currently
+            if (mesh instanceof __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__["a" /* default */])
+            absPos.sub(mesh.getRoot().position)
+             else
+            absPos.sub(mesh.parent.parent.getRoot().position)
+
+        }
+        else {
+
+        absPos={};  //if above fails, we interpret the node as a yet rendered node with  potential initial x,y,z
+
+            (typeof node.x!="undefined")?absPos.x=node.x:0;
+            (typeof node.y!="undefined")?absPos.y=node.x:0;
+            (typeof node.z!="undefined")?absPos.z=node.x:0;
+
+            }
+        return {position:new THREE.Vector3(absPos.x,absPos.y,absPos.z).multiplyScalar(this.mScale)};
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = DefaultDistribution;
+
+
 
 
 /***/ })

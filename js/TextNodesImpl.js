@@ -104,19 +104,26 @@ function TextNodes(env = globalEnv, options) {
 		//var scaling=1
 		//var size=500/distance*10*scaling
 
+        //calc angle to discard nodes that are to far at the sides of the screen or possible behind the camera
+		let dir1=new THREE.Vector3().copy(point2).sub(point1)
+		let dir2=env.camera.getWorldDirection()
+		var angle = dir1.angleTo(dir2)
+
+
 		//TODO is size still relevant somehow?
 		var size = 12
 
-			//return the result of the comparision
-			if (size < 10 || size > 80 || distance > options.maxDistance || distance < options.minDistance)
+		//return the result of the comparision
+		//angle  90° == pi/4 => 45° fov for text nodes to each side
+			if (size < 10 || size > 80 || angle>Math.PI/4 ||distance > options.maxDistance || distance < options.minDistance)
 				return {
-					distance,
+					distance,angle,
 					addNodeToSet: false,
 					node
 				};
 			else
 				return {
-					distance,
+					distance,angle,
 					addNodeToSet: true,
 					node
 				};
