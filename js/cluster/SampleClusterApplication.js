@@ -84,12 +84,11 @@ export class MyMain {
         let graphData=new GraphData(globalEnv.graphData)
 
 
-        //FIXME fix links to link to right nodes
+
        let preparedData= graphData.create()
 
-
-        preparedData.nodes
-      // var res = new RootCluster(globalNodes);
+        //FIXME  preparedData.nodes aren't shown
+          //   var res = new RootCluster(globalNodes);
          var res = new RootCluster(preparedData.nodes);
 
         globalEnv.scene.add(res);

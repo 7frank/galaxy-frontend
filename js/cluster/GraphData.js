@@ -19,13 +19,25 @@ class GraphData
 
     }
 
-    getRawNodes()
+    getClonedRawNodes()
     {
+        var mNodes={}
+
+            _.each(this.mGraphData.nodes,function(node,id){
+                mNodes[id]=_.extend({x:0,y:0,z:0},node)
+
+
+            })
+
+
+
+        this.mDataNodeCopy=mNodes
+
 
         // Build graph with data
         var d3Nodes  = [];
-        for (let nodeId in this.mGraphData.nodes) { // Turn nodes into array
-            const node = _.extend({},this.mGraphData.nodes[nodeId]);
+        for (let nodeId in mNodes) { // Turn nodes into array
+            const node =mNodes[nodeId] // _.extend({},mNodes);
             node._id = nodeId;
             d3Nodes.push(node);
         }
@@ -33,20 +45,14 @@ class GraphData
 
     }
 
-    getRawLinks(){
-
-        var d3Links  = this.mGraphData.links.map(link => {
-            return {
-                source: link[0],
-                target: link[1]
-            };
-        });
+    getAlteredRawLinks(){
+        var mDataNodeCopy= this.mDataNodeCopy
 
         //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
        var  d3Links  = this.mGraphData.links.map(link => {
             return {
-                source: this.mGraphData.nodes[link[0]],
-                target: this.mGraphData.nodes[link[1]]
+                source: mDataNodeCopy[link[0]],
+                target: mDataNodeCopy[link[1]]
             };
         })
 
@@ -75,14 +81,14 @@ class GraphData
     {
 
 
-   var d3Nodes= this.getRawNodes();
+   var d3Nodes= this.getClonedRawNodes();
 
     if (!d3Nodes.length) {
         return;
     } //if no data is present return for now
 
 
-    var d3Links =this.getRawLinks();
+    var d3Links =this.getAlteredRawLinks();
 
 
 //TODO

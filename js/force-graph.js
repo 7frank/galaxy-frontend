@@ -274,10 +274,14 @@ function ForceGraph() {
 			env.onFrame = () => {}; // Clear previous frame hook
 		env.scene = new THREE.Scene(); // Clear the place
 
+        var mNodes=_.extend({},env.graphData.nodes)
+
+
 		// Build graph with data
 		var d3Nodes = globalNodes = [];
-		for (let nodeId in env.graphData.nodes) { // Turn nodes into array
-			const node = env.graphData.nodes[nodeId];
+		for (let nodeId in mNodes) { // Turn nodes into array
+            const node = _.extend({},mNodes[nodeId]);
+			//const node = env.graphData.nodes[nodeId];
 			node._id = nodeId;
 			d3Nodes.push(node);
 		}
@@ -286,7 +290,7 @@ function ForceGraph() {
 			return;
 		} //if no data is present return for now
 
-
+//TODO
 		var d3Links
 		if (!env.useGroupFeature) {
 			d3Links = globalLinks = env.graphData.links.map(link => {
@@ -300,8 +304,8 @@ function ForceGraph() {
 			//This is for the network/group part working
 			d3Links = globalLinks = env.graphData.links.map(link => {
 					return {
-						source: env.graphData.nodes[link[0]],
-						target: env.graphData.nodes[link[1]]
+						source: mNodes[link[0]],
+						target: mNodes[link[1]]
 					};
 				})
 

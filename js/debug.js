@@ -11,7 +11,7 @@
 $(function () {
 
 
-    function runClusterSample1() {
+    function runInitialSample() {
 
 
         if (window["main"]) return
@@ -45,6 +45,12 @@ $(function () {
 
     }
 
+    function runClusterSample1()
+    {
+        main.runSample1()
+        //main.clusters.zoomToCluster()
+
+    }
 
     function runClusterSample2()
     {
@@ -63,8 +69,10 @@ $(function () {
 
   //  $(window).on("keyup", null, "mod+space",runClusterSample)
 
-    Mousetrap.bind( "mod+space",runClusterSample1)
+    Mousetrap.bind( "mod+space",runInitialSample)
 
+
+    Mousetrap.bind( "mod+1",runClusterSample1)
     Mousetrap.bind( "mod+2",runClusterSample2)
     Mousetrap.bind( "mod+3",runClusterSample3)
 
