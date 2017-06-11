@@ -22,6 +22,9 @@ import ClusterLeafElement from "./ClusterLeafElement"
 import BaseCluster3D from "./BaseCluster3D"
 import Cluster3DExtended from "./Cluster3DExtended"
 import RootCluster from "./RootCluster"
+import GraphData from "./GraphData"
+
+
 
 
 //-----------------------------------------
@@ -77,7 +80,17 @@ export class MyMain {
     {
         let speccs = this.getPossibleClusterSpeccsArray();
        // var res = new RootCluster(globalNodes, [speccs[0], speccs[1], speccs[2]]);
-       var res = new RootCluster(globalNodes);
+
+        let graphData=new GraphData(globalEnv.graphData)
+
+
+        //FIXME fix links to link to right nodes
+       let preparedData= graphData.create()
+
+
+        preparedData.nodes
+      // var res = new RootCluster(globalNodes);
+         var res = new RootCluster(preparedData.nodes);
 
         globalEnv.scene.add(res);
         res.position.set(0, 10000, 0);

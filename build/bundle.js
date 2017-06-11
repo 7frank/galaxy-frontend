@@ -64,7 +64,7 @@ var clusters =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 14);
+/******/ 	return __webpack_require__(__webpack_require__.s = 15);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,7 +73,7 @@ var clusters =
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 30.05.2017.
@@ -996,7 +996,7 @@ class EdgeUtil {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__ = __webpack_require__(16);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -1398,7 +1398,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(14);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -1705,6 +1705,196 @@ class ClusterNodeArray extends Array //List<Node>
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/**
+ * Created by Frank on 11.06.2017.
+ */
+
+
+
+class GraphData
+{
+
+    //constructor(nodes,edges){
+    constructor(graphData){
+            this.mGraphData=graphData
+      /*  this.mNodeData=[];
+        this.mEdgeData=[];
+
+        this.addNodes(nodes);
+        this.addEdges(nodes);*/
+
+    }
+
+    getRawNodes()
+    {
+
+        // Build graph with data
+        var d3Nodes  = [];
+        for (let nodeId in this.mGraphData.nodes) { // Turn nodes into array
+            const node = _.extend({},this.mGraphData.nodes[nodeId]);
+            node._id = nodeId;
+            d3Nodes.push(node);
+        }
+       return d3Nodes
+
+    }
+
+    getRawLinks(){
+
+        var d3Links  = this.mGraphData.links.map(link => {
+            return {
+                source: link[0],
+                target: link[1]
+            };
+        });
+
+        //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
+       var  d3Links  = this.mGraphData.links.map(link => {
+            return {
+                source: this.mGraphData.nodes[link[0]],
+                target: this.mGraphData.nodes[link[1]]
+            };
+        })
+
+    return d3Links
+
+
+
+    }
+
+
+  /*  addRawNodeData(nodes){
+      if (_.isArray(nodes)) this.mNodeData=this.mNodeData.concat(nodes)
+
+        return this;
+
+    }
+
+    addRawEdgeData(edges)
+    {
+        if (_.isArray(edges)) this.mEdgeData=this.mEdgeData.concat(edges)
+
+        return this;
+    }*/
+
+    create(env=globalEnv)
+    {
+
+
+   var d3Nodes= this.getRawNodes();
+
+    if (!d3Nodes.length) {
+        return;
+    } //if no data is present return for now
+
+
+    var d3Links =this.getRawLinks();
+
+
+//TODO
+  /*  function countVisibleNodes(node) {
+
+        env._nodeCounter.push(node)
+
+    }*/
+
+    // Add WebGL objects
+    d3Nodes.forEach(node => {
+
+        node = nodeMixin(env, node, {
+         //   onDrawNode: countVisibleNodes
+        })
+        node._bubble.name = env.nameAccessor(node) || '';
+
+
+        //TODO not highlighted group nodes should be rendered with separate point cloud
+        if (node.isGroupNode) {
+
+            //node.addClass("basic-sprite-collapsed")
+            node.addClass("basic-ring")
+
+            //node.on("mouseover",()=> node.addClass("basic-animated"))
+            //node.on("mouseout",()=> node.removeClass("basic-animated"))
+            node.on("mouseover", () => node.addClass("basic-ring-2"))
+            node.on("mouseout", () => node.removeClass("basic-ring-2"))
+
+        } else {
+
+            //TODO specific renderings for node should be handled via class property at node data itself
+            //NOTE: the default node/group nodes/links will be put inside a point  cloud for each so we woud need a point cloud for each 3d-class that generates a points object
+
+            //node.addClass("basic-sphere")
+
+            // nothing to begin with
+            //node.addClass("basic-sprite")
+
+        }
+
+    });
+
+    //-----------------------------------------------
+
+    //init mesh for groupline
+  /*  if (env.useLineGroup)
+        initLineGroup(env,{
+            opacity:0.01,
+            color:0x49616C,
+            transparent: true,
+        })
+
+    var linecount = 0;
+    var skipLines = env.numSkipEdgesRendered + 1;
+    if (skipLines < 1)
+        skipLines = 1
+    function shouldLineByVisible(link, id) {
+
+        return !(linecount++ % skipLines)
+    }
+*/
+    //d3Links.forEach(link => {
+    _.each(d3Links, (link, id) => {
+
+         //TODO have a function within the custer itself that is called
+        //determine by distance or something like that
+        var bVisible = true;// shouldLineByVisible()
+
+        linkMixin(env, link, {
+            lineIsVisible: bVisible,
+            color: 0xff0000,
+            opacity: 1
+        })
+
+
+    });
+
+
+
+
+
+    //----------------------
+
+
+    //nodes are prepared by previous step ? TODO which one was that? for further altering
+    extendGraphElements(d3Nodes, d3Links, env)
+
+
+        return {nodes:d3Nodes,edges:d3Links}
+
+}
+
+    //--------------------------------------------
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = GraphData;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(3);
 /**
  * Created by Frank on 06.06.2017.
@@ -1794,7 +1984,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1976,7 +2166,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2018,7 +2208,7 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2076,7 +2266,7 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2116,7 +2306,7 @@ class BaseEdge {
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2418,11 +2608,11 @@ class BaseNode extends THREE.Mesh {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 08.06.2017.
@@ -2528,21 +2718,22 @@ class EdgesContainer extends THREE.Object3D {
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ClusterLeafElement__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__GraphData__ = __webpack_require__(7);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
@@ -2553,6 +2744,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * - for rendering, these sets are going to be put into a container class like the "nodeClouds"
  * so a "nodesContainer" and a nodesClusterContainer will be needed which also have the distribution function
  */
+
+
+
 
 
 
@@ -2623,7 +2817,12 @@ class MyMain {
     {
         let speccs = this.getPossibleClusterSpeccsArray();
        // var res = new RootCluster(globalNodes, [speccs[0], speccs[1], speccs[2]]);
-       var res = new __WEBPACK_IMPORTED_MODULE_9__RootCluster__["a" /* default */](globalNodes);
+
+        let graphData=new __WEBPACK_IMPORTED_MODULE_10__GraphData__["a" /* default */](globalEnv.graphData)
+       let preparedData= graphData.create()
+        preparedData.nodes
+      // var res = new RootCluster(globalNodes);
+         var res = new __WEBPACK_IMPORTED_MODULE_9__RootCluster__["a" /* default */](preparedData.nodes);
 
         globalEnv.scene.add(res);
         res.position.set(0, 10000, 0);
@@ -2688,7 +2887,7 @@ class MyMain {
 	
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

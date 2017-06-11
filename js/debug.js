@@ -19,13 +19,15 @@ $(function () {
 
         setTimeout(function () {
 
-            globalEnv.nodeClouds.detach();
+       /*     globalEnv.nodeClouds.detach();
             globalEnv.lineMesh.visible = false;
             globalEnv.particles.pointCloud.visible = false
             globalEnv.tn.remove()
 
             globalEnv.countryTextNodes.remove()
             //  globalEnv.useNodeTextFeature=false
+            */
+
             main.clusters.zoomToCluster()
 
         }, 1000)

@@ -4,18 +4,6 @@
 	(document.getElementById("3d-graph"));
 
 
-   /*
-  mGraph.nodeDistancePromise=CountryDistanceMetric();
-
-  mGraph.nodeDistancePromise.then( function(dist){
-		
-
-
-	mGraph.dist=dist
-
-})
-*/
-
    var  cameraModi
 
 
