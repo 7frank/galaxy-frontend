@@ -55,7 +55,7 @@ export default class ClusterLeafElement extends THREE.Mesh
 
 
     //TODO refactor
-    setDistributionHandler(distribution)
+    setDistributionHandler(distribution,onComplete=function(){})
     {
 
         var that=this;
@@ -70,11 +70,7 @@ export default class ClusterLeafElement extends THREE.Mesh
             that.mEdgesContainer.updateEdges();
 
 
-        },function onComplete(){
-
-
-
-        });
+        },onComplete);
 
     }
 

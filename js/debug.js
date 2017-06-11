@@ -11,10 +11,10 @@
 $(function () {
 
 
-    function runClusterSample() {
+    function runClusterSample1() {
 
 
-        if (window["baseCluster"]) return
+        if (window["main"]) return
 
 
         setTimeout(function () {
@@ -26,39 +26,47 @@ $(function () {
 
             globalEnv.countryTextNodes.remove()
             //  globalEnv.useNodeTextFeature=false
-            baseCluster.zoomToCluster()
+            main.clusters.zoomToCluster()
 
         }, 1000)
 
-        setTimeout(function () {
-
-            baseCluster.zoomToCluster()
-
-        },2000)
 
 
 
-        setTimeout(function () {
-
-            baseCluster.cloneRoot()
-
-
-        },3000)
 
 
 
-        a = new clusters.MyMain;
-        baseCluster = a.clusters
+        main = new clusters.MyMain;
 
         //baseClusters.find("United States")[0].getRelationInfo()
-        //baseCluster.mClusters["United States"].getRelationInfo()
+        //main_baseCluster.mClusters["United States"].getRelationInfo()
+
+    }
+
+
+    function runClusterSample2()
+    {
+        main.runSample2()
+        //main.clusters.zoomToCluster()
+
+    }
+
+    function runClusterSample3()
+    {
+        main.runSample3()
+       // main.clusters.zoomToCluster()
 
     }
 
 
   //  $(window).on("keyup", null, "mod+space",runClusterSample)
 
-    Mousetrap.bind( "mod+space",runClusterSample)
+    Mousetrap.bind( "mod+space",runClusterSample1)
+
+    Mousetrap.bind( "mod+2",runClusterSample2)
+    Mousetrap.bind( "mod+3",runClusterSample3)
+
+
 
 })
 

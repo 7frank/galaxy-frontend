@@ -64,7 +64,7 @@ var clusters =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 13);
+/******/ 	return __webpack_require__(__webpack_require__.s = 14);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,7 +73,7 @@ var clusters =
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 30.05.2017.
@@ -113,7 +113,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         if (_.isArray(clusteringHandlers) && clusteringHandlers.length > 0) {
             this.applyClustering(clusteringHandlers);
         }
-        else this.updateCluster()
+       // else this.updateCluster()
 
     }
 
@@ -169,6 +169,69 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
     }
 
+
+    /**
+     * free the given gclusters again
+     *
+     *
+     *
+     */
+
+   static cleanUpClusters(clusters,self)
+    {
+        clusters.push(self)
+
+        _.each(clusters,function(cluster) {
+
+            if (cluster.tn) {
+                cluster.tn.remove()
+                delete (cluster.tn)
+            }
+            if (cluster.mTextNodes) {
+                cluster.mTextNodes.remove()
+                delete (cluster.mTextNodes)
+            }
+
+
+            if (cluster==self) return;//don't detach the current root element
+
+            if (cluster.parent) {
+
+                if (cluster.parent.mClusters && cluster.name)
+            delete(cluster.parent.mClusters[cluster.name])
+            cluster.parent.remove(cluster)
+            }
+
+
+
+        })
+
+
+
+
+
+    }
+
+    /**
+     * free leaf elements
+     *
+     *
+     */
+
+
+    cleanUpLeafs()
+    {
+        _.each(this.getLeafs(),function(leaf){
+
+            //TOO to leaf specific clean up
+
+            //for now at least remove the particle cloud
+            leaf.geometry.dispose()
+
+        })
+
+    }
+
     /**
      * this method can be re-run to change the sub-clusters
      * -which will result in deleting old clusters
@@ -183,7 +246,15 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         if (mClusteringSpeccsArray.length==1) {
 
+            let prevClusters= this.findClusters("*");
+            this.cleanUpLeafs();
             this.createParticlePointCloud(mClusteringSpeccsArray[0]);
+
+            //clean up previous clusters
+
+
+            BaseCluster3D.cleanUpClusters(prevClusters,this)
+
             return false;
         }
 
@@ -191,8 +262,16 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         var entry = mClusteringSpeccsArray[0];
 
+        //store previous clusters
+        let prevClusters= this.findClusters("*");
 
+        //create new clusters
         this.doClusteringForOnlyThis(entry);
+
+        //clean up previous clusters
+
+
+        BaseCluster3D.cleanUpClusters(prevClusters,this)
 
         _.each(this.mClusters, function (mCluster, key) {
 
@@ -222,7 +301,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();
         var options = _.extend({minClusterSize: 10, defaultMergeGroupName: "other"}, entry.options);
-
+        var that=this;
 
         var _clustersObj = {};
 
@@ -250,7 +329,13 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         _.extend(this.mClusters, _clustersObj)
 
 
-        this.setDistributionHandler(entry.distribution)
+        this.setDistributionHandler(entry.distribution,function (){
+
+            that.mClusterRule=entry
+            that.trigger("complete")
+
+
+        })
 
     }
 
@@ -291,7 +376,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         //TODO translation,rotation,scale by using different per-node function
 
         if (this.isLeaf())
-            this.mLeaf.setDistributionHandler(distribution);
+            this.mLeaf.setDistributionHandler(distribution,onComplete);
         else
             distribution.setNodes(this, function onStep(vecPosition, i) {
                 //  let n = values[i];
@@ -910,9 +995,8 @@ class EdgeUtil {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_DefaultDistribution__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ZoomUtil__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__ = __webpack_require__(15);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -959,7 +1043,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
         var distance=this.getRadius(defaultDistance)*3
 
-        __WEBPACK_IMPORTED_MODULE_4__ZoomUtil__["a" /* default */].moveToMesh(this,function onComplete(){  },distance)
+        __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__["a" /* default */].moveToMesh(this,function onComplete(){  },distance)
 
     }
 
@@ -1008,18 +1092,19 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
         })
 
+        var diameter=null;
             this.on("s dblclick",function(e) {
             e.stopPropagation()
 
 
-
-            var diameter=this.geometry.boundingSphere.radius*2
+        if (!diameter)
+            diameter=this.geometry.boundingSphere.radius*2
             console.log("clicky clicky",diameter)
             let speccsRoot=[
                 {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter,1)},
                 {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter*0.66,2)},
                 {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter*0.33,3)},
-                {distribution: new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](diameter*0.66,3)}
+                {distribution: new __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__["a" /* default */](diameter*0.66,3)}
                 ]
 
 
@@ -1231,10 +1316,10 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     }
 
 
-    getRoot()
+    getRoot(maxDepth=20)
     {
         var _root=this;
-        while ( true)
+        while ( maxDepth--)
         {
            let r=_root.parent;
            if (r==null) return _root;
@@ -1277,7 +1362,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     // ? already mClusters && entry!= mEntry
     testIfClusterNeedsRestructuring(entry)
     {
-        return this.mClusters&&this.mEntry!=entry
+        return this.mClusters&& this.mClusterRule!=entry
     }
 
     restructClusterBasedOnEntrys(entry)
@@ -1289,41 +1374,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     }
 
 
-    cleanUpClusters(clusters)
-    {
-        _.each(clusters,function(cluster){
 
-            if (cluster.tn) {
-                cluster.tn.remove()
-                delete (cluster.tn)
-            }
-            if (cluster.mTextNodes) {
-                cluster.mTextNodes.remove()
-                delete (cluster.mTextNodes)
-            }
-
-            delete(cluster.parent.mClusters[cluster.name])
-            cluster.parent.remove(cluster)
-
-
-
-
-        })
-
-    }
-
-    cleanUpLeafs()
-    {
-        _.each(this.getLeafs(),function(leaf){
-
-        //TOO to leaf specific clean up
-
-            //for now at least remove the particle cloud
-            leaf.mLeaf.geometry.dispose()
-
-        })
-
-    }
 
 
 
@@ -1331,39 +1382,9 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
     cloneRoot(){
 
-        let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_2__distributions_DefaultDistribution__["a" /* default */]()}
-
-        var that=this;
-
-       let prevClusters= this.findClusters("*");
-
-
-
-
-        this.applyClustering([defaultEntry])
-        this.cleanUpClusters(prevClusters)
-
 
     }
 
-    cloneRoot2(){
-        let clazz= this.getChildClusterConstructor()
-
-    let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_2__distributions_DefaultDistribution__["a" /* default */]()}
-
-
-        let clone =this.mClonedCluster = new clazz(this.mNodes)
-        clone.applyClustering([defaultEntry])
-
-
-        //TOD wrong offset ?wrong parent eg...
-        //clone.position.copy(this.position)
-        clone.position.add(new THREE.Vector3(0,0,1000));
-        this.parent.add(clone)
-
-      //  clone.zoomToCluster(1500)
-
-    }
 
 
 
@@ -1377,7 +1398,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(13);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -1435,7 +1456,7 @@ class ClusterLeafElement extends THREE.Mesh
 
 
     //TODO refactor
-    setDistributionHandler(distribution)
+    setDistributionHandler(distribution,onComplete=function(){})
     {
 
         var that=this;
@@ -1450,11 +1471,7 @@ class ClusterLeafElement extends THREE.Mesh
             that.mEdgesContainer.updateEdges();
 
 
-        },function onComplete(){
-
-
-
-        });
+        },onComplete);
 
     }
 
@@ -1782,6 +1799,188 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__ = __webpack_require__(0);
+/**
+ * Created by Frank on 29.05.2017.
+ */
+
+/**
+ * TODO  possible different ways to distribute elements => moveTo, goTo, stack?
+ *
+ *
+ */
+
+
+
+
+
+
+
+
+    class DefaultDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
+    {
+    constructor(scale=1,dimensions=3){
+
+        super(scale,dimensions)
+
+    }
+
+
+
+        setNodes(nodes,onNodePositionChange,onEnd) {
+            if (nodes instanceof __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__["a" /* default */]) {
+
+                //TODO
+                /*   if (nodes.isLeaf())
+                 nodes =nodes.mNodes
+                 else*/
+                nodes = nodes.mClusters
+
+            }
+            else
+            if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
+
+
+            //for canceling animation
+            var mTimeout;
+
+            let len= nodes.length|Object.keys(nodes).length
+
+
+            var i=0,j=0,k=0;
+
+            let _len;
+            if (this.dimensions==1)
+                _len=len;
+            if (this.dimensions==2)
+                _len= Math.sqrt(len);
+            if (this.dimensions==3)
+                _len=Math.pow(len,1/3);
+
+            if (this.dimensions<3)  k=0.5*_len
+            if (this.dimensions<2)  j=0.5*_len
+
+
+            let step=1/_len
+
+            //1d/2d/3d helpers
+            //for (let i=0;i<=1;i+=step)
+
+            var c=0;
+            var that=this;
+            var fixmeOnce=true;
+            _.each(nodes,function(n){
+
+                if (i>_len){
+                    j++;
+                    i=0;
+                }
+
+                if (j>_len){
+                    k++;
+                    j=0;
+                }
+
+
+                var dist= that.distribute(n, i/_len-0.5,j/_len-0.5,k/_len-0.5);
+
+
+
+                //  onNodePositionChange(dist.position,c)
+
+
+                //------------------------
+                //------------------------
+
+                //animating from current position to new one
+                var mc=c;
+                let origPos=(n.position)?n.position:n
+
+
+
+                let tween = new TWEEN.Tween(origPos)
+                    .to(dist.position,1)
+                    .onUpdate(function () {
+
+
+
+                    }).onComplete(function(){
+
+                        onNodePositionChange(dist.position,mc)
+                        //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
+
+                        if (fixmeOnce) {
+                            if (onEnd) onEnd()
+                            fixmeOnce=false
+                        }
+
+                        cancelAnimationFrame(mTimeout)
+
+                    })
+                    .start();
+
+                //------------------------
+                //------------------------
+
+
+                //i+=step
+                i++;
+                c++;
+            })
+
+
+
+            requestAnimationFrame(animate);
+
+            function animate(time) {
+                mTimeout=    requestAnimationFrame(animate);
+                TWEEN.update(time);
+            }
+
+
+        }
+
+
+//TODO this is quite redundant we want the same work flow but not at idle copy costs if possible
+    distribute(node,dx,dy,dz) {
+
+
+        var mesh = (node._bubble) ? node._bubble : node;
+        var absPos;
+        if (mesh) {
+            absPos = new THREE.Vector3();
+            absPos.setFromMatrixPosition(mesh.matrixWorld);
+
+        //TODO this is only working for specific cases currently
+            if (mesh instanceof __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__["a" /* default */])
+            absPos.sub(mesh.getRoot().position)
+             else
+            absPos.sub(mesh.parent.parent.getRoot().position)
+
+        }
+        else {
+
+        absPos={};  //if above fails, we interpret the node as a yet rendered node with  potential initial x,y,z
+
+            (typeof node.x!="undefined")?absPos.x=node.x:0;
+            (typeof node.y!="undefined")?absPos.y=node.x:0;
+            (typeof node.z!="undefined")?absPos.z=node.x:0;
+
+            }
+        return {position:new THREE.Vector3(absPos.x,absPos.y,absPos.z).multiplyScalar(this.mScale)};
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = DefaultDistribution;
+
+
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -1819,7 +2018,7 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1877,7 +2076,7 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1917,7 +2116,7 @@ class BaseEdge {
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2075,7 +2274,7 @@ class BaseNode extends THREE.Mesh {
             if (this.isMouseEvent(eName))
                 BaseNode.domEvents._notify(eName, this, origDomEvent, intersect);
             else
-                triggerKey(eName,origDomEvent, intersect)
+                this.triggerKey(eName,origDomEvent, intersect)
 
         };
 
@@ -2219,11 +2418,11 @@ class BaseNode extends THREE.Mesh {
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 08.06.2017.
@@ -2329,21 +2528,22 @@ class EdgesContainer extends THREE.Object3D {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_RandomDistribution__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_SphericalDistribution__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ClusterNodeArray__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterLeafElement__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__BaseCluster3D__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__Cluster3DExtended__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__RootCluster__ = __webpack_require__(7);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_7__Cluster3DExtended__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ClusterLeafElement__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(7);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
  * -into graph + subgraphs or simply multiple graphs
@@ -2353,6 +2553,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * - for rendering, these sets are going to be put into a container class like the "nodeClouds"
  * so a "nodesContainer" and a nodesClusterContainer will be needed which also have the distribution function
  */
+
 
 
 
@@ -2382,8 +2583,8 @@ class MyMain {
 
     constructor() {
 
-        this.clusters = this.runSample1();
-       // this.clusters = this.runSample2();
+        this.clusters = this.init();
+       this.runSample1();
     }
 
     getPossibleClusterSpeccsArray() {
@@ -2404,7 +2605,7 @@ class MyMain {
 
         let sample3 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 3)
 
-        let rand2 = new __WEBPACK_IMPORTED_MODULE_1__distributions_RandomDistribution__["a" /* default */](200, 2)
+        let rand2 = new __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__["a" /* default */](200, 2)
 
         return [
             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 3}},
@@ -2418,28 +2619,63 @@ class MyMain {
 
     }
 
-    runSample1() {
+    init()
+    {
         let speccs = this.getPossibleClusterSpeccsArray();
-        var res = new __WEBPACK_IMPORTED_MODULE_8__RootCluster__["a" /* default */](globalNodes, [speccs[0], speccs[1], speccs[2]]);
+       // var res = new RootCluster(globalNodes, [speccs[0], speccs[1], speccs[2]]);
+       var res = new __WEBPACK_IMPORTED_MODULE_9__RootCluster__["a" /* default */](globalNodes);
 
         globalEnv.scene.add(res);
         res.position.set(0, 10000, 0);
 
         return res
 
+
+
+    }
+
+
+    runSample1() {
+        console.log("runSample1")
+        let speccs = this.getPossibleClusterSpeccsArray();
+
+        this.clusters.applyClustering([speccs[0], speccs[1], speccs[2]])
+
+
     }
 
 
     runSample2() {
+        console.log("runSample2")
         let speccs = this.getPossibleClusterSpeccsArray();
-        var res = new __WEBPACK_IMPORTED_MODULE_8__RootCluster__["a" /* default */](globalNodes, [speccs[1],speccs[0], speccs[2]]);
+        var res = new __WEBPACK_IMPORTED_MODULE_9__RootCluster__["a" /* default */](globalNodes, [speccs[1],speccs[0], speccs[2]]);
+
+
+        this.clusters.applyClustering([speccs[1],speccs[0], speccs[2]])
+
+      return
+
+      /*  let speccs = this.getPossibleClusterSpeccsArray();
+        var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
 
         globalEnv.scene.add(res);
         res.position.set(5000, 10000, 0);
 
-        return res
+        return res*/
 
     }
+
+    runSample3() {
+        console.log("runSample3")
+        let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__["a" /* default */]()}
+
+        this.clusters.applyClustering([defaultEntry])
+
+
+
+    }
+
+
 
 
 }
@@ -2452,7 +2688,7 @@ class MyMain {
 	
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2516,76 +2752,6 @@ class ZoomUtil
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__ = __webpack_require__(0);
-/**
- * Created by Frank on 29.05.2017.
- */
-
-/**
- * TODO  possible different ways to distribute elements => moveTo, goTo, stack?
- *
- *
- */
-
-
-
-
-
-
-
-
-    class DefaultDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
-    {
-    constructor(scale=1,dimensions=3){
-
-        super(scale,dimensions)
-
-    }
-
-
-
-       
-
-//TODO this is quite redundant we want the same work flow but not at idle copy costs if possible
-    distribute(node,dx,dy,dz) {
-
-
-        var mesh = (node._bubble) ? node._bubble : node;
-        var absPos;
-        if (mesh) {
-            absPos = new THREE.Vector3();
-            absPos.setFromMatrixPosition(mesh.matrixWorld);
-
-        //TODO this is only working for specific cases currently
-            if (mesh instanceof __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__["a" /* default */])
-            absPos.sub(mesh.getRoot().position)
-             else
-            absPos.sub(mesh.parent.parent.getRoot().position)
-
-        }
-        else {
-
-        absPos={};  //if above fails, we interpret the node as a yet rendered node with  potential initial x,y,z
-
-            (typeof node.x!="undefined")?absPos.x=node.x:0;
-            (typeof node.y!="undefined")?absPos.y=node.x:0;
-            (typeof node.z!="undefined")?absPos.z=node.x:0;
-
-            }
-        return {position:new THREE.Vector3(absPos.x,absPos.y,absPos.z).multiplyScalar(this.mScale)};
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = DefaultDistribution;
-
-
 
 
 /***/ })

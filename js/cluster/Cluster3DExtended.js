@@ -7,7 +7,7 @@
 import BaseCluster3D from "./BaseCluster3D"
 
 import BaseDistribution from "./distributions/BaseDistribution"
-import DefaultDistribution from "./distributions/DefaultDistribution"
+
 import ForceGraphDistribution from "./distributions/ForceGraphDistribution"
 import ZoomUtil from "./ZoomUtil"
 
@@ -94,12 +94,13 @@ class Cluster3DExtended extends BaseCluster3D {
 
         })
 
+        var diameter=null;
             this.on("s dblclick",function(e) {
             e.stopPropagation()
 
 
-
-            var diameter=this.geometry.boundingSphere.radius*2
+        if (!diameter)
+            diameter=this.geometry.boundingSphere.radius*2
             console.log("clicky clicky",diameter)
             let speccsRoot=[
                 {distribution: new BaseDistribution(diameter,1)},
@@ -317,10 +318,10 @@ class Cluster3DExtended extends BaseCluster3D {
     }
 
 
-    getRoot()
+    getRoot(maxDepth=20)
     {
         var _root=this;
-        while ( true)
+        while ( maxDepth--)
         {
            let r=_root.parent;
            if (r==null) return _root;
@@ -363,7 +364,7 @@ class Cluster3DExtended extends BaseCluster3D {
     // ? already mClusters && entry!= mEntry
     testIfClusterNeedsRestructuring(entry)
     {
-        return this.mClusters&&this.mEntry!=entry
+        return this.mClusters&& this.mClusterRule!=entry
     }
 
     restructClusterBasedOnEntrys(entry)
@@ -375,41 +376,7 @@ class Cluster3DExtended extends BaseCluster3D {
     }
 
 
-    cleanUpClusters(clusters)
-    {
-        _.each(clusters,function(cluster){
 
-            if (cluster.tn) {
-                cluster.tn.remove()
-                delete (cluster.tn)
-            }
-            if (cluster.mTextNodes) {
-                cluster.mTextNodes.remove()
-                delete (cluster.mTextNodes)
-            }
-
-            delete(cluster.parent.mClusters[cluster.name])
-            cluster.parent.remove(cluster)
-
-
-
-
-        })
-
-    }
-
-    cleanUpLeafs()
-    {
-        _.each(this.getLeafs(),function(leaf){
-
-        //TOO to leaf specific clean up
-
-            //for now at least remove the particle cloud
-            leaf.mLeaf.geometry.dispose()
-
-        })
-
-    }
 
 
 
@@ -417,39 +384,9 @@ class Cluster3DExtended extends BaseCluster3D {
 
     cloneRoot(){
 
-        let defaultEntry={distribution:new DefaultDistribution()}
-
-        var that=this;
-
-       let prevClusters= this.findClusters("*");
-
-
-
-
-        this.applyClustering([defaultEntry])
-        this.cleanUpClusters(prevClusters)
-
 
     }
 
-    cloneRoot2(){
-        let clazz= this.getChildClusterConstructor()
-
-    let defaultEntry={distribution:new DefaultDistribution()}
-
-
-        let clone =this.mClonedCluster = new clazz(this.mNodes)
-        clone.applyClustering([defaultEntry])
-
-
-        //TOD wrong offset ?wrong parent eg...
-        //clone.position.copy(this.position)
-        clone.position.add(new THREE.Vector3(0,0,1000));
-        this.parent.add(clone)
-
-      //  clone.zoomToCluster(1500)
-
-    }
 
 
 

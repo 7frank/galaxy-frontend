@@ -37,7 +37,7 @@ class BaseCluster3D extends BaseNode {
         if (_.isArray(clusteringHandlers) && clusteringHandlers.length > 0) {
             this.applyClustering(clusteringHandlers);
         }
-        else this.updateCluster()
+       // else this.updateCluster()
 
     }
 
@@ -93,6 +93,69 @@ class BaseCluster3D extends BaseNode {
 
     }
 
+
+    /**
+     * free the given gclusters again
+     *
+     *
+     *
+     */
+
+   static cleanUpClusters(clusters,self)
+    {
+        clusters.push(self)
+
+        _.each(clusters,function(cluster) {
+
+            if (cluster.tn) {
+                cluster.tn.remove()
+                delete (cluster.tn)
+            }
+            if (cluster.mTextNodes) {
+                cluster.mTextNodes.remove()
+                delete (cluster.mTextNodes)
+            }
+
+
+            if (cluster==self) return;//don't detach the current root element
+
+            if (cluster.parent) {
+
+                if (cluster.parent.mClusters && cluster.name)
+            delete(cluster.parent.mClusters[cluster.name])
+            cluster.parent.remove(cluster)
+            }
+
+
+
+        })
+
+
+
+
+
+    }
+
+    /**
+     * free leaf elements
+     *
+     *
+     */
+
+
+    cleanUpLeafs()
+    {
+        _.each(this.getLeafs(),function(leaf){
+
+            //TOO to leaf specific clean up
+
+            //for now at least remove the particle cloud
+            leaf.geometry.dispose()
+
+        })
+
+    }
+
     /**
      * this method can be re-run to change the sub-clusters
      * -which will result in deleting old clusters
@@ -107,7 +170,15 @@ class BaseCluster3D extends BaseNode {
 
         if (mClusteringSpeccsArray.length==1) {
 
+            let prevClusters= this.findClusters("*");
+            this.cleanUpLeafs();
             this.createParticlePointCloud(mClusteringSpeccsArray[0]);
+
+            //clean up previous clusters
+
+
+            BaseCluster3D.cleanUpClusters(prevClusters,this)
+
             return false;
         }
 
@@ -115,8 +186,16 @@ class BaseCluster3D extends BaseNode {
 
         var entry = mClusteringSpeccsArray[0];
 
+        //store previous clusters
+        let prevClusters= this.findClusters("*");
 
+        //create new clusters
         this.doClusteringForOnlyThis(entry);
+
+        //clean up previous clusters
+
+
+        BaseCluster3D.cleanUpClusters(prevClusters,this)
 
         _.each(this.mClusters, function (mCluster, key) {
 
@@ -146,7 +225,7 @@ class BaseCluster3D extends BaseNode {
     doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();
         var options = _.extend({minClusterSize: 10, defaultMergeGroupName: "other"}, entry.options);
-
+        var that=this;
 
         var _clustersObj = {};
 
@@ -174,7 +253,13 @@ class BaseCluster3D extends BaseNode {
         _.extend(this.mClusters, _clustersObj)
 
 
-        this.setDistributionHandler(entry.distribution)
+        this.setDistributionHandler(entry.distribution,function (){
+
+            that.mClusterRule=entry
+            that.trigger("complete")
+
+
+        })
 
     }
 
@@ -215,7 +300,7 @@ class BaseCluster3D extends BaseNode {
         //TODO translation,rotation,scale by using different per-node function
 
         if (this.isLeaf())
-            this.mLeaf.setDistributionHandler(distribution);
+            this.mLeaf.setDistributionHandler(distribution,onComplete);
         else
             distribution.setNodes(this, function onStep(vecPosition, i) {
                 //  let n = values[i];

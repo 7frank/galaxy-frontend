@@ -151,7 +151,7 @@ export default class BaseNode extends THREE.Mesh {
             if (this.isMouseEvent(eName))
                 BaseNode.domEvents._notify(eName, this, origDomEvent, intersect);
             else
-                triggerKey(eName,origDomEvent, intersect)
+                this.triggerKey(eName,origDomEvent, intersect)
 
         };
 
