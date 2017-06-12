@@ -227,10 +227,64 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             //for now at least remove the particle cloud
             leaf.geometry.dispose()
-
+            if (leaf.parent)
+            leaf.parent.remove(leaf)
         })
 
     }
+
+
+    /**
+     * TODO we want to get the node positions relative to the current root? cluster
+     *      after reclustering we can use these to update the new positions to match the old ones in world coords
+     *
+     */
+
+    storeParentPositionInNodes(){
+
+    var leafElements=this.getLeafs()
+_.each(leafElements,function(leaf){
+    let mNodes=leaf.mNodes
+    _.each(mNodes,function(node){
+
+
+        var c1 = new THREE.Vector3();
+            c1.setFromMatrixPosition( leaf.matrixWorld );
+
+        node._parentPosAbs=c1;
+
+    })
+})
+
+
+    }
+
+    restoreNodePositionFromExParent(){
+
+
+
+        var leafElements=this.getLeafs()
+        _.each(leafElements,function(leaf){
+            let mNodes=leaf.mNodes
+            _.each(mNodes,function(node){
+                //get current parent pos
+                let c1=node._parentPosAbs
+
+                if (!c1) return;
+                var c2 = new THREE.Vector3();
+                c2.setFromMatrixPosition( leaf.matrixWorld );
+
+                node._bubble.position.add(c1).sub(c2)
+                _.extend(node,node._bubble.position)
+
+            })
+        })
+
+
+
+    }
+
+
 
     /**
      * this method can be re-run to change the sub-clusters
@@ -242,36 +296,36 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
     applyClustering(mClusteringSpeccsArray) {
 
+
+//FIXME currently only working in root
+      //  this.storeParentPositionInNodes()
+
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
-        if (mClusteringSpeccsArray.length==1) {
+        if (mClusteringSpeccsArray.length == 1) {
 
-            let prevClusters= this.findClusters("*");
+            let prevClusters = this.findClusters("*");
             this.cleanUpLeafs();
             this.createParticlePointCloud(mClusteringSpeccsArray[0]);
 
             //clean up previous clusters
 
 
-            BaseCluster3D.cleanUpClusters(prevClusters,this)
+            BaseCluster3D.cleanUpClusters(prevClusters, this)
 
             return false;
         }
 
 
-
         var entry = mClusteringSpeccsArray[0];
 
         //store previous clusters
-        let prevClusters= this.findClusters("*");
+        let prevClusters = this.findClusters("*");
 
         //create new clusters
         this.doClusteringForOnlyThis(entry);
 
-        //clean up previous clusters
 
-
-        BaseCluster3D.cleanUpClusters(prevClusters,this)
 
         _.each(this.mClusters, function (mCluster, key) {
 
@@ -289,7 +343,13 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         this.updateCluster()
 
 
+        //clean up previous clusters
+        BaseCluster3D.cleanUpClusters(prevClusters, this)
+
+        //adjust positions if cluster gets re-clustered
+       // this.restoreNodePositionFromExParent()
     }
+
 
 
     /**
@@ -297,6 +357,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      * the  visible child clusters are generated
      *
      */
+
 
     doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();
@@ -623,7 +684,7 @@ class BaseDistribution
         let defaults={scale:()=> 50 ,dimensions:1}
 
 
-
+        this.mDuration=2000 //FIXME longer duration does not render as intended
 
         this.dimensions=dimensions //TODO
         this.mScale=scale
@@ -643,6 +704,8 @@ class BaseDistribution
         else
         if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
 
+
+        var mDuration=this.mDuration
 
         //for canceling animation
         var mTimeout;
@@ -672,6 +735,9 @@ class BaseDistribution
         var c=0;
         var that=this;
         var fixmeOnce=true;
+
+        var tweens=[]
+
         _.each(nodes,function(n){
 
             if (i>_len){
@@ -702,7 +768,7 @@ class BaseDistribution
 
 
             let tween = new TWEEN.Tween(origPos)
-                .to(dist.position,400)
+                .to(dist.position,mDuration)
                 .onUpdate(function () {
 
                     onNodePositionChange(origPos,mc)
@@ -713,6 +779,12 @@ class BaseDistribution
                     //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
 
                     if (fixmeOnce) {
+
+                        _.each(tweens,function(tween){
+                            TWEEN.remove(tween)
+
+                        })
+
                         if (onEnd) onEnd()
                         fixmeOnce=false
                     }
@@ -725,7 +797,7 @@ class BaseDistribution
             //------------------------
             //------------------------
 
-
+            tweens.push(tween)
             //i+=step
             i++;
             c++;
@@ -736,9 +808,21 @@ class BaseDistribution
         requestAnimationFrame(animate);
 
         function animate(time) {
+
+
+           // TWEEN.update(time);
+
+            _.each(tweens,function(tween){
+                tween.update(time)
+
+            })
+
+
             mTimeout=    requestAnimationFrame(animate);
-            TWEEN.update(time);
+
         }
+
+
 
 
     }
@@ -1028,8 +1112,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     this.addListeners();
 
     //TODO have a "cluster-ready" event
-    setTimeout( ()=> this.addNodeCaptions(),1000)
-
+    setTimeout( ()=> this.addNodeCaptions(),7000)
+    //console.warn("TODO use events instead of arbitrary timeout to trigger for completion")
 
     }
 
@@ -1171,9 +1255,9 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
       _.each(this.getLeafs(),function(leaf){
 
-          leaf.parent._initDotParticles();
+         // leaf.parent._initDotParticles();
 
-          leaf.parent.updateDotParticles()
+         // leaf.parent.updateDotParticles()
 
       })
 
@@ -1329,63 +1413,6 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
     }
-
-//-----------------------------------
-//-----------------------------------
-//-----------------------------------
-//-----------------------------------
-
-//TODO add clone crossfade etc functionality
-
-    /**
-     * we want to be able to re-run applyClustering
-     *
-     *   therefore ...
-     *  create new clusters with an initial distribution => with same root nodes which should set the nodes to the same position
-     *
-     *
-     *
-     *
-     *
-     *
-     * if we do have an existing c+ sc structure
-     * and take one sc and set a new group filter on it
-     * ?? "clone" the sub cluster to maintain node positions
-     *
-     * xxx
-     * add actual distribution functions afterwards to move nodes to the new positions relative to it's new clusters
-     *
-     *
-     */
-
-    // use within applyCluster
-    // ? already mClusters && entry!= mEntry
-    testIfClusterNeedsRestructuring(entry)
-    {
-        return this.mClusters&& this.mClusterRule!=entry
-    }
-
-    restructClusterBasedOnEntrys(entry)
-    {
-        cloneRoot()
-
-
-
-    }
-
-
-
-
-
-
-
-
-    cloneRoot(){
-
-
-    }
-
-
 
 
 
@@ -1673,6 +1700,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 /**
  * a set of node objects
  * the cluster itself doesn't contain any visual representation of the nodes
+ * Note: currently not used and partial functionality implemented in GraphData
  */
 
 
@@ -1753,9 +1781,12 @@ class GraphData
 
     getAlteredRawLinks(){
         var mDataNodeCopy= this.mDataNodeCopy
+    var skipLines=100
+
+        var links=this.mGraphData.links.filter((v,id)=> !(id%skipLines)   )
 
         //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
-       var  d3Links  = this.mGraphData.links.map(link => {
+       var  d3Links  = links.map(link => {
             return {
                 source: mDataNodeCopy[link[0]],
                 target: mDataNodeCopy[link[1]]
@@ -1985,6 +2016,18 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
     }
 
 
+
+
+    applyClustering(mClusteringSpeccsArray) {
+
+        this.storeParentPositionInNodes()
+        super.applyClustering(mClusteringSpeccsArray)
+
+        this.restoreNodePositionFromExParent()
+    }
+
+
+
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = RootCluster;
 
@@ -2209,7 +2252,7 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
         }
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = RandomDistribution;
+/* unused harmony export default */
 
 
 
@@ -2784,7 +2827,7 @@ class MyMain {
     constructor() {
 
         this.clusters = this.init();
-       this.runSample1();
+
     }
 
     getPossibleClusterSpeccsArray() {
@@ -2799,17 +2842,15 @@ class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 2)
-        let sample2 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 2)
+        let sample1 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](40000, 2) //1000
+        let sample2 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](5000, 2)//200
+        let sample3 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](100, 3)//50
 
-
-        let sample3 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 3)
-
-        let rand2 = new __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__["a" /* default */](200, 2)
+      //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 3}},
-            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 3}},
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
+            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}},
             {generator: industrySetGenerator, distribution: sample3, options: {minClusterSize: 3}},
 
             , {distribution: sample3}
@@ -2819,8 +2860,39 @@ class MyMain {
 
     }
 
+    getForceSpeccs() {
+
+        function countrySetGenerator(groupFunction, node) {
+
+            groupFunction(node.group, node)
+        }
+
+        function industrySetGenerator(groupFunction, node) {
+            groupFunction(node.industry, node)
+        }
+
+        //using these 2 we should have a 2d plane with 3d cubes on it
+        let sample1 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](40000, 3) //1000
+        let sample2 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](5000, 3)//200
+        let sample3 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](100, 3)//50
+
+        //  let rand2 = new RandomDistribution(200, 2)
+
+        return [
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
+            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}}
+            , {distribution: sample3}
+
+
+        ]
+
+    }
+
+
     init()
     {
+        if (this.inited) return
+
         let speccs = this.getPossibleClusterSpeccsArray();
        // var res = new RootCluster(globalNodes, [speccs[0], speccs[1], speccs[2]]);
 
@@ -2835,7 +2907,10 @@ class MyMain {
          var res = new __WEBPACK_IMPORTED_MODULE_9__RootCluster__["a" /* default */](preparedData.nodes);
 
         globalEnv.scene.add(res);
-        res.position.set(0, 10000, 0);
+        res.position.set(0, 0, 0);
+
+
+        this.inited=true;
 
         return res
 
@@ -2855,27 +2930,33 @@ class MyMain {
 
 
     runSample2() {
+
+        //let speccs = this.getPossibleClusterSpeccsArray();
+        //var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
+
+
+        //this.clusters.applyClustering([speccs[1],speccs[0], speccs[2]])
         console.log("runSample2")
-        let speccs = this.getPossibleClusterSpeccsArray();
-        var res = new __WEBPACK_IMPORTED_MODULE_9__RootCluster__["a" /* default */](globalNodes, [speccs[1],speccs[0], speccs[2]]);
+        let speccs = this.getForceSpeccs();
+
+        this.clusters.applyClustering(speccs);
 
 
-        this.clusters.applyClustering([speccs[1],speccs[0], speccs[2]])
-
-      return
-
-      /*  let speccs = this.getPossibleClusterSpeccsArray();
-        var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
-
-        globalEnv.scene.add(res);
-        res.position.set(5000, 10000, 0);
-
-        return res*/
 
     }
 
     runSample3() {
         console.log("runSample3")
+        let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](4000,2)}
+
+        this.clusters.applyClustering([defaultEntry])
+
+
+
+    }
+
+    runSample4() {
+        console.log("runSample4")
         let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__["a" /* default */]()}
 
         this.clusters.applyClustering([defaultEntry])
@@ -2883,6 +2964,7 @@ class MyMain {
 
 
     }
+
 
 
 

@@ -77,7 +77,7 @@ function getParticleShaderMaterial()
 		function createParticleSystemForNodes(nodes,options)	
 		{
 			
-				options=_.extend({groupKeyName:"isGroupNode",groupValueName:"nodes",nodeKey:'itemCount',increment:3},options)
+				options=_.extend({groupKeyName:"isGroupNode",groupValueName:"nodes",nodeKey:'itemCount',increment:5},options)
 			
 			
 			function getNodeParticleCount(node)
@@ -269,7 +269,7 @@ function animate(time) {
 			customColors[ v * 3 + 2 ]=color.b
 			*/
 			
-           var easing=0.2+(v%1000)/1000;
+           var easing=0.2+(v%100)/100;
 		   var inc_easing=increment*easing
             if(Math.abs(positions[ v * 3 + 0 ]-destination[ v * 3 + 0 ])>error)positions[ v * 3 + 0 ] += (destination[ v * 3 + 0 ]-positions[ v * 3 + 0 ])/inc_easing;
             else{

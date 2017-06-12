@@ -20,7 +20,7 @@ export default  class BaseDistribution
         let defaults={scale:()=> 50 ,dimensions:1}
 
 
-
+        this.mDuration=2000 //FIXME longer duration does not render as intended
 
         this.dimensions=dimensions //TODO
         this.mScale=scale
@@ -40,6 +40,8 @@ export default  class BaseDistribution
         else
         if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
 
+
+        var mDuration=this.mDuration
 
         //for canceling animation
         var mTimeout;
@@ -69,6 +71,9 @@ export default  class BaseDistribution
         var c=0;
         var that=this;
         var fixmeOnce=true;
+
+        var tweens=[]
+
         _.each(nodes,function(n){
 
             if (i>_len){
@@ -99,7 +104,7 @@ export default  class BaseDistribution
 
 
             let tween = new TWEEN.Tween(origPos)
-                .to(dist.position,400)
+                .to(dist.position,mDuration)
                 .onUpdate(function () {
 
                     onNodePositionChange(origPos,mc)
@@ -110,6 +115,12 @@ export default  class BaseDistribution
                     //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
 
                     if (fixmeOnce) {
+
+                        _.each(tweens,function(tween){
+                            TWEEN.remove(tween)
+
+                        })
+
                         if (onEnd) onEnd()
                         fixmeOnce=false
                     }
@@ -122,7 +133,7 @@ export default  class BaseDistribution
             //------------------------
             //------------------------
 
-
+            tweens.push(tween)
             //i+=step
             i++;
             c++;
@@ -133,9 +144,21 @@ export default  class BaseDistribution
         requestAnimationFrame(animate);
 
         function animate(time) {
+
+
+           // TWEEN.update(time);
+
+            _.each(tweens,function(tween){
+                tween.update(time)
+
+            })
+
+
             mTimeout=    requestAnimationFrame(animate);
-            TWEEN.update(time);
+
         }
+
+
 
 
     }

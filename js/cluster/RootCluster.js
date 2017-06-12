@@ -82,4 +82,16 @@ class RootCluster extends Cluster3DExtended {
     }
 
 
+
+
+    applyClustering(mClusteringSpeccsArray) {
+
+        this.storeParentPositionInNodes()
+        super.applyClustering(mClusteringSpeccsArray)
+
+        this.restoreNodePositionFromExParent()
+    }
+
+
+
 }

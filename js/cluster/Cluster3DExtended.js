@@ -30,8 +30,8 @@ class Cluster3DExtended extends BaseCluster3D {
     this.addListeners();
 
     //TODO have a "cluster-ready" event
-    setTimeout( ()=> this.addNodeCaptions(),1000)
-
+    setTimeout( ()=> this.addNodeCaptions(),7000)
+    //console.warn("TODO use events instead of arbitrary timeout to trigger for completion")
 
     }
 
@@ -173,9 +173,9 @@ class Cluster3DExtended extends BaseCluster3D {
 
       _.each(this.getLeafs(),function(leaf){
 
-          leaf.parent._initDotParticles();
+         // leaf.parent._initDotParticles();
 
-          leaf.parent.updateDotParticles()
+         // leaf.parent.updateDotParticles()
 
       })
 
@@ -331,63 +331,6 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
     }
-
-//-----------------------------------
-//-----------------------------------
-//-----------------------------------
-//-----------------------------------
-
-//TODO add clone crossfade etc functionality
-
-    /**
-     * we want to be able to re-run applyClustering
-     *
-     *   therefore ...
-     *  create new clusters with an initial distribution => with same root nodes which should set the nodes to the same position
-     *
-     *
-     *
-     *
-     *
-     *
-     * if we do have an existing c+ sc structure
-     * and take one sc and set a new group filter on it
-     * ?? "clone" the sub cluster to maintain node positions
-     *
-     * xxx
-     * add actual distribution functions afterwards to move nodes to the new positions relative to it's new clusters
-     *
-     *
-     */
-
-    // use within applyCluster
-    // ? already mClusters && entry!= mEntry
-    testIfClusterNeedsRestructuring(entry)
-    {
-        return this.mClusters&& this.mClusterRule!=entry
-    }
-
-    restructClusterBasedOnEntrys(entry)
-    {
-        cloneRoot()
-
-
-
-    }
-
-
-
-
-
-
-
-
-    cloneRoot(){
-
-
-    }
-
-
 
 
 

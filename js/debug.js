@@ -18,19 +18,19 @@ $(function () {
 
 
         setTimeout(function () {
-
-       /*     globalEnv.nodeClouds.detach();
+            globalEnv.demoDisabled=true
+            globalEnv.nodeClouds.detach();
             globalEnv.lineMesh.visible = false;
             globalEnv.particles.pointCloud.visible = false
             globalEnv.tn.remove()
 
             globalEnv.countryTextNodes.remove()
             //  globalEnv.useNodeTextFeature=false
-            */
+
 
             main.clusters.zoomToCluster()
 
-        }, 1000)
+        }, 2000)
 
 
 
@@ -47,34 +47,42 @@ $(function () {
 
     function runClusterSample1()
     {
+        runInitialSample()
         main.runSample1()
         //main.clusters.zoomToCluster()
 
     }
 
     function runClusterSample2()
-    {
+    {  runInitialSample()
         main.runSample2()
         //main.clusters.zoomToCluster()
 
     }
 
     function runClusterSample3()
-    {
+    {  runInitialSample()
         main.runSample3()
        // main.clusters.zoomToCluster()
+
+    }
+    function runClusterSample4()
+    {  runInitialSample()
+        main.runSample4()
+        // main.clusters.zoomToCluster()
 
     }
 
 
   //  $(window).on("keyup", null, "mod+space",runClusterSample)
 
-    Mousetrap.bind( "mod+space",runInitialSample)
+    //Mousetrap.bind( "mod+space",runInitialSample)
 
 
-    Mousetrap.bind( "mod+1",runClusterSample1)
-    Mousetrap.bind( "mod+2",runClusterSample2)
-    Mousetrap.bind( "mod+3",runClusterSample3)
+    Mousetrap.bind( "1",runClusterSample1)
+    Mousetrap.bind( "2",runClusterSample2)
+    Mousetrap.bind( "3",runClusterSample3)
+    Mousetrap.bind( "4",runClusterSample4)
 
 
 

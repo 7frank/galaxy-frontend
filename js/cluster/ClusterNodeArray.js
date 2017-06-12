@@ -2,6 +2,7 @@
 /**
  * a set of node objects
  * the cluster itself doesn't contain any visual representation of the nodes
+ * Note: currently not used and partial functionality implemented in GraphData
  */
 
 

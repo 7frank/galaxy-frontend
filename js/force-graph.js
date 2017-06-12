@@ -184,7 +184,7 @@ function ForceGraph() {
 				if (env.tn && !env.useNodeTextFeature)
 					env.tn.remove();
 
-				if (env.countryTextNodes && env.useNodeTextFeature)
+				if (env.countryTextNodes && env.useNodeTextFeature && !env.demoDisabled)
 					env.countryTextNodes.update();
 
 				if (env.countryTextNodes && !env.useNodeTextFeature)
@@ -227,6 +227,8 @@ function ForceGraph() {
 
 			// Frame cycle
 			env.controls.update();
+
+
 
 			if (env.nodeClouds && env.nodeClouds.raytracer)
 				env.nodeClouds.raytracer.raycast(console.log)
@@ -640,9 +642,11 @@ function ForceGraph() {
 
 			//start the node particle effect
 				setTimeout(function () {
-					if (env.particles)
-						//env.particles.updateDestinations()
-						env.particles.start()
+
+
+						//FIXME see flickering bug
+                    //	if (env.particles)
+						//env.particles.start()
 
 				}, 1000)
 

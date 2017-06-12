@@ -151,10 +151,64 @@ class BaseCluster3D extends BaseNode {
 
             //for now at least remove the particle cloud
             leaf.geometry.dispose()
-
+            if (leaf.parent)
+            leaf.parent.remove(leaf)
         })
 
     }
+
+
+    /**
+     * TODO we want to get the node positions relative to the current root? cluster
+     *      after reclustering we can use these to update the new positions to match the old ones in world coords
+     *
+     */
+
+    storeParentPositionInNodes(){
+
+    var leafElements=this.getLeafs()
+_.each(leafElements,function(leaf){
+    let mNodes=leaf.mNodes
+    _.each(mNodes,function(node){
+
+
+        var c1 = new THREE.Vector3();
+            c1.setFromMatrixPosition( leaf.matrixWorld );
+
+        node._parentPosAbs=c1;
+
+    })
+})
+
+
+    }
+
+    restoreNodePositionFromExParent(){
+
+
+
+        var leafElements=this.getLeafs()
+        _.each(leafElements,function(leaf){
+            let mNodes=leaf.mNodes
+            _.each(mNodes,function(node){
+                //get current parent pos
+                let c1=node._parentPosAbs
+
+                if (!c1) return;
+                var c2 = new THREE.Vector3();
+                c2.setFromMatrixPosition( leaf.matrixWorld );
+
+                node._bubble.position.add(c1).sub(c2)
+                _.extend(node,node._bubble.position)
+
+            })
+        })
+
+
+
+    }
+
+
 
     /**
      * this method can be re-run to change the sub-clusters
@@ -166,36 +220,36 @@ class BaseCluster3D extends BaseNode {
 
     applyClustering(mClusteringSpeccsArray) {
 
+
+//FIXME currently only working in root
+      //  this.storeParentPositionInNodes()
+
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
-        if (mClusteringSpeccsArray.length==1) {
+        if (mClusteringSpeccsArray.length == 1) {
 
-            let prevClusters= this.findClusters("*");
+            let prevClusters = this.findClusters("*");
             this.cleanUpLeafs();
             this.createParticlePointCloud(mClusteringSpeccsArray[0]);
 
             //clean up previous clusters
 
 
-            BaseCluster3D.cleanUpClusters(prevClusters,this)
+            BaseCluster3D.cleanUpClusters(prevClusters, this)
 
             return false;
         }
 
 
-
         var entry = mClusteringSpeccsArray[0];
 
         //store previous clusters
-        let prevClusters= this.findClusters("*");
+        let prevClusters = this.findClusters("*");
 
         //create new clusters
         this.doClusteringForOnlyThis(entry);
 
-        //clean up previous clusters
 
-
-        BaseCluster3D.cleanUpClusters(prevClusters,this)
 
         _.each(this.mClusters, function (mCluster, key) {
 
@@ -213,7 +267,13 @@ class BaseCluster3D extends BaseNode {
         this.updateCluster()
 
 
+        //clean up previous clusters
+        BaseCluster3D.cleanUpClusters(prevClusters, this)
+
+        //adjust positions if cluster gets re-clustered
+       // this.restoreNodePositionFromExParent()
     }
+
 
 
     /**
@@ -221,6 +281,7 @@ class BaseCluster3D extends BaseNode {
      * the  visible child clusters are generated
      *
      */
+
 
     doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();

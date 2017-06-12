@@ -1,26 +1,60 @@
+bugs:
+    partcles within node are altering between + and - for too long for the bigger data set
+    which generates some kind of flickering...
+
+
+
 
 clusters
 
--interference with search functinoality => not always zooms to correct result
+-interference with search functionality => not always zooms to correct result
 [x]todo per cluster line mesh or at least matrixWorld property for nodes to be able to calc the position from that
--cluster texts (formally eg. country texts)
--implement leaf text nodes so that relevant texts from multiple clusters with visibleTexts < xVal
--sort param for applyClustering(speccs)
-[]-re-cluster on the fly
-fix arrows for clusters
-keyboard events per cluster
-    per node also?
-color select/update for root cluster
+[x] cluster texts (formally eg. country texts)
+[/] implement leaf text nodes so that relevant texts from multiple clusters with visibleTexts < xVal
+-used existing implementiation TODO refactor for more efficiency
+-by having leaf-textnodes instead of rootcluster based we should be able to skip a lot of updates and irrelevant checks
+
+
+[]sort param for applyClustering(speccs)
+-optional sorting of clusters for better visualisation
+
+[/]re-cluster on the fly
+-partially working => bug tracking
+
+[x]fix arrows for clusters
+-cleanup arrows when rebuilding/moving clusters
+
+[]keyboard events per cluster
+  per node also?
+[]color select/update for root cluster
+
+[] nodemixin => BaseLeafNodeFactory to be able to bind handlers and specifics
+-having a nodefactory bound to a cluster would provide customisation features per view
+ (or potential alternative editing modes via toolbar select)
+
+--------------------------------------
+>>>>>>>>>>>Wednesday DEMO<<<<<<<<<<<<<
+
+-use actual data provided last time
+-have multiple views with potentially different behaviour bound to them
+-- 2d/3d
+-fix bugs to match default implementation
+-keep default implementation as one possible view
+
+
+
+
 
 --------------------------------------
 
 
 BUG:
-	[]//FIXME this is only currently there for the search function to trigger text generation because the onComplete Mehthod might have a problem
-		
+	[]there is a timeout that triggers a text redraw (bad practice and potentially error prone)
+	   FIXME this is only currently there for the search function to trigger text generation because the onComplete Mehthod might have a problem
+
 	[]change how text nodes are selected
 	[] so that the current selection and points close to the center are prioritised?
-		
+
 
 		[]re-enable slider zoom-in/out with +- buttons
 
@@ -29,10 +63,10 @@ BUG:
 
 
 [] node pointclouds position based on mass center? problem changing when animating
---would be nice to ahve for convex shape feature in 2d as well as 3d		
-		
+--would be nice to ahve for convex shape feature in 2d as well as 3d
+
 []improve user interaction tools like clicking behaviour and different stated
-- also dbl click triggers click 		
+- also dbl click triggers click
 
 []spend some time to generate some alternative node distributions for that
 [] so we can use alternative distribution functions and interchange them
@@ -40,29 +74,29 @@ For 2D, We still have to make a bit of changes
 [] subclusters
 And for 3D, if we can do clusters within clusters
 The use case would be, we would group companies in each sector within a country
-Instead of randomly distributed currently 
-So we would strictly cluster it based on sector 
+Instead of randomly distributed currently
+So we would strictly cluster it based on sector
 
 	[]And each sector would have nice looking transparent wrapper around it
 And we can see interaction of that sector and other in that country
 As well as country sector to other country sector
 So a country would have transparent wrapper in that
 And inside a country would be wrappers of sectors as well
-We can try that with 2D first 
+We can try that with 2D first
 And do for 3D as well
 
 ------------------------------------------
 ------------------------------------------
 ------------------------------------------
 
-actually, If we can do 1D and 3D. instead of 2D and 3D as well. 
+actually, If we can do 1D and 3D. instead of 2D and 3D as well.
 I forgot that 2D and 1D are actually different :smile:
 so here are plans for next steps, Frank
 
 
-1. Sector clusters within the country cluster for 3D and 1D. 
+1. Sector clusters within the country cluster for 3D and 1D.
 
-	For 3D. If we can put color transparent 
+	For 3D. If we can put color transparent
 
 	For 1D. it could look something like this.
 
@@ -70,7 +104,7 @@ so here are plans for next steps, Frank
 
 4. click to highlight then click to popup
 
-5, node color (From downdown list) connect to real time stock price from Intrio API. I have access to this API will next Monday. 
+5, node color (From downdown list) connect to real time stock price from Intrio API. I have access to this API will next Monday.
 
 6. dots - tooltip for news
 
@@ -91,7 +125,7 @@ so here are plans for next steps, Frank
 
 --------------CURRENT-------------------
 
-[]2d/3d 
+[]2d/3d
 
 
 (5) country texts
@@ -104,14 +138,14 @@ so here are plans for next steps, Frank
 
 [] rest of nodes than n<40 elements gets own "Other" -group
 
- 
+
 
 --------------ADDITIONAL-------------------
 -dynamic countrytext ranges from cluster infos
 -like minDistance = function ()....
 
  [x50%] multiselect nodes via ctrl
- 
+
 -[x]line texture 2d => animate direction
 
 - better autocomplete? https://select2.github.io/examples.html
@@ -139,13 +173,13 @@ Arrow helper seems bugged throws errors all the times or does it?
 
 [x] graph tick animate... FIXME edges are the proplem
 [] separate textnode draw and get with throttle //draw :10 calc: 100
-[] country text nodes filter invisible clouds frustum 
+[] country text nodes filter invisible clouds frustum
 [] numSkipEdgesRendered change reload
 
 --------------FEATURES-------------------
 
 a;
-smooth hull 
+smooth hull
 skip for now takes too long atm
 
 b;
@@ -161,13 +195,13 @@ dots inside node (use case: each dot represent a story about company)
 [x?] performance
  [x]ram usage!!!!
  [x] pointclouds and textures!!
- 
 
-- one light color for in and outgoing instead of red green 
+
+- one light color for in and outgoing instead of red green
 
 - change annie animation into the blue circle for exnandable nodes
 
-- invisible hull size equal sprite size 
+- invisible hull size equal sprite size
 - //FIXME picking won't work inless spherehelper useDebugSphere was triggered once
 
 - potential bad initialisation of realdata compare "node group_data" vs "node.nodes.group_data"
@@ -183,7 +217,7 @@ also have a sorted list at the end of a render cycle of node distances to camera
 as a presort mechanism
 hiding prev cycle only and so on
 -----------------------------------------------------
-- meshline only show strongest ties if line count > m => at least one per node 
+- meshline only show strongest ties if line count > m => at least one per node
 ------------------------------------------------------
 - better behavoiur of small dots
 ---

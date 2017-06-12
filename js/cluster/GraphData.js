@@ -47,9 +47,12 @@ class GraphData
 
     getAlteredRawLinks(){
         var mDataNodeCopy= this.mDataNodeCopy
+    var skipLines=100
+
+        var links=this.mGraphData.links.filter((v,id)=> !(id%skipLines)   )
 
         //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
-       var  d3Links  = this.mGraphData.links.map(link => {
+       var  d3Links  = links.map(link => {
             return {
                 source: mDataNodeCopy[link[0]],
                 target: mDataNodeCopy[link[1]]

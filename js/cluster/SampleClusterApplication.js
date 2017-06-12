@@ -41,7 +41,7 @@ export class MyMain {
     constructor() {
 
         this.clusters = this.init();
-       this.runSample1();
+
     }
 
     getPossibleClusterSpeccsArray() {
@@ -56,17 +56,15 @@ export class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new BaseDistribution(1000, 2)
-        let sample2 = new BaseDistribution(200, 2)
+        let sample1 = new BaseDistribution(40000, 2) //1000
+        let sample2 = new BaseDistribution(5000, 2)//200
+        let sample3 = new BaseDistribution(100, 3)//50
 
-
-        let sample3 = new BaseDistribution(50, 3)
-
-        let rand2 = new RandomDistribution(200, 2)
+      //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 3}},
-            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 3}},
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
+            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}},
             {generator: industrySetGenerator, distribution: sample3, options: {minClusterSize: 3}},
 
             , {distribution: sample3}
@@ -76,8 +74,39 @@ export class MyMain {
 
     }
 
+    getForceSpeccs() {
+
+        function countrySetGenerator(groupFunction, node) {
+
+            groupFunction(node.group, node)
+        }
+
+        function industrySetGenerator(groupFunction, node) {
+            groupFunction(node.industry, node)
+        }
+
+        //using these 2 we should have a 2d plane with 3d cubes on it
+        let sample1 = new ForceGraphDistribution(40000, 3) //1000
+        let sample2 = new ForceGraphDistribution(5000, 3)//200
+        let sample3 = new ForceGraphDistribution(100, 3)//50
+
+        //  let rand2 = new RandomDistribution(200, 2)
+
+        return [
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
+            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}}
+            , {distribution: sample3}
+
+
+        ]
+
+    }
+
+
     init()
     {
+        if (this.inited) return
+
         let speccs = this.getPossibleClusterSpeccsArray();
        // var res = new RootCluster(globalNodes, [speccs[0], speccs[1], speccs[2]]);
 
@@ -92,7 +121,10 @@ export class MyMain {
          var res = new RootCluster(preparedData.nodes);
 
         globalEnv.scene.add(res);
-        res.position.set(0, 10000, 0);
+        res.position.set(0, 0, 0);
+
+
+        this.inited=true;
 
         return res
 
@@ -112,27 +144,33 @@ export class MyMain {
 
 
     runSample2() {
+
+        //let speccs = this.getPossibleClusterSpeccsArray();
+        //var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
+
+
+        //this.clusters.applyClustering([speccs[1],speccs[0], speccs[2]])
         console.log("runSample2")
-        let speccs = this.getPossibleClusterSpeccsArray();
-        var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
+        let speccs = this.getForceSpeccs();
+
+        this.clusters.applyClustering(speccs);
 
 
-        this.clusters.applyClustering([speccs[1],speccs[0], speccs[2]])
-
-      return
-
-      /*  let speccs = this.getPossibleClusterSpeccsArray();
-        var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
-
-        globalEnv.scene.add(res);
-        res.position.set(5000, 10000, 0);
-
-        return res*/
 
     }
 
     runSample3() {
         console.log("runSample3")
+        let defaultEntry={distribution:new BaseDistribution(4000,2)}
+
+        this.clusters.applyClustering([defaultEntry])
+
+
+
+    }
+
+    runSample4() {
+        console.log("runSample4")
         let defaultEntry={distribution:new DefaultDistribution()}
 
         this.clusters.applyClustering([defaultEntry])
@@ -140,6 +178,7 @@ export class MyMain {
 
 
     }
+
 
 
 
