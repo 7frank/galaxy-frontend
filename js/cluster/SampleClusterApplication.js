@@ -66,8 +66,8 @@ export class MyMain {
         }
 
         var that=this
-        var sampleSpeccs=this.getPossibleClusterSpeccsArray();
 
+        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
         function loadData() {
 
             if (!that.mGraphData) {
@@ -75,7 +75,9 @@ export class MyMain {
                 return ;
             }
 
-            this.setSpeccs(sampleSpeccs).setData(that.mGraphData)
+            let mSpeccs=[speccs[0], speccs[1], speccs[3]]
+
+            this.setSpeccs(mSpeccs).setData(that.mGraphData)
         }
 
 
@@ -126,7 +128,6 @@ export class MyMain {
         return [
             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
             {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}},
-            {generator: industrySetGenerator, distribution: sample3, options: {minClusterSize: 3}},
 
             , {distribution: sample3}
 

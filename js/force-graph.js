@@ -219,10 +219,6 @@ function ForceGraph() {
 
 			env.controls.addEventListener("change", updateTextWhenCameraIsMoving)
 
-        env.controls.addEventListener("change", function(){
-        	console.log("change orig")
-
-		})
 
 
 

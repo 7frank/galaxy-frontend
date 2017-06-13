@@ -53,6 +53,9 @@ class GraphView3D extends View3D
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
+        res.applyClustering(speccs)
+
+
 
 
         this.start()
@@ -65,7 +68,7 @@ class GraphView3D extends View3D
 
     setData(mGraphData)
     {
-        this.initStatic();
+       // this.initStatic();
 
         if (!this.mRootCluster)
         this.mRootCluster= this.initClusterForView(mGraphData,this.mScene)
@@ -75,8 +78,11 @@ class GraphView3D extends View3D
 
     }
 
+    attachedCallback(){
 
+    this.initStatic();
 
+    }
 }
 
 

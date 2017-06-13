@@ -2442,6 +2442,9 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
+        res.applyClustering(speccs)
+
+
 
 
         this.start()
@@ -2454,7 +2457,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     setData(mGraphData)
     {
-        this.initStatic();
+       // this.initStatic();
 
         if (!this.mRootCluster)
         this.mRootCluster= this.initClusterForView(mGraphData,this.mScene)
@@ -2464,8 +2467,11 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     }
 
+    attachedCallback(){
 
+    this.initStatic();
 
+    }
 }
 /* unused harmony export default */
 
@@ -3012,8 +3018,8 @@ class MyMain {
         }
 
         var that=this
-        var sampleSpeccs=this.getPossibleClusterSpeccsArray();
 
+        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
         function loadData() {
 
             if (!that.mGraphData) {
@@ -3021,7 +3027,9 @@ class MyMain {
                 return ;
             }
 
-            this.setSpeccs(sampleSpeccs).setData(that.mGraphData)
+            let mSpeccs=[speccs[0], speccs[1], speccs[3]]
+
+            this.setSpeccs(mSpeccs).setData(that.mGraphData)
         }
 
 
@@ -3072,7 +3080,6 @@ class MyMain {
         return [
             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
             {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}},
-            {generator: industrySetGenerator, distribution: sample3, options: {minClusterSize: 3}},
 
             , {distribution: sample3}
 
@@ -3260,7 +3267,18 @@ class View3D extends HTMLElement
 
 
 
+
     }
+
+
+    resizeCanvas() {
+    if (this.mRenderer) {
+        this.mRenderer.setSize(this.clientWidth, this.clientHeight);
+        this.mCamera.aspect = this.clientWidth /this.clientHeight;
+        this.mCamera.updateProjectionMatrix();
+    }
+}
+
 
    /* get scene() {
         return ""+ this.mScene
@@ -3283,9 +3301,9 @@ class View3D extends HTMLElement
     initStatic() {
 
     if (this._inited_static_) return;
+ var that=this
 
-
-        this.mFPS=1;
+        this.mFPS=30;
         this.minFPS=0;
         this.maxFPS=144;
 
@@ -3295,7 +3313,7 @@ class View3D extends HTMLElement
 
         this.mCaption=$("<span>View3D</span>").css({
            // "pointer-events":"none",
-            position:"relative",top:0,left:0})
+            position:"relative",top:0,left:0,zIndex:1})
 
         $(this).append(   this.mCaption)
 
@@ -3308,20 +3326,41 @@ class View3D extends HTMLElement
         this.mCamera = new THREE.PerspectiveCamera();
         this.mCamera.far = 100000;
 
+
         // Setup scene
 
         this.mScene = new THREE.Scene();
+
+
+
+        this.mCamera.lookAt(this.mScene.position);
+
+        this.mCamera.position.z = 5000;
+
+
 
         // Setup renderer
         this.mRenderer = new THREE.WebGLRenderer({
             antialias: true
         });
-        this.mRenderer.setClearColor( 0x00FF00 );
+        this.mRenderer.setClearColor( 0x0000FF );
         this.mRenderer.setPixelRatio( window.devicePixelRatio );
 
         this.appendChild(this.mRenderer.domElement);
 
-        $(this.mRenderer.domElement).css({width:"100%",height:"100%"})
+
+ /*    
+    $(this.mRenderer.domElement).on("mouseover",function(){
+            that.setActive()
+        })
+        $(this.mRenderer.domElement).on("mouseout",function(){
+            that.setInactive()
+        })
+        */
+
+
+
+        $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"})
 
 
         //init domEnvents
@@ -3332,23 +3371,13 @@ class View3D extends HTMLElement
 
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
         this.mControls.rotateSpeed = 0.3
-        window.oooControls=  this.mControls
+        window.oooView=  this
 
+
+
+        this.resizeCanvas()
 
         this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  )
-
-        this.mControls.addEventListener("change",function(...args){
-
-     //FIXME it seems that the controls are not triggered by the mouse movements
-//though they can be triggered manually but still dont render anything
-            //oooControls.target.set(-1000,-1,-1);oooControls.update()
-
-          debugger;
-           console.log("cjange")
-
-        })
-
-
 
         this._inited_static_=true
 
@@ -3361,7 +3390,9 @@ class View3D extends HTMLElement
 var that=this;
       function animate(time) {
 
+          that.mControls.update();
 
+          if (that.mFPS==0) return;
 
           let nextTime=that.mLastFrameTime + (1000 / that.mFPS);
           if (nextTime > time) {
@@ -3370,12 +3401,12 @@ var that=this;
               return;
           }
 
-          console.log("animate",time)
+      //    console.log("animate",time)
 
           that.mLastFrameTime = time
 
 
-          that.mControls.update();
+
 
           $(that).trigger("before-frame")
           $(that).trigger("animate")
@@ -3397,22 +3428,24 @@ var that=this;
 
     }
 
-    setToActive()
+    setActive()
     {
+
         //fullscreen
         $(this).addClass("view-3d-maximised")
 
         //fps
         this.mFPS=this.maxFPS
 
-
+        this.resizeCanvas()
     }
 
-    setToThumbnail()
+    setInactive()
     {
         $(this).removeClass("view-3d-maximised")
         this.mFPS=this.minFPS
 
+        this.resizeCanvas()
     }
 
 
