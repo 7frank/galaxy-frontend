@@ -64,7 +64,7 @@ var clusters =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 15);
+/******/ 	return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,7 +73,7 @@ var clusters =
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 30.05.2017.
@@ -1079,8 +1079,8 @@ class EdgeUtil {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__ = __webpack_require__(17);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -1199,12 +1199,13 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
         this.on("mouseover mousemove",function(){
 
+            if (  this.mHull)
             this.mHull.material.visible=true;
         })
 
 
         this.on("mouseout",function(){
-
+            if (  this.mHull)
             this.mHull.material.visible=false;
 
 
@@ -1425,7 +1426,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(15);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -1525,6 +1526,375 @@ class ClusterLeafElement extends THREE.Mesh
 
 /***/ }),
 /* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by Frank on 11.06.2017.
+ */
+
+
+
+class GraphData
+{
+
+    //constructor(nodes,edges){
+    constructor(graphData){
+            this.mGraphData=graphData
+      /*  this.mNodeData=[];
+        this.mEdgeData=[];
+
+        this.addNodes(nodes);
+        this.addEdges(nodes);*/
+
+    }
+
+    getClonedRawNodes()
+    {
+        var mNodes={}
+
+            _.each(this.mGraphData.nodes,function(node,id){
+                mNodes[id]=_.extend({x:0,y:0,z:0},node)
+
+
+            })
+
+
+
+        this.mDataNodeCopy=mNodes
+
+
+        // Build graph with data
+        var d3Nodes  = [];
+        for (let nodeId in mNodes) { // Turn nodes into array
+            const node =mNodes[nodeId] // _.extend({},mNodes);
+            node._id = nodeId;
+            d3Nodes.push(node);
+        }
+       return d3Nodes
+
+    }
+
+    getAlteredRawLinks(){
+        var mDataNodeCopy= this.mDataNodeCopy
+    var skipLines=100
+
+        var links=this.mGraphData.links.filter((v,id)=> !(id%skipLines)   )
+
+        //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
+       var  d3Links  = links.map(link => {
+            return {
+                source: mDataNodeCopy[link[0]],
+                target: mDataNodeCopy[link[1]]
+            };
+        })
+
+    return d3Links
+
+
+
+    }
+
+
+  /*  addRawNodeData(nodes){
+      if (_.isArray(nodes)) this.mNodeData=this.mNodeData.concat(nodes)
+
+        return this;
+
+    }
+
+    addRawEdgeData(edges)
+    {
+        if (_.isArray(edges)) this.mEdgeData=this.mEdgeData.concat(edges)
+
+        return this;
+    }*/
+
+    createClusterNodesAndEdges(env=globalEnv)
+    {
+
+
+   var d3Nodes= this.getClonedRawNodes();
+
+    if (!d3Nodes.length) {
+        return;
+    } //if no data is present return for now
+
+
+    var d3Links =this.getAlteredRawLinks();
+
+
+//TODO
+  /*  function countVisibleNodes(node) {
+
+        env._nodeCounter.push(node)
+
+    }*/
+
+    // Add WebGL objects
+    d3Nodes.forEach(node => {
+
+        node = nodeMixin(env, node, {
+         //   onDrawNode: countVisibleNodes
+        })
+        node._bubble.name = env.nameAccessor(node) || '';
+
+
+        //TODO not highlighted group nodes should be rendered with separate point cloud
+        if (node.isGroupNode) {
+
+            //node.addClass("basic-sprite-collapsed")
+            node.addClass("basic-ring")
+
+            //node.on("mouseover",()=> node.addClass("basic-animated"))
+            //node.on("mouseout",()=> node.removeClass("basic-animated"))
+            node.on("mouseover", () => node.addClass("basic-ring-2"))
+            node.on("mouseout", () => node.removeClass("basic-ring-2"))
+
+        } else {
+
+            //TODO specific renderings for node should be handled via class property at node data itself
+            //NOTE: the default node/group nodes/links will be put inside a point  cloud for each so we woud need a point cloud for each 3d-class that generates a points object
+
+            //node.addClass("basic-sphere")
+
+            // nothing to begin with
+            //node.addClass("basic-sprite")
+
+        }
+
+    });
+
+    //-----------------------------------------------
+
+    //init mesh for groupline
+  /*  if (env.useLineGroup)
+        initLineGroup(env,{
+            opacity:0.01,
+            color:0x49616C,
+            transparent: true,
+        })
+
+    var linecount = 0;
+    var skipLines = env.numSkipEdgesRendered + 1;
+    if (skipLines < 1)
+        skipLines = 1
+    function shouldLineByVisible(link, id) {
+
+        return !(linecount++ % skipLines)
+    }
+*/
+
+        //TODO have more thatn one line mesh per rootcluster .. isntead have line meshes per sub-cluster
+       var mLineGroup= this.initLineGroupHelper()
+
+        //used to wrap per cluster functionality
+        function linkMixinExt(link,options)
+        {
+            var env={mergedLineMesh:mLineGroup}
+
+            return linkMixin(env,link,options)
+
+        }
+
+
+
+
+        //d3Links.forEach(link => {
+    _.each(d3Links, (link, id) => {
+
+         //TODO have a function within the custer itself that is called
+        //determine by distance or something like that
+        var bVisible = true;// shouldLineByVisible()
+
+        linkMixinExt( link, {
+            lineIsVisible: bVisible,
+            color: 0xff0000,
+            opacity: 1
+        })
+
+
+    });
+
+
+
+
+
+    //----------------------
+
+
+    //nodes are prepared by previous step ? TODO which one was that? for further altering
+    extendGraphElements(d3Nodes, d3Links, env)
+
+
+        return {nodes:d3Nodes,edges:d3Links}
+
+}
+
+    //--------------------------------------------
+
+
+    /**
+     * TODO refactor line group into stand alone class to be used per-cluster
+     *
+     *
+     *
+     */
+   initLineGroupHelper( options) {
+
+
+       var line_geom = new THREE.Geometry();
+       var lineMaterial
+       var mergedLineMesh
+
+
+
+
+
+    var defaults = {
+        opacity: 0.01,
+        transparent: true,
+        //lineIsVisible:true, // if disabled the line won't be shown on the scene
+        color: 0xffffff
+    }
+
+    options = _.extend(defaults, options)
+
+    lineMaterial = new THREE.MeshBasicMaterial({
+        color: options.color,
+        transparent: options.transparent,
+        opacity: options.opacity,
+        depthTest: false,
+        depthWrite: false
+    });
+
+
+    mergedLineMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
+
+    mergedLineMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
+
+
+
+  return mergedLineMesh
+
+
+}
+
+
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = GraphData;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(3);
+/**
+ * Created by Frank on 06.06.2017.
+ */
+
+
+//TODO refactor RootCluster
+
+
+/**
+ *
+ *  a RootCluster is a root node that contains additional rendering infos over multiple nodes
+ * for example: it handles node captions (text nodes)
+ */
+
+class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /* default */] {
+
+    constructor(...args)
+    {
+        super(...args)
+
+        this.addGlobalNodeCaptions()
+
+
+        //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
+        setTimeout(()=> this.onAfterClusteredAndDistributed(),1000)
+
+
+    }
+
+
+    /**
+     * @override
+     * prevent multiple recursive  root clusters from being created by default
+     */
+
+    getChildClusterConstructor()
+    {
+        return __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /* default */];
+
+    }
+
+
+    /**
+     *
+     * TODO the root cluster manages the visibility of all of it's currently visible nodes
+     * we do have a hierarchical structure that we can use to speed up the rendering a bit
+     *
+     */
+
+
+    addGlobalNodeCaptions(){
+
+        //TODO remove global dependency
+        let env=undefined
+
+        if (!this.tn)
+            this.tn = TextNodes(env, {
+                maxVisibleCount: 10,
+                onNodeText: function (node) {
+
+                    if (node.name)
+                        return node.name
+
+                    return node.id
+
+                },
+                getNodes: () => this.mNodes
+            })
+
+
+    }
+
+
+
+    update(){
+        super.update()
+
+        if (this.tn)
+        this.tn.update();
+
+    }
+
+
+
+
+    applyClustering(mClusteringSpeccsArray) {
+
+        this.storeParentPositionInNodes()
+        super.applyClustering(mClusteringSpeccsArray)
+
+        this.restoreNodePositionFromExParent()
+    }
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = RootCluster;
+
+
+/***/ }),
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1692,7 +2062,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1726,310 +2096,6 @@ class ClusterNodeArray extends Array //List<Node>
 /* unused harmony export default */
 
 
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * Created by Frank on 11.06.2017.
- */
-
-
-
-class GraphData
-{
-
-    //constructor(nodes,edges){
-    constructor(graphData){
-            this.mGraphData=graphData
-      /*  this.mNodeData=[];
-        this.mEdgeData=[];
-
-        this.addNodes(nodes);
-        this.addEdges(nodes);*/
-
-    }
-
-    getClonedRawNodes()
-    {
-        var mNodes={}
-
-            _.each(this.mGraphData.nodes,function(node,id){
-                mNodes[id]=_.extend({x:0,y:0,z:0},node)
-
-
-            })
-
-
-
-        this.mDataNodeCopy=mNodes
-
-
-        // Build graph with data
-        var d3Nodes  = [];
-        for (let nodeId in mNodes) { // Turn nodes into array
-            const node =mNodes[nodeId] // _.extend({},mNodes);
-            node._id = nodeId;
-            d3Nodes.push(node);
-        }
-       return d3Nodes
-
-    }
-
-    getAlteredRawLinks(){
-        var mDataNodeCopy= this.mDataNodeCopy
-    var skipLines=100
-
-        var links=this.mGraphData.links.filter((v,id)=> !(id%skipLines)   )
-
-        //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
-       var  d3Links  = links.map(link => {
-            return {
-                source: mDataNodeCopy[link[0]],
-                target: mDataNodeCopy[link[1]]
-            };
-        })
-
-    return d3Links
-
-
-
-    }
-
-
-  /*  addRawNodeData(nodes){
-      if (_.isArray(nodes)) this.mNodeData=this.mNodeData.concat(nodes)
-
-        return this;
-
-    }
-
-    addRawEdgeData(edges)
-    {
-        if (_.isArray(edges)) this.mEdgeData=this.mEdgeData.concat(edges)
-
-        return this;
-    }*/
-
-    create(env=globalEnv)
-    {
-
-
-   var d3Nodes= this.getClonedRawNodes();
-
-    if (!d3Nodes.length) {
-        return;
-    } //if no data is present return for now
-
-
-    var d3Links =this.getAlteredRawLinks();
-
-
-//TODO
-  /*  function countVisibleNodes(node) {
-
-        env._nodeCounter.push(node)
-
-    }*/
-
-    // Add WebGL objects
-    d3Nodes.forEach(node => {
-
-        node = nodeMixin(env, node, {
-         //   onDrawNode: countVisibleNodes
-        })
-        node._bubble.name = env.nameAccessor(node) || '';
-
-
-        //TODO not highlighted group nodes should be rendered with separate point cloud
-        if (node.isGroupNode) {
-
-            //node.addClass("basic-sprite-collapsed")
-            node.addClass("basic-ring")
-
-            //node.on("mouseover",()=> node.addClass("basic-animated"))
-            //node.on("mouseout",()=> node.removeClass("basic-animated"))
-            node.on("mouseover", () => node.addClass("basic-ring-2"))
-            node.on("mouseout", () => node.removeClass("basic-ring-2"))
-
-        } else {
-
-            //TODO specific renderings for node should be handled via class property at node data itself
-            //NOTE: the default node/group nodes/links will be put inside a point  cloud for each so we woud need a point cloud for each 3d-class that generates a points object
-
-            //node.addClass("basic-sphere")
-
-            // nothing to begin with
-            //node.addClass("basic-sprite")
-
-        }
-
-    });
-
-    //-----------------------------------------------
-
-    //init mesh for groupline
-  /*  if (env.useLineGroup)
-        initLineGroup(env,{
-            opacity:0.01,
-            color:0x49616C,
-            transparent: true,
-        })
-
-    var linecount = 0;
-    var skipLines = env.numSkipEdgesRendered + 1;
-    if (skipLines < 1)
-        skipLines = 1
-    function shouldLineByVisible(link, id) {
-
-        return !(linecount++ % skipLines)
-    }
-*/
-    //d3Links.forEach(link => {
-    _.each(d3Links, (link, id) => {
-
-         //TODO have a function within the custer itself that is called
-        //determine by distance or something like that
-        var bVisible = true;// shouldLineByVisible()
-
-        linkMixin(env, link, {
-            lineIsVisible: bVisible,
-            color: 0xff0000,
-            opacity: 1
-        })
-
-
-    });
-
-
-
-
-
-    //----------------------
-
-
-    //nodes are prepared by previous step ? TODO which one was that? for further altering
-    extendGraphElements(d3Nodes, d3Links, env)
-
-
-        return {nodes:d3Nodes,edges:d3Links}
-
-}
-
-    //--------------------------------------------
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = GraphData;
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(3);
-/**
- * Created by Frank on 06.06.2017.
- */
-
-
-//TODO refactor RootCluster
-
-
-/**
- *
- *  a RootCluster is a root node that contains additional rendering infos over multiple nodes
- * for example: it handles node captions (text nodes)
- */
-
-class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /* default */] {
-
-    constructor(...args)
-    {
-        super(...args)
-
-        this.addGlobalNodeCaptions()
-
-
-        //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
-        setTimeout(()=> this.onAfterClusteredAndDistributed(),1000)
-
-
-    }
-
-
-    /**
-     * @override
-     * prevent multiple recursive  root clusters from being created by default
-     */
-
-    getChildClusterConstructor()
-    {
-        return __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /* default */];
-
-    }
-
-
-    /**
-     *
-     * TODO the root cluster manages the visibility of all of it's currently visible nodes
-     * we do have a hierarchical structure that we can use to speed up the rendering a bit
-     *
-     */
-
-
-    addGlobalNodeCaptions(){
-
-        //TODO remove global dependency
-        let env=undefined
-
-        if (!this.tn)
-            this.tn = TextNodes(env, {
-                maxVisibleCount: 10,
-                onNodeText: function (node) {
-
-                    if (node.name)
-                        return node.name
-
-                    return node.id
-
-                },
-                getNodes: () => this.mNodes
-            })
-
-
-    }
-
-
-
-    update(){
-        super.update()
-
-        if (this.tn)
-        this.tn.update();
-
-    }
-
-
-
-
-    applyClustering(mClusteringSpeccsArray) {
-
-        this.storeParentPositionInNodes()
-        super.applyClustering(mClusteringSpeccsArray)
-
-        this.restoreNodePositionFromExParent()
-    }
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = RootCluster;
 
 
 /***/ }),
@@ -2319,6 +2385,99 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(5);
+/**
+ * Created by Frank on 13.06.2017.
+ */
+
+
+
+
+
+
+
+
+
+
+class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default */]
+{
+
+    constructor(...args)
+    {
+        super(...args)
+
+        this.mRootCluster=null
+
+    }
+
+
+    setSpeccs(speccs)
+    {
+        this.mSpeccs=speccs;
+        return this
+    }
+
+    getSpeccs()
+    {
+
+        return this.mSpeccs
+    }
+
+
+    initClusterForView(rawGraphData,parentEl3D) {
+
+
+        if (!rawGraphData) return
+
+        let speccs = this.getSpeccs();
+
+        let graphData = new __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__["a" /* default */](rawGraphData)
+
+
+        let preparedData = graphData.createClusterNodesAndEdges()
+
+        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes);
+
+        parentEl3D.add(res);
+        res.position.set(0, 0, 0);
+
+
+        this.start()
+
+        return res
+
+
+    }
+
+
+    setData(mGraphData)
+    {
+        this.initStatic();
+
+        if (!this.mRootCluster)
+        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene)
+
+
+
+
+    }
+
+
+
+}
+/* unused harmony export default */
+
+
+
+document.registerElement("graph-view-3d", GraphView3D);
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /**
  * Created by Frank on 08.06.2017.
  */
@@ -2355,7 +2514,7 @@ class BaseEdge {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2657,11 +2816,11 @@ class BaseNode extends THREE.Mesh {
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 08.06.2017.
@@ -2767,7 +2926,7 @@ class EdgesContainer extends THREE.Object3D {
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2775,14 +2934,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ClusterLeafElement__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__GraphData__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__GraphData__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__view_GraphView3D__ = __webpack_require__(12);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
@@ -2813,9 +2973,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
+
 //-----------------------------------------
 //-----------DEBUG-------------------------
 //-----------------------------------------
+
 
 
 
@@ -2826,7 +2988,66 @@ class MyMain {
 
     constructor() {
 
-        this.clusters = this.init();
+
+        this.setupViews()
+
+        //  this.clusters = this.init();
+
+
+    }
+
+
+    setupViews() {
+
+        var container = $("<div>")
+            .css({display:"flex",position: "absolute", top: "10em", left: "20em", width: "60em"})
+            .appendTo("body")
+
+        let thumbCSS = {
+            height: 150,
+            width: "200",
+            display: "flex",
+            border: "1px solid rgba(128, 128, 128, 0.5)",
+            margin:"0.2em"
+        }
+
+        var that=this
+        var sampleSpeccs=this.getPossibleClusterSpeccsArray();
+
+        function loadData() {
+
+            if (!that.mGraphData) {
+                console.warn("data not loaded")
+                return ;
+            }
+
+            this.setSpeccs(sampleSpeccs).setData(that.mGraphData)
+        }
+
+
+        let mGraphView1 = document.createElement("graph-view-3d")
+
+        $(mGraphView1)
+            .css(thumbCSS)
+
+
+
+        $(mGraphView1).on("click",loadData )
+
+
+        let mGraphView2 = document.createElement("graph-view-3d")
+        $(mGraphView2)
+            .css(thumbCSS)
+
+        $(mGraphView2).on("click",loadData )
+
+
+        //$(this).on("data-changed",function(){})
+
+
+
+        container.append(mGraphView1, mGraphView2)
+
 
     }
 
@@ -2846,7 +3067,7 @@ class MyMain {
         let sample2 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](5000, 2)//200
         let sample3 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](100, 3)//50
 
-      //  let rand2 = new RandomDistribution(200, 2)
+        //  let rand2 = new RandomDistribution(200, 2)
 
         return [
             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
@@ -2889,34 +3110,15 @@ class MyMain {
     }
 
 
-    init()
-    {
-        if (this.inited) return
+    setGraphData(graphData) {
+        this.mGraphData = graphData;
+       // this.init(mGraphData);
 
-        let speccs = this.getPossibleClusterSpeccsArray();
-       // var res = new RootCluster(globalNodes, [speccs[0], speccs[1], speccs[2]]);
-
-        let graphData=new __WEBPACK_IMPORTED_MODULE_10__GraphData__["a" /* default */](globalEnv.graphData)
-
-
-
-       let preparedData= graphData.create()
-
-        //FIXME  preparedData.nodes aren't shown
-          //   var res = new RootCluster(globalNodes);
-         var res = new __WEBPACK_IMPORTED_MODULE_9__RootCluster__["a" /* default */](preparedData.nodes);
-
-        globalEnv.scene.add(res);
-        res.position.set(0, 0, 0);
-
-
-        this.inited=true;
-
-        return res
-
-
+        //TODO
+        //$(this).trigger("data-changed")
 
     }
+
 
 
     runSample1() {
@@ -2930,43 +3132,29 @@ class MyMain {
 
 
     runSample2() {
-
-        //let speccs = this.getPossibleClusterSpeccsArray();
-        //var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
-
-
-        //this.clusters.applyClustering([speccs[1],speccs[0], speccs[2]])
         console.log("runSample2")
         let speccs = this.getForceSpeccs();
 
         this.clusters.applyClustering(speccs);
-
-
-
     }
 
     runSample3() {
         console.log("runSample3")
-        let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](4000,2)}
+        let defaultEntry = {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](4000, 2)}
 
         this.clusters.applyClustering([defaultEntry])
-
 
 
     }
 
     runSample4() {
         console.log("runSample4")
-        let defaultEntry={distribution:new __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__["a" /* default */]()}
+        let defaultEntry = {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__["a" /* default */]()}
 
         this.clusters.applyClustering([defaultEntry])
 
 
-
     }
-
-
-
 
 
 }
@@ -2979,7 +3167,7 @@ class MyMain {
 	
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3044,6 +3232,228 @@ class ZoomUtil
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
 
+
+/***/ }),
+/* 18 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by Frank on 13.06.2017.
+ */
+
+
+//a view class to be able to use multiple views and switch between them
+//limit fps
+//see shadertoy for usage as thumbnail and such
+
+
+class View3D extends HTMLElement
+{
+
+    constructor(...args){
+    super(...args)
+
+
+
+       this.initStatic()
+
+
+
+    }
+
+   /* get scene() {
+        return ""+ this.mScene
+    }
+    set scene(scene) {
+        this.mScene=scene
+    }
+*/
+    setCaption(text)
+    {
+        this.mCaption.html("").append(text)
+        return this
+    }
+
+
+    /**
+     *   set up controls,  scene,   renderer,     animation
+     *
+     */
+    initStatic() {
+
+    if (this._inited_static_) return;
+
+
+        this.mFPS=1;
+        this.minFPS=0;
+        this.maxFPS=144;
+
+
+        this.mLastFrameTime=-1
+
+
+        this.mCaption=$("<span>View3D</span>").css({
+           // "pointer-events":"none",
+            position:"relative",top:0,left:0})
+
+        $(this).append(   this.mCaption)
+
+        // Add nav info section
+
+
+        //createTooltip()
+
+        // Setup camera
+        this.mCamera = new THREE.PerspectiveCamera();
+        this.mCamera.far = 100000;
+
+        // Setup scene
+
+        this.mScene = new THREE.Scene();
+
+        // Setup renderer
+        this.mRenderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        this.mRenderer.setClearColor( 0x00FF00 );
+        this.mRenderer.setPixelRatio( window.devicePixelRatio );
+
+        this.appendChild(this.mRenderer.domElement);
+
+        $(this.mRenderer.domElement).css({width:"100%",height:"100%"})
+
+
+        //init domEnvents
+        this.mDomEvents = new THREEx.DomEvents(this.mCamera, this.mRenderer.domElement)
+
+        // Add camera interaction
+
+
+        this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
+        this.mControls.rotateSpeed = 0.3
+        window.oooControls=  this.mControls
+
+
+        this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  )
+
+        this.mControls.addEventListener("change",function(...args){
+
+     //FIXME it seems that the controls are not triggered by the mouse movements
+//though they can be triggered manually but still dont render anything
+            //oooControls.target.set(-1000,-1,-1);oooControls.update()
+
+          debugger;
+           console.log("cjange")
+
+        })
+
+
+
+        this._inited_static_=true
+
+    return this
+
+    }
+
+         // Kick-off renderer
+    animate() {
+var that=this;
+      function animate(time) {
+
+
+
+          let nextTime=that.mLastFrameTime + (1000 / that.mFPS);
+          if (nextTime > time) {
+
+              that.mFrameId = requestAnimationFrame(animate);
+              return;
+          }
+
+          console.log("animate",time)
+
+          that.mLastFrameTime = time
+
+
+          that.mControls.update();
+
+          $(that).trigger("before-frame")
+          $(that).trigger("animate")
+
+          that.mRenderer.render(that.mScene, that.mCamera);
+
+
+          that.mFrameId = requestAnimationFrame(animate);
+      }
+
+        animate(-1)
+
+    }
+
+
+    add(object3D)
+    {
+        this.mScene.add(object3D)
+
+    }
+
+    setToActive()
+    {
+        //fullscreen
+        $(this).addClass("view-3d-maximised")
+
+        //fps
+        this.mFPS=this.maxFPS
+
+
+    }
+
+    setToThumbnail()
+    {
+        $(this).removeClass("view-3d-maximised")
+        this.mFPS=this.minFPS
+
+    }
+
+
+    start(){
+
+    this.stop()
+
+     this.animate()
+
+
+    }
+
+    stop(){
+        window.cancelAnimationFrame( this.mFrameId)
+    }
+
+    resume(){
+
+       this.start()
+
+    }
+
+
+    show(){
+        this.resume()
+
+
+    }
+
+    hide() {
+        this.stop()
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = View3D;
+
+
+
+
+document.registerElement("view-3d", View3D);
 
 /***/ })
 /******/ ]);

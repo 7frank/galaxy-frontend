@@ -123,7 +123,7 @@ function getGraphDataSets() {
 			
 			
 		//the load function itself
-			const loadCSV = function (Graph) {
+			const loadCSV = function (Graph,alternativehandler) {
 				
 				var nodes=[]
 				
@@ -206,8 +206,8 @@ function getGraphDataSets() {
 		
 			
 		//the load function itself
-			const loadCSV = function (Graph) {
-				
+			const loadCSV = function (Graph,alternativehandler) {
+
 				var nodes=[]
 				var links=[]
 				
@@ -264,7 +264,7 @@ function getGraphDataSets() {
 				.then(function(){  
 
 				
-					defaultLoadSuccess(_,{expanded:["United States"],nodes:nodes,links:links,isRealData:true})
+					defaultLoadSuccess(_,{expanded:["United States"],nodes:nodes,links:links,isRealData:true},alternativehandler)
 					
 					if(onLoadSuccess)
 					onLoadSuccess(Graph)
@@ -285,24 +285,24 @@ function getGraphDataSets() {
 	}
 	
 	
-	function defaultLoadSuccess(_, data) {
+	function defaultLoadSuccess(_, data,alternativehandler) {
 	
 	
 	if (data.nodes.length>1000)
 		openGraphConfirmDialog("filename.filetodo",data.nodes.length,function acceptCallback(){
 			
-			defaultLoadHandler(_, data) 
+			defaultLoadHandler(_, data,alternativehandler)
 			
 		})
 	else
-	defaultLoadHandler(_, data) 
+	defaultLoadHandler(_, data,alternativehandler)
 	
 	}
 	
 	
 
 	
-	function defaultLoadHandler(_, data) {
+	function defaultLoadHandler(_, data,alternativehandler) {
 		const nodes = {};
 
 
@@ -343,8 +343,22 @@ function getGraphDataSets() {
 				});
 
 				console.log("invalid links after loading",invalidLinks)
-		
-		Graph
+
+
+		let mGraphData={
+            nodes: nodes,
+            links: alteredLinks,// net.links.map(link => [link.source, link.target]),
+            expand:expanded,
+            alpha: alpha,
+            hasCountryGroups:data.isRealData
+        }
+
+		//TODO refactor loading .. cureently this is quite messy..
+		if (typeof alternativehandler=="function")
+        alternativehandler(mGraphData)
+		else
+			throw new Error("using deprecated approach with only one graph instance. use alternativehandler property instead")
+		/*Graph
 		.resetState()
 		.nameAccessor(node => node.id)
 		.colorAccessor(function (node) {
@@ -362,13 +376,10 @@ function getGraphDataSets() {
 		})
 
 		.shapeAccessor(node => node.shape ? node.shape : "sphere")
-		.graphData({
-			nodes: nodes,
-			links: alteredLinks,// net.links.map(link => [link.source, link.target]),
-			expand:expanded,
-			alpha: alpha,
-			hasCountryGroups:data.isRealData
-		});
+		.graphData(mGraphData);
+		*/
+
+
 	}
 
 	return [

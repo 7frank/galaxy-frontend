@@ -25,6 +25,7 @@ import RootCluster from "./RootCluster"
 import GraphData from "./GraphData"
 
 
+import GraphView3D from "../view/GraphView3D"
 
 
 //-----------------------------------------
@@ -33,6 +34,7 @@ import GraphData from "./GraphData"
 
 
 export {Cluster3DExtended}
+
 /**
  * currently used for debugging purposes
  */
@@ -40,7 +42,66 @@ export class MyMain {
 
     constructor() {
 
-        this.clusters = this.init();
+
+        this.setupViews()
+
+        //  this.clusters = this.init();
+
+
+    }
+
+
+    setupViews() {
+
+        var container = $("<div>")
+            .css({display:"flex",position: "absolute", top: "10em", left: "20em", width: "60em"})
+            .appendTo("body")
+
+        let thumbCSS = {
+            height: 150,
+            width: "200",
+            display: "flex",
+            border: "1px solid rgba(128, 128, 128, 0.5)",
+            margin:"0.2em"
+        }
+
+        var that=this
+        var sampleSpeccs=this.getPossibleClusterSpeccsArray();
+
+        function loadData() {
+
+            if (!that.mGraphData) {
+                console.warn("data not loaded")
+                return ;
+            }
+
+            this.setSpeccs(sampleSpeccs).setData(that.mGraphData)
+        }
+
+
+        let mGraphView1 = document.createElement("graph-view-3d")
+
+        $(mGraphView1)
+            .css(thumbCSS)
+
+
+
+        $(mGraphView1).on("click",loadData )
+
+
+        let mGraphView2 = document.createElement("graph-view-3d")
+        $(mGraphView2)
+            .css(thumbCSS)
+
+        $(mGraphView2).on("click",loadData )
+
+
+        //$(this).on("data-changed",function(){})
+
+
+
+        container.append(mGraphView1, mGraphView2)
+
 
     }
 
@@ -60,7 +121,7 @@ export class MyMain {
         let sample2 = new BaseDistribution(5000, 2)//200
         let sample3 = new BaseDistribution(100, 3)//50
 
-      //  let rand2 = new RandomDistribution(200, 2)
+        //  let rand2 = new RandomDistribution(200, 2)
 
         return [
             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
@@ -103,34 +164,15 @@ export class MyMain {
     }
 
 
-    init()
-    {
-        if (this.inited) return
+    setGraphData(graphData) {
+        this.mGraphData = graphData;
+       // this.init(mGraphData);
 
-        let speccs = this.getPossibleClusterSpeccsArray();
-       // var res = new RootCluster(globalNodes, [speccs[0], speccs[1], speccs[2]]);
-
-        let graphData=new GraphData(globalEnv.graphData)
-
-
-
-       let preparedData= graphData.create()
-
-        //FIXME  preparedData.nodes aren't shown
-          //   var res = new RootCluster(globalNodes);
-         var res = new RootCluster(preparedData.nodes);
-
-        globalEnv.scene.add(res);
-        res.position.set(0, 0, 0);
-
-
-        this.inited=true;
-
-        return res
-
-
+        //TODO
+        //$(this).trigger("data-changed")
 
     }
+
 
 
     runSample1() {
@@ -144,43 +186,29 @@ export class MyMain {
 
 
     runSample2() {
-
-        //let speccs = this.getPossibleClusterSpeccsArray();
-        //var res = new RootCluster(globalNodes, [speccs[1],speccs[0], speccs[2]]);
-
-
-        //this.clusters.applyClustering([speccs[1],speccs[0], speccs[2]])
         console.log("runSample2")
         let speccs = this.getForceSpeccs();
 
         this.clusters.applyClustering(speccs);
-
-
-
     }
 
     runSample3() {
         console.log("runSample3")
-        let defaultEntry={distribution:new BaseDistribution(4000,2)}
+        let defaultEntry = {distribution: new BaseDistribution(4000, 2)}
 
         this.clusters.applyClustering([defaultEntry])
-
 
 
     }
 
     runSample4() {
         console.log("runSample4")
-        let defaultEntry={distribution:new DefaultDistribution()}
+        let defaultEntry = {distribution: new DefaultDistribution()}
 
         this.clusters.applyClustering([defaultEntry])
 
 
-
     }
-
-
-
 
 
 }

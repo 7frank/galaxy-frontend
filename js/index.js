@@ -44,35 +44,70 @@
 
     }
 }	
-	
-	
-let curDataSetIdx;
-const dataSets = getGraphDataSets();
 
-let toggleData;
-(toggleData = function() {
-	curDataSetIdx = curDataSetIdx === undefined ? 0 : (curDataSetIdx+1)%dataSets.length;
-	const dataSet = dataSets[curDataSetIdx];
 
-	dataSet(Graph); // Load data set
-	//document.getElementById('graph-data-description').innerHTML = dataSet.description ? `Viewing ${dataSet.description}` : '';
-})(); // IIFE init
 
-let toggleDimensions = function(numDimensions) {
-	Graph
-		.resetState()				// Wipe nodes
-		.numDimensions(numDimensions);
-	dataSets[curDataSetIdx](Graph); // Reload nodes
-};
 
+    function loadDefaultView() {
+
+        let curDataSetIdx;
+        const dataSets = getGraphDataSets();
+        let dataSet = dataSets[0]
+        let mGraph = null
+
+        function alternativehandler(mGraphData)
+		{
+			console.log("graphData",mGraphData)
+
+
+            Graph
+                .resetState()
+                .nameAccessor(node => node.id)
+                .colorAccessor(function (node) {
+                    if (node.color) return node.color
+
+                    if (typeof node.group == "undefined") {
+                        node.group = 0;
+                        return Math.round(Math.random() * 256 * 256 * 256)
+                    }
+
+                    if (typeof node.group!="string")
+                        return parseInt(colors[node.group % colors.length].slice(1), 16)
+                    else
+                        return 0xffffff
+                })
+
+                .shapeAccessor(node => node.shape ? node.shape : "sphere")
+                .graphData(mGraphData);
+
+
+		}
+
+        dataSet(mGraph,alternativehandler); // default Load data set
+
+    }
+
+
+    function loadAlternativeView() {
+
+      let  main = new clusters.MyMain;
+
+
+        const dataSets = getGraphDataSets();
+        let dataSet = dataSets[0]
+
+        dataSet(null,function alternativehandler(mGraphData)
+        {
+
+            main.setGraphData(mGraphData)
+
+
+        });
+
+    }
 
 $(function(){
-	
-$(window).on("resize",function(){
-	
-	Graph.width(window.innerWidth).height(window.innerHeight)
-
-})
-
+    loadDefaultView()
+    loadAlternativeView()
 
 })

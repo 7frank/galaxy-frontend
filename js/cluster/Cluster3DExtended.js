@@ -117,12 +117,13 @@ class Cluster3DExtended extends BaseCluster3D {
 
         this.on("mouseover mousemove",function(){
 
+            if (  this.mHull)
             this.mHull.material.visible=true;
         })
 
 
         this.on("mouseout",function(){
-
+            if (  this.mHull)
             this.mHull.material.visible=false;
 
 

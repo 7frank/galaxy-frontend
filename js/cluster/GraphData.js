@@ -80,7 +80,7 @@ class GraphData
         return this;
     }*/
 
-    create(env=globalEnv)
+    createClusterNodesAndEdges(env=globalEnv)
     {
 
 
@@ -154,14 +154,30 @@ class GraphData
         return !(linecount++ % skipLines)
     }
 */
-    //d3Links.forEach(link => {
+
+        //TODO have more thatn one line mesh per rootcluster .. isntead have line meshes per sub-cluster
+       var mLineGroup= this.initLineGroupHelper()
+
+        //used to wrap per cluster functionality
+        function linkMixinExt(link,options)
+        {
+            var env={mergedLineMesh:mLineGroup}
+
+            return linkMixin(env,link,options)
+
+        }
+
+
+
+
+        //d3Links.forEach(link => {
     _.each(d3Links, (link, id) => {
 
          //TODO have a function within the custer itself that is called
         //determine by distance or something like that
         var bVisible = true;// shouldLineByVisible()
 
-        linkMixin(env, link, {
+        linkMixinExt( link, {
             lineIsVisible: bVisible,
             color: 0xff0000,
             opacity: 1
@@ -186,6 +202,55 @@ class GraphData
 }
 
     //--------------------------------------------
+
+
+    /**
+     * TODO refactor line group into stand alone class to be used per-cluster
+     *
+     *
+     *
+     */
+   initLineGroupHelper( options) {
+
+
+       var line_geom = new THREE.Geometry();
+       var lineMaterial
+       var mergedLineMesh
+
+
+
+
+
+    var defaults = {
+        opacity: 0.01,
+        transparent: true,
+        //lineIsVisible:true, // if disabled the line won't be shown on the scene
+        color: 0xffffff
+    }
+
+    options = _.extend(defaults, options)
+
+    lineMaterial = new THREE.MeshBasicMaterial({
+        color: options.color,
+        transparent: options.transparent,
+        opacity: options.opacity,
+        depthTest: false,
+        depthWrite: false
+    });
+
+
+    mergedLineMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
+
+    mergedLineMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
+
+
+
+  return mergedLineMesh
+
+
+}
+
+
 
 
 

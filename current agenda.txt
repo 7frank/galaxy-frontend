@@ -1,12 +1,13 @@
 bugs:
     partcles within node are altering between + and - for too long for the bigger data set
     which generates some kind of flickering...
+    -stop animations no view change to prevent wrong visu
 
 
 
 
 clusters
-
+[]compute scale of distributions automatically
 -interference with search functionality => not always zooms to correct result
 [x]todo per cluster line mesh or at least matrixWorld property for nodes to be able to calc the position from that
 [x] cluster texts (formally eg. country texts)

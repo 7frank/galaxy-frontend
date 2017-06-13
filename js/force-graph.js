@@ -219,7 +219,14 @@ function ForceGraph() {
 
 			env.controls.addEventListener("change", updateTextWhenCameraIsMoving)
 
-			// Kick-off renderer
+        env.controls.addEventListener("change", function(){
+        	console.log("change orig")
+
+		})
+
+
+
+        // Kick-off renderer
 
 			var _____skipFrames = 0;
 		(function animate() { // IIFE

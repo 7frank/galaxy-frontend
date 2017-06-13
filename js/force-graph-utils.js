@@ -1385,9 +1385,7 @@ function basicElementExtend(env,obj,_mesh)
 		return self	
 }  
   
-  
-	
-				
+
 
 
 		function linkMixin(env,link,options)
@@ -1409,6 +1407,7 @@ function basicElementExtend(env,obj,_mesh)
 				
 				
 				var lineMaterial = new THREE.MeshBasicMaterial({ color:options.color, transparent: options.transparent ,opacity:options.opacity});
+				if (env.lineOpacity) //deprecated?
 				lineMaterial.opacity = env.lineOpacity;
 				
 				

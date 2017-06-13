@@ -10,11 +10,15 @@
 
 $(function () {
 
+return
+    main = new clusters.MyMain;
 
-    function runInitialSample() {
 
 
-        if (window["main"]) return
+    /*function runInitialSample() {
+
+
+       if (window["main"]) return
 
 
         setTimeout(function () {
@@ -34,40 +38,39 @@ $(function () {
 
 
 
-
-
-
-
         main = new clusters.MyMain;
+
+       main.setupViews();
+
 
         //baseClusters.find("United States")[0].getRelationInfo()
         //main_baseCluster.mClusters["United States"].getRelationInfo()
 
-    }
+    }*/
 
     function runClusterSample1()
     {
-        runInitialSample()
+
         main.runSample1()
         //main.clusters.zoomToCluster()
 
     }
 
     function runClusterSample2()
-    {  runInitialSample()
+    {
         main.runSample2()
         //main.clusters.zoomToCluster()
 
     }
 
     function runClusterSample3()
-    {  runInitialSample()
+    {
         main.runSample3()
        // main.clusters.zoomToCluster()
 
     }
     function runClusterSample4()
-    {  runInitialSample()
+    {
         main.runSample4()
         // main.clusters.zoomToCluster()
 
@@ -84,6 +87,8 @@ $(function () {
     Mousetrap.bind( "3",runClusterSample3)
     Mousetrap.bind( "4",runClusterSample4)
 
+
+   // runInitialSample()
 
 
 })
