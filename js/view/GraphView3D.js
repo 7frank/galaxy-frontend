@@ -68,7 +68,7 @@ class GraphView3D extends View3D
 
     setData(mGraphData)
     {
-       // this.initStatic();
+        this.initStatic();
 
         if (!this.mRootCluster)
         this.mRootCluster= this.initClusterForView(mGraphData,this.mScene)
@@ -78,12 +78,11 @@ class GraphView3D extends View3D
 
     }
 
-    attachedCallback(){
+    connectedCallback(){
 
     this.initStatic();
-
+        this.start();
     }
 }
 
-
-document.registerElement("graph-view-3d", GraphView3D);
+customElements.define("graph-view-3d", GraphView3D);

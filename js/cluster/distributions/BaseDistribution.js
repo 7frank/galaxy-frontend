@@ -20,7 +20,7 @@ export default  class BaseDistribution
         let defaults={scale:()=> 50 ,dimensions:1}
 
 
-        this.mDuration=2000 //FIXME longer duration does not render as intended
+        this.mDuration=1//2000 //FIXME longer duration does not render as intended
 
         this.dimensions=dimensions //TODO
         this.mScale=scale
@@ -28,6 +28,8 @@ export default  class BaseDistribution
 
 
     setNodes(nodes,onNodePositionChange,onEnd) {
+
+
         if (nodes instanceof BaseCluster3D) {
 
             //TODO
@@ -70,9 +72,12 @@ export default  class BaseDistribution
 
         var c=0;
         var that=this;
-        var fixmeOnce=true;
+        var notTweenFinished=true;
 
-        var tweens=[]
+        //stop previous animations
+        this.stop()
+
+        var tweens=this.mTweens=[]
 
         _.each(nodes,function(n){
 
@@ -114,18 +119,18 @@ export default  class BaseDistribution
 
                     //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
 
-                    if (fixmeOnce) {
+                    if (notTweenFinished) {
 
-                        _.each(tweens,function(tween){
-                            TWEEN.remove(tween)
-
-                        })
+                      that.stop()
 
                         if (onEnd) onEnd()
-                        fixmeOnce=false
+                        notTweenFinished=false
+
+                        //console.log("cancel",mTimeout)
+                        cancelAnimationFrame(mTimeout)
                     }
 
-                    cancelAnimationFrame(mTimeout)
+
 
                 })
                 .start();
@@ -141,19 +146,17 @@ export default  class BaseDistribution
 
 
 
-        requestAnimationFrame(animate);
-
+        mTimeout= requestAnimationFrame(animate);
+//FIXME stop updating tweens if no longer necessary
         function animate(time) {
 
-
-           // TWEEN.update(time);
-
-            _.each(tweens,function(tween){
+        //console.log("anmiate",mTimeout)
+           _.each(tweens,function(tween){
                 tween.update(time)
 
             })
 
-
+            if (notTweenFinished)
             mTimeout=    requestAnimationFrame(animate);
 
         }
@@ -163,8 +166,21 @@ export default  class BaseDistribution
 
     }
 
+    stop(){
+
+
+        _.each(this.mTweens,function(tween){
+
+            TWEEN.remove(tween)
+
+        })
+
+    }
+
+
     //TODO this should be called to distribute the elements of the country layer when finished
     //TODO also it will be useful to add rotation as well in the future
+
 
 
     distribute(node,dx,dy,dz){

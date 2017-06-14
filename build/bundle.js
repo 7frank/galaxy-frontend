@@ -684,7 +684,7 @@ class BaseDistribution
         let defaults={scale:()=> 50 ,dimensions:1}
 
 
-        this.mDuration=2000 //FIXME longer duration does not render as intended
+        this.mDuration=1//2000 //FIXME longer duration does not render as intended
 
         this.dimensions=dimensions //TODO
         this.mScale=scale
@@ -692,6 +692,8 @@ class BaseDistribution
 
 
     setNodes(nodes,onNodePositionChange,onEnd) {
+
+
         if (nodes instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */]) {
 
             //TODO
@@ -734,9 +736,12 @@ class BaseDistribution
 
         var c=0;
         var that=this;
-        var fixmeOnce=true;
+        var notTweenFinished=true;
 
-        var tweens=[]
+        //stop previous animations
+        this.stop()
+
+        var tweens=this.mTweens=[]
 
         _.each(nodes,function(n){
 
@@ -778,18 +783,18 @@ class BaseDistribution
 
                     //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
 
-                    if (fixmeOnce) {
+                    if (notTweenFinished) {
 
-                        _.each(tweens,function(tween){
-                            TWEEN.remove(tween)
-
-                        })
+                      that.stop()
 
                         if (onEnd) onEnd()
-                        fixmeOnce=false
+                        notTweenFinished=false
+
+                        //console.log("cancel",mTimeout)
+                        cancelAnimationFrame(mTimeout)
                     }
 
-                    cancelAnimationFrame(mTimeout)
+
 
                 })
                 .start();
@@ -805,19 +810,17 @@ class BaseDistribution
 
 
 
-        requestAnimationFrame(animate);
-
+        mTimeout= requestAnimationFrame(animate);
+//FIXME stop updating tweens if no longer necessary
         function animate(time) {
 
-
-           // TWEEN.update(time);
-
-            _.each(tweens,function(tween){
+        //console.log("anmiate",mTimeout)
+           _.each(tweens,function(tween){
                 tween.update(time)
 
             })
 
-
+            if (notTweenFinished)
             mTimeout=    requestAnimationFrame(animate);
 
         }
@@ -827,8 +830,21 @@ class BaseDistribution
 
     }
 
+    stop(){
+
+
+        _.each(this.mTweens,function(tween){
+
+            TWEEN.remove(tween)
+
+        })
+
+    }
+
+
     //TODO this should be called to distribute the elements of the country layer when finished
     //TODO also it will be useful to add rotation as well in the future
+
 
 
     distribute(node,dx,dy,dz){
@@ -2457,7 +2473,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     setData(mGraphData)
     {
-       // this.initStatic();
+        this.initStatic();
 
         if (!this.mRootCluster)
         this.mRootCluster= this.initClusterForView(mGraphData,this.mScene)
@@ -2467,17 +2483,17 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     }
 
-    attachedCallback(){
+    connectedCallback(){
 
     this.initStatic();
-
+        this.start();
     }
 }
 /* unused harmony export default */
 
 
+customElements.define("graph-view-3d", GraphView3D);
 
-document.registerElement("graph-view-3d", GraphView3D);
 
 /***/ }),
 /* 13 */
@@ -3040,19 +3056,37 @@ class MyMain {
 
 
 
-        $(mGraphView1).on("click",loadData )
+
+
 
 
         let mGraphView2 = document.createElement("graph-view-3d")
         $(mGraphView2)
             .css(thumbCSS)
 
-        $(mGraphView2).on("click",loadData )
 
 
         //$(this).on("data-changed",function(){})
 
 
+
+
+        //TODO have the data loading handled via promise for each view individually
+        var dataInterval;
+        dataInterval=setInterval(function(){
+
+            if (!that.mGraphData) {
+                return ;
+            }
+
+
+            let mSpeccs=[speccs[0], speccs[1], speccs[3]]
+
+            mGraphView1.setSpeccs(mSpeccs).setData(that.mGraphData)
+            mGraphView2.setSpeccs(mSpeccs).setData(that.mGraphData)
+
+            clearInterval(dataInterval)
+        },100)
 
         container.append(mGraphView1, mGraphView2)
 
@@ -3263,7 +3297,7 @@ class View3D extends HTMLElement
 
 
 
-       this.initStatic()
+     //  this.initStatic()
 
 
 
@@ -3303,7 +3337,7 @@ class View3D extends HTMLElement
     if (this._inited_static_) return;
  var that=this
 
-        this.mFPS=30;
+        this.mFPS=0;
         this.minFPS=0;
         this.maxFPS=144;
 
@@ -3349,29 +3383,34 @@ class View3D extends HTMLElement
         this.appendChild(this.mRenderer.domElement);
 
 
- /*    //FIXME binding events will interfere with controls
-    $(this.mRenderer.domElement).on("mouseover",function(){
-            that.setActive()
-        })
-        $(this.mRenderer.domElement).on("mouseout",function(){
-            that.setInactive()
-        })
-        */
-
 
 
         $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"})
 
 
         //init domEnvents
-        this.mDomEvents = new THREEx.DomEvents(this.mCamera, this.mRenderer.domElement)
+        this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement)
+
+
+
+        //FIXME binding events will interfere with controls
+        $(this.mRenderer.domElement).on("mouseover",function(e){
+            e.stopPropagation()
+            that.setActive()
+        })
+        $(this.mRenderer.domElement).on("mouseout",function(e){
+            e.stopPropagation()
+            that.setInactive()
+        })
+
 
         // Add camera interaction
-
-
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
         this.mControls.rotateSpeed = 0.3
-        window.oooView=  this
+
+
+
+
 
 
 
@@ -3388,21 +3427,29 @@ class View3D extends HTMLElement
          // Kick-off renderer
     animate() {
 
-
-var that=this;
+       var initialFrames=1;
+        var that=this;
       function animate(time) {
 
           that.mControls.update();
+          initialFrames--
+          if (that.mFPS==0) {
 
-          if (that.mFPS==0) return;
-
-          let nextTime=that.mLastFrameTime + (1000 / that.mFPS);
-          if (nextTime > time) {
-
-              that.mFrameId = requestAnimationFrame(animate);
-              return;
+              if (initialFrames<0)
+              {
+                  that.mFrameId = requestAnimationFrame(animate);
+                  return;
+              }
           }
+          else {
 
+              let nextTime = that.mLastFrameTime + (1000 / that.mFPS);
+              if (nextTime > time) {
+
+                  that.mFrameId = requestAnimationFrame(animate);
+                  return;
+              }
+          }
       //    console.log("animate",time)
 
           that.mLastFrameTime = time
@@ -3411,7 +3458,7 @@ var that=this;
 
 
           $(that).trigger("before-frame")
-          $(that).trigger("animate")
+         // $(that).trigger("animate")
 
           that.mRenderer.render(that.mScene, that.mCamera);
 
@@ -3487,8 +3534,8 @@ var that=this;
 
 
 
+customElements.define("view-3d", View3D);
 
-document.registerElement("view-3d", View3D);
 
 /***/ })
 /******/ ]);

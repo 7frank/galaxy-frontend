@@ -17,7 +17,7 @@ class View3D extends HTMLElement
 
 
 
-       this.initStatic()
+     //  this.initStatic()
 
 
 
@@ -57,7 +57,7 @@ class View3D extends HTMLElement
     if (this._inited_static_) return;
  var that=this
 
-        this.mFPS=30;
+        this.mFPS=0;
         this.minFPS=0;
         this.maxFPS=144;
 
@@ -103,29 +103,34 @@ class View3D extends HTMLElement
         this.appendChild(this.mRenderer.domElement);
 
 
- /*    //FIXME binding events will interfere with controls
-    $(this.mRenderer.domElement).on("mouseover",function(){
-            that.setActive()
-        })
-        $(this.mRenderer.domElement).on("mouseout",function(){
-            that.setInactive()
-        })
-        */
-
 
 
         $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"})
 
 
         //init domEnvents
-        this.mDomEvents = new THREEx.DomEvents(this.mCamera, this.mRenderer.domElement)
+        this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement)
+
+
+
+        //FIXME binding events will interfere with controls
+        $(this.mRenderer.domElement).on("mouseover",function(e){
+            e.stopPropagation()
+            that.setActive()
+        })
+        $(this.mRenderer.domElement).on("mouseout",function(e){
+            e.stopPropagation()
+            that.setInactive()
+        })
+
 
         // Add camera interaction
-
-
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
         this.mControls.rotateSpeed = 0.3
-        window.oooView=  this
+
+
+
+
 
 
 
@@ -142,21 +147,29 @@ class View3D extends HTMLElement
          // Kick-off renderer
     animate() {
 
-
-var that=this;
+       var initialFrames=1;
+        var that=this;
       function animate(time) {
 
           that.mControls.update();
+          initialFrames--
+          if (that.mFPS==0) {
 
-          if (that.mFPS==0) return;
-
-          let nextTime=that.mLastFrameTime + (1000 / that.mFPS);
-          if (nextTime > time) {
-
-              that.mFrameId = requestAnimationFrame(animate);
-              return;
+              if (initialFrames<0)
+              {
+                  that.mFrameId = requestAnimationFrame(animate);
+                  return;
+              }
           }
+          else {
 
+              let nextTime = that.mLastFrameTime + (1000 / that.mFPS);
+              if (nextTime > time) {
+
+                  that.mFrameId = requestAnimationFrame(animate);
+                  return;
+              }
+          }
       //    console.log("animate",time)
 
           that.mLastFrameTime = time
@@ -165,7 +178,7 @@ var that=this;
 
 
           $(that).trigger("before-frame")
-          $(that).trigger("animate")
+         // $(that).trigger("animate")
 
           that.mRenderer.render(that.mScene, that.mCamera);
 
@@ -239,5 +252,4 @@ var that=this;
 }
 
 
-
-document.registerElement("view-3d", View3D);
+customElements.define("view-3d", View3D);

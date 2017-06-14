@@ -107,7 +107,7 @@
     }
 
 $(function(){
-  //  loadDefaultView()
+    loadDefaultView()
     loadAlternativeView()
 
 })

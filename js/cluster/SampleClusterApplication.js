@@ -88,19 +88,37 @@ export class MyMain {
 
 
 
-        $(mGraphView1).on("click",loadData )
+
+
 
 
         let mGraphView2 = document.createElement("graph-view-3d")
         $(mGraphView2)
             .css(thumbCSS)
 
-        $(mGraphView2).on("click",loadData )
 
 
         //$(this).on("data-changed",function(){})
 
 
+
+
+        //TODO have the data loading handled via promise for each view individually
+        var dataInterval;
+        dataInterval=setInterval(function(){
+
+            if (!that.mGraphData) {
+                return ;
+            }
+
+
+            let mSpeccs=[speccs[0], speccs[1], speccs[3]]
+
+            mGraphView1.setSpeccs(mSpeccs).setData(that.mGraphData)
+            mGraphView2.setSpeccs(mSpeccs).setData(that.mGraphData)
+
+            clearInterval(dataInterval)
+        },100)
 
         container.append(mGraphView1, mGraphView2)
 
