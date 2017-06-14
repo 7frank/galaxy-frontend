@@ -127,7 +127,9 @@ $(function(){
 		
 		globalEnv.particles.updateColors()
 		
-		
+
+		$(window).trigger("node-color-change",val)
+
 	}).appendTo("body")
 	
 })

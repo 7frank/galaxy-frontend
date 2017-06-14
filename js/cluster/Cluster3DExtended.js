@@ -29,9 +29,6 @@ class Cluster3DExtended extends BaseCluster3D {
 
     this.addListeners();
 
-    //TODO have a "cluster-ready" event
-    setTimeout( ()=> this.addNodeCaptions(),7000)
-    //console.warn("TODO use events instead of arbitrary timeout to trigger for completion")
 
     }
 
@@ -143,6 +140,10 @@ class Cluster3DExtended extends BaseCluster3D {
     {
         super.update();
 
+        //TODO have a "cluster-ready" event
+        this.addNodeCaptions()
+
+
         if (this.mTextNodes)
         this.mTextNodes.update();
 
@@ -246,6 +247,11 @@ class Cluster3DExtended extends BaseCluster3D {
     addNodeCaptions(){
 
 
+        var rootCluster=this.getRoot()
+        if (!rootCluster.mParentView) return
+
+
+
         function _getNodePosition(node) {
 
             var mVec3 = new THREE.Vector3();
@@ -258,7 +264,23 @@ class Cluster3DExtended extends BaseCluster3D {
         var nodes=Object.values(this.mClusters)
 
         //TODO remove global dependency in TextNodes
-        let env=undefined
+
+
+        var mTextNode = $(rootCluster.mParentView.mRenderer.domElement).parent().children(".graph-captions-container")
+
+
+        let env={
+                renderer:rootCluster.mParentView.mRenderer,
+                currentNodesVisible:[],//can be left empty if below nodes function is used
+                textNode:mTextNode,
+                camera:rootCluster.mParentView.mCamera
+
+            }
+
+
+
+
+
 
         //TODO make sure radius is dynamically changed when cluster radius changes
 

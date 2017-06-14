@@ -684,7 +684,7 @@ class BaseDistribution
         let defaults={scale:()=> 50 ,dimensions:1}
 
 
-        this.mDuration=1//2000 //FIXME longer duration does not render as intended
+        this.mDuration=2000 //FIXME longer duration does not render as intended
 
         this.dimensions=dimensions //TODO
         this.mScale=scale
@@ -1127,9 +1127,6 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
     this.addListeners();
 
-    //TODO have a "cluster-ready" event
-    setTimeout( ()=> this.addNodeCaptions(),7000)
-    //console.warn("TODO use events instead of arbitrary timeout to trigger for completion")
 
     }
 
@@ -1241,6 +1238,10 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     {
         super.update();
 
+        //TODO have a "cluster-ready" event
+        this.addNodeCaptions()
+
+
         if (this.mTextNodes)
         this.mTextNodes.update();
 
@@ -1344,6 +1345,11 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     addNodeCaptions(){
 
 
+        var rootCluster=this.getRoot()
+        if (!rootCluster.mParentView) return
+
+
+
         function _getNodePosition(node) {
 
             var mVec3 = new THREE.Vector3();
@@ -1356,7 +1362,23 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         var nodes=Object.values(this.mClusters)
 
         //TODO remove global dependency in TextNodes
-        let env=undefined
+
+
+        var mTextNode = $(rootCluster.mParentView.mRenderer.domElement).parent().children(".graph-captions-container")
+
+
+        let env={
+                renderer:rootCluster.mParentView.mRenderer,
+                currentNodesVisible:[],//can be left empty if below nodes function is used
+                textNode:mTextNode,
+                camera:rootCluster.mParentView.mCamera
+
+            }
+
+
+
+
+
 
         //TODO make sure radius is dynamically changed when cluster radius changes
 
@@ -1830,14 +1852,66 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
     {
         super(...args)
 
-        this.addGlobalNodeCaptions()
+       // this.addGlobalNodeCaptions()
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
         setTimeout(()=> this.onAfterClusteredAndDistributed(),1000)
 
 
+
+       this.addColorHandler()
+
+
     }
+
+
+    addColorHandler()
+    {
+
+   var nodes=this.mNodes;
+   var that=this
+
+
+        function getCountryNamesFromNodes(nodes)
+        {
+            var res={}
+            _.each(nodes,(n) => res[n.group]=true)
+
+         return Object.keys(res)
+        }
+        var countryNames=null;
+
+        $(window).on("node-color-change",function(e,val){
+
+
+          if (!countryNames)countryNames=getCountryNamesFromNodes(nodes)
+
+            var helper=computeGroupNodeColorHelper(countryNames)
+
+
+         //   var val=$sel.val()
+            if (val=="group")
+                nodes.forEach(function(v){ v.color=helper.getColor(v.group)});
+            else
+                nodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
+
+            _.each(that.getLeafs(),function(leaf){
+
+
+                leaf.mParticles.update()
+            })
+
+
+
+
+
+
+        })
+
+
+    }
+
 
 
     /**
@@ -1853,6 +1927,18 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
     /**
+     * attaches to root cluster to a specific View3D element to be able to perform container based operations
+     *
+     *
+     */
+    attachToView3D(view3D){
+        this.mParentView=view3D
+
+        this.addGlobalNodeCaptions()
+
+    }
+
+    /**
      *
      * TODO the root cluster manages the visibility of all of it's currently visible nodes
      * we do have a hierarchical structure that we can use to speed up the rendering a bit
@@ -1860,10 +1946,69 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
      */
 
 
-    addGlobalNodeCaptions(){
+    addGlobalNodeCaptions() {
 
-        //TODO remove global dependency
-        let env=undefined
+        if (!this.mParentView) {
+            console.warn("use attachToView3D() to attach cluster to a view container first")
+            return
+        }
+
+        function createTextNodeContainer() {
+
+            //create container for text elements
+
+            var textElementsContainer = $("<div>").addClass("graph-captions-container").css({
+                width: "100%",
+                height: "100%",
+               // top: 0,
+               // left: 0,
+                overflow: "hidden",
+                position: "absolute",
+                "pointer-events": "none"//, border: "1px solid red"
+            })
+
+            return textElementsContainer
+        }
+
+        /**
+         * for the method to work env  needs to contain the following paraams :
+         * env={
+         *  renderer.domElement,  for get dimensions and text pos
+         *   currentNodesVisible,   // ... nodes visible==all nodes in set is to harsh let rootcluster handle it probably
+         *	textNode,               // node container that is overlay with pointerevents none
+         *  camera
+         *  }
+         */
+
+
+        var mTextNode = $(this.mParentView.mRenderer.domElement).parent().children(".graph-captions-container")
+
+       if (mTextNode.length == 0) {
+
+            mTextNode = createTextNodeContainer(this.mParentView.mRenderer.domElement);
+            $(this.mParentView.mRenderer.domElement).parent().append(mTextNode)
+            this.mTextNodesContainer=mTextNode
+
+        }
+
+        this.mGlobalTextNodesContainer=mTextNode
+
+        mTextNode.height(this.mParentView.clientHeight)
+        mTextNode.width(this.mParentView.clientWidth)
+
+
+       mTextNode.empty()
+
+
+
+
+        let env={
+            renderer:this.mParentView.mRenderer,
+            currentNodesVisible:[],//can be left empty if below nodes function is used
+            textNode:mTextNode,
+            camera:this.mParentView.mCamera
+
+        }
 
         if (!this.tn)
             this.tn = TextNodes(env, {
@@ -1876,7 +2021,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
                     return node.id
 
                 },
-                getNodes: () => this.mNodes
+                getNodes: () => this.mNodes //FIXME use only visible nodes to improve performance
             })
 
 
@@ -2291,7 +2436,7 @@ class ClusterNodeArray extends Array //List<Node>
         return {position:new THREE.Vector3(absPos.x,absPos.y,absPos.z).multiplyScalar(this.mScale)};
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = DefaultDistribution;
+/* unused harmony export default */
 
 
 
@@ -2429,6 +2574,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
     }
 
 
+
     setSpeccs(speccs)
     {
         this.mSpeccs=speccs;
@@ -2456,11 +2602,17 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
         var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes);
 
+
+
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
         res.applyClustering(speccs)
+        //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
+        res.attachToView3D(this)
 
-
+        $(this).on("before-render",function(){
+            res.update()
+        })
 
 
         this.start()
@@ -2483,11 +2635,34 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     }
 
-    connectedCallback(){
+    maximise() {
 
-    this.initStatic();
-        this.start();
+        super.maximise()
+
+        let root = this.mRootCluster
+        if (root.mParentView && root.mGlobalTextNodesContainer) {
+
+            root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight)
+            root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
+            console.log("maximised", root.mGlobalTextNodesContainer)
+        }
     }
+
+    undoMaximise(){
+            super.undoMaximise()
+
+
+            let root=this.mRootCluster
+            if (root.mParentView && root.mGlobalTextNodesContainer) {
+
+                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight)
+                root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
+            }
+
+
+    }
+
+
 }
 /* unused harmony export default */
 
@@ -3010,8 +3185,8 @@ class MyMain {
 
     constructor() {
 
-
         this.setupViews()
+
 
         //  this.clusters = this.init();
 
@@ -3021,74 +3196,194 @@ class MyMain {
 
     setupViews() {
 
-        var container = $("<div>")
-            .css({display:"flex",position: "absolute", top: "10em", left: "20em", width: "60em"})
-            .appendTo("body")
 
-        let thumbCSS = {
-            height: 300,
-            width: 400,
-            display: "flex",
-            border: "1px solid rgba(128, 128, 128, 0.5)",
-            margin:"0.2em"
+        function createContainer(){
+
+            var container = $("<div>")
+                .css({"pointer-events":"none",display:"flex","flex-flow": "row wrap",position: "absolute", top: "10em", left: "20em", width: "60em"})
+                .appendTo("body")
+
+            let title=$("<div>press 'space' to toggle menu </div>")
+                .css({ width: "100%","font-size":"1em"})
+
+
+
+            function toggleMenu(){
+                container.toggle()
+            }
+            title.on("click",toggleMenu)
+
+            container.append(title)
+
+
+            Mousetrap.bind( "space",toggleMenu)
+
+            return container
         }
 
         var that=this
 
-        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
-        function loadData() {
 
-            if (!that.mGraphData) {
-                console.warn("data not loaded")
-                return ;
+
+        var container =createContainer()
+
+
+        function createDefaultView(name="View3D",speccs,data){
+
+
+            let thumbCSS = {
+                "pointer-events":"all",
+                height: 225,
+                width: 300,
+                display: "flex",
+                border: "1px solid rgba(128, 128, 128, 0.5)",
+                margin:"0.2em"
             }
 
-            let mSpeccs=[speccs[0], speccs[1], speccs[3]]
 
-            this.setSpeccs(mSpeccs).setData(that.mGraphData)
+            let mGraphView = document.createElement("graph-view-3d")
+            //  mGraphView1.setCaption("sample 1")
+
+
+            mGraphView.setCaption(name)
+
+            $(mGraphView)
+                .css(thumbCSS)
+
+            $(mGraphView).on("dblclick",function(){
+                let maximisedContainer=$("#3d-graph")
+                //globalEnv.scene=mGraphView.mScene
+                var prevMaximisedElement= maximisedContainer.children("graph-view-3d")
+
+                _.each(prevMaximisedElement,function(view){
+
+                    view.undoMaximise()
+
+                })
+
+                //container.append(prevMaximisedElement)
+               // maximisedContainer.append(this)
+
+
+                this.maximise()
+
+            })
+
+
+            mGraphView.setSpeccs(speccs)
+            mGraphView.setData({links:[ ["1","2"]],nodes:{"1":{"id": "1", "group": 1, "shape" : "cube"},"1":{"id": "2", "group": 1, "shape" : "cube"}}})
+
+
+
+
+
+
+            mGraphView.setData=function(){}
+
+
+            return mGraphView
+
         }
 
 
-        let mGraphView1 = document.createElement("graph-view-3d")
-
-        $(mGraphView1)
-            .css(thumbCSS)
+        function createView(name="View3D",speccs,data){
 
 
-
-
-
-
-
-        let mGraphView2 = document.createElement("graph-view-3d")
-        $(mGraphView2)
-            .css(thumbCSS)
-
-
-
-        //$(this).on("data-changed",function(){})
-
-
-
-
-        //TODO have the data loading handled via promise for each view individually
-        var dataInterval;
-        dataInterval=setInterval(function(){
-
-            if (!that.mGraphData) {
-                return ;
+            let thumbCSS = {
+                "pointer-events":"all",
+                height: 225,
+                width: 300,
+                display: "flex",
+                border: "1px solid rgba(128, 128, 128, 0.5)",
+                margin:"0.2em"
             }
 
 
-            let mSpeccs=[speccs[0], speccs[1], speccs[3]]
+            let mGraphView = document.createElement("graph-view-3d")
+            //  mGraphView1.setCaption("sample 1")
 
-            mGraphView1.setSpeccs(mSpeccs).setData(that.mGraphData)
-            mGraphView2.setSpeccs(mSpeccs).setData(that.mGraphData)
 
-            clearInterval(dataInterval)
-        },100)
+            mGraphView.setCaption(name)
 
-        container.append(mGraphView1, mGraphView2)
+            $(mGraphView)
+                .css(thumbCSS)
+
+            $(mGraphView).on("dblclick",function(){
+                let maximisedContainer=$("#3d-graph")
+                //globalEnv.scene=mGraphView.mScene
+                var prevMaximisedElement= maximisedContainer.children("graph-view-3d")
+
+                _.each(prevMaximisedElement,function(view){
+
+                    view.undoMaximise()
+
+                })
+
+                 container.append(prevMaximisedElement)
+                maximisedContainer.append(this)
+
+
+                this.maximise()
+
+            })
+
+
+            mGraphView.setSpeccs(speccs)
+
+            return mGraphView
+
+        }
+
+
+
+
+
+        let views=[]
+
+
+
+      //  let view0 = createDefaultView("Default",[{distribution:new BaseDistribution(2000,3)}])
+      //  views.push(view0)
+
+        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
+        let view1 = createView("View1",[speccs[0], speccs[1], speccs[3]])
+        views.push(view1)
+
+
+        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
+        let view2 = createView("View2",[speccs[1], speccs[0], speccs[3]])
+        views.push(view2)
+
+
+        let view3 = createView("View3",[{distribution:new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000,3)}])
+        views.push(view3)
+
+//---------------------------
+
+
+
+
+
+
+        //------------------------------------
+        $(this).on("data-changed",loadAll)
+        if (that.mGraphData) loadAll()
+
+        function loadAll(){
+
+
+            _.each(views,function(view){
+            view.setData(that.mGraphData)
+            })
+
+        }
+
+
+
+        _.each(views,function(view){
+            container.append(view)
+        })
+
 
 
     }
@@ -3155,12 +3450,11 @@ class MyMain {
         this.mGraphData = graphData;
        // this.init(mGraphData);
 
-        //TODO
-        //$(this).trigger("data-changed")
+        $(this).trigger("data-changed")
 
     }
 
-
+/*
 
     runSample1() {
         console.log("runSample1")
@@ -3181,7 +3475,7 @@ class MyMain {
 
     runSample3() {
         console.log("runSample3")
-        let defaultEntry = {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](4000, 2)}
+        let defaultEntry = {distribution: new BaseDistribution(4000, 2)}
 
         this.clusters.applyClustering([defaultEntry])
 
@@ -3190,13 +3484,13 @@ class MyMain {
 
     runSample4() {
         console.log("runSample4")
-        let defaultEntry = {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__["a" /* default */]()}
+        let defaultEntry = {distribution: new DefaultDistribution()}
 
         this.clusters.applyClustering([defaultEntry])
 
 
     }
-
+*/
 
 }
 /* harmony export (immutable) */ __webpack_exports__["MyMain"] = MyMain;
@@ -3296,9 +3590,22 @@ class View3D extends HTMLElement
     super(...args)
 
 
+        this.createCSSRule()
 
-     //  this.initStatic()
+    //   this.initStatic()
 
+
+
+
+    }
+
+    //TODO remove little redundancy
+    createCSSRule()
+    {
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = '.view-3d-maximised { position: absolute !important;   top: 0  !important;   left: 0  !important;   height: 100% !important;    width: 100% !important; }';
+        document.getElementsByTagName('head')[0].appendChild(style);
 
 
 
@@ -3311,7 +3618,12 @@ class View3D extends HTMLElement
         this.mCamera.aspect = this.clientWidth /this.clientHeight;
         this.mCamera.updateProjectionMatrix();
     }
-}
+
+        if (this.mRenderer)
+         this.mControls.rotateSpeed = 1600/this.clientWidth*0.3
+
+
+    }
 
 
    /* get scene() {
@@ -3323,9 +3635,29 @@ class View3D extends HTMLElement
 */
     setCaption(text)
     {
+
+
+        let captionCSS= {
+            "pointer-events": "none",
+            position: "relative",
+            padding: "1em",
+            "font-size": "2em",
+            top: "30%",
+            height: "3em",
+            width: "100%",
+            background: "rgba(255,255,255,0.3)",
+            left: "0px",
+            "z-index": 1
+        }
+
+        if (!this.mCaption)
+            this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
+
         this.mCaption.html("").append(text)
         return this
     }
+
+
 
 
     /**
@@ -3334,20 +3666,31 @@ class View3D extends HTMLElement
      */
     initStatic() {
 
-    if (this._inited_static_) return;
- var that=this
+         if (this._inited_static_) return;
+         var that=this
 
-        this.mFPS=0;
+        this.mFPS=0.5;
         this.minFPS=0;
         this.maxFPS=144;
 
 
         this.mLastFrameTime=-1
 
+        let captionCSS= {
+            "pointer-events": "none",
+            position: "relative",
+            padding: "1em",
+            "font-size": "2em",
+            top: "30%",
+            height: "3em",
+            width: "100%",
+            background: "rgba(255,255,255,0.3)",
+            left: "0px",
+            "z-index": 1
+        }
 
-        this.mCaption=$("<span>View3D</span>").css({
-            "pointer-events":"none",
-            position:"relative",top:0,left:0,zIndex:1})
+    if (!this.mCaption)
+        this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
 
         $(this).append(   this.mCaption)
 
@@ -3369,7 +3712,7 @@ class View3D extends HTMLElement
 
         this.mCamera.lookAt(this.mScene.position);
 
-        this.mCamera.position.z = 5000;
+        this.mCamera.position.z = 9000;
 
 
 
@@ -3397,16 +3740,28 @@ class View3D extends HTMLElement
         $(this.mRenderer.domElement).on("mouseover",function(e){
             e.stopPropagation()
             that.setActive()
+
+
+
+            that.mCaption.stop().fadeOut()
+
+
         })
         $(this.mRenderer.domElement).on("mouseout",function(e){
             e.stopPropagation()
             that.setInactive()
+
+
+            if (!$(that).hasClass("view-3d-maximised"))
+            that.mCaption.stop().delay(400).fadeIn()
+
+
         })
 
 
         // Add camera interaction
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
-        this.mControls.rotateSpeed = 0.3
+       // this.mControls.rotateSpeed = 0.3
 
 
 
@@ -3457,7 +3812,7 @@ class View3D extends HTMLElement
 
 
 
-          $(that).trigger("before-frame")
+          $(that).trigger("before-render")
          // $(that).trigger("animate")
 
           that.mRenderer.render(that.mScene, that.mCamera);
@@ -3477,21 +3832,41 @@ class View3D extends HTMLElement
 
     }
 
+
+    maximise() {
+        $(this).addClass("view-3d-maximised")
+
+        this.setActive()
+
+
+    }
+
+    undoMaximise() {
+        $(this).removeClass("view-3d-maximised")
+
+        this.setInactive()
+
+
+    }
+
+
+
+
+
     setActive()
     {
-
-        //fullscreen
-        $(this).addClass("view-3d-maximised")
 
         //fps
         this.mFPS=this.maxFPS
 
         this.resizeCanvas()
+        this.start();
+
     }
 
     setInactive()
     {
-        $(this).removeClass("view-3d-maximised")
+      //  $(this).removeClass("view-3d-maximised")
         this.mFPS=this.minFPS
 
         this.resizeCanvas()
@@ -3526,6 +3901,13 @@ class View3D extends HTMLElement
 
     hide() {
         this.stop()
+    }
+
+
+    connectedCallback(){
+
+        this.initStatic();
+        this.start();
     }
 
 

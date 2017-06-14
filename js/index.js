@@ -98,7 +98,7 @@
 
         dataSet(null,function alternativehandler(mGraphData)
         {
-
+        console.log("data loaded")
             main.setGraphData(mGraphData)
 
 

@@ -42,8 +42,8 @@ export class MyMain {
 
     constructor() {
 
-
         this.setupViews()
+
 
         //  this.clusters = this.init();
 
@@ -53,74 +53,194 @@ export class MyMain {
 
     setupViews() {
 
-        var container = $("<div>")
-            .css({display:"flex",position: "absolute", top: "10em", left: "20em", width: "60em"})
-            .appendTo("body")
 
-        let thumbCSS = {
-            height: 300,
-            width: 400,
-            display: "flex",
-            border: "1px solid rgba(128, 128, 128, 0.5)",
-            margin:"0.2em"
+        function createContainer(){
+
+            var container = $("<div>")
+                .css({"pointer-events":"none",display:"flex","flex-flow": "row wrap",position: "absolute", top: "10em", left: "20em", width: "60em"})
+                .appendTo("body")
+
+            let title=$("<div>press 'space' to toggle menu </div>")
+                .css({ width: "100%","font-size":"1em"})
+
+
+
+            function toggleMenu(){
+                container.toggle()
+            }
+            title.on("click",toggleMenu)
+
+            container.append(title)
+
+
+            Mousetrap.bind( "space",toggleMenu)
+
+            return container
         }
 
         var that=this
 
-        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
-        function loadData() {
 
-            if (!that.mGraphData) {
-                console.warn("data not loaded")
-                return ;
+
+        var container =createContainer()
+
+
+        function createDefaultView(name="View3D",speccs,data){
+
+
+            let thumbCSS = {
+                "pointer-events":"all",
+                height: 225,
+                width: 300,
+                display: "flex",
+                border: "1px solid rgba(128, 128, 128, 0.5)",
+                margin:"0.2em"
             }
 
-            let mSpeccs=[speccs[0], speccs[1], speccs[3]]
 
-            this.setSpeccs(mSpeccs).setData(that.mGraphData)
+            let mGraphView = document.createElement("graph-view-3d")
+            //  mGraphView1.setCaption("sample 1")
+
+
+            mGraphView.setCaption(name)
+
+            $(mGraphView)
+                .css(thumbCSS)
+
+            $(mGraphView).on("dblclick",function(){
+                let maximisedContainer=$("#3d-graph")
+                //globalEnv.scene=mGraphView.mScene
+                var prevMaximisedElement= maximisedContainer.children("graph-view-3d")
+
+                _.each(prevMaximisedElement,function(view){
+
+                    view.undoMaximise()
+
+                })
+
+                //container.append(prevMaximisedElement)
+               // maximisedContainer.append(this)
+
+
+                this.maximise()
+
+            })
+
+
+            mGraphView.setSpeccs(speccs)
+            mGraphView.setData({links:[ ["1","2"]],nodes:{"1":{"id": "1", "group": 1, "shape" : "cube"},"1":{"id": "2", "group": 1, "shape" : "cube"}}})
+
+
+
+
+
+
+            mGraphView.setData=function(){}
+
+
+            return mGraphView
+
         }
 
 
-        let mGraphView1 = document.createElement("graph-view-3d")
-
-        $(mGraphView1)
-            .css(thumbCSS)
+        function createView(name="View3D",speccs,data){
 
 
-
-
-
-
-
-        let mGraphView2 = document.createElement("graph-view-3d")
-        $(mGraphView2)
-            .css(thumbCSS)
-
-
-
-        //$(this).on("data-changed",function(){})
-
-
-
-
-        //TODO have the data loading handled via promise for each view individually
-        var dataInterval;
-        dataInterval=setInterval(function(){
-
-            if (!that.mGraphData) {
-                return ;
+            let thumbCSS = {
+                "pointer-events":"all",
+                height: 225,
+                width: 300,
+                display: "flex",
+                border: "1px solid rgba(128, 128, 128, 0.5)",
+                margin:"0.2em"
             }
 
 
-            let mSpeccs=[speccs[0], speccs[1], speccs[3]]
+            let mGraphView = document.createElement("graph-view-3d")
+            //  mGraphView1.setCaption("sample 1")
 
-            mGraphView1.setSpeccs(mSpeccs).setData(that.mGraphData)
-            mGraphView2.setSpeccs(mSpeccs).setData(that.mGraphData)
 
-            clearInterval(dataInterval)
-        },100)
+            mGraphView.setCaption(name)
 
-        container.append(mGraphView1, mGraphView2)
+            $(mGraphView)
+                .css(thumbCSS)
+
+            $(mGraphView).on("dblclick",function(){
+                let maximisedContainer=$("#3d-graph")
+                //globalEnv.scene=mGraphView.mScene
+                var prevMaximisedElement= maximisedContainer.children("graph-view-3d")
+
+                _.each(prevMaximisedElement,function(view){
+
+                    view.undoMaximise()
+
+                })
+
+                 container.append(prevMaximisedElement)
+                maximisedContainer.append(this)
+
+
+                this.maximise()
+
+            })
+
+
+            mGraphView.setSpeccs(speccs)
+
+            return mGraphView
+
+        }
+
+
+
+
+
+        let views=[]
+
+
+
+      //  let view0 = createDefaultView("Default",[{distribution:new BaseDistribution(2000,3)}])
+      //  views.push(view0)
+
+        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
+        let view1 = createView("View1",[speccs[0], speccs[1], speccs[3]])
+        views.push(view1)
+
+
+        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
+        let view2 = createView("View2",[speccs[1], speccs[0], speccs[3]])
+        views.push(view2)
+
+
+        let view3 = createView("View3",[{distribution:new BaseDistribution(2000,3)}])
+        views.push(view3)
+
+//---------------------------
+
+
+
+
+
+
+        //------------------------------------
+        $(this).on("data-changed",loadAll)
+        if (that.mGraphData) loadAll()
+
+        function loadAll(){
+
+
+            _.each(views,function(view){
+            view.setData(that.mGraphData)
+            })
+
+        }
+
+
+
+        _.each(views,function(view){
+            container.append(view)
+        })
+
 
 
     }
@@ -187,12 +307,11 @@ export class MyMain {
         this.mGraphData = graphData;
        // this.init(mGraphData);
 
-        //TODO
-        //$(this).trigger("data-changed")
+        $(this).trigger("data-changed")
 
     }
 
-
+/*
 
     runSample1() {
         console.log("runSample1")
@@ -228,7 +347,7 @@ export class MyMain {
 
 
     }
-
+*/
 
 }
 

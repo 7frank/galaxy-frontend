@@ -4,6 +4,18 @@
  * text nodes get rendered from a finite subset of given nodes depending on parameters like min/max distance
  */
 
+/**
+ *
+ * for the method to work env  needs to contain the following paraams :
+ * env={..
+ *  renderer.domElement
+ *   currentNodesVisible to select visible text nodes from
+ *	textNode node container that is overlay with pointerevents none
+ *  camera
+ *  }
+ */
+
+
 function TextNodes(env = globalEnv, options) {
 	var domEl = env.renderer.domElement
 
@@ -219,6 +231,7 @@ function TextNodes(env = globalEnv, options) {
 		//let's take the result set of the last renderer loop as a start
 		//the data is in approximate descending distance from farthest to closest
 		var mNodes = options.getNodes();
+       // console.error("textnodes",mNodes.length)
 		var maxVisibleTextNodes = options.maxVisibleCount;
 
 		//next let's find the closest x nodes that match the criterias to be displayed

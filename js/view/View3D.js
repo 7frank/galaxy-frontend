@@ -16,9 +16,22 @@ class View3D extends HTMLElement
     super(...args)
 
 
+        this.createCSSRule()
 
-     //  this.initStatic()
+    //   this.initStatic()
 
+
+
+
+    }
+
+    //TODO remove little redundancy
+    createCSSRule()
+    {
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = '.view-3d-maximised { position: absolute !important;   top: 0  !important;   left: 0  !important;   height: 100% !important;    width: 100% !important; }';
+        document.getElementsByTagName('head')[0].appendChild(style);
 
 
 
@@ -31,7 +44,12 @@ class View3D extends HTMLElement
         this.mCamera.aspect = this.clientWidth /this.clientHeight;
         this.mCamera.updateProjectionMatrix();
     }
-}
+
+        if (this.mRenderer)
+         this.mControls.rotateSpeed = 1600/this.clientWidth*0.3
+
+
+    }
 
 
    /* get scene() {
@@ -43,9 +61,29 @@ class View3D extends HTMLElement
 */
     setCaption(text)
     {
+
+
+        let captionCSS= {
+            "pointer-events": "none",
+            position: "relative",
+            padding: "1em",
+            "font-size": "2em",
+            top: "30%",
+            height: "3em",
+            width: "100%",
+            background: "rgba(255,255,255,0.3)",
+            left: "0px",
+            "z-index": 1
+        }
+
+        if (!this.mCaption)
+            this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
+
         this.mCaption.html("").append(text)
         return this
     }
+
+
 
 
     /**
@@ -54,20 +92,31 @@ class View3D extends HTMLElement
      */
     initStatic() {
 
-    if (this._inited_static_) return;
- var that=this
+         if (this._inited_static_) return;
+         var that=this
 
-        this.mFPS=0;
+        this.mFPS=0.5;
         this.minFPS=0;
         this.maxFPS=144;
 
 
         this.mLastFrameTime=-1
 
+        let captionCSS= {
+            "pointer-events": "none",
+            position: "relative",
+            padding: "1em",
+            "font-size": "2em",
+            top: "30%",
+            height: "3em",
+            width: "100%",
+            background: "rgba(255,255,255,0.3)",
+            left: "0px",
+            "z-index": 1
+        }
 
-        this.mCaption=$("<span>View3D</span>").css({
-            "pointer-events":"none",
-            position:"relative",top:0,left:0,zIndex:1})
+    if (!this.mCaption)
+        this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
 
         $(this).append(   this.mCaption)
 
@@ -89,7 +138,7 @@ class View3D extends HTMLElement
 
         this.mCamera.lookAt(this.mScene.position);
 
-        this.mCamera.position.z = 5000;
+        this.mCamera.position.z = 9000;
 
 
 
@@ -117,16 +166,28 @@ class View3D extends HTMLElement
         $(this.mRenderer.domElement).on("mouseover",function(e){
             e.stopPropagation()
             that.setActive()
+
+
+
+            that.mCaption.stop().fadeOut()
+
+
         })
         $(this.mRenderer.domElement).on("mouseout",function(e){
             e.stopPropagation()
             that.setInactive()
+
+
+            if (!$(that).hasClass("view-3d-maximised"))
+            that.mCaption.stop().delay(400).fadeIn()
+
+
         })
 
 
         // Add camera interaction
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
-        this.mControls.rotateSpeed = 0.3
+       // this.mControls.rotateSpeed = 0.3
 
 
 
@@ -177,7 +238,7 @@ class View3D extends HTMLElement
 
 
 
-          $(that).trigger("before-frame")
+          $(that).trigger("before-render")
          // $(that).trigger("animate")
 
           that.mRenderer.render(that.mScene, that.mCamera);
@@ -197,21 +258,41 @@ class View3D extends HTMLElement
 
     }
 
+
+    maximise() {
+        $(this).addClass("view-3d-maximised")
+
+        this.setActive()
+
+
+    }
+
+    undoMaximise() {
+        $(this).removeClass("view-3d-maximised")
+
+        this.setInactive()
+
+
+    }
+
+
+
+
+
     setActive()
     {
-
-        //fullscreen
-        $(this).addClass("view-3d-maximised")
 
         //fps
         this.mFPS=this.maxFPS
 
         this.resizeCanvas()
+        this.start();
+
     }
 
     setInactive()
     {
-        $(this).removeClass("view-3d-maximised")
+      //  $(this).removeClass("view-3d-maximised")
         this.mFPS=this.minFPS
 
         this.resizeCanvas()
@@ -246,6 +327,13 @@ class View3D extends HTMLElement
 
     hide() {
         this.stop()
+    }
+
+
+    connectedCallback(){
+
+        this.initStatic();
+        this.start();
     }
 
 

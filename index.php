@@ -68,7 +68,7 @@
 		<script src="./js/AppDataService.js"></script>
 
 
-    <script src="./js/debug.js"></script>
+
 
 
 

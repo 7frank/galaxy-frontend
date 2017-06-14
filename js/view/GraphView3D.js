@@ -24,6 +24,7 @@ class GraphView3D extends View3D
     }
 
 
+
     setSpeccs(speccs)
     {
         this.mSpeccs=speccs;
@@ -51,11 +52,17 @@ class GraphView3D extends View3D
 
         var res = new RootCluster(preparedData.nodes);
 
+
+
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
         res.applyClustering(speccs)
+        //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
+        res.attachToView3D(this)
 
-
+        $(this).on("before-render",function(){
+            res.update()
+        })
 
 
         this.start()
@@ -78,11 +85,34 @@ class GraphView3D extends View3D
 
     }
 
-    connectedCallback(){
+    maximise() {
 
-    this.initStatic();
-        this.start();
+        super.maximise()
+
+        let root = this.mRootCluster
+        if (root.mParentView && root.mGlobalTextNodesContainer) {
+
+            root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight)
+            root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
+            console.log("maximised", root.mGlobalTextNodesContainer)
+        }
     }
+
+    undoMaximise(){
+            super.undoMaximise()
+
+
+            let root=this.mRootCluster
+            if (root.mParentView && root.mGlobalTextNodesContainer) {
+
+                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight)
+                root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
+            }
+
+
+    }
+
+
 }
 
 customElements.define("graph-view-3d", GraphView3D);

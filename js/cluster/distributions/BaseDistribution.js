@@ -20,7 +20,7 @@ export default  class BaseDistribution
         let defaults={scale:()=> 50 ,dimensions:1}
 
 
-        this.mDuration=1//2000 //FIXME longer duration does not render as intended
+        this.mDuration=2000 //FIXME longer duration does not render as intended
 
         this.dimensions=dimensions //TODO
         this.mScale=scale
