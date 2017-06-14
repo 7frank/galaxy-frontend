@@ -58,8 +58,8 @@ export class MyMain {
             .appendTo("body")
 
         let thumbCSS = {
-            height: 150,
-            width: "200",
+            height: 300,
+            width: 400,
             display: "flex",
             border: "1px solid rgba(128, 128, 128, 0.5)",
             margin:"0.2em"

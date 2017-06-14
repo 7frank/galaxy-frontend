@@ -66,7 +66,7 @@ class View3D extends HTMLElement
 
 
         this.mCaption=$("<span>View3D</span>").css({
-           // "pointer-events":"none",
+            "pointer-events":"none",
             position:"relative",top:0,left:0,zIndex:1})
 
         $(this).append(   this.mCaption)
@@ -97,13 +97,13 @@ class View3D extends HTMLElement
         this.mRenderer = new THREE.WebGLRenderer({
             antialias: true
         });
-        this.mRenderer.setClearColor( 0x0000FF );
+        this.mRenderer.setClearColor( 0x111111 );
         this.mRenderer.setPixelRatio( window.devicePixelRatio );
 
         this.appendChild(this.mRenderer.domElement);
 
 
- /*    
+ /*    //FIXME binding events will interfere with controls
     $(this.mRenderer.domElement).on("mouseover",function(){
             that.setActive()
         })
@@ -141,6 +141,8 @@ class View3D extends HTMLElement
 
          // Kick-off renderer
     animate() {
+
+
 var that=this;
       function animate(time) {
 
