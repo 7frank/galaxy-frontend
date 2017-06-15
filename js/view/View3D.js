@@ -118,7 +118,9 @@ class View3D extends HTMLElement
     if (!this.mCaption)
         this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
 
-        $(this).append(   this.mCaption)
+        $(this).append(   this.mCaption).addClass("view-3d")
+
+
 
         // Add nav info section
 

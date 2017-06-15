@@ -115,22 +115,26 @@ $(function(){
 	
 	
 	$sel.on("change",function(e,ui){
-		var helper=computeGroupNodeColorHelper(globalEnv.nodeClouds.groupIdList)
-		
-		var val=$sel.val()
-		if (val=="group")
-		globalNodes.forEach(function(v){ v.color=helper.getColor(v.group)});	
-			else 
-		globalNodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
-		
-		globalEnv.nodeClouds.update()
-		
-		globalEnv.particles.updateColors()
-		
+        var val=$sel.val()
 
 		$(window).trigger("node-color-change",val)
 
-	}).appendTo("body")
+
+        var helper=computeGroupNodeColorHelper(globalEnv.nodeClouds.groupIdList)
+
+
+        if (val=="group")
+            globalNodes.forEach(function(v){ v.color=helper.getColor(v.group)});
+        else
+            globalNodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
+
+        globalEnv.nodeClouds.update()
+
+        globalEnv.particles.updateColors()
+
+
+
+    }).appendTo("body")
 	
 })
 

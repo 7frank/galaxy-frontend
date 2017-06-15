@@ -26,6 +26,7 @@ import GraphData from "./GraphData"
 
 
 import GraphView3D from "../view/GraphView3D"
+import SimpleForceGraphView3D from "../view/SimpleForceGraphView3D"
 
 
 //-----------------------------------------
@@ -52,6 +53,14 @@ export class MyMain {
 
 
     setupViews() {
+        const thumbCSS = {
+            "pointer-events":"all",
+            height: 225,
+            width: 300,
+            display: "flex",
+            border: "1px solid rgba(128, 128, 128, 0.5)",
+            margin:"0.2em"
+        }
 
 
         function createContainer(){
@@ -60,7 +69,7 @@ export class MyMain {
                 .css({"pointer-events":"none",display:"flex","flex-flow": "row wrap",position: "absolute", top: "10em", left: "20em", width: "60em"})
                 .appendTo("body")
 
-            let title=$("<div>press 'space' to toggle menu </div>")
+            let title=$("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
                 .css({ width: "100%","font-size":"1em"})
 
 
@@ -85,23 +94,18 @@ export class MyMain {
         var container =createContainer()
 
 
-        function createDefaultView(name="View3D",speccs,data){
+        function createDefaultView(name="View3D"){
+
+            let mGraphView = document.createElement("simple-force-graph-view-3d")//("view-3d")
 
 
-            let thumbCSS = {
-                "pointer-events":"all",
-                height: 225,
-                width: 300,
-                display: "flex",
-                border: "1px solid rgba(128, 128, 128, 0.5)",
-                margin:"0.2em"
-            }
+            customElements.whenDefined("simple-force-graph-view-3d").then(function() {
 
 
-            let mGraphView = document.createElement("graph-view-3d")
-            //  mGraphView1.setCaption("sample 1")
 
 
+
+            if ( mGraphView.setCaption)
             mGraphView.setCaption(name)
 
             $(mGraphView)
@@ -110,33 +114,36 @@ export class MyMain {
             $(mGraphView).on("dblclick",function(){
                 let maximisedContainer=$("#3d-graph")
                 //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement= maximisedContainer.children("graph-view-3d")
+                var prevMaximisedElement= maximisedContainer.children(".view-3d");//("graph-view-3d")
 
                 _.each(prevMaximisedElement,function(view){
 
-                    view.undoMaximise()
+                    view.undoMaximise() //
 
                 })
 
-                //container.append(prevMaximisedElement)
-               // maximisedContainer.append(this)
+                container.append(prevMaximisedElement)
 
-
+                //--------
+                maximisedContainer.append(this)
                 this.maximise()
+
+
 
             })
 
 
-            mGraphView.setSpeccs(speccs)
-            mGraphView.setData({links:[ ["1","2"]],nodes:{"1":{"id": "1", "group": 1, "shape" : "cube"},"1":{"id": "2", "group": 1, "shape" : "cube"}}})
+            })
+            var setData=mGraphView.setData
+            mGraphView.setData=function(data){
 
+                customElements.whenDefined("simple-force-graph-view-3d").then(function() {
 
+                    setData.call(mGraphView,data)
 
+                })
 
-
-
-            mGraphView.setData=function(){}
-
+            }
 
             return mGraphView
 
@@ -146,16 +153,6 @@ export class MyMain {
         function createView(name="View3D",speccs,data){
 
 
-            let thumbCSS = {
-                "pointer-events":"all",
-                height: 225,
-                width: 300,
-                display: "flex",
-                border: "1px solid rgba(128, 128, 128, 0.5)",
-                margin:"0.2em"
-            }
-
-
             let mGraphView = document.createElement("graph-view-3d")
             //  mGraphView1.setCaption("sample 1")
 
@@ -168,7 +165,7 @@ export class MyMain {
             $(mGraphView).on("dblclick",function(){
                 let maximisedContainer=$("#3d-graph")
                 //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement= maximisedContainer.children("graph-view-3d")
+                var prevMaximisedElement= maximisedContainer.children(".view-3d")//("graph-view-3d")
 
                 _.each(prevMaximisedElement,function(view){
 
@@ -199,26 +196,21 @@ export class MyMain {
 
 
 
-      //  let view0 = createDefaultView("Default",[{distribution:new BaseDistribution(2000,3)}])
-      //  views.push(view0)
+       let view0 = createDefaultView("Default")
+       views.push(view0)
 
         var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
         let view1 = createView("View1",[speccs[0], speccs[1], speccs[3]])
         views.push(view1)
 
 
-        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
-        let view2 = createView("View2",[speccs[1], speccs[0], speccs[3]])
+        var speccs=this.getForceSpeccs()
+        let view2 = createView("View2",speccs)
         views.push(view2)
 
 
         let view3 = createView("View3",[{distribution:new BaseDistribution(2000,3)}])
         views.push(view3)
-
-//---------------------------
-
-
-
 
 
 
@@ -234,8 +226,6 @@ export class MyMain {
             })
 
         }
-
-
 
         _.each(views,function(view){
             container.append(view)
@@ -311,43 +301,6 @@ export class MyMain {
 
     }
 
-/*
-
-    runSample1() {
-        console.log("runSample1")
-        let speccs = this.getPossibleClusterSpeccsArray();
-
-        this.clusters.applyClustering([speccs[0], speccs[1], speccs[2]])
-
-
-    }
-
-
-    runSample2() {
-        console.log("runSample2")
-        let speccs = this.getForceSpeccs();
-
-        this.clusters.applyClustering(speccs);
-    }
-
-    runSample3() {
-        console.log("runSample3")
-        let defaultEntry = {distribution: new BaseDistribution(4000, 2)}
-
-        this.clusters.applyClustering([defaultEntry])
-
-
-    }
-
-    runSample4() {
-        console.log("runSample4")
-        let defaultEntry = {distribution: new DefaultDistribution()}
-
-        this.clusters.applyClustering([defaultEntry])
-
-
-    }
-*/
 
 }
 

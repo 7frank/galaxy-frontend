@@ -4,9 +4,10 @@ bugs:
 
     -stop animations no view change to prevent wrong visualisation
 
-    -performance issues for thumbnails
-
-
+    [x]performance issues for thumbnails
+    text nodes appear when default/global impl gets loaded
+    restore interaction=>  node meshes and such
+        (probably also something with global values)
 
 clusters
 []compute scale of distributions automatically

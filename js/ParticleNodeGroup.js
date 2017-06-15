@@ -462,7 +462,7 @@ function createParticleSystemsByGroupAttr(allNodes, options) {
 	groupIDs = _.uniq(groupIDs)
 
 		for (var id of groupIDs) {
-			var nodes = globalNodes.filter((v) => v.group == id)
+			var nodes = allNodes.filter((v) => v.group == id) //globalNodes
 
 				var elem = ParticleNodeGroup(nodes, {
 					nodeDefaultSize: 10,

@@ -412,7 +412,7 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 	 */
 
 	//prepare nodes
-	for (node of d3Nodes) {
+	for (let node of d3Nodes) {
 
 		if (!node.edges)
 			node.edges = [];
@@ -425,7 +425,7 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
 	}
 
-	for (item of d3Links) {
+	for (let item of d3Links) {
 
 		item._line.edge = item
 
