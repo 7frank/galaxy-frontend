@@ -26,8 +26,25 @@ export default  class BaseDistribution
         this.mScale=scale
     }
 
+    onSort(sortFN)
+    {
+        this.mSortFunction=sortFN
+        return this
+    }
+
+    doSort(nodesArray)
+    {
+        if (!this.mSortFunction) return
+
+        nodesArray.sort(this.mSortFunction)
+
+
+    }
+
 
     setNodes(nodes,onNodePositionChange,onEnd) {
+
+
 
 
         if (nodes instanceof BaseCluster3D) {
@@ -36,19 +53,24 @@ export default  class BaseDistribution
          /*   if (nodes.isLeaf())
                 nodes =nodes.mNodes
                 else*/
-                nodes = nodes.mClusters
+                nodes = Object.values( nodes.mClusters)
 
         }
         else
         if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
 
 
+        this.doSort(nodes)
+
         var mDuration=this.mDuration
 
         //for canceling animation
         var mTimeout;
 
-        let len= nodes.length|Object.keys(nodes).length
+
+
+
+        let len= nodes.length//|Object.keys(nodes).length
 
 
         var i=0,j=0,k=0;

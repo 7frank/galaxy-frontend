@@ -79,7 +79,7 @@ class EdgeUtil {
                 relevantEdgesPerCluster[id]={}
                 let nodes=cluster.getNodes()
                 //get only relevant nodes per cluster that link to/from other clusters
-                let edges=EdgeUtil.getEdgesForNodes(nodes,false,true)
+                let edges=EdgeUtil.getEdgesForNodes(nodes,false,true,true)
                 relevantEdgesPerCluster[id]=edges
 
             })
@@ -172,14 +172,14 @@ class EdgeUtil {
      *  this would be suitable to do force-graph distribution on a cluster and all descendants
      */
 
-    static getEdgesForNodes(nodes, bInternal = true, bExternal = false) {
+    static getEdgesForNodes(nodes, bInternal = true, bOutgoing = false,bIngoing = false) {
 
 
 
 //a node can be a cluster that represents a set of nodes
  //   if (nodes instanceof BaseCluster3D) nodes = nodes.mNodes
 
-    if (!bInternal && !bExternal) return []
+    if (!bInternal && !bOutgoing && !bIngoing) return []
     //get relevant edges from
 
     //a.clusters.mClusters.mClusters["United States"][0].mNodes
@@ -190,11 +190,12 @@ class EdgeUtil {
 
         //check if it is a container element
         if (node instanceof BaseCluster3D) {
-            let _edges = EdgeUtil.getEdgesForNodes(node.mNodes, bInternal, bExternal)
+            let _edges = EdgeUtil.getEdgesForNodes(node.mNodes, bInternal, bOutgoing,bIngoing)
             edges = edges.concat(_edges);
             edges = _.uniq(edges)
             return
         }
+
 
         _.each(node.edges, function (edge, id) {
 
@@ -205,14 +206,27 @@ class EdgeUtil {
 
             let isInternalNode = srcContained && trgContained;
 
+
+            let isOutgoing=!isInternalNode&&srcContained
+            let isIngoing=!isInternalNode&&trgContained
+            //TODO we do want to distinguish between outgoing and ingoing edges
+            // /if (!isInternalNode)
+            //calc direction
+
+
             // console.log(srcContained,trgContained,isInternalNode)
-            if (bInternal&&bExternal || bInternal && isInternalNode || bExternal && !isInternalNode) {
+         /*   if (bInternal&&bExternal || bInternal && isInternalNode || bExternal && !isInternalNode) {
                 edges = edges.concat(node.edges);
                 edges = _.uniq(edges)
-            }
+            }*/
+
+            if (bInternal&& bOutgoing&&bIngoing)
+                edges.push(edge)
+              else
+            if (bInternal&& isInternalNode || bOutgoing && isOutgoing || bIngoing && isIngoing)
+                edges.push(edge)
 
         })
-
 
     })
 

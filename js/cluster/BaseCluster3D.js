@@ -33,11 +33,11 @@ class BaseCluster3D extends BaseNode {
         this.addNodes(nodes);
 
         this.mClusters = {};
-          //Cluster if present, use to cluster nodes into sub-clusters
+        //Cluster if present, use to cluster nodes into sub-clusters
         if (_.isArray(clusteringHandlers) && clusteringHandlers.length > 0) {
             this.applyClustering(clusteringHandlers);
         }
-       // else this.updateCluster()
+        // else this.updateCluster()
 
     }
 
@@ -85,8 +85,8 @@ class BaseCluster3D extends BaseNode {
 
 
     /**
-    *  used for recursive cluster generation if class is used for inheritance
-    */
+     *  used for recursive cluster generation if class is used for inheritance
+     */
 
     getChildClusterConstructor() {
         return this.constructor
@@ -101,11 +101,10 @@ class BaseCluster3D extends BaseNode {
      *
      */
 
-   static cleanUpClusters(clusters,self)
-    {
+    static cleanUpClusters(clusters, self) {
         clusters.push(self)
 
-        _.each(clusters,function(cluster) {
+        _.each(clusters, function (cluster) {
 
             if (cluster.tn) {
                 cluster.tn.remove()
@@ -117,21 +116,17 @@ class BaseCluster3D extends BaseNode {
             }
 
 
-            if (cluster==self) return;//don't detach the current root element
+            if (cluster == self) return;//don't detach the current root element
 
             if (cluster.parent) {
 
                 if (cluster.parent.mClusters && cluster.name)
-            delete(cluster.parent.mClusters[cluster.name])
-            cluster.parent.remove(cluster)
+                    delete(cluster.parent.mClusters[cluster.name])
+                cluster.parent.remove(cluster)
             }
 
 
-
         })
-
-
-
 
 
     }
@@ -143,16 +138,15 @@ class BaseCluster3D extends BaseNode {
      */
 
 
-    cleanUpLeafs()
-    {
-        _.each(this.getLeafs(),function(leaf){
+    cleanUpLeafs() {
+        _.each(this.getLeafs(), function (leaf) {
 
             //TOO to leaf specific clean up
 
             //for now at least remove the particle cloud
             leaf.geometry.dispose()
             if (leaf.parent)
-            leaf.parent.remove(leaf)
+                leaf.parent.remove(leaf)
         })
 
     }
@@ -164,50 +158,47 @@ class BaseCluster3D extends BaseNode {
      *
      */
 
-    storeParentPositionInNodes(){
+    storeParentPositionInNodes() {
 
-    var leafElements=this.getLeafs()
-_.each(leafElements,function(leaf){
-    let mNodes=leaf.mNodes
-    _.each(mNodes,function(node){
-
-
-        var c1 = new THREE.Vector3();
-            c1.setFromMatrixPosition( leaf.matrixWorld );
-
-        node._parentPosAbs=c1;
-
-    })
-})
+        var leafElements = this.getLeafs()
+        _.each(leafElements, function (leaf) {
+            let mNodes = leaf.mNodes
+            _.each(mNodes, function (node) {
 
 
-    }
+                var c1 = new THREE.Vector3();
+                c1.setFromMatrixPosition(leaf.matrixWorld);
 
-    restoreNodePositionFromExParent(){
-
-
-
-        var leafElements=this.getLeafs()
-        _.each(leafElements,function(leaf){
-            let mNodes=leaf.mNodes
-            _.each(mNodes,function(node){
-                //get current parent pos
-                let c1=node._parentPosAbs
-
-                if (!c1) return;
-                var c2 = new THREE.Vector3();
-                c2.setFromMatrixPosition( leaf.matrixWorld );
-
-                node._bubble.position.add(c1).sub(c2)
-                _.extend(node,node._bubble.position)
+                node._parentPosAbs = c1;
 
             })
         })
 
 
-
     }
 
+    restoreNodePositionFromExParent() {
+
+
+        var leafElements = this.getLeafs()
+        _.each(leafElements, function (leaf) {
+            let mNodes = leaf.mNodes
+            _.each(mNodes, function (node) {
+                //get current parent pos
+                let c1 = node._parentPosAbs
+
+                if (!c1) return;
+                var c2 = new THREE.Vector3();
+                c2.setFromMatrixPosition(leaf.matrixWorld);
+
+                node._bubble.position.add(c1).sub(c2)
+                _.extend(node, node._bubble.position)
+
+            })
+        })
+
+
+    }
 
 
     /**
@@ -222,7 +213,7 @@ _.each(leafElements,function(leaf){
 
 
 //FIXME currently only working in root
-      //  this.storeParentPositionInNodes()
+        //  this.storeParentPositionInNodes()
 
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
@@ -250,7 +241,6 @@ _.each(leafElements,function(leaf){
         this.doClusteringForOnlyThis(entry);
 
 
-
         _.each(this.mClusters, function (mCluster, key) {
 
             var nextDepthSpeccsArray = [].concat(mClusteringSpeccsArray);
@@ -271,9 +261,8 @@ _.each(leafElements,function(leaf){
         BaseCluster3D.cleanUpClusters(prevClusters, this)
 
         //adjust positions if cluster gets re-clustered
-       // this.restoreNodePositionFromExParent()
+        // this.restoreNodePositionFromExParent()
     }
-
 
 
     /**
@@ -285,25 +274,30 @@ _.each(leafElements,function(leaf){
 
     doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();
-        var options = _.extend({minClusterSize: 10, defaultMergeGroupName: "other"}, entry.options);
-        var that=this;
+        var options = _.extend({
+            minClusterSize: 10,
+            defaultMergeGroupName: "other"
+
+    }, entry.options);
+        var that = this;
 
         var _clustersObj = {};
 
 
         //post-process
         //merge clusters that don't match the criteria again
-        _.each(this.groupBy(entry.generator), function (_cluster, key) {
+        let elements=this.groupBy(entry.generator)
+        _.each(elements, function (_cluster, key) {
 
             if (_cluster.getNodes().length < options.minClusterSize) {
 
                 var dMGN = options.defaultMergeGroupName
                 if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz;//new BaseCluster3D()
-                _clustersObj[dMGN].name=dMGN
+                _clustersObj[dMGN].name = dMGN
                 _clustersObj[dMGN].addNodes(_cluster.getNodes())
             }
             else {
-                _cluster.name=key
+                _cluster.name = key
                 _clustersObj[key] = _cluster
 
 
@@ -314,9 +308,9 @@ _.each(leafElements,function(leaf){
         _.extend(this.mClusters, _clustersObj)
 
 
-        this.setDistributionHandler(entry.distribution,function (){
+        this.setDistributionHandler(entry.distribution, function () {
 
-            that.mClusterRule=entry
+            that.mClusterRule = entry
             that.trigger("complete")
 
 
@@ -355,18 +349,21 @@ _.each(leafElements,function(leaf){
      *  there is a similar implementation for the ClusterLeafElement class
      * @param distribution instanceof BaseDistribution
      */
-    setDistributionHandler(distribution,onComplete=function(){}) {
+    setDistributionHandler(distribution, onComplete = function () {
+    }) {
 
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
 
         if (this.isLeaf())
-            this.mLeaf.setDistributionHandler(distribution,onComplete);
+            this.mLeaf.setDistributionHandler(distribution, onComplete);
         else
             distribution.setNodes(this, function onStep(vecPosition, i) {
                 //  let n = values[i];
                 //  n.position.copy(vecPosition)
-            },function(){   onComplete()   });
+            }, function () {
+                onComplete()
+            });
 
 
     }
@@ -408,15 +405,13 @@ _.each(leafElements,function(leaf){
         boundingSphere.radius = radius;
 
 
-
-
         var geometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
         var material = new THREE.MeshBasicMaterial({
             color: 0xFFFFFF,
             wireframe: false,
             transparent: true,
             opacity: 0.3,
-            visible:false
+            visible: false
         });
 
 
@@ -473,9 +468,9 @@ _.each(leafElements,function(leaf){
     }
 
     /**
-    * updates hull and adds child clusters if necessary
-    *
-    *
+     * updates hull and adds child clusters if necessary
+     *
+     *
      */
     updateCluster() {
 
@@ -515,7 +510,7 @@ _.each(leafElements,function(leaf){
      * @params defaultRadius if the radius is not yet determined the fefault value is used instead
      * @returns the radius of the cluster
      */
-    getRadius(defaultRadius=100) {
+    getRadius(defaultRadius = 100) {
 
         return this.geometry.boundingSphere ? this.geometry.boundingSphere.radius : defaultRadius;
 
@@ -528,7 +523,7 @@ _.each(leafElements,function(leaf){
      */
     onAfterClusteredAndDistributed() {
 
-      _.each(_.reverse( this.findClusters("*")), function (cluster) {
+        _.each(_.reverse(this.findClusters("*")), function (cluster) {
             cluster.adjustHullSize();
 
 

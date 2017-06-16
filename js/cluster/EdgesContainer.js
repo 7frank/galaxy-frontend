@@ -34,10 +34,13 @@ class EdgesContainer extends THREE.Object3D {
     setFromNodes(nodes) {
 
 
-        let edges = EdgeUtil.getEdgesForNodes(nodes, true, true);
+        let edges = EdgeUtil.getEdgesForNodes(nodes, true, true,false);
 
-        let edge2 = EdgeUtil.getEdgesForNodes(nodes, true, false);
-        let edge3 = EdgeUtil.getEdgesForNodes(nodes, false, true);
+      //  let edge2 = EdgeUtil.getEdgesForNodes(nodes, true, false,false);
+      //  let edge3 = EdgeUtil.getEdgesForNodes(nodes, false, true,true);
+
+       // console.warn("setFromNodes",edges,edge2,edge3)
+      //  console.warn("------------",edges.length,edge2.length,edge3.length)
 
         for (let edge of edges)
             this.addEdge(edge)

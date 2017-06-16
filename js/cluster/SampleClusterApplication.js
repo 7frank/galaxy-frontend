@@ -150,7 +150,7 @@ export class MyMain {
         }
 
 
-        function createView(name="View3D",speccs,data){
+        function createView(name="View3D",speccs){
 
 
             let mGraphView = document.createElement("graph-view-3d")
@@ -199,8 +199,8 @@ export class MyMain {
        let view0 = createDefaultView("Default")
        views.push(view0)
 
-        var speccs=[].concat(this.getPossibleClusterSpeccsArray());//FIXME speccs does have 4 elements 0,1,3?
-        let view1 = createView("View1",[speccs[0], speccs[1], speccs[3]])
+        var speccs=this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
+        let view1 = createView("View1",speccs)
         views.push(view1)
 
 
@@ -211,6 +211,12 @@ export class MyMain {
 
         let view3 = createView("View3",[{distribution:new BaseDistribution(2000,3)}])
         views.push(view3)
+
+        var speccs=this.get2DChartSortedSpeccsArray()
+
+        let view4 = createView("View4",speccs)
+        views.push(view4)
+
 
 
 
@@ -231,6 +237,49 @@ export class MyMain {
             container.append(view)
         })
 
+
+
+    }
+
+
+    get2DChartSortedSpeccsArray(){
+
+
+        function countrySetGenerator(groupFunction, node) {
+
+            groupFunction(node.group, node)
+        }
+
+        function industrySetGenerator(groupFunction, node) {
+            groupFunction(node.industry, node)
+        }
+
+        function mySort(a, b) {
+            return (a.mNodes.length < b.mNodes.length) ? 1 : -1;
+            //return (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1;
+        }
+
+
+        /**
+         *
+         *        sort:null, //TODO use sort and direction to place the elements
+         direction:new THREE.Vector3(0,1,0)
+         if (typeof options.sort=="function")
+         elements.sort(options.sort)
+         *
+         * //,direction:new THREE.Vector3(0,0,1),sort:mySort
+         *
+         */
+
+
+
+        return [
+            {generator: countrySetGenerator, distribution:  new BaseDistribution(1000, 1).onSort(mySort), options: {minClusterSize: 15}},
+            {generator: industrySetGenerator, distribution: new BaseDistribution(200, 1).onSort(mySort), options: {minClusterSize: 15}},
+            {distribution: new BaseDistribution(50, 2)}
+
+
+        ]
 
 
     }
@@ -256,8 +305,7 @@ export class MyMain {
         return [
             {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
             {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}},
-
-            , {distribution: sample3}
+            {distribution: sample3}
 
 
         ]

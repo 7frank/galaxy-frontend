@@ -5,6 +5,8 @@
 export default
 class BaseEdge {
 
+    //FIXME fix offset of edges or add to rootcluster maybe? with offset per cluster? ...
+
     constructor(start,end) {
 
         this.mStart=start;
