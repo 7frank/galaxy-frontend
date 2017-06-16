@@ -9,7 +9,7 @@ import BaseCluster3D from "./BaseCluster3D"
 import BaseDistribution from "./distributions/BaseDistribution"
 
 import ForceGraphDistribution from "./distributions/ForceGraphDistribution"
-import ZoomUtil from "./ZoomUtil"
+import ZoomUtil from "../utils/ZoomUtil"
 
 
 
@@ -33,6 +33,21 @@ class Cluster3DExtended extends BaseCluster3D {
     }
 
     /**
+     * tries to get the view3d element, which the cluster is rendered within
+     *
+     */
+
+    getRootView()
+    {
+       let root=this.getRoot()
+
+        if (!root) return null;
+
+        return root.mParentView
+
+    }
+
+    /**
      *   have a dynamic distance based on the size of the cluster
      *
      */
@@ -40,10 +55,12 @@ class Cluster3DExtended extends BaseCluster3D {
     {
 
 
+        let  view=this.getRootView()
+
         var distance=this.getRadius(defaultDistance)*3
 
-        ZoomUtil.moveToMesh(this,function onComplete(){  },distance)
 
+        ZoomUtil.moveToCluster(this,{distance})
     }
 
 
@@ -175,9 +192,9 @@ class Cluster3DExtended extends BaseCluster3D {
 
       _.each(this.getLeafs(),function(leaf){
 
-         // leaf.parent._initDotParticles();
+          leaf.parent._initDotParticles();
 
-         // leaf.parent.updateDotParticles()
+          leaf.parent.updateDotParticles()
 
       })
 

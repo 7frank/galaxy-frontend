@@ -47,9 +47,10 @@ class GraphData
 
     getAlteredRawLinks(){
         var mDataNodeCopy= this.mDataNodeCopy
-    var skipLines=100
+   // var skipLines=100
+//FIXME filtering visible nodes here will break edge based calculations and arrows
 
-        var links=this.mGraphData.links.filter((v,id)=> !(id%skipLines)   )
+        var links=this.mGraphData.links   //.filter((v,id)=> !(id%skipLines)   )
 
         //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
        var  d3Links  = links.map(link => {
@@ -80,8 +81,21 @@ class GraphData
         return this;
     }*/
 
-    createClusterNodesAndEdges(env=globalEnv)
+    createClusterNodesAndEdges( view3d)
     {
+        //env=globalEnv
+        //see ForceGraph
+        //TODO minimal env options to create a node
+        var env={
+            nameAccessor:node =>node.name || node.id,
+            colorAccessor: node => node.color,
+            valAccessor:node => node.val,
+            nodeRelSize:4,
+           // useDebugSphere:true,
+            domEvents:view3d.mDomEvents
+        }
+
+
 
 
    var d3Nodes= this.getClonedRawNodes();

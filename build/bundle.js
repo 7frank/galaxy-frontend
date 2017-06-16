@@ -64,7 +64,7 @@ var clusters =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 18);
+/******/ 	return __webpack_require__(__webpack_require__.s = 19);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,7 +73,7 @@ var clusters =
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 30.05.2017.
@@ -1039,6 +1039,7 @@ class EdgeUtil {
     static getEdgesForNodes(nodes, bInternal = true, bExternal = false) {
 
 
+
 //a node can be a cluster that represents a set of nodes
  //   if (nodes instanceof BaseCluster3D) nodes = nodes.mNodes
 
@@ -1069,7 +1070,7 @@ class EdgeUtil {
             let isInternalNode = srcContained && trgContained;
 
             // console.log(srcContained,trgContained,isInternalNode)
-            if (bInternal && isInternalNode || bExternal && !isInternalNode) {
+            if (bInternal&&bExternal || bInternal && isInternalNode || bExternal && !isInternalNode) {
                 edges = edges.concat(node.edges);
                 edges = _.uniq(edges)
             }
@@ -1141,9 +1142,10 @@ class GraphData
 
     getAlteredRawLinks(){
         var mDataNodeCopy= this.mDataNodeCopy
-    var skipLines=100
+   // var skipLines=100
+//FIXME filtering visible nodes here will break edge based calculations and arrows
 
-        var links=this.mGraphData.links.filter((v,id)=> !(id%skipLines)   )
+        var links=this.mGraphData.links   //.filter((v,id)=> !(id%skipLines)   )
 
         //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
        var  d3Links  = links.map(link => {
@@ -1174,8 +1176,21 @@ class GraphData
         return this;
     }*/
 
-    createClusterNodesAndEdges(env=globalEnv)
+    createClusterNodesAndEdges( view3d)
     {
+        //env=globalEnv
+        //see ForceGraph
+        //TODO minimal env options to create a node
+        var env={
+            nameAccessor:node =>node.name || node.id,
+            colorAccessor: node => node.color,
+            valAccessor:node => node.val,
+            nodeRelSize:4,
+           // useDebugSphere:true,
+            domEvents:view3d.mDomEvents
+        }
+
+
 
 
    var d3Nodes= this.getClonedRawNodes();
@@ -1360,7 +1375,7 @@ class GraphData
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(8);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -1395,6 +1410,21 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     }
 
     /**
+     * tries to get the view3d element, which the cluster is rendered within
+     *
+     */
+
+    getRootView()
+    {
+       let root=this.getRoot()
+
+        if (!root) return null;
+
+        return root.mParentView
+
+    }
+
+    /**
      *   have a dynamic distance based on the size of the cluster
      *
      */
@@ -1402,10 +1432,12 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     {
 
 
+        let  view=this.getRootView()
+
         var distance=this.getRadius(defaultDistance)*3
 
-        __WEBPACK_IMPORTED_MODULE_3__ZoomUtil__["a" /* default */].moveToMesh(this,function onComplete(){  },distance)
 
+        __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__["a" /* default */].moveToCluster(this,{distance})
     }
 
 
@@ -1537,9 +1569,9 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
       _.each(this.getLeafs(),function(leaf){
 
-         // leaf.parent._initDotParticles();
+          leaf.parent._initDotParticles();
 
-         // leaf.parent.updateDotParticles()
+          leaf.parent.updateDotParticles()
 
       })
 
@@ -1728,7 +1760,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(18);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -1746,9 +1778,9 @@ class ClusterLeafElement extends THREE.Mesh
 
 
         this.mNodes=nodes;
-        this.mParticles=this.createParticleCloud();
+        this.mNodeParticles=this.createParticleNodeCloud();
 
-        this.add( this.mParticles.pointCloud)
+        this.add( this.mNodeParticles.pointCloud)
 
         //FIXME wrong positions
         this.appendNodes(nodes)
@@ -1794,7 +1826,7 @@ class ClusterLeafElement extends THREE.Mesh
 
             let n=that.mNodes[i];
             if (n._bubble) n._bubble.position.set(n.x,n.y,n.z);
-            that.mParticles.updateNodePosition(i);
+            that.mNodeParticles.updateNodePosition(i);
 
 
             //TODO this currently will get triggerd per node not per node set so we do have to alter the distribution class a bit
@@ -1805,7 +1837,14 @@ class ClusterLeafElement extends THREE.Mesh
 
     }
 
-    createParticleCloud()
+
+    /**
+     * creates a structure that contains a point cloud for the nodes for mre effiecient rendering
+     *
+     * @returns {{nodes, pointCloud, updateCrossFade, update, updateNode, updateNodePosition, updateNodeColor, updateNodeSize, on, remove}|*}
+     */
+
+    createParticleNodeCloud()
     {
 
         var elem = ParticleNodeGroup( this.mNodes, {
@@ -1817,8 +1856,6 @@ class ClusterLeafElement extends THREE.Mesh
 
         return elem
     }
-
-
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
@@ -1899,7 +1936,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
             _.each(that.getLeafs(),function(leaf){
 
 
-                leaf.mParticles.update()
+                leaf.mNodeParticles.update()
             })
 
 
@@ -2228,6 +2265,118 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 "use strict";
 /**
+ * Created by Frank on 08.06.2017.
+ */
+
+//TODO refactor existing samples
+class ZoomUtil {
+
+
+    static moveToCluster(cluster, options) {
+
+        let defaults = {
+            complete: function () {
+            },
+            distance: 400
+        }
+        options = _.extend(defaults, options)
+
+        let view = cluster.getRootView()
+
+        if (!view) {
+            console.warn("cluster must be bound to instanceof View3D")
+            return
+        }
+
+
+        let mesh = cluster;
+        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, options.distance, options.complete);
+
+
+    }
+
+
+
+    static
+    moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
+    }) {
+
+         var position = new THREE.Vector3();
+        position.setFromMatrixPosition(mesh.matrixWorld);
+
+       ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
+
+
+    }
+
+
+    /**
+     *
+     *
+     * @param position must be in world coordiantes
+     * @param camera
+     * @param controls
+     * @param cameraDistanceToMesh
+     * @param onComplete
+     */
+    static
+    moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
+    }) {
+
+        var mTimeout;
+
+        var cameraTargetPosition = controls.target
+        var vec3Start = camera.position
+
+
+      //  var vec3End = new THREE.Vector3();
+      //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
+        var vec3End=position
+
+        //we want to have a fixed distance to a node when selecting
+        var distVec = vec3End.clone().sub(vec3Start)
+        var len = distVec.length()
+        distVec.normalize()
+        distVec.multiplyScalar(cameraDistanceToMesh) //apply fixed distance to the target
+
+        var alteredVecEnd = vec3End.clone().sub(distVec)
+
+
+        //change distance to target
+        var tween = new TWEEN.Tween(vec3Start)
+            .to(alteredVecEnd, 400)
+            //.onUpdate(function () {})
+            .onComplete(function () {
+                onComplete.bind(this)();
+                cancelAnimationFrame(mTimeout)
+            })
+            .start();
+
+        //lookat target
+        var tween2 = new TWEEN.Tween(cameraTargetPosition)
+            .to(vec3End, 400)
+            .start();
+
+        requestAnimationFrame(animate);
+
+        function animate(time) {
+            mTimeout = requestAnimationFrame(animate);
+            TWEEN.update(time);
+        }
+
+
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
  * Created by Frank on 13.06.2017.
  */
 
@@ -2274,7 +2423,7 @@ class View3D extends HTMLElement
     }
 
         if (this.mRenderer)
-         this.mControls.rotateSpeed = 1600/this.clientWidth*0.3
+            this.mControls.panSpeed =  this.mControls.rotateSpeed = 1600/this.clientWidth*0.3
 
 
     }
@@ -2376,7 +2525,7 @@ class View3D extends HTMLElement
         this.mRenderer = new THREE.WebGLRenderer({
             antialias: true
         });
-        this.mRenderer.setClearColor( 0x111111 );
+        this.mRenderer.setClearColor( 0x000000 );
         this.mRenderer.setPixelRatio( window.devicePixelRatio );
 
         this.appendChild(this.mRenderer.domElement);
@@ -2397,6 +2546,7 @@ class View3D extends HTMLElement
             e.stopPropagation()
             that.setActive()
 
+            $(that).attr("hasFocus",true)
 
 
             that.mCaption.stop().fadeOut()
@@ -2407,7 +2557,7 @@ class View3D extends HTMLElement
             e.stopPropagation()
             that.setInactive()
 
-
+            $(that).removeAttr("hasFocus")
             if (!$(that).hasClass("view-3d-maximised"))
             that.mCaption.stop().delay(400).fadeIn()
 
@@ -2576,7 +2726,7 @@ customElements.define("view-3d", View3D);
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2613,7 +2763,7 @@ class ClusterNodeArray extends Array //List<Node>
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2795,7 +2945,7 @@ class ClusterNodeArray extends Array //List<Node>
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2837,7 +2987,7 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2895,11 +3045,11 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(9);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(3);
 /**
@@ -2951,7 +3101,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
         let graphData = new __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__["a" /* default */](rawGraphData)
 
 
-        let preparedData = graphData.createClusterNodesAndEdges()
+        let preparedData = graphData.createClusterNodesAndEdges(this)
 
         var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes);
 
@@ -3024,12 +3174,13 @@ customElements.define("graph-view-3d", GraphView3D);
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_GraphData__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(3);
 /**
  * Created by Frank on 15.06.2017.
  */
@@ -3039,6 +3190,9 @@ customElements.define("graph-view-3d", GraphView3D);
 /**
  * Created by Frank on 13.06.2017.
  */
+
+
+
 
 
 
@@ -3108,35 +3262,6 @@ class SimpleForceGraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /
 
         })
 
-        /*
-                if (!rawGraphData) return
-
-                let speccs = this.getSpeccs();
-
-                let graphData = new GraphData(rawGraphData)
-
-
-                let preparedData = graphData.createClusterNodesAndEdges()
-
-                var res = new RootCluster(preparedData.nodes);
-
-
-
-                parentEl3D.add(res);
-                res.position.set(0, 0, 0);
-                res.applyClustering(speccs)
-                //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
-                res.attachToView3D(this)
-
-                $(this).on("before-render",function(){
-                    res.update()
-                })
-
-
-                this.start()
-
-                return res
-        */
         return graph
     }
 
@@ -3306,7 +3431,7 @@ function DefaultForceGraph(view3d) {
         env.renderer =view3d.mRenderer
 
         env.controls =view3d.mControls
-
+        env.domEvents=view3d.mDomEvents
 
 
         env.initialised = true;
@@ -3619,9 +3744,23 @@ function DefaultForceGraph(view3d) {
                 }
             })
 
-        function _getNodePosition(node) {
+        function _getCountryNodePosition(node) {
             return node.particles.pointCloud.geometry.boundingSphere.center.clone()
         }
+
+        function zoomToCountryNode(node) {
+
+            var position = new THREE.Vector3();
+            position.setFromMatrixPosition(node.particles.pointCloud.matrixWorld);
+            position.add(node.particles.pointCloud.geometry.boundingSphere.center)
+
+            __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__["a" /* default */].moveToPosition(position,env.camera,env.controls)
+
+            //doZoomToPos(_getCountryNodePosition(node))
+
+        }
+
+
 
         if (!env.countryTextNodes)
             env.countryTextNodes = TextNodes(env, {
@@ -3646,7 +3785,7 @@ function DefaultForceGraph(view3d) {
                     return 'graph-country-caption'
 
                 },
-                getNodePosition: _getNodePosition,
+                getNodePosition: _getCountryNodePosition,
                 interactable: true,
                 onAfterCreateTextField: function (node, el) {
 
@@ -3657,7 +3796,9 @@ function DefaultForceGraph(view3d) {
                     el.css("font-size", newSize);
 
                     el.on("click", function () {
-                        doZoomToPos(_getNodePosition(node))
+
+                     zoomToCountryNode(node)
+
                     })
 
                 }
@@ -3938,7 +4079,7 @@ function DefaultForceGraph(view3d) {
 
 
 
-        defaults = {
+        let defaults = {
             opacity: 0.01,
             transparent: true,
             //lineIsVisible:true, // if disabled the line won't be shown on the scene
@@ -4058,7 +4199,7 @@ function DefaultForceGraph(view3d) {
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4098,7 +4239,7 @@ class BaseEdge {
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4400,11 +4541,11 @@ class BaseNode extends THREE.Mesh {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 08.06.2017.
@@ -4441,8 +4582,10 @@ class EdgesContainer extends THREE.Object3D {
     setFromNodes(nodes) {
 
 
-        let edges = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, false, true);
+        let edges = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, true, true);
 
+        let edge2 = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, true, false);
+        let edge3 = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, false, true);
 
         for (let edge of edges)
             this.addEdge(edge)
@@ -4510,24 +4653,24 @@ class EdgesContainer extends THREE.Object3D {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ClusterLeafElement__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__GraphData__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__view_GraphView3D__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__view_SimpleForceGraphView3D__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__view_GraphView3D__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__view_SimpleForceGraphView3D__ = __webpack_require__(15);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
@@ -4841,73 +4984,6 @@ class MyMain {
 
 
 	
-
-/***/ }),
-/* 19 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * Created by Frank on 08.06.2017.
- */
-
-//TODO refactor existing samples
-class ZoomUtil
-{
-
-
-    static moveToMesh(mesh,onEnd,minMaxDistance=400) {
-
-        var mTimeout;
-
-    var vec3Start = mCamera.position
-
-
-    var vec3End = new THREE.Vector3();
-    vec3End.setFromMatrixPosition( mesh.matrixWorld );
-
-    //	var vec3End = mesh.position //e.target.position
-
-
-    //we want to have a fixed distance to a node when selecting
-    var distVec = vec3End.clone().sub(vec3Start)
-    var len = distVec.length()
-    distVec.normalize()
-    distVec.multiplyScalar(minMaxDistance) //apply fixed distance to the target
-
-    var alteredVecEnd = vec3End.clone().sub(distVec)
-
-
-    if (typeof onEnd!="function") onEnd=function(){}
-    //change distance to target
-    var tween = new TWEEN.Tween(vec3Start)
-        .to(alteredVecEnd, 400)
-        .onUpdate(function () {
-
-        }).onComplete(function(){  onEnd.bind(this)();  cancelAnimationFrame(mTimeout)  })
-        .start();
-
-    //lookat target
-    var tween2 = new TWEEN.Tween(globalEnv.controls.target)
-        .to(vec3End, 400)
-        .onUpdate(function () {
-
-        })
-        .start();
-
-    requestAnimationFrame(animate);
-
-        function animate(time) {
-            mTimeout=    requestAnimationFrame(animate);
-            TWEEN.update(time);
-        }
-
-}
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
-
 
 /***/ })
 /******/ ]);

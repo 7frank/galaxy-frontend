@@ -46,7 +46,7 @@ class View3D extends HTMLElement
     }
 
         if (this.mRenderer)
-         this.mControls.rotateSpeed = 1600/this.clientWidth*0.3
+            this.mControls.panSpeed =  this.mControls.rotateSpeed = 1600/this.clientWidth*0.3
 
 
     }
@@ -148,7 +148,7 @@ class View3D extends HTMLElement
         this.mRenderer = new THREE.WebGLRenderer({
             antialias: true
         });
-        this.mRenderer.setClearColor( 0x111111 );
+        this.mRenderer.setClearColor( 0x000000 );
         this.mRenderer.setPixelRatio( window.devicePixelRatio );
 
         this.appendChild(this.mRenderer.domElement);
@@ -169,6 +169,7 @@ class View3D extends HTMLElement
             e.stopPropagation()
             that.setActive()
 
+            $(that).attr("hasFocus",true)
 
 
             that.mCaption.stop().fadeOut()
@@ -179,7 +180,7 @@ class View3D extends HTMLElement
             e.stopPropagation()
             that.setInactive()
 
-
+            $(that).removeAttr("hasFocus")
             if (!$(that).hasClass("view-3d-maximised"))
             that.mCaption.stop().delay(400).fadeIn()
 

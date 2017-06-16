@@ -56,6 +56,8 @@ var previousNodeDblClicked;
 var previousNodes;
 
 function highlightNodeElements(bShowOtherNodes=false,bShowEdgeArrows=true) {
+
+
 	//TODO
 	/*if (previousNodes&& previousNodes!=this)
 {
@@ -82,6 +84,8 @@ function highlightNodeElements(bShowOtherNodes=false,bShowEdgeArrows=true) {
 		
 			//console.log("highlighting edges:" + (this.edges.length))
 
+
+
 		for (edge of this.edges)
 				edge.showHighlight()
 
@@ -89,7 +93,9 @@ function highlightNodeElements(bShowOtherNodes=false,bShowEdgeArrows=true) {
 				for (edge of this.edges)
 				{
 					var color= edge.source==this ? 0x99ff99: 0xffb2b2
-					addArrow(edge,color)
+
+
+                    addArrow(edge,color)
 				}
 }
 
@@ -138,6 +144,9 @@ function unhighlightEdgeElements() {
 }
 
 function extendElement(elements, attrName, options,env) {
+
+ var mDomEvents=env.domEvents
+
 	function _TODO(typeName) {
 		return function () {
 			console.warn("implement handler for", typeName)
@@ -257,17 +266,20 @@ function extendElement(elements, attrName, options,env) {
 	function doOnClickNode(currNodeClicked,stack=false,onAnimationEnd,isSelected=true,doHighlighNeighbours=true,doHighlighEdges=true,doZoomIn=true)
 	{
 		
-		
+
 		if (previousNodeClicked.indexOf(currNodeClicked)<0)
 		//if (previousNodeClicked!=currNodeClicked)
 			{
 			//node selected
 			highlightNodeElements.apply(currNodeClicked,[doHighlighNeighbours,doHighlighEdges])
-			
-			//doZoomToMesh(e.target)
-			if (doZoomIn)
+
+
+
+                if (doZoomIn)
 			doZoomToMesh(currNodeClicked._bubble,onAnimationEnd)
-			
+
+
+
 			if (isSelected)
 			{
 			//GUI.updateNodeInfo(currNodeClicked)
@@ -374,14 +386,14 @@ function extendGraphElements(d3Nodes, d3Links,env) {
 			//unhighlightNodeElements.apply(e.target.node)
 			return false;
 		}
-	})
+	},env)
 	
 	
 	//FIXME extending attrName sometimes false
 	
 	extendElement(d3Links, "_line", {
 		click: function (e) {
-			//doZoomToMesh(e.target.edge.source._bubble)
+
 		},
 		mousemove: highlightEdgeElements,
 		mouseleave: unhighlightEdgeElements
@@ -454,7 +466,7 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
 function doZoomToPos(vec3Position,distanceToPosition=500) {
 
-	console.warn("doZoomToPos: TODO wrong offset" )
+	console.warn("deprecated doZoomToPos")
 	//  var vec3End = new THREE.Vector3();  vec3End.setFromMatrixPosition( mesh.matrixWorld );
 
 	var env=globalEnv;
@@ -498,7 +510,7 @@ function doZoomToPos(vec3Position,distanceToPosition=500) {
 
 
 function doZoomByVal(val) {
-
+    console.warn("deprecated doZoomByVal")
 var env=globalEnv
 
 
@@ -546,8 +558,16 @@ var env=globalEnv
 function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 
 
+    let view=$(".view-3d[hasFocus]")[0]
+    if (!view) console.warn("no view focused to be able to zoom")
 
-		var vec3Start = mCamera.position
+
+	let camera=view.mCamera;
+    let controls=view.mControls;
+
+
+
+	var vec3Start = camera.position
 
 
     var vec3End = new THREE.Vector3();
@@ -575,7 +595,7 @@ function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 		.start();
 		
 		//lookat target
-		var tween2 = new TWEEN.Tween(globalEnv.controls.target)
+		var tween2 = new TWEEN.Tween(controls.target)
 		.to(vec3End, 400)
 		.onUpdate(function () {
 		
@@ -699,68 +719,40 @@ function _createShaderMaterial(vertexShader, fragmentShader, uniformOptions) {
 	return customMaterial
 }
 
-//------------------------------------------------
-//Feature 4 collapse/expand
 
-/**
- * toggles visiblility of childnodes and edges
- * TODO add previously not rendered nodes if initially collapsed
- *
- *
- */
- 
- 
-/*
-function setCollapsedSateOfChildNodesAndEdgesOfNode(d3NodeObj, bCollapsed) {
-
-	if (typeof d3NodeObj.collapsed == "undefined")
-		d3NodeObj.collapsed = false;
-	
-	
-	
-	
-				if (typeof bCollapsed == "undefined")
-					d3NodeObj.collapsed = !d3NodeObj.collapsed; 
-				else
-					d3NodeObj.collapsed = bCollapsed
-
-								console.log("node collapsed", d3NodeObj, d3NodeObj.collapsed)
-
-							function toggleCollapse(el) {
-
-								//if (typeof bCollapsed == "undefined")
-									//el.visible = !el.visible; else
-											el.visible = !d3NodeObj.collapsed//bCollapsed
-
-							}
-
-						var elements = d3NodeObj.children.map(function (v) {
-							return v._bubble
-						})
-						var edges = d3NodeObj.edges.map(function (v) {
-							if (v.source = d3NodeObj)
-								return v._line
-						})
-
-						for (el of elements)
-							toggleCollapse(el)
-
-							for (el of edges)
-								toggleCollapse(el)
-
-}
-
-*/
 
 
 //------------------------------------------------
 //Feature 5 arrows
 
+
+
+function _findSceneForMesh(mesh,maxIter=99)
+{
+	var scene=null
+ while(mesh.parent && maxIter--)
+ {
+ 	if (mesh.parent instanceof THREE.Scene) return mesh.parent
+     mesh=mesh.parent
+ }
+
+ return scene
+
+}
+
+
 //NOTE: add arrows only to selection to improve performance
-function addArrow(d3LinkObj,color) {
+function addArrow(d3LinkObj,color,options) {
 
 
-	
+	var defaults={
+		highlightArrowType:"line"
+
+	}
+
+	var env=_.extend(defaults,options)
+
+
 
 	if (d3LinkObj.arrow) return
 
@@ -810,13 +802,14 @@ function addArrow(d3LinkObj,color) {
 
 	var arrowHelper;
 	
-	//TODO
-	var env=globalEnv
+
+
 	if (env.highlightArrowType=="line")
 	{
 		let dir=to0.clone().sub(from0)
 		let len=dir.length()
-	arrowHelper = new THREE.ArrowHelper(dir.normalize(), from0, len, color||0x0000FF,0,0);
+
+		arrowHelper = new THREE.ArrowHelper(dir.normalize(), from0, len, color||0x0000FF,0.001,0.001); //setting headlength and with to zero will trigger lots of warnings
 	
 
 	
@@ -840,7 +833,16 @@ function addArrow(d3LinkObj,color) {
 	
 	d3LinkObj.arrow = arrowHelper
 	//lineMesh.parent.add(arrowHelper);
-env.scene.add(arrowHelper);
+
+
+    var scene=_findSceneForMesh(d3LinkObj.source._bubble)
+
+	if (!scene){
+		console.warn("no scene found")
+	debugger;
+	}
+	else
+    scene.add(arrowHelper);
 
 }
 
@@ -850,10 +852,17 @@ function removeArrow(d3LinkObj) {
 	var env=globalEnv
 	var lineMesh = d3LinkObj._line
 
+
 		if (d3LinkObj.arrow)
 		{
+		let parent=d3LinkObj.arrow.parent
+
 			//lineMesh.parent.remove(d3LinkObj.arrow);
-			env.scene.remove(d3LinkObj.arrow);
+            if (parent)
+            parent .remove(d3LinkObj.arrow);
+
+
+
 			d3LinkObj.arrow=null;
 		}
 }
@@ -1293,6 +1302,9 @@ register3DClass("basic-sphere",{
   
 function basicElementExtend(env,obj,_mesh)
 {
+	var mDomEvents=env.domEvents
+
+
 	var self=_.extend(obj,
 		{
 		_instances:{},
@@ -1592,7 +1604,7 @@ var lastSelectedNode;
 function nodeMixin(env,node,options) {
 	
 
-	
+
 	if (node._mixin_) return
 		node._mixin=true
 
@@ -1648,7 +1660,7 @@ options=_.extend({onDrawNode:function(){}},options)
 			options.onDrawNode.apply(this,[node])
 		}
 	
-	
+
 	var size=basicSpriteSize(env,node)/5
 	//var size=node.size?node.size*0.66:1
 	
@@ -1676,7 +1688,7 @@ options=_.extend({onDrawNode:function(){}},options)
 
 		zoom: function () {
 
-			//doZoomToMesh(this._bubble)
+
 			doOnClickNode(this)
 		},
 

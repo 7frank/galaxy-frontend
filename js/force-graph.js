@@ -156,7 +156,7 @@ function ForceGraph() {
 		env.domNode.appendChild(env.renderer.domElement);
 
 		//init domEnvents
-		env.domEvents = mDomEvents = new THREEx.DomEvents(env.camera, env.renderer.domElement)
+		env.domEvents  = new THREEx.DomEvents(env.camera, env.renderer.domElement)
 
 			// Add camera interaction
 
@@ -648,8 +648,8 @@ function ForceGraph() {
 
 
 						//FIXME see flickering bug
-                    //	if (env.particles)
-						//env.particles.start()
+                    	if (env.particles)
+						env.particles.start()
 
 				}, 1000)
 
@@ -806,7 +806,7 @@ function ForceGraph() {
 		env.scene.add(particles.pointCloud);
 
 		//FIXME currently does not animate
-		//particles.start()
+		particles.start()
 
 		env.particles = particles;
 	}

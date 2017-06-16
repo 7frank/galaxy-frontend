@@ -15,9 +15,9 @@ export default class ClusterLeafElement extends THREE.Mesh
 
 
         this.mNodes=nodes;
-        this.mParticles=this.createParticleCloud();
+        this.mNodeParticles=this.createParticleNodeCloud();
 
-        this.add( this.mParticles.pointCloud)
+        this.add( this.mNodeParticles.pointCloud)
 
         //FIXME wrong positions
         this.appendNodes(nodes)
@@ -63,7 +63,7 @@ export default class ClusterLeafElement extends THREE.Mesh
 
             let n=that.mNodes[i];
             if (n._bubble) n._bubble.position.set(n.x,n.y,n.z);
-            that.mParticles.updateNodePosition(i);
+            that.mNodeParticles.updateNodePosition(i);
 
 
             //TODO this currently will get triggerd per node not per node set so we do have to alter the distribution class a bit
@@ -74,7 +74,14 @@ export default class ClusterLeafElement extends THREE.Mesh
 
     }
 
-    createParticleCloud()
+
+    /**
+     * creates a structure that contains a point cloud for the nodes for mre effiecient rendering
+     *
+     * @returns {{nodes, pointCloud, updateCrossFade, update, updateNode, updateNodePosition, updateNodeColor, updateNodeSize, on, remove}|*}
+     */
+
+    createParticleNodeCloud()
     {
 
         var elem = ParticleNodeGroup( this.mNodes, {
@@ -86,8 +93,6 @@ export default class ClusterLeafElement extends THREE.Mesh
 
         return elem
     }
-
-
 
 }
 

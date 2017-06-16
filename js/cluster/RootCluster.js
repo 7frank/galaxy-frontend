@@ -66,7 +66,7 @@ class RootCluster extends Cluster3DExtended {
             _.each(that.getLeafs(),function(leaf){
 
 
-                leaf.mParticles.update()
+                leaf.mNodeParticles.update()
             })
 
 

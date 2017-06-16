@@ -119,7 +119,7 @@ $(function(){
 
 		$(window).trigger("node-color-change",val)
 
-
+/*
         var helper=computeGroupNodeColorHelper(globalEnv.nodeClouds.groupIdList)
 
 
@@ -131,6 +131,8 @@ $(function(){
         globalEnv.nodeClouds.update()
 
         globalEnv.particles.updateColors()
+
+*/
 
 
 

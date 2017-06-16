@@ -11,6 +11,9 @@
 
 
 import View3D from "./View3D"
+import ZoomUtil from "../utils/ZoomUtil"
+
+
 
 
 import GraphData from "../cluster/GraphData"
@@ -77,35 +80,6 @@ class SimpleForceGraphView3D extends View3D
 
         })
 
-        /*
-                if (!rawGraphData) return
-
-                let speccs = this.getSpeccs();
-
-                let graphData = new GraphData(rawGraphData)
-
-
-                let preparedData = graphData.createClusterNodesAndEdges()
-
-                var res = new RootCluster(preparedData.nodes);
-
-
-
-                parentEl3D.add(res);
-                res.position.set(0, 0, 0);
-                res.applyClustering(speccs)
-                //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
-                res.attachToView3D(this)
-
-                $(this).on("before-render",function(){
-                    res.update()
-                })
-
-
-                this.start()
-
-                return res
-        */
         return graph
     }
 
@@ -273,7 +247,7 @@ function DefaultForceGraph(view3d) {
         env.renderer =view3d.mRenderer
 
         env.controls =view3d.mControls
-
+        env.domEvents=view3d.mDomEvents
 
 
         env.initialised = true;
@@ -586,9 +560,23 @@ function DefaultForceGraph(view3d) {
                 }
             })
 
-        function _getNodePosition(node) {
+        function _getCountryNodePosition(node) {
             return node.particles.pointCloud.geometry.boundingSphere.center.clone()
         }
+
+        function zoomToCountryNode(node) {
+
+            var position = new THREE.Vector3();
+            position.setFromMatrixPosition(node.particles.pointCloud.matrixWorld);
+            position.add(node.particles.pointCloud.geometry.boundingSphere.center)
+
+            ZoomUtil.moveToPosition(position,env.camera,env.controls)
+
+            //doZoomToPos(_getCountryNodePosition(node))
+
+        }
+
+
 
         if (!env.countryTextNodes)
             env.countryTextNodes = TextNodes(env, {
@@ -613,7 +601,7 @@ function DefaultForceGraph(view3d) {
                     return 'graph-country-caption'
 
                 },
-                getNodePosition: _getNodePosition,
+                getNodePosition: _getCountryNodePosition,
                 interactable: true,
                 onAfterCreateTextField: function (node, el) {
 
@@ -624,7 +612,9 @@ function DefaultForceGraph(view3d) {
                     el.css("font-size", newSize);
 
                     el.on("click", function () {
-                        doZoomToPos(_getNodePosition(node))
+
+                     zoomToCountryNode(node)
+
                     })
 
                 }
@@ -905,7 +895,7 @@ function DefaultForceGraph(view3d) {
 
 
 
-        defaults = {
+        let defaults = {
             opacity: 0.01,
             transparent: true,
             //lineIsVisible:true, // if disabled the line won't be shown on the scene

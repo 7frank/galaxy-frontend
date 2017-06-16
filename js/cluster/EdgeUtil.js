@@ -175,6 +175,7 @@ class EdgeUtil {
     static getEdgesForNodes(nodes, bInternal = true, bExternal = false) {
 
 
+
 //a node can be a cluster that represents a set of nodes
  //   if (nodes instanceof BaseCluster3D) nodes = nodes.mNodes
 
@@ -205,7 +206,7 @@ class EdgeUtil {
             let isInternalNode = srcContained && trgContained;
 
             // console.log(srcContained,trgContained,isInternalNode)
-            if (bInternal && isInternalNode || bExternal && !isInternalNode) {
+            if (bInternal&&bExternal || bInternal && isInternalNode || bExternal && !isInternalNode) {
                 edges = edges.concat(node.edges);
                 edges = _.uniq(edges)
             }

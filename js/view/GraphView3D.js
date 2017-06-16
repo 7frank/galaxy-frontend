@@ -48,7 +48,7 @@ class GraphView3D extends View3D
         let graphData = new GraphData(rawGraphData)
 
 
-        let preparedData = graphData.createClusterNodesAndEdges()
+        let preparedData = graphData.createClusterNodesAndEdges(this)
 
         var res = new RootCluster(preparedData.nodes);
 
