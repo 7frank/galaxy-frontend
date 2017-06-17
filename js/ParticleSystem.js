@@ -199,7 +199,9 @@ function getParticleShaderMaterial()
 			let count=particlesPerNode[n]
 			
 			var scale=5
-			
+
+
+
 				for (var i=0;i<count;i++)
 				{
 				
@@ -222,30 +224,18 @@ function getParticleShaderMaterial()
 
 var percentage=1
 
-var particlesPlaced=0
-
-var animationID;
-/*
-var fps = 1;
-var now;
-var then = Date.now();
-var interval = 1000/fps;
-var delta;
-  
-*/
+var particlesPlaced=0;
 
 
-function animate(time) {
+var isRunning=false;
+function animateParticles(time) {
 
+	if (!isRunning) return;
 
-  //  now = Date.now();
-  // delta = now - then;
  
      
         if(particleSystem.parent){
 
-	 //if (delta > interval)
-     //  updateDestinations();
 
 
         var positions = geometry.attributes.position.array;
@@ -293,6 +283,8 @@ function animate(time) {
 
         if(fin){
 
+            isRunning=false; //stop updating
+
             increment=0;
 
             for(var v=0;v<particles;v++){
@@ -317,9 +309,7 @@ function animate(time) {
 	   }
 
      
-	 animationID=	requestAnimationFrame(animate);
 
-	//  then = now - (delta % interval);
 	 
 	}
 
@@ -334,22 +324,28 @@ function animate(time) {
 						updateDestinations:updateDestinations,
 						updateColors:updateColors,
 						start:function(){
+
 							if (!particleSystem) {
 								
 								console.error("already disposed")
 								return
 							}
 
+                            isRunning=true;
 							updateDestinations();
 							 
 							//for now just have a huge bounding volume
 							particleSystem.geometry.boundingSphere=new THREE.Sphere(new THREE.Vector3,50000);
 						
 							
-							animationID=requestAnimationFrame(animate);
+
 
 							},
-						stop:function(){  cancelAnimationFrame(animationID) },
+						stop:function(){
+                            isRunning=false;
+
+						},
+						update:animateParticles,
 						remove:function(){
 							this.stop()
 							

@@ -54,92 +54,103 @@ export class MyMain {
 
     setupViews() {
         const thumbCSS = {
-            "pointer-events":"all",
-            height: 225,
-            width: 300,
+            "pointer-events": "all",
+            height: 300,
+            width: 400,
             display: "flex",
-            border: "1px solid rgba(128, 128, 128, 0.5)",
-            margin:"0.2em"
+            "border": "1px solid rgba(128, 128, 128, 0.5)",
+            margin: "0.2em"
         }
 
 
-        function createContainer(){
+        function createContainer() {
+
+            let containerCSS = {
+              //"pointer-events": "none",
+                display: "flex",
+                "flex-flow": "row wrap",
+                position: "absolute",
+                top: "10em",
+                left: "20em",
+                width: 840,//"60em",
+                height:"40em"
+                ,"overflow-y":"scroll"
+                ,"overflow-x":"hidden",
+                background:"rgba(255, 255, 255, 0.2)",
+                border: "1px solid rgba(128, 128, 128, 0.5)",
+            }
+
 
             var container = $("<div>")
-                .css({"pointer-events":"none",display:"flex","flex-flow": "row wrap",position: "absolute", top: "10em", left: "20em", width: "60em"})
+                .css(containerCSS)
                 .appendTo("body")
 
-            let title=$("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
-                .css({ width: "100%","font-size":"1em"})
+            let title = $("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
+                .css({width: "100%", "font-size": "1em",color: "rgba(255, 255, 255, 0.5)"})
 
 
-
-            function toggleMenu(){
+            function toggleMenu() {
                 container.toggle()
             }
-            title.on("click",toggleMenu)
+
+            title.on("click", toggleMenu)
 
             container.append(title)
 
 
-            Mousetrap.bind( "space",toggleMenu)
+            Mousetrap.bind("space", toggleMenu)
 
             return container
         }
 
-        var that=this
+        var that = this
 
 
+        var container = createContainer()
 
-        var container =createContainer()
 
-
-        function createDefaultView(name="View3D"){
+        function createDefaultView(name = "View3D") {
 
             let mGraphView = document.createElement("simple-force-graph-view-3d")//("view-3d")
 
 
-            customElements.whenDefined("simple-force-graph-view-3d").then(function() {
+            customElements.whenDefined("simple-force-graph-view-3d").then(function () {
 
 
+                if (mGraphView.setCaption)
+                    mGraphView.setCaption(name)
 
+                $(mGraphView)
+                    .css(thumbCSS)
 
+                $(mGraphView).on("dblclick", function () {
+                    let maximisedContainer = $("#3d-graph")
+                    //globalEnv.scene=mGraphView.mScene
+                    var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
 
-            if ( mGraphView.setCaption)
-            mGraphView.setCaption(name)
+                    _.each(prevMaximisedElement, function (view) {
 
-            $(mGraphView)
-                .css(thumbCSS)
+                        view.undoMaximise() //
 
-            $(mGraphView).on("dblclick",function(){
-                let maximisedContainer=$("#3d-graph")
-                //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement= maximisedContainer.children(".view-3d");//("graph-view-3d")
+                    })
 
-                _.each(prevMaximisedElement,function(view){
+                    container.append(prevMaximisedElement)
 
-                    view.undoMaximise() //
+                    //--------
+                    maximisedContainer.append(this)
+                    this.maximise()
+
 
                 })
 
-                container.append(prevMaximisedElement)
-
-                //--------
-                maximisedContainer.append(this)
-                this.maximise()
-
-
 
             })
+            var setData = mGraphView.setData
+            mGraphView.setData = function (data) {
 
+                customElements.whenDefined("simple-force-graph-view-3d").then(function () {
 
-            })
-            var setData=mGraphView.setData
-            mGraphView.setData=function(data){
-
-                customElements.whenDefined("simple-force-graph-view-3d").then(function() {
-
-                    setData.call(mGraphView,data)
+                    setData.call(mGraphView, data)
 
                 })
 
@@ -150,7 +161,7 @@ export class MyMain {
         }
 
 
-        function createView(name="View3D",speccs){
+        function createView(name = "View3D", speccs) {
 
 
             let mGraphView = document.createElement("graph-view-3d")
@@ -162,18 +173,18 @@ export class MyMain {
             $(mGraphView)
                 .css(thumbCSS)
 
-            $(mGraphView).on("dblclick",function(){
-                let maximisedContainer=$("#3d-graph")
+            $(mGraphView).on("dblclick", function () {
+                let maximisedContainer = $("#3d-graph")
                 //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement= maximisedContainer.children(".view-3d")//("graph-view-3d")
+                var prevMaximisedElement = maximisedContainer.children(".view-3d")//("graph-view-3d")
 
-                _.each(prevMaximisedElement,function(view){
+                _.each(prevMaximisedElement, function (view) {
 
                     view.undoMaximise()
 
                 })
 
-                 container.append(prevMaximisedElement)
+                container.append(prevMaximisedElement)
                 maximisedContainer.append(this)
 
 
@@ -189,60 +200,58 @@ export class MyMain {
         }
 
 
+        let views = []
 
 
+        let view0 = createDefaultView("Default")
+        views.push(view0)
 
-        let views=[]
-
-
-
-       let view0 = createDefaultView("Default")
-       views.push(view0)
-
-        var speccs=this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
-        let view1 = createView("View1",speccs)
+        var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
+        let view1 = createView("View1", speccs)
         views.push(view1)
 
 
-        var speccs=this.getForceSpeccs()
-        let view2 = createView("View2",speccs)
+        var speccs = this.getForceSpeccs()
+        let view2 = createView("View2", speccs)
         views.push(view2)
 
 
-        let view3 = createView("View3",[{distribution:new BaseDistribution(2000,3)}])
+        let view3 = createView("View3", [{distribution: new BaseDistribution(2000, 3)}])
         views.push(view3)
 
-        var speccs=this.get2DChartSortedSpeccsArray()
+        var speccs = this.get2DChartSortedSpeccsArray()
 
-        let view4 = createView("View4",speccs)
+        let view4 = createView("2d-Barchart", speccs)
         views.push(view4)
 
+        var speccs = this.get2DPlaneCountryOnlySpeccs()
+        let view5 = createView("2d-Plane country-only", speccs)
+        views.push(view5)
 
 
 
         //------------------------------------
-        $(this).on("data-changed",loadAll)
+        $(this).on("data-changed", loadAll)
         if (that.mGraphData) loadAll()
 
-        function loadAll(){
+        function loadAll() {
 
 
-            _.each(views,function(view){
-            view.setData(that.mGraphData)
+            _.each(views, function (view) {
+                view.setData(that.mGraphData)
             })
 
         }
 
-        _.each(views,function(view){
+        _.each(views, function (view) {
             container.append(view)
         })
-
 
 
     }
 
 
-    get2DChartSortedSpeccsArray(){
+    get2DChartSortedSpeccsArray() {
 
 
         function countrySetGenerator(groupFunction, node) {
@@ -259,24 +268,50 @@ export class MyMain {
             //return (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1;
         }
 
+        return [
+            {
+                generator: countrySetGenerator,
+                distribution: new BaseDistribution(1000, 1).onSort(mySort),
+                options: {minClusterSize: 15}
+            },
+            {
+                generator: industrySetGenerator,
+                distribution: new BaseDistribution(200, 1).onSort(mySort),
+                options: {minClusterSize: 15}
+            },
+            {distribution: new BaseDistribution(50, 2)}
 
-        /**
-         *
-         *        sort:null, //TODO use sort and direction to place the elements
-         direction:new THREE.Vector3(0,1,0)
-         if (typeof options.sort=="function")
-         elements.sort(options.sort)
-         *
-         * //,direction:new THREE.Vector3(0,0,1),sort:mySort
-         *
-         */
+
+        ]
 
 
+    }
+
+
+    get2DPlaneCountryOnlySpeccs() {
+
+
+        function countrySetGenerator(groupFunction, node) {
+
+            groupFunction(node.group, node)
+        }
+
+        function industrySetGenerator(groupFunction, node) {
+            groupFunction(node.industry, node)
+        }
+
+        function mySort(a, b) {
+            return (a.mNodes.length < b.mNodes.length) ? 1 : -1;
+            //return (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1;
+        }
 
         return [
-            {generator: countrySetGenerator, distribution:  new BaseDistribution(1000, 1).onSort(mySort), options: {minClusterSize: 15}},
-            {generator: industrySetGenerator, distribution: new BaseDistribution(200, 1).onSort(mySort), options: {minClusterSize: 15}},
-            {distribution: new BaseDistribution(50, 2)}
+            {
+                generator: countrySetGenerator,
+                distribution: new BaseDistribution(1000, 2).onSort(mySort),
+                options: {minClusterSize: 15}
+            },
+            {distribution: new BaseDistribution(200, 2)}
 
 
         ]
@@ -343,7 +378,7 @@ export class MyMain {
 
     setGraphData(graphData) {
         this.mGraphData = graphData;
-       // this.init(mGraphData);
+        // this.init(mGraphData);
 
         $(this).trigger("data-changed")
 

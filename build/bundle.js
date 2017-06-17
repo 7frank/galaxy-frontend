@@ -427,7 +427,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
     setDistributionHandler(distribution, onComplete = function () {
     }) {
-
+        var that=this
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
 
@@ -437,10 +437,24 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             distribution.setNodes(this, function onStep(vecPosition, i) {
                 //  let n = values[i];
                 //  n.position.copy(vecPosition)
+
+                updateLeafsEdges(that)
+
             }, function () {
                 onComplete()
             });
 
+
+        //FIXME redundant updating multiple edges and potentially leafs
+        function updateLeafsEdges(cluster)
+        {
+            let leafs=cluster.getLeafs()
+
+            _.each(leafs,function(leaf){
+                leaf.mEdgesContainer.updateEdges();
+            })
+
+        }
 
     }
 
@@ -892,7 +906,7 @@ class EdgeUtil {
      *
      *
      */
-    static getConnectedClusters(){
+    static getConnectedClusters() {
 
         //finds external nodes of a cluster
 
@@ -902,46 +916,43 @@ class EdgeUtil {
     }
 
 
-
-
     /*
-    * takes a object containing BaseCluster3D as input and returns
-    * a set of edges
-    *
-    * */
+     * takes a object containing BaseCluster3D as input and returns
+     * a set of edges
+     *
+     * */
 
-    static createEdgesBetweenClustersFromMap(clustersContainer){
-
-
-       let info= EdgeUtil.getClusterInfo(clustersContainer)
-
-        let clusterKeys= Object.keys(clustersContainer) ;
+    static createEdgesBetweenClustersFromMap(clustersContainer) {
 
 
-        var edgesArray=[];
-       _.each(clusterKeys,function(key){
+        let info = EdgeUtil.getClusterInfo(clustersContainer)
 
-           let otherClusterKeys= Object.keys(info[key].clustersConnectedTo) ;
-
-           _.each(otherClusterKeys,function(otherKey){
-
-               let otherClusters= info[key].clustersConnectedTo;
-               let edgesForCluster= info[key].edges;
-
-               let linkStrength=Object.keys(edgesForCluster).length
-
-               edgesArray.push({
-                       source:clustersContainer[key],
-                       target:otherClusters[otherKey],
-                       link_strength:linkStrength
-                   })
+        let clusterKeys = Object.keys(clustersContainer);
 
 
-           });
+        var edgesArray = [];
+        _.each(clusterKeys, function (key) {
+
+            let otherClusterKeys = Object.keys(info[key].clustersConnectedTo);
+
+            _.each(otherClusterKeys, function (otherKey) {
+
+                let otherClusters = info[key].clustersConnectedTo;
+                let edgesForCluster = info[key].edges;
+
+                let linkStrength = Object.keys(edgesForCluster).length
+
+                edgesArray.push({
+                    source: clustersContainer[key],
+                    target: otherClusters[otherKey],
+                    link_strength: linkStrength
+                })
 
 
+            });
 
-       });
+
+        });
 
         return edgesArray;
     }
@@ -951,90 +962,86 @@ class EdgeUtil {
      * @param clustersContainer  ...  Map<name,cluster>
      * @returns an object containing certain infos about clusters (what clusters are connected, with which edges and nodes within the cluster)
      */
-    static getClusterInfo(clustersContainer){
+    static getClusterInfo(clustersContainer) {
 
         //find connections between clusters from nodes contained
 
-        var relevantEdgesPerCluster={}
-            _.each(clustersContainer,function(cluster,id){
-                relevantEdgesPerCluster[id]={}
-                let nodes=cluster.getNodes()
-                //get only relevant nodes per cluster that link to/from other clusters
-                let edges=EdgeUtil.getEdgesForNodes(nodes,false,true,true)
-                relevantEdgesPerCluster[id]=edges
+        var relevantEdgesPerCluster = {}
+        _.each(clustersContainer, function (cluster, id) {
+            relevantEdgesPerCluster[id] = {}
+            let nodes = cluster.getNodes()
+            //get only relevant nodes per cluster that link to/from other clusters
+            let edges = EdgeUtil.getEdgesForNodes(nodes, false, true, true)
+            relevantEdgesPerCluster[id] = edges
 
-            })
+        })
 
 
-
-        function isNodeOfCluster(node,cluster)
-        {
-          return cluster.getNodes().indexOf(node)>=0
+        function isNodeOfCluster(node, cluster) {
+            return cluster.getNodes().indexOf(node) >= 0
 
         }
 
         //just in case clusters can overlap
         //returns a map of the clusters that contain the node
-        function lookUpClustersOfNode(node){
+        function lookUpClustersOfNode(node) {
 
-            var clustersForNode={};
+            var clustersForNode = {};
 
-            _.each(clustersContainer,function(cluster,id){
+            _.each(clustersContainer, function (cluster, id) {
 
-               if (  isNodeOfCluster(node,cluster))
-                   clustersForNode[id] = cluster;
+                if (isNodeOfCluster(node, cluster))
+                    clustersForNode[id] = cluster;
             });
 
             return clustersForNode;
 
         }
 
-        var clustersContainerRelationInfo={};
+        var clustersContainerRelationInfo = {};
 
 
         //get the clusters that connect to each other from the dges between them
-        _.each(relevantEdgesPerCluster,function(clusterExternalEdges,clusterID){
+        _.each(relevantEdgesPerCluster, function (clusterExternalEdges, clusterID) {
 
-            clustersContainerRelationInfo[clusterID]={
-                clustersConnectedTo:{},
-                edges:{},
-                nodes:{}
+            clustersContainerRelationInfo[clusterID] = {
+                clustersConnectedTo: {},
+                edges: {},
+                nodes: {}
 
             };
 
             //for each edge of the current cluster that connects to another cluster
-            _.each(clusterExternalEdges,function(externalEdge){
+            _.each(clusterExternalEdges, function (externalEdge) {
 
 
 
                 //we can ignore the node that is contained within the current cluster
 
-               var testNode= isNodeOfCluster(externalEdge.source,clustersContainer[clusterID]);
-               let otherNode=testNode?externalEdge.target:externalEdge.source;
+                var testNode = isNodeOfCluster(externalEdge.source, clustersContainer[clusterID]);
+                let otherNode = testNode ? externalEdge.target : externalEdge.source;
 
 
-               let clustersThatContainNode = lookUpClustersOfNode(otherNode);
+                let clustersThatContainNode = lookUpClustersOfNode(otherNode);
                 delete (clustersThatContainNode[clusterID]) //undo self reference
 
-                _.extend(clustersContainerRelationInfo[clusterID].clustersConnectedTo,clustersThatContainNode);
+                _.extend(clustersContainerRelationInfo[clusterID].clustersConnectedTo, clustersThatContainNode);
 
-                var keys=Object.keys(clustersThatContainNode)
+                var keys = Object.keys(clustersThatContainNode)
 
 
                 //have some additional infos
-                _.each(keys,function(key){
+                _.each(keys, function (key) {
 
                     //the edges that link to the specific cluster
-                   if (!clustersContainerRelationInfo[clusterID].edges[key]) clustersContainerRelationInfo[clusterID].edges[key]=[]
+                    if (!clustersContainerRelationInfo[clusterID].edges[key]) clustersContainerRelationInfo[clusterID].edges[key] = []
                     clustersContainerRelationInfo[clusterID].edges[key].push(externalEdge)
 
                     //the nodes the edges connect to
-                    if (!clustersContainerRelationInfo[clusterID].nodes[key]) clustersContainerRelationInfo[clusterID].nodes[key]=[]
+                    if (!clustersContainerRelationInfo[clusterID].nodes[key]) clustersContainerRelationInfo[clusterID].nodes[key] = []
                     clustersContainerRelationInfo[clusterID].nodes[key].push(externalEdge)
 
                 })
-
-
 
 
                 //all clusters the node links to
@@ -1053,68 +1060,72 @@ class EdgeUtil {
      *  this would be suitable to do force-graph distribution on a cluster and all descendants
      */
 
-    static getEdgesForNodes(nodes, bInternal = true, bOutgoing = false,bIngoing = false) {
+    static getEdgesForNodes(nodes, bInternal = true, bOutgoing = false, bIngoing = false) {
 
 
 
 //a node can be a cluster that represents a set of nodes
- //   if (nodes instanceof BaseCluster3D) nodes = nodes.mNodes
+        //   if (nodes instanceof BaseCluster3D) nodes = nodes.mNodes
 
-    if (!bInternal && !bOutgoing && !bIngoing) return []
-    //get relevant edges from
+        if (!bInternal && !bOutgoing && !bIngoing) return []
+        //get relevant edges from
 
-    //a.clusters.mClusters.mClusters["United States"][0].mNodes
+        //a.clusters.mClusters.mClusters["United States"][0].mNodes
 
-    var edges = [];
+        var edges = [];
 
-    _.each(nodes, function (node, id) {
+        _.each(nodes, function (node, id) {
 
-        //check if it is a container element
-        if (node instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */]) {
-            let _edges = EdgeUtil.getEdgesForNodes(node.mNodes, bInternal, bOutgoing,bIngoing)
-            edges = edges.concat(_edges);
-            edges = _.uniq(edges)
-            return
-        }
-
-
-        _.each(node.edges, function (edge, id) {
-
-
-            let srcContained = nodes.indexOf(edge.source) >= 0;
-            let trgContained = nodes.indexOf(edge.target) >= 0;
-
-
-            let isInternalNode = srcContained && trgContained;
-
-
-            let isOutgoing=!isInternalNode&&srcContained
-            let isIngoing=!isInternalNode&&trgContained
-            //TODO we do want to distinguish between outgoing and ingoing edges
-            // /if (!isInternalNode)
-            //calc direction
-
-
-            // console.log(srcContained,trgContained,isInternalNode)
-         /*   if (bInternal&&bExternal || bInternal && isInternalNode || bExternal && !isInternalNode) {
-                edges = edges.concat(node.edges);
+            //check if it is a container element
+            if (node instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */]) {
+                let _edges = EdgeUtil.getEdgesForNodes(node.mNodes, bInternal, bOutgoing, bIngoing)
+                edges = edges.concat(_edges);
                 edges = _.uniq(edges)
-            }*/
+                return
+            }
 
-            if (bInternal&& bOutgoing&&bIngoing)
-                edges.push(edge)
-              else
-            if (bInternal&& isInternalNode || bOutgoing && isOutgoing || bIngoing && isIngoing)
-                edges.push(edge)
+
+            _.each(node.edges, function (edge, id) {
+
+
+                let srcContained = nodes.indexOf(edge.source) >= 0;
+                let trgContained = nodes.indexOf(edge.target) >= 0;
+
+
+                let isInternalNode = srcContained && trgContained;
+
+
+                let isOutgoing = !isInternalNode && srcContained
+                let isIngoing = !isInternalNode && trgContained
+                //TODO we do want to distinguish between outgoing and ingoing edges
+                // /if (!isInternalNode)
+                //calc direction
+
+
+                // console.log(srcContained,trgContained,isInternalNode)
+                /*   if (bInternal&&bExternal || bInternal && isInternalNode || bExternal && !isInternalNode) {
+                 edges = edges.concat(node.edges);
+                 edges = _.uniq(edges)
+                 }*/
+                function pushit(edge) {
+                    edge.isSrcInternalNode = srcContained
+                    edge.isTrgInternalNode = trgContained
+                    edges.push(edge)
+                }
+
+                if (bInternal && bOutgoing && bIngoing)
+                    pushit(edge)
+                else if (bInternal && isInternalNode || bOutgoing && isOutgoing || bIngoing && isIngoing)
+                    pushit(edge)
+
+            })
 
         })
 
-    })
 
+        return edges
 
-    return edges
-
-}
+    }
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = EdgeUtil;
@@ -1495,16 +1506,23 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
                 var _dist=speccs[curr++%speccs.length].distribution
 
                 console.log("setting distribution function",_dist)
-                res.setDistributionHandler(   _dist  )
+                res.setDistributionHandler(   _dist ,function onComplete(){
+
+                    //distribution-complete
+                    res.onAfterClusteredAndDistributed()
+
+
+
+                } )
 
                 //FIXME add complete handler
-                setTimeout(function()
+/*                setTimeout(function()
                 {
 
                     res.onAfterClusteredAndDistributed()
 
                 },1000 )
-
+*/
             }
         }
 
@@ -1572,6 +1590,12 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         if (this.mTextNodes)
         this.mTextNodes.update();
 
+
+
+        if (this.mParticles)
+            this.mParticles.update();
+
+
     }
 
 
@@ -1597,8 +1621,10 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
      */
     onAfterClusteredAndDistributed(){
         super.onAfterClusteredAndDistributed();
+let leafs=this.getLeafs()
+        console.warn("onAfterClusteredAndDistributed",leafs.length)
 
-      _.each(this.getLeafs(),function(leaf){
+      _.each(leafs,function(leaf){
 
           leaf.parent._initDotParticles();
 
@@ -1654,6 +1680,15 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
             var particles = createParticleSystemForNodes(nodes, demoOptions);
             this.add(particles.pointCloud);
+
+                //TODO call start if distribution function is finished
+                this.on("distribution-complete",function(){
+
+                    particles.start()
+
+
+                })
+
 
             this.mParticles = particles;
         }
@@ -2647,8 +2682,6 @@ class View3D extends HTMLElement
           that.mLastFrameTime = time
 
 
-
-
           $(that).trigger("before-render")
          // $(that).trigger("animate")
 
@@ -3145,6 +3178,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
         res.attachToView3D(this)
 
         $(this).on("before-render",function(){
+            //TODO who is responsible for the updating itself to cluster or the view?
             res.update()
         })
 
@@ -3248,8 +3282,10 @@ class SimpleForceGraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /
 
     initForceGraphView(rawGraphData,parentEl3D) {
 
+        var graph=this.mSimpleGraph
 
-        var graph=new DefaultForceGraph(this)
+        if (!graph)
+            graph=this.mSimpleGraph=new DefaultForceGraph(this)
             .numDimensions(3)
             (this);
 
@@ -3448,7 +3484,6 @@ function DefaultForceGraph(view3d) {
        // env.domNode.innerHTML = '';
         // Add nav info section
 
-
         createTooltip()
 
         // Setup camera
@@ -3523,10 +3558,13 @@ function DefaultForceGraph(view3d) {
 
 
 
-        // Kick-off renderer
+
+
+
 
         var _____skipFrames = 0;
-        (function animate() { // IIFE
+        $(view3d).on("before-render",function(){
+
             env.onFrame();
 
             // Frame cycle
@@ -3540,7 +3578,7 @@ function DefaultForceGraph(view3d) {
             //skip onBeforeRenderFor NumberOfFrames
             _____skipFrames++
 
-           // if (window['globalNodes'])
+            // if (window['globalNodes'])
             //    globalNodes.forEach((n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
 
             //TODO what we want here instead is, a probably already existsing list of sorted visible meshes
@@ -3559,8 +3597,16 @@ function DefaultForceGraph(view3d) {
             if (env.nodeClouds)
                 env.nodeClouds.updateCrossFade()
 
+        })
+
+        // Kick-off renderer
+
+
+   /*     (function animate() { // IIFE
+
+
             requestAnimationFrame(animate);
-        })()
+        })()*/
     }
 
     //----------------------------------------
@@ -3909,6 +3955,10 @@ function DefaultForceGraph(view3d) {
                 env.particles.start()
 
             }, 1000)
+
+            if (env.particles)
+                env.particles.update()
+
 
             //set the text labels to the correct positions
 
@@ -4519,7 +4569,11 @@ class BaseNode extends THREE.Mesh {
 
         // adding before-render event default handler
         this.on("before-render",function(){
-            this.update()
+
+            //the update is currently called from the view3D for the root element
+            //and all child elements..
+            // TODO check what impact this has on the workflow
+          //  this.update()
 
         })
 
@@ -4592,12 +4646,76 @@ class EdgesContainer extends THREE.Object3D {
     constructor(...args) {
         super(...args);
         this.initLineMesh();
+
+        this.mExternalNodesHelpers=[]
+
     }
 
     addEdge(_edge) {
 
+
+        var that = this
+
+        function createExternalNodeHelper(node,internalOtherNode) {
+            var nPos = node._bubble.position
+            var adjustedPos = new THREE.Vector3
+
+            return {
+                position: adjustedPos,
+                update: function () {
+
+                    //FIXME currently does not match with arrowhelpers so .. invalid
+
+                    if (!node.get3DRoot().parent) return //not connected
+
+
+                    adjustedPos.setFromMatrixPosition( node.get3DRoot().parent.matrixWorld );
+
+                    //setFromMatrix
+                    adjustedPos.add(nPos)
+                    let other=new THREE.Vector3
+                    other.setFromMatrixPosition( internalOtherNode.get3DRoot().parent.matrixWorld );
+
+                    adjustedPos.sub(other)
+
+
+                }
+            }
+        }
+
+        //we need to keep track of  edges that are within it's container and those who are linked to outer elements
+        //so all nodes within the edges that link into another cluster (!isSrcInternalNode)
+        //are stored for later updating
+
         //        let newEdge = new BaseEdge(_edge.mStart,_edge.mEnd);
-        let newEdge = new __WEBPACK_IMPORTED_MODULE_0__BaseEdge__["a" /* default */]( _edge.source._bubble.position, _edge.target._bubble.position);
+        let newEdge = new __WEBPACK_IMPORTED_MODULE_0__BaseEdge__["a" /* default */](_edge.source._bubble.position, _edge.target._bubble.position);
+
+
+        if (!_edge.isSrcInternalNode)
+        {
+            let helper = createExternalNodeHelper(_edge.source,_edge.target)
+            this.mExternalNodesHelpers.push(helper)
+            this.mEdges.geometry.vertices.push(helper.position);
+
+         }
+         else
+        this.mEdges.geometry.vertices.push(newEdge.getStart());
+
+
+        if (!_edge.isTrgInternalNode)
+        {
+            let helper = createExternalNodeHelper(_edge.target,_edge.source)
+            this.mExternalNodesHelpers.push(helper)
+            this.mEdges.geometry.vertices.push(helper.position);
+
+        }
+        else
+            this.mEdges.geometry.vertices.push(newEdge.getStart());
+
+
+
+
+
 
         this.mEdges.geometry.vertices.push(newEdge.getStart());
         this.mEdges.geometry.vertices.push(newEdge.getEnd());
@@ -4607,6 +4725,8 @@ class EdgesContainer extends THREE.Object3D {
     }
 
     updateEdges() {
+
+        _.each(this.mExternalNodesHelpers,helper => helper.update())
 
         this.mEdges.geometry.verticesNeedUpdate = true;
 
@@ -4655,7 +4775,7 @@ class EdgesContainer extends THREE.Object3D {
                 color: options.color,
                 transparent: options.transparent,
                 opacity: options.opacity,
-                depthTest: false,
+                depthTest: true,
                 depthWrite: false
             });
 
@@ -4672,7 +4792,7 @@ class EdgesContainer extends THREE.Object3D {
 
 
         this.mEdges = initLineGroup({
-            opacity: 0.5,
+            opacity: 0.2,
             color: 0x49616C,
             transparent: true,
         })
@@ -4764,92 +4884,103 @@ class MyMain {
 
     setupViews() {
         const thumbCSS = {
-            "pointer-events":"all",
-            height: 225,
-            width: 300,
+            "pointer-events": "all",
+            height: 300,
+            width: 400,
             display: "flex",
-            border: "1px solid rgba(128, 128, 128, 0.5)",
-            margin:"0.2em"
+            "border": "1px solid rgba(128, 128, 128, 0.5)",
+            margin: "0.2em"
         }
 
 
-        function createContainer(){
+        function createContainer() {
+
+            let containerCSS = {
+              //"pointer-events": "none",
+                display: "flex",
+                "flex-flow": "row wrap",
+                position: "absolute",
+                top: "10em",
+                left: "20em",
+                width: 840,//"60em",
+                height:"40em"
+                ,"overflow-y":"scroll"
+                ,"overflow-x":"hidden",
+                background:"rgba(255, 255, 255, 0.2)",
+                border: "1px solid rgba(128, 128, 128, 0.5)",
+            }
+
 
             var container = $("<div>")
-                .css({"pointer-events":"none",display:"flex","flex-flow": "row wrap",position: "absolute", top: "10em", left: "20em", width: "60em"})
+                .css(containerCSS)
                 .appendTo("body")
 
-            let title=$("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
-                .css({ width: "100%","font-size":"1em"})
+            let title = $("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
+                .css({width: "100%", "font-size": "1em",color: "rgba(255, 255, 255, 0.5)"})
 
 
-
-            function toggleMenu(){
+            function toggleMenu() {
                 container.toggle()
             }
-            title.on("click",toggleMenu)
+
+            title.on("click", toggleMenu)
 
             container.append(title)
 
 
-            Mousetrap.bind( "space",toggleMenu)
+            Mousetrap.bind("space", toggleMenu)
 
             return container
         }
 
-        var that=this
+        var that = this
 
 
+        var container = createContainer()
 
-        var container =createContainer()
 
-
-        function createDefaultView(name="View3D"){
+        function createDefaultView(name = "View3D") {
 
             let mGraphView = document.createElement("simple-force-graph-view-3d")//("view-3d")
 
 
-            customElements.whenDefined("simple-force-graph-view-3d").then(function() {
+            customElements.whenDefined("simple-force-graph-view-3d").then(function () {
 
 
+                if (mGraphView.setCaption)
+                    mGraphView.setCaption(name)
 
+                $(mGraphView)
+                    .css(thumbCSS)
 
+                $(mGraphView).on("dblclick", function () {
+                    let maximisedContainer = $("#3d-graph")
+                    //globalEnv.scene=mGraphView.mScene
+                    var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
 
-            if ( mGraphView.setCaption)
-            mGraphView.setCaption(name)
+                    _.each(prevMaximisedElement, function (view) {
 
-            $(mGraphView)
-                .css(thumbCSS)
+                        view.undoMaximise() //
 
-            $(mGraphView).on("dblclick",function(){
-                let maximisedContainer=$("#3d-graph")
-                //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement= maximisedContainer.children(".view-3d");//("graph-view-3d")
+                    })
 
-                _.each(prevMaximisedElement,function(view){
+                    container.append(prevMaximisedElement)
 
-                    view.undoMaximise() //
+                    //--------
+                    maximisedContainer.append(this)
+                    this.maximise()
+
 
                 })
 
-                container.append(prevMaximisedElement)
-
-                //--------
-                maximisedContainer.append(this)
-                this.maximise()
-
-
 
             })
+            var setData = mGraphView.setData
+            mGraphView.setData = function (data) {
 
+                customElements.whenDefined("simple-force-graph-view-3d").then(function () {
 
-            })
-            var setData=mGraphView.setData
-            mGraphView.setData=function(data){
-
-                customElements.whenDefined("simple-force-graph-view-3d").then(function() {
-
-                    setData.call(mGraphView,data)
+                    setData.call(mGraphView, data)
 
                 })
 
@@ -4860,7 +4991,7 @@ class MyMain {
         }
 
 
-        function createView(name="View3D",speccs){
+        function createView(name = "View3D", speccs) {
 
 
             let mGraphView = document.createElement("graph-view-3d")
@@ -4872,18 +5003,18 @@ class MyMain {
             $(mGraphView)
                 .css(thumbCSS)
 
-            $(mGraphView).on("dblclick",function(){
-                let maximisedContainer=$("#3d-graph")
+            $(mGraphView).on("dblclick", function () {
+                let maximisedContainer = $("#3d-graph")
                 //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement= maximisedContainer.children(".view-3d")//("graph-view-3d")
+                var prevMaximisedElement = maximisedContainer.children(".view-3d")//("graph-view-3d")
 
-                _.each(prevMaximisedElement,function(view){
+                _.each(prevMaximisedElement, function (view) {
 
                     view.undoMaximise()
 
                 })
 
-                 container.append(prevMaximisedElement)
+                container.append(prevMaximisedElement)
                 maximisedContainer.append(this)
 
 
@@ -4899,60 +5030,58 @@ class MyMain {
         }
 
 
+        let views = []
 
 
+        let view0 = createDefaultView("Default")
+        views.push(view0)
 
-        let views=[]
-
-
-
-       let view0 = createDefaultView("Default")
-       views.push(view0)
-
-        var speccs=this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
-        let view1 = createView("View1",speccs)
+        var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
+        let view1 = createView("View1", speccs)
         views.push(view1)
 
 
-        var speccs=this.getForceSpeccs()
-        let view2 = createView("View2",speccs)
+        var speccs = this.getForceSpeccs()
+        let view2 = createView("View2", speccs)
         views.push(view2)
 
 
-        let view3 = createView("View3",[{distribution:new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000,3)}])
+        let view3 = createView("View3", [{distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 3)}])
         views.push(view3)
 
-        var speccs=this.get2DChartSortedSpeccsArray()
+        var speccs = this.get2DChartSortedSpeccsArray()
 
-        let view4 = createView("View4",speccs)
+        let view4 = createView("2d-Barchart", speccs)
         views.push(view4)
 
+        var speccs = this.get2DPlaneCountryOnlySpeccs()
+        let view5 = createView("2d-Plane country-only", speccs)
+        views.push(view5)
 
 
 
         //------------------------------------
-        $(this).on("data-changed",loadAll)
+        $(this).on("data-changed", loadAll)
         if (that.mGraphData) loadAll()
 
-        function loadAll(){
+        function loadAll() {
 
 
-            _.each(views,function(view){
-            view.setData(that.mGraphData)
+            _.each(views, function (view) {
+                view.setData(that.mGraphData)
             })
 
         }
 
-        _.each(views,function(view){
+        _.each(views, function (view) {
             container.append(view)
         })
-
 
 
     }
 
 
-    get2DChartSortedSpeccsArray(){
+    get2DChartSortedSpeccsArray() {
 
 
         function countrySetGenerator(groupFunction, node) {
@@ -4969,24 +5098,50 @@ class MyMain {
             //return (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1;
         }
 
+        return [
+            {
+                generator: countrySetGenerator,
+                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 1).onSort(mySort),
+                options: {minClusterSize: 15}
+            },
+            {
+                generator: industrySetGenerator,
+                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 1).onSort(mySort),
+                options: {minClusterSize: 15}
+            },
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 2)}
 
-        /**
-         *
-         *        sort:null, //TODO use sort and direction to place the elements
-         direction:new THREE.Vector3(0,1,0)
-         if (typeof options.sort=="function")
-         elements.sort(options.sort)
-         *
-         * //,direction:new THREE.Vector3(0,0,1),sort:mySort
-         *
-         */
+
+        ]
 
 
+    }
+
+
+    get2DPlaneCountryOnlySpeccs() {
+
+
+        function countrySetGenerator(groupFunction, node) {
+
+            groupFunction(node.group, node)
+        }
+
+        function industrySetGenerator(groupFunction, node) {
+            groupFunction(node.industry, node)
+        }
+
+        function mySort(a, b) {
+            return (a.mNodes.length < b.mNodes.length) ? 1 : -1;
+            //return (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1;
+        }
 
         return [
-            {generator: countrySetGenerator, distribution:  new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 1).onSort(mySort), options: {minClusterSize: 15}},
-            {generator: industrySetGenerator, distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 1).onSort(mySort), options: {minClusterSize: 15}},
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 2)}
+            {
+                generator: countrySetGenerator,
+                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 2).onSort(mySort),
+                options: {minClusterSize: 15}
+            },
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 2)}
 
 
         ]
@@ -5053,7 +5208,7 @@ class MyMain {
 
     setGraphData(graphData) {
         this.mGraphData = graphData;
-       // this.init(mGraphData);
+        // this.init(mGraphData);
 
         $(this).trigger("data-changed")
 

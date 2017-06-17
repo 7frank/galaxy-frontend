@@ -61,6 +61,7 @@ class GraphView3D extends View3D
         res.attachToView3D(this)
 
         $(this).on("before-render",function(){
+            //TODO who is responsible for the updating itself to cluster or the view?
             res.update()
         })
 

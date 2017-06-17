@@ -87,16 +87,23 @@ class Cluster3DExtended extends BaseCluster3D {
                 var _dist=speccs[curr++%speccs.length].distribution
 
                 console.log("setting distribution function",_dist)
-                res.setDistributionHandler(   _dist  )
+                res.setDistributionHandler(   _dist ,function onComplete(){
+
+                    //distribution-complete
+                    res.onAfterClusteredAndDistributed()
+
+
+
+                } )
 
                 //FIXME add complete handler
-                setTimeout(function()
+/*                setTimeout(function()
                 {
 
                     res.onAfterClusteredAndDistributed()
 
                 },1000 )
-
+*/
             }
         }
 
@@ -164,6 +171,12 @@ class Cluster3DExtended extends BaseCluster3D {
         if (this.mTextNodes)
         this.mTextNodes.update();
 
+
+
+        if (this.mParticles)
+            this.mParticles.update();
+
+
     }
 
 
@@ -189,8 +202,10 @@ class Cluster3DExtended extends BaseCluster3D {
      */
     onAfterClusteredAndDistributed(){
         super.onAfterClusteredAndDistributed();
+let leafs=this.getLeafs()
+        console.warn("onAfterClusteredAndDistributed",leafs.length)
 
-      _.each(this.getLeafs(),function(leaf){
+      _.each(leafs,function(leaf){
 
           leaf.parent._initDotParticles();
 
@@ -246,6 +261,15 @@ class Cluster3DExtended extends BaseCluster3D {
 
             var particles = createParticleSystemForNodes(nodes, demoOptions);
             this.add(particles.pointCloud);
+
+                //TODO call start if distribution function is finished
+                this.on("distribution-complete",function(){
+
+                    particles.start()
+
+
+                })
+
 
             this.mParticles = particles;
         }

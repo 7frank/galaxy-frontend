@@ -35,8 +35,10 @@ class SimpleForceGraphView3D extends View3D
 
     initForceGraphView(rawGraphData,parentEl3D) {
 
+        var graph=this.mSimpleGraph
 
-        var graph=new DefaultForceGraph(this)
+        if (!graph)
+            graph=this.mSimpleGraph=new DefaultForceGraph(this)
             .numDimensions(3)
             (this);
 
@@ -233,7 +235,6 @@ function DefaultForceGraph(view3d) {
        // env.domNode.innerHTML = '';
         // Add nav info section
 
-
         createTooltip()
 
         // Setup camera
@@ -308,10 +309,13 @@ function DefaultForceGraph(view3d) {
 
 
 
-        // Kick-off renderer
+
+
+
 
         var _____skipFrames = 0;
-        (function animate() { // IIFE
+        $(view3d).on("before-render",function(){
+
             env.onFrame();
 
             // Frame cycle
@@ -325,7 +329,7 @@ function DefaultForceGraph(view3d) {
             //skip onBeforeRenderFor NumberOfFrames
             _____skipFrames++
 
-           // if (window['globalNodes'])
+            // if (window['globalNodes'])
             //    globalNodes.forEach((n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
 
             //TODO what we want here instead is, a probably already existsing list of sorted visible meshes
@@ -344,8 +348,16 @@ function DefaultForceGraph(view3d) {
             if (env.nodeClouds)
                 env.nodeClouds.updateCrossFade()
 
+        })
+
+        // Kick-off renderer
+
+
+   /*     (function animate() { // IIFE
+
+
             requestAnimationFrame(animate);
-        })()
+        })()*/
     }
 
     //----------------------------------------
@@ -694,6 +706,10 @@ function DefaultForceGraph(view3d) {
                 env.particles.start()
 
             }, 1000)
+
+            if (env.particles)
+                env.particles.update()
+
 
             //set the text labels to the correct positions
 

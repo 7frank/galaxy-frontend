@@ -351,7 +351,7 @@ class BaseCluster3D extends BaseNode {
      */
     setDistributionHandler(distribution, onComplete = function () {
     }) {
-
+        var that=this
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
 
@@ -361,10 +361,24 @@ class BaseCluster3D extends BaseNode {
             distribution.setNodes(this, function onStep(vecPosition, i) {
                 //  let n = values[i];
                 //  n.position.copy(vecPosition)
+
+                updateLeafsEdges(that)
+
             }, function () {
                 onComplete()
             });
 
+
+        //FIXME redundant updating multiple edges and potentially leafs
+        function updateLeafsEdges(cluster)
+        {
+            let leafs=cluster.getLeafs()
+
+            _.each(leafs,function(leaf){
+                leaf.mEdgesContainer.updateEdges();
+            })
+
+        }
 
     }
 

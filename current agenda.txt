@@ -1,6 +1,15 @@
 bugs:
-    partcles within node are altering between + and - for too long for the bigger data set
+   [x]fix zoom feature for nodes
+   afterwads refactor node and links into proper classes
+    []get particles and edges running again (currently broken)
+        >>edges: currently the edges container is created from a set of nodes which are positioned in object-space(not world)
+        so edges do have the same position informations and won't render correct if edges do are external
+    []text uml
+
+    []partcles within node are altering between + and - for too long for the bigger data set
     which generates some kind of flickering...
+    -aso particles currently don't work because they are updated i the wrong way, but previously had  to much of a performance impact
+
 
     -stop animations no view change to prevent wrong visualisation
 
@@ -8,8 +17,13 @@ bugs:
     text nodes appear when default/global impl gets loaded
     restore interaction=>  node meshes and such
         (probably also something with global values)
+        nodes do cout toward rendered elements so probably offset for controls is wrong
+
+
+
 
 clusters
+[]consider putting the edges behind the nodes => nodes above edges for easier visu
 []compute scale of distributions automatically
 -interference with search functionality => not always zooms to correct result
 [x]todo per cluster line mesh or at least matrixWorld property for nodes to be able to calc the position from that

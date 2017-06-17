@@ -239,8 +239,6 @@ class View3D extends HTMLElement
           that.mLastFrameTime = time
 
 
-
-
           $(that).trigger("before-render")
          // $(that).trigger("animate")
 

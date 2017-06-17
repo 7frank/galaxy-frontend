@@ -240,7 +240,11 @@ export default class BaseNode extends THREE.Mesh {
 
         // adding before-render event default handler
         this.on("before-render",function(){
-            this.update()
+
+            //the update is currently called from the view3D for the root element
+            //and all child elements..
+            // TODO check what impact this has on the workflow
+          //  this.update()
 
         })
 
