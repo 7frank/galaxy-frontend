@@ -1621,7 +1621,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
      */
     onAfterClusteredAndDistributed(){
         super.onAfterClusteredAndDistributed();
-let leafs=this.getLeafs()
+        let leafs=this.getLeafs()
         console.warn("onAfterClusteredAndDistributed",leafs.length)
 
       _.each(leafs,function(leaf){
@@ -1959,7 +1959,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
-        setTimeout(()=> this.onAfterClusteredAndDistributed(),1000)
+        setTimeout(()=> this.onAfterClusteredAndDistributed(),2000)
 
 
 
@@ -3947,14 +3947,15 @@ function DefaultForceGraph(view3d) {
                 env.nodeClouds.updateBoundingSpheres();
 
             //start the node particle effect
-            setTimeout(function () {
+            //setTimeout(function () {
 
 
                 //FIXME see flickering bug
-                if (env.particles)
-                env.particles.start()
 
-            }, 1000)
+                if (env.particles)
+                    env.particles.start()
+
+           // }, 1000)
 
             if (env.particles)
                 env.particles.update()
@@ -4642,12 +4643,25 @@ class BaseNode extends THREE.Mesh {
 
 
 
+
+/**
+ * NOTE: the nodes for this container need to be child elements of the  same cluster
+ *
+ *
+ */
+
 class EdgesContainer extends THREE.Object3D {
     constructor(...args) {
         super(...args);
         this.initLineMesh();
 
         this.mExternalNodesHelpers=[]
+
+
+        this.skipEdges=10;
+        this.drawInternalEdges=true;
+        this.drawOutgoingEdges=true;
+        this.drawIngoingEdges=true;
 
     }
 
@@ -4710,15 +4724,15 @@ class EdgesContainer extends THREE.Object3D {
 
         }
         else
-            this.mEdges.geometry.vertices.push(newEdge.getStart());
+            this.mEdges.geometry.vertices.push(newEdge.getEnd());
 
 
 
 
 
 
-        this.mEdges.geometry.vertices.push(newEdge.getStart());
-        this.mEdges.geometry.vertices.push(newEdge.getEnd());
+       // this.mEdges.geometry.vertices.push(newEdge.getStart());
+       // this.mEdges.geometry.vertices.push(newEdge.getEnd());
 
 
         return newEdge;
@@ -4735,13 +4749,16 @@ class EdgesContainer extends THREE.Object3D {
     setFromNodes(nodes) {
 
 
-        let edges = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, true, true,false);
 
-      //  let edge2 = EdgeUtil.getEdgesForNodes(nodes, true, false,false);
-      //  let edge3 = EdgeUtil.getEdgesForNodes(nodes, false, true,true);
 
-       // console.warn("setFromNodes",edges,edge2,edge3)
-      //  console.warn("------------",edges.length,edge2.length,edge3.length)
+
+        let edges = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, this.drawInternalEdges,this.drawOutgoingEdges,this.drawIngoingEdges);
+
+    //skip edges for better performance
+        //TODO option to filter by size and take only most relevant n elements
+        let edgeCounter=0;
+        edges= edges.filter( e => edgeCounter++%this.skipEdges==0 )
+
 
         for (let edge of edges)
             this.addEdge(edge)
@@ -4897,8 +4914,16 @@ class MyMain {
 
             let containerCSS = {
               //"pointer-events": "none",
-                display: "flex",
-                "flex-flow": "row wrap",
+               // display: "flex",
+               // "flex-flow": "row wrap",
+
+                display: "grid",
+               // "grid-template-rows": "repeat(10, 287px)",
+                "grid-auto-rows": "300px",
+                "grid-template-columns": "50% 50%",
+
+                padding:"1em",
+
                 position: "absolute",
                 top: "10em",
                 left: "20em",
@@ -4916,7 +4941,7 @@ class MyMain {
                 .appendTo("body")
 
             let title = $("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
-                .css({width: "100%", "font-size": "1em",color: "rgba(255, 255, 255, 0.5)"})
+                .css({position: "absolute","pointer-events": "none",width: "100%", "font-size": "1em",color: "rgba(255, 255, 255, 0.5)"})
 
 
             function toggleMenu() {
@@ -5033,20 +5058,20 @@ class MyMain {
         let views = []
 
 
-        let view0 = createDefaultView("Default")
+        let view0 = createDefaultView("previous force-graph")
         views.push(view0)
 
-        var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
+      /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
         let view1 = createView("View1", speccs)
-        views.push(view1)
+        views.push(view1)*/
 
 
         var speccs = this.getForceSpeccs()
-        let view2 = createView("View2", speccs)
+        let view2 = createView("new force-graph", speccs)
         views.push(view2)
 
 
-        let view3 = createView("View3", [{distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 3)}])
+        let view3 = createView("node distribution test case", [{distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 3)}])
         views.push(view3)
 
         var speccs = this.get2DChartSortedSpeccsArray()
@@ -5138,10 +5163,10 @@ class MyMain {
         return [
             {
                 generator: countrySetGenerator,
-                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 2).onSort(mySort),
+                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 2).onSort(mySort),
                 options: {minClusterSize: 15}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 2)}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](400, 2)}
 
 
         ]
@@ -5189,9 +5214,9 @@ class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](40000, 3) //1000
-        let sample2 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](5000, 3)//200
-        let sample3 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](100, 3)//50
+        let sample1 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](4000, 3) //1000
+        let sample2 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](1000, 3)//200
+        let sample3 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](500, 3)//50
 
         //  let rand2 = new RandomDistribution(200, 2)
 

@@ -23,7 +23,7 @@ class RootCluster extends Cluster3DExtended {
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
-        setTimeout(()=> this.onAfterClusteredAndDistributed(),1000)
+        setTimeout(()=> this.onAfterClusteredAndDistributed(),2000)
 
 
 

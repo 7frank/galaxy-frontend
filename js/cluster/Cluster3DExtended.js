@@ -202,7 +202,7 @@ class Cluster3DExtended extends BaseCluster3D {
      */
     onAfterClusteredAndDistributed(){
         super.onAfterClusteredAndDistributed();
-let leafs=this.getLeafs()
+        let leafs=this.getLeafs()
         console.warn("onAfterClusteredAndDistributed",leafs.length)
 
       _.each(leafs,function(leaf){

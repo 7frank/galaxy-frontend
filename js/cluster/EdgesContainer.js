@@ -6,6 +6,13 @@
 import BaseEdge from "./BaseEdge"
 import EdgeUtil from "./EdgeUtil"
 
+
+/**
+ * NOTE: the nodes for this container need to be child elements of the  same cluster
+ *
+ *
+ */
+
 export default
 class EdgesContainer extends THREE.Object3D {
     constructor(...args) {
@@ -13,6 +20,12 @@ class EdgesContainer extends THREE.Object3D {
         this.initLineMesh();
 
         this.mExternalNodesHelpers=[]
+
+
+        this.skipEdges=10;
+        this.drawInternalEdges=true;
+        this.drawOutgoingEdges=true;
+        this.drawIngoingEdges=true;
 
     }
 
@@ -75,15 +88,15 @@ class EdgesContainer extends THREE.Object3D {
 
         }
         else
-            this.mEdges.geometry.vertices.push(newEdge.getStart());
+            this.mEdges.geometry.vertices.push(newEdge.getEnd());
 
 
 
 
 
 
-        this.mEdges.geometry.vertices.push(newEdge.getStart());
-        this.mEdges.geometry.vertices.push(newEdge.getEnd());
+       // this.mEdges.geometry.vertices.push(newEdge.getStart());
+       // this.mEdges.geometry.vertices.push(newEdge.getEnd());
 
 
         return newEdge;
@@ -100,13 +113,16 @@ class EdgesContainer extends THREE.Object3D {
     setFromNodes(nodes) {
 
 
-        let edges = EdgeUtil.getEdgesForNodes(nodes, true, true,false);
 
-      //  let edge2 = EdgeUtil.getEdgesForNodes(nodes, true, false,false);
-      //  let edge3 = EdgeUtil.getEdgesForNodes(nodes, false, true,true);
 
-       // console.warn("setFromNodes",edges,edge2,edge3)
-      //  console.warn("------------",edges.length,edge2.length,edge3.length)
+
+        let edges = EdgeUtil.getEdgesForNodes(nodes, this.drawInternalEdges,this.drawOutgoingEdges,this.drawIngoingEdges);
+
+    //skip edges for better performance
+        //TODO option to filter by size and take only most relevant n elements
+        let edgeCounter=0;
+        edges= edges.filter( e => edgeCounter++%this.skipEdges==0 )
+
 
         for (let edge of edges)
             this.addEdge(edge)

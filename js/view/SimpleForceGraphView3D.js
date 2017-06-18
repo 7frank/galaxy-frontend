@@ -698,14 +698,15 @@ function DefaultForceGraph(view3d) {
                 env.nodeClouds.updateBoundingSpheres();
 
             //start the node particle effect
-            setTimeout(function () {
+            //setTimeout(function () {
 
 
                 //FIXME see flickering bug
-                if (env.particles)
-                env.particles.start()
 
-            }, 1000)
+                if (env.particles)
+                    env.particles.start()
+
+           // }, 1000)
 
             if (env.particles)
                 env.particles.update()

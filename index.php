@@ -177,12 +177,19 @@
     height: 5px;
 	}
 
+    ::-webkit-scrollbar-thumb
+    {
+        background: red;
 
-	::-webkit-scrollbar-button {
+    }
+
+    ::-webkit-scrollbar-button {
     background: transparent;
+        width: 0px;
+        height: 0px;
 	}
 	
-	::-webkit-scrollbar-track-piece {
+	::-webkit-scrollbar-track {
     background: #888;
 	}
 
