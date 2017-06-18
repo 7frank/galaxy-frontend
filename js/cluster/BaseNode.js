@@ -102,7 +102,7 @@ export default class BaseNode extends THREE.Mesh {
                 this.onCustomEvent(eName,eventhandler);
             else
             if (this.isMouseEvent(eName))
-                BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
+                this.getDOMEvents().addEventListener(this, eName, eventhandler.bind(this), false);
             else
                 this.onKey(eName, eventhandler)
 
@@ -122,7 +122,7 @@ export default class BaseNode extends THREE.Mesh {
                 this.offCustomEvent(eName,eventhandler);
             else
             if (this.isMouseEvent(eName))
-                BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
+                this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
             else
                 this.offKey(eName, eventhandler)
 
@@ -149,7 +149,7 @@ export default class BaseNode extends THREE.Mesh {
                 this.triggerCustomEvent(eName, origDomEvent, intersect);
             else
             if (this.isMouseEvent(eName))
-                BaseNode.domEvents._notify(eName, this, origDomEvent, intersect);
+                this.getDOMEvents()._notify(eName, this, origDomEvent, intersect);
             else
                 this.triggerKey(eName,origDomEvent, intersect)
 
@@ -165,7 +165,9 @@ export default class BaseNode extends THREE.Mesh {
 
     //---------------end of event definition part----------------------
 
-    constructor(...args) {
+    constructor(view) {
+
+
 
         BaseNode.initStatic()
 
@@ -183,6 +185,11 @@ export default class BaseNode extends THREE.Mesh {
 
 
         super(BaseNode.sphereGeometry, material);
+
+
+        if (view instanceof HTMLElement)
+            this.setView(view)
+
 
         this.mCustomEvents=$({})
 
@@ -267,7 +274,7 @@ export default class BaseNode extends THREE.Mesh {
 
         //FIXME set camera and domElement not via env attribute ...
         // BaseNode.domEvents = new THREEx.DomEvents(/*camera, renderer.domElement*/)
-        BaseNode.domEvents = globalEnv.domEvents
+       // BaseNode.domEvents = globalEnv.domEvents
 
 
         BaseNode._static_initialised_ = true
@@ -293,5 +300,31 @@ export default class BaseNode extends THREE.Mesh {
      *
      */
     update(){}
+
+
+    /**
+     * stub
+     *
+     *
+     */
+    getDOMElement(){
+
+
+            throw new Error("implement method 'getDOMElement' in sub class (return valid domElement) ")
+
+    }
+
+
+    /**
+     * stub
+     *
+     *
+     */
+    getDOMEvents(){
+
+
+        throw new Error("implement method 'getDOMEvents' in sub class (return valid THREEx.domEvents) ")
+
+    }
 
 }

@@ -42,7 +42,7 @@ export default  class BaseDistribution
     }
 
 
-    setNodes(nodes,onNodePositionChange,onEnd) {
+    setNodes(nodes,onNodePositionChange,onStepComplete,onEnd) {
 
 
 
@@ -93,6 +93,7 @@ export default  class BaseDistribution
         //for (let i=0;i<=1;i+=step)
 
         var c=0;
+        var count=nodes.length;
         var that=this;
         var notTweenFinished=true;
 
@@ -133,6 +134,12 @@ export default  class BaseDistribution
             let tween = new TWEEN.Tween(origPos)
                 .to(dist.position,mDuration)
                 .onUpdate(function () {
+
+                    //after the last node was updated
+                    if (mc==count-1)
+                        if (onStepComplete)
+                            onStepComplete()
+
 
                     onNodePositionChange(origPos,mc)
 

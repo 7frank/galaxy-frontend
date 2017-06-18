@@ -16,7 +16,7 @@ class ZoomUtil {
         }
         options = _.extend(defaults, options)
 
-        let view = cluster.getRootView()
+        let view = cluster.getView()
 
         if (!view) {
             console.warn("cluster must be bound to instanceof View3D")

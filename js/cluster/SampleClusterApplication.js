@@ -132,6 +132,9 @@ export class MyMain {
                     .css(thumbCSS)
 
                 $(mGraphView).on("dblclick", function () {
+
+                    container.toggle()
+
                     let maximisedContainer = $("#3d-graph")
                     //globalEnv.scene=mGraphView.mScene
                     var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
@@ -182,6 +185,8 @@ export class MyMain {
                 .css(thumbCSS)
 
             $(mGraphView).on("dblclick", function () {
+                container.toggle()
+
                 let maximisedContainer = $("#3d-graph")
                 //globalEnv.scene=mGraphView.mScene
                 var prevMaximisedElement = maximisedContainer.children(".view-3d")//("graph-view-3d")

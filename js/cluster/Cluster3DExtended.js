@@ -24,28 +24,16 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
 
-    constructor(nodes, clusteringHandlers) {
-        super(nodes, clusteringHandlers);
+    constructor(nodes, clusteringHandlers,view) {
+        super(nodes, clusteringHandlers,view);
+
+
 
     this.addListeners();
 
 
     }
 
-    /**
-     * tries to get the view3d element, which the cluster is rendered within
-     *
-     */
-
-    getRootView()
-    {
-       let root=this.getRoot()
-
-        if (!root) return null;
-
-        return root.mParentView
-
-    }
 
     /**
      *   have a dynamic distance based on the size of the cluster
@@ -55,7 +43,7 @@ class Cluster3DExtended extends BaseCluster3D {
     {
 
 
-        let  view=this.getRootView()
+        let  view=this.getView()
 
         var distance=this.getRadius(defaultDistance)*3
 
@@ -377,21 +365,6 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
 
-
-
-    }
-
-
-    getRoot(maxDepth=20)
-    {
-        var _root=this;
-        while ( maxDepth--)
-        {
-           let r=_root.parent;
-           if (r==null) return _root;
-           if (! (r instanceof BaseCluster3D)) return _root;
-            _root=r;
-        }
 
 
     }

@@ -103,9 +103,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      * @param nodes
      * @param clusteringHandler instanceof List<ClusteringHandler>
      */
-    constructor(nodes, clusteringHandlers) {
-        super();
-
+    constructor(nodes, clusteringHandlers,view) {
+        super(view);
+       // this.setView(view)
         this.addNodes(nodes);
 
         this.mClusters = {};
@@ -354,7 +354,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             minClusterSize: 10,
             defaultMergeGroupName: "other"
 
-    }, entry.options);
+        }, entry.options);
         var that = this;
 
         var _clustersObj = {};
@@ -362,13 +362,13 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         //post-process
         //merge clusters that don't match the criteria again
-        let elements=this.groupBy(entry.generator)
+        let elements = this.groupBy(entry.generator)
         _.each(elements, function (_cluster, key) {
 
             if (_cluster.getNodes().length < options.minClusterSize) {
 
                 var dMGN = options.defaultMergeGroupName
-                if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz;//new BaseCluster3D()
+                if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz(undefined,undefined,that.getView());//new BaseCluster3D()
                 _clustersObj[dMGN].name = dMGN
                 _clustersObj[dMGN].addNodes(_cluster.getNodes())
             }
@@ -401,11 +401,11 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
     groupBy(filterFunction) {
         var clazz = this.getChildClusterConstructor();
-
+        var that=this;
         let container = {}
 
         function groupFunction(key, val) {
-            if (typeof container[key] == "undefined") container[key] = new clazz;//new BaseCluster3D();
+            if (typeof container[key] == "undefined") container[key] = new clazz(undefined,undefined,that.getView());//new BaseCluster3D();
 
             container[key].addNodes(val)
         }
@@ -427,31 +427,31 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
     setDistributionHandler(distribution, onComplete = function () {
     }) {
-        var that=this
+        var that = this
         var values = Object.values(this.mClusters)
         //TODO translation,rotation,scale by using different per-node function
 
         if (this.isLeaf())
             this.mLeaf.setDistributionHandler(distribution, onComplete);
         else
-            distribution.setNodes(this, function onStep(vecPosition, i) {
-                //  let n = values[i];
-                //  n.position.copy(vecPosition)
+            distribution.setNodes(this,
+                function onNodePositionChanged(vecPosition, i) {
+                },
+                function onStep() {
 
-                updateLeafsEdges(that)
+                    updateLeafsEdges(that)
 
-            }, function () {
-                onComplete()
-            });
+                }, function () {
+                    onComplete()
+                });
 
 
         //FIXME redundant updating multiple edges and potentially leafs
-        function updateLeafsEdges(cluster)
-        {
-            let leafs=cluster.getLeafs()
+        function updateLeafsEdges(cluster) {
+            let leafs = cluster.getLeafs()
 
-            _.each(leafs,function(leaf){
-                leaf.mEdgesContainer.updateEdges();
+            _.each(leafs, function (leaf) {
+                leaf.updateEdges();
             })
 
         }
@@ -461,7 +461,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     /**
      *
      *  current limenentation of the hull is a simle sphere with a border with the radius of the boundingSphere
-     *  TODO  could be convex hull in sub class in which case override
+     *  TODO  could be convex hull in sub class, in which case the method still needs to be overridden
      */
 
     adjustHullSize() {
@@ -495,32 +495,41 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         boundingSphere.radius = radius;
 
 
-        var geometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
-        var material = new THREE.MeshBasicMaterial({
+        var ringGeometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
+        var ringMaterial = new THREE.MeshBasicMaterial({
             color: 0xFFFFFF,
             wireframe: false,
             transparent: true,
             opacity: 0.3,
-            visible: false
+            visible: true
         });
 
-
-        var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
-        //  var material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, transparent: true, opacity: 0.1});
+        ringGeometry.boundingSphere=boundingSphere
 
 
-        this.mHull = new THREE.Mesh(geometry, material)
-        // this.mHull.position.copy(_center);
 
-        // this.geometry.boundingSphere=boundingSphere
+        this.mHull = new THREE.Mesh(ringGeometry, ringMaterial)
+
         this.add(this.mHull);
-        this.mHull.onBeforeRender = function (...args) {
+        this.mHull.onBeforeRender = function( renderer, scene, camera, geometry, material, group ) {
             //billboard effect
-            this.setRotationFromQuaternion(args[2].quaternion)
+            this.setRotationFromQuaternion(camera.quaternion)
+       //     console.warn(camera.quaternion.x,camera.quaternion.y)
 
         }
 
 
+        var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
+        var sphereMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.1
+        });
+
+        sphereGeometry.boundingSphere=boundingSphere
+
+       // this.material = sphereMaterial;
         this.geometry = sphereGeometry;
 
 
@@ -661,6 +670,93 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
+
+    getDOMElement(){
+
+
+        var view3d= this.getView()
+        if (!view3d||  !view3d.domElement)
+        {
+            console.warn("attach graph to a view before using dom specific functions")
+            return null;
+        }
+
+        return view3d.domElement
+
+    }
+
+
+    /**
+     *
+     *
+     *
+     *
+     */
+    getDOMEvents(){
+
+
+        var view3d= this.getView()
+        if (!view3d||  !view3d.mDomEvents)
+        {
+            console.warn("attach graph to a view before using dom specific functions")
+            return null;
+        }
+
+        return view3d.mDomEvents
+
+    }
+
+
+
+    /**
+     * tries to get the view3d element, which the cluster is rendered within
+     * @returns a View3D if attached to the view before, else null
+     */
+    getView()
+    {
+      //  var rootCluster=this.getRoot()
+       // if (!rootCluster.mParentView) return null
+     return this.mParentView
+    }
+
+    /**
+     * sets the view element for the root
+     * the view must be a View3D (extends HTMLElement)
+     *
+     */
+    setView(view3d)
+    {
+       // var rootCluster=this.getRoot()
+
+       this.mParentView=view3d;
+     return this
+    }
+
+    /**
+     *
+     *
+     *
+     * returns the root element of the cluster
+     */
+
+
+    getRoot(maxDepth=20)
+    {
+        var _root=this;
+        while ( maxDepth--)
+        {
+            let r=_root.parent;
+            if (r==null) return _root;
+            if (! (r instanceof BaseCluster3D)) return _root;
+            _root=r;
+        }
+
+
+    }
+
+
+
+
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BaseCluster3D;
 
@@ -715,7 +811,7 @@ class BaseDistribution
     }
 
 
-    setNodes(nodes,onNodePositionChange,onEnd) {
+    setNodes(nodes,onNodePositionChange,onStepComplete,onEnd) {
 
 
 
@@ -766,6 +862,7 @@ class BaseDistribution
         //for (let i=0;i<=1;i+=step)
 
         var c=0;
+        var count=nodes.length;
         var that=this;
         var notTweenFinished=true;
 
@@ -806,6 +903,12 @@ class BaseDistribution
             let tween = new TWEEN.Tween(origPos)
                 .to(dist.position,mDuration)
                 .onUpdate(function () {
+
+                    //after the last node was updated
+                    if (mc==count-1)
+                        if (onStepComplete)
+                            onStepComplete()
+
 
                     onNodePositionChange(origPos,mc)
 
@@ -1443,28 +1546,16 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
 
-    constructor(nodes, clusteringHandlers) {
-        super(nodes, clusteringHandlers);
+    constructor(nodes, clusteringHandlers,view) {
+        super(nodes, clusteringHandlers,view);
+
+
 
     this.addListeners();
 
 
     }
 
-    /**
-     * tries to get the view3d element, which the cluster is rendered within
-     *
-     */
-
-    getRootView()
-    {
-       let root=this.getRoot()
-
-        if (!root) return null;
-
-        return root.mParentView
-
-    }
 
     /**
      *   have a dynamic distance based on the size of the cluster
@@ -1474,7 +1565,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     {
 
 
-        let  view=this.getRootView()
+        let  view=this.getView()
 
         var distance=this.getRadius(defaultDistance)*3
 
@@ -1801,21 +1892,6 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
     }
 
 
-    getRoot(maxDepth=20)
-    {
-        var _root=this;
-        while ( maxDepth--)
-        {
-           let r=_root.parent;
-           if (r==null) return _root;
-           if (! (r instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */])) return _root;
-            _root=r;
-        }
-
-
-    }
-
-
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Cluster3DExtended;
@@ -1850,6 +1926,8 @@ class ClusterLeafElement extends THREE.Mesh
 
         //FIXME wrong positions
         this.appendNodes(nodes)
+
+
 
         this.createEdgesFromNodes(nodes)
 
@@ -1888,20 +1966,29 @@ class ClusterLeafElement extends THREE.Mesh
     {
 
         var that=this;
-        distribution.setNodes(this.mNodes,function onStep(vec,i){
+        distribution.setNodes(this.mNodes,function(vec,i){
 
             let n=that.mNodes[i];
             if (n._bubble) n._bubble.position.set(n.x,n.y,n.z);
             that.mNodeParticles.updateNodePosition(i);
 
+        },function onStep(){
 
-            //TODO this currently will get triggerd per node not per node set so we do have to alter the distribution class a bit
-            that.mEdgesContainer.updateEdges();
+
+            that.updateEdges();
 
 
         },onComplete);
 
     }
+
+        updateEdges()
+        {
+            if (this.mEdgesContainer)
+                this.mEdgesContainer.updateEdges();
+
+        }
+
 
 
     /**
@@ -2199,7 +2286,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
      * @param onTick
      * @param onTICKComplete
      */
-    startSimulation(nodes, edges = [], onTick, onTICKComplete) {
+    startSimulation(nodes, edges = [], onTick, onComplete) {
 
         // Add force-directed layout
         let layout = d3_force.forceSimulation();
@@ -2231,8 +2318,11 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
         layout.on("tick", function () {
             onTick(layout, nodes, edges)
-            if (onTICKComplete) onTICKComplete()
+
         }).on('end', function () {
+
+            if (onComplete) onComplete()
+
         }).restart();
 
     }
@@ -2243,7 +2333,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
     //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
     //in both cases we can determine the edges from it
 
-    setNodes(nodes,onNodePositionChange) {
+    setNodes(nodes,onNodePositionChange,onStep,onComplete) {
 
 
         if (!nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */] && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
@@ -2255,13 +2345,16 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
         //in case nodes are instance of BaseNode3D
         if (nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */]) {
 
+
+          //TODO this part seems not to be used at all currently
+            mEdges = nodes.createEdgesForChildClusters();
+
             mNodes = Object.values(nodes.mClusters).map(function (n) {
                 n.position.copy(new THREE.Vector3(0, 0, 0));
                 return n.position;
             });
 
 
-            mEdges = nodes.createEdgesForChildClusters();
 
         }
         else
@@ -2292,18 +2385,14 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
             });*/
 
+
+          //handle each node callback
           _.each(d3Nodes,onNodePositionChange)
+            //handle step callback
+            if (onStep)
+            onStep()
 
-
-        }, function () {
-
-         /*   _.each(pcbs, function (pcElem) {
-                //updates the array buffer for the point cloud
-                pcElem.update()
-
-            })*/
-
-        });
+        },onComplete);
 
 
     }
@@ -2347,7 +2436,7 @@ class ZoomUtil {
         }
         options = _.extend(defaults, options)
 
-        let view = cluster.getRootView()
+        let view = cluster.getView()
 
         if (!view) {
             console.warn("cluster must be bound to instanceof View3D")
@@ -2615,7 +2704,7 @@ class View3D extends HTMLElement
             $(that).attr("hasFocus",true)
 
 
-            that.mCaption.stop().fadeOut()
+            that.mCaption.stop(true,false).fadeOut(200)
 
 
         })
@@ -2625,7 +2714,7 @@ class View3D extends HTMLElement
 
             $(that).removeAttr("hasFocus")
             if (!$(that).hasClass("view-3d-maximised"))
-            that.mCaption.stop().delay(400).fadeIn()
+            that.mCaption.stop(true,false).delay(400).fadeIn()
 
 
         })
@@ -2856,122 +2945,9 @@ class ClusterNodeArray extends Array //List<Node>
 
         super(scale,dimensions)
 
+        this.mDuration=1;
     }
 
-
-
-        setNodes(nodes,onNodePositionChange,onEnd) {
-            if (nodes instanceof __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__["a" /* default */]) {
-
-                //TODO
-                /*   if (nodes.isLeaf())
-                 nodes =nodes.mNodes
-                 else*/
-                nodes = nodes.mClusters
-
-            }
-            else
-            if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
-
-
-            //for canceling animation
-            var mTimeout;
-
-            let len= nodes.length|Object.keys(nodes).length
-
-
-            var i=0,j=0,k=0;
-
-            let _len;
-            if (this.dimensions==1)
-                _len=len;
-            if (this.dimensions==2)
-                _len= Math.sqrt(len);
-            if (this.dimensions==3)
-                _len=Math.pow(len,1/3);
-
-            if (this.dimensions<3)  k=0.5*_len
-            if (this.dimensions<2)  j=0.5*_len
-
-
-            let step=1/_len
-
-            //1d/2d/3d helpers
-            //for (let i=0;i<=1;i+=step)
-
-            var c=0;
-            var that=this;
-            var fixmeOnce=true;
-            _.each(nodes,function(n){
-
-                if (i>_len){
-                    j++;
-                    i=0;
-                }
-
-                if (j>_len){
-                    k++;
-                    j=0;
-                }
-
-
-                var dist= that.distribute(n, i/_len-0.5,j/_len-0.5,k/_len-0.5);
-
-
-
-                //  onNodePositionChange(dist.position,c)
-
-
-                //------------------------
-                //------------------------
-
-                //animating from current position to new one
-                var mc=c;
-                let origPos=(n.position)?n.position:n
-
-
-
-                let tween = new TWEEN.Tween(origPos)
-                    .to(dist.position,1)
-                    .onUpdate(function () {
-
-
-
-                    }).onComplete(function(){
-
-                        onNodePositionChange(dist.position,mc)
-                        //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
-
-                        if (fixmeOnce) {
-                            if (onEnd) onEnd()
-                            fixmeOnce=false
-                        }
-
-                        cancelAnimationFrame(mTimeout)
-
-                    })
-                    .start();
-
-                //------------------------
-                //------------------------
-
-
-                //i+=step
-                i++;
-                c++;
-            })
-
-
-
-            requestAnimationFrame(animate);
-
-            function animate(time) {
-                mTimeout=    requestAnimationFrame(animate);
-                TWEEN.update(time);
-            }
-
-
-        }
 
 
 //TODO this is quite redundant we want the same work flow but not at idle copy costs if possible
@@ -3167,7 +3143,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
         let preparedData = graphData.createClusterNodesAndEdges(this)
 
-        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes);
+        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes,undefined,this);
 
 
 
@@ -4432,7 +4408,7 @@ class BaseNode extends THREE.Mesh {
                 this.onCustomEvent(eName,eventhandler);
             else
             if (this.isMouseEvent(eName))
-                BaseNode.domEvents.addEventListener(this, eName, eventhandler.bind(this), false);
+                this.getDOMEvents().addEventListener(this, eName, eventhandler.bind(this), false);
             else
                 this.onKey(eName, eventhandler)
 
@@ -4452,7 +4428,7 @@ class BaseNode extends THREE.Mesh {
                 this.offCustomEvent(eName,eventhandler);
             else
             if (this.isMouseEvent(eName))
-                BaseNode.domEvents.removeEventListener(this, eName, eventhandler, false);
+                this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
             else
                 this.offKey(eName, eventhandler)
 
@@ -4479,7 +4455,7 @@ class BaseNode extends THREE.Mesh {
                 this.triggerCustomEvent(eName, origDomEvent, intersect);
             else
             if (this.isMouseEvent(eName))
-                BaseNode.domEvents._notify(eName, this, origDomEvent, intersect);
+                this.getDOMEvents()._notify(eName, this, origDomEvent, intersect);
             else
                 this.triggerKey(eName,origDomEvent, intersect)
 
@@ -4495,7 +4471,9 @@ class BaseNode extends THREE.Mesh {
 
     //---------------end of event definition part----------------------
 
-    constructor(...args) {
+    constructor(view) {
+
+
 
         BaseNode.initStatic()
 
@@ -4513,6 +4491,11 @@ class BaseNode extends THREE.Mesh {
 
 
         super(BaseNode.sphereGeometry, material);
+
+
+        if (view instanceof HTMLElement)
+            this.setView(view)
+
 
         this.mCustomEvents=$({})
 
@@ -4597,7 +4580,7 @@ class BaseNode extends THREE.Mesh {
 
         //FIXME set camera and domElement not via env attribute ...
         // BaseNode.domEvents = new THREEx.DomEvents(/*camera, renderer.domElement*/)
-        BaseNode.domEvents = globalEnv.domEvents
+       // BaseNode.domEvents = globalEnv.domEvents
 
 
         BaseNode._static_initialised_ = true
@@ -4623,6 +4606,32 @@ class BaseNode extends THREE.Mesh {
      *
      */
     update(){}
+
+
+    /**
+     * stub
+     *
+     *
+     */
+    getDOMElement(){
+
+
+            throw new Error("implement method 'getDOMElement' in sub class (return valid domElement) ")
+
+    }
+
+
+    /**
+     * stub
+     *
+     *
+     */
+    getDOMEvents(){
+
+
+        throw new Error("implement method 'getDOMEvents' in sub class (return valid THREEx.domEvents) ")
+
+    }
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BaseNode;
@@ -4979,6 +4988,9 @@ class MyMain {
                     .css(thumbCSS)
 
                 $(mGraphView).on("dblclick", function () {
+
+                    container.toggle()
+
                     let maximisedContainer = $("#3d-graph")
                     //globalEnv.scene=mGraphView.mScene
                     var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
@@ -5029,6 +5041,8 @@ class MyMain {
                 .css(thumbCSS)
 
             $(mGraphView).on("dblclick", function () {
+                container.toggle()
+
                 let maximisedContainer = $("#3d-graph")
                 //globalEnv.scene=mGraphView.mScene
                 var prevMaximisedElement = maximisedContainer.children(".view-3d")//("graph-view-3d")

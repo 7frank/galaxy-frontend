@@ -22,6 +22,8 @@ export default class ClusterLeafElement extends THREE.Mesh
         //FIXME wrong positions
         this.appendNodes(nodes)
 
+
+
         this.createEdgesFromNodes(nodes)
 
     }
@@ -59,20 +61,29 @@ export default class ClusterLeafElement extends THREE.Mesh
     {
 
         var that=this;
-        distribution.setNodes(this.mNodes,function onStep(vec,i){
+        distribution.setNodes(this.mNodes,function(vec,i){
 
             let n=that.mNodes[i];
             if (n._bubble) n._bubble.position.set(n.x,n.y,n.z);
             that.mNodeParticles.updateNodePosition(i);
 
+        },function onStep(){
 
-            //TODO this currently will get triggerd per node not per node set so we do have to alter the distribution class a bit
-            that.mEdgesContainer.updateEdges();
+
+            that.updateEdges();
 
 
         },onComplete);
 
     }
+
+        updateEdges()
+        {
+            if (this.mEdgesContainer)
+                this.mEdgesContainer.updateEdges();
+
+        }
+
 
 
     /**

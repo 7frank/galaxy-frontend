@@ -33,7 +33,7 @@ class ForceGraphDistribution extends BaseDistribution
      * @param onTick
      * @param onTICKComplete
      */
-    startSimulation(nodes, edges = [], onTick, onTICKComplete) {
+    startSimulation(nodes, edges = [], onTick, onComplete) {
 
         // Add force-directed layout
         let layout = d3_force.forceSimulation();
@@ -65,8 +65,11 @@ class ForceGraphDistribution extends BaseDistribution
 
         layout.on("tick", function () {
             onTick(layout, nodes, edges)
-            if (onTICKComplete) onTICKComplete()
+
         }).on('end', function () {
+
+            if (onComplete) onComplete()
+
         }).restart();
 
     }
@@ -77,7 +80,7 @@ class ForceGraphDistribution extends BaseDistribution
     //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
     //in both cases we can determine the edges from it
 
-    setNodes(nodes,onNodePositionChange) {
+    setNodes(nodes,onNodePositionChange,onStep,onComplete) {
 
 
         if (!nodes instanceof BaseCluster3D && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
@@ -89,13 +92,16 @@ class ForceGraphDistribution extends BaseDistribution
         //in case nodes are instance of BaseNode3D
         if (nodes instanceof BaseCluster3D) {
 
+
+          //TODO this part seems not to be used at all currently
+            mEdges = nodes.createEdgesForChildClusters();
+
             mNodes = Object.values(nodes.mClusters).map(function (n) {
                 n.position.copy(new THREE.Vector3(0, 0, 0));
                 return n.position;
             });
 
 
-            mEdges = nodes.createEdgesForChildClusters();
 
         }
         else
@@ -126,18 +132,14 @@ class ForceGraphDistribution extends BaseDistribution
 
             });*/
 
+
+          //handle each node callback
           _.each(d3Nodes,onNodePositionChange)
+            //handle step callback
+            if (onStep)
+            onStep()
 
-
-        }, function () {
-
-         /*   _.each(pcbs, function (pcElem) {
-                //updates the array buffer for the point cloud
-                pcElem.update()
-
-            })*/
-
-        });
+        },onComplete);
 
 
     }

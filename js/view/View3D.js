@@ -172,7 +172,7 @@ class View3D extends HTMLElement
             $(that).attr("hasFocus",true)
 
 
-            that.mCaption.stop().fadeOut()
+            that.mCaption.stop(true,false).fadeOut(200)
 
 
         })
@@ -182,7 +182,7 @@ class View3D extends HTMLElement
 
             $(that).removeAttr("hasFocus")
             if (!$(that).hasClass("view-3d-maximised"))
-            that.mCaption.stop().delay(400).fadeIn()
+            that.mCaption.stop(true,false).delay(400).fadeIn()
 
 
         })
