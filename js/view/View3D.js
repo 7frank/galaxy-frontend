@@ -165,7 +165,7 @@ class View3D extends HTMLElement
 
 
         //FIXME binding events will interfere with controls
-        $(this.mRenderer.domElement).on("mouseover",function(e){
+        $(this.mRenderer.domElement).on("mouseover",_.throttle(function(e){
             e.stopPropagation()
             that.setActive()
 
@@ -175,7 +175,7 @@ class View3D extends HTMLElement
             that.mCaption.stop(true,false).fadeOut(200)
 
 
-        })
+        },20))
         $(this.mRenderer.domElement).on("mouseout",function(e){
             e.stopPropagation()
             that.setInactive()
@@ -267,6 +267,13 @@ class View3D extends HTMLElement
 
 
     }
+
+    isMaximised(){
+
+     return   $(this).hasClass("view-3d-maximised")
+
+    }
+
 
     undoMaximise() {
         $(this).removeClass("view-3d-maximised")

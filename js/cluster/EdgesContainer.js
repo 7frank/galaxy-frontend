@@ -22,7 +22,7 @@ class EdgesContainer extends THREE.Object3D {
         this.mExternalNodesHelpers=[]
 
 
-        this.skipEdges=10;
+        this.skipEdges=100;
         this.drawInternalEdges=true;
         this.drawOutgoingEdges=true;
         this.drawIngoingEdges=true;

@@ -17,9 +17,10 @@ export default class ClusterLeafElement extends THREE.Mesh
         this.mNodes=nodes;
         this.mNodeParticles=this.createParticleNodeCloud();
 
+
         this.add( this.mNodeParticles.pointCloud)
 
-        //FIXME wrong positions
+//FIXME mayor performance hit
         this.appendNodes(nodes)
 
 

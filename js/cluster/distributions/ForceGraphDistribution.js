@@ -9,22 +9,26 @@ import EdgeUtil from "../EdgeUtil"
 import BaseCluster3D from "../BaseCluster3D"
 
 
-
 /*
-* TODO the forceGraphDistribution should work like a normal force graph
-* but optimally is could use a initial distribution from another dist function with no animation enabled
-*
-* */
-
+ * TODO the forceGraphDistribution should work like a normal force graph
+ * but optimally is could use a initial distribution from another dist function with no animation enabled
+ *
+ * */
 
 
 export default
-class ForceGraphDistribution extends BaseDistribution
-{
-    constructor(scale=50,dimensions=1){
-        super(scale,dimensions);
+class ForceGraphDistribution extends BaseDistribution {
+    constructor(scale = 50, dimensions = 1) {
+        super(scale, dimensions);
+
+        this.initialEngineTicks = 5;
+
+
+        this.maxConvergeTime=5000//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeFrames=300//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
+
     /**
      * a reduced simulation (for testing)
      * TODO add edges and rest of original src
@@ -35,12 +39,13 @@ class ForceGraphDistribution extends BaseDistribution
      */
     startSimulation(nodes, edges = [], onTick, onComplete) {
 
+        var that=this
+
         // Add force-directed layout
         let layout = d3_force.forceSimulation();
 
-        //   console.log(... arguments)
 
-        var scale=this.mScale
+        var scale = this.mScale
 
 
         //FIXME containers need links
@@ -51,19 +56,36 @@ class ForceGraphDistribution extends BaseDistribution
                 return d._id
             })
                 .distance(function computeLinkDistance() {
-                    return scale/50;
+                    return scale / 50;
 
                 })
                 .links(edges))
-            .force("collide", d3_force.forceCollide(scale/10)
+            .force("collide", d3_force.forceCollide(scale / 10)
                 .iterations(1))
-            .force('charge', (node) => -scale/50)
+            .force('charge', (node) => -scale / 50)
             .force('linkStrength', (link) => 1)
 
 
             .stop();
 
+
+        for (let i = 0; i < this.initialEngineTicks; i++) {
+            layout.tick();
+        } // Initial ticks before starting to render
+
+
+        let cntTicks = 0;
+        const startTickTime = new Date();
+
         layout.on("tick", function () {
+
+
+            if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
+                layout.alpha(0); //trigger end
+                layout.stop(); // Stop ticking graph
+            }
+
+
             onTick(layout, nodes, edges)
 
         }).on('end', function () {
@@ -75,12 +97,10 @@ class ForceGraphDistribution extends BaseDistribution
     }
 
 
-
-
     //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
     //in both cases we can determine the edges from it
 
-    setNodes(nodes,onNodePositionChange,onStep,onComplete) {
+    setNodes(nodes, onNodePositionChange, onStep, onComplete) {
 
 
         if (!nodes instanceof BaseCluster3D && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
@@ -93,7 +113,7 @@ class ForceGraphDistribution extends BaseDistribution
         if (nodes instanceof BaseCluster3D) {
 
 
-          //TODO this part seems not to be used at all currently
+            //TODO this part seems not to be used at all currently
             mEdges = nodes.createEdgesForChildClusters();
 
             mNodes = Object.values(nodes.mClusters).map(function (n) {
@@ -102,44 +122,42 @@ class ForceGraphDistribution extends BaseDistribution
             });
 
 
+        }
+        else if (_.isArray(nodes)) {
+            mNodes = nodes.map(function (n) {
+
+                //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
+                mEdges = mEdges.concat(n.edges);
+
+                _.extend(n, {x: 0, y: 0, z: 0});
+                return n;
+
+            });
 
         }
-        else
-        if (_.isArray(nodes)) {
-        mNodes = nodes.map(function (n) {
-
-            //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
-            mEdges = mEdges.concat(n.edges);
-
-            _.extend(n,{x:0,y:0,z:0});
-            return n;
-
-        });
-
-    }
 
 
         this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {
 
             // Update nodes position
             //TODO remove this when particle node groups work with picking and selecting
-          /*  d3Nodes.forEach(node => {
+            /*  d3Nodes.forEach(node => {
 
-                const sphere = node._bubble;
-                sphere.position.x = node.x;
-                sphere.position.y = node.y || 0;
-                sphere.position.z = node.z || 0;
+             const sphere = node._bubble;
+             sphere.position.x = node.x;
+             sphere.position.y = node.y || 0;
+             sphere.position.z = node.z || 0;
 
-            });*/
+             });*/
 
 
-          //handle each node callback
-          _.each(d3Nodes,onNodePositionChange)
+            //handle each node callback
+            _.each(d3Nodes, onNodePositionChange)
             //handle step callback
             if (onStep)
-            onStep()
+                onStep()
 
-        },onComplete);
+        }, onComplete);
 
 
     }
@@ -148,12 +166,12 @@ class ForceGraphDistribution extends BaseDistribution
     //TODO also it will be useful to add rotation as well in the future
 
 
-    distribute(node,dx,dy,dz){
+    distribute(node, dx, dy, dz) {
 
-        return {position:new THREE.Vector3(0,0,0)}
+        return {position: new THREE.Vector3(0, 0, 0)}
 
-      //  return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
+        //  return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
 
-     }
+    }
 }
 

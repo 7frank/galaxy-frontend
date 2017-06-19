@@ -384,7 +384,7 @@ function getGraphDataSets() {
 
 	return [
 			
-			//loadRealDataSampleOnly("assets/realDataNodesv5_ticker.csv","assets/realDataLinksv5.csv",function(graph){ }),
+			loadRealDataSampleOnly("assets/realDataNodesv5_ticker.csv","assets/realDataLinksv5.csv",function(graph){ }),
 			loadRealDataSampleOnly("assets/realDataNodesv1_with_ticker.csv","assets/realDataLinksv1.csv",function(graph){  }),
 			//loadRealDataSampleOnly("assets/realDataNodesv1.csv","assets/realDataLinksv1.csv",function(graph){graph.numSkipEdgesRendered(1)  }),
 			//loadRealDataSampleOnly("assets/realDataNodes.csv","assets/realDataLinks.csv",function(graph){graph.numSkipEdgesRendered(20)  }),

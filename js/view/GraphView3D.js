@@ -53,6 +53,15 @@ class GraphView3D extends View3D
         var res = new RootCluster(preparedData.nodes,undefined,this);
 
 
+//-- count visible nodes
+   //TODO check if this interferes with the nodeMixin and the default implementation
+      var visibleNodes=[];
+        _.each(preparedData.nodes,function(node){
+            node.get3DRoot().onBeforeRender=function(){
+                visibleNodes.push(node);
+            }
+        })
+//--
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
@@ -60,9 +69,34 @@ class GraphView3D extends View3D
         //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this)
 
-        $(this).on("before-render",function(){
-            //TODO who is responsible for the updating itself to cluster or the view?
+        var that=this
+        var _____skipFrames=0
+
+        $(that).on("before-render",function(){
+
+
+
+
+
             res.update()
+
+
+            if (that.isMaximised()) {
+
+                   _____skipFrames++
+                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
+             let prev_vis=preparedData.nodes[0]._bubble.material.visible
+                let _vis= (_____skipFrames % 20) ? false : true
+                preparedData.nodes[0]._bubble.material.visible = _vis
+
+                if (prev_vis)
+                {
+                GUI.updateFromVisibleNodes(visibleNodes)
+                $(that).trigger("visible-nodes-changed") //TODO inverse control via listening
+                }
+            }
+            visibleNodes=[] //reset count
+
         })
 
 

@@ -501,7 +501,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             wireframe: false,
             transparent: true,
             opacity: 0.3,
-            visible: true
+            visible: false
         });
 
         ringGeometry.boundingSphere=boundingSphere
@@ -636,16 +636,23 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     /**
      * returns an array of the actual ClusterLeafElements
      * that render the nodes itself
+     *
+     * TODO add clear function and remove cached elements
      */
 
     getLeafs() {
-        var leafElements = [];
+        if (this._LeafsCached) this._LeafsCached
+
+
+        var leafElements =this._LeafsCached= [];
 
         this.traverse(function (item) {
             if (item instanceof __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */])
                 leafElements.push(item)
 
         })
+
+
         return leafElements;
     }
 
@@ -1922,9 +1929,10 @@ class ClusterLeafElement extends THREE.Mesh
         this.mNodes=nodes;
         this.mNodeParticles=this.createParticleNodeCloud();
 
+
         this.add( this.mNodeParticles.pointCloud)
 
-        //FIXME wrong positions
+//FIXME mayor performance hit
         this.appendNodes(nodes)
 
 
@@ -2263,21 +2271,25 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
 
-
 /*
-* TODO the forceGraphDistribution should work like a normal force graph
-* but optimally is could use a initial distribution from another dist function with no animation enabled
-*
-* */
+ * TODO the forceGraphDistribution should work like a normal force graph
+ * but optimally is could use a initial distribution from another dist function with no animation enabled
+ *
+ * */
 
 
+class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */] {
+    constructor(scale = 50, dimensions = 1) {
+        super(scale, dimensions);
 
-class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */]
-{
-    constructor(scale=50,dimensions=1){
-        super(scale,dimensions);
+        this.initialEngineTicks = 5;
+
+
+        this.maxConvergeTime=5000//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeFrames=300//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
+
     /**
      * a reduced simulation (for testing)
      * TODO add edges and rest of original src
@@ -2288,12 +2300,13 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
      */
     startSimulation(nodes, edges = [], onTick, onComplete) {
 
+        var that=this
+
         // Add force-directed layout
         let layout = d3_force.forceSimulation();
 
-        //   console.log(... arguments)
 
-        var scale=this.mScale
+        var scale = this.mScale
 
 
         //FIXME containers need links
@@ -2304,19 +2317,36 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
                 return d._id
             })
                 .distance(function computeLinkDistance() {
-                    return scale/50;
+                    return scale / 50;
 
                 })
                 .links(edges))
-            .force("collide", d3_force.forceCollide(scale/10)
+            .force("collide", d3_force.forceCollide(scale / 10)
                 .iterations(1))
-            .force('charge', (node) => -scale/50)
+            .force('charge', (node) => -scale / 50)
             .force('linkStrength', (link) => 1)
 
 
             .stop();
 
+
+        for (let i = 0; i < this.initialEngineTicks; i++) {
+            layout.tick();
+        } // Initial ticks before starting to render
+
+
+        let cntTicks = 0;
+        const startTickTime = new Date();
+
         layout.on("tick", function () {
+
+
+            if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
+                layout.alpha(0); //trigger end
+                layout.stop(); // Stop ticking graph
+            }
+
+
             onTick(layout, nodes, edges)
 
         }).on('end', function () {
@@ -2328,12 +2358,10 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
     }
 
 
-
-
     //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
     //in both cases we can determine the edges from it
 
-    setNodes(nodes,onNodePositionChange,onStep,onComplete) {
+    setNodes(nodes, onNodePositionChange, onStep, onComplete) {
 
 
         if (!nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */] && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
@@ -2346,7 +2374,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
         if (nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */]) {
 
 
-          //TODO this part seems not to be used at all currently
+            //TODO this part seems not to be used at all currently
             mEdges = nodes.createEdgesForChildClusters();
 
             mNodes = Object.values(nodes.mClusters).map(function (n) {
@@ -2355,44 +2383,42 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
             });
 
 
+        }
+        else if (_.isArray(nodes)) {
+            mNodes = nodes.map(function (n) {
+
+                //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
+                mEdges = mEdges.concat(n.edges);
+
+                _.extend(n, {x: 0, y: 0, z: 0});
+                return n;
+
+            });
 
         }
-        else
-        if (_.isArray(nodes)) {
-        mNodes = nodes.map(function (n) {
-
-            //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
-            mEdges = mEdges.concat(n.edges);
-
-            _.extend(n,{x:0,y:0,z:0});
-            return n;
-
-        });
-
-    }
 
 
         this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {
 
             // Update nodes position
             //TODO remove this when particle node groups work with picking and selecting
-          /*  d3Nodes.forEach(node => {
+            /*  d3Nodes.forEach(node => {
 
-                const sphere = node._bubble;
-                sphere.position.x = node.x;
-                sphere.position.y = node.y || 0;
-                sphere.position.z = node.z || 0;
+             const sphere = node._bubble;
+             sphere.position.x = node.x;
+             sphere.position.y = node.y || 0;
+             sphere.position.z = node.z || 0;
 
-            });*/
+             });*/
 
 
-          //handle each node callback
-          _.each(d3Nodes,onNodePositionChange)
+            //handle each node callback
+            _.each(d3Nodes, onNodePositionChange)
             //handle step callback
             if (onStep)
-            onStep()
+                onStep()
 
-        },onComplete);
+        }, onComplete);
 
 
     }
@@ -2401,13 +2427,13 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
     //TODO also it will be useful to add rotation as well in the future
 
 
-    distribute(node,dx,dy,dz){
+    distribute(node, dx, dy, dz) {
 
-        return {position:new THREE.Vector3(0,0,0)}
+        return {position: new THREE.Vector3(0, 0, 0)}
 
-      //  return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
+        //  return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
 
-     }
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ForceGraphDistribution;
 
@@ -2697,7 +2723,7 @@ class View3D extends HTMLElement
 
 
         //FIXME binding events will interfere with controls
-        $(this.mRenderer.domElement).on("mouseover",function(e){
+        $(this.mRenderer.domElement).on("mouseover",_.throttle(function(e){
             e.stopPropagation()
             that.setActive()
 
@@ -2707,7 +2733,7 @@ class View3D extends HTMLElement
             that.mCaption.stop(true,false).fadeOut(200)
 
 
-        })
+        },20))
         $(this.mRenderer.domElement).on("mouseout",function(e){
             e.stopPropagation()
             that.setInactive()
@@ -2799,6 +2825,13 @@ class View3D extends HTMLElement
 
 
     }
+
+    isMaximised(){
+
+     return   $(this).hasClass("view-3d-maximised")
+
+    }
+
 
     undoMaximise() {
         $(this).removeClass("view-3d-maximised")
@@ -3146,6 +3179,15 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
         var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes,undefined,this);
 
 
+//-- count visible nodes
+   //TODO check if this interferes with the nodeMixin and the default implementation
+      var visibleNodes=[];
+        _.each(preparedData.nodes,function(node){
+            node.get3DRoot().onBeforeRender=function(){
+                visibleNodes.push(node);
+            }
+        })
+//--
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
@@ -3153,9 +3195,34 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
         //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this)
 
-        $(this).on("before-render",function(){
-            //TODO who is responsible for the updating itself to cluster or the view?
+        var that=this
+        var _____skipFrames=0
+
+        $(that).on("before-render",function(){
+
+
+
+
+
             res.update()
+
+
+            if (that.isMaximised()) {
+
+                   _____skipFrames++
+                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
+             let prev_vis=preparedData.nodes[0]._bubble.material.visible
+                let _vis= (_____skipFrames % 20) ? false : true
+                preparedData.nodes[0]._bubble.material.visible = _vis
+
+                if (prev_vis)
+                {
+                GUI.updateFromVisibleNodes(visibleNodes)
+                $(that).trigger("visible-nodes-changed") //TODO inverse control via listening
+                }
+            }
+            visibleNodes=[] //reset count
+
         })
 
 
@@ -4667,7 +4734,7 @@ class EdgesContainer extends THREE.Object3D {
         this.mExternalNodesHelpers=[]
 
 
-        this.skipEdges=10;
+        this.skipEdges=100;
         this.drawInternalEdges=true;
         this.drawOutgoingEdges=true;
         this.drawIngoingEdges=true;
@@ -5030,11 +5097,7 @@ class MyMain {
 
         function createView(name = "View3D", speccs) {
 
-
             let mGraphView = document.createElement("graph-view-3d")
-            //  mGraphView1.setCaption("sample 1")
-
-
             mGraphView.setCaption(name)
 
             $(mGraphView)
@@ -5071,10 +5134,10 @@ class MyMain {
 
         let views = []
 
-
+/*
         let view0 = createDefaultView("previous force-graph")
         views.push(view0)
-
+*/
       /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
         let view1 = createView("View1", speccs)
         views.push(view1)*/
@@ -5087,7 +5150,7 @@ class MyMain {
 
         let view3 = createView("node distribution test case", [{distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 3)}])
         views.push(view3)
-
+        /*
         var speccs = this.get2DChartSortedSpeccsArray()
 
         let view4 = createView("2d-Barchart", speccs)
@@ -5096,7 +5159,7 @@ class MyMain {
         var speccs = this.get2DPlaneCountryOnlySpeccs()
         let view5 = createView("2d-Plane country-only", speccs)
         views.push(view5)
-
+*/
 
 
         //------------------------------------
@@ -5108,8 +5171,9 @@ class MyMain {
 
             _.each(views, function (view) {
                 view.setData(that.mGraphData)
-            })
 
+            })
+            $(".cloudNodeColorSelect").val("group").trigger("change")
         }
 
         _.each(views, function (view) {
@@ -5235,7 +5299,7 @@ class MyMain {
         //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 40}},
             {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}}
             , {distribution: sample3}
 

@@ -174,11 +174,7 @@ export class MyMain {
 
         function createView(name = "View3D", speccs) {
 
-
             let mGraphView = document.createElement("graph-view-3d")
-            //  mGraphView1.setCaption("sample 1")
-
-
             mGraphView.setCaption(name)
 
             $(mGraphView)
@@ -215,10 +211,10 @@ export class MyMain {
 
         let views = []
 
-
+/*
         let view0 = createDefaultView("previous force-graph")
         views.push(view0)
-
+*/
       /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
         let view1 = createView("View1", speccs)
         views.push(view1)*/
@@ -231,7 +227,7 @@ export class MyMain {
 
         let view3 = createView("node distribution test case", [{distribution: new BaseDistribution(2000, 3)}])
         views.push(view3)
-
+        /*
         var speccs = this.get2DChartSortedSpeccsArray()
 
         let view4 = createView("2d-Barchart", speccs)
@@ -240,7 +236,7 @@ export class MyMain {
         var speccs = this.get2DPlaneCountryOnlySpeccs()
         let view5 = createView("2d-Plane country-only", speccs)
         views.push(view5)
-
+*/
 
 
         //------------------------------------
@@ -252,8 +248,9 @@ export class MyMain {
 
             _.each(views, function (view) {
                 view.setData(that.mGraphData)
-            })
 
+            })
+            $(".cloudNodeColorSelect").val("group").trigger("change")
         }
 
         _.each(views, function (view) {
@@ -379,7 +376,7 @@ export class MyMain {
         //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 40}},
             {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}}
             , {distribution: sample3}
 

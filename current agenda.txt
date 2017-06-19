@@ -1,14 +1,20 @@
 bugs:
-   [x]fix zoom feature for nodes
-   afterwads refactor node and links into proper classes
-    []get particles and edges running again (currently broken)
-        >>edges: currently the edges container is created from a set of nodes which are positioned in object-space(not world)
-        so edges do have the same position informations and won't render correct if edges do are external
-    []text uml
 
+    []text utf8 not displayed correct
+
+    []get particles running again (currently broken)
     []partcles within node are altering between + and - for too long for the bigger data set
     which generates some kind of flickering...
-    -aso particles currently don't work because they are updated i the wrong way, but previously had  to much of a performance impact
+    -aso particles currently don't work because they are updated in the wrong way, but previously had  to much of a performance impact
+    [] companies visible are no longer tracked, this should be done per view
+
+    [x]fix zoom feature for nodes
+
+    [x]get edges running again
+        currently the edges container is created from a set of nodes which are positioned in object-space(not world)
+        so edges do have the same position informations and won't render correct if edges do are external
+
+
 
 
     -stop animations no view change to prevent wrong visualisation
@@ -33,10 +39,10 @@ clusters
 -by having leaf-textnodes instead of rootcluster based we should be able to skip a lot of updates and irrelevant checks
 
 
-[]sort param for applyClustering(speccs)
+[x]sort param for BaseDistribution().onSort
 -optional sorting of clusters for better visualisation
 
-[/]re-cluster on the fly
+[x]re-cluster on the fly
 -partially working => bug tracking
 
 [x]fix arrows for clusters
@@ -44,12 +50,13 @@ clusters
 
 []keyboard events per cluster
   per node also?
-[]color select/update for root cluster
+[x]color select/update for root cluster
 
 [] nodemixin => BaseLeafNodeFactory to be able to bind handlers and specifics
 -having a nodefactory bound to a cluster would provide customisation features per view
  (or potential alternative editing modes via toolbar select)
-
+ -------------------------------------
+--------------------------------------
 --------------------------------------
 >>>>>>>>>>>Wednesday DEMO<<<<<<<<<<<<<
 

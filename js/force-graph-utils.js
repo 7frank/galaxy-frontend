@@ -1598,6 +1598,10 @@ function basicElementExtend(env,obj,_mesh)
 //TODO
 var sphereGeometry = new THREE.SphereGeometry(1,3,2 );
 var emptyGeometry = new THREE.Geometry();
+var singleNodeMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,visible:true,opacity:0,transparent:true ,
+    alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
+
+} );
 
 var lastSelectedNode;
 
@@ -1639,8 +1643,8 @@ options=_.extend({onDrawNode:function(){}},options)
 				if (!emptyGeometry.boundingSphere)
 				emptyGeometry.boundingSphere= new THREE.Sphere(new THREE.Vector3,1);
 				
-		
-				node._bubble = new THREE.Mesh(sphereGeometry, material );
+		//the single material is only for the node counting. so it should be irrelevant for rendering itself
+				node._bubble = new THREE.Mesh(sphereGeometry, singleNodeMaterial) //material );
 	
 	
 		

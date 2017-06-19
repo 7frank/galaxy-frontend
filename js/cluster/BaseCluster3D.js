@@ -425,7 +425,7 @@ class BaseCluster3D extends BaseNode {
             wireframe: false,
             transparent: true,
             opacity: 0.3,
-            visible: true
+            visible: false
         });
 
         ringGeometry.boundingSphere=boundingSphere
@@ -560,16 +560,23 @@ class BaseCluster3D extends BaseNode {
     /**
      * returns an array of the actual ClusterLeafElements
      * that render the nodes itself
+     *
+     * TODO add clear function and remove cached elements
      */
 
     getLeafs() {
-        var leafElements = [];
+        if (this._LeafsCached) this._LeafsCached
+
+
+        var leafElements =this._LeafsCached= [];
 
         this.traverse(function (item) {
             if (item instanceof ClusterLeafElement)
                 leafElements.push(item)
 
         })
+
+
         return leafElements;
     }
 
