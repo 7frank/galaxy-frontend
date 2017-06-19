@@ -225,8 +225,10 @@ export class MyMain {
         views.push(view2)
 
 
-        let view3 = createView("node distribution test case", [{distribution: new BaseDistribution(2000, 3)}])
+      /*  let view3 = createView("node distribution test case", [{distribution: new BaseDistribution(2000, 3)}])
         views.push(view3)
+        */
+
         /*
         var speccs = this.get2DChartSortedSpeccsArray()
 
