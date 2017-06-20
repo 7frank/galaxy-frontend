@@ -3,21 +3,6 @@
  */
 
 
-THREE.EllipsoidGeometry = function ( width, height, depth, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
-
-    THREE.SphereGeometry.call( this, width * 0.5, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength );
-
-    var matrix = new THREE.Matrix4().makeScale( 1.0, height/width, depth/width );
-
-    this.applyMatrix( matrix );
-
-    //this.boundingSphere.applyMatrix4( matrix );
-
-};
-
-THREE.EllipsoidGeometry.prototype = Object.create( THREE.Geometry.prototype );
-
-
 import ClusterLeafElement from "./ClusterLeafElement"
 import BaseNode from "./BaseNode"
 import EdgeUtil from "./EdgeUtil"
@@ -216,6 +201,19 @@ class BaseCluster3D extends BaseNode {
     }
 
 
+    setEntry(entry)
+    {
+        this.mEntry=entry
+
+    }
+
+    getClusterOptions()
+    {
+        return this.mEntry?this.mEntry.options:{}
+
+    }
+
+
     /**
      * this method can be re-run to change the sub-clusters
      * -which will result in deleting old clusters
@@ -225,6 +223,8 @@ class BaseCluster3D extends BaseNode {
      */
 
     applyClustering(mClusteringSpeccsArray) {
+
+        if (mClusteringSpeccsArray.length >= 1) this.setEntry(mClusteringSpeccsArray[0])
 
 
 //FIXME currently only working in root
@@ -291,7 +291,8 @@ class BaseCluster3D extends BaseNode {
         var clazz = this.getChildClusterConstructor();
         var options = _.extend({
             minClusterSize: 10,
-            defaultMergeGroupName: "other"
+            defaultMergeGroupName: "other",
+            hull:function(){  return new THREE.Mesh()  }
 
         }, entry.options);
         var that = this;
@@ -397,79 +398,6 @@ class BaseCluster3D extends BaseNode {
 
     }
 
-
-    getDefaultHullMaterial()
-    {
-
-     return  new THREE.MeshBasicMaterial({
-            color: 0xFFFFFF,
-            wireframe: false,
-            transparent: true,
-            opacity: 0.1,
-            visible: false
-        });
-
-    }
-
-
-    getEllipsoidHull(boundingBox) {
-
-        let _center = boundingBox.getCenter();
-        let _size= boundingBox.getSize()
-
-        var sphereGeometry=new THREE.EllipsoidGeometry(_size.x,_size.y,_size.z)
-
-        let hull = new THREE.Mesh(sphereGeometry,this.getDefaultHullMaterial())
-
-        return hull
-
-    }
-
-    getBoxHull(boundingBox) {
-
-            let _center = boundingBox.getCenter();
-            let _size= boundingBox.getSize()
-
-            var box=new THREE.BoxGeometry(_size.x,_size.y,_size.z)
-
-        var geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
-
-        var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2,opacity:0.1,transparent:true } );
-
-        var wireframe = new THREE.LineSegments( geo, mat );
-
-       return wireframe
-
-
-
-    }
-
-
-
-
-    getRingHull(boundingSphere)
-    {
-
-        let ringGeometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
-
-
-        ringGeometry.boundingSphere=boundingSphere
-
-
-
-       let hull = new THREE.Mesh(ringGeometry,this.getDefaultHullMaterial())
-
-
-        hull.onBeforeRender = function( renderer, scene, camera, geometry, material, group ) {
-            //billboard effect
-            this.setRotationFromQuaternion(camera.quaternion)
-            //     console.warn(camera.quaternion.x,camera.quaternion.y)
-
-        }
-
-        return hull
-    }
-
     /**
      *
      *  current limenentation of the hull is a simle sphere with a border with the radius of the boundingSphere
@@ -498,8 +426,8 @@ class BaseCluster3D extends BaseNode {
 
         //get center, radius
         let _center = boundingBox.getCenter();
-        let _size= boundingBox.getSize()
-        let radius =_size.length() / 2;
+        let _size = boundingBox.getSize()
+        let radius = _size.length() / 2;
 
 
         //TODO
@@ -508,14 +436,24 @@ class BaseCluster3D extends BaseNode {
         boundingSphere.radius = radius;
 
 //TODO refactor into separate package the hull should be set by the user creating the specific cluster implementation as option per sub-cluster
-   //... like if cluster nodes > x return HullImpl
+        //... like if cluster nodes > x return HullImpl
+
+        var mOptions = this.getClusterOptions();
+
+        if (typeof mOptions.hull == "function") {
+
+        this.mHull = mOptions.hull(boundingBox)
+
+        this.mHull.material.visible = false//set hull default to invisible
+        this.add(this.mHull);
+         }
+          else console.warn("default hull function  not defined")
+
 
         //this.mHull=this.getRingHull(boundingSphere)
        // this.mHull=this.getEllipsoidHull(boundingBox)
-          this.mHull=this.getBoxHull(boundingBox)
-        this.mHull.material.visible=false//set hull default to invisible
+        //  this.mHull=this.getBoxHull(boundingBox)
 
-        this.add(this.mHull);
 
 
 

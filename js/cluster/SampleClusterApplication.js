@@ -9,6 +9,23 @@
  */
 
 
+
+THREE.EllipsoidGeometry = function ( width, height, depth, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
+
+    THREE.SphereGeometry.call( this, width * 0.5, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength );
+
+    var matrix = new THREE.Matrix4().makeScale( 1.0, height/width, depth/width );
+
+    this.applyMatrix( matrix );
+
+    //this.boundingSphere.applyMatrix4( matrix );
+
+};
+
+THREE.EllipsoidGeometry.prototype = Object.create( THREE.Geometry.prototype );
+
+
+
 import BaseDistribution from "./distributions/BaseDistribution"
 import DefaultDistribution from "./distributions/DefaultDistribution"
 import RandomDistribution from "./distributions/RandomDistribution"
@@ -49,6 +66,91 @@ export class MyMain {
         //  this.clusters = this.init();
 
 
+    }
+
+
+
+
+    getDefaultHullMaterial()
+    {
+
+        return  new THREE.MeshBasicMaterial({
+            color: 0xFFFFFF,
+            wireframe: false,
+            transparent: true,
+            opacity: 0.1,
+            visible: false
+        });
+
+    }
+
+
+    getEllipsoidHull(boundingBox) {
+
+        let _center = boundingBox.getCenter();
+        let _size= boundingBox.getSize()
+
+        var sphereGeometry=new THREE.EllipsoidGeometry(_size.x,_size.y,_size.z)
+
+        let hull = new THREE.Mesh(sphereGeometry,this.getDefaultHullMaterial())
+
+        return hull
+
+    }
+
+    getBoxHull(boundingBox) {
+
+        let _center = boundingBox.getCenter();
+        let _size= boundingBox.getSize()
+
+        var box=new THREE.BoxGeometry(_size.x,_size.y,_size.z)
+
+        var geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
+
+        var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 5,opacity:0.1,transparent:true } );
+
+        var wireframe = new THREE.LineSegments( geo, mat );
+
+        return wireframe
+
+
+
+    }
+
+
+
+
+    getRingHull(boundingBox)
+    {
+
+        let boundingSphere = new THREE.Sphere;
+        //get center, radius
+        let _center = boundingBox.getCenter();
+        let _size= boundingBox.getSize()
+        let radius =_size.length() / 2;
+        //TODO
+        if (radius < 40) radius = 40
+
+        boundingSphere.radius = radius;
+
+        let ringGeometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
+
+
+        ringGeometry.boundingSphere=boundingSphere
+
+
+
+        let hull = new THREE.Mesh(ringGeometry,this.getDefaultHullMaterial())
+
+
+        hull.onBeforeRender = function( renderer, scene, camera, geometry, material, group ) {
+            //billboard effect
+            this.setRotationFromQuaternion(camera.quaternion)
+            //     console.warn(camera.quaternion.x,camera.quaternion.y)
+
+        }
+
+        return hull
     }
 
 
@@ -371,16 +473,16 @@ export class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new ForceGraphDistribution(4000, 3) //1000
+        let sample1 = new ForceGraphDistribution(4000, 2) //1000
         let sample2 = new ForceGraphDistribution(1000, 3)//200
         let sample3 = new ForceGraphDistribution(500, 3)//50
 
         //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 40}},
-            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}}
-            , {distribution: sample3}
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 40,hull:this.getBoxHull}},
+            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15,hull:this.getBoxHull}}
+            , {distribution: sample3,hull:this.getEllipsoidHull.bind(this)}
 
 
         ]

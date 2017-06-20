@@ -13,7 +13,7 @@ bugs:
     [x]get edges running again
         currently the edges container is created from a set of nodes which are positioned in object-space(not world)
         so edges do have the same position informations and won't render correct if edges do are external
-
+    []search gui is currently behind elements
 
 
 
