@@ -6,6 +6,17 @@
 
 $(function () {
 
+
+	function getNodes(){
+
+       let  view=$(".view-3d.view-3d-maximised").get(0)
+
+      return (view &&view.mRootCluster&&view.mRootCluster.mNodes)?view.mRootCluster.mNodes: []
+
+
+	}
+
+
 	var filterResult = [];
 
 	var container = $("<div>")
@@ -28,7 +39,7 @@ $(function () {
 				unhighlightNodeElements.apply(v)
 			})
 
-			filterResult = globalNodes.filter(function (v) {
+			filterResult = getNodes().filter(function (v) {
 					var val = searchbar.val().toLowerCase()
 						//name:r.name,group:r.country,industry:r.industry
 						var isName,

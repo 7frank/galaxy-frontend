@@ -24,7 +24,14 @@
     vertical-align: middle;
 	padding:0.2em
 	}
-	
+
+
+	.searchbar-container
+	{
+		z-index:999;
+
+	}
+
 
 	.graph-node-info
 	{

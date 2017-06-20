@@ -129,7 +129,7 @@ class View3D extends HTMLElement
 
         // Setup camera
         this.mCamera = new THREE.PerspectiveCamera();
-        this.mCamera.far = 100000;
+        this.mCamera.far = 200000;
 
 
         // Setup scene
@@ -192,7 +192,7 @@ class View3D extends HTMLElement
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
        // this.mControls.rotateSpeed = 0.3
 
-
+        this.mControls.maxDistance = this.mCamera.far;
 
 
 
@@ -239,7 +239,7 @@ class View3D extends HTMLElement
           that.mLastFrameTime = time
 
 
-          $(that).trigger("before-render")
+          $(that).trigger("before-render",time)
          // $(that).trigger("animate")
 
           that.mRenderer.render(that.mScene, that.mCamera);

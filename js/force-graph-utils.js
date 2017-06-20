@@ -559,6 +559,9 @@ function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 
 
     let view=$(".view-3d[hasFocus]")[0]
+
+    if (!view)view=$(".view-3d.view-3d-maximised").get(0)
+
     if (!view) console.warn("no view focused to be able to zoom")
 
 

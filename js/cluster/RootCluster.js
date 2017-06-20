@@ -47,6 +47,18 @@ class RootCluster extends Cluster3DExtended {
 
          return Object.keys(res)
         }
+
+
+
+
+        function updateParticles(leaf)
+        {
+        if (leaf && leaf.parent && leaf.parent.mParticles)
+            leaf.parent.mParticles.updateColors();
+            else setTimeout(() => updateParticles(leaf), 100 )
+        }
+
+
         var countryNames=null;
 
         $(window).on("node-color-change",function(e,val){
@@ -67,6 +79,11 @@ class RootCluster extends Cluster3DExtended {
 
 
                 leaf.mNodeParticles.update()
+
+
+                updateParticles(leaf)
+
+
             })
 
 

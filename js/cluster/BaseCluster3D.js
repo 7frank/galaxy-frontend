@@ -209,7 +209,7 @@ class BaseCluster3D extends BaseNode {
 
     getClusterOptions()
     {
-        return this.mEntry?this.mEntry.options:{}
+        return this.mEntry&&this.mEntry.options?this.mEntry.options:{}
 
     }
 

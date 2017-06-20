@@ -78,7 +78,7 @@ class GraphView3D extends View3D
 
 
 
-            res.update()
+           // res.update()
 
 
             if (that.isMaximised()) {

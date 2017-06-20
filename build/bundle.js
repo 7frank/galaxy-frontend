@@ -285,7 +285,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
     getClusterOptions()
     {
-        return this.mEntry?this.mEntry.options:{}
+        return this.mEntry&&this.mEntry.options?this.mEntry.options:{}
 
     }
 
@@ -815,8 +815,11 @@ class BaseDistribution
 
         this.dimensions=dimensions //TODO
         this.mScale=scale
+        this.mEasingFunction=TWEEN.Easing.Quadratic.In
     }
 
+
+    //TODO have an options setter instead that checks if this["key"] exists and warns if option not exists
     onSort(sortFN)
     {
         this.mSortFunction=sortFN
@@ -923,6 +926,7 @@ class BaseDistribution
 
 
             let tween = new TWEEN.Tween(origPos)
+                    .easing(that.mEasingFunction)
                 .to(dist.position,mDuration)
                 .onUpdate(function () {
 
@@ -1689,7 +1693,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
     /**
-     *
+     *  NOTE:don't call update for any cluster directly,it will be called via before-render
      *
      */
     update()
@@ -1704,7 +1708,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         this.mTextNodes.update();
 
 
-
+        if (this.isLeaf())
         if (this.mParticles)
             this.mParticles.update();
 
@@ -1759,8 +1763,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         if (this.isLeaf())
             if (this.mParticles)
             {
+               this.mParticles.updateColors();
 
-                this.mParticles.start();
 
               //  this.mParticles.pointCloud.position.sub(this.position);
             }
@@ -1794,6 +1798,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
             var particles = createParticleSystemForNodes(nodes, demoOptions);
             this.add(particles.pointCloud);
 
+
+                particles.start()
                 //TODO call start if distribution function is finished
                 this.on("distribution-complete",function(){
 
@@ -2093,6 +2099,18 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
          return Object.keys(res)
         }
+
+
+
+
+        function updateParticles(leaf)
+        {
+        if (leaf && leaf.parent && leaf.parent.mParticles)
+            leaf.parent.mParticles.updateColors();
+            else setTimeout(() => updateParticles(leaf), 100 )
+        }
+
+
         var countryNames=null;
 
         $(window).on("node-color-change",function(e,val){
@@ -2113,6 +2131,11 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
                 leaf.mNodeParticles.update()
+
+
+                updateParticles(leaf)
+
+
             })
 
 
@@ -2702,7 +2725,7 @@ class View3D extends HTMLElement
 
         // Setup camera
         this.mCamera = new THREE.PerspectiveCamera();
-        this.mCamera.far = 100000;
+        this.mCamera.far = 200000;
 
 
         // Setup scene
@@ -2765,7 +2788,7 @@ class View3D extends HTMLElement
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
        // this.mControls.rotateSpeed = 0.3
 
-
+        this.mControls.maxDistance = this.mCamera.far;
 
 
 
@@ -2812,7 +2835,7 @@ class View3D extends HTMLElement
           that.mLastFrameTime = time
 
 
-          $(that).trigger("before-render")
+          $(that).trigger("before-render",time)
          // $(that).trigger("animate")
 
           that.mRenderer.render(that.mScene, that.mCamera);
@@ -3219,7 +3242,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
 
 
-            res.update()
+           // res.update()
 
 
             if (that.isMaximised()) {
@@ -4639,7 +4662,7 @@ class BaseNode extends THREE.Mesh {
             //the update is currently called from the view3D for the root element
             //and all child elements..
             // TODO check what impact this has on the workflow
-          //  this.update()
+            this.update()
 
         })
 
@@ -4684,7 +4707,7 @@ class BaseNode extends THREE.Mesh {
 
     /**
      * update stub, override in descending class
-     *
+     * NOTE:don't call update for any cluster directly,it will be called via before-render
      *
      */
     update(){}
@@ -5031,6 +5054,7 @@ class MyMain {
         var sphereGeometry=new THREE.EllipsoidGeometry(_size.x,_size.y,_size.z)
 
         let hull = new THREE.Mesh(sphereGeometry,this.getDefaultHullMaterial())
+       // hull.position.copy(_center)
 
         return hull
 
@@ -5048,7 +5072,7 @@ class MyMain {
         var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 5,opacity:0.1,transparent:true } );
 
         var wireframe = new THREE.LineSegments( geo, mat );
-
+        wireframe.position.sub(_center)
         return wireframe
 
 
@@ -5173,10 +5197,12 @@ class MyMain {
 
                 $(mGraphView).on("dblclick", function () {
 
+                 if (  mGraphView.isMaximised()) return
+
                     container.toggle()
 
                     let maximisedContainer = $("#3d-graph")
-                    //globalEnv.scene=mGraphView.mScene
+
                     var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
 
                     _.each(prevMaximisedElement, function (view) {
@@ -5221,6 +5247,8 @@ class MyMain {
                 .css(thumbCSS)
 
             $(mGraphView).on("dblclick", function () {
+
+                if (  mGraphView.isMaximised()) return
                 container.toggle()
 
                 let maximisedContainer = $("#3d-graph")
@@ -5265,16 +5293,18 @@ class MyMain {
         views.push(view2)
 
 
-      /*  let view3 = createView("node distribution test case", [{distribution: new BaseDistribution(2000, 3)}])
-        views.push(view3)
-        */
+      // let view3 = createView("node distribution test case", [{distribution: new BaseDistribution(2000, 3)}])
+     //   views.push(view3)
 
-        /*
+
+
         var speccs = this.get2DChartSortedSpeccsArray()
 
         let view4 = createView("2d-Barchart", speccs)
         views.push(view4)
 
+
+/*
         var speccs = this.get2DPlaneCountryOnlySpeccs()
         let view5 = createView("2d-Plane country-only", speccs)
         views.push(view5)
@@ -5324,14 +5354,14 @@ class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 1).onSort(mySort),
-                options: {minClusterSize: 15}
+                options: {minClusterSize: 15,hull:this.getBoxHull}
             },
             {
                 generator: industrySetGenerator,
                 distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 1).onSort(mySort),
-                options: {minClusterSize: 15}
+                options: {minClusterSize: 15,hull:this.getBoxHull}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 2)}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 2), options: {minClusterSize: 15,hull:this.getBoxHull}}
 
 
         ]

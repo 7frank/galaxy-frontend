@@ -251,7 +251,7 @@ export default class BaseNode extends THREE.Mesh {
             //the update is currently called from the view3D for the root element
             //and all child elements..
             // TODO check what impact this has on the workflow
-          //  this.update()
+            this.update()
 
         })
 
@@ -296,7 +296,7 @@ export default class BaseNode extends THREE.Mesh {
 
     /**
      * update stub, override in descending class
-     *
+     * NOTE:don't call update for any cluster directly,it will be called via before-render
      *
      */
     update(){}

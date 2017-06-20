@@ -93,6 +93,7 @@ export class MyMain {
         var sphereGeometry=new THREE.EllipsoidGeometry(_size.x,_size.y,_size.z)
 
         let hull = new THREE.Mesh(sphereGeometry,this.getDefaultHullMaterial())
+       // hull.position.copy(_center)
 
         return hull
 
@@ -110,7 +111,7 @@ export class MyMain {
         var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 5,opacity:0.1,transparent:true } );
 
         var wireframe = new THREE.LineSegments( geo, mat );
-
+        wireframe.position.sub(_center)
         return wireframe
 
 
@@ -235,10 +236,12 @@ export class MyMain {
 
                 $(mGraphView).on("dblclick", function () {
 
+                 if (  mGraphView.isMaximised()) return
+
                     container.toggle()
 
                     let maximisedContainer = $("#3d-graph")
-                    //globalEnv.scene=mGraphView.mScene
+
                     var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
 
                     _.each(prevMaximisedElement, function (view) {
@@ -283,6 +286,8 @@ export class MyMain {
                 .css(thumbCSS)
 
             $(mGraphView).on("dblclick", function () {
+
+                if (  mGraphView.isMaximised()) return
                 container.toggle()
 
                 let maximisedContainer = $("#3d-graph")
@@ -327,16 +332,18 @@ export class MyMain {
         views.push(view2)
 
 
-      /*  let view3 = createView("node distribution test case", [{distribution: new BaseDistribution(2000, 3)}])
-        views.push(view3)
-        */
+      // let view3 = createView("node distribution test case", [{distribution: new BaseDistribution(2000, 3)}])
+     //   views.push(view3)
 
-        /*
+
+
         var speccs = this.get2DChartSortedSpeccsArray()
 
         let view4 = createView("2d-Barchart", speccs)
         views.push(view4)
 
+
+/*
         var speccs = this.get2DPlaneCountryOnlySpeccs()
         let view5 = createView("2d-Plane country-only", speccs)
         views.push(view5)
@@ -386,14 +393,14 @@ export class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new BaseDistribution(1000, 1).onSort(mySort),
-                options: {minClusterSize: 15}
+                options: {minClusterSize: 15,hull:this.getBoxHull}
             },
             {
                 generator: industrySetGenerator,
                 distribution: new BaseDistribution(200, 1).onSort(mySort),
-                options: {minClusterSize: 15}
+                options: {minClusterSize: 15,hull:this.getBoxHull}
             },
-            {distribution: new BaseDistribution(50, 2)}
+            {distribution: new BaseDistribution(50, 2), options: {minClusterSize: 15,hull:this.getBoxHull}}
 
 
         ]

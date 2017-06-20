@@ -145,7 +145,7 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
     /**
-     *
+     *  NOTE:don't call update for any cluster directly,it will be called via before-render
      *
      */
     update()
@@ -160,7 +160,7 @@ class Cluster3DExtended extends BaseCluster3D {
         this.mTextNodes.update();
 
 
-
+        if (this.isLeaf())
         if (this.mParticles)
             this.mParticles.update();
 
@@ -215,8 +215,8 @@ class Cluster3DExtended extends BaseCluster3D {
         if (this.isLeaf())
             if (this.mParticles)
             {
+               this.mParticles.updateColors();
 
-                this.mParticles.start();
 
               //  this.mParticles.pointCloud.position.sub(this.position);
             }
@@ -250,6 +250,8 @@ class Cluster3DExtended extends BaseCluster3D {
             var particles = createParticleSystemForNodes(nodes, demoOptions);
             this.add(particles.pointCloud);
 
+
+                particles.start()
                 //TODO call start if distribution function is finished
                 this.on("distribution-complete",function(){
 

@@ -216,7 +216,7 @@ function getParticleShaderMaterial()
 				}           
             }
 				
-				
+
 				
 			}
 					
@@ -227,12 +227,50 @@ var percentage=1
 var particlesPlaced=0;
 
 
+var tween;
+
+var  start_time;
+
+function createTween(duration=1000,easing=TWEEN.Easing.Quadratic.In) {
+
+    start_time=Date.now();
+
+    var positions = geometry.attributes.position.array;
+
+    console.log("createTween",positions,destination,duration)
+
+    tween = new TWEEN.Tween(positions)
+
+        .to(destination, duration)
+		.easing(easing)
+		.onUpdate(function(){
+			console.log(positions.length)
+            geometry.attributes.position.needsUpdate = true;
+
+		}).onComplete(() => isRunning=false )
+
+
+    return tween
+}
+
+
 var isRunning=false;
-function animateParticles(time) {
+
+
+function animateParticles() {
+
+//TODO
 
 	if (!isRunning) return;
 
- 
+	if (tween&& isRunning)
+    tween.update(Date.now())
+
+
+
+
+/*
+		 console.warn("animate particles",time)
      
         if(particleSystem.parent){
 
@@ -250,14 +288,7 @@ function animateParticles(time) {
         for(var v=0;v<pct;v++){
             a=false,b=false,c=false;
             //easing=Math.sin((0.55+(v%100)/100*0.4)*Math.PI);
-			
-			
-			/*var color=new THREE.Color( nodes[v].color||0xffff00);
-			
-			customColors[ v * 3 + 0 ]=color.r
-			customColors[ v * 3 + 1 ]=color.g
-			customColors[ v * 3 + 2 ]=color.b
-			*/
+
 			
            var easing=0.2+(v%100)/100;
 		   var inc_easing=increment*easing
@@ -282,7 +313,7 @@ function animateParticles(time) {
         }
 
         if(fin){
-
+		console.log("fin")
             isRunning=false; //stop updating
 
             increment=0;
@@ -307,7 +338,7 @@ function animateParticles(time) {
 		
         //animatePointSize(false);
 	   }
-
+*/
      
 
 	 
@@ -333,7 +364,11 @@ function animateParticles(time) {
 
                             isRunning=true;
 							updateDestinations();
-							 
+
+                            let tween=createTween();
+
+							tween.start()
+
 							//for now just have a huge bounding volume
 							particleSystem.geometry.boundingSphere=new THREE.Sphere(new THREE.Vector3,50000);
 						

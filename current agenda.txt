@@ -1,11 +1,20 @@
 bugs:
 
+---------------URGENT--------------
+boundingboxes are off..
+might be due to edges used for bb calc or pointclouds before animating
+anlso animation of dots is off..
+-----------------------------------
+
     []text utf8 not displayed correct
 
     []get particles running again (currently broken)
     []partcles within node are altering between + and - for too long for the bigger data set
     which generates some kind of flickering...
-    -aso particles currently don't work because they are updated in the wrong way, but previously had  to much of a performance impact
+    -also particles currently don't work because they are updated in the wrong way, but previously had  to much of a performance impact
+    -animation does not show up porperly when using tweenjs
+
+
     [] companies visible are no longer tracked, this should be done per view
 
     [x]fix zoom feature for nodes
@@ -14,7 +23,7 @@ bugs:
         currently the edges container is created from a set of nodes which are positioned in object-space(not world)
         so edges do have the same position informations and won't render correct if edges do are external
     []search gui is currently behind elements
-
+    [] hull for cluster == leaf not rendered
 
 
     -stop animations no view change to prevent wrong visualisation
@@ -24,6 +33,7 @@ bugs:
     restore interaction=>  node meshes and such
         (probably also something with global values)
         nodes do cout toward rendered elements so probably offset for controls is wrong
+
 
 
 

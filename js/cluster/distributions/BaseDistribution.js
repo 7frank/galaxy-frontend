@@ -24,8 +24,11 @@ export default  class BaseDistribution
 
         this.dimensions=dimensions //TODO
         this.mScale=scale
+        this.mEasingFunction=TWEEN.Easing.Quadratic.In
     }
 
+
+    //TODO have an options setter instead that checks if this["key"] exists and warns if option not exists
     onSort(sortFN)
     {
         this.mSortFunction=sortFN
@@ -132,6 +135,7 @@ export default  class BaseDistribution
 
 
             let tween = new TWEEN.Tween(origPos)
+                    .easing(that.mEasingFunction)
                 .to(dist.position,mDuration)
                 .onUpdate(function () {
 
