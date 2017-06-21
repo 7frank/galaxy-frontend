@@ -224,7 +224,8 @@ class BaseCluster3D extends BaseNode {
 
     applyClustering(mClusteringSpeccsArray) {
 
-        if (mClusteringSpeccsArray.length >= 1) this.setEntry(mClusteringSpeccsArray[0])
+        if (mClusteringSpeccsArray.length >= 1)
+            this.setEntry(mClusteringSpeccsArray[0])
 
 
 //FIXME currently only working in root
@@ -422,8 +423,19 @@ class BaseCluster3D extends BaseNode {
         let boundingSphere = new THREE.Sphere;
 
         let boundingBox = new THREE.Box3;
-        boundingBox.setFromObject(this);
 
+
+      //  boundingBox.setFromObject(this);
+
+
+        //FIXME the boundingbox must be generated for the particles
+        if (this.isLeaf()) {
+         let pc=this.mLeaf.mNodeParticles.pointCloud
+
+            boundingBox.setFromObject(pc);
+
+
+        }
         //get center, radius
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
@@ -435,26 +447,16 @@ class BaseCluster3D extends BaseNode {
 
         boundingSphere.radius = radius;
 
-//TODO refactor into separate package the hull should be set by the user creating the specific cluster implementation as option per sub-cluster
-        //... like if cluster nodes > x return HullImpl
 
+        //compute hull object from bounding box
         var mOptions = this.getClusterOptions();
-
         if (typeof mOptions.hull == "function") {
-
         this.mHull = mOptions.hull(boundingBox)
 
-        this.mHull.material.visible = false//set hull default to invisible
+       // this.mHull.material.visible = false//set hull default to invisible
         this.add(this.mHull);
          }
           else console.warn("default hull function  not defined")
-
-
-        //this.mHull=this.getRingHull(boundingSphere)
-       // this.mHull=this.getEllipsoidHull(boundingBox)
-        //  this.mHull=this.getBoxHull(boundingBox)
-
-
 
 
 
@@ -466,7 +468,8 @@ class BaseCluster3D extends BaseNode {
             opacity: 0.1
         });
 
-        sphereGeometry.boundingSphere=boundingSphere
+        //sphereGeometry.boundingSphere=boundingSphere
+         sphereGeometry.boundingBox=boundingBox
 
        // this.material = sphereMaterial;
         this.geometry = sphereGeometry;

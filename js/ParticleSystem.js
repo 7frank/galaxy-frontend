@@ -160,7 +160,7 @@ function getParticleShaderMaterial()
 	
 				for (var i=0;i<count;i++)
 				{
-					var color=(typeof nodes[i].color=="number")?new THREE.Color(nodes[i].color):new THREE.Color(0xffff00);
+					var color=(typeof node.color=="number")?new THREE.Color(node.color):new THREE.Color(0xffff00);
 				
 							var rnd=Math.random()*0.1
 							values_color[ v * 3 + 0 ] = color.r*1.1+rnd;

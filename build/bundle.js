@@ -300,7 +300,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
     applyClustering(mClusteringSpeccsArray) {
 
-        if (mClusteringSpeccsArray.length >= 1) this.setEntry(mClusteringSpeccsArray[0])
+        if (mClusteringSpeccsArray.length >= 1)
+            this.setEntry(mClusteringSpeccsArray[0])
 
 
 //FIXME currently only working in root
@@ -498,8 +499,19 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         let boundingSphere = new THREE.Sphere;
 
         let boundingBox = new THREE.Box3;
-        boundingBox.setFromObject(this);
 
+
+      //  boundingBox.setFromObject(this);
+
+
+        //FIXME the boundingbox must be generated for the particles
+        if (this.isLeaf()) {
+         let pc=this.mLeaf.mNodeParticles.pointCloud
+
+            boundingBox.setFromObject(pc);
+
+
+        }
         //get center, radius
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
@@ -511,26 +523,16 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         boundingSphere.radius = radius;
 
-//TODO refactor into separate package the hull should be set by the user creating the specific cluster implementation as option per sub-cluster
-        //... like if cluster nodes > x return HullImpl
 
+        //compute hull object from bounding box
         var mOptions = this.getClusterOptions();
-
         if (typeof mOptions.hull == "function") {
-
         this.mHull = mOptions.hull(boundingBox)
 
-        this.mHull.material.visible = false//set hull default to invisible
+       // this.mHull.material.visible = false//set hull default to invisible
         this.add(this.mHull);
          }
           else console.warn("default hull function  not defined")
-
-
-        //this.mHull=this.getRingHull(boundingSphere)
-       // this.mHull=this.getEllipsoidHull(boundingBox)
-        //  this.mHull=this.getBoxHull(boundingBox)
-
-
 
 
 
@@ -542,7 +544,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             opacity: 0.1
         });
 
-        sphereGeometry.boundingSphere=boundingSphere
+        //sphereGeometry.boundingSphere=boundingSphere
+         sphereGeometry.boundingBox=boundingBox
 
        // this.material = sphereMaterial;
         this.geometry = sphereGeometry;
@@ -1746,6 +1749,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
           leaf.parent._initDotParticles();
 
           leaf.parent.updateDotParticles()
+
+          leaf.parent.adjustHullSize()
 
       })
 
@@ -3283,6 +3288,23 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
 
     }
+
+    loadDataSet(ds){
+
+      var that = this
+
+        ds(null,function onSuccess(mGraphData)
+        {
+            console.log("data loaded")
+            that.setData(mGraphData)
+
+            $(".cloudNodeColorSelect").val("group").trigger("change")
+
+        });
+
+    return this
+    }
+
 
     maximise() {
 
@@ -4971,20 +4993,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-THREE.EllipsoidGeometry = function ( width, height, depth, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
+THREE.EllipsoidGeometry = function (width, height, depth, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
 
-    THREE.SphereGeometry.call( this, width * 0.5, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength );
+    THREE.SphereGeometry.call(this, width * 0.5, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength);
 
-    var matrix = new THREE.Matrix4().makeScale( 1.0, height/width, depth/width );
+    var matrix = new THREE.Matrix4().makeScale(1.0, height / width, depth / width);
 
-    this.applyMatrix( matrix );
+    this.applyMatrix(matrix);
 
     //this.boundingSphere.applyMatrix4( matrix );
 
 };
 
-THREE.EllipsoidGeometry.prototype = Object.create( THREE.Geometry.prototype );
-
+THREE.EllipsoidGeometry.prototype = Object.create(THREE.Geometry.prototype);
 
 
 
@@ -5019,8 +5040,8 @@ THREE.EllipsoidGeometry.prototype = Object.create( THREE.Geometry.prototype );
  */
 class MyMain {
 
-    constructor() {
-
+    constructor(datasets) {
+        this.setDataSets(datasets)
         this.setupViews()
 
 
@@ -5030,12 +5051,9 @@ class MyMain {
     }
 
 
+    getDefaultHullMaterial() {
 
-
-    getDefaultHullMaterial()
-    {
-
-        return  new THREE.MeshBasicMaterial({
+        return new THREE.MeshBasicMaterial({
             color: 0xFFFFFF,
             wireframe: false,
             transparent: true,
@@ -5049,12 +5067,12 @@ class MyMain {
     getEllipsoidHull(boundingBox) {
 
         let _center = boundingBox.getCenter();
-        let _size= boundingBox.getSize()
+        let _size = boundingBox.getSize()
 
-        var sphereGeometry=new THREE.EllipsoidGeometry(_size.x,_size.y,_size.z)
+        var sphereGeometry = new THREE.EllipsoidGeometry(_size.x, _size.y, _size.z)
 
-        let hull = new THREE.Mesh(sphereGeometry,this.getDefaultHullMaterial())
-       // hull.position.copy(_center)
+        let hull = new THREE.Mesh(sphereGeometry, this.getDefaultHullMaterial())
+        // hull.position.copy(_center)
 
         return hull
 
@@ -5063,33 +5081,29 @@ class MyMain {
     getBoxHull(boundingBox) {
 
         let _center = boundingBox.getCenter();
-        let _size= boundingBox.getSize()
+        let _size = boundingBox.getSize()
 
-        var box=new THREE.BoxGeometry(_size.x,_size.y,_size.z)
+        var box = new THREE.BoxGeometry(_size.x, _size.y, _size.z)
 
-        var geo = new THREE.EdgesGeometry( box ); // or WireframeGeometry( geometry )
+        var geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
 
-        var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 5,opacity:0.1,transparent:true } );
+        var mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: 0.1, transparent: true});
 
-        var wireframe = new THREE.LineSegments( geo, mat );
-        wireframe.position.sub(_center)
+        var wireframe = new THREE.LineSegments(geo, mat);
+      wireframe.position.add(_center)
         return wireframe
-
 
 
     }
 
 
-
-
-    getRingHull(boundingBox)
-    {
+    getRingHull(boundingBox) {
 
         let boundingSphere = new THREE.Sphere;
         //get center, radius
         let _center = boundingBox.getCenter();
-        let _size= boundingBox.getSize()
-        let radius =_size.length() / 2;
+        let _size = boundingBox.getSize()
+        let radius = _size.length() / 2;
         //TODO
         if (radius < 40) radius = 40
 
@@ -5098,14 +5112,13 @@ class MyMain {
         let ringGeometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
 
 
-        ringGeometry.boundingSphere=boundingSphere
+        ringGeometry.boundingSphere = boundingSphere
 
 
+        let hull = new THREE.Mesh(ringGeometry, this.getDefaultHullMaterial())
 
-        let hull = new THREE.Mesh(ringGeometry,this.getDefaultHullMaterial())
 
-
-        hull.onBeforeRender = function( renderer, scene, camera, geometry, material, group ) {
+        hull.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
             //billboard effect
             this.setRotationFromQuaternion(camera.quaternion)
             //     console.warn(camera.quaternion.x,camera.quaternion.y)
@@ -5130,25 +5143,25 @@ class MyMain {
         function createContainer() {
 
             let containerCSS = {
-              //"pointer-events": "none",
-               // display: "flex",
-               // "flex-flow": "row wrap",
+                //"pointer-events": "none",
+                // display: "flex",
+                // "flex-flow": "row wrap",
 
                 display: "grid",
-               // "grid-template-rows": "repeat(10, 287px)",
+                // "grid-template-rows": "repeat(10, 287px)",
                 "grid-auto-rows": "300px",
                 "grid-template-columns": "50% 50%",
 
-                padding:"1em",
+                padding: "1em",
 
                 position: "absolute",
                 top: "10em",
                 left: "20em",
                 width: 840,//"60em",
-                height:"40em"
-                ,"overflow-y":"scroll"
-                ,"overflow-x":"hidden",
-                background:"rgba(255, 255, 255, 0.2)",
+                height: "40em"
+                , "overflow-y": "scroll"
+                , "overflow-x": "hidden",
+                background: "rgba(255, 255, 255, 0.2)",
                 border: "1px solid rgba(128, 128, 128, 0.5)",
             }
 
@@ -5158,7 +5171,13 @@ class MyMain {
                 .appendTo("body")
 
             let title = $("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
-                .css({position: "absolute","pointer-events": "none",width: "100%", "font-size": "1em",color: "rgba(255, 255, 255, 0.5)"})
+                .css({
+                    position: "absolute",
+                    "pointer-events": "none",
+                    width: "100%",
+                    "font-size": "1em",
+                    color: "rgba(255, 255, 255, 0.5)"
+                })
 
 
             function toggleMenu() {
@@ -5197,7 +5216,7 @@ class MyMain {
 
                 $(mGraphView).on("dblclick", function () {
 
-                 if (  mGraphView.isMaximised()) return
+                    if (mGraphView.isMaximised()) return
 
                     container.toggle()
 
@@ -5248,7 +5267,7 @@ class MyMain {
 
             $(mGraphView).on("dblclick", function () {
 
-                if (  mGraphView.isMaximised()) return
+                if (mGraphView.isMaximised()) return
                 container.toggle()
 
                 let maximisedContainer = $("#3d-graph")
@@ -5279,51 +5298,46 @@ class MyMain {
 
         let views = []
 
-/*
-        let view0 = createDefaultView("previous force-graph")
-        views.push(view0)
-*/
-      /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
-        let view1 = createView("View1", speccs)
-        views.push(view1)*/
+        /*
+         let view0 = createDefaultView("previous force-graph")
+         views.push(view0)
+         */
+        /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
+         let view1 = createView("View1", speccs)
+         views.push(view1)*/
 
 
-        var speccs = this.getForceSpeccs()
-        let view2 = createView("new force-graph", speccs)
-        views.push(view2)
+        //NOTE: target rendering
+        /*  var speccs = this.getForceSpeccs()
+         let view2 = createView("new force-graph", speccs)
+         .loadDataSet(this.getDSByID(0))
+         views.push(view2)
+         */
+
+        let view3 = createView("node distribution test case",
+            [{
+                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 3),
+                options: { hull: this.getBoxHull}
+            }])
+            .loadDataSet(this.getDSByID(1))
+
+        views.push(view3)
+
+        /*
+
+         var speccs = this.get2DChartSortedSpeccsArray()
+
+         let view4 = createView("2d-Barchart", speccs)
+         .loadDataSet(this.getDSByID(1))
+         views.push(view4)
 
 
-      // let view3 = createView("node distribution test case", [{distribution: new BaseDistribution(2000, 3)}])
-     //   views.push(view3)
 
+         var speccs = this.get2DPlaneCountryOnlySpeccs()
+         let view5 = createView("2d-Plane country-only", speccs)
+         views.push(view5)
+         */
 
-
-        var speccs = this.get2DChartSortedSpeccsArray()
-
-        let view4 = createView("2d-Barchart", speccs)
-        views.push(view4)
-
-
-/*
-        var speccs = this.get2DPlaneCountryOnlySpeccs()
-        let view5 = createView("2d-Plane country-only", speccs)
-        views.push(view5)
-*/
-
-
-        //------------------------------------
-        $(this).on("data-changed", loadAll)
-        if (that.mGraphData) loadAll()
-
-        function loadAll() {
-
-
-            _.each(views, function (view) {
-                view.setData(that.mGraphData)
-
-            })
-            $(".cloudNodeColorSelect").val("group").trigger("change")
-        }
 
         _.each(views, function (view) {
             container.append(view)
@@ -5354,14 +5368,14 @@ class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 1).onSort(mySort),
-                options: {minClusterSize: 15,hull:this.getBoxHull}
+                options: {minClusterSize: 15, hull: this.getBoxHull}
             },
             {
                 generator: industrySetGenerator,
                 distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 1).onSort(mySort),
-                options: {minClusterSize: 15,hull:this.getBoxHull}
+                options: {minClusterSize: 15, hull: this.getBoxHull}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 2), options: {minClusterSize: 15,hull:this.getBoxHull}}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 2), options: {minClusterSize: 15, hull: this.getBoxHull}}
 
 
         ]
@@ -5448,9 +5462,17 @@ class MyMain {
         //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 40,hull:this.getBoxHull}},
-            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15,hull:this.getBoxHull}}
-            , {distribution: sample3,hull:this.getEllipsoidHull.bind(this)}
+            {
+                generator: countrySetGenerator,
+                distribution: sample1,
+                options: {minClusterSize: 40, hull: this.getBoxHull}
+            },
+            {
+                generator: industrySetGenerator,
+                distribution: sample2,
+                options: {minClusterSize: 15, hull: this.getBoxHull}
+            }
+            , {distribution: sample3, hull: this.getEllipsoidHull.bind(this)}
 
 
         ]
@@ -5458,12 +5480,14 @@ class MyMain {
     }
 
 
-    setGraphData(graphData) {
-        this.mGraphData = graphData;
-        // this.init(mGraphData);
+    setDataSets(datasets) {
+        this.mDataSets = datasets;
 
-        $(this).trigger("data-changed")
+    }
 
+
+    getDSByID(id) {
+        return this.mDataSets[id]
     }
 
 

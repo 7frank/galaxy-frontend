@@ -199,6 +199,8 @@ class Cluster3DExtended extends BaseCluster3D {
 
           leaf.parent.updateDotParticles()
 
+          leaf.parent.adjustHullSize()
+
       })
 
 

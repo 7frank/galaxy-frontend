@@ -90,19 +90,8 @@
 
     function loadAlternativeView() {
 
-      let  main = new clusters.MyMain;
+      let  main = new clusters.MyMain(getGraphDataSets());
 
-
-        const dataSets = getGraphDataSets();
-        let dataSet = dataSets[0]
-
-        dataSet(null,function alternativehandler(mGraphData)
-        {
-        console.log("data loaded")
-            main.setGraphData(mGraphData)
-
-
-        });
 
     }
 

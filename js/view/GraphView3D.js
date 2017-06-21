@@ -120,6 +120,23 @@ class GraphView3D extends View3D
 
     }
 
+    loadDataSet(ds){
+
+      var that = this
+
+        ds(null,function onSuccess(mGraphData)
+        {
+            console.log("data loaded")
+            that.setData(mGraphData)
+
+            $(".cloudNodeColorSelect").val("group").trigger("change")
+
+        });
+
+    return this
+    }
+
+
     maximise() {
 
         super.maximise()
