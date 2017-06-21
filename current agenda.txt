@@ -1,8 +1,3 @@
-keymap
- s ... recluster hovered cluster/leaf
- t ... toogle select current cluster
- u TODO toggle cluster text nodes ?
-
 bugs:
 
 
@@ -12,32 +7,37 @@ bugs:
     !if view mouse move => wrong boundingbox calc
     => something in the animation loop might change node positions?
     => setFromObject...would create wrong bb because of other elements within pc getting changed while animation loop runs
+    TODO cluster bounding boxes
+    NOTE: might be due to edges used for bb calc or pointclouds before animating
 
 
-    might be due to edges used for bb calc or pointclouds before animating
 [/]also animation of dots is off..
 rendering data seems to be dependent quad sample + forcegraph => bad quad rendering
+
+[] cluster/text nodes.. missing again
 
 -----------------------------------
 
     []text utf8 not displayed correct
 
-    []get particles running again (currently broken)
-    []partcles within node are altering between + and - for too long for the bigger data set
-    which generates some kind of flickering...
-    -also particles currently don't work because they are updated in the wrong way, but previously had  to much of a performance impact
-    -animation does not show up porperly when using tweenjs
+    [/]get particles running again (currently broken)
+    [x]partcles within node are altering between + and - for too long for the bigger data set
+        which generates some kind of flickering...
+        NOTE:changed implementation for particles => tweenjs
+
+    [x]also particles currently don't work because they are updated in the wrong way, but previously had  to much of a performance impact
+    [x]animation does not show up porperly when using tweenjs
 
 
-    [] companies visible are no longer tracked, this should be done per view
+    [x] companies visible are no longer tracked, this should be done per view
 
     [x]fix zoom feature for nodes
 
     [x]get edges running again
         currently the edges container is created from a set of nodes which are positioned in object-space(not world)
         so edges do have the same position informations and won't render correct if edges do are external
-    []search gui is currently behind elements
-    [] hull for cluster == leaf not rendered
+    [x]search gui is currently behind elements
+    [x] hull for cluster == leaf not rendered
 
 
     -stop animations no view change to prevent wrong visualisation

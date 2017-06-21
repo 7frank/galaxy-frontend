@@ -75,7 +75,7 @@
     <script src="./js/lib/dat.gui.min.js"></script>
 	<script>
 	
-	
+	/*
 	//model for dat.gui
     var SampleModel = function () {
 
@@ -152,7 +152,7 @@
 
 	
     };
-	
+	*/
 	</script>
 	
 	<style>
@@ -213,78 +213,37 @@
 	.inverted {
 	filter: invert(100%);
 	}
+
+
+    .info-panel{
+        display:none;
+        width: 40%;
+        z-index: 9999;
+        position: absolute;
+        top: 30%;
+        left: 30%;
+    }
 	
 	
 	</style>
-	
-	<script id="vertexShader1" type="x-shader/x-vertex">
-	uniform vec3 viewVector;
-	uniform float c;
-	uniform float p;
-	varying float intensity;
-	void main() 
-	{
-		vec3 vNormal = normalize( normalMatrix * normal );
-		vec3 vNormel = normalize( normalMatrix * viewVector );
-		intensity = pow( c - dot(vNormal, vNormel), p );
-		
-		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-	}
-	</script>
 
-	<!-- fragment shader a.k.a. pixel shader -->
-	<script id="fragmentShader1" type="x-shader/x-vertex"> 
-	uniform vec3 glowColor;
-	varying float intensity;
-	void main() 
-	{
-		vec3 glow = glowColor * intensity;
-		gl_FragColor = vec4( glow, 1.0 );
-	}
-	</script>
-	
-	<script type="x-shader/x-vertex" id="vertexshader2">
-
-			attribute float size;
-			attribute vec3 customColor;
-			varying vec3 vColor;
-
-			void main() {
-
-				vColor = customColor;
-
-				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-
-				gl_PointSize = size * ( 300.0 / length( mvPosition.xyz ) );
-
-				gl_Position = projectionMatrix * mvPosition;
-
-			}
-
-		</script>
-
-		<script type="x-shader/x-fragment" id="fragmentshader2">
-
-			uniform vec3 color;
-			uniform sampler2D texture;
-
-			varying vec3 vColor;
-
-			void main() {
-
-				gl_FragColor = vec4( color * vColor, 1.0 );
-
-				gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
-
-			}
-
-		</script>
 	<?php include ("header_include.php"); ?>
 	
 </head>
 
 <body>
 
+<pre class="info-panel">
+    keymap
+    ------------------------------------
+    h ... toggle this help menu
+
+    s ... recluster hovered cluster/leaf
+    t ... toogle select current cluster
+    u TODO toggle cluster text nodes ?
+    e ... toggle edges
+    ------------------------------------
+</pre>
 
 
 <div id="3d-graph"  style="width: calc(100vw); height: calc(100vh);"></div>

@@ -435,7 +435,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
-
     getCompoundBoundingBox() {
         var box = new THREE.Box3;
         _.each(this.getLeafs(), function (leaf) {
@@ -450,21 +449,19 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             if (pc.geometry.boundingBox)
                 boundingBox.copy(pc.geometry.boundingBox)
-          /*  else
-                boundingBox.setFromObject(pc);
-*/
+            /*  else
+             boundingBox.setFromObject(pc);
+             */
 
 
             let _center = boundingBox.getCenter();
 
             //FIXME offsets are not properly calculated
-           // let offset=leaf.localToWorld(new THREE.Vector3) //boundingBox.getCenter()
+            // let offset=leaf.localToWorld(new THREE.Vector3) //boundingBox.getCenter()
             boundingBox.translate(_center);
 
 
-
-
-                box.union(boundingBox);
+            box.union(boundingBox);
 
 
         });
@@ -518,8 +515,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
 
     adjustHullSize() {
-console.warn("adjustHullSize")
-
+        console.warn("adjustHullSize")
+/*
         if (this.mHull && this.mHull.geometry)
             this.mHull.geometry.dispose();
         if (this.mHull && this.mHull.material)
@@ -531,8 +528,7 @@ console.warn("adjustHullSize")
         this.geometry.boundingBox = null;
         this.geometry.boundingSphere = null;
         delete(this.geometry);
-
-
+*/
 
         let boundingBox = new THREE.Box3;
 
@@ -541,61 +537,62 @@ console.warn("adjustHullSize")
         if (this.isLeaf()) {
             let pc = this.mLeaf.mNodeParticles.pointCloud
             console.log(this.mLeaf.mNodeParticles.pointCloud)
-            if (!pc)
-            {
+            if (!pc) {
                 console.error("leaf: nodescontainer not created yet")
             }
             else {
 
-             //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
+                //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
                 boundingBox.setFromArray(pc.geometry.attributes.position.array)
                 pc.geometry.boundingBox = boundingBox
             }
 
         }
-       /* else //FIXME get bb of all leafs instead + actual position
-            //we want to generate the hull for a cluster that is no leaf only:
-            //if the leaf/child has finished it's distribution function
-            //and
-            //if ths has distributed it's children
-            //via listeners?
-            boundingBox = this.getCompoundBoundingBox()
-*/
+        /* else //FIXME get bb of all leafs instead + actual position
+         //we want to generate the hull for a cluster that is no leaf only:
+         //if the leaf/child has finished it's distribution function
+         //and
+         //if ths has distributed it's children
+         //via listeners?
+         boundingBox = this.getCompoundBoundingBox()
+         */
         //get center, radius
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
         let radius = _size.length() / 2;
 
 
-        let boundingSphere =boundingBox.getBoundingSphere()
-
-        //TODO
-       /*
-       if (radius < 40) radius = 40
-
-        boundingSphere.radius = radius;
-        */
+        let boundingSphere = boundingBox.getBoundingSphere()
 
 
+        // we must have at least one hull impl
+        // it might be invisible or idle but it should be set via defaults /
+        // also text nodes depend on valid sized bbox
         //compute hull object from bounding box
         var mOptions = this.getClusterOptions();
         if (typeof mOptions.hull == "function") {
-            {
 
-            this.mHull = mOptions.hull(boundingBox)
 
+            let mHull = mOptions.hull(boundingBox)
+
+            if (!this.mHull) {
+
+                this.mHull = mHull;
+                // this.mHull.material.visible = false//set hull default to invisible
+                this.add(this.mHull);
             }
-            // this.mHull.material.visible = false//set hull default to invisible
-            this.add(this.mHull);
-        }
-        else {
-            console.error("default hull function  not defined") //TODO we must have at leastone hull impl  //it might be invisible or idle but it should be set via defaults
+            else {
+                this.mHull.geometry = mHull.geometry
 
-
+                this.mHull.position.copy(mHull.position)
+            }
 
         }
+        else
+            console.error("default hull function  not defined")
 
-//TODO this is currently used for the muse interactions but should be refactored and removed
+
+        //TODO this is currently used for the mouse interactions but should be refactored and removed
         var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
         var sphereMaterial = new THREE.MeshBasicMaterial({
             color: 0xff0000,
@@ -609,10 +606,10 @@ console.warn("adjustHullSize")
 
 
         // this.material = sphereMaterial;
-        if (this.mHull&& this.mHull.geometry)
-            this.geometry=this.mHull.geometry
+        if (this.mHull && this.mHull.geometry)
+            this.geometry = this.mHull.geometry
         else
-        this.geometry = sphereGeometry;
+            this.geometry = sphereGeometry;
 
 
     }
@@ -640,15 +637,15 @@ console.warn("adjustHullSize")
 
     createParticlePointCloud(entry) {
         // console.log("reached leaf cluster", this)
-var that=this
+        var that = this
         let leaf = new __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */](this.mNodes);
         this.mLeaf = leaf;
         this.add(leaf);
-        leaf.setDistributionHandler(entry.distribution,function(){
+        leaf.setDistributionHandler(entry.distribution, function () {
 
             //create/update the hull element after the animation has finished
 
-           that.updateIfIsLeaf()
+            that.updateIfIsLeaf()
 
 
         })
@@ -656,8 +653,7 @@ var that=this
     }
 
 
-    updateIfIsLeaf()
-    {
+    updateIfIsLeaf() {
         this.adjustHullSize()
         this._initDotParticles();
         this.updateDotParticles()
@@ -674,7 +670,7 @@ var that=this
 
         this.addAllSubClustersToContainer();
 
-      //  this.adjustHullSize(); //diabled for testing of hull and bounding box
+        //  this.adjustHullSize(); //diabled for testing of hull and bounding box
 
     }
 
@@ -719,21 +715,21 @@ var that=this
      * has to be called after initialisation to re-calculate dependent elements
      * like dot clouds and cluster boder and hull
      */
-   /* onAfterClusteredAndDistributed() {
+    /* onAfterClusteredAndDistributed() {
 
 
-      //  return //FIXME
-        _.each(_.reverse(this.findClusters("*")), function (cluster) {
+     //  return //FIXME
+     _.each(_.reverse(this.findClusters("*")), function (cluster) {
 
-            if (!cluster.isLeaf())
-            cluster.adjustHullSize();
+     if (!cluster.isLeaf())
+     cluster.adjustHullSize();
 
 
-        })
+     })
 
-        if (!this.isLeaf())
-       this.adjustHullSize()
-    }*/
+     if (!this.isLeaf())
+     this.adjustHullSize()
+     }*/
 
 
     /**
@@ -853,12 +849,12 @@ var that=this
             _root = r;
         }
 
-    return _root
+        return _root
     }
 
     getParents(maxDepth = 20) {
         var _root = this;
-        var parents=[]
+        var parents = []
         while (maxDepth--) {
             let r = _root.parent;
             if (r == null) return parents
@@ -872,7 +868,6 @@ var that=this
         return parents;
 
     }
-
 
 
 }
@@ -1899,7 +1894,9 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
     addNodeCaptions() {
 
-
+        if (this._hasNodeCaptions_) return
+        console.log("addNodeCaptions")
+        this._hasNodeCaptions_=true
         var rootCluster = this.getRoot()
         if (!rootCluster.mParentView) return
 
@@ -1933,6 +1930,11 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         //TODO make sure radius is dynamically changed when cluster radius changes
 
         let minDistance = this.getRadius() / 3
+
+        // TODO the bounding volume determines the visibility of the text nodes
+        //TODO so currently with no volume generated properly the text nodes are invisible
+        //  if (minDistance<10000) minDistance=10000
+
         let maxDistance = minDistance * 10
 
         if (!this.mTextNodes)
@@ -2275,6 +2277,8 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
         })
+
+
 
 
     }
@@ -2747,7 +2751,10 @@ class View3D extends HTMLElement
         this.mTime=-1;
     //   this.initStatic()
 
-
+        // Setup renderer
+        this.mRenderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
 
 
     }
@@ -2873,10 +2880,7 @@ class View3D extends HTMLElement
 
 
 
-        // Setup renderer
-        this.mRenderer = new THREE.WebGLRenderer({
-            antialias: true
-        });
+
         this.mRenderer.setClearColor( 0x000000 );
         this.mRenderer.setPixelRatio( window.devicePixelRatio );
 
@@ -2905,14 +2909,22 @@ class View3D extends HTMLElement
 
 
         },20))
-        $(this.mRenderer.domElement).on("mouseout",function(e){
-            e.stopPropagation()
-            that.setInactive()
 
-            $(that).removeAttr("hasFocus")
-            if (!$(that).hasClass("view-3d-maximised"))
-            that.mCaption.stop(true,false).delay(400).fadeIn()
 
+        $(this.mRenderer.domElement).on("mouseout",function(e) {
+            e.stopPropagation();
+
+
+            $(that).removeAttr("hasFocus");
+            if (!$(that).hasClass("view-3d-maximised")) {
+
+            that.mCaption.stop(true, false).delay(400).fadeIn();
+
+            //keep maximised element active or whatever state it currently holds
+            that.setInactive();
+
+
+            }
 
         })
 
@@ -2942,10 +2954,11 @@ class View3D extends HTMLElement
 
        var initialFrames=1;
         var that=this;
+
       function animate(time) {
         that.mTime=time
 
-          that.mControls.update();
+
           initialFrames--
           if (that.mFPS==0) {
 
@@ -2967,6 +2980,8 @@ class View3D extends HTMLElement
 
 
           that.mLastFrameTime = time
+
+          that.mControls.update();
 
 
           $(that).trigger("before-render",time)
@@ -3655,6 +3670,23 @@ class SimpleForceGraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /
     }
 
 
+    loadDataSet(ds){
+
+        var that = this
+
+        ds(null,function onSuccess(mGraphData)
+        {
+            console.log("data loaded")
+            that.setData(mGraphData)
+
+            $(".cloudNodeColorSelect").val("group").trigger("change")
+
+        });
+
+        return this
+    }
+
+
 }
 /* unused harmony export default */
 
@@ -3696,8 +3728,8 @@ function DefaultForceGraph(view3d) {
    // globalEnv = env
 
     const exposeProps = [
-        new CompProp('width', window.innerWidth, false, resizeCanvas),
-        new CompProp('height', window.innerHeight, false, resizeCanvas),
+        new CompProp('width', view3d.clientWidth, false, resizeCanvas),
+        new CompProp('height', view3d.clientHeight, false, resizeCanvas),
         new CompProp('graphData', {
             nodes: {
                 1: {
@@ -4401,6 +4433,16 @@ function DefaultForceGraph(view3d) {
             env.camera.aspect = env.width / env.height;
             env.camera.updateProjectionMatrix();
         }
+
+        if(env.textNode)
+        {
+           // $(env.textNode).height(env.height)
+           // $(env.textNode).width(env.width)
+
+
+        }
+
+
     }
 
     //---------------------------------------
@@ -5504,6 +5546,34 @@ class MyMain {
 
             mGraphView.setSpeccs(speccs)
 
+            //TODO per view ... mGraphView.mRenderer.domElement
+            let events= new Mousetrap();
+
+
+           var edgesVisible=true;
+            events.bind("e",function(){
+                edgesVisible=!edgesVisible;
+                _.each(mGraphView.mRootCluster.getLeafs(),function(leaf){
+
+                    leaf.mEdgesContainer.visible=edgesVisible
+
+                })
+
+
+            })
+
+            var infoVisible=true;
+            events.bind("h",function(){
+                infoVisible=!infoVisible;
+                $(".info-panel").toggle(infoVisible)
+
+
+            })
+
+
+
+
+
             return mGraphView
 
         }
@@ -5511,44 +5581,68 @@ class MyMain {
 
         let views = []
 
-        /*
-         let view0 = createDefaultView("previous force-graph")
-         views.push(view0)
-         */
-        /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
-         let view1 = createView("View1", speccs)
-         views.push(view1)*/
 
 
-        //NOTE: target rendering
-        var speccs = this.getForceSpeccs()
-         let view2 = createView("new force-graph", speccs)
-         .loadDataSet(this.getDSByID(0))
-         views.push(view2)
+        if(window.location.hash=="#debug") {
 
 
-        let view3 = createView("node distribution test case",
-            [{
-                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 3),
-                options: { hull: this.getBoxHull}
-            }])
+            //NOTE: target rendering
+            var speccs = this.getForceSpeccs()
+            let view2 = createView("new force-graph", speccs)
+                .loadDataSet(this.getDSByID(1))
+            views.push(view2)
+
+
+
+            let view3 = createView("node distribution test case",
+                [{
+                    distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 3),
+                    options: { hull: this.getBoxHull}
+                }])
+                .loadDataSet(this.getDSByID(1))
+
+            views.push(view3)
+
+
+            var speccs = this.get2DChartSortedSpeccsArray()
+
+            let view4 = createView("2d-Barchart", speccs)
+                .loadDataSet(this.getDSByID(1))
+            views.push(view4)
+
+            /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
+             let view1 = createView("View1", speccs)
+             views.push(view1)*/
+
+            /*
+             var speccs = this.get2DPlaneCountryOnlySpeccs()
+             let view5 = createView("2d-Plane country-only", speccs)
+             views.push(view5)
+             */
+
+        } else {
+
+
+
+
+
+            //NOTE: target rendering
+             var speccs = this.getForceSpeccs()
+             let view2 = createView("new force-graph", speccs)
+             .loadDataSet(this.getDSByID(0))
+             views.push(view2)
+
+
+
+        }
+
+
+        let view0 = createDefaultView("previous force-graph")
             .loadDataSet(this.getDSByID(1))
-
-        views.push(view3)
-
-
-         var speccs = this.get2DChartSortedSpeccsArray()
-
-         let view4 = createView("2d-Barchart", speccs)
-         .loadDataSet(this.getDSByID(1))
-         views.push(view4)
+        views.push(view0)
 
 
-/*
-         var speccs = this.get2DPlaneCountryOnlySpeccs()
-         let view5 = createView("2d-Plane country-only", speccs)
-         views.push(view5)
-*/
+
 
 
         _.each(views, function (view) {

@@ -20,7 +20,10 @@ class View3D extends HTMLElement
         this.mTime=-1;
     //   this.initStatic()
 
-
+        // Setup renderer
+        this.mRenderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
 
 
     }
@@ -146,10 +149,7 @@ class View3D extends HTMLElement
 
 
 
-        // Setup renderer
-        this.mRenderer = new THREE.WebGLRenderer({
-            antialias: true
-        });
+
         this.mRenderer.setClearColor( 0x000000 );
         this.mRenderer.setPixelRatio( window.devicePixelRatio );
 
@@ -178,14 +178,22 @@ class View3D extends HTMLElement
 
 
         },20))
-        $(this.mRenderer.domElement).on("mouseout",function(e){
-            e.stopPropagation()
-            that.setInactive()
 
-            $(that).removeAttr("hasFocus")
-            if (!$(that).hasClass("view-3d-maximised"))
-            that.mCaption.stop(true,false).delay(400).fadeIn()
 
+        $(this.mRenderer.domElement).on("mouseout",function(e) {
+            e.stopPropagation();
+
+
+            $(that).removeAttr("hasFocus");
+            if (!$(that).hasClass("view-3d-maximised")) {
+
+            that.mCaption.stop(true, false).delay(400).fadeIn();
+
+            //keep maximised element active or whatever state it currently holds
+            that.setInactive();
+
+
+            }
 
         })
 
@@ -215,10 +223,11 @@ class View3D extends HTMLElement
 
        var initialFrames=1;
         var that=this;
+
       function animate(time) {
         that.mTime=time
 
-          that.mControls.update();
+
           initialFrames--
           if (that.mFPS==0) {
 
@@ -240,6 +249,8 @@ class View3D extends HTMLElement
 
 
           that.mLastFrameTime = time
+
+          that.mControls.update();
 
 
           $(that).trigger("before-render",time)

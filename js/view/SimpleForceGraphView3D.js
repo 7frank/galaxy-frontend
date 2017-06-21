@@ -99,6 +99,23 @@ class SimpleForceGraphView3D extends View3D
     }
 
 
+    loadDataSet(ds){
+
+        var that = this
+
+        ds(null,function onSuccess(mGraphData)
+        {
+            console.log("data loaded")
+            that.setData(mGraphData)
+
+            $(".cloudNodeColorSelect").val("group").trigger("change")
+
+        });
+
+        return this
+    }
+
+
 }
 
 customElements.define("simple-force-graph-view-3d", SimpleForceGraphView3D);
@@ -138,8 +155,8 @@ function DefaultForceGraph(view3d) {
    // globalEnv = env
 
     const exposeProps = [
-        new CompProp('width', window.innerWidth, false, resizeCanvas),
-        new CompProp('height', window.innerHeight, false, resizeCanvas),
+        new CompProp('width', view3d.clientWidth, false, resizeCanvas),
+        new CompProp('height', view3d.clientHeight, false, resizeCanvas),
         new CompProp('graphData', {
             nodes: {
                 1: {
@@ -843,6 +860,16 @@ function DefaultForceGraph(view3d) {
             env.camera.aspect = env.width / env.height;
             env.camera.updateProjectionMatrix();
         }
+
+        if(env.textNode)
+        {
+           // $(env.textNode).height(env.height)
+           // $(env.textNode).width(env.width)
+
+
+        }
+
+
     }
 
     //---------------------------------------

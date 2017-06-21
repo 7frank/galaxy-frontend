@@ -310,6 +310,34 @@ export class MyMain {
 
             mGraphView.setSpeccs(speccs)
 
+            //TODO per view ... mGraphView.mRenderer.domElement
+            let events= new Mousetrap();
+
+
+           var edgesVisible=true;
+            events.bind("e",function(){
+                edgesVisible=!edgesVisible;
+                _.each(mGraphView.mRootCluster.getLeafs(),function(leaf){
+
+                    leaf.mEdgesContainer.visible=edgesVisible
+
+                })
+
+
+            })
+
+            var infoVisible=true;
+            events.bind("h",function(){
+                infoVisible=!infoVisible;
+                $(".info-panel").toggle(infoVisible)
+
+
+            })
+
+
+
+
+
             return mGraphView
 
         }
@@ -317,44 +345,68 @@ export class MyMain {
 
         let views = []
 
-        /*
-         let view0 = createDefaultView("previous force-graph")
-         views.push(view0)
-         */
-        /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
-         let view1 = createView("View1", speccs)
-         views.push(view1)*/
 
 
-        //NOTE: target rendering
-        var speccs = this.getForceSpeccs()
-         let view2 = createView("new force-graph", speccs)
-         .loadDataSet(this.getDSByID(0))
-         views.push(view2)
+        if(window.location.hash=="#debug") {
 
 
-        let view3 = createView("node distribution test case",
-            [{
-                distribution: new BaseDistribution(2000, 3),
-                options: { hull: this.getBoxHull}
-            }])
+            //NOTE: target rendering
+            var speccs = this.getForceSpeccs()
+            let view2 = createView("new force-graph", speccs)
+                .loadDataSet(this.getDSByID(1))
+            views.push(view2)
+
+
+
+            let view3 = createView("node distribution test case",
+                [{
+                    distribution: new BaseDistribution(2000, 3),
+                    options: { hull: this.getBoxHull}
+                }])
+                .loadDataSet(this.getDSByID(1))
+
+            views.push(view3)
+
+
+            var speccs = this.get2DChartSortedSpeccsArray()
+
+            let view4 = createView("2d-Barchart", speccs)
+                .loadDataSet(this.getDSByID(1))
+            views.push(view4)
+
+            /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
+             let view1 = createView("View1", speccs)
+             views.push(view1)*/
+
+            /*
+             var speccs = this.get2DPlaneCountryOnlySpeccs()
+             let view5 = createView("2d-Plane country-only", speccs)
+             views.push(view5)
+             */
+
+        } else {
+
+
+
+
+
+            //NOTE: target rendering
+             var speccs = this.getForceSpeccs()
+             let view2 = createView("new force-graph", speccs)
+             .loadDataSet(this.getDSByID(0))
+             views.push(view2)
+
+
+
+        }
+
+
+        let view0 = createDefaultView("previous force-graph")
             .loadDataSet(this.getDSByID(1))
-
-        views.push(view3)
-
-
-         var speccs = this.get2DChartSortedSpeccsArray()
-
-         let view4 = createView("2d-Barchart", speccs)
-         .loadDataSet(this.getDSByID(1))
-         views.push(view4)
+        views.push(view0)
 
 
-/*
-         var speccs = this.get2DPlaneCountryOnlySpeccs()
-         let view5 = createView("2d-Plane country-only", speccs)
-         views.push(view5)
-*/
+
 
 
         _.each(views, function (view) {

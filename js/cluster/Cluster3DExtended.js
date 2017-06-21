@@ -264,7 +264,9 @@ class Cluster3DExtended extends BaseCluster3D {
 
     addNodeCaptions() {
 
-
+        if (this._hasNodeCaptions_) return
+        console.log("addNodeCaptions")
+        this._hasNodeCaptions_=true
         var rootCluster = this.getRoot()
         if (!rootCluster.mParentView) return
 
@@ -298,6 +300,11 @@ class Cluster3DExtended extends BaseCluster3D {
         //TODO make sure radius is dynamically changed when cluster radius changes
 
         let minDistance = this.getRadius() / 3
+
+        // TODO the bounding volume determines the visibility of the text nodes
+        //TODO so currently with no volume generated properly the text nodes are invisible
+        //  if (minDistance<10000) minDistance=10000
+
         let maxDistance = minDistance * 10
 
         if (!this.mTextNodes)

@@ -265,7 +265,6 @@ function extendElement(elements, attrName, options,env) {
 	//isSelected == false will prevent the actual node selection and only will trigger the zoom+highlight parts
 	function doOnClickNode(currNodeClicked,stack=false,onAnimationEnd,isSelected=true,doHighlighNeighbours=true,doHighlighEdges=true,doZoomIn=true)
 	{
-		
 
 		if (previousNodeClicked.indexOf(currNodeClicked)<0)
 		//if (previousNodeClicked!=currNodeClicked)
@@ -593,7 +592,7 @@ function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 		var tween = new TWEEN.Tween(vec3Start)
 		.to(alteredVecEnd, 400)
 		.onUpdate(function () {
-		
+
 		}).onComplete(onEnd)
 		.start();
 		
@@ -601,7 +600,7 @@ function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 		var tween2 = new TWEEN.Tween(controls.target)
 		.to(vec3End, 400)
 		.onUpdate(function () {
-		
+
 		})
 		.start();
 
