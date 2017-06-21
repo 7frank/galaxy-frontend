@@ -11,32 +11,29 @@
 import BaseCluster3D from "../BaseCluster3D"
 
 
-export default  class BaseDistribution
-{
-    constructor(scale=50,dimensions=1){
+export default  class BaseDistribution {
+    constructor(scale = 50, dimensions = 1) {
 
         //TODO have some kind of dynamic width function as alternative to the static scale value
         //this way it would be possible to have equal with child nodes for example
-        let defaults={scale:()=> 50 ,dimensions:1}
+        let defaults = {scale: () => 50, dimensions: 1}
 
 
-        this.mDuration=2000 //FIXME longer duration does not render as intended
+        this.mDuration = 2000 //FIXME longer duration does not render as intended
 
-        this.dimensions=dimensions //TODO
-        this.mScale=scale
-        this.mEasingFunction=TWEEN.Easing.Quadratic.In
+        this.dimensions = dimensions //TODO
+        this.mScale = scale
+        this.mEasingFunction = TWEEN.Easing.Quadratic.In
     }
 
 
     //TODO have an options setter instead that checks if this["key"] exists and warns if option not exists
-    onSort(sortFN)
-    {
-        this.mSortFunction=sortFN
+    onSort(sortFN) {
+        this.mSortFunction = sortFN
         return this
     }
 
-    doSort(nodesArray)
-    {
+    doSort(nodesArray) {
         if (!this.mSortFunction) return
 
         nodesArray.sort(this.mSortFunction)
@@ -45,124 +42,116 @@ export default  class BaseDistribution
     }
 
 
-    setNodes(nodes,onNodePositionChange,onStepComplete,onEnd) {
-
-
+    setNodes(nodes, onNodePositionChange, onStepComplete, onEnd) {
 
 
         if (nodes instanceof BaseCluster3D) {
 
             //TODO
-         /*   if (nodes.isLeaf())
-                nodes =nodes.mNodes
-                else*/
-                nodes = Object.values( nodes.mClusters)
+            /*   if (nodes.isLeaf())
+             nodes =nodes.mNodes
+             else*/
+            nodes = Object.values(nodes.mClusters)
 
         }
-        else
-        if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
+        else if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
 
 
         this.doSort(nodes)
 
-        var mDuration=this.mDuration
+        var mDuration = this.mDuration
 
         //for canceling animation
         var mTimeout;
 
 
+        let len = nodes.length//|Object.keys(nodes).length
 
 
-        let len= nodes.length//|Object.keys(nodes).length
-
-
-        var i=0,j=0,k=0;
+        var i = 0, j = 0, k = 0;
 
         let _len;
-        if (this.dimensions==1)
-            _len=len;
-        if (this.dimensions==2)
-            _len= Math.sqrt(len);
-        if (this.dimensions==3)
-            _len=Math.pow(len,1/3);
+        if (this.dimensions == 1)
+            _len = len;
+        if (this.dimensions == 2)
+            _len = Math.sqrt(len);
+        if (this.dimensions == 3)
+            _len = Math.pow(len, 1 / 3);
 
-        if (this.dimensions<3)  k=0.5*_len
-        if (this.dimensions<2)  j=0.5*_len
+        if (this.dimensions < 3) k = 0.5 * _len
+        if (this.dimensions < 2) j = 0.5 * _len
 
 
-        let step=1/_len
+        let step = 1 / _len
 
         //1d/2d/3d helpers
         //for (let i=0;i<=1;i+=step)
 
-        var c=0;
-        var count=nodes.length;
-        var that=this;
-        var notTweenFinished=true;
+        var c = 0;
+        var count = nodes.length;
+        var that = this;
+        var notTweenFinished = true;
 
         //stop previous animations
         this.stop()
 
-        var tweens=this.mTweens=[]
+        var tweens = this.mTweens = []
 
-        _.each(nodes,function(n){
+        _.each(nodes, function (n) {
 
-            if (i>_len){
+            if (i > _len) {
                 j++;
-                i=0;
+                i = 0;
             }
 
-            if (j>_len){
+            if (j > _len) {
                 k++;
-                j=0;
+                j = 0;
             }
 
 
-            var dist= that.distribute(n, i/_len-0.5,j/_len-0.5,k/_len-0.5);
+            var dist = that.distribute(n, i / _len - 0.5, j / _len - 0.5, k / _len - 0.5);
 
 
-
-           //  onNodePositionChange(dist.position,c)
+            //  onNodePositionChange(dist.position,c)
 
 
             //------------------------
             //------------------------
 
             //animating from current position to new one
-        var mc=c;
-        let origPos=(n.position)?n.position:n
-
+            var mc = c;
+            let origPos = (n.position) ? n.position : n
 
 
             let tween = new TWEEN.Tween(origPos)
-                    .easing(that.mEasingFunction)
-                .to(dist.position,mDuration)
+                .easing(that.mEasingFunction)
+                .to(dist.position, mDuration)
                 .onUpdate(function () {
 
                     //after the last node was updated
-                    if (mc==count-1)
+                    if (mc == count - 1) {
                         if (onStepComplete)
                             onStepComplete()
 
+                       // console.warn("Step",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
+                    }
 
-                    onNodePositionChange(origPos,mc)
+                    onNodePositionChange(origPos, mc)
 
-                }).onComplete(function(){
+                }).onComplete(function () {
 
-
-                    //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
 
                     if (notTweenFinished) {
-
-                      that.stop()
-
+                        notTweenFinished = false;
+                        that.stop();
+                     //   console.warn("onEnd",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
                         if (onEnd) onEnd()
-                        notTweenFinished=false
+
 
                         //console.log("cancel",mTimeout)
                         cancelAnimationFrame(mTimeout)
                     }
-
 
 
                 })
@@ -178,31 +167,28 @@ export default  class BaseDistribution
         })
 
 
-
-        mTimeout= requestAnimationFrame(animate);
+        mTimeout = requestAnimationFrame(animate);
 //FIXME stop updating tweens if no longer necessary
         function animate(time) {
 
-        //console.log("anmiate",mTimeout)
-           _.each(tweens,function(tween){
+            //console.log("anmiate",mTimeout)
+            _.each(tweens, function (tween) {
                 tween.update(time)
 
             })
 
             if (notTweenFinished)
-            mTimeout=    requestAnimationFrame(animate);
+                mTimeout = requestAnimationFrame(animate);
 
         }
 
 
-
-
     }
 
-    stop(){
+    stop() {
 
 
-        _.each(this.mTweens,function(tween){
+        _.each(this.mTweens, function (tween) {
 
             TWEEN.remove(tween)
 
@@ -215,10 +201,9 @@ export default  class BaseDistribution
     //TODO also it will be useful to add rotation as well in the future
 
 
+    distribute(node, dx, dy, dz) {
 
-    distribute(node,dx,dy,dz){
-
-        return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
+        return {position: new THREE.Vector3(dx, dy, dz).multiplyScalar(this.mScale)};
     }
 }
 

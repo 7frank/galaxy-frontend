@@ -23,7 +23,7 @@ class RootCluster extends Cluster3DExtended {
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
-        setTimeout(()=> this.onAfterClusteredAndDistributed(),2000)
+       // setTimeout(()=> this.onAfterClusteredAndDistributed(),5000)
 
 
 
@@ -53,8 +53,12 @@ class RootCluster extends Cluster3DExtended {
 
         function updateParticles(leaf)
         {
-        if (leaf && leaf.parent && leaf.parent.mParticles)
+        if (leaf && leaf.parent && leaf.parent.mParticles) {
+
             leaf.parent.mParticles.updateColors();
+
+
+        }
             else setTimeout(() => updateParticles(leaf), 100 )
         }
 
@@ -217,7 +221,7 @@ class RootCluster extends Cluster3DExtended {
         super.update()
 
         if (this.tn)
-        this.tn.update();
+       this.tn.update();
 
     }
 

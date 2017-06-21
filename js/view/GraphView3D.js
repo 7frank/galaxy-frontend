@@ -21,8 +21,9 @@ class GraphView3D extends View3D
 
         this.mRootCluster=null
 
-    }
 
+
+    }
 
 
     setSpeccs(speccs)
@@ -36,6 +37,9 @@ class GraphView3D extends View3D
 
         return this.mSpeccs
     }
+
+
+
 
 
     initClusterForView(rawGraphData,parentEl3D) {

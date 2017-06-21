@@ -237,16 +237,14 @@ function createTween(duration=1000,easing=TWEEN.Easing.Quadratic.In) {
 
     var positions = geometry.attributes.position.array;
 
-    console.log("createTween",positions,destination,duration)
+   // console.log("createTween",positions,destination,duration)
 
     tween = new TWEEN.Tween(positions)
 
         .to(destination, duration)
 		.easing(easing)
 		.onUpdate(function(){
-			console.log(positions.length)
             geometry.attributes.position.needsUpdate = true;
-
 		}).onComplete(() => isRunning=false )
 
 

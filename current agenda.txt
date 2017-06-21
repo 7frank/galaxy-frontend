@@ -1,9 +1,23 @@
+keymap
+ s ... recluster hovered cluster/leaf
+ t ... toogle select current cluster
+ u TODO toggle cluster text nodes ?
+
 bugs:
 
+
+
 ---------------URGENT--------------
-boundingboxes are off..
-might be due to edges used for bb calc or pointclouds before animating
-anlso animation of dots is off..
+[/]boundingboxes are off..
+    !if view mouse move => wrong boundingbox calc
+    => something in the animation loop might change node positions?
+    => setFromObject...would create wrong bb because of other elements within pc getting changed while animation loop runs
+
+
+    might be due to edges used for bb calc or pointclouds before animating
+[/]also animation of dots is off..
+rendering data seems to be dependent quad sample + forcegraph => bad quad rendering
+
 -----------------------------------
 
     []text utf8 not displayed correct
@@ -33,12 +47,13 @@ anlso animation of dots is off..
     restore interaction=>  node meshes and such
         (probably also something with global values)
         nodes do cout toward rendered elements so probably offset for controls is wrong
-
+    [x]mouseevents are bugged.. partial solution  e.stopPropagation() is supported by threex domevents
 
 
 
 
 clusters
+[] create simple data filter and view generator for debugging
 []consider putting the edges behind the nodes => nodes above edges for easier visu
 []compute scale of distributions automatically
 -interference with search functionality => not always zooms to correct result

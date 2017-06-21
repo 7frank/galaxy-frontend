@@ -28,6 +28,8 @@ class Cluster3DExtended extends BaseCluster3D {
         super(nodes, clusteringHandlers,view);
 
 
+        this.selected=false
+
 
     this.addListeners();
 
@@ -78,7 +80,11 @@ class Cluster3DExtended extends BaseCluster3D {
                 res.setDistributionHandler(   _dist ,function onComplete(){
 
                     //distribution-complete
-                    res.onAfterClusteredAndDistributed()
+                  if (res.isLeaf())
+                      res.adjustHullSize()
+
+
+                   //res.onAfterClusteredAndDistributed()
 
 
 
@@ -124,19 +130,36 @@ class Cluster3DExtended extends BaseCluster3D {
             fn()
         })
 
-        this.on("mouseover mousemove",function(){
+        this.on("mouseover mousemove",function(e){
+            e.stopPropagation()
 
             if (  this.mHull)
-            this.mHull.material.visible=true;
+            //this.mHull.material.visible=true;
+                this.mHull.material.opacity=1;
+            let name=(this.name?this.name:this.id)
+
+            let parents=this.getParents()
+            parents.shift()
+            let root=parents.map( p => p.name?p.name:p.id ).join(" ")
+//TODO public setter function
+            this.getView().setTooltip(root+" "+name)
+
+
         })
 
 
         this.on("mouseout",function(){
             if (  this.mHull)
-            this.mHull.material.visible=false;
-
-
+            //this.mHull.material.visible=false;
+                this.mHull.material.opacity=0.2;
+           this.getView().setTooltip("")
         })
+
+        this.on("t",function(e){
+            e.stopPropagation()
+          this.toggleSelect()
+        })
+
 
 
 
@@ -150,6 +173,7 @@ class Cluster3DExtended extends BaseCluster3D {
      */
     update()
     {
+
         super.update();
 
         //TODO have a "cluster-ready" event
@@ -183,33 +207,6 @@ class Cluster3DExtended extends BaseCluster3D {
 
     }
 
-
-    /**
-     * has to be called after initialisation to re-calculate dependent elements
-     * like dot clouds and cluster boder and hull
-     */
-    onAfterClusteredAndDistributed(){
-        super.onAfterClusteredAndDistributed();
-        let leafs=this.getLeafs()
-        console.warn("onAfterClusteredAndDistributed",leafs.length)
-
-      _.each(leafs,function(leaf){
-
-          leaf.parent._initDotParticles();
-
-          leaf.parent.updateDotParticles()
-
-          leaf.parent.adjustHullSize()
-
-      })
-
-
-
-
-
-
-
-    }
 
 
     updateDotParticles()
@@ -373,6 +370,78 @@ class Cluster3DExtended extends BaseCluster3D {
 
     }
 
+    isSelected()
+    {
+        return this.selected
+
+    }
+
+    toggleSelect()
+    {
+        if (this.isSelected())
+            this.unselectCluster()
+        else
+            this.selectCluster()
+
+
+            }
+
+    /**
+     * selecting a cluster will show all child elements of this sub-cluster and hide all other branches of the root-cluster
+     *
+     *
+     */
+
+    selectCluster()
+    {
+
+        if (this.isSelected()) return
+
+
+
+
+       var allLeafs= this.getRoot().getLeafs()
+       var mLeafs= this.getLeafs()
+
+
+        _.each(allLeafs,function(other){
+
+            let isChildOfCluster=mLeafs.indexOf(other)>=0
+
+           other.parent.visible=isChildOfCluster
+            //other.material.visible=isChildOfCluster
+
+        })
+
+
+        this.selected=true
+
+    }
+
+
+
+    unselectCluster()
+    {
+
+        if (!this.isSelected()) return
+
+
+
+
+        var allLeafs= this.getRoot().getLeafs()
+
+
+
+        _.each(allLeafs,function(other){
+
+            other.parent.visible=true
+
+        })
+
+
+        this.selected=false
+
+    }
 
 
 }

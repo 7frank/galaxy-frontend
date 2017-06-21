@@ -108,6 +108,8 @@ export class MyMain {
 
         var wireframe = new THREE.LineSegments(geo, mat);
         wireframe.position.add(_center)
+        wireframe.geometry.boundingBox=boundingBox
+
         return wireframe
 
 
@@ -325,11 +327,11 @@ export class MyMain {
 
 
         //NOTE: target rendering
-   /*      var speccs = this.getForceSpeccs()
+        var speccs = this.getForceSpeccs()
          let view2 = createView("new force-graph", speccs)
          .loadDataSet(this.getDSByID(0))
          views.push(view2)
-    */
+
 
         let view3 = createView("node distribution test case",
             [{
@@ -339,7 +341,6 @@ export class MyMain {
             .loadDataSet(this.getDSByID(1))
 
         views.push(view3)
-
 
 
          var speccs = this.get2DChartSortedSpeccsArray()
@@ -384,15 +385,15 @@ export class MyMain {
         return [
             {
                 generator: countrySetGenerator,
-                distribution: new BaseDistribution(1000, 2).onSort(mySort),
+                distribution: new BaseDistribution(4000, 2).onSort(mySort),
                 options: {minClusterSize: 15, hull: this.getBoxHull}
-            },/*
+            },
             {
                 generator: industrySetGenerator,
-                distribution: new BaseDistribution(200, 1).onSort(mySort),
+                distribution: new BaseDistribution(2000, 1).onSort(mySort),
                 options: {minClusterSize: 15, hull: this.getBoxHull}
-            },*/
-            {distribution: new BaseDistribution(50, 3), options: {minClusterSize: 15, hull: this.getBoxHull}}
+            },
+            {distribution: new BaseDistribution(200, 3), options: {minClusterSize: 15, hull: this.getBoxHull}}
 
 
         ]
@@ -472,8 +473,8 @@ export class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new ForceGraphDistribution(4000, 2) //1000
-        let sample2 = new ForceGraphDistribution(1000, 3)//200
+        let sample1 = new BaseDistribution(15000, 2) //1000
+        let sample2 = new ForceGraphDistribution(3000, 3)//200
         let sample3 = new ForceGraphDistribution(500, 3)//50
 
         //  let rand2 = new RandomDistribution(200, 2)

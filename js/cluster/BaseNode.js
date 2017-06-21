@@ -187,6 +187,10 @@ export default class BaseNode extends THREE.Mesh {
         super(BaseNode.sphereGeometry, material);
 
 
+       // var axisHelper = new THREE.AxisHelper( 50 );
+       // this.add( axisHelper );
+
+
         if (view instanceof HTMLElement)
             this.setView(view)
 
@@ -213,6 +217,7 @@ export default class BaseNode extends THREE.Mesh {
         //FIXME something is off with ordering an nesting .. preventing the correct node to be used
         //store the current cluster/node
         this.on("mouseover", function (e) {
+            e.stopPropagation()
             BaseNode.lastHoveredNode = e.target
            // e.stopPropagation()
 

@@ -103,9 +103,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      * @param nodes
      * @param clusteringHandler instanceof List<ClusteringHandler>
      */
-    constructor(nodes, clusteringHandlers,view) {
+    constructor(nodes, clusteringHandlers, view) {
         super(view);
-       // this.setView(view)
         this.addNodes(nodes);
 
         this.mClusters = {};
@@ -277,15 +276,12 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
-    setEntry(entry)
-    {
-        this.mEntry=entry
-
+    setEntry(entry) {
+        this.mEntry = entry
     }
 
-    getClusterOptions()
-    {
-        return this.mEntry&&this.mEntry.options?this.mEntry.options:{}
+    getClusterOptions() {
+        return this.mEntry && this.mEntry.options ? this.mEntry.options : {}
 
     }
 
@@ -340,9 +336,10 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             if (nextDepthSpeccsArray.length > 1)
                 mCluster.applyClustering(nextDepthSpeccsArray);
-            else
+            else {
+                mCluster.setEntry(entry)
                 mCluster.createParticlePointCloud(nextDepthSpeccsArray[0]);
-
+            }
 
         })
 
@@ -369,7 +366,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         var options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
-            hull:function(){  return new THREE.Mesh()  }
+            hull: function () {
+                return new THREE.Mesh()
+            }
 
         }, entry.options);
         var that = this;
@@ -385,7 +384,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             if (_cluster.getNodes().length < options.minClusterSize) {
 
                 var dMGN = options.defaultMergeGroupName
-                if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz(undefined,undefined,that.getView());//new BaseCluster3D()
+                if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz(undefined, undefined, that.getView());//new BaseCluster3D()
                 _clustersObj[dMGN].name = dMGN
                 _clustersObj[dMGN].addNodes(_cluster.getNodes())
             }
@@ -418,11 +417,11 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
     groupBy(filterFunction) {
         var clazz = this.getChildClusterConstructor();
-        var that=this;
+        var that = this;
         let container = {}
 
         function groupFunction(key, val) {
-            if (typeof container[key] == "undefined") container[key] = new clazz(undefined,undefined,that.getView());//new BaseCluster3D();
+            if (typeof container[key] == "undefined") container[key] = new clazz(undefined, undefined, that.getView());//new BaseCluster3D();
 
             container[key].addNodes(val)
         }
@@ -433,6 +432,43 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         return container
 
+    }
+
+
+
+    getCompoundBoundingBox() {
+        var box = new THREE.Box3;
+        _.each(this.getLeafs(), function (leaf) {
+            var geometry = leaf.geometry;
+            if (geometry === undefined) return;
+
+
+            let boundingBox = new THREE.Box3;
+            //generate the boundingbox for the node particles if it is a leaf
+
+            let pc = leaf.mNodeParticles.pointCloud
+
+            if (pc.geometry.boundingBox)
+                boundingBox.copy(pc.geometry.boundingBox)
+          /*  else
+                boundingBox.setFromObject(pc);
+*/
+
+
+            let _center = boundingBox.getCenter();
+
+            //FIXME offsets are not properly calculated
+           // let offset=leaf.localToWorld(new THREE.Vector3) //boundingBox.getCenter()
+            boundingBox.translate(_center);
+
+
+
+
+                box.union(boundingBox);
+
+
+        });
+        return box;
     }
 
 
@@ -482,7 +518,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
 
     adjustHullSize() {
-
+console.warn("adjustHullSize")
 
         if (this.mHull && this.mHull.geometry)
             this.mHull.geometry.dispose();
@@ -496,46 +532,70 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         this.geometry.boundingSphere = null;
         delete(this.geometry);
 
-        let boundingSphere = new THREE.Sphere;
+
 
         let boundingBox = new THREE.Box3;
 
 
-      //  boundingBox.setFromObject(this);
-
-
-        //FIXME the boundingbox must be generated for the particles
+        //generate the boundingbox for the node particles if this is a leaf
         if (this.isLeaf()) {
-         let pc=this.mLeaf.mNodeParticles.pointCloud
+            let pc = this.mLeaf.mNodeParticles.pointCloud
+            console.log(this.mLeaf.mNodeParticles.pointCloud)
+            if (!pc)
+            {
+                console.error("leaf: nodescontainer not created yet")
+            }
+            else {
 
-            boundingBox.setFromObject(pc);
-
+             //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
+                boundingBox.setFromArray(pc.geometry.attributes.position.array)
+                pc.geometry.boundingBox = boundingBox
+            }
 
         }
+       /* else //FIXME get bb of all leafs instead + actual position
+            //we want to generate the hull for a cluster that is no leaf only:
+            //if the leaf/child has finished it's distribution function
+            //and
+            //if ths has distributed it's children
+            //via listeners?
+            boundingBox = this.getCompoundBoundingBox()
+*/
         //get center, radius
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
         let radius = _size.length() / 2;
 
 
+        let boundingSphere =boundingBox.getBoundingSphere()
+
         //TODO
-        if (radius < 40) radius = 40
+       /*
+       if (radius < 40) radius = 40
 
         boundingSphere.radius = radius;
+        */
 
 
         //compute hull object from bounding box
         var mOptions = this.getClusterOptions();
         if (typeof mOptions.hull == "function") {
-        this.mHull = mOptions.hull(boundingBox)
+            {
 
-       // this.mHull.material.visible = false//set hull default to invisible
-        this.add(this.mHull);
-         }
-          else console.warn("default hull function  not defined")
+            this.mHull = mOptions.hull(boundingBox)
+
+            }
+            // this.mHull.material.visible = false//set hull default to invisible
+            this.add(this.mHull);
+        }
+        else {
+            console.error("default hull function  not defined") //TODO we must have at leastone hull impl  //it might be invisible or idle but it should be set via defaults
 
 
 
+        }
+
+//TODO this is currently used for the muse interactions but should be refactored and removed
         var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
         var sphereMaterial = new THREE.MeshBasicMaterial({
             color: 0xff0000,
@@ -545,9 +605,13 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         });
 
         //sphereGeometry.boundingSphere=boundingSphere
-         sphereGeometry.boundingBox=boundingBox
+        sphereGeometry.boundingBox = boundingBox
 
-       // this.material = sphereMaterial;
+
+        // this.material = sphereMaterial;
+        if (this.mHull&& this.mHull.geometry)
+            this.geometry=this.mHull.geometry
+        else
         this.geometry = sphereGeometry;
 
 
@@ -576,11 +640,22 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
     createParticlePointCloud(entry) {
         // console.log("reached leaf cluster", this)
-
+var that=this
         let leaf = new __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */](this.mNodes);
         this.mLeaf = leaf;
         this.add(leaf);
-        leaf.setDistributionHandler(entry.distribution)
+        leaf.setDistributionHandler(entry.distribution,function(){
+
+            //create/update the hull element after the animation has finished
+                that.adjustHullSize()
+
+
+            that._initDotParticles();
+            that.updateDotParticles()
+
+
+
+        })
 
     }
 
@@ -593,7 +668,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         this.addAllSubClustersToContainer();
 
-        this.adjustHullSize();
+      //  this.adjustHullSize(); //diabled for testing of hull and bounding box
 
     }
 
@@ -638,17 +713,21 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      * has to be called after initialisation to re-calculate dependent elements
      * like dot clouds and cluster boder and hull
      */
-    onAfterClusteredAndDistributed() {
+   /* onAfterClusteredAndDistributed() {
 
+
+      //  return //FIXME
         _.each(_.reverse(this.findClusters("*")), function (cluster) {
+
+            if (!cluster.isLeaf())
             cluster.adjustHullSize();
 
 
         })
 
-
-        this.adjustHullSize()
-    }
+        if (!this.isLeaf())
+       this.adjustHullSize()
+    }*/
 
 
     /**
@@ -662,7 +741,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         if (this._LeafsCached) this._LeafsCached
 
 
-        var leafElements =this._LeafsCached= [];
+        var leafElements = this._LeafsCached = [];
 
         this.traverse(function (item) {
             if (item instanceof __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */])
@@ -695,13 +774,11 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
+    getDOMElement() {
 
-    getDOMElement(){
 
-
-        var view3d= this.getView()
-        if (!view3d||  !view3d.domElement)
-        {
+        var view3d = this.getView()
+        if (!view3d || !view3d.domElement) {
             console.warn("attach graph to a view before using dom specific functions")
             return null;
         }
@@ -717,12 +794,11 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      *
      *
      */
-    getDOMEvents(){
+    getDOMEvents() {
 
 
-        var view3d= this.getView()
-        if (!view3d||  !view3d.mDomEvents)
-        {
+        var view3d = this.getView()
+        if (!view3d || !view3d.mDomEvents) {
             console.warn("attach graph to a view before using dom specific functions")
             return null;
         }
@@ -732,16 +808,14 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
-
     /**
      * tries to get the view3d element, which the cluster is rendered within
      * @returns a View3D if attached to the view before, else null
      */
-    getView()
-    {
-      //  var rootCluster=this.getRoot()
-       // if (!rootCluster.mParentView) return null
-     return this.mParentView
+    getView() {
+        //  var rootCluster=this.getRoot()
+        // if (!rootCluster.mParentView) return null
+        return this.mParentView
     }
 
     /**
@@ -749,12 +823,11 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      * the view must be a View3D (extends HTMLElement)
      *
      */
-    setView(view3d)
-    {
-       // var rootCluster=this.getRoot()
+    setView(view3d) {
+        // var rootCluster=this.getRoot()
 
-       this.mParentView=view3d;
-     return this
+        this.mParentView = view3d;
+        return this
     }
 
     /**
@@ -765,20 +838,34 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
 
 
-    getRoot(maxDepth=20)
-    {
-        var _root=this;
-        while ( maxDepth--)
-        {
-            let r=_root.parent;
-            if (r==null) return _root;
-            if (! (r instanceof BaseCluster3D)) return _root;
-            _root=r;
+    getRoot(maxDepth = 20) {
+        var _root = this;
+        while (maxDepth--) {
+            let r = _root.parent;
+            if (r == null) return _root;
+            if (!(r instanceof BaseCluster3D)) return _root;
+            _root = r;
         }
 
-
+    return _root
     }
 
+    getParents(maxDepth = 20) {
+        var _root = this;
+        var parents=[]
+        while (maxDepth--) {
+            let r = _root.parent;
+            if (r == null) return parents
+            if (!(r instanceof BaseCluster3D)) return parents;
+            _root = r;
+
+            parents.unshift(_root)
+
+        }
+
+        return parents;
+
+    }
 
 
 
@@ -805,32 +892,29 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
 
-class BaseDistribution
-{
-    constructor(scale=50,dimensions=1){
+class BaseDistribution {
+    constructor(scale = 50, dimensions = 1) {
 
         //TODO have some kind of dynamic width function as alternative to the static scale value
         //this way it would be possible to have equal with child nodes for example
-        let defaults={scale:()=> 50 ,dimensions:1}
+        let defaults = {scale: () => 50, dimensions: 1}
 
 
-        this.mDuration=2000 //FIXME longer duration does not render as intended
+        this.mDuration = 2000 //FIXME longer duration does not render as intended
 
-        this.dimensions=dimensions //TODO
-        this.mScale=scale
-        this.mEasingFunction=TWEEN.Easing.Quadratic.In
+        this.dimensions = dimensions //TODO
+        this.mScale = scale
+        this.mEasingFunction = TWEEN.Easing.Quadratic.In
     }
 
 
     //TODO have an options setter instead that checks if this["key"] exists and warns if option not exists
-    onSort(sortFN)
-    {
-        this.mSortFunction=sortFN
+    onSort(sortFN) {
+        this.mSortFunction = sortFN
         return this
     }
 
-    doSort(nodesArray)
-    {
+    doSort(nodesArray) {
         if (!this.mSortFunction) return
 
         nodesArray.sort(this.mSortFunction)
@@ -839,124 +923,116 @@ class BaseDistribution
     }
 
 
-    setNodes(nodes,onNodePositionChange,onStepComplete,onEnd) {
-
-
+    setNodes(nodes, onNodePositionChange, onStepComplete, onEnd) {
 
 
         if (nodes instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */]) {
 
             //TODO
-         /*   if (nodes.isLeaf())
-                nodes =nodes.mNodes
-                else*/
-                nodes = Object.values( nodes.mClusters)
+            /*   if (nodes.isLeaf())
+             nodes =nodes.mNodes
+             else*/
+            nodes = Object.values(nodes.mClusters)
 
         }
-        else
-        if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
+        else if (!_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
 
 
         this.doSort(nodes)
 
-        var mDuration=this.mDuration
+        var mDuration = this.mDuration
 
         //for canceling animation
         var mTimeout;
 
 
+        let len = nodes.length//|Object.keys(nodes).length
 
 
-        let len= nodes.length//|Object.keys(nodes).length
-
-
-        var i=0,j=0,k=0;
+        var i = 0, j = 0, k = 0;
 
         let _len;
-        if (this.dimensions==1)
-            _len=len;
-        if (this.dimensions==2)
-            _len= Math.sqrt(len);
-        if (this.dimensions==3)
-            _len=Math.pow(len,1/3);
+        if (this.dimensions == 1)
+            _len = len;
+        if (this.dimensions == 2)
+            _len = Math.sqrt(len);
+        if (this.dimensions == 3)
+            _len = Math.pow(len, 1 / 3);
 
-        if (this.dimensions<3)  k=0.5*_len
-        if (this.dimensions<2)  j=0.5*_len
+        if (this.dimensions < 3) k = 0.5 * _len
+        if (this.dimensions < 2) j = 0.5 * _len
 
 
-        let step=1/_len
+        let step = 1 / _len
 
         //1d/2d/3d helpers
         //for (let i=0;i<=1;i+=step)
 
-        var c=0;
-        var count=nodes.length;
-        var that=this;
-        var notTweenFinished=true;
+        var c = 0;
+        var count = nodes.length;
+        var that = this;
+        var notTweenFinished = true;
 
         //stop previous animations
         this.stop()
 
-        var tweens=this.mTweens=[]
+        var tweens = this.mTweens = []
 
-        _.each(nodes,function(n){
+        _.each(nodes, function (n) {
 
-            if (i>_len){
+            if (i > _len) {
                 j++;
-                i=0;
+                i = 0;
             }
 
-            if (j>_len){
+            if (j > _len) {
                 k++;
-                j=0;
+                j = 0;
             }
 
 
-            var dist= that.distribute(n, i/_len-0.5,j/_len-0.5,k/_len-0.5);
+            var dist = that.distribute(n, i / _len - 0.5, j / _len - 0.5, k / _len - 0.5);
 
 
-
-           //  onNodePositionChange(dist.position,c)
+            //  onNodePositionChange(dist.position,c)
 
 
             //------------------------
             //------------------------
 
             //animating from current position to new one
-        var mc=c;
-        let origPos=(n.position)?n.position:n
-
+            var mc = c;
+            let origPos = (n.position) ? n.position : n
 
 
             let tween = new TWEEN.Tween(origPos)
-                    .easing(that.mEasingFunction)
-                .to(dist.position,mDuration)
+                .easing(that.mEasingFunction)
+                .to(dist.position, mDuration)
                 .onUpdate(function () {
 
                     //after the last node was updated
-                    if (mc==count-1)
+                    if (mc == count - 1) {
                         if (onStepComplete)
                             onStepComplete()
 
+                       // console.warn("Step",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
+                    }
 
-                    onNodePositionChange(origPos,mc)
+                    onNodePositionChange(origPos, mc)
 
-                }).onComplete(function(){
+                }).onComplete(function () {
 
-
-                    //TODO instead of onEnd we shoudhave a timed function that gets called very 20 ms or so until onColplete is triggered by at least one node
 
                     if (notTweenFinished) {
-
-                      that.stop()
-
+                        notTweenFinished = false;
+                        that.stop();
+                     //   console.warn("onEnd",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
                         if (onEnd) onEnd()
-                        notTweenFinished=false
+
 
                         //console.log("cancel",mTimeout)
                         cancelAnimationFrame(mTimeout)
                     }
-
 
 
                 })
@@ -972,31 +1048,28 @@ class BaseDistribution
         })
 
 
-
-        mTimeout= requestAnimationFrame(animate);
+        mTimeout = requestAnimationFrame(animate);
 //FIXME stop updating tweens if no longer necessary
         function animate(time) {
 
-        //console.log("anmiate",mTimeout)
-           _.each(tweens,function(tween){
+            //console.log("anmiate",mTimeout)
+            _.each(tweens, function (tween) {
                 tween.update(time)
 
             })
 
             if (notTweenFinished)
-            mTimeout=    requestAnimationFrame(animate);
+                mTimeout = requestAnimationFrame(animate);
 
         }
 
 
-
-
     }
 
-    stop(){
+    stop() {
 
 
-        _.each(this.mTweens,function(tween){
+        _.each(this.mTweens, function (tween) {
 
             TWEEN.remove(tween)
 
@@ -1009,10 +1082,9 @@ class BaseDistribution
     //TODO also it will be useful to add rotation as well in the future
 
 
+    distribute(node, dx, dy, dz) {
 
-    distribute(node,dx,dy,dz){
-
-        return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
+        return {position: new THREE.Vector3(dx, dy, dz).multiplyScalar(this.mScale)};
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BaseDistribution;
@@ -1359,6 +1431,9 @@ class GraphData
             nameAccessor:node =>node.name || node.id,
             colorAccessor: node => node.color,
             valAccessor:node => node.val,
+
+            sizeAccessor:node => node.itemCount,
+
             nodeRelSize:4,
            // useDebugSphere:true,
             domEvents:view3d.mDomEvents
@@ -1391,6 +1466,9 @@ class GraphData
          //   onDrawNode: countVisibleNodes
         })
         node._bubble.name = env.nameAccessor(node) || '';
+
+
+        node.size=env.sizeAccessor(node) || undefined;
 
 
         //TODO not highlighted group nodes should be rendered with separate point cloud
@@ -1579,6 +1657,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         super(nodes, clusteringHandlers,view);
 
 
+        this.selected=false
+
 
     this.addListeners();
 
@@ -1629,7 +1709,11 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
                 res.setDistributionHandler(   _dist ,function onComplete(){
 
                     //distribution-complete
-                    res.onAfterClusteredAndDistributed()
+                  if (res.isLeaf())
+                      res.adjustHullSize()
+
+
+                   //res.onAfterClusteredAndDistributed()
 
 
 
@@ -1655,7 +1739,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         })
 
         var diameter=null;
-            this.on("s dblclick",function(e) {
+            this.on("s",function(e) {
             e.stopPropagation()
 
 
@@ -1675,19 +1759,36 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
             fn()
         })
 
-        this.on("mouseover mousemove",function(){
+        this.on("mouseover mousemove",function(e){
+            e.stopPropagation()
 
             if (  this.mHull)
-            this.mHull.material.visible=true;
+            //this.mHull.material.visible=true;
+                this.mHull.material.opacity=1;
+            let name=(this.name?this.name:this.id)
+
+            let parents=this.getParents()
+            parents.shift()
+            let root=parents.map( p => p.name?p.name:p.id ).join(" ")
+//TODO public setter function
+            this.getView().setTooltip(root+" "+name)
+
+
         })
 
 
         this.on("mouseout",function(){
             if (  this.mHull)
-            this.mHull.material.visible=false;
-
-
+            //this.mHull.material.visible=false;
+                this.mHull.material.opacity=0.2;
+           this.getView().setTooltip("")
         })
+
+        this.on("t",function(e){
+            e.stopPropagation()
+          this.toggleSelect()
+        })
+
 
 
 
@@ -1701,6 +1802,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
      */
     update()
     {
+
         super.update();
 
         //TODO have a "cluster-ready" event
@@ -1734,33 +1836,6 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
     }
 
-
-    /**
-     * has to be called after initialisation to re-calculate dependent elements
-     * like dot clouds and cluster boder and hull
-     */
-    onAfterClusteredAndDistributed(){
-        super.onAfterClusteredAndDistributed();
-        let leafs=this.getLeafs()
-        console.warn("onAfterClusteredAndDistributed",leafs.length)
-
-      _.each(leafs,function(leaf){
-
-          leaf.parent._initDotParticles();
-
-          leaf.parent.updateDotParticles()
-
-          leaf.parent.adjustHullSize()
-
-      })
-
-
-
-
-
-
-
-    }
 
 
     updateDotParticles()
@@ -1924,6 +1999,78 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
     }
 
+    isSelected()
+    {
+        return this.selected
+
+    }
+
+    toggleSelect()
+    {
+        if (this.isSelected())
+            this.unselectCluster()
+        else
+            this.selectCluster()
+
+
+            }
+
+    /**
+     * selecting a cluster will show all child elements of this sub-cluster and hide all other branches of the root-cluster
+     *
+     *
+     */
+
+    selectCluster()
+    {
+
+        if (this.isSelected()) return
+
+
+
+
+       var allLeafs= this.getRoot().getLeafs()
+       var mLeafs= this.getLeafs()
+
+
+        _.each(allLeafs,function(other){
+
+            let isChildOfCluster=mLeafs.indexOf(other)>=0
+
+           other.parent.visible=isChildOfCluster
+            //other.material.visible=isChildOfCluster
+
+        })
+
+
+        this.selected=true
+
+    }
+
+
+
+    unselectCluster()
+    {
+
+        if (!this.isSelected()) return
+
+
+
+
+        var allLeafs= this.getRoot().getLeafs()
+
+
+
+        _.each(allLeafs,function(other){
+
+            other.parent.visible=true
+
+        })
+
+
+        this.selected=false
+
+    }
 
 
 }
@@ -1958,7 +2105,7 @@ class ClusterLeafElement extends THREE.Mesh
 
         this.add( this.mNodeParticles.pointCloud)
 
-//FIXME mayor performance hit
+        //TODO check if still mayor performane hit
         this.appendNodes(nodes)
 
 
@@ -2080,7 +2227,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
-        setTimeout(()=> this.onAfterClusteredAndDistributed(),2000)
+       // setTimeout(()=> this.onAfterClusteredAndDistributed(),5000)
 
 
 
@@ -2110,8 +2257,12 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
         function updateParticles(leaf)
         {
-        if (leaf && leaf.parent && leaf.parent.mParticles)
+        if (leaf && leaf.parent && leaf.parent.mParticles) {
+
             leaf.parent.mParticles.updateColors();
+
+
+        }
             else setTimeout(() => updateParticles(leaf), 100 )
         }
 
@@ -2274,7 +2425,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
         super.update()
 
         if (this.tn)
-        this.tn.update();
+       this.tn.update();
 
     }
 
@@ -2626,6 +2777,8 @@ class View3D extends HTMLElement
 
     }
 
+
+
     //TODO remove little redundancy
     createCSSRule()
     {
@@ -2835,7 +2988,7 @@ class View3D extends HTMLElement
                   return;
               }
           }
-      //    console.log("animate",time)
+
 
           that.mLastFrameTime = time
 
@@ -2941,9 +3094,82 @@ class View3D extends HTMLElement
 
     connectedCallback(){
 
+        this.createTooltip()
+
+
         this.initStatic();
         this.start();
+
+
     }
+
+
+    createTooltip() {
+
+        // Setup tooltip
+        if ( this.toolTipElem ) return
+
+        this.toolTipElem = document.createElement('div');
+        this.toolTipElem.classList.add('graph-tooltip');
+
+        $(this.toolTipElem).css({
+            "z-index":1,
+            position:"relative",
+            "user-select": "none"
+        })
+
+        this.appendChild(this.toolTipElem);
+
+        // Capture mouse coords on move
+
+        this.mouse = new THREE.Vector2();
+        this.mouse.x = -2; // Initialize off canvas
+        this.mouse.y = -2;
+        this.addEventListener("mousemove", ev => {
+            // update the mouse pos
+
+
+            //$(env.toolTipElem).show()
+
+            const offset = getOffset(this),
+                relPos = {
+                    x: ev.pageX - offset.left,
+                    y: ev.pageY - offset.top
+                };
+            this.mouse.x = (relPos.x / this.clientWidth) * 2 - 1;
+            this.mouse.y =  - (relPos.y / this.clientHeight) * 2 + 1;
+            //console.log(offset);
+            // Move tooltip
+            this.toolTipElem.style.top = (relPos.y - 40) + 'px';
+            this.toolTipElem.style.left = (relPos.x - 20) + 'px';
+
+            function getOffset(el) {
+                const rect = el.getBoundingClientRect(),
+                    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+                    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                return {
+                    top: rect.top + scrollTop,
+                    left: rect.left + scrollLeft
+                };
+            }
+        }, false);
+
+    }
+
+
+    /**
+     * set the content of the tooltip
+     *
+     *
+     * @param text
+     */
+    setTooltip(text)
+    {
+
+        $(this.toolTipElem).html("").append(text)
+
+    }
+
 
 
 }
@@ -3190,8 +3416,9 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
         this.mRootCluster=null
 
-    }
 
+
+    }
 
 
     setSpeccs(speccs)
@@ -3205,6 +3432,9 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
         return this.mSpeccs
     }
+
+
+
 
 
     initClusterForView(rawGraphData,parentEl3D) {
@@ -4620,6 +4850,10 @@ class BaseNode extends THREE.Mesh {
         super(BaseNode.sphereGeometry, material);
 
 
+       // var axisHelper = new THREE.AxisHelper( 50 );
+       // this.add( axisHelper );
+
+
         if (view instanceof HTMLElement)
             this.setView(view)
 
@@ -4646,6 +4880,7 @@ class BaseNode extends THREE.Mesh {
         //FIXME something is off with ordering an nesting .. preventing the correct node to be used
         //store the current cluster/node
         this.on("mouseover", function (e) {
+            e.stopPropagation()
             BaseNode.lastHoveredNode = e.target
            // e.stopPropagation()
 
@@ -5090,7 +5325,9 @@ class MyMain {
         var mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: 0.1, transparent: true});
 
         var wireframe = new THREE.LineSegments(geo, mat);
-      wireframe.position.add(_center)
+        wireframe.position.add(_center)
+        wireframe.geometry.boundingBox=boundingBox
+
         return wireframe
 
 
@@ -5308,11 +5545,11 @@ class MyMain {
 
 
         //NOTE: target rendering
-        /*  var speccs = this.getForceSpeccs()
+        var speccs = this.getForceSpeccs()
          let view2 = createView("new force-graph", speccs)
          .loadDataSet(this.getDSByID(0))
          views.push(view2)
-         */
+
 
         let view3 = createView("node distribution test case",
             [{
@@ -5323,7 +5560,6 @@ class MyMain {
 
         views.push(view3)
 
-        /*
 
          var speccs = this.get2DChartSortedSpeccsArray()
 
@@ -5332,11 +5568,11 @@ class MyMain {
          views.push(view4)
 
 
-
+/*
          var speccs = this.get2DPlaneCountryOnlySpeccs()
          let view5 = createView("2d-Plane country-only", speccs)
          views.push(view5)
-         */
+*/
 
 
         _.each(views, function (view) {
@@ -5367,15 +5603,15 @@ class MyMain {
         return [
             {
                 generator: countrySetGenerator,
-                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](1000, 1).onSort(mySort),
+                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](4000, 2).onSort(mySort),
                 options: {minClusterSize: 15, hull: this.getBoxHull}
             },
             {
                 generator: industrySetGenerator,
-                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 1).onSort(mySort),
+                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 1).onSort(mySort),
                 options: {minClusterSize: 15, hull: this.getBoxHull}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](50, 2), options: {minClusterSize: 15, hull: this.getBoxHull}}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 3), options: {minClusterSize: 15, hull: this.getBoxHull}}
 
 
         ]
@@ -5405,9 +5641,9 @@ class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 2).onSort(mySort),
-                options: {minClusterSize: 15}
+                options: {minClusterSize: 15, hull: this.getBoxHull}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](400, 2)}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](400, 2),  options: { hull: this.getBoxHull}}
 
 
         ]
@@ -5455,8 +5691,8 @@ class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](4000, 2) //1000
-        let sample2 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](1000, 3)//200
+        let sample1 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](15000, 2) //1000
+        let sample2 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](3000, 3)//200
         let sample3 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](500, 3)//50
 
         //  let rand2 = new RandomDistribution(200, 2)

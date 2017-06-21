@@ -20,7 +20,7 @@ export default class ClusterLeafElement extends THREE.Mesh
 
         this.add( this.mNodeParticles.pointCloud)
 
-//FIXME mayor performance hit
+        //TODO check if still mayor performane hit
         this.appendNodes(nodes)
 
 

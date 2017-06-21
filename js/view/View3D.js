@@ -25,6 +25,8 @@ class View3D extends HTMLElement
 
     }
 
+
+
     //TODO remove little redundancy
     createCSSRule()
     {
@@ -234,7 +236,7 @@ class View3D extends HTMLElement
                   return;
               }
           }
-      //    console.log("animate",time)
+
 
           that.mLastFrameTime = time
 
@@ -340,9 +342,82 @@ class View3D extends HTMLElement
 
     connectedCallback(){
 
+        this.createTooltip()
+
+
         this.initStatic();
         this.start();
+
+
     }
+
+
+    createTooltip() {
+
+        // Setup tooltip
+        if ( this.toolTipElem ) return
+
+        this.toolTipElem = document.createElement('div');
+        this.toolTipElem.classList.add('graph-tooltip');
+
+        $(this.toolTipElem).css({
+            "z-index":1,
+            position:"relative",
+            "user-select": "none"
+        })
+
+        this.appendChild(this.toolTipElem);
+
+        // Capture mouse coords on move
+
+        this.mouse = new THREE.Vector2();
+        this.mouse.x = -2; // Initialize off canvas
+        this.mouse.y = -2;
+        this.addEventListener("mousemove", ev => {
+            // update the mouse pos
+
+
+            //$(env.toolTipElem).show()
+
+            const offset = getOffset(this),
+                relPos = {
+                    x: ev.pageX - offset.left,
+                    y: ev.pageY - offset.top
+                };
+            this.mouse.x = (relPos.x / this.clientWidth) * 2 - 1;
+            this.mouse.y =  - (relPos.y / this.clientHeight) * 2 + 1;
+            //console.log(offset);
+            // Move tooltip
+            this.toolTipElem.style.top = (relPos.y - 40) + 'px';
+            this.toolTipElem.style.left = (relPos.x - 20) + 'px';
+
+            function getOffset(el) {
+                const rect = el.getBoundingClientRect(),
+                    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+                    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                return {
+                    top: rect.top + scrollTop,
+                    left: rect.left + scrollLeft
+                };
+            }
+        }, false);
+
+    }
+
+
+    /**
+     * set the content of the tooltip
+     *
+     *
+     * @param text
+     */
+    setTooltip(text)
+    {
+
+        $(this.toolTipElem).html("").append(text)
+
+    }
+
 
 
 }

@@ -202,7 +202,6 @@ class BaseCluster3D extends BaseNode {
 
     setEntry(entry) {
         this.mEntry = entry
-
     }
 
     getClusterOptions() {
@@ -261,9 +260,10 @@ class BaseCluster3D extends BaseNode {
 
             if (nextDepthSpeccsArray.length > 1)
                 mCluster.applyClustering(nextDepthSpeccsArray);
-            else
+            else {
+                mCluster.setEntry(entry)
                 mCluster.createParticlePointCloud(nextDepthSpeccsArray[0]);
-
+            }
 
         })
 
@@ -374,14 +374,16 @@ class BaseCluster3D extends BaseNode {
 
             if (pc.geometry.boundingBox)
                 boundingBox.copy(pc.geometry.boundingBox)
-            else
+          /*  else
                 boundingBox.setFromObject(pc);
+*/
 
 
+            let _center = boundingBox.getCenter();
 
             //FIXME offsets are not properly calculated
-            let offset=leaf.localToWorld(new THREE.Vector3())
-           // boundingBox.translate(offset);
+           // let offset=leaf.localToWorld(new THREE.Vector3) //boundingBox.getCenter()
+            boundingBox.translate(_center);
 
 
 
@@ -440,7 +442,7 @@ class BaseCluster3D extends BaseNode {
      */
 
     adjustHullSize() {
-
+console.warn("adjustHullSize")
 
         if (this.mHull && this.mHull.geometry)
             this.mHull.geometry.dispose();
@@ -454,46 +456,70 @@ class BaseCluster3D extends BaseNode {
         this.geometry.boundingSphere = null;
         delete(this.geometry);
 
-        let boundingSphere = new THREE.Sphere;
+
 
         let boundingBox = new THREE.Box3;
 
 
-        //generate the boundingbox for the node particles ifit is a leaf
+        //generate the boundingbox for the node particles if this is a leaf
         if (this.isLeaf()) {
             let pc = this.mLeaf.mNodeParticles.pointCloud
+            console.log(this.mLeaf.mNodeParticles.pointCloud)
+            if (!pc)
+            {
+                console.error("leaf: nodescontainer not created yet")
+            }
+            else {
 
-            boundingBox.setFromObject(pc);
-            pc.geometry.boundingBox=boundingBox
+             //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
+                boundingBox.setFromArray(pc.geometry.attributes.position.array)
+                pc.geometry.boundingBox = boundingBox
+            }
 
         }
-        else //FIXME get bb of all leafs instead + actual position
-        //boundingBox.setFromArray(this.getLeafs());
+       /* else //FIXME get bb of all leafs instead + actual position
+            //we want to generate the hull for a cluster that is no leaf only:
+            //if the leaf/child has finished it's distribution function
+            //and
+            //if ths has distributed it's children
+            //via listeners?
             boundingBox = this.getCompoundBoundingBox()
-
+*/
         //get center, radius
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
         let radius = _size.length() / 2;
 
 
+        let boundingSphere =boundingBox.getBoundingSphere()
+
         //TODO
-        if (radius < 40) radius = 40
+       /*
+       if (radius < 40) radius = 40
 
         boundingSphere.radius = radius;
+        */
 
 
         //compute hull object from bounding box
         var mOptions = this.getClusterOptions();
         if (typeof mOptions.hull == "function") {
+            {
+
             this.mHull = mOptions.hull(boundingBox)
 
+            }
             // this.mHull.material.visible = false//set hull default to invisible
             this.add(this.mHull);
         }
-        else console.warn("default hull function  not defined")
+        else {
+            console.error("default hull function  not defined") //TODO we must have at leastone hull impl  //it might be invisible or idle but it should be set via defaults
 
 
+
+        }
+
+//TODO this is currently used for the muse interactions but should be refactored and removed
         var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
         var sphereMaterial = new THREE.MeshBasicMaterial({
             color: 0xff0000,
@@ -505,7 +531,11 @@ class BaseCluster3D extends BaseNode {
         //sphereGeometry.boundingSphere=boundingSphere
         sphereGeometry.boundingBox = boundingBox
 
+
         // this.material = sphereMaterial;
+        if (this.mHull&& this.mHull.geometry)
+            this.geometry=this.mHull.geometry
+        else
         this.geometry = sphereGeometry;
 
 
@@ -534,11 +564,22 @@ class BaseCluster3D extends BaseNode {
 
     createParticlePointCloud(entry) {
         // console.log("reached leaf cluster", this)
-
+var that=this
         let leaf = new ClusterLeafElement(this.mNodes);
         this.mLeaf = leaf;
         this.add(leaf);
-        leaf.setDistributionHandler(entry.distribution)
+        leaf.setDistributionHandler(entry.distribution,function(){
+
+            //create/update the hull element after the animation has finished
+                that.adjustHullSize()
+
+
+            that._initDotParticles();
+            that.updateDotParticles()
+
+
+
+        })
 
     }
 
@@ -551,7 +592,7 @@ class BaseCluster3D extends BaseNode {
 
         this.addAllSubClustersToContainer();
 
-        this.adjustHullSize();
+      //  this.adjustHullSize(); //diabled for testing of hull and bounding box
 
     }
 
@@ -596,17 +637,21 @@ class BaseCluster3D extends BaseNode {
      * has to be called after initialisation to re-calculate dependent elements
      * like dot clouds and cluster boder and hull
      */
-    onAfterClusteredAndDistributed() {
+   /* onAfterClusteredAndDistributed() {
 
+
+      //  return //FIXME
         _.each(_.reverse(this.findClusters("*")), function (cluster) {
+
+            if (!cluster.isLeaf())
             cluster.adjustHullSize();
 
 
         })
 
-
-        this.adjustHullSize()
-    }
+        if (!this.isLeaf())
+       this.adjustHullSize()
+    }*/
 
 
     /**
@@ -726,8 +771,26 @@ class BaseCluster3D extends BaseNode {
             _root = r;
         }
 
+    return _root
+    }
+
+    getParents(maxDepth = 20) {
+        var _root = this;
+        var parents=[]
+        while (maxDepth--) {
+            let r = _root.parent;
+            if (r == null) return parents
+            if (!(r instanceof BaseCluster3D)) return parents;
+            _root = r;
+
+            parents.unshift(_root)
+
+        }
+
+        return parents;
 
     }
+
 
 
 }

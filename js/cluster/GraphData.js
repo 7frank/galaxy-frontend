@@ -90,6 +90,9 @@ class GraphData
             nameAccessor:node =>node.name || node.id,
             colorAccessor: node => node.color,
             valAccessor:node => node.val,
+
+            sizeAccessor:node => node.itemCount,
+
             nodeRelSize:4,
            // useDebugSphere:true,
             domEvents:view3d.mDomEvents
@@ -122,6 +125,9 @@ class GraphData
          //   onDrawNode: countVisibleNodes
         })
         node._bubble.name = env.nameAccessor(node) || '';
+
+
+        node.size=env.sizeAccessor(node) || undefined;
 
 
         //TODO not highlighted group nodes should be rendered with separate point cloud
