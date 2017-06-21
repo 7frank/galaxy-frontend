@@ -27,9 +27,8 @@ class BaseCluster3D extends BaseNode {
      * @param nodes
      * @param clusteringHandler instanceof List<ClusteringHandler>
      */
-    constructor(nodes, clusteringHandlers,view) {
+    constructor(nodes, clusteringHandlers, view) {
         super(view);
-       // this.setView(view)
         this.addNodes(nodes);
 
         this.mClusters = {};
@@ -201,15 +200,13 @@ class BaseCluster3D extends BaseNode {
     }
 
 
-    setEntry(entry)
-    {
-        this.mEntry=entry
+    setEntry(entry) {
+        this.mEntry = entry
 
     }
 
-    getClusterOptions()
-    {
-        return this.mEntry&&this.mEntry.options?this.mEntry.options:{}
+    getClusterOptions() {
+        return this.mEntry && this.mEntry.options ? this.mEntry.options : {}
 
     }
 
@@ -293,7 +290,9 @@ class BaseCluster3D extends BaseNode {
         var options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
-            hull:function(){  return new THREE.Mesh()  }
+            hull: function () {
+                return new THREE.Mesh()
+            }
 
         }, entry.options);
         var that = this;
@@ -309,7 +308,7 @@ class BaseCluster3D extends BaseNode {
             if (_cluster.getNodes().length < options.minClusterSize) {
 
                 var dMGN = options.defaultMergeGroupName
-                if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz(undefined,undefined,that.getView());//new BaseCluster3D()
+                if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz(undefined, undefined, that.getView());//new BaseCluster3D()
                 _clustersObj[dMGN].name = dMGN
                 _clustersObj[dMGN].addNodes(_cluster.getNodes())
             }
@@ -342,11 +341,11 @@ class BaseCluster3D extends BaseNode {
      */
     groupBy(filterFunction) {
         var clazz = this.getChildClusterConstructor();
-        var that=this;
+        var that = this;
         let container = {}
 
         function groupFunction(key, val) {
-            if (typeof container[key] == "undefined") container[key] = new clazz(undefined,undefined,that.getView());//new BaseCluster3D();
+            if (typeof container[key] == "undefined") container[key] = new clazz(undefined, undefined, that.getView());//new BaseCluster3D();
 
             container[key].addNodes(val)
         }
@@ -357,6 +356,41 @@ class BaseCluster3D extends BaseNode {
 
         return container
 
+    }
+
+
+
+    getCompoundBoundingBox() {
+        var box = new THREE.Box3;
+        _.each(this.getLeafs(), function (leaf) {
+            var geometry = leaf.geometry;
+            if (geometry === undefined) return;
+
+
+            let boundingBox = new THREE.Box3;
+            //generate the boundingbox for the node particles if it is a leaf
+
+            let pc = leaf.mNodeParticles.pointCloud
+
+            if (pc.geometry.boundingBox)
+                boundingBox.copy(pc.geometry.boundingBox)
+            else
+                boundingBox.setFromObject(pc);
+
+
+
+            //FIXME offsets are not properly calculated
+            let offset=leaf.localToWorld(new THREE.Vector3())
+           // boundingBox.translate(offset);
+
+
+
+
+                box.union(boundingBox);
+
+
+        });
+        return box;
     }
 
 
@@ -425,17 +459,18 @@ class BaseCluster3D extends BaseNode {
         let boundingBox = new THREE.Box3;
 
 
-      //  boundingBox.setFromObject(this);
-
-
-        //FIXME the boundingbox must be generated for the particles
+        //generate the boundingbox for the node particles ifit is a leaf
         if (this.isLeaf()) {
-         let pc=this.mLeaf.mNodeParticles.pointCloud
+            let pc = this.mLeaf.mNodeParticles.pointCloud
 
             boundingBox.setFromObject(pc);
-
+            pc.geometry.boundingBox=boundingBox
 
         }
+        else //FIXME get bb of all leafs instead + actual position
+        //boundingBox.setFromArray(this.getLeafs());
+            boundingBox = this.getCompoundBoundingBox()
+
         //get center, radius
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
@@ -451,13 +486,12 @@ class BaseCluster3D extends BaseNode {
         //compute hull object from bounding box
         var mOptions = this.getClusterOptions();
         if (typeof mOptions.hull == "function") {
-        this.mHull = mOptions.hull(boundingBox)
+            this.mHull = mOptions.hull(boundingBox)
 
-       // this.mHull.material.visible = false//set hull default to invisible
-        this.add(this.mHull);
-         }
-          else console.warn("default hull function  not defined")
-
+            // this.mHull.material.visible = false//set hull default to invisible
+            this.add(this.mHull);
+        }
+        else console.warn("default hull function  not defined")
 
 
         var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
@@ -469,9 +503,9 @@ class BaseCluster3D extends BaseNode {
         });
 
         //sphereGeometry.boundingSphere=boundingSphere
-         sphereGeometry.boundingBox=boundingBox
+        sphereGeometry.boundingBox = boundingBox
 
-       // this.material = sphereMaterial;
+        // this.material = sphereMaterial;
         this.geometry = sphereGeometry;
 
 
@@ -586,7 +620,7 @@ class BaseCluster3D extends BaseNode {
         if (this._LeafsCached) this._LeafsCached
 
 
-        var leafElements =this._LeafsCached= [];
+        var leafElements = this._LeafsCached = [];
 
         this.traverse(function (item) {
             if (item instanceof ClusterLeafElement)
@@ -619,13 +653,11 @@ class BaseCluster3D extends BaseNode {
     }
 
 
+    getDOMElement() {
 
-    getDOMElement(){
 
-
-        var view3d= this.getView()
-        if (!view3d||  !view3d.domElement)
-        {
+        var view3d = this.getView()
+        if (!view3d || !view3d.domElement) {
             console.warn("attach graph to a view before using dom specific functions")
             return null;
         }
@@ -641,12 +673,11 @@ class BaseCluster3D extends BaseNode {
      *
      *
      */
-    getDOMEvents(){
+    getDOMEvents() {
 
 
-        var view3d= this.getView()
-        if (!view3d||  !view3d.mDomEvents)
-        {
+        var view3d = this.getView()
+        if (!view3d || !view3d.mDomEvents) {
             console.warn("attach graph to a view before using dom specific functions")
             return null;
         }
@@ -656,16 +687,14 @@ class BaseCluster3D extends BaseNode {
     }
 
 
-
     /**
      * tries to get the view3d element, which the cluster is rendered within
      * @returns a View3D if attached to the view before, else null
      */
-    getView()
-    {
-      //  var rootCluster=this.getRoot()
-       // if (!rootCluster.mParentView) return null
-     return this.mParentView
+    getView() {
+        //  var rootCluster=this.getRoot()
+        // if (!rootCluster.mParentView) return null
+        return this.mParentView
     }
 
     /**
@@ -673,12 +702,11 @@ class BaseCluster3D extends BaseNode {
      * the view must be a View3D (extends HTMLElement)
      *
      */
-    setView(view3d)
-    {
-       // var rootCluster=this.getRoot()
+    setView(view3d) {
+        // var rootCluster=this.getRoot()
 
-       this.mParentView=view3d;
-     return this
+        this.mParentView = view3d;
+        return this
     }
 
     /**
@@ -689,21 +717,17 @@ class BaseCluster3D extends BaseNode {
      */
 
 
-    getRoot(maxDepth=20)
-    {
-        var _root=this;
-        while ( maxDepth--)
-        {
-            let r=_root.parent;
-            if (r==null) return _root;
-            if (! (r instanceof BaseCluster3D)) return _root;
-            _root=r;
+    getRoot(maxDepth = 20) {
+        var _root = this;
+        while (maxDepth--) {
+            let r = _root.parent;
+            if (r == null) return _root;
+            if (!(r instanceof BaseCluster3D)) return _root;
+            _root = r;
         }
 
 
     }
-
-
 
 
 }

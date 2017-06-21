@@ -104,7 +104,7 @@ class Cluster3DExtended extends BaseCluster3D {
         })
 
         var diameter=null;
-            this.on("s dblclick",function(e) {
+            this.on("s",function(e) {
             e.stopPropagation()
 
 

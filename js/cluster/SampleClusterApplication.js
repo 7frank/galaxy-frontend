@@ -107,7 +107,7 @@ export class MyMain {
         var mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: 0.1, transparent: true});
 
         var wireframe = new THREE.LineSegments(geo, mat);
-      wireframe.position.add(_center)
+        wireframe.position.add(_center)
         return wireframe
 
 
@@ -325,11 +325,11 @@ export class MyMain {
 
 
         //NOTE: target rendering
-        /*  var speccs = this.getForceSpeccs()
+   /*      var speccs = this.getForceSpeccs()
          let view2 = createView("new force-graph", speccs)
          .loadDataSet(this.getDSByID(0))
          views.push(view2)
-         */
+    */
 
         let view3 = createView("node distribution test case",
             [{
@@ -340,7 +340,7 @@ export class MyMain {
 
         views.push(view3)
 
-        /*
+
 
          var speccs = this.get2DChartSortedSpeccsArray()
 
@@ -349,11 +349,11 @@ export class MyMain {
          views.push(view4)
 
 
-
+/*
          var speccs = this.get2DPlaneCountryOnlySpeccs()
          let view5 = createView("2d-Plane country-only", speccs)
          views.push(view5)
-         */
+*/
 
 
         _.each(views, function (view) {
@@ -384,15 +384,15 @@ export class MyMain {
         return [
             {
                 generator: countrySetGenerator,
-                distribution: new BaseDistribution(1000, 1).onSort(mySort),
+                distribution: new BaseDistribution(1000, 2).onSort(mySort),
                 options: {minClusterSize: 15, hull: this.getBoxHull}
-            },
+            },/*
             {
                 generator: industrySetGenerator,
                 distribution: new BaseDistribution(200, 1).onSort(mySort),
                 options: {minClusterSize: 15, hull: this.getBoxHull}
-            },
-            {distribution: new BaseDistribution(50, 2), options: {minClusterSize: 15, hull: this.getBoxHull}}
+            },*/
+            {distribution: new BaseDistribution(50, 3), options: {minClusterSize: 15, hull: this.getBoxHull}}
 
 
         ]
@@ -422,9 +422,9 @@ export class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new BaseDistribution(2000, 2).onSort(mySort),
-                options: {minClusterSize: 15}
+                options: {minClusterSize: 15, hull: this.getBoxHull}
             },
-            {distribution: new BaseDistribution(400, 2)}
+            {distribution: new BaseDistribution(400, 2),  options: { hull: this.getBoxHull}}
 
 
         ]
