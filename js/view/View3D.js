@@ -17,7 +17,7 @@ class View3D extends HTMLElement
 
 
         this.createCSSRule()
-
+        this.mTime=-1;
     //   this.initStatic()
 
 
@@ -216,6 +216,7 @@ class View3D extends HTMLElement
        var initialFrames=1;
         var that=this;
       function animate(time) {
+        that.mTime=time
 
           that.mControls.update();
           initialFrames--

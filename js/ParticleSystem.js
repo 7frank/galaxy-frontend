@@ -77,7 +77,14 @@ function getParticleShaderMaterial()
 		function createParticleSystemForNodes(nodes,options)	
 		{
 			
-				options=_.extend({groupKeyName:"isGroupNode",groupValueName:"nodes",nodeKey:'itemCount',increment:5},options)
+				options=_.extend({
+					groupKeyName:"isGroupNode",
+					groupValueName:"nodes",
+					nodeKey:'itemCount',
+					increment:5,
+					duration:1000,
+					easing:TWEEN.Easing.Linear.None
+				},options)
 			
 			
 			function getNodeParticleCount(node)
@@ -231,21 +238,27 @@ var tween;
 
 var  start_time;
 
-function createTween(duration=1000,easing=TWEEN.Easing.Quadratic.In) {
+function createTween(duration=1000,easing) {
 
     start_time=Date.now();
 
     var positions = geometry.attributes.position.array;
 
-   // console.log("createTween",positions,destination,duration)
+   // console.log("createParticleTween",positions,destination,duration,Date.now())
 
     tween = new TWEEN.Tween(positions)
+        .to(destination, duration);
 
-        .to(destination, duration)
-		.easing(easing)
-		.onUpdate(function(){
+    if (typeof easing=="function")
+    tween.easing(easing)
+
+    tween.onUpdate(function(){
+         //   console.log("updateParticleTween",positions,destination,Date.now())
             geometry.attributes.position.needsUpdate = true;
-		}).onComplete(() => isRunning=false )
+		}).onComplete(() => {
+    	isRunning=false;
+        geometry.attributes.position.needsUpdate = true;
+    } )
 
 
     return tween
@@ -255,91 +268,21 @@ function createTween(duration=1000,easing=TWEEN.Easing.Quadratic.In) {
 var isRunning=false;
 
 
-function animateParticles() {
+function animateParticles(mTime) {
 
-//TODO
+if (!mTime) {
+
+    console.warn("update function needs time from amination loop  see View3D::getView().mTime")
+ 	return
+}
+
+
 
 	if (!isRunning) return;
 
 	if (tween&& isRunning)
-    tween.update(Date.now())
+    tween.update(mTime)
 
-
-
-
-/*
-		 console.warn("animate particles",time)
-     
-        if(particleSystem.parent){
-
-
-
-        var positions = geometry.attributes.position.array;
-		 var customColors = geometry.attributes.customColor.array;
-        //var currentColor = new THREE.Color();
-        error=0.2;
-        var a=false,b=false,c=false,fin=true;
-        if(increment>0){
-			
-		var pct=particles/percentage;
-		
-        for(var v=0;v<pct;v++){
-            a=false,b=false,c=false;
-            //easing=Math.sin((0.55+(v%100)/100*0.4)*Math.PI);
-
-			
-           var easing=0.2+(v%100)/100;
-		   var inc_easing=increment*easing
-            if(Math.abs(positions[ v * 3 + 0 ]-destination[ v * 3 + 0 ])>error)positions[ v * 3 + 0 ] += (destination[ v * 3 + 0 ]-positions[ v * 3 + 0 ])/inc_easing;
-            else{
-                positions[ v * 3 + 0 ]=destination[ v * 3 + 0 ];
-                a=true;
-            }
-            if(Math.abs(positions[ v * 3 + 1 ]-destination[ v * 3 + 1 ])>error)positions[ v * 3 + 1 ] += (destination[ v * 3 + 1 ]-positions[ v * 3 + 1 ])/inc_easing;
-            else{
-                positions[ v * 3 + 1 ]=destination[ v * 3 + 1 ];
-                b=true;
-            }
-            if(Math.abs(positions[ v * 3 + 2 ]-destination[ v * 3 + 2 ])>error)positions[ v * 3 + 2 ] += (destination[ v * 3 + 2 ]-positions[ v * 3 + 2 ])/inc_easing;
-            else{
-                positions[ v * 3 + 2 ]=destination[ v * 3 + 2 ];
-                c=true;
-            }
-            if(a &&b &&c){
-                particlesPlaced++;
-            }else{fin=false;}
-        }
-
-        if(fin){
-		console.log("fin")
-            isRunning=false; //stop updating
-
-            increment=0;
-
-            for(var v=0;v<particles;v++){
-                positions[ v * 3 + 0 ]=destination[ v * 3 + 0 ];
-                positions[ v * 3 + 1 ]=destination[ v * 3 + 1 ];
-                positions[ v * 3 + 2 ]=destination[ v * 3 + 2 ];
-            }
-
-        }
-
-            //animateOverlay(particlesPlaced/particles);
-
-        }else{
-
-           // animateOverlay(0);
-        }
-
-        geometry.attributes.position.needsUpdate = true;
-		//geometry.attributes.customColor.needsUpdate = true;
-		
-        //animatePointSize(false);
-	   }
-*/
-     
-
-	 
 	}
 
 		
@@ -363,7 +306,7 @@ function animateParticles() {
                             isRunning=true;
 							updateDestinations();
 
-                            let tween=createTween();
+                            let tween=createTween(options.duration,options.easing);
 
 							tween.start()
 

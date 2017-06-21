@@ -571,15 +571,21 @@ var that=this
         leaf.setDistributionHandler(entry.distribution,function(){
 
             //create/update the hull element after the animation has finished
-                that.adjustHullSize()
 
-
-            that._initDotParticles();
-            that.updateDotParticles()
-
+           that.updateIfIsLeaf()
 
 
         })
+
+    }
+
+
+    updateIfIsLeaf()
+    {
+        this.adjustHullSize()
+        this._initDotParticles();
+        this.updateDotParticles()
+
 
     }
 
