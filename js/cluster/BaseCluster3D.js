@@ -6,6 +6,7 @@
 import ClusterLeafElement from "./ClusterLeafElement"
 import BaseNode from "./BaseNode"
 import EdgeUtil from "./EdgeUtil"
+import BaseVolume from "./hull/BaseVolume"
 
 
 /**
@@ -41,9 +42,6 @@ class BaseCluster3D extends BaseNode {
         // else this.updateCluster()
 
     }
-
-
-
 
 
     /**
@@ -296,9 +294,7 @@ class BaseCluster3D extends BaseNode {
         var options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
-            hull: function () {
-                return new THREE.Mesh()
-            }
+            hull: new BaseVolume()
 
         }, entry.options);
         var that = this;
@@ -335,19 +331,18 @@ class BaseCluster3D extends BaseNode {
          * in which case we bubble up the tree to notify for changes and readjust parent elements
          *
          */
-        _.each(this.mClusters,function(childCluster){
-            childCluster.on("hull-updated",_.throttle(function(){
+        _.each(this.mClusters, function (childCluster) {
+            childCluster.on("hull-updated", _.throttle(function () {
                 that.adjustHullSize()
-            that.trigger("hull-updated")
+                that.trigger("hull-updated")
 
-         },100))
+            }, 100))
         })
 
 
         this.setDistributionHandler(entry.distribution, function () {
 
             that.mClusterRule = entry
-
 
 
         })
@@ -380,20 +375,19 @@ class BaseCluster3D extends BaseNode {
 
 
     getCompoundBoundingBox() {
-        var that=this
+        var that = this
         var box = new THREE.Box3;
 
         _.each(this.mClusters, function (subCluster) {
             let boundingBox = new THREE.Box3;
 
             if (!subCluster.geometry.boundingBox) return //not computed bbox, ignore
-            boundingBox.copy(subCluster.geometry.boundingBox )
-
+            boundingBox.copy(subCluster.geometry.boundingBox)
 
 
             //FIXME offsets are not properly calculated
-            let offset_parent=that.localToWorld(new THREE.Vector3)
-            let offset_world=subCluster.localToWorld(new THREE.Vector3)
+            let offset_parent = that.localToWorld(new THREE.Vector3)
+            let offset_world = subCluster.localToWorld(new THREE.Vector3)
             boundingBox.translate(offset_world.sub(offset_parent));
 
 
@@ -453,7 +447,6 @@ class BaseCluster3D extends BaseNode {
      */
 
     adjustHullSize() {
-        console.warn("adjustHullSize")
 
 
         let boundingBox = new THREE.Box3;
@@ -462,7 +455,7 @@ class BaseCluster3D extends BaseNode {
         //generate the boundingbox for the node particles if this is a leaf
         if (this.isLeaf()) {
             let pc = this.mLeaf.mNodeParticles.pointCloud
-            console.log(this.mLeaf.mNodeParticles.pointCloud)
+
             if (!pc) {
                 console.error("leaf: nodescontainer not created yet")
             }
@@ -476,14 +469,14 @@ class BaseCluster3D extends BaseNode {
 
         }
         else
-        /**  FIXME get bb of all leafs instead + actual position
-         //we want to generate the hull for a cluster that is no leaf only:
-         //if the leaf/child has finished it's distribution function
-         //and
-         //if ths has distributed it's children
-         //via listeners?
-         */
-         boundingBox = this.getCompoundBoundingBox()
+            /**  FIXME get bb of all leafs instead + actual position
+             //we want to generate the hull for a cluster that is no leaf only:
+             //if the leaf/child has finished it's distribution function
+             //and
+             //if ths has distributed it's children
+             //via listeners?
+             */
+            boundingBox = this.getCompoundBoundingBox()
 
         //get center, radius
         let _center = boundingBox.getCenter();
@@ -499,10 +492,22 @@ class BaseCluster3D extends BaseNode {
         // also text nodes depend on valid sized bbox
         //compute hull object from bounding box
         var mOptions = this.getClusterOptions();
-        if (typeof mOptions.hull == "function") {
+        let mHull
+
+        if (typeof mOptions.hull == "undefined")
+            console.error("default hull function  not defined")
+            else {
+
+            if (mOptions.hull instanceof BaseVolume)
+            {
+                mHull = mOptions.hull.createFromBoundingBox(boundingBox);
+                mHull.info=mOptions.hull;
+            }
+            else
+            if (typeof mOptions.hull == "function")
+            mHull = mOptions.hull(boundingBox);
 
 
-            let mHull = mOptions.hull(boundingBox)
 
             if (!this.mHull) {
 
@@ -517,8 +522,6 @@ class BaseCluster3D extends BaseNode {
             }
 
         }
-        else
-            console.error("default hull function  not defined")
 
 
         //TODO this is currently used for the mouse interactions but should be refactored and removed

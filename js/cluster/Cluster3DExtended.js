@@ -127,10 +127,22 @@ class Cluster3DExtended extends BaseCluster3D {
         this.on("mouseover mousemove", function (e) {
             e.stopPropagation()
 
-            if (this.mHull)
-            //this.mHull.material.visible=true;
+            if (this.mHull) {
+
+                if (this.mHull.info)
+                {
+                    this.mHull.material.visible=  this.mHull.info.canBeVisible()
+
+
+                }
+
+
                 this.mHull.material.opacity = 1;
-            let name = (this.name ? this.name : this.id)
+
+
+            }
+
+                let name = (this.name ? this.name : this.id)
 
             let parents = this.getParents()
             parents.shift()
@@ -144,8 +156,13 @@ class Cluster3DExtended extends BaseCluster3D {
 
         this.on("mouseout", function () {
             if (this.mHull)
-            //this.mHull.material.visible=false;
+            {
+
                 this.mHull.material.opacity = 0.2;
+
+            }
+
+
             this.getView().setTooltip("")
         })
 

@@ -45,6 +45,8 @@ import GraphView3D from "../view/GraphView3D"
 import SimpleForceGraphView3D from "../view/SimpleForceGraphView3D"
 
 
+import BoxVolume from "./hull/BoxVolume"
+
 //-----------------------------------------
 //-----------DEBUG-------------------------
 //-----------------------------------------
@@ -96,8 +98,8 @@ export class MyMain {
     }
 
     getBoxHull(boundingBox) {
-
-        let _center = boundingBox.getCenter();
+    return new BoxVolume().createFromBoundingBox(boundingBox)
+      /*  let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
 
         var box = new THREE.BoxGeometry(_size.x, _size.y, _size.z)
@@ -111,7 +113,7 @@ export class MyMain {
         wireframe.geometry.boundingBox=boundingBox
 
         return wireframe
-
+*/
 
     }
 
@@ -535,15 +537,15 @@ export class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: sample1,
-                options: {minClusterSize: 40, hull: this.getBoxHull}
+                options: {minClusterSize: 40}
             },
             {
                 generator: industrySetGenerator,
                 distribution: sample2,
-                options: {minClusterSize: 15, hull: this.getBoxHull}
+                options: {minClusterSize: 15, hull: this.getBoxHull} //FIXME  this option is used twice for leaf and parent  and below is ignored
             }
             , {distribution: sample3, hull: this.getEllipsoidHull.bind(this)}
-
+            //FIXME getEllipsoidHullis not used
 
         ]
 
