@@ -359,7 +359,7 @@ export class MyMain {
             views.push(view2)
 
 
-
+/*
             let view3 = createView("node distribution test case",
                 [{
                     distribution: new BaseDistribution(2000, 3),
@@ -375,6 +375,9 @@ export class MyMain {
             let view4 = createView("2d-Barchart", speccs)
                 .loadDataSet(this.getDSByID(1))
             views.push(view4)
+*/
+
+
 
             /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
              let view1 = createView("View1", speccs)
@@ -515,36 +518,67 @@ export class MyMain {
 
     }
 
+
+    /**
+     * this is a sample configuration for  the cluster.
+     * it contains 2 subdivisions:  -first into countries
+     *                              -followed by industry
+     *
+     */
     getForceSpeccs() {
 
-        function countrySetGenerator(groupFunction, node) {
 
+        //the function that is called to create the  country groups
+        function countrySetGenerator(groupFunction, node) {
+            // the group function takes 2 arguments
+            // the first is the value that will determine the key of the group
+            //in this case node.group contains country names
+            //the second argument is the node itself that is passed into the group created
             groupFunction(node.group, node)
         }
 
+        //same goes for the industy clusters that are sub-clusters of the country clusters in this example
         function industrySetGenerator(groupFunction, node) {
             groupFunction(node.industry, node)
         }
 
-        //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new BaseDistribution(15000, 2) //1000
-        let sample2 = new ForceGraphDistribution(3000, 3)//200
-        let sample3 = new ForceGraphDistribution(500, 3)//50
 
-        //  let rand2 = new RandomDistribution(200, 2)
+
+        //there are several distribution classes defined
+        //these handle how the current cluster positions it's sub-clusters when rendering
+        //basically a distribution function does have 2 parameters
+        // the first is the maximum size in x/y/z direction the elements within can be placed
+        // the second defined the dimensions 1/2/3 that get used for the element placement
+
+
+        let countryDistribution = new BaseDistribution(15000, 2) // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new ForceGraphDistribution(3000, 3)// industries within countries use the Force-Graph approach to position elements
+        let nodesWithinIndustryDistribution = new ForceGraphDistribution(500, 3)//same goes for the nodes within each industry
+
+        //the final configuration for rendering
+        //it contains an additional options attribute per array entry
+
+        // @param options.minClusterSize ... is the lower bound for the nodes within the cluster
+        // if the cluster has fewer elements all clusters previously generated are places within this "other" cluster
+        // @param options. defaultMergeGroupName the name of the "other" cluster can be changed by this value
+        // @param options.hull can be used to add a volume around the cluster
+        //by default if no value gets set, the BaseVolume class is used which is invisible by default
+        //but is necessary for other components like picking and tet rendering
+
+
 
         return [
             {
                 generator: countrySetGenerator,
-                distribution: sample1,
+                distribution: countryDistribution,
                 options: {minClusterSize: 40}
             },
             {
                 generator: industrySetGenerator,
-                distribution: sample2,
-                options: {minClusterSize: 15, hull: this.getBoxHull} //FIXME  this option is used twice for leaf and parent  and below is ignored
+                distribution: industryDistribution,
+                options: {minClusterSize: 15,hull: this.getBoxHull} //FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: sample3, hull: this.getEllipsoidHull.bind(this)}
+            , {distribution: nodesWithinIndustryDistribution, hull: this.getBoxHull }  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
 
         ]
