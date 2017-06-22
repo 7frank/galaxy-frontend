@@ -31,6 +31,8 @@ class BaseCluster3D extends BaseNode {
         super(view);
         this.addNodes(nodes);
 
+        this.registerCustomEvent("hull-updated") // gets called if the hull got adjusted
+
         this.mClusters = {};
         //Cluster if present, use to cluster nodes into sub-clusters
         if (_.isArray(clusteringHandlers) && clusteringHandlers.length > 0) {
@@ -39,6 +41,10 @@ class BaseCluster3D extends BaseNode {
         // else this.updateCluster()
 
     }
+
+
+
+
 
     /**
      * add one or many nodes to the cluster
@@ -324,10 +330,24 @@ class BaseCluster3D extends BaseNode {
         _.extend(this.mClusters, _clustersObj)
 
 
+        /**
+         * add listeners to child elements if the hull was update
+         * in which case we bubble up the tree to notify for changes and readjust parent elements
+         *
+         */
+        _.each(this.mClusters,function(childCluster){
+            childCluster.on("hull-updated",_.throttle(function(){
+                that.adjustHullSize()
+            that.trigger("hull-updated")
+
+         },100))
+        })
+
+
         this.setDistributionHandler(entry.distribution, function () {
 
             that.mClusterRule = entry
-            that.trigger("complete")
+
 
 
         })
@@ -360,36 +380,30 @@ class BaseCluster3D extends BaseNode {
 
 
     getCompoundBoundingBox() {
+        var that=this
         var box = new THREE.Box3;
-        _.each(this.getLeafs(), function (leaf) {
-            var geometry = leaf.geometry;
-            if (geometry === undefined) return;
 
-
+        _.each(this.mClusters, function (subCluster) {
             let boundingBox = new THREE.Box3;
-            //generate the boundingbox for the node particles if it is a leaf
 
-            let pc = leaf.mNodeParticles.pointCloud
-
-            if (pc.geometry.boundingBox)
-                boundingBox.copy(pc.geometry.boundingBox)
-            /*  else
-             boundingBox.setFromObject(pc);
-             */
+            if (!subCluster.geometry.boundingBox) return //not computed bbox, ignore
+            boundingBox.copy(subCluster.geometry.boundingBox )
 
 
-            let _center = boundingBox.getCenter();
 
             //FIXME offsets are not properly calculated
-            // let offset=leaf.localToWorld(new THREE.Vector3) //boundingBox.getCenter()
-            boundingBox.translate(_center);
+            let offset_parent=that.localToWorld(new THREE.Vector3)
+            let offset_world=subCluster.localToWorld(new THREE.Vector3)
+            boundingBox.translate(offset_world.sub(offset_parent));
 
 
             box.union(boundingBox);
 
 
-        });
-        return box;
+        })
+
+        return box
+
     }
 
 
@@ -440,19 +454,7 @@ class BaseCluster3D extends BaseNode {
 
     adjustHullSize() {
         console.warn("adjustHullSize")
-/*
-        if (this.mHull && this.mHull.geometry)
-            this.mHull.geometry.dispose();
-        if (this.mHull && this.mHull.material)
-            this.mHull.material.dispose();
 
-        if (this.mHull) this.remove(this.mHull)
-
-        this.geometry.dispose();
-        this.geometry.boundingBox = null;
-        this.geometry.boundingSphere = null;
-        delete(this.geometry);
-*/
 
         let boundingBox = new THREE.Box3;
 
@@ -471,15 +473,18 @@ class BaseCluster3D extends BaseNode {
                 pc.geometry.boundingBox = boundingBox
             }
 
+
         }
-        /* else //FIXME get bb of all leafs instead + actual position
+        else
+        /**  FIXME get bb of all leafs instead + actual position
          //we want to generate the hull for a cluster that is no leaf only:
          //if the leaf/child has finished it's distribution function
          //and
          //if ths has distributed it's children
          //via listeners?
-         boundingBox = this.getCompoundBoundingBox()
          */
+         boundingBox = this.getCompoundBoundingBox()
+
         //get center, radius
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
@@ -535,6 +540,9 @@ class BaseCluster3D extends BaseNode {
         else
             this.geometry = sphereGeometry;
 
+
+//notify listeners that the hull size probably changed
+        this.trigger("hull-updated")
 
     }
 

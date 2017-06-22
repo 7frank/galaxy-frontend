@@ -20,40 +20,43 @@ export default class BaseNode extends THREE.Mesh {
      */
 
 
-    getRegisteredCustomEvents()
-    {
-        return ['before-render']
+    getRegisteredCustomEvents() {
+        return this.mCustomEventNames
 
     }
 
-    isCustomEvent(eventName)
-    {
-        return this.getRegisteredCustomEvents().indexOf(eventName)>=0
+    registerCustomEvent(eventName) {
+
+        if (!this.mCustomEventNames) this.mCustomEventNames = [];
+
+        this.mCustomEventNames.push(eventName);
+
     }
 
-    isMouseEvent(eventName)
-    {
-        return  THREEx.DomEvents.eventNames.indexOf(eventName) >= 0
+
+    isCustomEvent(eventName) {
+        return this.getRegisteredCustomEvents().indexOf(eventName) >= 0
     }
 
+    isMouseEvent(eventName) {
+        return THREEx.DomEvents.eventNames.indexOf(eventName) >= 0
+    }
 
 
     //------------------------------------------------
-    onCustomEvent(eventName,eventhandler)
-    {
-        this.mCustomEvents.on(eventName,eventhandler.bind(this))
+    onCustomEvent(eventName, eventhandler) {
+        this.mCustomEvents.on(eventName, eventhandler.bind(this))
     }
 
-    offCustomEvent(eventName,eventhandler)
-    {
-        this.mCustomEvents.off(eventName,eventhandler)
+    offCustomEvent(eventName, eventhandler) {
+        this.mCustomEvents.off(eventName, eventhandler)
     }
 
 
-    triggerCustomEvent(eventName, origDomEvent, intersect)
-    {
+    triggerCustomEvent(eventName, origDomEvent, intersect) {
         this.mCustomEvents.trigger(eventName, origDomEvent, intersect)
     }
+
     //------------------------------------------------
 
 
@@ -61,35 +64,34 @@ export default class BaseNode extends THREE.Mesh {
     // them on the current element similar to how the mouse events do
     //Note: the current implementation only triggers keypresses every 300 ms
     onKey(eventName, eventhandler) {
-        let handler=_.throttle(eventhandler.bind(this),300)
+        let handler = _.throttle(eventhandler.bind(this), 300)
 
-        this.mKeyboardEvents.bind(eventName,handler ,'keydown');
+        this.mKeyboardEvents.bind(eventName, handler, 'keydown');
 
     }
+
     //TODO wont work with debounced handler
-    offKey(eventName, eventhandler)
-    {
+    offKey(eventName, eventhandler) {
         this.mKeyboardEvents.unbind(eventName, eventhandler);
-       // $(window).off(eventName, eventhandler);
+        // $(window).off(eventName, eventhandler);
 
     }
 
-    triggerKey(eventName, origDomEvent, intersect)
-    {
-        this.mKeyboardEvents.trigger(eventName,  origDomEvent, intersect);
-       // $(window).trigger(eventName, origDomEvent, intersect);
+    triggerKey(eventName, origDomEvent, intersect) {
+        this.mKeyboardEvents.trigger(eventName, origDomEvent, intersect);
+        // $(window).trigger(eventName, origDomEvent, intersect);
     }
 
     /**
      * gets called on the node that the mouse is hovering over
      *
      */
-    resolveKeyEvent(event){
+    resolveKeyEvent(event) {
 
 
         this.mKeyboardEvents.handleKeyEvent(event)
 
-     }
+    }
 
 
     //------------------------------------------------
@@ -98,15 +100,15 @@ export default class BaseNode extends THREE.Mesh {
 
         for (let eName of eventName.split(" ")) {
 
-            if (this. isCustomEvent(eName))
-                this.onCustomEvent(eName,eventhandler);
-            else
-            if (this.isMouseEvent(eName))
+            if (this.isCustomEvent(eName))
+                this.onCustomEvent(eName, eventhandler);
+            else if (this.isMouseEvent(eName))
                 this.getDOMEvents().addEventListener(this, eName, eventhandler.bind(this), false);
             else
                 this.onKey(eName, eventhandler)
 
-        };
+        }
+        ;
 
         return this;
     }
@@ -116,21 +118,19 @@ export default class BaseNode extends THREE.Mesh {
         for (let eName of eventName.split(" "))
 
 
-        for (let eName of eventName.split(" ")) {
+            for (let eName of eventName.split(" ")) {
 
-            if (this. isCustomEvent(eName))
-                this.offCustomEvent(eName,eventhandler);
-            else
-            if (this.isMouseEvent(eName))
-                this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
-            else
-                this.offKey(eName, eventhandler)
+                if (this.isCustomEvent(eName))
+                    this.offCustomEvent(eName, eventhandler);
+                else if (this.isMouseEvent(eName))
+                    this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
+                else
+                    this.offKey(eName, eventhandler)
 
-        };
+            }
+        ;
 
         return this;
-
-
 
 
     }
@@ -138,22 +138,18 @@ export default class BaseNode extends THREE.Mesh {
     trigger(eventName, origDomEvent, intersect) {
 
 
-
-
-
         for (let eName of eventName.split(" ")) {
 
 
-
-            if (this. isCustomEvent(eName))
+            if (this.isCustomEvent(eName))
                 this.triggerCustomEvent(eName, origDomEvent, intersect);
-            else
-            if (this.isMouseEvent(eName))
+            else if (this.isMouseEvent(eName))
                 this.getDOMEvents()._notify(eName, this, origDomEvent, intersect);
             else
-                this.triggerKey(eName,origDomEvent, intersect)
+                this.triggerKey(eName, origDomEvent, intersect)
 
-        };
+        }
+        ;
 
         return this;
 
@@ -161,12 +157,9 @@ export default class BaseNode extends THREE.Mesh {
     }
 
 
-
-
     //---------------end of event definition part----------------------
 
     constructor(view) {
-
 
 
         BaseNode.initStatic()
@@ -186,16 +179,18 @@ export default class BaseNode extends THREE.Mesh {
 
         super(BaseNode.sphereGeometry, material);
 
+        this.registerCustomEvent('before-render')
 
-       // var axisHelper = new THREE.AxisHelper( 50 );
-       // this.add( axisHelper );
+
+        // var axisHelper = new THREE.AxisHelper( 50 );
+        // this.add( axisHelper );
 
 
         if (view instanceof HTMLElement)
             this.setView(view)
 
 
-        this.mCustomEvents=$({})
+        this.mCustomEvents = $({})
 
 
         this.addDefaultHandlers();
@@ -204,12 +199,10 @@ export default class BaseNode extends THREE.Mesh {
 
         //keyboard events container
         // TODO to be able to use event bubbling we'd need to append the html elements to the one of the parent cluster
-        this.mKeyboardEvents= new Mousetrap(document.createElement("span"));
+        this.mKeyboardEvents = new Mousetrap(document.createElement("span"));
 
 
     }
-
-
 
 
     addDefaultHandlers() {
@@ -219,19 +212,19 @@ export default class BaseNode extends THREE.Mesh {
         this.on("mouseover", function (e) {
             e.stopPropagation()
             BaseNode.lastHoveredNode = e.target
-           // e.stopPropagation()
+            // e.stopPropagation()
 
         })
         this.on("mouseout", function (e) {
-          //  BaseNode.lastHoveredNode =null;
-          //  e.stopPropagation()
+            //  BaseNode.lastHoveredNode =null;
+            //  e.stopPropagation()
 
         })
 
 
         // adding before-render event
 
-        function onBeforeRender(){
+        function onBeforeRender() {
             this.trigger("before-render")
 
         }
@@ -239,8 +232,10 @@ export default class BaseNode extends THREE.Mesh {
         Object.defineProperty(this, "onBeforeRender", {
             enumerable: false,
             configurable: false,
-            get: function() { return onBeforeRender.bind(this); }.bind(this),
-            set: function(newValue) {
+            get: function () {
+                return onBeforeRender.bind(this);
+            }.bind(this),
+            set: function (newValue) {
 
                 console.warn("onBeforeRender cannot be overridden use .on('before-render',function(){}) instead")
 
@@ -251,7 +246,7 @@ export default class BaseNode extends THREE.Mesh {
         //------------------
 
         // adding before-render event default handler
-        this.on("before-render",function(){
+        this.on("before-render", function () {
 
             //the update is currently called from the view3D for the root element
             //and all child elements..
@@ -279,11 +274,10 @@ export default class BaseNode extends THREE.Mesh {
 
         //FIXME set camera and domElement not via env attribute ...
         // BaseNode.domEvents = new THREEx.DomEvents(/*camera, renderer.domElement*/)
-       // BaseNode.domEvents = globalEnv.domEvents
+        // BaseNode.domEvents = globalEnv.domEvents
 
 
         BaseNode._static_initialised_ = true
-
 
 
         //have one gloabal listener for all nodes and let them
@@ -295,7 +289,6 @@ export default class BaseNode extends THREE.Mesh {
         });
 
 
-
     }
 
 
@@ -304,7 +297,8 @@ export default class BaseNode extends THREE.Mesh {
      * NOTE:don't call update for any cluster directly,it will be called via before-render
      *
      */
-    update(){}
+    update() {
+    }
 
 
     /**
@@ -312,10 +306,10 @@ export default class BaseNode extends THREE.Mesh {
      *
      *
      */
-    getDOMElement(){
+    getDOMElement() {
 
 
-            throw new Error("implement method 'getDOMElement' in sub class (return valid domElement) ")
+        throw new Error("implement method 'getDOMElement' in sub class (return valid domElement) ")
 
     }
 
@@ -325,7 +319,7 @@ export default class BaseNode extends THREE.Mesh {
      *
      *
      */
-    getDOMEvents(){
+    getDOMEvents() {
 
 
         throw new Error("implement method 'getDOMEvents' in sub class (return valid THREEx.domEvents) ")

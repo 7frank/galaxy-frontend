@@ -125,9 +125,13 @@ function TextNodes(env = globalEnv, options) {
 		//TODO is size still relevant somehow?
 		var size = 12
 
-		//return the result of the comparision
+
+		let _minDistance=typeof options.minDistance=="function"?options.minDistance():options.minDistance
+        let _maxDistance=typeof options.maxDistance=="function"?options.maxDistance():options.maxDistance
+
+        //return the result of the comparision
 		//angle  90° == pi/4 => 45° fov for text nodes to each side
-			if (size < 10 || size > 80 || angle>Math.PI/4 ||distance > options.maxDistance || distance < options.minDistance)
+			if (size < 10 || size > 80 || angle>Math.PI/4 ||distance > _maxDistance || distance <_minDistance)
 				return {
 					distance,angle,
 					addNodeToSet: false,
@@ -233,6 +237,8 @@ function TextNodes(env = globalEnv, options) {
 		var mNodes = options.getNodes();
        // console.error("textnodes",mNodes.length)
 		var maxVisibleTextNodes = options.maxVisibleCount;
+
+
 
 		//next let's find the closest x nodes that match the criterias to be displayed
 		var nodesCurrentBatch = [];

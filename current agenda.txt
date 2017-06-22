@@ -3,6 +3,9 @@ bugs:
 
 
 ---------------URGENT--------------
+
+[]TODO textnodes improve performance by first checking for container boundingbox
+
 [/]boundingboxes are off..
     !if view mouse move => wrong boundingbox calc
     => something in the animation loop might change node positions?
@@ -15,8 +18,13 @@ bugs:
 rendering data seems to be dependent quad sample + forcegraph => bad quad rendering
 
 [] cluster/text nodes.. missing again
+ TODO fixing cluster bounding boxes will solve that!!!
+ notify parent to rebuild it's hull from children bbxs
+ (throttle that >100ms) profit?
 
 -----------------------------------
+
+
 
     []text utf8 not displayed correct
 

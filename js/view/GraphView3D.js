@@ -96,6 +96,7 @@ class GraphView3D extends View3D
                 if (prev_vis)
                 {
                 GUI.updateFromVisibleNodes(visibleNodes)
+                    that.mVisibleNodes=visibleNodes
                 $(that).trigger("visible-nodes-changed") //TODO inverse control via listening
                 }
             }

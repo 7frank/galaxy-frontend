@@ -299,19 +299,19 @@ class Cluster3DExtended extends BaseCluster3D {
 
         //TODO make sure radius is dynamically changed when cluster radius changes
 
-        let minDistance = this.getRadius() / 3
+        //let minDistance = this.getRadius() / 3
 
         // TODO the bounding volume determines the visibility of the text nodes
         //TODO so currently with no volume generated properly the text nodes are invisible
         //  if (minDistance<10000) minDistance=10000
 
-        let maxDistance = minDistance * 10
+       // let maxDistance = minDistance * 10
 
         if (!this.mTextNodes)
             this.mTextNodes = TextNodes(env, {
                 maxVisibleCount: 50,
-                maxDistance: maxDistance,//30000
-                minDistance: minDistance, //3000
+                maxDistance: ()=> this.getRadius() / 3*10,//30000
+                minDistance:  ()=> this.getRadius() / 3, //3000
                 getNodes: function () {
 
                     return nodes

@@ -19,7 +19,7 @@ class RootCluster extends Cluster3DExtended {
     {
         super(...args)
 
-       // this.addGlobalNodeCaptions()
+
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
@@ -191,7 +191,7 @@ class RootCluster extends Cluster3DExtended {
 
 
 
-
+var that=this
         let env={
             renderer:this.mParentView.mRenderer,
             currentNodesVisible:[],//can be left empty if below nodes function is used
@@ -211,7 +211,16 @@ class RootCluster extends Cluster3DExtended {
                     return node.id
 
                 },
-                getNodes: () => this.mNodes //FIXME use only visible nodes to improve performance
+                getNodes: function(){
+                    //FIXME use only visible nodes to improve performance
+                    //TODO also have a per cluster approach for further performance improvements
+                    let view=that.getView()
+
+                   let res=(view&&_.isArray(view.mVisibleNodes))?view.mVisibleNodes:[]
+                    if (res==undefined) console.warn("!")
+                    return res
+
+                }
             })
 
 

@@ -107,6 +107,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         super(view);
         this.addNodes(nodes);
 
+        this.registerCustomEvent("hull-updated") // gets called if the hull got adjusted
+
         this.mClusters = {};
         //Cluster if present, use to cluster nodes into sub-clusters
         if (_.isArray(clusteringHandlers) && clusteringHandlers.length > 0) {
@@ -115,6 +117,10 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         // else this.updateCluster()
 
     }
+
+
+
+
 
     /**
      * add one or many nodes to the cluster
@@ -400,10 +406,24 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         _.extend(this.mClusters, _clustersObj)
 
 
+        /**
+         * add listeners to child elements if the hull was update
+         * in which case we bubble up the tree to notify for changes and readjust parent elements
+         *
+         */
+        _.each(this.mClusters,function(childCluster){
+            childCluster.on("hull-updated",_.throttle(function(){
+                that.adjustHullSize()
+            that.trigger("hull-updated")
+
+         },100))
+        })
+
+
         this.setDistributionHandler(entry.distribution, function () {
 
             that.mClusterRule = entry
-            that.trigger("complete")
+
 
 
         })
@@ -436,36 +456,30 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
     getCompoundBoundingBox() {
+        var that=this
         var box = new THREE.Box3;
-        _.each(this.getLeafs(), function (leaf) {
-            var geometry = leaf.geometry;
-            if (geometry === undefined) return;
 
-
+        _.each(this.mClusters, function (subCluster) {
             let boundingBox = new THREE.Box3;
-            //generate the boundingbox for the node particles if it is a leaf
 
-            let pc = leaf.mNodeParticles.pointCloud
-
-            if (pc.geometry.boundingBox)
-                boundingBox.copy(pc.geometry.boundingBox)
-            /*  else
-             boundingBox.setFromObject(pc);
-             */
+            if (!subCluster.geometry.boundingBox) return //not computed bbox, ignore
+            boundingBox.copy(subCluster.geometry.boundingBox )
 
 
-            let _center = boundingBox.getCenter();
 
             //FIXME offsets are not properly calculated
-            // let offset=leaf.localToWorld(new THREE.Vector3) //boundingBox.getCenter()
-            boundingBox.translate(_center);
+            let offset_parent=that.localToWorld(new THREE.Vector3)
+            let offset_world=subCluster.localToWorld(new THREE.Vector3)
+            boundingBox.translate(offset_world.sub(offset_parent));
 
 
             box.union(boundingBox);
 
 
-        });
-        return box;
+        })
+
+        return box
+
     }
 
 
@@ -516,19 +530,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
     adjustHullSize() {
         console.warn("adjustHullSize")
-/*
-        if (this.mHull && this.mHull.geometry)
-            this.mHull.geometry.dispose();
-        if (this.mHull && this.mHull.material)
-            this.mHull.material.dispose();
 
-        if (this.mHull) this.remove(this.mHull)
-
-        this.geometry.dispose();
-        this.geometry.boundingBox = null;
-        this.geometry.boundingSphere = null;
-        delete(this.geometry);
-*/
 
         let boundingBox = new THREE.Box3;
 
@@ -547,15 +549,18 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 pc.geometry.boundingBox = boundingBox
             }
 
+
         }
-        /* else //FIXME get bb of all leafs instead + actual position
+        else
+        /**  FIXME get bb of all leafs instead + actual position
          //we want to generate the hull for a cluster that is no leaf only:
          //if the leaf/child has finished it's distribution function
          //and
          //if ths has distributed it's children
          //via listeners?
-         boundingBox = this.getCompoundBoundingBox()
          */
+         boundingBox = this.getCompoundBoundingBox()
+
         //get center, radius
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize()
@@ -611,6 +616,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         else
             this.geometry = sphereGeometry;
 
+
+//notify listeners that the hull size probably changed
+        this.trigger("hull-updated")
 
     }
 
@@ -1929,19 +1937,19 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
         //TODO make sure radius is dynamically changed when cluster radius changes
 
-        let minDistance = this.getRadius() / 3
+        //let minDistance = this.getRadius() / 3
 
         // TODO the bounding volume determines the visibility of the text nodes
         //TODO so currently with no volume generated properly the text nodes are invisible
         //  if (minDistance<10000) minDistance=10000
 
-        let maxDistance = minDistance * 10
+       // let maxDistance = minDistance * 10
 
         if (!this.mTextNodes)
             this.mTextNodes = TextNodes(env, {
                 maxVisibleCount: 50,
-                maxDistance: maxDistance,//30000
-                minDistance: minDistance, //3000
+                maxDistance: ()=> this.getRadius() / 3*10,//30000
+                minDistance:  ()=> this.getRadius() / 3, //3000
                 getNodes: function () {
 
                     return nodes
@@ -2200,7 +2208,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
     {
         super(...args)
 
-       // this.addGlobalNodeCaptions()
+
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
@@ -2372,7 +2380,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
 
-
+var that=this
         let env={
             renderer:this.mParentView.mRenderer,
             currentNodesVisible:[],//can be left empty if below nodes function is used
@@ -2392,7 +2400,16 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
                     return node.id
 
                 },
-                getNodes: () => this.mNodes //FIXME use only visible nodes to improve performance
+                getNodes: function(){
+                    //FIXME use only visible nodes to improve performance
+                    //TODO also have a per cluster approach for further performance improvements
+                    let view=that.getView()
+
+                   let res=(view&&_.isArray(view.mVisibleNodes))?view.mVisibleNodes:[]
+                    if (res==undefined) console.warn("!")
+                    return res
+
+                }
             })
 
 
@@ -3482,6 +3499,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
                 if (prev_vis)
                 {
                 GUI.updateFromVisibleNodes(visibleNodes)
+                    that.mVisibleNodes=visibleNodes
                 $(that).trigger("visible-nodes-changed") //TODO inverse control via listening
                 }
             }
@@ -4701,40 +4719,43 @@ class BaseNode extends THREE.Mesh {
      */
 
 
-    getRegisteredCustomEvents()
-    {
-        return ['before-render']
+    getRegisteredCustomEvents() {
+        return this.mCustomEventNames
 
     }
 
-    isCustomEvent(eventName)
-    {
-        return this.getRegisteredCustomEvents().indexOf(eventName)>=0
+    registerCustomEvent(eventName) {
+
+        if (!this.mCustomEventNames) this.mCustomEventNames = [];
+
+        this.mCustomEventNames.push(eventName);
+
     }
 
-    isMouseEvent(eventName)
-    {
-        return  THREEx.DomEvents.eventNames.indexOf(eventName) >= 0
+
+    isCustomEvent(eventName) {
+        return this.getRegisteredCustomEvents().indexOf(eventName) >= 0
     }
 
+    isMouseEvent(eventName) {
+        return THREEx.DomEvents.eventNames.indexOf(eventName) >= 0
+    }
 
 
     //------------------------------------------------
-    onCustomEvent(eventName,eventhandler)
-    {
-        this.mCustomEvents.on(eventName,eventhandler.bind(this))
+    onCustomEvent(eventName, eventhandler) {
+        this.mCustomEvents.on(eventName, eventhandler.bind(this))
     }
 
-    offCustomEvent(eventName,eventhandler)
-    {
-        this.mCustomEvents.off(eventName,eventhandler)
+    offCustomEvent(eventName, eventhandler) {
+        this.mCustomEvents.off(eventName, eventhandler)
     }
 
 
-    triggerCustomEvent(eventName, origDomEvent, intersect)
-    {
+    triggerCustomEvent(eventName, origDomEvent, intersect) {
         this.mCustomEvents.trigger(eventName, origDomEvent, intersect)
     }
+
     //------------------------------------------------
 
 
@@ -4742,35 +4763,34 @@ class BaseNode extends THREE.Mesh {
     // them on the current element similar to how the mouse events do
     //Note: the current implementation only triggers keypresses every 300 ms
     onKey(eventName, eventhandler) {
-        let handler=_.throttle(eventhandler.bind(this),300)
+        let handler = _.throttle(eventhandler.bind(this), 300)
 
-        this.mKeyboardEvents.bind(eventName,handler ,'keydown');
+        this.mKeyboardEvents.bind(eventName, handler, 'keydown');
 
     }
+
     //TODO wont work with debounced handler
-    offKey(eventName, eventhandler)
-    {
+    offKey(eventName, eventhandler) {
         this.mKeyboardEvents.unbind(eventName, eventhandler);
-       // $(window).off(eventName, eventhandler);
+        // $(window).off(eventName, eventhandler);
 
     }
 
-    triggerKey(eventName, origDomEvent, intersect)
-    {
-        this.mKeyboardEvents.trigger(eventName,  origDomEvent, intersect);
-       // $(window).trigger(eventName, origDomEvent, intersect);
+    triggerKey(eventName, origDomEvent, intersect) {
+        this.mKeyboardEvents.trigger(eventName, origDomEvent, intersect);
+        // $(window).trigger(eventName, origDomEvent, intersect);
     }
 
     /**
      * gets called on the node that the mouse is hovering over
      *
      */
-    resolveKeyEvent(event){
+    resolveKeyEvent(event) {
 
 
         this.mKeyboardEvents.handleKeyEvent(event)
 
-     }
+    }
 
 
     //------------------------------------------------
@@ -4779,15 +4799,15 @@ class BaseNode extends THREE.Mesh {
 
         for (let eName of eventName.split(" ")) {
 
-            if (this. isCustomEvent(eName))
-                this.onCustomEvent(eName,eventhandler);
-            else
-            if (this.isMouseEvent(eName))
+            if (this.isCustomEvent(eName))
+                this.onCustomEvent(eName, eventhandler);
+            else if (this.isMouseEvent(eName))
                 this.getDOMEvents().addEventListener(this, eName, eventhandler.bind(this), false);
             else
                 this.onKey(eName, eventhandler)
 
-        };
+        }
+        ;
 
         return this;
     }
@@ -4797,21 +4817,19 @@ class BaseNode extends THREE.Mesh {
         for (let eName of eventName.split(" "))
 
 
-        for (let eName of eventName.split(" ")) {
+            for (let eName of eventName.split(" ")) {
 
-            if (this. isCustomEvent(eName))
-                this.offCustomEvent(eName,eventhandler);
-            else
-            if (this.isMouseEvent(eName))
-                this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
-            else
-                this.offKey(eName, eventhandler)
+                if (this.isCustomEvent(eName))
+                    this.offCustomEvent(eName, eventhandler);
+                else if (this.isMouseEvent(eName))
+                    this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
+                else
+                    this.offKey(eName, eventhandler)
 
-        };
+            }
+        ;
 
         return this;
-
-
 
 
     }
@@ -4819,22 +4837,18 @@ class BaseNode extends THREE.Mesh {
     trigger(eventName, origDomEvent, intersect) {
 
 
-
-
-
         for (let eName of eventName.split(" ")) {
 
 
-
-            if (this. isCustomEvent(eName))
+            if (this.isCustomEvent(eName))
                 this.triggerCustomEvent(eName, origDomEvent, intersect);
-            else
-            if (this.isMouseEvent(eName))
+            else if (this.isMouseEvent(eName))
                 this.getDOMEvents()._notify(eName, this, origDomEvent, intersect);
             else
-                this.triggerKey(eName,origDomEvent, intersect)
+                this.triggerKey(eName, origDomEvent, intersect)
 
-        };
+        }
+        ;
 
         return this;
 
@@ -4842,12 +4856,9 @@ class BaseNode extends THREE.Mesh {
     }
 
 
-
-
     //---------------end of event definition part----------------------
 
     constructor(view) {
-
 
 
         BaseNode.initStatic()
@@ -4867,16 +4878,18 @@ class BaseNode extends THREE.Mesh {
 
         super(BaseNode.sphereGeometry, material);
 
+        this.registerCustomEvent('before-render')
 
-       // var axisHelper = new THREE.AxisHelper( 50 );
-       // this.add( axisHelper );
+
+        // var axisHelper = new THREE.AxisHelper( 50 );
+        // this.add( axisHelper );
 
 
         if (view instanceof HTMLElement)
             this.setView(view)
 
 
-        this.mCustomEvents=$({})
+        this.mCustomEvents = $({})
 
 
         this.addDefaultHandlers();
@@ -4885,12 +4898,10 @@ class BaseNode extends THREE.Mesh {
 
         //keyboard events container
         // TODO to be able to use event bubbling we'd need to append the html elements to the one of the parent cluster
-        this.mKeyboardEvents= new Mousetrap(document.createElement("span"));
+        this.mKeyboardEvents = new Mousetrap(document.createElement("span"));
 
 
     }
-
-
 
 
     addDefaultHandlers() {
@@ -4900,19 +4911,19 @@ class BaseNode extends THREE.Mesh {
         this.on("mouseover", function (e) {
             e.stopPropagation()
             BaseNode.lastHoveredNode = e.target
-           // e.stopPropagation()
+            // e.stopPropagation()
 
         })
         this.on("mouseout", function (e) {
-          //  BaseNode.lastHoveredNode =null;
-          //  e.stopPropagation()
+            //  BaseNode.lastHoveredNode =null;
+            //  e.stopPropagation()
 
         })
 
 
         // adding before-render event
 
-        function onBeforeRender(){
+        function onBeforeRender() {
             this.trigger("before-render")
 
         }
@@ -4920,8 +4931,10 @@ class BaseNode extends THREE.Mesh {
         Object.defineProperty(this, "onBeforeRender", {
             enumerable: false,
             configurable: false,
-            get: function() { return onBeforeRender.bind(this); }.bind(this),
-            set: function(newValue) {
+            get: function () {
+                return onBeforeRender.bind(this);
+            }.bind(this),
+            set: function (newValue) {
 
                 console.warn("onBeforeRender cannot be overridden use .on('before-render',function(){}) instead")
 
@@ -4932,7 +4945,7 @@ class BaseNode extends THREE.Mesh {
         //------------------
 
         // adding before-render event default handler
-        this.on("before-render",function(){
+        this.on("before-render", function () {
 
             //the update is currently called from the view3D for the root element
             //and all child elements..
@@ -4960,11 +4973,10 @@ class BaseNode extends THREE.Mesh {
 
         //FIXME set camera and domElement not via env attribute ...
         // BaseNode.domEvents = new THREEx.DomEvents(/*camera, renderer.domElement*/)
-       // BaseNode.domEvents = globalEnv.domEvents
+        // BaseNode.domEvents = globalEnv.domEvents
 
 
         BaseNode._static_initialised_ = true
-
 
 
         //have one gloabal listener for all nodes and let them
@@ -4976,7 +4988,6 @@ class BaseNode extends THREE.Mesh {
         });
 
 
-
     }
 
 
@@ -4985,7 +4996,8 @@ class BaseNode extends THREE.Mesh {
      * NOTE:don't call update for any cluster directly,it will be called via before-render
      *
      */
-    update(){}
+    update() {
+    }
 
 
     /**
@@ -4993,10 +5005,10 @@ class BaseNode extends THREE.Mesh {
      *
      *
      */
-    getDOMElement(){
+    getDOMElement() {
 
 
-            throw new Error("implement method 'getDOMElement' in sub class (return valid domElement) ")
+        throw new Error("implement method 'getDOMElement' in sub class (return valid domElement) ")
 
     }
 
@@ -5006,7 +5018,7 @@ class BaseNode extends THREE.Mesh {
      *
      *
      */
-    getDOMEvents(){
+    getDOMEvents() {
 
 
         throw new Error("implement method 'getDOMEvents' in sub class (return valid THREEx.domEvents) ")
