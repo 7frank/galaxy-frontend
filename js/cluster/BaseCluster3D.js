@@ -209,7 +209,15 @@ class BaseCluster3D extends BaseNode {
     }
 
     getClusterOptions() {
-        return this.mEntry && this.mEntry.options ? this.mEntry.options : {}
+
+       let options= _.extend({
+            minClusterSize: 10,
+            defaultMergeGroupName: "other",
+            hull: new BaseVolume()
+
+        },   this.mEntry.options);
+
+        return options
 
     }
 
@@ -224,7 +232,7 @@ class BaseCluster3D extends BaseNode {
 
     applyClustering(mClusteringSpeccsArray) {
 
-        if (mClusteringSpeccsArray.length >= 1)
+        if (mClusteringSpeccsArray.length >= 0)
             this.setEntry(mClusteringSpeccsArray[0])
 
 
@@ -291,12 +299,7 @@ class BaseCluster3D extends BaseNode {
 
     doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();
-        var options = _.extend({
-            minClusterSize: 10,
-            defaultMergeGroupName: "other",
-            hull: new BaseVolume()
-
-        }, entry.options);
+        var options =this.getClusterOptions()
         var that = this;
 
         var _clustersObj = {};
@@ -374,29 +377,48 @@ class BaseCluster3D extends BaseNode {
     }
 
 
-    getCompoundBoundingBox() {
-        var that = this
-        var box = new THREE.Box3;
 
+    getVerticesFromBoundingBox(boundingBox){
+
+
+
+        let _center = boundingBox.getCenter();
+        let _size = boundingBox.getSize();
+
+        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
+
+        box.translate(_center.x,_center.y,_center.z);
+
+        return box.vertices
+    }
+
+
+
+    getCompoundBoundingBoxInfo() {
+        var that = this;
+        var box = new THREE.Box3;
+        var vertices = [];
         _.each(this.mClusters, function (subCluster) {
             let boundingBox = new THREE.Box3;
 
-            if (!subCluster.geometry.boundingBox) return //not computed bbox, ignore
-            boundingBox.copy(subCluster.geometry.boundingBox)
+            if (!subCluster.geometry.boundingBox) return; //not computed bbox, ignore
+            boundingBox.copy(subCluster.geometry.boundingBox);
 
 
             //FIXME offsets are not properly calculated
-            let offset_parent = that.localToWorld(new THREE.Vector3)
-            let offset_world = subCluster.localToWorld(new THREE.Vector3)
+            let offset_parent = that.localToWorld(new THREE.Vector3);
+            let offset_world = subCluster.localToWorld(new THREE.Vector3);
             boundingBox.translate(offset_world.sub(offset_parent));
 
+           let vert= that.getVerticesFromBoundingBox(boundingBox);
+            vertices=vertices.concat(vert);
 
             box.union(boundingBox);
 
 
         })
 
-        return box
+        return {box:box,vertices:vertices}
 
     }
 
@@ -449,8 +471,8 @@ class BaseCluster3D extends BaseNode {
     adjustHullSize() {
 
 
-        let boundingBox = new THREE.Box3;
 
+        let info={box: new THREE.Box3,vertices:[]};
 
         //generate the boundingbox for the node particles if this is a leaf
         if (this.isLeaf()) {
@@ -462,13 +484,14 @@ class BaseCluster3D extends BaseNode {
             else {
 
                 //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
-                boundingBox.setFromArray(pc.geometry.attributes.position.array)
-                pc.geometry.boundingBox = boundingBox
+                info.box.setFromArray(pc.geometry.attributes.position.array);
+                info.vertices=this.getVerticesFromBoundingBox( info.box)  //TODO get vertices from array
+                pc.geometry.boundingBox =  info.box
             }
 
 
         }
-        else
+        else {
             /**  FIXME get bb of all leafs instead + actual position
              //we want to generate the hull for a cluster that is no leaf only:
              //if the leaf/child has finished it's distribution function
@@ -476,15 +499,21 @@ class BaseCluster3D extends BaseNode {
              //if ths has distributed it's children
              //via listeners?
              */
-            boundingBox = this.getCompoundBoundingBox()
+             info = this.getCompoundBoundingBoxInfo();
+
+
+        }
+
+        let boundingBox=info.box;
+
 
         //get center, radius
         let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize()
+        let _size = boundingBox.getSize();
         let radius = _size.length() / 2;
 
 
-        let boundingSphere = boundingBox.getBoundingSphere()
+        let boundingSphere = boundingBox.getBoundingSphere();
 
 
         // we must have at least one hull impl
@@ -500,12 +529,15 @@ class BaseCluster3D extends BaseNode {
 
             if (mOptions.hull instanceof BaseVolume)
             {
-                mHull = mOptions.hull.createFromBoundingBox(boundingBox);
+                //TODO use the vertices of the bbox instead of the bbox itself
+                let vertices= info.vertices
+                mHull = mOptions.hull.createFromBoundingBox(vertices,boundingBox);
                 mHull.info=mOptions.hull;
             }
             else
-            if (typeof mOptions.hull == "function")
-            mHull = mOptions.hull(boundingBox);
+                console.error("must be instanceof BaseVolume")
+          //  if (typeof mOptions.hull == "function")
+          //  mHull = mOptions.hull(boundingBox);
 
 
 
@@ -517,6 +549,11 @@ class BaseCluster3D extends BaseNode {
             }
             else {
                 this.mHull.geometry = mHull.geometry
+
+                //FIXME
+                this.mHull.setActive=mHull.setActive
+                this.mHull.setInactive=mHull.setInactive
+
 
                 this.mHull.position.copy(mHull.position)
             }

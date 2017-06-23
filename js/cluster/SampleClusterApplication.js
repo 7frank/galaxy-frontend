@@ -46,6 +46,7 @@ import SimpleForceGraphView3D from "../view/SimpleForceGraphView3D"
 
 
 import BoxVolume from "./hull/BoxVolume"
+import ConvexVolume from "./hull/ConvexVolume"
 
 //-----------------------------------------
 //-----------DEBUG-------------------------
@@ -97,25 +98,7 @@ export class MyMain {
 
     }
 
-    getBoxHull(boundingBox) {
-    return new BoxVolume().createFromBoundingBox(boundingBox)
-      /*  let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize()
 
-        var box = new THREE.BoxGeometry(_size.x, _size.y, _size.z)
-
-        var geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
-
-        var mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: 0.1, transparent: true});
-
-        var wireframe = new THREE.LineSegments(geo, mat);
-        wireframe.position.add(_center)
-        wireframe.geometry.boundingBox=boundingBox
-
-        return wireframe
-*/
-
-    }
 
 
     getRingHull(boundingBox) {
@@ -363,7 +346,7 @@ export class MyMain {
             let view3 = createView("node distribution test case",
                 [{
                     distribution: new BaseDistribution(2000, 3),
-                    options: { hull: this.getBoxHull}
+                    options: { hull: new BoxVolume()}
                 }])
                 .loadDataSet(this.getDSByID(1))
 
@@ -443,14 +426,14 @@ export class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new BaseDistribution(4000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull: this.getBoxHull}
+                options: {minClusterSize: 15, hull:  new BoxVolume()}
             },
             {
                 generator: industrySetGenerator,
                 distribution: new BaseDistribution(2000, 1).onSort(mySort),
-                options: {minClusterSize: 15, hull: this.getBoxHull}
+                options: {minClusterSize: 15, hull: new BoxVolume()}
             },
-            {distribution: new BaseDistribution(200, 3), options: {minClusterSize: 15, hull: this.getBoxHull}}
+            {distribution: new BaseDistribution(200, 3), options: {minClusterSize: 15, hull:  new BoxVolume()}}
 
 
         ]
@@ -480,9 +463,9 @@ export class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new BaseDistribution(2000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull: this.getBoxHull}
+                options: {minClusterSize: 15, hull: new BoxVolume()}
             },
-            {distribution: new BaseDistribution(400, 2),  options: { hull: this.getBoxHull}}
+            {distribution: new BaseDistribution(400, 2),  options: { hull:  new BoxVolume()}}
 
 
         ]
@@ -551,7 +534,7 @@ export class MyMain {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new BaseDistribution(15000, 2) // countries get placed equally on a plane of size 15k X 15k
+        let countryDistribution = new BaseDistribution(25000, 2) // countries get placed equally on a plane of size 15k X 15k
         let industryDistribution = new ForceGraphDistribution(3000, 3)// industries within countries use the Force-Graph approach to position elements
         let nodesWithinIndustryDistribution = new ForceGraphDistribution(500, 3)//same goes for the nodes within each industry
 
@@ -576,9 +559,9 @@ export class MyMain {
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
-                options: {minClusterSize: 15,hull: this.getBoxHull} //FIXME  this option is used twice for leaf and parent  and below is ignored
+                options: {minClusterSize: 15,hull:new ConvexVolume() }// new BoxVolume() //FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: nodesWithinIndustryDistribution, hull: this.getBoxHull }  // this.getEllipsoidHull.bind(this)
+            , {distribution: nodesWithinIndustryDistribution, hull: new BoxVolume() }  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
 
         ]

@@ -19,6 +19,33 @@ class BoxVolume extends  BaseVolume {
     }
 
 
+
+    /**
+     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
+     * eg. depending on the distance of camera and object
+     *
+     * @param newLOD
+     */
+    setLOD(newLOD)
+    {
+      super.setLOD(newLOD);
+
+        //by default just set the opacity and visibility accordingly
+        if ( this.mesh && this.mesh.material) {
+            this.mesh.material.opacity = this.lod
+
+            if (this.lod<=0)
+                this.mesh.material.visible=false;
+            else
+                this.mesh.material.visible=true;
+
+
+        }
+
+    }
+
+
+
     canBeVisible()
     {
         return true

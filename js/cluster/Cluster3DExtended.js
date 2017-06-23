@@ -96,8 +96,8 @@ class Cluster3DExtended extends BaseCluster3D {
         }
 
         //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
-        this.on("space", function (e) {
-            // e.stopPropagation()
+        this.on("z click", function (e) {
+             e.stopPropagation()
 
             this.zoomToCluster()
 
@@ -137,7 +137,14 @@ class Cluster3DExtended extends BaseCluster3D {
                 }
 
 
-                this.mHull.material.opacity = 1;
+
+                if ( this.mHull.setActive)
+                    this.mHull.setActive()
+                else
+                {
+                    console.warn("TODO setActive() missing ")
+                    this.mHull.material.opacity=0.7
+                }
 
 
             }
@@ -158,7 +165,13 @@ class Cluster3DExtended extends BaseCluster3D {
             if (this.mHull)
             {
 
-                this.mHull.material.opacity = 0.2;
+    if ( this.mHull.setInactive)
+                this.mHull.setInactive()
+                else
+    {
+        console.warn("TODO setInactive() missing ")
+        this.mHull.material.opacity=0.2
+    }
 
             }
 

@@ -64,7 +64,7 @@ var clusters =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 21);
+/******/ 	return __webpack_require__(__webpack_require__.s = 22);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,9 +73,9 @@ var clusters =
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(9);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -454,29 +454,48 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
-    getCompoundBoundingBox() {
-        var that = this
-        var box = new THREE.Box3;
 
+    getVerticesFromBoundingBox(boundingBox){
+
+
+
+        let _center = boundingBox.getCenter();
+        let _size = boundingBox.getSize();
+
+        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
+
+        box.translate(_center.x,_center.y,_center.z);
+
+        return box.vertices
+    }
+
+
+
+    getCompoundBoundingBoxInfo() {
+        var that = this;
+        var box = new THREE.Box3;
+        var vertices = [];
         _.each(this.mClusters, function (subCluster) {
             let boundingBox = new THREE.Box3;
 
-            if (!subCluster.geometry.boundingBox) return //not computed bbox, ignore
-            boundingBox.copy(subCluster.geometry.boundingBox)
+            if (!subCluster.geometry.boundingBox) return; //not computed bbox, ignore
+            boundingBox.copy(subCluster.geometry.boundingBox);
 
 
             //FIXME offsets are not properly calculated
-            let offset_parent = that.localToWorld(new THREE.Vector3)
-            let offset_world = subCluster.localToWorld(new THREE.Vector3)
+            let offset_parent = that.localToWorld(new THREE.Vector3);
+            let offset_world = subCluster.localToWorld(new THREE.Vector3);
             boundingBox.translate(offset_world.sub(offset_parent));
 
+           let vert= that.getVerticesFromBoundingBox(boundingBox);
+            vertices=vertices.concat(vert);
 
             box.union(boundingBox);
 
 
         })
 
-        return box
+        return {box:box,vertices:vertices}
 
     }
 
@@ -529,8 +548,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     adjustHullSize() {
 
 
-        let boundingBox = new THREE.Box3;
 
+        let info={box: new THREE.Box3,vertices:[]};
 
         //generate the boundingbox for the node particles if this is a leaf
         if (this.isLeaf()) {
@@ -542,13 +561,14 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             else {
 
                 //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
-                boundingBox.setFromArray(pc.geometry.attributes.position.array)
-                pc.geometry.boundingBox = boundingBox
+                info.box.setFromArray(pc.geometry.attributes.position.array);
+                info.vertices=this.getVerticesFromBoundingBox( info.box)  //TODO get vertices from array
+                pc.geometry.boundingBox =  info.box
             }
 
 
         }
-        else
+        else {
             /**  FIXME get bb of all leafs instead + actual position
              //we want to generate the hull for a cluster that is no leaf only:
              //if the leaf/child has finished it's distribution function
@@ -556,15 +576,21 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
              //if ths has distributed it's children
              //via listeners?
              */
-            boundingBox = this.getCompoundBoundingBox()
+             info = this.getCompoundBoundingBoxInfo();
+
+
+        }
+
+        let boundingBox=info.box;
+
 
         //get center, radius
         let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize()
+        let _size = boundingBox.getSize();
         let radius = _size.length() / 2;
 
 
-        let boundingSphere = boundingBox.getBoundingSphere()
+        let boundingSphere = boundingBox.getBoundingSphere();
 
 
         // we must have at least one hull impl
@@ -580,12 +606,15 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             if (mOptions.hull instanceof __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__["a" /* default */])
             {
-                mHull = mOptions.hull.createFromBoundingBox(boundingBox);
+                //TODO use the vertices of the bbox instead of the bbox itself
+                let vertices= info.vertices
+                mHull = mOptions.hull.createFromBoundingBox(vertices,boundingBox);
                 mHull.info=mOptions.hull;
             }
             else
-            if (typeof mOptions.hull == "function")
-            mHull = mOptions.hull(boundingBox);
+                console.error("must be instanceof BaseVolume")
+          //  if (typeof mOptions.hull == "function")
+          //  mHull = mOptions.hull(boundingBox);
 
 
 
@@ -597,6 +626,11 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             }
             else {
                 this.mHull.geometry = mHull.geometry
+
+                //FIXME
+                this.mHull.setActive=mHull.setActive
+                this.mHull.setInactive=mHull.setInactive
+
 
                 this.mHull.position.copy(mHull.position)
             }
@@ -1643,7 +1677,7 @@ class GraphData
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(10);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -1741,8 +1775,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         }
 
         //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
-        this.on("space", function (e) {
-            // e.stopPropagation()
+        this.on("z click", function (e) {
+             e.stopPropagation()
 
             this.zoomToCluster()
 
@@ -1782,7 +1816,14 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
                 }
 
 
-                this.mHull.material.opacity = 1;
+
+                if ( this.mHull.setActive)
+                    this.mHull.setActive()
+                else
+                {
+                    console.warn("TODO setActive() missing ")
+                    this.mHull.material.opacity=0.7
+                }
 
 
             }
@@ -1803,7 +1844,13 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
             if (this.mHull)
             {
 
-                this.mHull.material.opacity = 0.2;
+    if ( this.mHull.setInactive)
+                this.mHull.setInactive()
+                else
+    {
+        console.warn("TODO setInactive() missing ")
+        this.mHull.material.opacity=0.2
+    }
 
             }
 
@@ -2091,7 +2138,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(21);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -2659,6 +2706,69 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseVolume__ = __webpack_require__(9);
+/**
+ * Created by Frank on 22.06.2017.
+ */
+
+
+/**
+ * a slight derivative of it's base class
+ * allowing for user to add to sub-cluster
+ *
+ */
+
+class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* default */] {
+
+    constructor(...args) {
+        super(...args)
+
+
+    }
+
+
+
+    /**
+     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
+     * eg. depending on the distance of camera and object
+     *
+     * @param newLOD
+     */
+    setLOD(newLOD)
+    {
+      super.setLOD(newLOD);
+
+        //by default just set the opacity and visibility accordingly
+        if ( this.mesh && this.mesh.material) {
+            this.mesh.material.opacity = this.lod
+
+            if (this.lod<=0)
+                this.mesh.material.visible=false;
+            else
+                this.mesh.material.visible=true;
+
+
+        }
+
+    }
+
+
+
+    canBeVisible()
+    {
+        return true
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = BoxVolume;
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /**
  * Created by Frank on 22.06.2017.
  */
@@ -2675,9 +2785,29 @@ class BaseVolume {
 
     constructor() {
 
+        this.lod=1
+
+    }
+
+
+    /**
+     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
+     * eg. depending on the distance of camera and object
+     *
+     * @param newLOD
+     */
+    setLOD(newLOD)
+    {
+        if (newLOD<0) newLOD=0;
+        if (newLOD>1) newLOD=1;
+
+
+        this.lod=newLOD
 
 
     }
+
+
 
     /**
      * determines if the volume is can be made visible to the user
@@ -2691,26 +2821,54 @@ class BaseVolume {
     }
 
 
-    createFromBoundingBox(boundingBox) {
+//FIXME have a better approach to generate the hull
+//? rather: create from vertices
+    createFromBoundingBox(vertices,boundingBox) {
 
         let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize()
+        let _size = boundingBox.getSize();
 
-        var box = new THREE.BoxGeometry(_size.x, _size.y, _size.z)
+        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
 
-        var geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
+        let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
 
-        var mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: 0.1, transparent: true});
+        let mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: 0.1, transparent: true});
 
-        var wireframe = new THREE.LineSegments(geo, mat);
-        wireframe.position.add(_center)
-        wireframe.geometry.boundingBox=boundingBox
+        let wireframe = new THREE.LineSegments(geo, mat);
+        wireframe.position.add(_center);
+        wireframe.geometry.boundingBox=boundingBox;
 
-        return wireframe
+        this.mesh=this.mix(wireframe);
+
+
+        return this.mesh
+
+
 
 
     }
 
+
+    mix(mesh)
+    {
+
+        mesh.setActive=function(){
+
+           this.material.opacity=1;
+
+        }
+
+
+        mesh.setInactive=function(){
+
+        this.material.opacity=0.3
+
+        }
+
+        return mesh
+
+
+    }
 
 
 
@@ -2722,7 +2880,7 @@ class BaseVolume {
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2834,7 +2992,7 @@ class ZoomUtil {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3280,7 +3438,7 @@ customElements.define("view-3d", View3D);
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3317,7 +3475,7 @@ class ClusterNodeArray extends Array //List<Node>
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3386,7 +3544,7 @@ class ClusterNodeArray extends Array //List<Node>
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3428,7 +3586,7 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3486,47 +3644,118 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 
 
 /***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseVolume__ = __webpack_require__(8);
-/**
- * Created by Frank on 22.06.2017.
- */
-
-
-/**
- * a slight derivative of it's base class
- * allowing for user to add to sub-cluster
- *
- */
-
-class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* default */] {
-
-    constructor(...args) {
-        super(...args)
-
-
-    }
-
-
-    canBeVisible()
-    {
-        return true
-    }
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = BoxVolume;
-
-
-/***/ }),
 /* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(8);
+/**
+ * Created by Frank on 23.06.2017.
+ */
+
+
+
+
+
+
+/**
+ *
+ *
+ *
+ */
+
+class ConvexVolume extends  __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* default */] {
+
+
+
+//leaf- bbox => geometry => sum(vertex)
+
+//ConvexGeometry
+//NOTE also have compute different detailed hulls to set by lod factor
+    //eg. if lod <0.3 this.mesh.geometry=this.lowpolyMesh
+
+
+
+
+    createFromBoundingBox(vertices,boundingBox) {
+
+
+        let geo =  new THREE.ConvexGeometry(vertices)
+
+
+
+
+        this.geometryLowPoly=geo.clone()
+        let modifier=new THREE.SubdivisionModifier(1)
+        modifier.modify(geo)
+        this.geometryAveragePoly=geo.clone()
+        modifier.modify(geo)
+        this.geometryHighPoly=geo.clone()
+
+        //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
+        let mat = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            opacity: 0.03,
+            transparent: true,
+            depthWrite:false,
+            side: THREE.BackSide
+        });
+
+        let mesh = new THREE.Mesh(geo, mat);
+
+        mesh.geometry.boundingBox=boundingBox;
+
+        this.mesh=this.mix(mesh);
+
+        return this.mesh;
+
+    }
+
+
+    setLOD(l)
+    {
+        super.setLOD(l)
+//FIXME lod will only work if we use the generated mesh instead of how we currently just use the geometry so the mouse events will stay at the original mesh
+
+        if (l<0.3) this.mesh.geometry=this.geometryLowPoly
+        if (l>=0.3&& l<=0.7) this.mesh.geometry=this.geometryAveragePoly
+        if (l>0.7) this.mesh.geometry=this.geometryHighPoly
+    }
+
+
+    mix(mesh)
+    {
+
+        mesh.setActive=function(){
+
+            this.material.opacity=0.1;
+
+        }
+
+
+        mesh.setInactive=function(){
+
+            this.material.opacity=0.03
+
+        }
+
+        return mesh
+
+
+    }
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ConvexVolume;
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(3);
 /**
@@ -3708,12 +3937,12 @@ customElements.define("graph-view-3d", GraphView3D);
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(3);
 /**
  * Created by Frank on 15.06.2017.
@@ -4777,7 +5006,7 @@ function DefaultForceGraph(view3d) {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4819,7 +5048,7 @@ class BaseEdge {
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5157,11 +5386,11 @@ class BaseNode extends THREE.Mesh {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 08.06.2017.
@@ -5354,25 +5583,26 @@ class EdgesContainer extends THREE.Object3D {
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ClusterLeafElement__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__GraphData__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__view_GraphView3D__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__view_SimpleForceGraphView3D__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__view_GraphView3D__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__view_SimpleForceGraphView3D__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__hull_ConvexVolume__ = __webpack_require__(16);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
@@ -5399,6 +5629,7 @@ THREE.EllipsoidGeometry = function (width, height, depth, widthSegments, heightS
 };
 
 THREE.EllipsoidGeometry.prototype = Object.create(THREE.Geometry.prototype);
+
 
 
 
@@ -5473,25 +5704,7 @@ class MyMain {
 
     }
 
-    getBoxHull(boundingBox) {
-    return new __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]().createFromBoundingBox(boundingBox)
-      /*  let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize()
 
-        var box = new THREE.BoxGeometry(_size.x, _size.y, _size.z)
-
-        var geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
-
-        var mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: 0.1, transparent: true});
-
-        var wireframe = new THREE.LineSegments(geo, mat);
-        wireframe.position.add(_center)
-        wireframe.geometry.boundingBox=boundingBox
-
-        return wireframe
-*/
-
-    }
 
 
     getRingHull(boundingBox) {
@@ -5739,7 +5952,7 @@ class MyMain {
             let view3 = createView("node distribution test case",
                 [{
                     distribution: new BaseDistribution(2000, 3),
-                    options: { hull: this.getBoxHull}
+                    options: { hull: new BoxVolume()}
                 }])
                 .loadDataSet(this.getDSByID(1))
 
@@ -5819,14 +6032,14 @@ class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](4000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull: this.getBoxHull}
+                options: {minClusterSize: 15, hull:  new __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]()}
             },
             {
                 generator: industrySetGenerator,
                 distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 1).onSort(mySort),
-                options: {minClusterSize: 15, hull: this.getBoxHull}
+                options: {minClusterSize: 15, hull: new __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]()}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 3), options: {minClusterSize: 15, hull: this.getBoxHull}}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 3), options: {minClusterSize: 15, hull:  new __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]()}}
 
 
         ]
@@ -5856,9 +6069,9 @@ class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull: this.getBoxHull}
+                options: {minClusterSize: 15, hull: new __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]()}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](400, 2),  options: { hull: this.getBoxHull}}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](400, 2),  options: { hull:  new __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]()}}
 
 
         ]
@@ -5894,36 +6107,67 @@ class MyMain {
 
     }
 
+
+    /**
+     * this is a sample configuration for  the cluster.
+     * it contains 2 subdivisions:  -first into countries
+     *                              -followed by industry
+     *
+     */
     getForceSpeccs() {
 
-        function countrySetGenerator(groupFunction, node) {
 
+        //the function that is called to create the  country groups
+        function countrySetGenerator(groupFunction, node) {
+            // the group function takes 2 arguments
+            // the first is the value that will determine the key of the group
+            //in this case node.group contains country names
+            //the second argument is the node itself that is passed into the group created
             groupFunction(node.group, node)
         }
 
+        //same goes for the industy clusters that are sub-clusters of the country clusters in this example
         function industrySetGenerator(groupFunction, node) {
             groupFunction(node.industry, node)
         }
 
-        //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](15000, 2) //1000
-        let sample2 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](3000, 3)//200
-        let sample3 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](500, 3)//50
 
-        //  let rand2 = new RandomDistribution(200, 2)
+
+        //there are several distribution classes defined
+        //these handle how the current cluster positions it's sub-clusters when rendering
+        //basically a distribution function does have 2 parameters
+        // the first is the maximum size in x/y/z direction the elements within can be placed
+        // the second defined the dimensions 1/2/3 that get used for the element placement
+
+
+        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](25000, 2) // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](3000, 3)// industries within countries use the Force-Graph approach to position elements
+        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](500, 3)//same goes for the nodes within each industry
+
+        //the final configuration for rendering
+        //it contains an additional options attribute per array entry
+
+        // @param options.minClusterSize ... is the lower bound for the nodes within the cluster
+        // if the cluster has fewer elements all clusters previously generated are places within this "other" cluster
+        // @param options. defaultMergeGroupName the name of the "other" cluster can be changed by this value
+        // @param options.hull can be used to add a volume around the cluster
+        //by default if no value gets set, the BaseVolume class is used which is invisible by default
+        //but is necessary for other components like picking and tet rendering
+
+
 
         return [
             {
                 generator: countrySetGenerator,
-                distribution: sample1,
+                distribution: countryDistribution,
                 options: {minClusterSize: 40}
             },
             {
                 generator: industrySetGenerator,
-                distribution: sample2,
-                options: {minClusterSize: 15,hull: this.getBoxHull} //FIXME  this option is used twice for leaf and parent  and below is ignored
+                distribution: industryDistribution,
+                options: {minClusterSize: 15,hull:new __WEBPACK_IMPORTED_MODULE_14__hull_ConvexVolume__["a" /* default */]() }// new BoxVolume() //FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: sample3, hull: this.getBoxHull }  // this.getEllipsoidHull.bind(this)
+            , {distribution: nodesWithinIndustryDistribution, hull: new __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]() }  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
 
         ]

@@ -1,0 +1,740 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section*
+Basics
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+get some kind of structure into this 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Abstract
+\end_layout
+
+\begin_layout Standard
+The following document will be some sort of a documentation of the features,
+ progress and bugs while creating the (force) graph.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO obviously
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Intro
+\end_layout
+
+\begin_layout Section
+Features/Versions
+\end_layout
+
+\begin_layout Subsection
+next version
+\end_layout
+
+\begin_layout Subsubsection
+Top prio till friday presentation
+\end_layout
+
+\begin_layout Itemize
+BaseVolume around cluster 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+"If you zoom out enough, it will be at the country level But when you zoom
+ in enough into country, each sector cluster wrapper would be displayed
+ If we can make transparent wrapper a bit more transparent for each sector
+ at far distance level"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+simple convex hull 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+from bounding box dots will be faster
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+ellipse or convex static around clusters with onbefore 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+=> distance check like partially existing nice looking + transparent 
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+[]text nodes performace still needs improvements 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+definitly check this one out but not longer 'till friday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+memory leaks most of it is definitly because of the text nodes 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+[x]prevent scroll default behaviour on text nodes
+\end_layout
+
+\begin_layout Subsubsection
+---------------URGENT--------------
+\end_layout
+
+\begin_layout Itemize
+[]TODO textnodes improve performance by first checking for container boundingbox
+ 
+\end_layout
+
+\begin_layout Itemize
+[] speccs=> hull option => FIXME this option is used twice for leaf and
+ parent and below is ignored
+\end_layout
+
+\begin_layout Itemize
+[x]boundingboxes are off..
+ !if view mouse move
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+=> wrong boundingbox calc
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+NOTE: might be due to edges used for bb calc or pointclouds before animating
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+=> something in the animation loop might change node positions? 
+\end_layout
+
+\begin_layout Itemize
+=> setFromObject...would create wrong bb because of other elements within pc
+ getting changed while animation loop runs 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+TODO cluster bounding boxes 
+\end_layout
+
+\begin_layout Standard
+[/]also animation of dots is off..
+ rendering data seems to be dependent quad sample + forcegraph => bad quad
+ rendering
+\end_layout
+
+\begin_layout Standard
+[] cluster/text nodes..
+ missing again TODO fixing cluster bounding boxes will solve that!!! notify
+ parent to rebuild it's hull from children bbxs (throttle that >100ms) profit?
+\end_layout
+
+\begin_layout Subsubsection
+misc
+\end_layout
+
+\begin_layout Standard
+[]text utf8 not displayed correct
+\end_layout
+
+\begin_layout Standard
+[/]get particles running again (currently broken) [x]partcles within node
+ are altering between + and - for too long for the bigger data set which
+ generates some kind of flickering...
+ NOTE:changed implementation for particles => tweenjs
+\end_layout
+
+\begin_layout Standard
+[x]also particles currently don't work because they are updated in the wrong
+ way, but previously had to much of a performance impact [x]animation does
+ not show up porperly when using tweenjs
+\end_layout
+
+\begin_layout Standard
+[x] companies visible are no longer tracked, this should be done per view
+\end_layout
+
+\begin_layout Standard
+[x]fix zoom feature for nodes
+\end_layout
+
+\begin_layout Standard
+[x]get edges running again currently the edges container is created from
+ a set of nodes which are positioned in object-space(not world) so edges
+ do have the same position informations and won't render correct if edges
+ do are external [x]search gui is currently behind elements [x] hull for
+ cluster == leaf not rendered
+\end_layout
+
+\begin_layout Standard
+-stop animations no view change to prevent wrong visualisation
+\end_layout
+
+\begin_layout Standard
+[x]performance issues for thumbnails text nodes appear when default/global
+ impl gets loaded restore interaction=> node meshes and such (probably also
+ something with global values) nodes do cout toward rendered elements so
+ probably offset for controls is wrong [x]mouseevents are bugged..
+ partial solution e.stopPropagation() is supported by threex domevents
+\end_layout
+
+\begin_layout Subsubsection
+Clusters
+\end_layout
+
+\begin_layout Itemize
+[] create simple data filter and view generator for debugging 
+\end_layout
+
+\begin_layout Itemize
+[]consider putting the edges behind the nodes => nodes above edges for easier
+ visu 
+\end_layout
+
+\begin_layout Itemize
+[]compute scale of distributions automatically -interference with search
+ functionality => not always zooms to correct result 
+\end_layout
+
+\begin_layout Itemize
+[x]todo per cluster line mesh or at least matrixWorld property for nodes
+ to be able to calc the position from that 
+\end_layout
+
+\begin_layout Itemize
+[x] cluster texts (formally eg.
+ country texts) 
+\end_layout
+
+\begin_layout Itemize
+[/] implement leaf text nodes so that relevant texts from multiple clusters
+ with visibleTexts < xVal -used existing implementiation TODO refactor for
+ more efficiency -by having leaf-textnodes instead of rootcluster based
+ we should be able to skip a lot of updates and irrelevant checks
+\end_layout
+
+\begin_layout Itemize
+[x]sort param for BaseDistribution().onSort -optional sorting of clusters
+ for better visualisation
+\end_layout
+
+\begin_layout Itemize
+[x]re-cluster on the fly -partially working => bug tracking
+\end_layout
+
+\begin_layout Itemize
+[x]fix arrows for clusters -cleanup arrows when rebuilding/moving clusters
+\end_layout
+
+\begin_layout Itemize
+[]keyboard events per cluster per node also? 
+\end_layout
+
+\begin_layout Itemize
+[x]color select/update for root cluster
+\end_layout
+
+\begin_layout Itemize
+[] nodemixin => BaseLeafNodeFactory to be able to bind handlers and specifics
+ -having a nodefactory bound to a cluster would provide customisation features
+ per view (or potential alternative editing modes via toolbar select)
+\end_layout
+
+\begin_layout Subsubsection
+Wednesday demo
+\end_layout
+
+\begin_layout Itemize
+use actual data provided last time 
+\end_layout
+
+\begin_layout Itemize
+have multiple views with potentially different behaviour bound to them --
+ 2d/3d 
+\end_layout
+
+\begin_layout Itemize
+fix bugs to match default implementation 
+\end_layout
+
+\begin_layout Itemize
+keep default implementation as one possible view
+\end_layout
+
+\begin_layout Subsubsection
+xx
+\end_layout
+
+\begin_layout Itemize
+[]BUG: there is a timeout that triggers a text redraw (bad practice and
+ potentially error prone)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+FIXME this is only currently there for the search function to trigger text
+ generation because the onComplete Mehthod might have a problem
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+[]Arrow helper seems bugged throws errors all the times or does it?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+fixed.
+ the problem was a zero size arrow head parameter 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+[]change how text nodes are selected 
+\end_layout
+
+\begin_layout Itemize
+[] so that the current selection and points close to the center are prioritised?
+\end_layout
+
+\begin_layout Itemize
+[]re-enable slider zoom-in/out with +- buttons
+\end_layout
+
+\begin_layout Itemize
+[] restrict 2d camera controls
+\end_layout
+
+\begin_layout Subsubsection
+other
+\end_layout
+
+\begin_layout Itemize
+[] node pointclouds position based on mass center? problem changing when
+ animating --would be nice to ahve for convex shape feature in 2d as well
+ as 3d
+\end_layout
+
+\begin_layout Itemize
+[]improve user interaction tools like clicking behaviour and different stated
+ - also dbl click triggers click
+\end_layout
+
+\begin_layout Itemize
+[]spend some time to generate some alternative node distributions for that
+ 
+\end_layout
+
+\begin_layout Itemize
+[] so we can use alternative distribution functions and interchange them
+ For 2D, We still have to make a bit of changes 
+\end_layout
+
+\begin_layout Itemize
+[] subclusters And for 3D, if we can do clusters within clusters The use
+ case would be, we would group companies in each sector within a country
+ Instead of randomly distributed currently So we would strictly cluster
+ it based on sector
+\end_layout
+
+\begin_layout Itemize
+[]And each sector would have nice looking transparent wrapper around it
+ And we can see interaction of that sector and other in that country As
+ well as country sector to other country sector So a country would have
+ transparent wrapper in that And inside a country would be wrappers of sectors
+ as well We can try that with 2D first And do for 3D as well 
+\end_layout
+
+\begin_layout Subsubsection
+features some time ago
+\end_layout
+
+\begin_layout Standard
+plans for next steps, Frank
+\end_layout
+
+\begin_layout Standard
+1.
+ Sector clusters within the country cluster for 3D and 1D.
+\end_layout
+
+\begin_layout Standard
+For 3D.
+ If we can put color transparent
+\end_layout
+
+\begin_layout Standard
+For 1D.
+ it could look something like this.
+\end_layout
+
+\begin_layout Standard
+3.
+ when search and select show, company name
+\end_layout
+
+\begin_layout Standard
+4.
+ click to highlight then click to popup
+\end_layout
+
+\begin_layout Standard
+5, node color (From downdown list) connect to real time stock price from
+ Intrio API.
+ I have access to this API will next Monday.
+\end_layout
+
+\begin_layout Standard
+6.
+ dots - tooltip for news
+\end_layout
+
+\begin_layout Standard
+7.
+ blinking node - for live news stored in my database
+\end_layout
+
+\begin_layout Subsubsection
+Current
+\end_layout
+
+\begin_layout Standard
+[]2d/3d
+\end_layout
+
+\begin_layout Itemize
+(5) country texts -when clicking country update other text node thingies
+ - Each country will also have its own text color and size from the data
+ file.
+ -have an optional sort flag/ method to hide country names that are not
+ inside th frustum
+\end_layout
+
+\begin_layout Itemize
+(6) Let's use + and - control instead of the one we have - Better node distribut
+ion
+\end_layout
+
+\begin_layout Itemize
+[] rest of nodes than n<40 elements gets own "Other" -group
+\end_layout
+
+\begin_layout Subsubsection
+additional
+\end_layout
+
+\begin_layout Itemize
+dynamic countrytext ranges from cluster infos -like minDistance = function
+ ()....
+\end_layout
+
+\begin_layout Itemize
+[x50%] multiselect nodes via ctrl
+\end_layout
+
+\begin_layout Itemize
+[x]line texture 2d => animate direction
+\end_layout
+
+\begin_layout Itemize
+better autocomplete? https://select2.github.io/examples.html
+\end_layout
+
+\begin_layout Itemize
+better initial rand seed with sectors cloud_count rt 3 => d [d][d][d] -
+ animation paths / idle animation -story modes from animations: country
+ road/explore current cluster
+\end_layout
+
+\begin_layout Itemize
+cross fade - blend in/out clusters of nodes and simple effective geometry
+ or reduced simple convex hull
+\end_layout
+
+\begin_layout Itemize
+[x]real world company data for info, price, news ...
+ 
+\end_layout
+
+\begin_layout Itemize
+[]proper module structure / refactoring gui
+\end_layout
+
+\begin_layout Subsubsection
+test
+\end_layout
+
+\begin_layout Itemize
+test http://keithwhor.github.io/multithread.js/ 
+\end_layout
+
+\begin_layout Itemize
+test throttle where possible 
+\end_layout
+
+\begin_layout Itemize
+test check every for/each/map/filter call for perf impact use the f-ing
+ performance tab
+\end_layout
+
+\begin_layout Itemize
+[x] graph tick animate...
+ FIXME edges are the proplem 
+\end_layout
+
+\begin_layout Itemize
+[] separate textnode draw and get with throttle //draw :10 calc: 100
+\end_layout
+
+\begin_layout Itemize
+[] country text nodes filter invisible clouds frustum 
+\end_layout
+
+\begin_layout Itemize
+[] numSkipEdgesRendered change reload 
+\end_layout
+
+\begin_layout Subsection
+early version
+\end_layout
+
+\begin_layout Subsubsection
+features
+\end_layout
+
+\begin_layout Itemize
+a; smooth hull skip for now takes too long atm
+\end_layout
+
+\begin_layout Itemize
+b; arrow hover does not look good for now just line color
+\end_layout
+
+\begin_layout Itemize
+c/1; dots inside node (use case: each dot represent a story about company)
+ -can be mouse over aswell 
+\end_layout
+
+\begin_layout Subsubsection
+random
+\end_layout
+
+\begin_layout Itemize
+[x?] performance [x]ram usage!!!! 
+\end_layout
+
+\begin_layout Itemize
+[x] pointclouds and textures!!
+\end_layout
+
+\begin_layout Itemize
+one light color for in and outgoing instead of red green
+\end_layout
+
+\begin_layout Itemize
+change annie animation into the blue circle for exnandable nodes
+\end_layout
+
+\begin_layout Itemize
+invisible hull size equal sprite size
+\end_layout
+
+\begin_layout Itemize
+//FIXME picking won't work inless spherehelper useDebugSphere was triggered
+ once
+\end_layout
+
+\begin_layout Itemize
+potential bad initialisation of realdata compare "node group_data" vs "node.nodes.
+group_data" also "isGroupNode" vs "group_data"
+\end_layout
+
+\begin_layout Itemize
+text wont show if debug shpere isnt enabled see mesh onafterrender
+\end_layout
+
+\begin_layout Subsubsection
+x
+\end_layout
+
+\begin_layout Itemize
+//FIXME create a solid node group particle system frist then add tetxt functiona
+lity to it 
+\end_layout
+
+\begin_layout Itemize
+- limit max amount of text nodes showing per rendering cycle by dividing
+ screen into cells nXm and limit amount of nodes displayed within cell also
+ have a sorted list at the end of a render cycle of node distances to camera
+ and select the top x most as a presort mechanism hiding prev cycle only
+ and so on
+\end_layout
+
+\begin_layout Subsubsection
+y
+\end_layout
+
+\begin_layout Itemize
+meshline only show strongest ties if line count > m => at least one per
+ node 
+\end_layout
+
+\begin_layout Itemize
+better behavoiur of small dots 
+\end_layout
+
+\begin_layout Itemize
+mockup as in screenshot 
+\end_layout
+
+\begin_layout Itemize
+improve performance overall and in specific text nodes by sorting particle
+ clouds from viewer position
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+also check for redundant code that might get called often
+\end_layout
+
+\begin_layout Standard
+eg.
+ use each with limit
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+test
+\end_layout
+
+\begin_layout Itemize
+Test group line where only centers of groups are conected
+\end_layout
+
+\begin_layout Itemize
+test reduction of group lines with only most relevant
+\end_layout
+
+\begin_layout Itemize
+test individual force graphs
+\end_layout
+
+\begin_layout Itemize
+test if meshes for ui and pointcloud raytracer interfere in some way
+\end_layout
+
+\end_body
+\end_document

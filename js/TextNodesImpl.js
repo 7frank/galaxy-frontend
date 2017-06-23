@@ -67,7 +67,8 @@ function TextNodes(env = globalEnv, options) {
 				lastNode = node;
 
 		node.text = $("<span>").hide().addClass(options.getCSSClasses())
-			.addClass("noselect")
+			.addClass("noselect").
+			on("mousewheel", e => e.preventDefault())
 			.attr('unselectable', 'on')
 			.css('user-select', 'none')
 			.on('selectstart', false)
@@ -94,7 +95,8 @@ function TextNodes(env = globalEnv, options) {
 	//--------------------------------
 	//update text nodes
 
-	function getScreenPos(p, domEl) {
+	//@deprecated
+	function getScreenPos2(p, domEl) {
 
 		var vector = p.clone();
 
@@ -105,6 +107,27 @@ function TextNodes(env = globalEnv, options) {
 
 		return vector;
 	}
+
+
+    /**
+	 *
+	 *
+     * @param p THREE.Vector3 .. position of element
+     * @param camera ... camera object
+     * @param viewOffsetWidthBy2  .. the relative screen offset of the container (view) divided by two
+     * @param viewOffsetHeightBy2 .. the relative screen offset of the container (view)divided by two
+     */
+    function getScreenPos(p, camera,viewOffsetWidthBy2,viewOffsetHeightBy2,viewOffsetX,viewOffsetY) {
+
+        var vector = p.clone();
+
+        vector.project(camera);
+
+        vector.x = (vector.x + 1) * viewOffsetWidthBy2 + viewOffsetX
+        vector.y =  - (vector.y - 1) * viewOffsetHeightBy2 +viewOffsetY
+
+        return vector;
+    }
 
 	//--------------------------------
 	//test if node matches criterias to be part of the current text node set
@@ -155,6 +178,18 @@ function TextNodes(env = globalEnv, options) {
 
 	function compareAndHidePreviousBatch(nodeInfosCurrentBatch) {
 
+
+    	// vars to safe some ms later on
+		var camera=env.camera;
+
+        var dw=domEl.offsetWidth /2;
+        var dh=domEl.offsetHeight /2;
+
+        var dl=domEl.offsetLeft;
+        var dt=domEl.offsetTop;
+
+
+
 		//updates the positions of the text labels matching it's 3d node counterparts positions
 		function updatePos(node, distance = 0) {
 
@@ -162,7 +197,9 @@ function TextNodes(env = globalEnv, options) {
 				return;
 
 			var pos = options.getNodePosition(node);
-			var coords = getScreenPos(pos, domEl);
+		//	var coords = getScreenPos(pos, domEl);
+
+			var coords = getScreenPos(pos,camera,dw,dh,dl,dt);
 
 			//TODO this offset stuff might need some parameters in the options section
 			var centered = coords.x - node.text.width() / 2;

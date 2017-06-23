@@ -21,6 +21,11 @@
 
    <!-- <script src="./dist/js/NodesContainer.js"></script> -->
 	<script src="./build/bundle.js"></script>
+    <script src="./js/lib/SubdivisionModifier.js"></script>
+
+
+
+
 
 
 	<script src="./js/THREE.ArrowExt.js"></script>
@@ -240,6 +245,7 @@
 
     s ... recluster hovered cluster/leaf
     t ... toogle select current cluster
+    z/click ... zoom to cluster
     u TODO toggle cluster text nodes ?
     e ... toggle edges
     ------------------------------------
