@@ -68,7 +68,7 @@ class BaseVolume {
         wireframe.position.add(_center);
         wireframe.geometry.boundingBox=boundingBox;
 
-        this.mesh=this.mix(wireframe);
+        this.mesh=wireframe;
 
 
         return this.mesh
@@ -79,26 +79,21 @@ class BaseVolume {
     }
 
 
-    mix(mesh)
-    {
-
-        mesh.setActive=function(){
-
-           this.material.opacity=1;
-
-        }
 
 
-        mesh.setInactive=function(){
+    setActive(){
 
-        this.material.opacity=0.3
-
-        }
-
-        return mesh
-
+        this.mesh.material.opacity=1*this.lod;
 
     }
+
+
+    setInactive(){
+
+        this.mesh.material.opacity=0.3*this.lod
+
+    }
+
 
 
 

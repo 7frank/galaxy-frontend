@@ -55,7 +55,7 @@ class ConvexVolume extends  BoxVolume {
 
         mesh.geometry.boundingBox=boundingBox;
 
-        this.mesh=this.mix(mesh);
+        this.mesh=mesh;
 
         return this.mesh;
 
@@ -73,27 +73,18 @@ class ConvexVolume extends  BoxVolume {
     }
 
 
-    mix(mesh)
-    {
+   setActive(){
 
-        mesh.setActive=function(){
-
-            this.material.opacity=0.1;
+            this.mesh.material.opacity=0.1*this.lod;
 
         }
 
 
-        mesh.setInactive=function(){
+      setInactive(){
 
-            this.material.opacity=0.03
+            this.mesh.material.opacity=0.03*this.lod
 
-        }
-
-        return mesh
-
-
-    }
-
+      }
 
 
 }
