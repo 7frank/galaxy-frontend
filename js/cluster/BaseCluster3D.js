@@ -41,6 +41,43 @@ class BaseCluster3D extends BaseNode {
         }
         // else this.updateCluster()
 
+
+        //update lod //TODO the function shoul forwared onBeforeRender args in a way
+        this.on("before-render", function () {
+
+            if (!this.mHull) return
+
+            let view = this.getView()
+            //based on distance to the camera the LOD is set for the hull object
+            let src = view.mCamera.position
+
+            let dst
+            if (this.mHull&& this.mHull.mesh && this.mHull.mesh.geometry && this.mHull.mesh.geometry.boundingBox)
+                dst = this.mHull.mesh.geometry.boundingBox.getCenter()
+            else
+                dst = this.position
+
+
+            dst = this.localToWorld(dst.clone());
+
+            let distance = dst.sub(src).length();
+
+            //TODO how to handle max/ind distance with the lod approach of meshes
+            let maxDistance = this.getRadius() * 15;
+            let minDistance = 0// this.getRadius() ;
+
+            let L = maxDistance - minDistance
+
+
+            var lod = 1 - (distance - minDistance) / (maxDistance - minDistance)
+
+
+           //   this.mHull.factory.setLOD(lod)//FIXME lod min, max ...
+            this.mHull.setLOD(lod)
+
+        })
+
+
     }
 
 
@@ -210,12 +247,12 @@ class BaseCluster3D extends BaseNode {
 
     getClusterOptions() {
 
-       let options= _.extend({
+        let options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
-            hull: new BaseVolume()
+            hull: BaseVolume
 
-        },   this.mEntry.options);
+        }, this.mEntry.options);
 
         return options
 
@@ -299,7 +336,7 @@ class BaseCluster3D extends BaseNode {
 
     doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();
-        var options =this.getClusterOptions()
+        var options = this.getClusterOptions()
         var that = this;
 
         var _clustersObj = {};
@@ -377,9 +414,7 @@ class BaseCluster3D extends BaseNode {
     }
 
 
-
-    getVerticesFromBoundingBox(boundingBox){
-
+    getVerticesFromBoundingBox(boundingBox) {
 
 
         let _center = boundingBox.getCenter();
@@ -387,11 +422,10 @@ class BaseCluster3D extends BaseNode {
 
         let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
 
-        box.translate(_center.x,_center.y,_center.z);
+        box.translate(_center.x, _center.y, _center.z);
 
         return box.vertices
     }
-
 
 
     getCompoundBoundingBoxInfo() {
@@ -410,15 +444,15 @@ class BaseCluster3D extends BaseNode {
             let offset_world = subCluster.localToWorld(new THREE.Vector3);
             boundingBox.translate(offset_world.sub(offset_parent));
 
-           let vert= that.getVerticesFromBoundingBox(boundingBox);
-            vertices=vertices.concat(vert);
+            let vert = that.getVerticesFromBoundingBox(boundingBox);
+            vertices = vertices.concat(vert);
 
             box.union(boundingBox);
 
 
         })
 
-        return {box:box,vertices:vertices}
+        return {box: box, vertices: vertices}
 
     }
 
@@ -464,124 +498,81 @@ class BaseCluster3D extends BaseNode {
 
     /**
      *
-     *  current limenentation of the hull is a simle sphere with a border with the radius of the boundingSphere
-     *  TODO  could be convex hull in sub class, in which case the method still needs to be overridden
+     *  current implementation of the hull is a simple invisible boundingBox with
+     *  @see BaseVolume
+     *
+     *  this function get's called after a cluster has triggered the "hull-update" event in which case
+     * the current set "hull" - option is used to recalculate the hull feature
+     *
      */
 
     adjustHullSize() {
 
 
+        let info = {box: new THREE.Box3, vertices: []};
 
-        let info={box: new THREE.Box3,vertices:[]};
-
-        //generate the boundingbox for the node particles if this is a leaf
+        //generate the boundingBox for the node particles if the clster is a leaf
         if (this.isLeaf()) {
             let pc = this.mLeaf.mNodeParticles.pointCloud
 
             if (!pc) {
-                console.error("leaf: nodescontainer not created yet")
+                throw new Error("nodescontainer not created yet for leaf")
             }
             else {
 
                 //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
                 info.box.setFromArray(pc.geometry.attributes.position.array);
-                info.vertices=this.getVerticesFromBoundingBox( info.box)  //TODO get vertices from array
-                pc.geometry.boundingBox =  info.box
+                info.vertices = this.getVerticesFromBoundingBox(info.box)  //TODO get vertices from array
+                pc.geometry.boundingBox = info.box
             }
 
 
         }
         else {
-            /**  FIXME get bb of all leafs instead + actual position
-             //we want to generate the hull for a cluster that is no leaf only:
-             //if the leaf/child has finished it's distribution function
-             //and
-             //if ths has distributed it's children
-             //via listeners?
-             */
-             info = this.getCompoundBoundingBoxInfo();
-
+            //  override default values with actual bbox infos
+            info = this.getCompoundBoundingBoxInfo();
 
         }
 
-        let boundingBox=info.box;
-
-
-        //get center, radius
-        let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize();
-        let radius = _size.length() / 2;
-
-
-        let boundingSphere = boundingBox.getBoundingSphere();
-
+        let boundingBox = info.box;
 
         // we must have at least one hull impl
-        // it might be invisible or idle but it should be set via defaults /
+        // it might be invisible or idle but it should be set via defaults
         // also text nodes depend on valid sized bbox
         //compute hull object from bounding box
         var mOptions = this.getClusterOptions();
-        let mHull
 
-        if (typeof mOptions.hull == "undefined")
-            console.error("default hull function  not defined")
-            else {
+        // create the hull container
+        if (!this.mHull)
+            if (BaseVolume == mOptions.hull || BaseVolume.isPrototypeOf(mOptions.hull)) {
 
-            if (mOptions.hull instanceof BaseVolume)
-            {
-                //TODO use the vertices of the bbox instead of the bbox itself
-                let vertices= info.vertices
-                mHull = mOptions.hull.createFromBoundingBox(vertices,boundingBox);
-                mHull.info=mOptions.hull;
-            }
-            else
-                console.error("must be instanceof BaseVolume")
-          //  if (typeof mOptions.hull == "function")
-          //  mHull = mOptions.hull(boundingBox);
-
-
-
-            if (!this.mHull) {
-
-                this.mHull = mHull;
-                // this.mHull.material.visible = false//set hull default to invisible
+                this.mHull = new mOptions.hull();
                 this.add(this.mHull);
             }
-            else {
-                this.mHull.geometry = mHull.geometry
+            else throw new Error("option hull must have superclass BaseVolume");
 
-                //FIXME
-                this.mHull.setActive=mHull.setActive
-                this.mHull.setInactive=mHull.setInactive
+        //--------------
+        let vertices = info.vertices;
+        this.mHull.createFromBoundingBox(vertices, boundingBox);
 
+        //--------------
+        //copy the geometry for the doeEvents to work
+        if (!this.mHull && this.mHull.geometry) {
 
-                this.mHull.position.copy(mHull.position)
-            }
+            this.geometry = this.mHull.geometry;
 
         }
+        else {
 
+            //have some default geometry for the domEvents //TODO find out why it fails without this part
+            let boundingSphere = boundingBox.getBoundingSphere();
+            //TODO this is currently used for the mouse interactions but should be refactored and removed
+            var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
+            sphereGeometry.boundingBox = boundingBox;
+           this.geometry = sphereGeometry;
+        }
 
-        //TODO this is currently used for the mouse interactions but should be refactored and removed
-        var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
-        var sphereMaterial = new THREE.MeshBasicMaterial({
-            color: 0xff0000,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.1
-        });
-
-        //sphereGeometry.boundingSphere=boundingSphere
-        sphereGeometry.boundingBox = boundingBox
-
-
-        // this.material = sphereMaterial;
-        if (this.mHull && this.mHull.geometry)
-            this.geometry = this.mHull.geometry
-        else
-            this.geometry = sphereGeometry;
-
-
-//notify listeners that the hull size probably changed
+        //notify listeners that the hull size changed
         this.trigger("hull-updated")
 
     }

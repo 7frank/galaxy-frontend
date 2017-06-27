@@ -11,12 +11,11 @@
 
 
 export default
-class BaseVolume {
+class BaseVolume extends THREE.Object3D {
 
-    constructor() {
-
+    constructor(...args) {
+        super(...args)
         this.lod=1
-
     }
 
 
@@ -68,7 +67,10 @@ class BaseVolume {
         wireframe.position.add(_center);
         wireframe.geometry.boundingBox=boundingBox;
 
+
+        if (this.mesh) this.remove(this.mesh);
         this.mesh=wireframe;
+        this.add(wireframe);
 
 
         return this.mesh

@@ -128,7 +128,7 @@ export default class BaseNode extends THREE.Mesh {
                     this.offKey(eName, eventhandler)
 
             }
-        ;
+
 
         return this;
 
@@ -225,7 +225,7 @@ export default class BaseNode extends THREE.Mesh {
         // adding before-render event
 
         function onBeforeRender() {
-            this.trigger("before-render")
+            this.trigger("before-render",null,arguments)
 
         }
 

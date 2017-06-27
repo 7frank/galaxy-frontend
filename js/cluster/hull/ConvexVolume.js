@@ -3,8 +3,6 @@
  */
 
 
-
-
 import BoxVolume from "./BoxVolume"
 
 /**
@@ -14,7 +12,7 @@ import BoxVolume from "./BoxVolume"
  */
 
 export default
-class ConvexVolume extends  BoxVolume {
+class ConvexVolume extends BoxVolume {
 
 
 
@@ -25,66 +23,71 @@ class ConvexVolume extends  BoxVolume {
     //eg. if lod <0.3 this.mesh.geometry=this.lowpolyMesh
 
 
+    createFromBoundingBox(vertices, boundingBox) {
 
 
-    createFromBoundingBox(vertices,boundingBox) {
+        let geo = new THREE.ConvexGeometry(vertices)
 
 
-        let geo =  new THREE.ConvexGeometry(vertices)
-
-
-
-
-        this.geometryLowPoly=geo.clone()
-        let modifier=new THREE.SubdivisionModifier(1)
+        this.geometryLowPoly = geo.clone()
+        let modifier = new THREE.SubdivisionModifier(1)
         modifier.modify(geo)
-        this.geometryAveragePoly=geo.clone()
+        this.geometryAveragePoly = geo.clone()
         modifier.modify(geo)
-        this.geometryHighPoly=geo.clone()
+        this.geometryHighPoly = geo.clone()
 
         //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
         let mat = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             opacity: 0.03,
             transparent: true,
-            depthWrite:false,
+            depthWrite: false,
             side: THREE.BackSide
         });
 
         let mesh = new THREE.Mesh(geo, mat);
 
-        mesh.geometry.boundingBox=boundingBox;
+        mesh.geometry.boundingBox = boundingBox;
 
-        this.mesh=mesh;
 
+        if (this.mesh) this.remove(this.mesh);
+        this.mesh = mesh;
+        this.add(mesh);
         return this.mesh;
 
     }
 
 
-    setLOD(l)
-    {
+    setLOD(l) {
         super.setLOD(l)
 //FIXME lod will only work if we use the generated mesh instead of how we currently just use the geometry so the mouse events will stay at the original mesh
 
-        if (l<0.3) this.mesh.geometry=this.geometryLowPoly
-        if (l>=0.3&& l<=0.7) this.mesh.geometry=this.geometryAveragePoly
-        if (l>0.7) this.mesh.geometry=this.geometryHighPoly
+        if (l < 0.3) this.mesh.geometry = this.geometryLowPoly
+        if (l >= 0.3 && l <= 0.7) this.mesh.geometry = this.geometryAveragePoly
+        if (l > 0.7) this.mesh.geometry = this.geometryHighPoly
     }
 
 
-   setActive(){
-
-            this.mesh.material.opacity=0.1*this.lod;
-
-        }
+    setActive() {
 
 
-      setInactive(){
 
-            this.mesh.material.opacity=0.03*this.lod
+        let opacity = 0.1 * this.lod;
+        this.mesh.material.opacity = opacity;
 
-      }
+        console.log("setActive",opacity)
+
+    }
+
+
+    setInactive() {
+
+        let opacity = 0.03 * this.lod;
+        this.mesh.material.opacity = opacity;
+
+
+        console.log("setInactive",opacity)
+    }
 
 
 }

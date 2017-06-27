@@ -96,7 +96,7 @@ class Cluster3DExtended extends BaseCluster3D {
         }
 
         //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
-        this.on("z click", function (e) {
+        this.on("z", function (e) {
              e.stopPropagation()
 
             this.zoomToCluster()
@@ -119,43 +119,32 @@ class Cluster3DExtended extends BaseCluster3D {
             ]
 
 
-            var fn = onClickFactory(this, speccsRoot)
+            var fn = onClickFactory(this, speccsRoot);
 
             fn()
         })
 
         this.on("mouseover mousemove", function (e) {
-            e.stopPropagation()
+            e.stopPropagation();
 
             if (this.mHull) {
 
-                if (this.mHull.info)
-                {
-                    this.mHull.material.visible=  this.mHull.info.canBeVisible()
-
-
-                }
-
-
-
-                if ( this.mHull.setActive)
-                    this.mHull.setActive()
-                else
-                {
-                    console.warn("TODO setActive() missing ")
-                    this.mHull.material.opacity=0.7
-                }
-
+                this.mHull.mesh.material.visible=  this.mHull.canBeVisible();
+                this.mHull.setActive();
 
             }
 
-                let name = (this.name ? this.name : this.id)
+                let name = (this.name ? this.name : this.id);
 
-            let parents = this.getParents()
-            parents.shift()
-            let root = parents.map(p => p.name ? p.name : p.id).join(" ")
-//TODO public setter function
-            this.getView().setTooltip(root + " " + name)
+            let parents = this.getParents();
+            parents.shift();
+            let root = parents.map(p => p.name ? p.name : p.id).join(" ");
+            //TODO public setter function
+
+
+            let lod=(this.mHull && this.mHull.factory)? this.mHull.factory.lod:-1;
+
+            this.getView().setTooltip(root + " " + name+" LOD:"+lod)
 
 
         })
@@ -164,17 +153,8 @@ class Cluster3DExtended extends BaseCluster3D {
         this.on("mouseout", function () {
             if (this.mHull)
             {
-
-    if ( this.mHull.setInactive)
-                this.mHull.setInactive()
-                else
-    {
-        console.warn("TODO setInactive() missing ")
-        this.mHull.material.opacity=0.2
-    }
-
+                this.mHull.setInactive();
             }
-
 
             this.getView().setTooltip("")
         })

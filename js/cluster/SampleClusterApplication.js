@@ -426,14 +426,14 @@ export class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new BaseDistribution(4000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull:  new BoxVolume()}
+                options: {minClusterSize: 15, hull:  BoxVolume}
             },
             {
                 generator: industrySetGenerator,
                 distribution: new BaseDistribution(2000, 1).onSort(mySort),
-                options: {minClusterSize: 15, hull: new BoxVolume()}
+                options: {minClusterSize: 15, hull: BoxVolume}
             },
-            {distribution: new BaseDistribution(200, 3), options: {minClusterSize: 15, hull:  new BoxVolume()}}
+            {distribution: new BaseDistribution(200, 3), options: {minClusterSize: 15, hull: BoxVolume}}
 
 
         ]
@@ -463,7 +463,7 @@ export class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new BaseDistribution(2000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull: new BoxVolume()}
+                options: {minClusterSize: 15, hull: BoxVolume}
             },
             {distribution: new BaseDistribution(400, 2),  options: { hull:  new BoxVolume()}}
 
@@ -559,9 +559,9 @@ export class MyMain {
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
-                options: {minClusterSize: 15,hull:new ConvexVolume() }// new BoxVolume() //FIXME  this option is used twice for leaf and parent  and below is ignored
+                options: {minClusterSize: 15,hull:ConvexVolume }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: nodesWithinIndustryDistribution, hull: new BoxVolume() }  // this.getEllipsoidHull.bind(this)
+            , {distribution: nodesWithinIndustryDistribution, hull: BoxVolume }  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
 
         ]
