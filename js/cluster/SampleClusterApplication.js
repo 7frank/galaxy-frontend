@@ -342,27 +342,34 @@ export class MyMain {
             views.push(view2)
 
 
-/*
-            let view3 = createView("node distribution test case",
-                [{
-                    distribution: new BaseDistribution(2000, 3),
-                    options: { hull: new BoxVolume()}
-                }])
+            var speccs = this.getPossibleClusterSpeccsArray()
+            let view1 = createView("dist test", speccs)
                 .loadDataSet(this.getDSByID(1))
-
-            views.push(view3)
-
-
-            var speccs = this.get2DChartSortedSpeccsArray()
-
-            let view4 = createView("2d-Barchart", speccs)
-                .loadDataSet(this.getDSByID(1))
-            views.push(view4)
-*/
+            views.push(view1)
 
 
 
-            /*  var speccs = this.getPossibleClusterSpeccsArray();//FIXME speccs does have 4 elements 0,1,3?
+            /*
+                        let view3 = createView("node distribution test case",
+                            [{
+                                distribution: new BaseDistribution(2000, 3),
+                                options: { hull: new BoxVolume()}
+                            }])
+                            .loadDataSet(this.getDSByID(1))
+
+                        views.push(view3)
+
+
+                        var speccs = this.get2DChartSortedSpeccsArray()
+
+                        let view4 = createView("2d-Barchart", speccs)
+                            .loadDataSet(this.getDSByID(1))
+                        views.push(view4)
+            */
+
+
+
+            /*  var speccs = this.getPossibleClusterSpeccsArray();
              let view1 = createView("View1", speccs)
              views.push(view1)*/
 
@@ -486,15 +493,15 @@ export class MyMain {
 
         //using these 2 we should have a 2d plane with 3d cubes on it
         let sample1 = new BaseDistribution(40000, 2) //1000
-        let sample2 = new BaseDistribution(5000, 2)//200
+        let sample2 = new ForceGraphDistribution(5000, 2)//200
         let sample3 = new BaseDistribution(100, 3)//50
 
         //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 15}},
-            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 15}},
-            {distribution: sample3}
+            {generator: countrySetGenerator, distribution: sample1,     options: {minClusterSize: 5, hull: BoxVolume}},
+            {generator: industrySetGenerator, distribution: sample2,      options: {minClusterSize: 5, hull: BoxVolume}},
+            {distribution: sample3,      options: {hull: BoxVolume}}
 
 
         ]
@@ -551,7 +558,8 @@ export class MyMain {
 
 
         return [
-            {
+
+           {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
                 options: {minClusterSize: 40}

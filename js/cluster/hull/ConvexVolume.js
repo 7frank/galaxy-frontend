@@ -116,22 +116,12 @@ class ConvexVolume extends BoxVolume {
 
 
     setActive() {
-
         this.maxOpacity = 0.6;
-
-        // let opacity = 0.1 * this.lod;
-        // this.mesh.material.opacity = opacity;
-
-
     }
 
 
     setInactive() {
         this.maxOpacity = 0.3;
-        //   let opacity = 0.03 * this.lod;
-        //  this.mesh.material.opacity = opacity;
-
-
     }
 
 

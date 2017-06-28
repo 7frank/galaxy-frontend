@@ -86,14 +86,14 @@ class BaseVolume extends THREE.Object3D {
 
     setActive(){
 
-        this.mesh.material.opacity=1*this.lod;
+        this.maxOpacity=1
 
     }
 
 
     setInactive(){
 
-        this.mesh.material.opacity=0.3*this.lod
+        this.maxOpacity=0.3
 
     }
 
