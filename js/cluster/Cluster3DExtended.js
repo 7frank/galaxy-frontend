@@ -25,7 +25,7 @@ class Cluster3DExtended extends BaseCluster3D {
         super(nodes, clusteringHandlers, view);
 
 
-        this.selected = false
+        this.selected = false;
 
 
         this.addListeners();
@@ -41,9 +41,9 @@ class Cluster3DExtended extends BaseCluster3D {
     zoomToCluster(defaultDistance = 400) {
 
 
-        let view = this.getView()
+        let view = this.getView();
 
-        var distance = this.getRadius(defaultDistance) * 3
+        var distance = this.getRadius(defaultDistance) * 3;
 
 
         ZoomUtil.moveToCluster(this, {distance})
@@ -61,7 +61,7 @@ class Cluster3DExtended extends BaseCluster3D {
     addListeners() {
 
 
-        var curr = 0
+        var curr = 0;
 
         function onClickFactory(res, speccs) {
 
@@ -69,9 +69,9 @@ class Cluster3DExtended extends BaseCluster3D {
             return function clickAndSpeccHandler() {
 
 
-                var _dist = speccs[curr++ % speccs.length].distribution
+                var _dist = speccs[curr++ % speccs.length].distribution;
 
-                console.log("setting distribution function", _dist)
+                console.log("setting distribution function", _dist);
                 res.setDistributionHandler(_dist, function onComplete() {
 
                     //distribution-complete
@@ -97,32 +97,32 @@ class Cluster3DExtended extends BaseCluster3D {
 
         //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
         this.on("z", function (e) {
-             e.stopPropagation()
+             e.stopPropagation();
 
             this.zoomToCluster()
 
-        })
+        });
 
         var diameter = null;
         this.on("s", function (e) {
-            e.stopPropagation()
+            e.stopPropagation();
 
 
             if (!diameter)
-                diameter = this.geometry.boundingSphere.radius * 2
-            console.log("clicky clicky", diameter)
+                diameter = this.geometry.boundingSphere.radius * 2;
+            console.log("clicky clicky", diameter);
             let speccsRoot = [
                 {distribution: new BaseDistribution(diameter, 1)},
                 {distribution: new BaseDistribution(diameter * 0.66, 2)},
                 {distribution: new BaseDistribution(diameter * 0.33, 3)},
                 {distribution: new ForceGraphDistribution(diameter * 0.66, 3)}
-            ]
+            ];
 
 
             var fn = onClickFactory(this, speccsRoot);
 
             fn()
-        })
+        });
 
         this.on("mouseover mousemove", function (e) {
             e.stopPropagation();
@@ -147,7 +147,7 @@ class Cluster3DExtended extends BaseCluster3D {
             this.getView().setTooltip(root + " " + name+" LOD:"+lod)
 
 
-        })
+        });
 
 
         this.on("mouseout", function () {
@@ -157,10 +157,10 @@ class Cluster3DExtended extends BaseCluster3D {
             }
 
             this.getView().setTooltip("")
-        })
+        });
 
         this.on("t", function (e) {
-            e.stopPropagation()
+            e.stopPropagation();
             this.toggleSelect()
         })
 
@@ -177,7 +177,7 @@ class Cluster3DExtended extends BaseCluster3D {
         super.update();
 
         //TODO have a "cluster-ready" event
-        this.addNodeCaptions()
+        this.addNodeCaptions();
 
 
         if (this.mTextNodes)
@@ -222,24 +222,24 @@ class Cluster3DExtended extends BaseCluster3D {
     //potentially add them at specific time
     _initDotParticles() {
 
-        if (this.mParticles) this.mParticles.start()
+        if (this.mParticles) this.mParticles.start();
 
 
         if (this.isLeaf() && !this.mParticles) {
 
-            var nodes = this.mLeaf.mNodes
+            var nodes = this.mLeaf.mNodes;
             var demoOptions = {
                 increment: 1,
                 duration: 1000,
                 easing: TWEEN.Easing.Exponential.Out
-            }
+            };
 
             if (!nodes) //FIXME this only works that way because to realData is not generated properly
                 demoOptions.npc = function (n) {
 
                     return n.itemCount | 5
                     //return 5
-                }
+                };
 
 
             //TODO refactor force-graph-utils
@@ -248,14 +248,14 @@ class Cluster3DExtended extends BaseCluster3D {
             this.add(particles.pointCloud);
 
 
-            particles.start()
+            particles.start();
             //TODO call start if distribution function is finished
             this.on("distribution-complete", function () {
 
                 particles.start()
 
 
-            })
+            });
 
 
             this.mParticles = particles;
@@ -274,11 +274,11 @@ class Cluster3DExtended extends BaseCluster3D {
 
     addNodeCaptions() {
 
-        if (this._hasNodeCaptions_) return
-        console.log("addNodeCaptions")
-        this._hasNodeCaptions_=true
-        var rootCluster = this.getRoot()
-        if (!rootCluster.mParentView) return
+        if (this._hasNodeCaptions_) return;
+        console.log("addNodeCaptions");
+        this._hasNodeCaptions_=true;
+        var rootCluster = this.getRoot();
+        if (!rootCluster.mParentView) return;
 
 
         function _getNodePosition(node) {
@@ -290,12 +290,12 @@ class Cluster3DExtended extends BaseCluster3D {
             return mVec3; //node.position.clone()
         }
 
-        var nodes = Object.values(this.mClusters)
+        var nodes = Object.values(this.mClusters);
 
         //TODO remove global dependency in TextNodes
 
 
-        var mTextNode = $(rootCluster.mParentView.mRenderer.domElement).parent().children(".graph-captions-container")
+        var mTextNode = $(rootCluster.mParentView.mRenderer.domElement).parent().children(".graph-captions-container");
 
 
         let env = {
@@ -304,7 +304,7 @@ class Cluster3DExtended extends BaseCluster3D {
             textNode: mTextNode,
             camera: rootCluster.mParentView.mCamera
 
-        }
+        };
 
 
         //TODO make sure radius is dynamically changed when cluster radius changes
@@ -373,7 +373,7 @@ class Cluster3DExtended extends BaseCluster3D {
 
     toggleSelect() {
         if (this.isSelected())
-            this.unselectCluster()
+            this.unselectCluster();
         else
             this.selectCluster()
 
@@ -388,21 +388,21 @@ class Cluster3DExtended extends BaseCluster3D {
 
     selectCluster() {
 
-        if (this.isSelected()) return
+        if (this.isSelected()) return;
 
 
-        var allLeafs = this.getRoot().getLeafs()
-        var mLeafs = this.getLeafs()
+        var allLeafs = this.getRoot().getLeafs();
+        var mLeafs = this.getLeafs();
 
 
         _.each(allLeafs, function (other) {
 
-            let isChildOfCluster = mLeafs.indexOf(other) >= 0
+            let isChildOfCluster = mLeafs.indexOf(other) >= 0;
 
             other.parent.visible = isChildOfCluster
             //other.material.visible=isChildOfCluster
 
-        })
+        });
 
 
         this.selected = true
@@ -412,17 +412,17 @@ class Cluster3DExtended extends BaseCluster3D {
 
     unselectCluster() {
 
-        if (!this.isSelected()) return
+        if (!this.isSelected()) return;
 
 
-        var allLeafs = this.getRoot().getLeafs()
+        var allLeafs = this.getRoot().getLeafs();
 
 
         _.each(allLeafs, function (other) {
 
             other.parent.visible = true
 
-        })
+        });
 
 
         this.selected = false

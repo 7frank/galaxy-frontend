@@ -32,7 +32,7 @@ class BoxVolume extends  BaseVolume {
 
         //by default just set the opacity and visibility accordingly
         if ( this.mesh && this.mesh.material) {
-            this.mesh.material.opacity = this.lod
+            this.mesh.material.opacity =this.maxOpacity*this.lod
 
             if (this.lod<=0)
                 this.mesh.material.visible=false;

@@ -14,8 +14,9 @@ export default
 class BaseVolume extends THREE.Object3D {
 
     constructor(...args) {
-        super(...args)
-        this.lod=1
+        super(...args);
+        this.lod=1;
+        this.maxOpacity=0.1
     }
 
 
@@ -61,7 +62,7 @@ class BaseVolume extends THREE.Object3D {
 
         let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
 
-        let mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: 0.1, transparent: true});
+        let mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: true});
 
         let wireframe = new THREE.LineSegments(geo, mat);
         wireframe.position.add(_center);

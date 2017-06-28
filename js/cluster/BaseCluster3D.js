@@ -32,7 +32,7 @@ class BaseCluster3D extends BaseNode {
         super(view);
         this.addNodes(nodes);
 
-        this.registerCustomEvent("hull-updated") // gets called if the hull got adjusted
+        this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
 
         this.mClusters = {};
         //Cluster if present, use to cluster nodes into sub-clusters
@@ -45,17 +45,17 @@ class BaseCluster3D extends BaseNode {
         //update lod //TODO the function shoul forwared onBeforeRender args in a way
         this.on("before-render", function () {
 
-            if (!this.mHull) return
+            if (!this.mHull) return;
 
-            let view = this.getView()
+            let view = this.getView();
             //based on distance to the camera the LOD is set for the hull object
-            let src = view.mCamera.position
+            let src = view.mCamera.position;
 
-            let dst
+            let dst;
             if (this.mHull&& this.mHull.mesh && this.mHull.mesh.geometry && this.mHull.mesh.geometry.boundingBox)
-                dst = this.mHull.mesh.geometry.boundingBox.getCenter()
+                dst = this.mHull.mesh.geometry.boundingBox.getCenter();
             else
-                dst = this.position
+                dst = this.position;
 
 
             dst = this.localToWorld(dst.clone());
@@ -63,17 +63,17 @@ class BaseCluster3D extends BaseNode {
             let distance = dst.sub(src).length();
 
             //TODO how to handle max/ind distance with the lod approach of meshes
-            let maxDistance = this.getRadius() * 15;
-            let minDistance = 0// this.getRadius() ;
+            let maxDistance = this.getRadius() * 25;
+            let minDistance = 0//this.getRadius() ;
 
-            let L = maxDistance - minDistance
-
-
-            var lod = 1 - (distance - minDistance) / (maxDistance - minDistance)
+            let L = maxDistance - minDistance;
 
 
-           //   this.mHull.factory.setLOD(lod)//FIXME lod min, max ...
-            this.mHull.setLOD(lod)
+            var lod = 1 - (distance - minDistance) / (maxDistance - minDistance);
+
+
+             // this.mHull.setLOD(0.5)
+          this.mHull.setLOD(lod)
 
         })
 
@@ -142,16 +142,16 @@ class BaseCluster3D extends BaseNode {
      */
 
     static cleanUpClusters(clusters, self) {
-        clusters.push(self)
+        clusters.push(self);
 
         _.each(clusters, function (cluster) {
 
             if (cluster.tn) {
-                cluster.tn.remove()
+                cluster.tn.remove();
                 delete (cluster.tn)
             }
             if (cluster.mTextNodes) {
-                cluster.mTextNodes.remove()
+                cluster.mTextNodes.remove();
                 delete (cluster.mTextNodes)
             }
 
@@ -161,7 +161,7 @@ class BaseCluster3D extends BaseNode {
             if (cluster.parent) {
 
                 if (cluster.parent.mClusters && cluster.name)
-                    delete(cluster.parent.mClusters[cluster.name])
+                    delete(cluster.parent.mClusters[cluster.name]);
                 cluster.parent.remove(cluster)
             }
 
@@ -184,7 +184,7 @@ class BaseCluster3D extends BaseNode {
             //TOO to leaf specific clean up
 
             //for now at least remove the particle cloud
-            leaf.geometry.dispose()
+            leaf.geometry.dispose();
             if (leaf.parent)
                 leaf.parent.remove(leaf)
         })
@@ -200,9 +200,9 @@ class BaseCluster3D extends BaseNode {
 
     storeParentPositionInNodes() {
 
-        var leafElements = this.getLeafs()
+        var leafElements = this.getLeafs();
         _.each(leafElements, function (leaf) {
-            let mNodes = leaf.mNodes
+            let mNodes = leaf.mNodes;
             _.each(mNodes, function (node) {
 
 
@@ -220,18 +220,18 @@ class BaseCluster3D extends BaseNode {
     restoreNodePositionFromExParent() {
 
 
-        var leafElements = this.getLeafs()
+        var leafElements = this.getLeafs();
         _.each(leafElements, function (leaf) {
-            let mNodes = leaf.mNodes
+            let mNodes = leaf.mNodes;
             _.each(mNodes, function (node) {
                 //get current parent pos
-                let c1 = node._parentPosAbs
+                let c1 = node._parentPosAbs;
 
                 if (!c1) return;
                 var c2 = new THREE.Vector3();
                 c2.setFromMatrixPosition(leaf.matrixWorld);
 
-                node._bubble.position.add(c1).sub(c2)
+                node._bubble.position.add(c1).sub(c2);
                 _.extend(node, node._bubble.position)
 
             })
@@ -270,7 +270,7 @@ class BaseCluster3D extends BaseNode {
     applyClustering(mClusteringSpeccsArray) {
 
         if (mClusteringSpeccsArray.length >= 0)
-            this.setEntry(mClusteringSpeccsArray[0])
+            this.setEntry(mClusteringSpeccsArray[0]);
 
 
 //FIXME currently only working in root
@@ -287,7 +287,7 @@ class BaseCluster3D extends BaseNode {
             //clean up previous clusters
 
 
-            BaseCluster3D.cleanUpClusters(prevClusters, this)
+            BaseCluster3D.cleanUpClusters(prevClusters, this);
 
             return false;
         }
@@ -310,13 +310,13 @@ class BaseCluster3D extends BaseNode {
             if (nextDepthSpeccsArray.length > 1)
                 mCluster.applyClustering(nextDepthSpeccsArray);
             else {
-                mCluster.setEntry(entry)
+                mCluster.setEntry(entry);
                 mCluster.createParticlePointCloud(nextDepthSpeccsArray[0]);
             }
 
-        })
+        });
 
-        this.updateCluster()
+        this.updateCluster();
 
 
         //clean up previous clusters
@@ -336,7 +336,7 @@ class BaseCluster3D extends BaseNode {
 
     doClusteringForOnlyThis(entry) {
         var clazz = this.getChildClusterConstructor();
-        var options = this.getClusterOptions()
+        var options = this.getClusterOptions();
         var that = this;
 
         var _clustersObj = {};
@@ -344,26 +344,26 @@ class BaseCluster3D extends BaseNode {
 
         //post-process
         //merge clusters that don't match the criteria again
-        let elements = this.groupBy(entry.generator)
+        let elements = this.groupBy(entry.generator);
         _.each(elements, function (_cluster, key) {
 
             if (_cluster.getNodes().length < options.minClusterSize) {
 
-                var dMGN = options.defaultMergeGroupName
+                var dMGN = options.defaultMergeGroupName;
                 if (typeof  _clustersObj[dMGN] == "undefined") _clustersObj[dMGN] = new clazz(undefined, undefined, that.getView());//new BaseCluster3D()
-                _clustersObj[dMGN].name = dMGN
+                _clustersObj[dMGN].name = dMGN;
                 _clustersObj[dMGN].addNodes(_cluster.getNodes())
             }
             else {
-                _cluster.name = key
+                _cluster.name = key;
                 _clustersObj[key] = _cluster
 
 
             }
-        })
+        });
 
 
-        _.extend(this.mClusters, _clustersObj)
+        _.extend(this.mClusters, _clustersObj);
 
 
         /**
@@ -373,11 +373,11 @@ class BaseCluster3D extends BaseNode {
          */
         _.each(this.mClusters, function (childCluster) {
             childCluster.on("hull-updated", _.throttle(function () {
-                that.adjustHullSize()
+                that.adjustHullSize();
                 that.trigger("hull-updated")
 
             }, 100))
-        })
+        });
 
 
         this.setDistributionHandler(entry.distribution, function () {
@@ -397,7 +397,7 @@ class BaseCluster3D extends BaseNode {
     groupBy(filterFunction) {
         var clazz = this.getChildClusterConstructor();
         var that = this;
-        let container = {}
+        let container = {};
 
         function groupFunction(key, val) {
             if (typeof container[key] == "undefined") container[key] = new clazz(undefined, undefined, that.getView());//new BaseCluster3D();
@@ -428,6 +428,8 @@ class BaseCluster3D extends BaseNode {
     }
 
 
+
+    //TODO it  seems, the vertices aren't calculated properly
     getCompoundBoundingBoxInfo() {
         var that = this;
         var box = new THREE.Box3;
@@ -439,22 +441,59 @@ class BaseCluster3D extends BaseNode {
             boundingBox.copy(subCluster.geometry.boundingBox);
 
 
-            //FIXME offsets are not properly calculated
             let offset_parent = that.localToWorld(new THREE.Vector3);
             let offset_world = subCluster.localToWorld(new THREE.Vector3);
             boundingBox.translate(offset_world.sub(offset_parent));
 
             let vert = that.getVerticesFromBoundingBox(boundingBox);
+
+           // let vert = that.mHull.mesh.geometry.vertices;
             vertices = vertices.concat(vert);
 
             box.union(boundingBox);
 
 
-        })
+        });
 
         return {box: box, vertices: vertices}
 
     }
+
+
+
+    /**
+     * in case this is a leaf cluster the function
+     * returns an array of vertices positioned relative to it's parent
+     * (the vertices are further used for the boundingVolume feature)
+     */
+    getVerticesForLeaf() {
+        var that = this;
+
+        var leaf=this.mLeaf;
+
+
+
+            let el=leaf.mNodeParticles.pointCloud;
+
+            let offset_parent = that.localToWorld(new THREE.Vector3);
+            let offset_world = el.localToWorld(new THREE.Vector3);
+
+
+            let translateOffset=offset_world.sub(offset_parent);
+
+           let geometry=el.geometry;
+            var attributes = geometry.attributes;
+            var positions = attributes.position.array;
+            let vert=[];
+            for ( var i = 0; i < positions.length; i += 3 ) {
+
+                let v=new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+                vert.push(  v.add(translateOffset));
+            }
+
+       return vert
+    }
+
 
 
     /**
@@ -465,8 +504,8 @@ class BaseCluster3D extends BaseNode {
      */
     setDistributionHandler(distribution, onComplete = function () {
     }) {
-        var that = this
-        var values = Object.values(this.mClusters)
+        var that = this;
+        var values = Object.values(this.mClusters);
         //TODO translation,rotation,scale by using different per-node function
 
         if (this.isLeaf())
@@ -486,7 +525,7 @@ class BaseCluster3D extends BaseNode {
 
         //FIXME redundant updating multiple edges and potentially leafs
         function updateLeafsEdges(cluster) {
-            let leafs = cluster.getLeafs()
+            let leafs = cluster.getLeafs();
 
             _.each(leafs, function (leaf) {
                 leaf.updateEdges();
@@ -513,7 +552,7 @@ class BaseCluster3D extends BaseNode {
 
         //generate the boundingBox for the node particles if the clster is a leaf
         if (this.isLeaf()) {
-            let pc = this.mLeaf.mNodeParticles.pointCloud
+            let pc = this.mLeaf.mNodeParticles.pointCloud;
 
             if (!pc) {
                 throw new Error("nodescontainer not created yet for leaf")
@@ -522,7 +561,9 @@ class BaseCluster3D extends BaseNode {
 
                 //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
                 info.box.setFromArray(pc.geometry.attributes.position.array);
-                info.vertices = this.getVerticesFromBoundingBox(info.box)  //TODO get vertices from array
+               // info.vertices = this.getVerticesFromBoundingBox(info.box)  //TODO get vertices from array
+                info.vertices = this.getVerticesForLeaf();
+
                 pc.geometry.boundingBox = info.box
             }
 
@@ -600,7 +641,7 @@ class BaseCluster3D extends BaseNode {
 
     createParticlePointCloud(entry) {
         // console.log("reached leaf cluster", this)
-        var that = this
+        var that = this;
         let leaf = new ClusterLeafElement(this.mNodes);
         this.mLeaf = leaf;
         this.add(leaf);
@@ -617,7 +658,7 @@ class BaseCluster3D extends BaseNode {
 
 
     updateIfIsLeaf() {
-        this.adjustHullSize()
+        this.adjustHullSize();
         this._initDotParticles();
         this.updateDotParticles()
 
@@ -703,7 +744,7 @@ class BaseCluster3D extends BaseNode {
      */
 
     getLeafs() {
-        if (this._LeafsCached) this._LeafsCached
+        if (this._LeafsCached) this._LeafsCached;
 
 
         var leafElements = this._LeafsCached = [];
@@ -712,7 +753,7 @@ class BaseCluster3D extends BaseNode {
             if (item instanceof ClusterLeafElement)
                 leafElements.push(item)
 
-        })
+        });
 
 
         return leafElements;
@@ -725,14 +766,14 @@ class BaseCluster3D extends BaseNode {
      *
      */
     findClusters(selector) {
-        var clusters = []
+        var clusters = [];
 
         this.traverse(function (item) {
             if (item instanceof BaseCluster3D)
                 clusters.push(item)
-        })
+        });
 
-        clusters.shift() //remove first elemn as it is "this"
+        clusters.shift(); //remove first elemn as it is "this"
 
         return clusters
 
@@ -742,9 +783,9 @@ class BaseCluster3D extends BaseNode {
     getDOMElement() {
 
 
-        var view3d = this.getView()
+        var view3d = this.getView();
         if (!view3d || !view3d.domElement) {
-            console.warn("attach graph to a view before using dom specific functions")
+            console.warn("attach graph to a view before using dom specific functions");
             return null;
         }
 
@@ -762,9 +803,9 @@ class BaseCluster3D extends BaseNode {
     getDOMEvents() {
 
 
-        var view3d = this.getView()
+        var view3d = this.getView();
         if (!view3d || !view3d.mDomEvents) {
-            console.warn("attach graph to a view before using dom specific functions")
+            console.warn("attach graph to a view before using dom specific functions");
             return null;
         }
 
@@ -817,10 +858,10 @@ class BaseCluster3D extends BaseNode {
 
     getParents(maxDepth = 20) {
         var _root = this;
-        var parents = []
+        var parents = [];
         while (maxDepth--) {
             let r = _root.parent;
-            if (r == null) return parents
+            if (r == null) return parents;
             if (!(r instanceof BaseCluster3D)) return parents;
             _root = r;
 
