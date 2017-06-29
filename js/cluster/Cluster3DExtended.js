@@ -106,8 +106,6 @@ class Cluster3DExtended extends BaseCluster3D {
         var diameter = null;
         this.on("s", function (e) {
             e.stopPropagation();
-
-
             if (!diameter)
                 diameter = this.geometry.boundingSphere.radius * 2;
             console.log("clicky clicky", diameter);
@@ -123,6 +121,23 @@ class Cluster3DExtended extends BaseCluster3D {
 
             fn()
         });
+
+
+        this.on("a", function (e) {
+            e.stopPropagation();
+            if (!diameter)
+                diameter = this.geometry.boundingSphere.radius * 2;
+            console.log("clicky clicky", diameter);
+            let speccsRoot = [
+                {distribution: new ForceGraphDistribution(diameter * 0.66, 3)}
+            ];
+
+
+            var fn = onClickFactory(this, speccsRoot);
+
+            fn()
+        });
+
 
         this.on("mouseover mousemove", function (e) {
             e.stopPropagation();
@@ -142,7 +157,7 @@ class Cluster3DExtended extends BaseCluster3D {
             //TODO public setter function
 
 
-            let lod=(this.mHull && this.mHull.factory)? this.mHull.factory.lod:-1;
+            let lod=(this.mHull)? this.mHull.lod:-1;
 
             this.getView().setTooltip(root + " " + name+" LOD:"+lod)
 

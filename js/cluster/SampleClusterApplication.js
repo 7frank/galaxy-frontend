@@ -61,7 +61,7 @@ export {Cluster3DExtended}
 export class MyMain {
 
     constructor(datasets) {
-        this.setDataSets(datasets)
+        this.setDataSets(datasets);
         this.setupViews()
 
 
@@ -87,11 +87,11 @@ export class MyMain {
     getEllipsoidHull(boundingBox) {
 
         let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize()
+        let _size = boundingBox.getSize();
 
-        var sphereGeometry = new THREE.EllipsoidGeometry(_size.x, _size.y, _size.z)
+        var sphereGeometry = new THREE.EllipsoidGeometry(_size.x, _size.y, _size.z);
 
-        let hull = new THREE.Mesh(sphereGeometry, this.getDefaultHullMaterial())
+        let hull = new THREE.Mesh(sphereGeometry, this.getDefaultHullMaterial());
         // hull.position.copy(_center)
 
         return hull
@@ -106,20 +106,20 @@ export class MyMain {
         let boundingSphere = new THREE.Sphere;
         //get center, radius
         let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize()
+        let _size = boundingBox.getSize();
         let radius = _size.length() / 2;
         //TODO
-        if (radius < 40) radius = 40
+        if (radius < 40) radius = 40;
 
         boundingSphere.radius = radius;
 
         let ringGeometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
 
 
-        ringGeometry.boundingSphere = boundingSphere
+        ringGeometry.boundingSphere = boundingSphere;
 
 
-        let hull = new THREE.Mesh(ringGeometry, this.getDefaultHullMaterial())
+        let hull = new THREE.Mesh(ringGeometry, this.getDefaultHullMaterial());
 
 
         hull.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
@@ -127,7 +127,7 @@ export class MyMain {
             this.setRotationFromQuaternion(camera.quaternion)
             //     console.warn(camera.quaternion.x,camera.quaternion.y)
 
-        }
+        };
 
         return hull
     }
@@ -141,7 +141,7 @@ export class MyMain {
             display: "flex",
             "border": "1px solid rgba(128, 128, 128, 0.5)",
             margin: "0.2em"
-        }
+        };
 
 
         function createContainer() {
@@ -167,12 +167,12 @@ export class MyMain {
                 , "overflow-x": "hidden",
                 background: "rgba(255, 255, 255, 0.2)",
                 border: "1px solid rgba(128, 128, 128, 0.5)",
-            }
+            };
 
 
             var container = $("<div>")
                 .css(containerCSS)
-                .appendTo("body")
+                .appendTo("body");
 
             let title = $("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
                 .css({
@@ -181,50 +181,50 @@ export class MyMain {
                     width: "100%",
                     "font-size": "1em",
                     color: "rgba(255, 255, 255, 0.5)"
-                })
+                });
 
 
             function toggleMenu() {
                 container.toggle()
             }
 
-            title.on("click", toggleMenu)
+            title.on("click", toggleMenu);
 
-            container.append(title)
+            container.append(title);
 
 
-            Mousetrap.bind("space", toggleMenu)
+            Mousetrap.bind("space", toggleMenu);
 
             return container
         }
 
-        var that = this
+        var that = this;
 
 
-        var container = createContainer()
+        var container = createContainer();
 
 
         function createDefaultView(name = "View3D") {
 
-            let mGraphView = document.createElement("simple-force-graph-view-3d")//("view-3d")
+            let mGraphView = document.createElement("simple-force-graph-view-3d");//("view-3d")
 
 
             customElements.whenDefined("simple-force-graph-view-3d").then(function () {
 
 
                 if (mGraphView.setCaption)
-                    mGraphView.setCaption(name)
+                    mGraphView.setCaption(name);
 
                 $(mGraphView)
-                    .css(thumbCSS)
+                    .css(thumbCSS);
 
                 $(mGraphView).on("dblclick", function () {
 
-                    if (mGraphView.isMaximised()) return
+                    if (mGraphView.isMaximised()) return;
 
-                    container.toggle()
+                    container.toggle();
 
-                    let maximisedContainer = $("#3d-graph")
+                    let maximisedContainer = $("#3d-graph");
 
                     var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
 
@@ -232,20 +232,20 @@ export class MyMain {
 
                         view.undoMaximise() //
 
-                    })
+                    });
 
-                    container.append(prevMaximisedElement)
+                    container.append(prevMaximisedElement);
 
                     //--------
-                    maximisedContainer.append(this)
+                    maximisedContainer.append(this);
                     this.maximise()
 
 
                 })
 
 
-            })
-            var setData = mGraphView.setData
+            });
+            var setData = mGraphView.setData;
             mGraphView.setData = function (data) {
 
                 customElements.whenDefined("simple-force-graph-view-3d").then(function () {
@@ -254,7 +254,7 @@ export class MyMain {
 
                 })
 
-            }
+            };
 
             return mGraphView
 
@@ -263,37 +263,37 @@ export class MyMain {
 
         function createView(name = "View3D", speccs) {
 
-            let mGraphView = document.createElement("graph-view-3d")
-            mGraphView.setCaption(name)
+            let mGraphView = document.createElement("graph-view-3d");
+            mGraphView.setCaption(name);
 
             $(mGraphView)
-                .css(thumbCSS)
+                .css(thumbCSS);
 
             $(mGraphView).on("dblclick", function () {
 
-                if (mGraphView.isMaximised()) return
-                container.toggle()
+                if (mGraphView.isMaximised()) return;
+                container.toggle();
 
-                let maximisedContainer = $("#3d-graph")
+                let maximisedContainer = $("#3d-graph");
                 //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement = maximisedContainer.children(".view-3d")//("graph-view-3d")
+                var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
 
                 _.each(prevMaximisedElement, function (view) {
 
                     view.undoMaximise()
 
-                })
+                });
 
-                container.append(prevMaximisedElement)
-                maximisedContainer.append(this)
+                container.append(prevMaximisedElement);
+                maximisedContainer.append(this);
 
 
                 this.maximise()
 
-            })
+            });
 
 
-            mGraphView.setSpeccs(speccs)
+            mGraphView.setSpeccs(speccs);
 
             //TODO per view ... mGraphView.mRenderer.domElement
             let events= new Mousetrap();
@@ -309,7 +309,7 @@ export class MyMain {
                 })
 
 
-            })
+            });
 
             var infoVisible=true;
             events.bind("h",function(){
@@ -317,7 +317,7 @@ export class MyMain {
                 $(".info-panel").toggle(infoVisible)
 
 
-            })
+            });
 
 
 
@@ -328,7 +328,7 @@ export class MyMain {
         }
 
 
-        let views = []
+        let views = [];
 
 
 
@@ -336,16 +336,23 @@ export class MyMain {
 
 
             //NOTE: target rendering
-            var speccs = this.getForceSpeccs()
+            var speccs = this.getForceSpeccs();
             let view2 = createView("new force-graph", speccs)
-                .loadDataSet(this.getDSByID(1))
-            views.push(view2)
+                .loadDataSet(this.getDSByID(1));
+            views.push(view2);
 
 
-            var speccs = this.getPossibleClusterSpeccsArray()
+            var speccs = this.getPossibleClusterSpeccsArray();
             let view1 = createView("dist test", speccs)
-                .loadDataSet(this.getDSByID(1))
+                .loadDataSet(this.getDSByID(1));
             views.push(view1)
+
+
+
+            let view0 = createDefaultView("previous force-graph")
+                .loadDataSet(this.getDSByID(1));
+            views.push(view0);
+
 
 
 
@@ -386,19 +393,14 @@ export class MyMain {
 
 
             //NOTE: target rendering
-             var speccs = this.getForceSpeccs()
+             var speccs = this.getForceSpeccs();
              let view2 = createView("new force-graph", speccs)
-             .loadDataSet(this.getDSByID(0))
+             .loadDataSet(this.getDSByID(0));
              views.push(view2)
 
 
 
         }
-
-
-        let view0 = createDefaultView("previous force-graph")
-            .loadDataSet(this.getDSByID(1))
-        views.push(view0)
 
 
 
@@ -492,9 +494,9 @@ export class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new BaseDistribution(40000, 2) //1000
-        let sample2 = new ForceGraphDistribution(5000, 2)//200
-        let sample3 = new BaseDistribution(100, 3)//50
+        let sample1 = new BaseDistribution(40000, 2); //1000
+        let sample2 = new ForceGraphDistribution(5000, 2);//200
+        let sample3 = new BaseDistribution(100, 3);//50
 
         //  let rand2 = new RandomDistribution(200, 2)
 
@@ -541,9 +543,9 @@ export class MyMain {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new BaseDistribution(25000, 2) // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new ForceGraphDistribution(3000, 3)// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new ForceGraphDistribution(500, 3)//same goes for the nodes within each industry
+        let countryDistribution = new BaseDistribution(45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new ForceGraphDistribution(15000, 3);// industries within countries use the Force-Graph approach to position elements
+        let nodesWithinIndustryDistribution = new ForceGraphDistribution(500, 3);//same goes for the nodes within each industry
 
         //the final configuration for rendering
         //it contains an additional options attribute per array entry
@@ -586,6 +588,45 @@ export class MyMain {
     getDSByID(id) {
         return this.mDataSets[id]
     }
+
+//-------------------------------
+     getCurrentView()
+    {
+        return $(".view-3d.view-3d-maximised").get(0)
+
+    }
+
+    setGraph2D()
+    {
+
+
+        let speccs=this.getPossibleClusterSpeccsArray();
+        let view= this.getCurrentView();
+        view.mRootCluster.applyClustering(speccs);
+
+
+     //   doZoomToPos(new THREE.Vector3(0,0,3000));
+
+        view.mControls.noRotate=true;
+      //  view.mControls.target.set(new THREE.Vector3(0,0,0));
+
+
+    }
+
+
+
+    setGraph3D()
+    {
+
+        let speccs=this.getForceSpeccs();
+        let view= this.getCurrentView();
+        view.mRootCluster.applyClustering(speccs);
+
+        view.mControls.noRotate=false;
+     //   view.mControls.target.set(new THREE.Vector3(0,0,0));
+
+    }
+
 
 
 }

@@ -376,7 +376,7 @@ class BaseCluster3D extends BaseNode {
                 that.adjustHullSize();
                 that.trigger("hull-updated")
 
-            }, 100))
+            }, 100,{trailing:true,leading:false}))
         });
 
 

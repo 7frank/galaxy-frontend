@@ -21,11 +21,11 @@ class ForceGraphDistribution extends BaseDistribution {
     constructor(scale = 50, dimensions = 1) {
         super(scale, dimensions);
 
-        this.initialEngineTicks = 5;
+        this.initialEngineTicks = 1;
 
-
-        this.maxConvergeTime=5000//ms ... 5 seconds upper bound for loading phase
-        this.maxConvergeFrames=300//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
+    // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
+        this.maxConvergeTime=3000//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeFrames=90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
 
@@ -38,6 +38,8 @@ class ForceGraphDistribution extends BaseDistribution {
      * @param onTICKComplete
      */
     startSimulation(nodes, edges = [], onTick, onComplete) {
+
+
 
         var that=this
 
@@ -53,19 +55,20 @@ class ForceGraphDistribution extends BaseDistribution {
             .numDimensions(this.dimensions)
             .nodes(nodes)
             .force('link', d3_force.forceLink().id(function (d) {
+
+
                 return d._id
             })
                 .distance(function computeLinkDistance() {
                     return scale / 50;
 
                 })
-                .links(edges))
+               .links(edges)
+            )
             .force("collide", d3_force.forceCollide(scale / 10)
                 .iterations(1))
             .force('charge', (node) => -scale / 50)
             .force('linkStrength', (link) => 1)
-
-
             .stop();
 
 
@@ -79,12 +82,10 @@ class ForceGraphDistribution extends BaseDistribution {
 
         layout.on("tick", function () {
 
-
-            if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
+           if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
                 layout.alpha(0); //trigger end
                 layout.stop(); // Stop ticking graph
             }
-
 
             onTick(layout, nodes, edges)
 
@@ -116,26 +117,33 @@ class ForceGraphDistribution extends BaseDistribution {
             //TODO this part seems not to be used at all currently
             mEdges = nodes.createEdgesForChildClusters();
 
+
+            mEdges.forEach(function(edge){
+                edge.source=edge.source.position;
+                edge.target=edge.target.position;
+
+            })
+
             mNodes = Object.values(nodes.mClusters).map(function (n) {
-                n.position.copy(new THREE.Vector3(0, 0, 0));
+           //     n.position.copy(new THREE.Vector3(0, 0, 0));
+
                 return n.position;
             });
+
+
 
 
         }
         else if (_.isArray(nodes)) {
             mNodes = nodes.map(function (n) {
-
                 //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
                 mEdges = mEdges.concat(n.edges);
-
-                _.extend(n, {x: 0, y: 0, z: 0});
+                n.x=n.x|0;
+                n.y=n.y|0;
+                n.z=n.z|0;
                 return n;
-
             });
-
         }
-
 
         this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {
 
@@ -149,6 +157,8 @@ class ForceGraphDistribution extends BaseDistribution {
              sphere.position.z = node.z || 0;
 
              });*/
+
+
 
 
             //handle each node callback
