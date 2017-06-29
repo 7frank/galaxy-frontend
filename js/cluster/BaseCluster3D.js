@@ -45,7 +45,7 @@ class BaseCluster3D extends BaseNode {
         //update lod //TODO the function shoul forwared onBeforeRender args in a way
         this.on("before-render", function () {
 
-            if (!this.mHull) return;
+         //   if (!this.mHull) return;
 
             let view = this.getView();
             //based on distance to the camera the LOD is set for the hull object
@@ -71,14 +71,39 @@ class BaseCluster3D extends BaseNode {
 
             var lod = 1 - (distance - minDistance) / (maxDistance - minDistance);
 
-
-             // this.mHull.setLOD(0.5)
-          this.mHull.setLOD(lod)
+        this.setLOD(lod)
 
         })
 
 
     }
+
+
+    /**
+     *
+     *
+     *
+     *
+     * @param mLOD  .. the lod value is a normalised value between 0 and 1 where 0 is a minimal value indicating that the  cluster and it's elements should be rendered at minimum quality
+     *
+     */
+
+    setLOD(mLOD)
+    {
+
+
+        if (this.mHull)
+        this.mHull.setLOD(mLOD);
+
+
+        if (this.isLeaf())
+        {
+            this.mLeaf.setLOD(mLOD)
+        }
+
+
+    }
+
 
 
     /**

@@ -122,7 +122,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         //update lod //TODO the function shoul forwared onBeforeRender args in a way
         this.on("before-render", function () {
 
-            if (!this.mHull) return;
+         //   if (!this.mHull) return;
 
             let view = this.getView();
             //based on distance to the camera the LOD is set for the hull object
@@ -148,14 +148,39 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             var lod = 1 - (distance - minDistance) / (maxDistance - minDistance);
 
-
-             // this.mHull.setLOD(0.5)
-          this.mHull.setLOD(lod)
+        this.setLOD(lod)
 
         })
 
 
     }
+
+
+    /**
+     *
+     *
+     *
+     *
+     * @param mLOD  .. the lod value is a normalised value between 0 and 1 where 0 is a minimal value indicating that the  cluster and it's elements should be rendered at minimum quality
+     *
+     */
+
+    setLOD(mLOD)
+    {
+
+
+        if (this.mHull)
+        this.mHull.setLOD(mLOD);
+
+
+        if (this.isLeaf())
+        {
+            this.mLeaf.setLOD(mLOD)
+        }
+
+
+    }
+
 
 
     /**
@@ -2186,9 +2211,12 @@ class ClusterLeafElement extends THREE.Mesh
         this.mNodeParticles=this.createParticleNodeCloud();
 
 
-        this.add( this.mNodeParticles.pointCloud)
+        this.add( this.mNodeParticles.pointCloud);
 
-        //TODO check if still mayor performane hit
+
+
+        //TODO this still has mayor performance impact but is needed for counting the companies
+        //we'll use lod non the nodes as well therewore nodes forther away in the background wont count towards the coumpany count
         this.appendNodes(nodes)
 
 
@@ -2197,9 +2225,39 @@ class ClusterLeafElement extends THREE.Mesh
 
     }
 
+    setLOD(levelOfDetail)
+    {
+        if (  this.mNodeParticles)
+        this.mNodeParticles.pointCloud.visible= levelOfDetail>0.3;
+        //TODO nodes,edges, ... as well
+
+        if (  this.mEdgesContainer)
+       this.mEdgesContainer.visible= levelOfDetail>0.5;
+
+
+        if (  this.mNodeMeshes)
+            this.mNodeMeshes.visible= levelOfDetail>0.2;
+
+        if (this.parent && this.parent.mParticles)
+        this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
+
+
+
+    }
+
+
+
     appendNodes(nodes){
 
-        var that=this;
+        if (!this.mNodeMeshes)
+        {
+            this.mNodeMeshes=new THREE.Object3D;
+            this.add(this.mNodeMeshes)
+
+        }
+
+
+        var that=this.mNodeMeshes//this;
         _.each(nodes,function(node){
             if (node&& node._bubble)
                that.add(node._bubble)

@@ -532,18 +532,8 @@ lod/performance
 
 \begin_deeper
 \begin_layout Itemize
-performance wise the lod stuff i'm currently adding should squeeze out sime
- more fps 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO
-\end_layout
-
-\end_inset
-
-
+[x]performance wise the lod stuff i'm currently adding should squeeze out
+ sime more fps 
 \end_layout
 
 \begin_layout Itemize
@@ -566,18 +556,43 @@ occured because the boundingbox of the initial geometry for the ConexVolume
 \end_deeper
 \end_deeper
 \begin_layout Itemize
-[]have setLOD per cluster and disable things like nodecontainer or edges
+[x]have setLOD per cluster and disable things like nodecontainer or edges
  at distances > n*radius
-\begin_inset Note Note
+\end_layout
+
+\begin_layout Itemize
+leaf > nodes meshes: 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Greyedout
 status open
 
 \begin_layout Plain Layout
-TODO
+we'll use lod non the nodes as well therewore nodes forther away in the
+ background wont count towards the coumpany count 
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+ text nodes has a way to heavy performance impact..
+ 20% upwards ..
+ 
 \end_layout
 
 \end_deeper
@@ -627,22 +642,22 @@ switching versions takes too long
 \end_deeper
 \begin_layout Itemize
 edges
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+ 
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 it might be that throttling hull updates and updating edges havve a slight
  bug where the edges don't match the nodes after animation is finished
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO
-\end_layout
-
-\end_inset
-
- 
 \end_layout
 
 \begin_layout Itemize
