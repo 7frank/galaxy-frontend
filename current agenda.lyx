@@ -3,6 +3,9 @@
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+\definecolor{grey}{RGB}{122,122,122}
+\end_preamble
 \use_default_options true
 \maintain_unincluded_children false
 \language english
@@ -25,6 +28,7 @@
 \bibtex_command default
 \index_command default
 \paperfontsize default
+\spacing single
 \use_hyperref false
 \papersize default
 \use_geometry false
@@ -459,6 +463,57 @@ The backlog contains potential features sorted by it's priority to the product
  subject.
 \end_layout
 
+\begin_layout Itemize
+programmer wants different forms of tests to improve stability and code
+ quality
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://www.sitepoint.com/javascript-testing-unit-functional-integration/
+\end_layout
+
+\begin_layout Itemize
+https://cambridge-intelligence.com/test-javascript-ui/
+\end_layout
+
+\begin_layout Itemize
+Unit -tests
+\end_layout
+
+\begin_layout Itemize
+Integration tests
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mocha
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+functional tests
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Nightwatch.js? 
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+User wants to see animations between differnt visualisations
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+FIXME if a cluster has subclusters and no clustering is given use the existsing
+ * likewise with distributions * currently the cluster gets cleaned first
+ before the new visualisation is generated * 
+\end_layout
+
+\end_deeper
 \begin_layout Section
 Features/Versions/History/sprints
 \end_layout
@@ -486,6 +541,8 @@ sprint
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 it seems as if the force graph is used but the first iteration does create
  this odd 
 \begin_inset Quotes eld
@@ -499,22 +556,30 @@ line
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 applying the force graph distribution to any cluster will first show this
  line dist before the second time it is called it will distribute correct
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 also the edges in the forcegraphdist arent used/necessary Oo ...
  but they need to come from somewhere..
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 ok so the posiotions of the clusters where used for the nodes but for the
  edges the clusters where used as source and target
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 changing the source and target of the edge to link to the nodes/positions
  instead solved the roblem
 \end_layout
@@ -532,21 +597,29 @@ lod/performance
 
 \begin_deeper
 \begin_layout Itemize
-[x]performance wise the lod stuff i'm currently adding should squeeze out
+[
+\strikeout on
+x]performance wise the lod stuff i'm currently adding should squeeze out
  sime more fps 
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 [x] added hull with LOD which helped a little with performance
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 [x] flickering of boundingVolumes at specific distances
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 occured because the boundingbox of the initial geometry for the ConexVolume
  wasn't computed before cloning, which resulted in different boundingboxes
  and thus different radii per LOD and constant changes between geometries
@@ -556,6 +629,8 @@ occured because the boundingbox of the initial geometry for the ConexVolume
 \end_deeper
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 [x]have setLOD per cluster and disable things like nodecontainer or edges
  at distances > n*radius
 \end_layout
@@ -601,11 +676,15 @@ rootcluster text seems to be the mayor factor here
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 also text nodes appears to be broken currently ....
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 nodes weren't always used for calculating visible items.
  because we skip calculating visible nodes to only occure every 20 frames
  the nodes reset itself with the next iteration being length==0
@@ -625,6 +704,12 @@ FIXME
  properly) the text nodes won't be updated
 \end_layout
 
+\begin_deeper
+\begin_layout Itemize
+this might be a problem
+\end_layout
+
+\end_deeper
 \end_deeper
 \end_deeper
 \end_deeper
@@ -648,7 +733,7 @@ see elaboration
 \end_layout
 
 \begin_layout Itemize
-\begin_inset Note Note
+\begin_inset Note Greyedout
 status open
 
 \begin_layout Plain Layout
@@ -673,8 +758,10 @@ also dragging will trigger click events
 \end_deeper
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 So we will 1
-\begin_inset Note Note
+\begin_inset Note Greyedout
 status open
 
 \begin_layout Plain Layout
@@ -688,10 +775,14 @@ d option as well
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 A simple flat version
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 switching versions takes too long 
 \end_layout
 
@@ -730,17 +821,45 @@ could be because the nodes where put into another container
 
 \end_deeper
 \begin_layout Itemize
+redist of clusters
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+hull takes quite some time to generate or does not show up
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+...50 sec plus
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
 smaller bugs
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 [x]particles are not within node
 \end_layout
 
 \begin_layout Itemize
 elements/particles sometimes don't show up
-\begin_inset Note Note
+\begin_inset Note Greyedout
 status open
 
 \begin_layout Plain Layout
@@ -765,6 +884,8 @@ clicking a node then following the edge and clicking the target will hide
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 []text will stay even if nodes are not longer visible
 \end_layout
 
@@ -784,11 +905,15 @@ this issue didn't appear any longer
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 [x]node tooltip
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 ....
  tooltip gets overridden by parent although stopPropagation is used
 \end_layout
@@ -820,6 +945,8 @@ unselect arrow when elements position changes
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 [x]see where get3DRoot has to be refactored into getParentCluster (we changed
  the node meshes parent element so some things are off)
 \end_layout
@@ -845,9 +972,19 @@ down
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 the other boundingvolume disappears ...
 \end_layout
 
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+BaseVolume had opacity >0 and appeared as if it was BoxVolume..
+\end_layout
+
+\end_deeper
 \end_deeper
 \begin_layout Subsection
 version as of 23.06.2017

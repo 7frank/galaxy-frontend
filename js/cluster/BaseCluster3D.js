@@ -181,6 +181,13 @@ class BaseCluster3D extends BaseNode {
             }
 
 
+            if (cluster.mHull) {
+                cluster.mHull.dispose();
+                delete (cluster.mHull);
+                cluster.mHull=null;
+            }
+
+
             if (cluster == self) return;//don't detach the current root element
 
             if (cluster.parent) {
@@ -206,12 +213,10 @@ class BaseCluster3D extends BaseNode {
     cleanUpLeafs() {
         _.each(this.getLeafs(), function (leaf) {
 
-            //TOO to leaf specific clean up
+            //TODO to leaf specific clean up
 
             //for now at least remove the particle cloud
-            leaf.geometry.dispose();
-            if (leaf.parent)
-                leaf.parent.remove(leaf)
+            leaf.cleanUp()
         })
 
     }

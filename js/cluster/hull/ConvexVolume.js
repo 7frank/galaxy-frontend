@@ -22,7 +22,7 @@ class ConvexVolume extends BoxVolume {
     //eg. if lod <0.3 this.mesh.geometry=this.lowpolyMesh
 
     constructor(...args) {
-        super(...args)
+        super(...args);
 
         this.maxOpacity = 0.6
 
@@ -34,7 +34,7 @@ class ConvexVolume extends BoxVolume {
         //ConvexGeometry does need at least 4 vertices
         //so in case we don't have as much we do use the boundingbox instead to generate some more vertices
         if (vertices.length < 4)
-            vertices = this.getVerticesFromBoundingBox(boundingBox)
+            vertices = this.getVerticesFromBoundingBox(boundingBox);
 
 
         let geo = new THREE.ConvexGeometry(vertices);
@@ -99,8 +99,8 @@ class ConvexVolume extends BoxVolume {
     setLOD(l) {
 
 
-        if (l < 0) l = 0
-        if (l > 1) l = 1
+        if (l < 0) l = 0;
+        if (l > 1) l = 1;
 
         var minOpacity=0.03;
 
@@ -111,7 +111,7 @@ class ConvexVolume extends BoxVolume {
 
         }
 
-        let y = mTransfer(l)
+        let y = mTransfer(l);
         super.setLOD(y* this.maxOpacity);
 
 
@@ -129,6 +129,22 @@ class ConvexVolume extends BoxVolume {
     setInactive() {
         this.maxOpacity = 0.3;
     }
+
+
+    dispose()
+    {
+
+        this.mesh.material.dispose();
+
+        this.geometryLowPoly.dispose();
+        this.geometryAveragePoly.dispose();
+        this.geometryHighPoly.dispose();
+
+        if (this.parent)
+            this.parent.remove(this)
+
+    }
+
 
 
 }

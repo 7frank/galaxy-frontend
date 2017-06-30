@@ -98,6 +98,16 @@ class BaseVolume extends THREE.Object3D {
     }
 
 
+    dispose()
+    {
+        this.mesh.geometry.dispose()
+        this.mesh.material.dispose()
+
+        if (this.parent)
+            this.parent.remove(this)
+
+    }
+
 
 
 

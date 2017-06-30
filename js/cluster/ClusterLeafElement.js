@@ -6,26 +6,21 @@
 import EdgesContainer from "./EdgesContainer"
 
 
-export default class ClusterLeafElement extends THREE.Mesh
-{
-    constructor(nodes){
+export default class ClusterLeafElement extends THREE.Mesh {
+    constructor(nodes) {
         super();
 
 
+        this.mNodes = nodes;
+        this.mNodeParticles = this.createParticleNodeCloud();
 
 
-        this.mNodes=nodes;
-        this.mNodeParticles=this.createParticleNodeCloud();
-
-
-        this.add( this.mNodeParticles.pointCloud);
-
+        this.add(this.mNodeParticles.pointCloud);
 
 
         //TODO this still has mayor performance impact but is needed for counting the companies
         //we'll use lod non the nodes as well therewore nodes forther away in the background wont count towards the coumpany count
-        this.appendNodes(nodes)
-
+        this.appendNodes(nodes);
 
 
         this.createEdgesFromNodes(nodes)
@@ -33,50 +28,80 @@ export default class ClusterLeafElement extends THREE.Mesh
     }
 
 
-    getView()
-    {
+    getView() {
         return this.parent.getView()
 
 
     }
 
-    setLOD(levelOfDetail)
-    {
-        if (  this.mNodeParticles)
-        this.mNodeParticles.pointCloud.visible= levelOfDetail>0.3;
+    setLOD(levelOfDetail) {
+        if (this.mNodeParticles)
+            this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
-        if (  this.mEdgesContainer)
-       this.mEdgesContainer.visible= levelOfDetail>0.3;
+        if (this.mEdgesContainer)
+            this.mEdgesContainer.visible = levelOfDetail > 0.3;
 
 
-        if (  this.mNodeMeshes)
-            this.mNodeMeshes.visible= levelOfDetail>0.2;
+        if (this.mNodeMeshes)
+            this.mNodeMeshes.visible = levelOfDetail > 0.2;
 
-       // if (this.parent && this.parent.mParticles)
-       // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
-
+        // if (this.parent && this.parent.mParticles)
+        // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
 
 
     }
 
 
+    cleanUp() {
 
-    appendNodes(nodes){
+
+        if (this.mNodeParticles) {
+            this.mNodeParticles.remove();
+            this.mNodeParticles.pointCloud.geometry.dispose();
+            this.mNodeParticles = null;
+        }
+
+        if (this.mEdgesContainer&&this.mEdgesContainer.geometry) {
 
 
-        if (!this.mNodeMeshes)
-        {
-            this.mNodeMeshes=new THREE.Object3D;
+        this.mEdgesContainer.geometry.dispose();
+        this.mEdgesContainer = null;
+     }
+
+        if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
+            this.mNodeMeshes.geometry.dispose();
+            this.mNodeMeshes = null;
+        }
+        if (this.parent && this.parent.mParticles) {
+            this.parent.mParticles.remove();
+            this.parent.mParticles.pointCloud.geometry.dispose();
+            this.parent.mParticles = null;
+        }
+
+        if (this.geometry)
+        this.geometry.dispose();
+        if (this.parent)
+            this.parent.remove(this)
+
+
+    }
+
+
+    appendNodes(nodes) {
+
+
+        if (!this.mNodeMeshes) {
+            this.mNodeMeshes = new THREE.Object3D;
             this.add(this.mNodeMeshes)
 
         }
 
 
-        var that=this.mNodeMeshes//this;
-        _.each(nodes,function(node){
-            if (node&& node._bubble)
-               that.add(node._bubble)
+        var that = this.mNodeMeshes;//this;
+        _.each(nodes, function (node) {
+            if (node && node._bubble)
+                that.add(node._bubble)
 
 
         })
@@ -85,48 +110,44 @@ export default class ClusterLeafElement extends THREE.Mesh
     }
 
 
+    createEdgesFromNodes(nodes) {
 
-    createEdgesFromNodes(nodes){
-
-       this.mEdgesContainer=new EdgesContainer();
+        this.mEdgesContainer = new EdgesContainer();
 
         this.mEdgesContainer.setFromNodes(nodes);
 
 
-        this.add( this.mEdgesContainer)
+        this.add(this.mEdgesContainer)
 
     }
 
 
-
     //TODO refactor
-    setDistributionHandler(distribution,onComplete=function(){})
-    {
+    setDistributionHandler(distribution, onComplete = function () {
+    }) {
 
-        var that=this;
-        distribution.setNodes(this.mNodes,function(vec,i){
+        var that = this;
+        distribution.setNodes(this.mNodes, function (vec, i) {
 
-            let n=that.mNodes[i];
-            if (n._bubble) n._bubble.position.set(n.x,n.y,n.z);
+            let n = that.mNodes[i];
+            if (n._bubble) n._bubble.position.set(n.x, n.y, n.z);
             that.mNodeParticles.updateNodePosition(i);
 
-        },function onStep(){
+        }, function onStep() {
 
 
             that.updateEdges();
 
 
-        },onComplete);
+        }, onComplete);
 
     }
 
-        updateEdges()
-        {
-            if (this.mEdgesContainer)
-                this.mEdgesContainer.updateEdges();
+    updateEdges() {
+        if (this.mEdgesContainer)
+            this.mEdgesContainer.updateEdges();
 
-        }
-
+    }
 
 
     /**
@@ -135,14 +156,13 @@ export default class ClusterLeafElement extends THREE.Mesh
      * @returns {{nodes, pointCloud, updateCrossFade, update, updateNode, updateNodePosition, updateNodeColor, updateNodeSize, on, remove}|*}
      */
 
-    createParticleNodeCloud()
-    {
+    createParticleNodeCloud() {
 
-        var elem = ParticleNodeGroup( this.mNodes, {
+        var elem = ParticleNodeGroup(this.mNodes, {
             nodeDefaultSize: 10,
             nodeDefaultScale: 10,
             nodeTexture: "img/dot7.png"
-        })
+        });
 
 
         return elem

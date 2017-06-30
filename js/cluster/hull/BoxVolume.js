@@ -14,7 +14,7 @@ class BoxVolume extends  BaseVolume {
 
     constructor(...args) {
         super(...args)
-
+        this.maxOpacity=0.1
 
     }
 

@@ -534,6 +534,20 @@ export class MyMain {
     }
 
 
+    getForceSpeccs2DChangesOnly(){
+
+        let speccs=this.getForceSpeccs()
+
+
+        speccs[0].distribution = new BaseDistribution(45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        speccs[1].distribution = new BaseDistribution(10000, 2);// industries within countries use the Force-Graph approach to position elements
+        speccs[2].distribution = new BaseDistribution(500, 3);//same g
+
+           return speccs
+
+    }
+
+
     /**
      * this is a sample configuration for  the cluster.
      * it contains 2 subdivisions:  -first into countries
@@ -623,15 +637,34 @@ export class MyMain {
     {
 
 
-        let speccs=this.getPossibleClusterSpeccsArray();
+        /**
+         * FIXME if a cluster has subclusters and no clustering is given use the existsing
+         * likewise with distributions
+         * currently the cluster gets cleaned first before the new visualisation is generated
+         *
+         *
+         *
+         */
+
+            //   let speccs=this.getPossibleClusterSpeccsArray();
+
+         let speccs=this.getForceSpeccs2DChangesOnly();
+
         let view= this.getCurrentView();
-        view.mRootCluster.applyClustering(speccs);
+        let rootCluster=view.mRootCluster;
+
+        rootCluster.cleanUpLeafs();
+        //clean up previous clusters
+        BaseCluster3D.cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
 
 
-     //   doZoomToPos(new THREE.Vector3(0,0,3000));
+        rootCluster.applyClustering(speccs);
 
-        view.mControls.noRotate=true;
-      //  view.mControls.target.set(new THREE.Vector3(0,0,0));
+
+       // doZoomToPos(new THREE.Vector3(0,0,10000));
+        //view.mControls.target.set(new THREE.Vector3(0,0,0));
+      //  view.mControls.noRotate=true;
+        doZoomToPos(new THREE.Vector3(0,0,0),10000);
 
 
     }
@@ -643,10 +676,20 @@ export class MyMain {
 
         let speccs=this.getForceSpeccs();
         let view= this.getCurrentView();
-        view.mRootCluster.applyClustering(speccs);
+        let rootCluster=view.mRootCluster;
+
+        rootCluster.cleanUpLeafs();
+        //clean up previous clusters
+        BaseCluster3D.cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
+
+
+
+        rootCluster.applyClustering(speccs);
 
         view.mControls.noRotate=false;
-     //   view.mControls.target.set(new THREE.Vector3(0,0,0));
+
+
+        doZoomToPos(new THREE.Vector3(0,0,0),10000);
 
     }
 

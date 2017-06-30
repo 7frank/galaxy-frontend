@@ -258,6 +258,13 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             }
 
 
+            if (cluster.mHull) {
+                cluster.mHull.dispose();
+                delete (cluster.mHull);
+                cluster.mHull=null;
+            }
+
+
             if (cluster == self) return;//don't detach the current root element
 
             if (cluster.parent) {
@@ -283,12 +290,10 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     cleanUpLeafs() {
         _.each(this.getLeafs(), function (leaf) {
 
-            //TOO to leaf specific clean up
+            //TODO to leaf specific clean up
 
             //for now at least remove the particle cloud
-            leaf.geometry.dispose();
-            if (leaf.parent)
-                leaf.parent.remove(leaf)
+            leaf.cleanUp()
         })
 
     }
@@ -1991,7 +1996,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
             if (!nodes) //FIXME this only works that way because to realData is not generated properly
                 demoOptions.npc = function (n) {
 
-                    return n.itemCount | 5
+                    return n.itemCount || 5
                     //return 5
                 };
 
@@ -2202,26 +2207,21 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
 
-class ClusterLeafElement extends THREE.Mesh
-{
-    constructor(nodes){
+class ClusterLeafElement extends THREE.Mesh {
+    constructor(nodes) {
         super();
 
 
+        this.mNodes = nodes;
+        this.mNodeParticles = this.createParticleNodeCloud();
 
 
-        this.mNodes=nodes;
-        this.mNodeParticles=this.createParticleNodeCloud();
-
-
-        this.add( this.mNodeParticles.pointCloud);
-
+        this.add(this.mNodeParticles.pointCloud);
 
 
         //TODO this still has mayor performance impact but is needed for counting the companies
         //we'll use lod non the nodes as well therewore nodes forther away in the background wont count towards the coumpany count
-        this.appendNodes(nodes)
-
+        this.appendNodes(nodes);
 
 
         this.createEdgesFromNodes(nodes)
@@ -2229,50 +2229,80 @@ class ClusterLeafElement extends THREE.Mesh
     }
 
 
-    getView()
-    {
+    getView() {
         return this.parent.getView()
 
 
     }
 
-    setLOD(levelOfDetail)
-    {
-        if (  this.mNodeParticles)
-        this.mNodeParticles.pointCloud.visible= levelOfDetail>0.3;
+    setLOD(levelOfDetail) {
+        if (this.mNodeParticles)
+            this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
-        if (  this.mEdgesContainer)
-       this.mEdgesContainer.visible= levelOfDetail>0.5;
+        if (this.mEdgesContainer)
+            this.mEdgesContainer.visible = levelOfDetail > 0.3;
 
 
-        if (  this.mNodeMeshes)
-            this.mNodeMeshes.visible= levelOfDetail>0.2;
+        if (this.mNodeMeshes)
+            this.mNodeMeshes.visible = levelOfDetail > 0.2;
 
-        if (this.parent && this.parent.mParticles)
-        this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
-
+        // if (this.parent && this.parent.mParticles)
+        // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
 
 
     }
 
 
+    cleanUp() {
 
-    appendNodes(nodes){
+
+        if (this.mNodeParticles) {
+            this.mNodeParticles.remove();
+            this.mNodeParticles.pointCloud.geometry.dispose();
+            this.mNodeParticles = null;
+        }
+
+        if (this.mEdgesContainer&&this.mEdgesContainer.geometry) {
 
 
-        if (!this.mNodeMeshes)
-        {
-            this.mNodeMeshes=new THREE.Object3D;
+        this.mEdgesContainer.geometry.dispose();
+        this.mEdgesContainer = null;
+     }
+
+        if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
+            this.mNodeMeshes.geometry.dispose();
+            this.mNodeMeshes = null;
+        }
+        if (this.parent && this.parent.mParticles) {
+            this.parent.mParticles.remove();
+            this.parent.mParticles.pointCloud.geometry.dispose();
+            this.parent.mParticles = null;
+        }
+
+        if (this.geometry)
+        this.geometry.dispose();
+        if (this.parent)
+            this.parent.remove(this)
+
+
+    }
+
+
+    appendNodes(nodes) {
+
+
+        if (!this.mNodeMeshes) {
+            this.mNodeMeshes = new THREE.Object3D;
             this.add(this.mNodeMeshes)
 
         }
 
 
-        var that=this.mNodeMeshes//this;
-        _.each(nodes,function(node){
-            if (node&& node._bubble)
-               that.add(node._bubble)
+        var that = this.mNodeMeshes;//this;
+        _.each(nodes, function (node) {
+            if (node && node._bubble)
+                that.add(node._bubble)
 
 
         })
@@ -2281,48 +2311,44 @@ class ClusterLeafElement extends THREE.Mesh
     }
 
 
+    createEdgesFromNodes(nodes) {
 
-    createEdgesFromNodes(nodes){
-
-       this.mEdgesContainer=new __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__["a" /* default */]();
+        this.mEdgesContainer = new __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__["a" /* default */]();
 
         this.mEdgesContainer.setFromNodes(nodes);
 
 
-        this.add( this.mEdgesContainer)
+        this.add(this.mEdgesContainer)
 
     }
 
 
-
     //TODO refactor
-    setDistributionHandler(distribution,onComplete=function(){})
-    {
+    setDistributionHandler(distribution, onComplete = function () {
+    }) {
 
-        var that=this;
-        distribution.setNodes(this.mNodes,function(vec,i){
+        var that = this;
+        distribution.setNodes(this.mNodes, function (vec, i) {
 
-            let n=that.mNodes[i];
-            if (n._bubble) n._bubble.position.set(n.x,n.y,n.z);
+            let n = that.mNodes[i];
+            if (n._bubble) n._bubble.position.set(n.x, n.y, n.z);
             that.mNodeParticles.updateNodePosition(i);
 
-        },function onStep(){
+        }, function onStep() {
 
 
             that.updateEdges();
 
 
-        },onComplete);
+        }, onComplete);
 
     }
 
-        updateEdges()
-        {
-            if (this.mEdgesContainer)
-                this.mEdgesContainer.updateEdges();
+    updateEdges() {
+        if (this.mEdgesContainer)
+            this.mEdgesContainer.updateEdges();
 
-        }
-
+    }
 
 
     /**
@@ -2331,14 +2357,13 @@ class ClusterLeafElement extends THREE.Mesh
      * @returns {{nodes, pointCloud, updateCrossFade, update, updateNode, updateNodePosition, updateNodeColor, updateNodeSize, on, remove}|*}
      */
 
-    createParticleNodeCloud()
-    {
+    createParticleNodeCloud() {
 
-        var elem = ParticleNodeGroup( this.mNodes, {
+        var elem = ParticleNodeGroup(this.mNodes, {
             nodeDefaultSize: 10,
             nodeDefaultScale: 10,
             nodeTexture: "img/dot7.png"
-        })
+        });
 
 
         return elem
@@ -2759,9 +2784,9 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
             mNodes = nodes.map(function (n) {
                 //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
                 mEdges = mEdges.concat(n.edges);
-                n.x=n.x|0;
-                n.y=n.y|0;
-                n.z=n.z|0;
+                n.x=n.x||0;
+                n.y=n.y||0;
+                n.z=n.z||0;
                 return n;
             });
         }
@@ -2831,7 +2856,7 @@ class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* defaul
 
     constructor(...args) {
         super(...args)
-
+        this.maxOpacity=0.1
 
     }
 
@@ -2901,7 +2926,7 @@ class BaseVolume extends THREE.Object3D {
     constructor(...args) {
         super(...args);
         this.lod=1;
-        this.maxOpacity=0.1
+        this.maxOpacity=0.0
     }
 
 
@@ -2982,6 +3007,16 @@ class BaseVolume extends THREE.Object3D {
 
     }
 
+
+    dispose()
+    {
+        this.mesh.geometry.dispose()
+        this.mesh.material.dispose()
+
+        if (this.parent)
+            this.parent.remove(this)
+
+    }
 
 
 
@@ -3128,6 +3163,9 @@ class View3D extends HTMLElement
 
         this.createCSSRule()
         this.mTime=-1;
+        this.mActualFPS=0;
+        this.showFPSCounter=false;
+
     //   this.initStatic()
 
         // Setup renderer
@@ -3211,8 +3249,8 @@ class View3D extends HTMLElement
          var that=this
 
         this.mFPS=0.5;
-        this.minFPS=0;
-        this.maxFPS=144;
+        this.minFPS=this.minFPS||0;
+        this.maxFPS=this.maxFPS||144;
 
 
         this.mLastFrameTime=-1
@@ -3271,6 +3309,24 @@ class View3D extends HTMLElement
         $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"})
 
 
+        //init basic keyboard io
+      //FIXME this probably interferes with domEvents here..
+        /*
+
+         this.mOtherEvents = new Mousetrap(this.mRenderer.domElement);
+          //  this.mOtherEvents
+            Mousetrap .bind("shift+r",function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("actualFPS",   that.mActualFPS)
+
+        })*/
+
+        this.mFpsCounter=$("<span     style='color: white;position: absolute;' >");
+        $(this).append(this.mFpsCounter);
+
+
+
         //init domEnvents
         this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement)
 
@@ -3322,6 +3378,12 @@ class View3D extends HTMLElement
 
         this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  )
 
+
+
+
+
+
+
         this._inited_static_=true
 
     return this
@@ -3331,8 +3393,9 @@ class View3D extends HTMLElement
          // Kick-off renderer
     animate() {
 
-       var initialFrames=1;
+        var initialFrames=1;
         var that=this;
+        var accTime=0,accFrames=0;
 
       function animate(time) {
         that.mTime=time
@@ -3356,6 +3419,25 @@ class View3D extends HTMLElement
                   return;
               }
           }
+
+
+          //count frames
+          accTime+=time-that.mLastFrameTime;
+          accFrames++;
+
+          if (accTime>1000)
+          {
+              that.mActualFPS=accFrames
+
+              if (that.showFPSCounter)
+              that.mFpsCounter.html(that.mActualFPS)
+
+              accTime=0;
+              accFrames=0;
+
+
+          }
+
 
 
           that.mLastFrameTime = time
@@ -3892,6 +3974,22 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
     setInactive() {
         this.maxOpacity = 0.3;
     }
+
+
+    dispose()
+    {
+
+        this.mesh.material.dispose()
+
+        this.geometryLowPoly.dispose()
+        this.geometryAveragePoly.dispose()
+        this.geometryHighPoly.dispose()
+
+        if (this.parent)
+            this.parent.remove(this)
+
+    }
+
 
 
 }
@@ -5888,6 +5986,14 @@ class MyMain {
         return hull
     }
 
+    isDebug()
+    {
+
+       return window.location.hash=="#debug"
+
+    }
+
+
 
     setupViews() {
         const thumbCSS = {
@@ -5964,6 +6070,8 @@ class MyMain {
 
             let mGraphView = document.createElement("simple-force-graph-view-3d");//("view-3d")
 
+            if (that.isDebug())
+                mGraphView.maxFPS=10;
 
             customElements.whenDefined("simple-force-graph-view-3d").then(function () {
 
@@ -6017,10 +6125,23 @@ class MyMain {
         }
 
 
+
+
         function createView(name = "View3D", speccs) {
 
             let mGraphView = document.createElement("graph-view-3d");
             mGraphView.setCaption(name);
+
+
+
+            if (that.isDebug())
+            {
+                mGraphView.maxFPS=10;
+
+            }
+
+            mGraphView.showFPSCounter=that.isDebug()
+
 
             $(mGraphView)
                 .css(thumbCSS);
@@ -6088,7 +6209,7 @@ class MyMain {
 
 
 
-        if(window.location.hash=="#debug") {
+        if(that.isDebug()) {
 
 
             //NOTE: target rendering
@@ -6267,6 +6388,20 @@ class MyMain {
     }
 
 
+    getForceSpeccs2DChangesOnly(){
+
+        let speccs=this.getForceSpeccs()
+
+
+        speccs[0].distribution = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        speccs[1].distribution = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](10000, 2);// industries within countries use the Force-Graph approach to position elements
+        speccs[2].distribution = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](500, 3);//same g
+
+           return speccs
+
+    }
+
+
     /**
      * this is a sample configuration for  the cluster.
      * it contains 2 subdivisions:  -first into countries
@@ -6320,7 +6455,7 @@ class MyMain {
            {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40}
+                options: {minClusterSize: 40, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */] }
             },
             {
                 generator: industrySetGenerator,
@@ -6356,15 +6491,34 @@ class MyMain {
     {
 
 
-        let speccs=this.getPossibleClusterSpeccsArray();
+        /**
+         * FIXME if a cluster has subclusters and no clustering is given use the existsing
+         * likewise with distributions
+         * currently the cluster gets cleaned first before the new visualisation is generated
+         *
+         *
+         *
+         */
+
+            //   let speccs=this.getPossibleClusterSpeccsArray();
+
+         let speccs=this.getForceSpeccs2DChangesOnly();
+
         let view= this.getCurrentView();
-        view.mRootCluster.applyClustering(speccs);
+        let rootCluster=view.mRootCluster;
+
+        rootCluster.cleanUpLeafs();
+        //clean up previous clusters
+        __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__["a" /* default */].cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
 
 
-     //   doZoomToPos(new THREE.Vector3(0,0,3000));
+        rootCluster.applyClustering(speccs);
 
-        view.mControls.noRotate=true;
-      //  view.mControls.target.set(new THREE.Vector3(0,0,0));
+
+       // doZoomToPos(new THREE.Vector3(0,0,10000));
+        //view.mControls.target.set(new THREE.Vector3(0,0,0));
+      //  view.mControls.noRotate=true;
+        doZoomToPos(new THREE.Vector3(0,0,0),10000);
 
 
     }
@@ -6376,10 +6530,20 @@ class MyMain {
 
         let speccs=this.getForceSpeccs();
         let view= this.getCurrentView();
-        view.mRootCluster.applyClustering(speccs);
+        let rootCluster=view.mRootCluster;
+
+        rootCluster.cleanUpLeafs();
+        //clean up previous clusters
+        __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__["a" /* default */].cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
+
+
+
+        rootCluster.applyClustering(speccs);
 
         view.mControls.noRotate=false;
-     //   view.mControls.target.set(new THREE.Vector3(0,0,0));
+
+
+        doZoomToPos(new THREE.Vector3(0,0,0),10000);
 
     }
 
