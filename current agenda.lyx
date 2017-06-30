@@ -585,7 +585,7 @@ we'll use lod non the nodes as well therewore nodes forther away in the
 status open
 
 \begin_layout Plain Layout
-FIXME
+TODO
 \end_layout
 
 \end_inset
@@ -712,12 +712,20 @@ FIXME
 
 \begin_deeper
 \begin_layout Itemize
-it might be that throttling hull updates and updating edges havve a slight
+it might be that throttling hull updates and updating edges produce a minor
  bug where the edges don't match the nodes after animation is finished
 \end_layout
 
 \begin_layout Itemize
 also when loading and maximising while loading this occured
+\end_layout
+
+\begin_layout Itemize
+if edges arent visible they are not updated?
+\end_layout
+
+\begin_layout Itemize
+could be because the nodes where put into another container
 \end_layout
 
 \end_deeper
@@ -727,24 +735,117 @@ smaller bugs
 
 \begin_deeper
 \begin_layout Itemize
-particles are not within node
+[x]particles are not within node
 \end_layout
 
+\begin_layout Itemize
+elements/particles sometimes don't show up
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+we need another transfer function with with visiblilty for minDistance always
+ true
+\end_layout
+
+\end_deeper
 \begin_layout Itemize
 clicking a node then following the edge and clicking the target will hide
  edges at first
 \end_layout
 
 \begin_layout Itemize
-text will stay even if nodes are not longer visible
+[]text will stay even if nodes are not longer visible
 \end_layout
 
+\begin_deeper
 \begin_layout Itemize
-node tooltip
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Plain Layout
+this issue didn't appear any longer
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+[x]node tooltip
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+....
+ tooltip gets overridden by parent although stopPropagation is used
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Plain Layout
+NOTE: currently solved by havning mouseover bound to clusters and mousemove
+ to nodes to override stuff again..
+ which works but is not optimal
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
 \begin_layout Itemize
 node selected particles invis
+\end_layout
+
+\begin_layout Itemize
+unselect arrow when elements position changes
+\end_layout
+
+\begin_layout Itemize
+[x]see where get3DRoot has to be refactored into getParentCluster (we changed
+ the node meshes parent element so some things are off)
+\end_layout
+
+\begin_layout Itemize
+in the big graph, searching for 
+\begin_inset Quotes eld
+\end_inset
+
+micros
+\begin_inset Quotes erd
+\end_inset
+
+ will not show the dropdown without pressing 
+\begin_inset Quotes eld
+\end_inset
+
+down
+\begin_inset Quotes erd
+\end_inset
+
+ key first
+\end_layout
+
+\begin_layout Itemize
+the other boundingvolume disappears ...
 \end_layout
 
 \end_deeper

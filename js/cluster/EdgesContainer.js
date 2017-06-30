@@ -44,15 +44,15 @@ class EdgesContainer extends THREE.Object3D {
 
                     //FIXME currently does not match with arrowhelpers so .. invalid
 
-                    if (!node.get3DRoot().parent) return //not connected
+                    if (!node.getParentCluster()) return //not connected
 
 
-                    adjustedPos.setFromMatrixPosition( node.get3DRoot().parent.matrixWorld );
+                    adjustedPos.setFromMatrixPosition( node.getParentCluster().matrixWorld );
 
                     //setFromMatrix
                     adjustedPos.add(nPos)
                     let other=new THREE.Vector3
-                    other.setFromMatrixPosition( internalOtherNode.get3DRoot().parent.matrixWorld );
+                    other.setFromMatrixPosition( internalOtherNode.getParentCluster().matrixWorld );
 
                     adjustedPos.sub(other)
 

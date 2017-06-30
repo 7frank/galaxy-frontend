@@ -87,6 +87,12 @@ class ConvexVolume extends BoxVolume {
     }
 
 
+    //TODO
+    transferFunction(x)
+    {
+        return x
+    }
+
 
     //TODO it is probably better to separate the LOD from the visiblility/opacity
     //
@@ -105,7 +111,7 @@ class ConvexVolume extends BoxVolume {
 
         }
 
-        let y = mTransfer(l )
+        let y = mTransfer(l)
         super.setLOD(y* this.maxOpacity);
 
 

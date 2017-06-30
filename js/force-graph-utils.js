@@ -68,7 +68,7 @@ function highlightNodeElements(bShowOtherNodes=false,bShowEdgeArrows=true) {
 
 	//console.log("highlighting nodes:" + (this.children.length + this.parents.length))
 
-	this.showHighlight()
+	this.showHighlight();
 
 	
 	
@@ -92,7 +92,7 @@ function highlightNodeElements(bShowOtherNodes=false,bShowEdgeArrows=true) {
 			if(bShowEdgeArrows)
 				for (edge of this.edges)
 				{
-					var color= edge.source==this ? 0x99ff99: 0xffb2b2
+					var color= edge.source==this ? 0x99ff99: 0xffb2b2;
 
 
                     addArrow(edge,color)
@@ -102,7 +102,7 @@ function highlightNodeElements(bShowOtherNodes=false,bShowEdgeArrows=true) {
 function unhighlightNodeElements() {
 	//console.log("unhighlighting nodes:" + (this.children.length + this.parents.length))
 
-	this.hideHighlight()
+	this.hideHighlight();
 
 	for (childNode of this.children)
 		childNode.hideHighlight()
@@ -122,12 +122,12 @@ function unhighlightNodeElements() {
 
 function highlightEdgeElements() {
 
-	this.showHighlight()
-	this.source.showHighlight()
-	this.target.showHighlight()
+	this.showHighlight();
+	this.source.showHighlight();
+	this.target.showHighlight();
 	
 
-					var color=   0x666666 
+					var color=   0x666666;
 					addArrow(this,color)
 			
 	
@@ -135,9 +135,9 @@ function highlightEdgeElements() {
 
 function unhighlightEdgeElements() {
 
-	this.hideHighlight()
-	this.source.hideHighlight()
-	this.target.hideHighlight()
+	this.hideHighlight();
+	this.source.hideHighlight();
+	this.target.hideHighlight();
 	
 		removeArrow(this)
 	
@@ -145,11 +145,11 @@ function unhighlightEdgeElements() {
 
 function extendElement(elements, attrName, options,env) {
 
- var mDomEvents=env.domEvents
+ var mDomEvents=env.domEvents;
 
 	function _TODO(typeName) {
 		return function () {
-			console.warn("implement handler for", typeName)
+			console.warn("implement handler for", typeName);
 			console.log(this, arguments)
 		}
 	}
@@ -159,8 +159,8 @@ function extendElement(elements, attrName, options,env) {
 		mouseleave: _TODO("mouseleave"),
 		click: _TODO("click"),
 		dblclick: _TODO("dblclick")
-	}
-	options = $.extend(true, {}, defaults, options)
+	};
+	options = $.extend(true, {}, defaults, options);
 
 
 
@@ -170,35 +170,35 @@ function extendElement(elements, attrName, options,env) {
 	
 	if (el._line&&env.useLineGroup)
 	{
-		el.showHighlight = function () {}
-		el.hideHighlight = function () {}
+		el.showHighlight = function () {};
+		el.hideHighlight = function () {};
 		
 		continue
 		
 	}
-		var mesh = el[attrName]
+		var mesh = el[attrName];
 
 		
 		
 		
-			mDomEvents.addEventListener(mesh, 'click', options.click, false)
-			mDomEvents.addEventListener(mesh, 'dblclick', options.dblclick, false)
+			mDomEvents.addEventListener(mesh, 'click', options.click, false);
+			mDomEvents.addEventListener(mesh, 'dblclick', options.dblclick, false);
 
 			mDomEvents.addEventListener(mesh, 'mouseover', function (e) {
 				options.mousemove.apply(e.target.node || e.target.edge)
-			}, false)
+			}, false);
 			mDomEvents.addEventListener(mesh, 'mouseout', function (e) {
 				options.mouseleave.apply(e.target.node || e.target.edge)
-			}, false)
+			}, false);
 
 			
 
 			el.showHighlight = function () {
 				
-				if (this.isHighlighted) return
-				this.isHighlighted=true
+				if (this.isHighlighted) return;
+				this.isHighlighted=true;
 				
-				if (attrName=="_bubble"&& this["_bubble"]==null) console.error("FIXME ") 
+				if (attrName=="_bubble"&& this["_bubble"]==null) console.error("FIXME ");
 				
 		if (this._bubble)
 		{
@@ -208,7 +208,7 @@ function extendElement(elements, attrName, options,env) {
 			
 		if (this._line)
 		{
-			var mesh = this[attrName]
+			var mesh = this[attrName];
 			 mesh.material.visible=false
 			
 		}	
@@ -223,7 +223,7 @@ function extendElement(elements, attrName, options,env) {
 
 
 			
-		}
+		};
 		
 		
 		el.hideHighlight = function () {
@@ -231,8 +231,8 @@ function extendElement(elements, attrName, options,env) {
 			
 			
 			
-				if (!this.isHighlighted) return
-				this.isHighlighted=false
+				if (!this.isHighlighted) return;
+				this.isHighlighted=false;
 			
 		if (this._bubble)
 		{
@@ -242,7 +242,7 @@ function extendElement(elements, attrName, options,env) {
 		
 		if (this._line)
 		{
-			var mesh = this[attrName]
+			var mesh = this[attrName];
 			 mesh.material.visible=true
 			
 		}	
@@ -270,12 +270,12 @@ function extendElement(elements, attrName, options,env) {
 		//if (previousNodeClicked!=currNodeClicked)
 			{
 			//node selected
-			highlightNodeElements.apply(currNodeClicked,[doHighlighNeighbours,doHighlighEdges])
+			highlightNodeElements.apply(currNodeClicked,[doHighlighNeighbours,doHighlighEdges]);
 
 
 
                 if (doZoomIn)
-			doZoomToMesh(currNodeClicked._bubble,onAnimationEnd)
+			doZoomToMesh(currNodeClicked._bubble,onAnimationEnd);
 
 
 
@@ -283,7 +283,7 @@ function extendElement(elements, attrName, options,env) {
 			{
 			//GUI.updateNodeInfo(currNodeClicked)
 			
-			currNodeClicked.addClass("basic-selection")
+			currNodeClicked.addClass("basic-selection");
 			
 			
 			//if (previousNodeClicked)
@@ -291,12 +291,12 @@ function extendElement(elements, attrName, options,env) {
 			if (previousNodeClicked.length>0)
 				for (p of previousNodeClicked)
 				{
-				p.removeClass("basic-selection")
+				p.removeClass("basic-selection");
 				unhighlightNodeElements.apply(p)
 				}
 		
 			if (!stack)
-			previousNodeClicked=[currNodeClicked]
+			previousNodeClicked=[currNodeClicked];
 			else
 			previousNodeClicked.push(currNodeClicked)	
 		
@@ -308,10 +308,10 @@ function extendElement(elements, attrName, options,env) {
 			{ 
 		//GUI.updateNodeInfo(currNodeClicked,false)
 				//node unselected
-				unhighlightNodeElements.apply(currNodeClicked)
+				unhighlightNodeElements.apply(currNodeClicked);
 			
 				//previousNodeClicked=[]
-				previousNodeClicked.splice(currNodeClicked)
+				previousNodeClicked.splice(currNodeClicked);
 				
 				currNodeClicked.removeClass("basic-selection")
 				
@@ -329,14 +329,14 @@ if clicked and not current selection trigger mouse leave on last
 //inject additional functionality
 function extendGraphElements(d3Nodes, d3Links,env) {
 
-	addGraphHierarchy(d3Nodes, d3Links)
+	addGraphHierarchy(d3Nodes, d3Links);
 
 
 	
 	extendElement(d3Nodes, "_bubble", {
 		mousemove:  function (e) {
 			
-			if (previousNodeClicked.indexOf(this)>=0)return 
+			if (previousNodeClicked.indexOf(this)>=0)return;
 			//if (previousNodeClicked==this) return 
 			
 			highlightNodeElements.apply(this,[true,true])
@@ -347,7 +347,7 @@ function extendGraphElements(d3Nodes, d3Links,env) {
 		mouseleave: function(){
 
 		//if (previousNodeClicked==this) return 
-		if (previousNodeClicked.indexOf(this)>=0)return 
+		if (previousNodeClicked.indexOf(this)>=0)return;
 		
 		
 		//if (previousNodeClicked!=this)
@@ -359,33 +359,33 @@ function extendGraphElements(d3Nodes, d3Links,env) {
 
 	},
 		click: function (e) {
-			var currNodeClicked=e.target.node
-			e.stopPropagation()
+			var currNodeClicked=e.target.node;
+			e.stopPropagation();
 			
 			//if (previousNodeClicked &&previousNodeClicked!=currNodeClicked) 	unhighlightNodeElements.apply(previousNodeClicked) 
 			if (previousNodeClicked.length>0 &&previousNodeClicked.indexOf(currNodeClicked)<0)
 			for (p of previousNodeClicked)
 				unhighlightNodeElements.apply(p) 
 		
-			doOnClickNode(currNodeClicked,e.origDomEvent.ctrlKey)
+			doOnClickNode(currNodeClicked,e.origDomEvent.ctrlKey);
 	
 				return false;
 		},
 		dblclick: function (e) {
-			e.stopPropagation()
+			e.stopPropagation();
 			//setCollapsedSateOfChildNodesAndEdgesOfNode(e.target.node)
-				var currNodeDblClicked=e.target.node
+				var currNodeDblClicked=e.target.node;
 				
-			GUI.updateNodeInfo(currNodeDblClicked,currNodeDblClicked!=previousNodeDblClicked )
+			GUI.updateNodeInfo(currNodeDblClicked,currNodeDblClicked!=previousNodeDblClicked );
 			
 			if (previousNodeDblClicked==currNodeDblClicked)
 			previousNodeDblClicked=null;
 		else
-			previousNodeDblClicked=currNodeDblClicked
+			previousNodeDblClicked=currNodeDblClicked;
 			//unhighlightNodeElements.apply(e.target.node)
 			return false;
 		}
-	},env)
+	},env);
 	
 	
 	//FIXME extending attrName sometimes false
@@ -438,7 +438,7 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
 	for (let item of d3Links) {
 
-		item._line.edge = item
+		item._line.edge = item;
 
 			//add edge list to nodes
 			if (item.source.edges.indexOf(item) < 0)
@@ -465,22 +465,22 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
 function doZoomToPos(vec3Position,distanceToPosition=500) {
 
-	console.warn("deprecated doZoomToPos")
+	console.warn("deprecated doZoomToPos");
 	//  var vec3End = new THREE.Vector3();  vec3End.setFromMatrixPosition( mesh.matrixWorld );
 
 	var env=globalEnv;
 
-		var vec3Start = env.camera.position
-		var vec3End = vec3Position
+		var vec3Start = env.camera.position;
+		var vec3End = vec3Position;
 
 
 		//we want to have a fixed distance to a node when selecting
-		var distVec = vec3End.clone().sub(vec3Start)
-		var len = distVec.length()
-		distVec.normalize()
-		distVec.multiplyScalar(distanceToPosition) //apply fixed distance to the target
+		var distVec = vec3End.clone().sub(vec3Start);
+		var len = distVec.length();
+		distVec.normalize();
+		distVec.multiplyScalar(distanceToPosition); //apply fixed distance to the target
 		
-		var alteredVecEnd = vec3End.clone().sub(distVec)
+		var alteredVecEnd = vec3End.clone().sub(distVec);
 
 		//change distance to target
 		var tween = new TWEEN.Tween(vec3Start)
@@ -509,25 +509,25 @@ function doZoomToPos(vec3Position,distanceToPosition=500) {
 
 
 function doZoomByVal(val) {
-    console.warn("deprecated doZoomByVal")
-var env=globalEnv
+    console.warn("deprecated doZoomByVal");
+var env=globalEnv;
 
 
 
 
 		
 
-		var vec3Start = env.camera.position
-		var vec3End = env.controls.target
+		var vec3Start = env.camera.position;
+		var vec3End = env.controls.target;
 
 
 		//we want to have a fixed distance to a node when selecting
-		var distVec = vec3End.clone().sub(vec3Start)
-		var len = distVec.length()
-		distVec.normalize()
-		distVec.multiplyScalar(val) //apply fixed distance to the target
+		var distVec = vec3End.clone().sub(vec3Start);
+		var len = distVec.length();
+		distVec.normalize();
+		distVec.multiplyScalar(val); //apply fixed distance to the target
 		
-		var alteredVecEnd = vec3End.clone().sub(distVec)
+		var alteredVecEnd = vec3End.clone().sub(distVec);
 
 		//change distance to target
 		var tween = new TWEEN.Tween(vec3Start)
@@ -557,11 +557,11 @@ var env=globalEnv
 function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 
 
-    let view=$(".view-3d[hasFocus]")[0]
+    let view=$(".view-3d[hasFocus]")[0];
 
-    if (!view)view=$(".view-3d.view-3d-maximised").get(0)
+    if (!view)view=$(".view-3d.view-3d-maximised").get(0);
 
-    if (!view) console.warn("no view focused to be able to zoom")
+    if (!view) console.warn("no view focused to be able to zoom");
 
 
 	let camera=view.mCamera;
@@ -569,7 +569,7 @@ function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 
 
 
-	var vec3Start = camera.position
+	var vec3Start = camera.position;
 
 
     var vec3End = new THREE.Vector3();
@@ -579,15 +579,15 @@ function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 
 
 		//we want to have a fixed distance to a node when selecting
-		var distVec = vec3End.clone().sub(vec3Start)
-		var len = distVec.length()
-		distVec.normalize()
-		distVec.multiplyScalar(minMaxDistance) //apply fixed distance to the target
+		var distVec = vec3End.clone().sub(vec3Start);
+		var len = distVec.length();
+		distVec.normalize();
+		distVec.multiplyScalar(minMaxDistance); //apply fixed distance to the target
 		
-		var alteredVecEnd = vec3End.clone().sub(distVec)
+		var alteredVecEnd = vec3End.clone().sub(distVec);
 
 
-		if (typeof onEnd!="function") onEnd=function(){}
+		if (typeof onEnd!="function") onEnd=function(){};
 		//change distance to target
 		var tween = new TWEEN.Tween(vec3Start)
 		.to(alteredVecEnd, 400)
@@ -619,8 +619,8 @@ function doZoomToMesh(mesh,onEnd,minMaxDistance=400) {
 //Feature 3 custom shader
 
 function createShaderMaterial(camera, color) {
-	var vertexShaderText = $('#vertexShader1').text()
-		var fragmentShaderText = $('#fragmentShader1').text()
+	var vertexShaderText = $('#vertexShader1').text();
+		var fragmentShaderText = $('#fragmentShader1').text();
 	
 		return _createShaderMaterial(vertexShaderText, fragmentShaderText, {
 			"c": {
@@ -643,8 +643,8 @@ function createShaderMaterial(camera, color) {
 }
 
 function createShaderMaterial2(camera, color) {
-	var vertexShaderText = $('#vertexShader2').text()
-		var fragmentShaderText = $('#fragmentShader2').text()
+	var vertexShaderText = $('#vertexShader2').text();
+		var fragmentShaderText = $('#fragmentShader2').text();
 
 		var attributes = {
 
@@ -703,9 +703,9 @@ function _createShaderMaterial(vertexShader, fragmentShader, uniformOptions) {
 			type: "v3",
 			value: new THREE.Vector3
 		}
-	}
+	};
 
-	uniformOptions = $.extend(true, {}, uniformDefaults, uniformOptions)
+	uniformOptions = $.extend(true, {}, uniformDefaults, uniformOptions);
 
 		// create custom material from the shader code
 		//   that is within specially labeled script tags
@@ -731,10 +731,10 @@ function _createShaderMaterial(vertexShader, fragmentShader, uniformOptions) {
 
 function _findSceneForMesh(mesh,maxIter=99)
 {
-	var scene=null
+	var scene=null;
  while(mesh.parent && maxIter--)
  {
- 	if (mesh.parent instanceof THREE.Scene) return mesh.parent
+ 	if (mesh.parent instanceof THREE.Scene) return mesh.parent;
      mesh=mesh.parent
  }
 
@@ -750,15 +750,15 @@ function addArrow(d3LinkObj,color,options) {
 	var defaults={
 		highlightArrowType:"line"
 
-	}
+	};
 
-	var env=_.extend(defaults,options)
+	var env=_.extend(defaults,options);
 
 
 
-	if (d3LinkObj.arrow) return
+	if (d3LinkObj.arrow) return;
 
-	var lineMesh = d3LinkObj._line
+	var lineMesh = d3LinkObj._line;
 
 	//TODO set arrow to sphere radius not center
 	
@@ -778,10 +778,10 @@ function addArrow(d3LinkObj,color,options) {
 
 
 		//TODO
-		if (!to0) return
+		if (!to0) return;
 		
-		var distVec = to0.clone().sub(from0)
-		var len = distVec.length()
+		var distVec = to0.clone().sub(from0);
+		var len = distVec.length();
 		
 		/**
 		* TODO currently the arrow helper gets used which creates some "ditter" effect when rendered at the same position as a edge
@@ -790,16 +790,16 @@ function addArrow(d3LinkObj,color,options) {
 		
 			
 		//distVec.normalize()
-		distVec.multiplyScalar(0.9) 
+		distVec.multiplyScalar(0.9);
 		//change start and end of arrow
-		var from = from0.clone().add(distVec)
-		var to = to0.clone().sub(distVec)
+		var from = from0.clone().add(distVec);
+		var to = to0.clone().sub(distVec);
 		
 		
 	var direction = to.clone().sub(from);
 	var length = direction.length();
 	
-	var headLength=0.2 * len *0.2 //use original length
+	var headLength=0.2 * len *0.2; //use original length
 	
 
 	var arrowHelper;
@@ -808,8 +808,8 @@ function addArrow(d3LinkObj,color,options) {
 
 	if (env.highlightArrowType=="line")
 	{
-		let dir=to0.clone().sub(from0)
-		let len=dir.length()
+		let dir=to0.clone().sub(from0);
+		let len=dir.length();
 
 		arrowHelper = new THREE.ArrowHelper(dir.normalize(), from0, len, color||0x0000FF,0.001,0.001); //setting headlength and with to zero will trigger lots of warnings
 	
@@ -819,8 +819,8 @@ function addArrow(d3LinkObj,color,options) {
 	else 
 	if (env.highlightArrowType=="animated")
 	{
-		let dir=to0.clone().sub(from0)
-		let len=dir.length()
+		let dir=to0.clone().sub(from0);
+		let len=dir.length();
 	
 	arrowHelper=new CustomAnimatedLineMesh(direction.normalize(), from, length, color||0x0000FF,1,"img/arrow.png")
 	
@@ -833,14 +833,14 @@ function addArrow(d3LinkObj,color,options) {
 	arrowHelper = new ArrowExt(direction.normalize(), from, length, color||0x0000FF, headLength,0.4 * headLength);
 
 	
-	d3LinkObj.arrow = arrowHelper
+	d3LinkObj.arrow = arrowHelper;
 	//lineMesh.parent.add(arrowHelper);
 
 
-    var scene=_findSceneForMesh(d3LinkObj.source._bubble)
+    var scene=_findSceneForMesh(d3LinkObj.source._bubble);
 
 	if (!scene){
-		console.warn("no scene found")
+		console.warn("no scene found");
 	debugger;
 	}
 	else
@@ -849,15 +849,15 @@ function addArrow(d3LinkObj,color,options) {
 }
 
 function removeArrow(d3LinkObj) {
-	if (!d3LinkObj.arrow) return
+	if (!d3LinkObj.arrow) return;
 	//TODO
-	var env=globalEnv
-	var lineMesh = d3LinkObj._line
+	var env=globalEnv;
+	var lineMesh = d3LinkObj._line;
 
 
 		if (d3LinkObj.arrow)
 		{
-		let parent=d3LinkObj.arrow.parent
+		let parent=d3LinkObj.arrow.parent;
 
 			//lineMesh.parent.remove(d3LinkObj.arrow);
             if (parent)
@@ -877,7 +877,7 @@ $(function () {
 
 setTimeout(function(){
 
-	var searchbar=$(".searchbar-container input")
+	var searchbar=$(".searchbar-container input");
 
     $(window).bind('keyup', 'ctrl+s', exportGraph);
     searchbar.on("keyup",null,'ctrl+s',exportGraph)
@@ -887,7 +887,7 @@ setTimeout(function(){
 
 	
 	
-})
+});
 
 
 function exportGraph()
@@ -913,17 +913,17 @@ function download(filename, text) {
 function _exportNodes(nodes,edges,ignoredNodeKeys)
 {
 	if (!ignoredNodeKeys)
-		ignoredNodeKeys="_id,children,parents,edges,_bubble".split(",")
+		ignoredNodeKeys="_id,children,parents,edges,_bubble".split(",");
 	
 	
 	
 	
 	
-	var mappedNodes=nodes.map( node => _.omit(node,ignoredNodeKeys))
+	var mappedNodes=nodes.map( node => _.omit(node,ignoredNodeKeys));
 	
-	var mappedEdges=edges.map( edge => ({source:edge.source.id,target:edge.target.id} )  )
+	var mappedEdges=edges.map( edge => ({source:edge.source.id,target:edge.target.id} )  );
 	
-	var obj={alpha:globalEnv.layout.alpha(),nodes:mappedNodes,links:mappedEdges}
+	var obj={alpha:globalEnv.layout.alpha(),nodes:mappedNodes,links:mappedEdges};
 	
 	return JSON.stringify(obj)
 	
@@ -936,24 +936,24 @@ function _exportNodes(nodes,edges,ignoredNodeKeys)
 setTimeout(function(){
 
 $("#3d-graph canvas").attr("tabindex","1").on("click",function(){  $(this).focus() })
-},500)	
+},500);
 
 	$(window).bind('keyup', '+', function(){
 		
-		curDataSetIdx=(curDataSetIdx+1)%dataSets.length
+		curDataSetIdx=(curDataSetIdx+1)%dataSets.length;
 		toggleDimensions(3)
 		
 	});
 	$(window).bind('keyup', '-', function(){
 		
-		curDataSetIdx=(curDataSetIdx+dataSets.length-1)%dataSets.length
+		curDataSetIdx=(curDataSetIdx+dataSets.length-1)%dataSets.length;
 		toggleDimensions(3)
 		
 	});
 
 //------------------------------------------------
 //helper structures for "class"-like work flow with nodes
-var _classes={}
+var _classes={};
 function register3DClass(className,options){
 	
   var defaults={
@@ -963,13 +963,13 @@ function register3DClass(className,options){
 		  return new THREE.Mesh(this.geometry(env,el), this.material(env,el));
 	  },onAdd:function(completeCallback){
 		if (completeCallback)
-		completeCallback()
-		  return
+		completeCallback();
+		  return;
 		
 	
-		var mesh=this
+		var mesh=this;
 	
-		mesh.material.opacity=0
+		mesh.material.opacity=0;
 		var tween = new TWEEN.Tween(mesh.material)
 		.to({opacity:1}, 200)
 		.onUpdate(function () {
@@ -983,11 +983,11 @@ function register3DClass(className,options){
 	  },
 	  onRemove:function(completeCallback){
 		  	if (completeCallback)
-		  completeCallback()
-		  return 
+		  completeCallback();
+		  return;
 		
-		var mesh=this
-		mesh.material.opacity=1
+		var mesh=this;
+		mesh.material.opacity=1;
 		var tween = new TWEEN.Tween(mesh.material)
 		.to({opacity:0}, 200)
 		.onUpdate(function () {
@@ -1001,60 +1001,60 @@ function register3DClass(className,options){
 		  
 	  },
 	  unique:false
-  }
+  };
   
-  options=$.extend(true,{},defaults,options)
+  options=$.extend(true,{},defaults,options);
   
-  if (typeof _classes[className]!="undefined") throw new Error("className already registered:",className)
+  if (typeof _classes[className]!="undefined") throw new Error("className already registered:",className);
   
  _classes[className]=options
 }
 
 function _newClassViaFactory(className,env,el)
 {
-	var factory=_classes[className]
+	var factory=_classes[className];
 	if (!factory) 
 	{
 		
 		//throw new Error("3d class "+className+" not found")
-		console.error("3d class "+className+" not found")
+		console.error("3d class "+className+" not found");
 	  
-		var mMesh=new THREE.Mesh()
-			mMesh.onAdd=function(){}
-			mMesh.onRemove=mMesh.onAdd=function(c){ if(c) c()}
-			mMesh.set=function(){}
+		var mMesh=new THREE.Mesh();
+			mMesh.onAdd=function(){};
+			mMesh.onRemove=mMesh.onAdd=function(c){ if(c) c()};
+			mMesh.set=function(){};
 	  return mMesh;
 	
 	  
 	}
 
 
-	if (factory.unique && factory._unique_instance) return factory._unique_instance
+	if (factory.unique && factory._unique_instance) return factory._unique_instance;
 
 	var material;
 	var geometry;
 	
 	
-	var mMesh=factory.instance(env,el)
+	var mMesh=factory.instance(env,el);
 		
 	if (factory.unique)
-	factory._unique_instance=mMesh
+	factory._unique_instance=mMesh;
 
-	mMesh.onAdd=factory.onAdd
-	mMesh.onRemove=factory.onRemove
+	mMesh.onAdd=factory.onAdd;
+	mMesh.onRemove=factory.onRemove;
 	mMesh.set=function(attrName,options){
 		//TODO do we needthat in any way?
 	
 		if (_.isObject(options))
 		{if (_.isObject(mMesh[attrName]))
-			$.extend(mMesh[attrName],options)
+			$.extend(mMesh[attrName],options);
 			else
 				mMesh[attrName]=options
 		}
 		else
 		mMesh[attrName]=options	
 		
-	}
+	};
 	
 	
 	return mMesh
@@ -1079,19 +1079,19 @@ function basicSpriteGeometry(env,el){
   
   function basicSpriteSize(env,el,scale=1){ 
 	// Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize
-	let size=el.size? el.size:32
-  size=Math.cbrt(size) * env.nodeRelSize
+	let size=el.size? el.size:32;
+  size=Math.cbrt(size) * env.nodeRelSize;
 		return (32+size*3)*scale
   
   }
   
 
 //define some sample "classes"
-register3DClass("basic-cube",{})
+register3DClass("basic-cube",{});
 //----------------------------------------
 register3DClass("hull-hint",{
 geometry:function(env,el){ return new THREE.CubeGeometry(20,20,20); }
-})
+});
 
 
 
@@ -1100,7 +1100,7 @@ register3DClass("basic-cube-highlighted",{
 	  geometry:function(env,el){ return new THREE.CubeGeometry(11,11,11); },
 	  material:function(env,el){ return  new THREE.MeshBasicMaterial({ color:  0xff0000, transparent: true });  },
 	  unique:false
-  })
+  });
 //----------------------------------------
 register3DClass("basic-sphere",{
 	material:function(env,el){
@@ -1108,7 +1108,7 @@ register3DClass("basic-sphere",{
 	},
 	  geometry:function(env,el){ return new THREE.SphereGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize,12,10); },
 	  unique:false
-  })
+  });
   //----------------------------------------
   register3DClass("basic-selection",{
 	material:function(env,el){
@@ -1116,7 +1116,7 @@ register3DClass("basic-sphere",{
 	},
 	  geometry:function(env,el){ return new THREE.SphereGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize/3.5,25,25); },
 	  unique:true
-  })
+  });
   
   //----------------------------------------
   
@@ -1132,14 +1132,14 @@ register3DClass("basic-sphere",{
 
 	  },instance(env,el){
 		  
-		  var mPointMesh=new THREE.Points( this.geometry(env,el), this.material(env,el) )
+		  var mPointMesh=new THREE.Points( this.geometry(env,el), this.material(env,el) );
 		 
 			
 		  return mPointMesh;
 		  
 	  },
 	  unique:false
-  })
+  });
 
   
   
@@ -1157,14 +1157,14 @@ register3DClass("basic-sphere",{
 
 	  },instance(env,el){
 		  
-		  var mPointMesh=new THREE.Points( this.geometry(env,el), this.material(env,el) )
+		  var mPointMesh=new THREE.Points( this.geometry(env,el), this.material(env,el) );
 		 
 			
 		  return mPointMesh;
 		  
 	  },
 	  unique:false
-  })
+  });
 
   
   //----------------------------------------
@@ -1182,14 +1182,14 @@ register3DClass("basic-sphere",{
 
 	  },instance(env,el){
 		  
-		  var mPointMesh=new THREE.Points( this.geometry(env,el), this.material(env,el) )
+		  var mPointMesh=new THREE.Points( this.geometry(env,el), this.material(env,el) );
 		 
 			
 		  return mPointMesh;
 		  
 	  },
 	  unique:false
-  })
+  });
 
   
    register3DClass("basic-animated",{
@@ -1212,7 +1212,7 @@ register3DClass("basic-sphere",{
 			requestAnimationFrame( animate );
 			annie.update(time/1000);	
 		}
-		requestAnimationFrame( animate )
+		requestAnimationFrame( animate );
 
 	
 					//var sprite = new THREE.TextureLoader().load("img/dot9.png");	
@@ -1221,7 +1221,7 @@ register3DClass("basic-sphere",{
 
 	  },instance(env,el){
 		  
-		  var mPointMesh=new THREE.Points( this.geometry(env,el), this.material(env,el) )
+		  var mPointMesh=new THREE.Points( this.geometry(env,el), this.material(env,el) );
 		  
 	
 			
@@ -1229,7 +1229,7 @@ register3DClass("basic-sphere",{
 		  
 	  },
 	  unique:false
-  })
+  });
   
   
 //----------------------------------------
@@ -1249,7 +1249,7 @@ register3DClass("basic-sphere",{
 		  
 	  },
 	  unique:false
-  })
+  });
   
   
   //----------------------------------------
@@ -1272,7 +1272,7 @@ register3DClass("basic-sphere",{
 		  
 	  },
 	  unique:false
-  })
+  });
    //----------------------------------------
   register3DClass("node-highlighted",{
 	  geometry:basicSpriteGeometry,
@@ -1291,7 +1291,7 @@ register3DClass("basic-sphere",{
 		  
 	  },
 	  unique:false
-  })
+  });
   
   
   
@@ -1304,7 +1304,7 @@ register3DClass("basic-sphere",{
   
 function basicElementExtend(env,obj,_mesh)
 {
-	var mDomEvents=env.domEvents
+	var mDomEvents=env.domEvents;
 
 
 	var self=_.extend(obj,
@@ -1328,7 +1328,15 @@ function basicElementExtend(env,obj,_mesh)
 		},get3DRoot:function(){
 		
 			return this._bubble 
-		},	
+		},
+			getParentCluster()  //NOTE: more of getParentClusterLeaf
+			{
+				let el=this.get3DRoot();
+
+				if (!el || !el.parent) return null;
+
+				return el.parent.parent
+			},
 		addClass:function(className)
 		{
 			
@@ -1340,13 +1348,13 @@ function basicElementExtend(env,obj,_mesh)
 			var mMesh;
 			
 			if (this._instances[className])
-				mMesh=this._instances[className]
+				mMesh=this._instances[className];
 			else 
-				mMesh=this._instances[className]=_newClassViaFactory(className,env,obj)
+				mMesh=this._instances[className]=_newClassViaFactory(className,env,obj);
 		
 		
 			
-			this.get3DRoot().add(mMesh)
+			this.get3DRoot().add(mMesh);
 			mMesh.onAdd()
 			
 
@@ -1359,7 +1367,7 @@ function basicElementExtend(env,obj,_mesh)
 			if (this._instances[className])
 			{
 			
-				mMesh=this._instances[className]
+				mMesh=this._instances[className];
 				
 				mMesh.onRemove( () => this.get3DRoot().remove(mMesh))
 			
@@ -1371,7 +1379,7 @@ function basicElementExtend(env,obj,_mesh)
 		hasClass:function(className){
 			var mMesh;
 			if (this._instances[className])
-				mMesh=this._instances[className]
+				mMesh=this._instances[className];
 			
 			return (this.get3DRoot().children.indexOf(mMesh)>=0)	
 			
@@ -1384,17 +1392,17 @@ function basicElementExtend(env,obj,_mesh)
 			var mMesh;
 			
 			if (this._instances[className])
-				mMesh=this._instances[className]
+				mMesh=this._instances[className];
 			
 			if (this.hasClass(className))
-				this.removeClass(className)
+				this.removeClass(className);
 			else
 				this.addClass(className)
 			
 			}
 			return this	
 		}
-		})
+		});
 		
 		return self	
 }  
@@ -1405,17 +1413,17 @@ function basicElementExtend(env,obj,_mesh)
 		function linkMixin(env,link,options)
 		{
 			
-			if (link._mixin_) return
-		link._mixin=true
+			if (link._mixin_) return;
+		link._mixin=true;
 			
 			defaults={
 				opacity:0.01,
 				transparent: true,
 				lineIsVisible:true, // if disabled the line won't be shown on the scene
 				 color: 0xffffff
-			}
+			};
 			
-			options=_.extend(defaults,options)
+			options=_.extend(defaults,options);
 			
 			function createBasicLineMesh(){
 				
@@ -1438,8 +1446,8 @@ function basicElementExtend(env,obj,_mesh)
 				function createLineGroupElem(){
 				
 								
-					var start=new THREE.Vector3(0,0,0)
-					var stop=new THREE.Vector3(0,0,0)	
+					var start=new THREE.Vector3(0,0,0);
+					var stop=new THREE.Vector3(0,0,0);
 
 					
 					//naive approach to reduce the edge count for larger graph
@@ -1467,8 +1475,8 @@ function basicElementExtend(env,obj,_mesh)
 				var line = new MeshLine();
 				var material = new MeshLineMaterial({transparent: options.transparent,opacity:options.opacity});
 				
-				var mStart=new THREE.Vector3
-				var mEnd=new THREE.Vector3
+				var mStart=new THREE.Vector3;
+				var mEnd=new THREE.Vector3;
 			
 				return { setStart:function(vec3){
 					mStart=vec3
@@ -1478,11 +1486,11 @@ function basicElementExtend(env,obj,_mesh)
 				getLine:function(srcWidth=1,dstWidth=1){
 					
 					
-					var geo=new THREE.Geometry()
+					var geo=new THREE.Geometry();
 					geo.vertices=[mStart,mEnd];
 					line.setGeometry( geo , function( p ) {
 					
-					var ratio=(srcWidth*p)+(dstWidth*(1-p))
+					var ratio=(srcWidth*p)+(dstWidth*(1-p));
 					return ratio  /10
 					} );	
 					var lineMesh = new THREE.Mesh( line.geometry, material ); 
@@ -1498,30 +1506,30 @@ function basicElementExtend(env,obj,_mesh)
 			if (env.useLineWidthFeature==true && (link.source.isGroupNode || link.target.isGroupNode) )
 			{
 				
-			var helper=createExtLineHelper()
+			var helper=createExtLineHelper();
 			
-				helper.setStart(new THREE.Vector3)
-				helper.setEnd(new THREE.Vector3)
+				helper.setStart(new THREE.Vector3);
+				helper.setEnd(new THREE.Vector3);
 						
 			
 				link._line =//new THREE.Object3D
-				helper.getLine()
+				helper.getLine();
 			
 				_.extend(link,{
 			
 			setStartEnd: function (mVecStart,mVecEnd) {
-				this.mStart=new THREE.Vector3(mVecStart.x, mVecStart.y || 0, mVecStart.z || 0)
-				this.mEnd=new THREE.Vector3(mVecEnd.x, mVecEnd.y || 0, mVecEnd.z || 0)
+				this.mStart=new THREE.Vector3(mVecStart.x, mVecStart.y || 0, mVecStart.z || 0);
+				this.mEnd=new THREE.Vector3(mVecEnd.x, mVecEnd.y || 0, mVecEnd.z || 0);
 				
 			
-				helper.setStart(this.mStart)
-				helper.setEnd(this.mEnd)
+				helper.setStart(this.mStart);
+				helper.setEnd(this.mEnd);
 	
 	
 				//FIXME handle line like a container to maintain event handlers and such
 				env.scene.remove(link._line);
-				link._line
-				link._line = helper.getLine(this.source.link_count||1,this.target.link_count||1)
+				link._line;
+				link._line = helper.getLine(this.source.link_count||1,this.target.link_count||1);
 				env.scene.add(link._line);
 
 			}
@@ -1540,16 +1548,16 @@ function basicElementExtend(env,obj,_mesh)
 					var lg=createLineGroupElem();
 				
 			
-				link._line={}
+				link._line={};
 				_.extend(link,{
 			
 				setStartEnd: function (mVecStart,mVecEnd) {
 					
-					lg.start.copy(mVecStart)
-					lg.stop.copy(mVecEnd)
+					lg.start.copy(mVecStart);
+					lg.stop.copy(mVecEnd);
 					
-					this.mStart=lg.start
-					this.mEnd=lg.stop
+					this.mStart=lg.start;
+					this.mEnd=lg.stop;
 					
 					lg.update()
 					
@@ -1562,17 +1570,17 @@ function basicElementExtend(env,obj,_mesh)
 				{
 				
 				
-					link._line = createBasicLineMesh()
+					link._line = createBasicLineMesh();
 				
 					_.extend(link,{
 				
 					setStartEnd: function (mVecStart,mVecEnd) {
 						
-						this.mStart=new THREE.Vector3(mVecStart.x, mVecStart.y || 0, mVecStart.z || 0)
-						this.mEnd=new THREE.Vector3(mVecEnd.x, mVecEnd.y || 0, mVecEnd.z || 0)
+						this.mStart=new THREE.Vector3(mVecStart.x, mVecStart.y || 0, mVecStart.z || 0);
+						this.mEnd=new THREE.Vector3(mVecEnd.x, mVecEnd.y || 0, mVecEnd.z || 0);
 						
-						this._line.geometry.vertices[0] =this.mStart
-						this._line.geometry.vertices[1] =this.mEnd
+						this._line.geometry.vertices[0] =this.mStart;
+						this._line.geometry.vertices[1] =this.mEnd;
 						
 						this._line.geometry.verticesNeedUpdate = true;
 						//this._line.geometry.computeBoundingSphere();
@@ -1611,11 +1619,11 @@ function nodeMixin(env,node,options) {
 	
 
 
-	if (node._mixin_) return
-		node._mixin=true
+	if (node._mixin_) return;
+		node._mixin=true;
 
 
-options=_.extend({onDrawNode:function(){}},options)		
+options=_.extend({onDrawNode:function(){}},options);
 	// have a container as root element  instead of the mesh itself	
 
 				//material is invisible but it seems that raycaster works as intended 
@@ -1646,7 +1654,7 @@ options=_.extend({onDrawNode:function(){}},options)
 				emptyGeometry.boundingSphere= new THREE.Sphere(new THREE.Vector3,1);
 				
 		//the single material is only for the node counting. so it should be irrelevant for rendering itself
-				node._bubble = new THREE.Mesh(sphereGeometry, singleNodeMaterial) //material );
+				node._bubble = new THREE.Mesh(sphereGeometry, singleNodeMaterial); //material );
 	
 	
 		
@@ -1659,18 +1667,18 @@ options=_.extend({onDrawNode:function(){}},options)
 		mMesh.onBeforeRender=function(renderer, scene, camera, geometry, material, group)
 		{
 			
-		}
+		};
 	
 		mMesh.onAfterRender=function(renderer, scene, camera, geometry, material, group)
 		{
 			options.onDrawNode.apply(this,[node])
-		}
+		};
 	
 
-	var size=basicSpriteSize(env,node)/5
+	var size=basicSpriteSize(env,node)/5;
 	//var size=node.size?node.size*0.66:1
 	
-	mMesh.scale.setScalar(size	)
+	mMesh.scale.setScalar(size	);
 	
 	
 	//FIXME
@@ -1678,7 +1686,7 @@ options=_.extend({onDrawNode:function(){}},options)
 	//if nodes get expanded check for nodes that need to be hidden 
 	
 	
-	basicElementExtend(env,node,mMesh)
+	basicElementExtend(env,node,mMesh);
 	
 	var self=_.extend(node,{
 		highlight: function () {
@@ -1704,9 +1712,9 @@ options=_.extend({onDrawNode:function(){}},options)
 			//setCollapsedSateOfChildNodesAndEdgesOfNode(this, true)
 			//if (typeof self.link_count!="number") return
 		
-			var grp=this.group
-			if (typeof grp=="undefined") return //silent fail
-			if (env.expand[grp]==true) return //already expanded
+			var grp=this.group;
+			if (typeof grp=="undefined") return; //silent fail
+			if (env.expand[grp]==true) return; //already expanded
 			
 			env.expand[grp] = true;
 			env.digest()
@@ -1717,9 +1725,9 @@ options=_.extend({onDrawNode:function(){}},options)
 
 			//setCollapsedSateOfChildNodesAndEdgesOfNode(this, false)
 
-			var grp=this.group
-			if (typeof grp=="undefined") return //silent fail
-			if (env.expand[grp]==false) return //already expanded
+			var grp=this.group;
+			if (typeof grp=="undefined") return; //silent fail
+			if (env.expand[grp]==false) return; //already expanded
 			
 			env.expand[grp] = false;
 			env.digest()
@@ -1729,51 +1737,59 @@ options=_.extend({onDrawNode:function(){}},options)
 			
 		}
 
-	})
+	});
 	
 	
 	//self.on("click mouseover mousemove ...")
 	
-	if (env.useTooltip){
+	//if (env.useTooltip){
 		
 	
-		self.on("mouseover",function(e,f,g){
+		self.on("mousemove",function(e,f,g){
+
+			e.stopPropagation();
 			//e.type,intersection,node)
 		
 			var node;
 			
 			if (e.intersect.object.node)
-			node=e.intersect.object.node
+			node=e.intersect.object.node;
 			else
-			if (e.origDomEvent) node=e.origDomEvent
+			if (e.origDomEvent) node=e.origDomEvent;
 			
 			
 			var info="";
 			if (node.name)
-				info +=" "+node.name	
+				info +=" "+node.name;
 			if (node.group)
-				info +=" "+node.group	
+				info +=" "+node.group;
 			if (node.info)
-				info +=" "+node.info	
+				info +=" "+node.info;
 			 
 			
 			if (info.trim()!="")
 			{
-				var content=$("<span class='content'>").html(info)
+				var content=$("<span class='content'>").html(info);
 				$(env.toolTipElem).html(content)
-				
+
+
+				if (node.getParentCluster() && node.getParentCluster().getView() )
+                    node.getParentCluster().getView().setTooltip(info)
+
 				
 			}
 			
 					
-		})
+		});
 		
 		self.on("mouseout",function(e){
-					env.toolTipElem.innerHTML=''
+            e.stopPropagation();
+
+         //	   $(env.toolTipElem).html("")
 		})
 	
 	
-	}
+//	}
 	
 	//add extra highlight for last clicked node
 	
@@ -1793,7 +1809,7 @@ options=_.extend({onDrawNode:function(){}},options)
 		if (self.isGroupNode)
 		self.on("dblclick",function(e){
 		e.target.node.expandGroup()
-		})
+		});
 		else //add none group node collapse behaviour
 		self.on("dblclick",function(e){
 		
@@ -1801,7 +1817,7 @@ options=_.extend({onDrawNode:function(){}},options)
 		if (env.useGroupFeature)
 		e.target.node.collapseGroup()
 		
-		})
+		});
 	
 	return self
 

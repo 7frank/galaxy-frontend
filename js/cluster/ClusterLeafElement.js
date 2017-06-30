@@ -32,6 +32,14 @@ export default class ClusterLeafElement extends THREE.Mesh
 
     }
 
+
+    getView()
+    {
+        return this.parent.getView()
+
+
+    }
+
     setLOD(levelOfDetail)
     {
         if (  this.mNodeParticles)

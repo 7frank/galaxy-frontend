@@ -140,7 +140,7 @@ class Cluster3DExtended extends BaseCluster3D {
         });
 
 
-        this.on("mouseover mousemove", function (e) {
+        this.on("mouseover", function (e) {
             e.stopPropagation();
 
             if (this.mHull) {
@@ -158,7 +158,8 @@ class Cluster3DExtended extends BaseCluster3D {
             //TODO public setter function
 
 
-            let lod=(this.mHull)? this.mHull.lod:-1;
+           // let lod=(this.mHull)? this.mHull.lod:-1;
+
 
             this.getView().setTooltip(root + " " + name) //+" LOD:"+lod
 
@@ -166,7 +167,8 @@ class Cluster3DExtended extends BaseCluster3D {
         });
 
 
-        this.on("mouseout", function () {
+        this.on("mouseout", function (e) {
+            e.stopPropagation();
             if (this.mHull)
             {
                 this.mHull.setInactive();

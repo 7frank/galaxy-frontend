@@ -20,6 +20,11 @@ class BoxVolume extends  BaseVolume {
 
 
 
+    transferFunction(x)
+    {
+     return 1
+    }
+
     /**
      * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
      * eg. depending on the distance of camera and object
@@ -31,10 +36,11 @@ class BoxVolume extends  BaseVolume {
       super.setLOD(newLOD);
 
         //by default just set the opacity and visibility accordingly
+        let y=this.transferFunction(newLOD)
         if ( this.mesh && this.mesh.material) {
-            this.mesh.material.opacity =this.maxOpacity*this.lod
+            this.mesh.material.opacity =this.maxOpacity*y; //TODO add transferFunction
 
-            if (this.lod<=0)
+            if (y<=0)
                 this.mesh.material.visible=false;
             else
                 this.mesh.material.visible=true;

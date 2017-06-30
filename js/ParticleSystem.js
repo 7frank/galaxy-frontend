@@ -205,7 +205,7 @@ function getParticleShaderMaterial()
 			var node=nodes[n]
 			let count=particlesPerNode[n]
 			
-			var scale=5
+			var scale=node.size/2|1
 
 
 

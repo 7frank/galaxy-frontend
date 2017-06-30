@@ -1876,7 +1876,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         });
 
 
-        this.on("mouseover mousemove", function (e) {
+        this.on("mouseover", function (e) {
             e.stopPropagation();
 
             if (this.mHull) {
@@ -1894,7 +1894,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
             //TODO public setter function
 
 
-            let lod=(this.mHull)? this.mHull.lod:-1;
+           // let lod=(this.mHull)? this.mHull.lod:-1;
+
 
             this.getView().setTooltip(root + " " + name) //+" LOD:"+lod
 
@@ -1902,7 +1903,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         });
 
 
-        this.on("mouseout", function () {
+        this.on("mouseout", function (e) {
+            e.stopPropagation();
             if (this.mHull)
             {
                 this.mHull.setInactive();
@@ -2223,6 +2225,14 @@ class ClusterLeafElement extends THREE.Mesh
 
 
         this.createEdgesFromNodes(nodes)
+
+    }
+
+
+    getView()
+    {
+        return this.parent.getView()
+
 
     }
 
@@ -2827,6 +2837,11 @@ class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* defaul
 
 
 
+    transferFunction(x)
+    {
+     return 1
+    }
+
     /**
      * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
      * eg. depending on the distance of camera and object
@@ -2838,10 +2853,11 @@ class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* defaul
       super.setLOD(newLOD);
 
         //by default just set the opacity and visibility accordingly
+        let y=this.transferFunction(newLOD)
         if ( this.mesh && this.mesh.material) {
-            this.mesh.material.opacity =this.maxOpacity*this.lod
+            this.mesh.material.opacity =this.maxOpacity*y; //TODO add transferFunction
 
-            if (this.lod<=0)
+            if (y<=0)
                 this.mesh.material.visible=false;
             else
                 this.mesh.material.visible=true;
@@ -3834,6 +3850,12 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
     }
 
 
+    //TODO
+    transferFunction(x)
+    {
+        return x
+    }
+
 
     //TODO it is probably better to separate the LOD from the visiblility/opacity
     //
@@ -3852,7 +3874,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
         }
 
-        let y = mTransfer(l )
+        let y = mTransfer(l)
         super.setLOD(y* this.maxOpacity);
 
 
@@ -5565,15 +5587,15 @@ class EdgesContainer extends THREE.Object3D {
 
                     //FIXME currently does not match with arrowhelpers so .. invalid
 
-                    if (!node.get3DRoot().parent) return //not connected
+                    if (!node.getParentCluster()) return //not connected
 
 
-                    adjustedPos.setFromMatrixPosition( node.get3DRoot().parent.matrixWorld );
+                    adjustedPos.setFromMatrixPosition( node.getParentCluster().matrixWorld );
 
                     //setFromMatrix
                     adjustedPos.add(nPos)
                     let other=new THREE.Vector3
-                    other.setFromMatrixPosition( internalOtherNode.get3DRoot().parent.matrixWorld );
+                    other.setFromMatrixPosition( internalOtherNode.getParentCluster().matrixWorld );
 
                     adjustedPos.sub(other)
 
