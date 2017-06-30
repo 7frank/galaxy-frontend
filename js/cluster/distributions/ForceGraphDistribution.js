@@ -138,9 +138,9 @@ class ForceGraphDistribution extends BaseDistribution {
             mNodes = nodes.map(function (n) {
                 //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
                 mEdges = mEdges.concat(n.edges);
-                n.x=n.x|0;
-                n.y=n.y|0;
-                n.z=n.z|0;
+                n.x=n.x||0;
+                n.y=n.y||0;
+                n.z=n.z||0;
                 return n;
             });
         }

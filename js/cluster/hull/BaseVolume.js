@@ -16,7 +16,7 @@ class BaseVolume extends THREE.Object3D {
     constructor(...args) {
         super(...args);
         this.lod=1;
-        this.maxOpacity=0.1
+        this.maxOpacity=0.0
     }
 
 

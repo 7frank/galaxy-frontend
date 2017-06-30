@@ -18,6 +18,9 @@ class View3D extends HTMLElement
 
         this.createCSSRule()
         this.mTime=-1;
+        this.mActualFPS=0;
+        this.showFPSCounter=false;
+
     //   this.initStatic()
 
         // Setup renderer
@@ -101,8 +104,8 @@ class View3D extends HTMLElement
          var that=this
 
         this.mFPS=0.5;
-        this.minFPS=0;
-        this.maxFPS=144;
+        this.minFPS=this.minFPS||0;
+        this.maxFPS=this.maxFPS||144;
 
 
         this.mLastFrameTime=-1
@@ -161,6 +164,24 @@ class View3D extends HTMLElement
         $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"})
 
 
+        //init basic keyboard io
+      //FIXME this probably interferes with domEvents here..
+        /*
+
+         this.mOtherEvents = new Mousetrap(this.mRenderer.domElement);
+          //  this.mOtherEvents
+            Mousetrap .bind("shift+r",function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("actualFPS",   that.mActualFPS)
+
+        })*/
+
+        this.mFpsCounter=$("<span     style='color: white;position: absolute;' >");
+        $(this).append(this.mFpsCounter);
+
+
+
         //init domEnvents
         this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement)
 
@@ -212,6 +233,12 @@ class View3D extends HTMLElement
 
         this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  )
 
+
+
+
+
+
+
         this._inited_static_=true
 
     return this
@@ -221,8 +248,9 @@ class View3D extends HTMLElement
          // Kick-off renderer
     animate() {
 
-       var initialFrames=1;
+        var initialFrames=1;
         var that=this;
+        var accTime=0,accFrames=0;
 
       function animate(time) {
         that.mTime=time
@@ -246,6 +274,25 @@ class View3D extends HTMLElement
                   return;
               }
           }
+
+
+          //count frames
+          accTime+=time-that.mLastFrameTime;
+          accFrames++;
+
+          if (accTime>1000)
+          {
+              that.mActualFPS=accFrames
+
+              if (that.showFPSCounter)
+              that.mFpsCounter.html(that.mActualFPS)
+
+              accTime=0;
+              accFrames=0;
+
+
+          }
+
 
 
           that.mLastFrameTime = time

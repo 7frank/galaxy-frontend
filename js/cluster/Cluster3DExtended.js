@@ -255,7 +255,7 @@ class Cluster3DExtended extends BaseCluster3D {
             if (!nodes) //FIXME this only works that way because to realData is not generated properly
                 demoOptions.npc = function (n) {
 
-                    return n.itemCount | 5
+                    return n.itemCount || 5
                     //return 5
                 };
 

@@ -132,6 +132,14 @@ export class MyMain {
         return hull
     }
 
+    isDebug()
+    {
+
+       return window.location.hash=="#debug"
+
+    }
+
+
 
     setupViews() {
         const thumbCSS = {
@@ -208,6 +216,8 @@ export class MyMain {
 
             let mGraphView = document.createElement("simple-force-graph-view-3d");//("view-3d")
 
+            if (that.isDebug())
+                mGraphView.maxFPS=10;
 
             customElements.whenDefined("simple-force-graph-view-3d").then(function () {
 
@@ -261,10 +271,23 @@ export class MyMain {
         }
 
 
+
+
         function createView(name = "View3D", speccs) {
 
             let mGraphView = document.createElement("graph-view-3d");
             mGraphView.setCaption(name);
+
+
+
+            if (that.isDebug())
+            {
+                mGraphView.maxFPS=10;
+
+            }
+
+            mGraphView.showFPSCounter=that.isDebug()
+
 
             $(mGraphView)
                 .css(thumbCSS);
@@ -332,7 +355,7 @@ export class MyMain {
 
 
 
-        if(window.location.hash=="#debug") {
+        if(that.isDebug()) {
 
 
             //NOTE: target rendering
@@ -564,7 +587,7 @@ export class MyMain {
            {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40}
+                options: {minClusterSize: 40, hull: BoxVolume }
             },
             {
                 generator: industrySetGenerator,

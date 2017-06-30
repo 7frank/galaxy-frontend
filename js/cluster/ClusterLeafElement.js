@@ -47,14 +47,14 @@ export default class ClusterLeafElement extends THREE.Mesh
         //TODO nodes,edges, ... as well
 
         if (  this.mEdgesContainer)
-       this.mEdgesContainer.visible= levelOfDetail>0.5;
+       this.mEdgesContainer.visible= levelOfDetail>0.3;
 
 
         if (  this.mNodeMeshes)
             this.mNodeMeshes.visible= levelOfDetail>0.2;
 
-        if (this.parent && this.parent.mParticles)
-        this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
+       // if (this.parent && this.parent.mParticles)
+       // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
 
 
 
