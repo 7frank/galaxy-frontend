@@ -179,6 +179,11 @@ function TextNodes(env = globalEnv, options) {
 	function compareAndHidePreviousBatch(nodeInfosCurrentBatch) {
 
 
+
+
+  if (previousVisibleNodes.length == 0 && nodeInfosCurrentBatch.length == 0  ) return;
+
+
     	// vars to safe some ms later on
 		var camera=env.camera;
 
@@ -225,7 +230,7 @@ function TextNodes(env = globalEnv, options) {
 
 					if (typeof preNode.text != "undefined") {
 
-						preNode.text.hide()
+						preNode.text.stop().hide()
 						preNode.text.remove();
 						delete (preNode.text)
 
@@ -259,10 +264,14 @@ function TextNodes(env = globalEnv, options) {
 
 			for (var nodeInfo of nodeInfosCurrentBatch) {
 				if (nodeInfo.node.text && !nodeInfo.node.text._marked_for_deletion_)
-					nodeInfo.node.text.stop().fadeIn(100);
+
+                    if (!nodeInfo.node.text.is( ":animated"))
+                    nodeInfo.node.text.stop().fadeIn(100);
 
 				updatePos(nodeInfo.node, nodeInfo.distance);
 			}
+
+
 
 	}
 	//--------------------------------
@@ -274,6 +283,7 @@ function TextNodes(env = globalEnv, options) {
 		var mNodes = options.getNodes();
        // console.error("textnodes",mNodes.length)
 		var maxVisibleTextNodes = options.maxVisibleCount;
+
 
 
 
@@ -312,6 +322,9 @@ function TextNodes(env = globalEnv, options) {
 
 			//second compare and hide/show nodes
 			compareAndHidePreviousBatch(nodesCurrentBatch);
+
+
+
 
 	}
 

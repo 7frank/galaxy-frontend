@@ -1832,7 +1832,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         }
 
         //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
-        this.on("z", function (e) {
+        // also dragging will trigger click events
+        this.on("z dblclick", function (e) {
              e.stopPropagation();
 
             this.zoomToCluster()
@@ -1889,13 +1890,13 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
             let parents = this.getParents();
             parents.shift();
-            let root = parents.map(p => p.name ? p.name : p.id).join(" ");
+            let root = parents.map(p => p.name ? p.name : p.id).join(" - ");
             //TODO public setter function
 
 
             let lod=(this.mHull)? this.mHull.lod:-1;
 
-            this.getView().setTooltip(root + " " + name+" LOD:"+lod)
+            this.getView().setTooltip(root + " " + name) //+" LOD:"+lod
 
 
         });
@@ -2249,6 +2250,7 @@ class ClusterLeafElement extends THREE.Mesh
 
     appendNodes(nodes){
 
+
         if (!this.mNodeMeshes)
         {
             this.mNodeMeshes=new THREE.Object3D;
@@ -2559,9 +2561,9 @@ var that=this
                 getNodes: function(){
                     //FIXME use only visible nodes to improve performance
                     //TODO also have a per cluster approach for further performance improvements
-                    let view=that.getView()
+                    let root=that.getRoot()
 
-                   let res=(view&&_.isArray(view.mVisibleNodes))?view.mVisibleNodes:[]
+                   let res=(root&&_.isArray(root.mVisibleRootTextNodes))?root.mVisibleRootTextNodes:[]
                     if (res==undefined) console.warn("!")
                     return res
 
@@ -2570,11 +2572,13 @@ var that=this
 
 
     }
-
-
+    updateRootTextNodes(nodes) {
+            this.mVisibleRootTextNodes=nodes
+    }
 
     update(){
         super.update()
+
 
         if (this.tn)
        this.tn.update();
@@ -3977,8 +3981,10 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
                 if (prev_vis)
                 {
                 GUI.updateFromVisibleNodes(visibleNodes)
-                    that.mVisibleNodes=visibleNodes
-                $(that).trigger("visible-nodes-changed") //TODO inverse control via listening
+                 //   that.mVisibleNodes=[].concat(visibleNodes)
+                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
+                    that.mRootCluster.updateRootTextNodes(visibleNodes);
+
                 }
             }
             visibleNodes=[] //reset count

@@ -214,9 +214,9 @@ var that=this
                 getNodes: function(){
                     //FIXME use only visible nodes to improve performance
                     //TODO also have a per cluster approach for further performance improvements
-                    let view=that.getView()
+                    let root=that.getRoot()
 
-                   let res=(view&&_.isArray(view.mVisibleNodes))?view.mVisibleNodes:[]
+                   let res=(root&&_.isArray(root.mVisibleRootTextNodes))?root.mVisibleRootTextNodes:[]
                     if (res==undefined) console.warn("!")
                     return res
 
@@ -225,11 +225,13 @@ var that=this
 
 
     }
-
-
+    updateRootTextNodes(nodes) {
+            this.mVisibleRootTextNodes=nodes
+    }
 
     update(){
         super.update()
+
 
         if (this.tn)
        this.tn.update();

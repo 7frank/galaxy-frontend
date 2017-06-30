@@ -595,6 +595,38 @@ FIXME
  
 \end_layout
 
+\begin_deeper
+\begin_layout Itemize
+rootcluster text seems to be the mayor factor here
+\end_layout
+
+\begin_layout Itemize
+also text nodes appears to be broken currently ....
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+nodes weren't always used for calculating visible items.
+ because we skip calculating visible nodes to only occure every 20 frames
+ the nodes reset itself with the next iteration being length==0
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+ if the rootcluster is not visible (is the boundingvolume not calculated
+ properly) the text nodes won't be updated
+\end_layout
+
+\end_deeper
+\end_deeper
 \end_deeper
 \begin_layout Itemize
 The usability isn't very good
@@ -615,6 +647,30 @@ see elaboration
 
 \end_layout
 
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+find a way to not get click triggered if dblclick is triggered when both
+ are bound to same element 
+\end_layout
+
+\begin_layout Itemize
+also dragging will trigger click events
+\end_layout
+
+\end_deeper
 \end_deeper
 \begin_layout Itemize
 So we will 1
@@ -662,6 +718,33 @@ it might be that throttling hull updates and updating edges havve a slight
 
 \begin_layout Itemize
 also when loading and maximising while loading this occured
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+smaller bugs
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+particles are not within node
+\end_layout
+
+\begin_layout Itemize
+clicking a node then following the edge and clicking the target will hide
+ edges at first
+\end_layout
+
+\begin_layout Itemize
+text will stay even if nodes are not longer visible
+\end_layout
+
+\begin_layout Itemize
+node tooltip
+\end_layout
+
+\begin_layout Itemize
+node selected particles invis
 \end_layout
 
 \end_deeper

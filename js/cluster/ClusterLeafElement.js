@@ -56,6 +56,7 @@ export default class ClusterLeafElement extends THREE.Mesh
 
     appendNodes(nodes){
 
+
         if (!this.mNodeMeshes)
         {
             this.mNodeMeshes=new THREE.Object3D;

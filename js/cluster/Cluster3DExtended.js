@@ -96,7 +96,8 @@ class Cluster3DExtended extends BaseCluster3D {
         }
 
         //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
-        this.on("z", function (e) {
+        // also dragging will trigger click events
+        this.on("z dblclick", function (e) {
              e.stopPropagation();
 
             this.zoomToCluster()
@@ -153,13 +154,13 @@ class Cluster3DExtended extends BaseCluster3D {
 
             let parents = this.getParents();
             parents.shift();
-            let root = parents.map(p => p.name ? p.name : p.id).join(" ");
+            let root = parents.map(p => p.name ? p.name : p.id).join(" - ");
             //TODO public setter function
 
 
             let lod=(this.mHull)? this.mHull.lod:-1;
 
-            this.getView().setTooltip(root + " " + name+" LOD:"+lod)
+            this.getView().setTooltip(root + " " + name) //+" LOD:"+lod
 
 
         });
