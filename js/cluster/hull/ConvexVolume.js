@@ -31,6 +31,33 @@ class ConvexVolume extends BoxVolume {
 
     createFromBoundingBox(vertices, boundingBox) {
 
+
+
+        //geometry ... at best a convexGeometry
+        //numSegments ... determines the smoothing of the rounded edges
+        //margin ... the margin of the convex geometry around the original geometry
+       function  myModifier(geometry,numSegments,margin)
+       {
+
+           let marginGeo = new THREE.Geometry();
+
+           for (let v of geometry.vertices) {
+               let sphere = new THREE.SphereGeometry(margin,numSegments, numSegments);
+               sphere.translate(v.x, v.y, v.z);
+
+               marginGeo.merge(sphere, sphere.matrix)
+
+           }
+
+
+
+           let convexGeoWithMargin = new THREE.ConvexGeometry(marginGeo.vertices);
+
+
+           return convexGeoWithMargin
+
+       }
+
         //ConvexGeometry does need at least 4 vertices
         //so in case we don't have as much we do use the boundingbox instead to generate some more vertices
         if (vertices.length < 4)
@@ -41,10 +68,11 @@ class ConvexVolume extends BoxVolume {
 
         //reduce the vertice count before adding margin
         let geo0 = new THREE.ConvexGeometry(vertices);
+        let margin = boundingBox.getSize().length()/10;
 
-
+/*
         let marginGeo = new THREE.Geometry();
-        let margin = 100;
+
         for (let v of geo0.vertices) {
             let sphere = new THREE.SphereGeometry(margin, 8, 6);
             sphere.translate(v.x, v.y, v.z);
@@ -57,8 +85,19 @@ class ConvexVolume extends BoxVolume {
         let alteredVertices = marginGeo.vertices
 
         let geo = new THREE.ConvexGeometry(alteredVertices);
-        geo.computeBoundingBox();
+*/
 
+        let geo= myModifier(geo0,5,margin)
+        geo.computeBoundingBox();
+        this.geometryLowPoly=geo;
+
+
+        let geo2= myModifier(geo0,10,margin)
+        geo2.computeBoundingBox();
+        this.geometryAveragePoly=geo2;
+
+
+/*
 
         let modifier = new THREE.SubdivisionModifier(1);
 
@@ -68,6 +107,8 @@ class ConvexVolume extends BoxVolume {
 
         modifier.modify(geo);
         this.geometryAveragePoly = geo.clone();
+
+*/
 
         //  modifier.modify(geo);
         //  this.geometryHighPoly = geo.clone();
@@ -134,6 +175,7 @@ class ConvexVolume extends BoxVolume {
         }
 
         let y = mTransfer(l);
+
         super.setLOD(y * this.maxOpacity);
 
 
@@ -141,8 +183,8 @@ class ConvexVolume extends BoxVolume {
          if (l >= 0.8 && l <= 0.95) this.mesh.geometry = this.geometryAveragePoly;
          if (l > 0.95) this.mesh.geometry = this.geometryHighPoly*/
 
-        if (l < 0.8) this.mesh.geometry = this.geometryLowPoly;
-        if (l >= 0.8) this.mesh.geometry = this.geometryAveragePoly;
+        if (l < 0.6) this.mesh.geometry = this.geometryLowPoly;
+        if (l >= 0.6) this.mesh.geometry = this.geometryAveragePoly;
 
 
     }
@@ -162,8 +204,11 @@ class ConvexVolume extends BoxVolume {
 
         this.mesh.material.dispose();
 
+        if (this.geometryLowPoly)
         this.geometryLowPoly.dispose();
+        if (this.geometryAveragePoly)
         this.geometryAveragePoly.dispose();
+        if (this.geometryHighPoly)
         this.geometryHighPoly.dispose();
 
         if (this.parent)
