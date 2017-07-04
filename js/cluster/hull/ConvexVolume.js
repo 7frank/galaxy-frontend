@@ -37,18 +37,40 @@ class ConvexVolume extends BoxVolume {
             vertices = this.getVerticesFromBoundingBox(boundingBox);
 
 
-        let geo = new THREE.ConvexGeometry(vertices);
-         geo.computeBoundingBox();
+        //we will create a sphere geometry with a radius==margin for each vertice and merge them beforehand
+
+        //reduce the vertice count before adding margin
+        let geo0 = new THREE.ConvexGeometry(vertices);
+
+
+        let marginGeo = new THREE.Geometry();
+        let margin = 100;
+        for (let v of geo0.vertices) {
+            let sphere = new THREE.SphereGeometry(margin, 8, 6);
+            sphere.translate(v.x, v.y, v.z);
+
+            marginGeo.merge(sphere, sphere.matrix)
+
+        }
+
+        //let alteredVertices=vertices
+        let alteredVertices = marginGeo.vertices
+
+        let geo = new THREE.ConvexGeometry(alteredVertices);
+        geo.computeBoundingBox();
+
 
         let modifier = new THREE.SubdivisionModifier(1);
-        modifier.modify(geo);
+
+        //  modifier.modify(geo);
 
         this.geometryLowPoly = geo.clone();
 
         modifier.modify(geo);
         this.geometryAveragePoly = geo.clone();
-        modifier.modify(geo);
-        this.geometryHighPoly = geo.clone();
+
+        //  modifier.modify(geo);
+        //  this.geometryHighPoly = geo.clone();
 
         //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
         let mat = new THREE.MeshBasicMaterial({
@@ -57,6 +79,7 @@ class ConvexVolume extends BoxVolume {
             transparent: true,
             depthWrite: false,
             side: THREE.BackSide
+            //  ,   wireframe:true
         });
 
         //   let mesh = new THREE.Mesh(geo, mat);
@@ -88,8 +111,7 @@ class ConvexVolume extends BoxVolume {
 
 
     //TODO
-    transferFunction(x)
-    {
+    transferFunction(x) {
         return x
     }
 
@@ -102,22 +124,27 @@ class ConvexVolume extends BoxVolume {
         if (l < 0) l = 0;
         if (l > 1) l = 1;
 
-        var minOpacity=0.03;
+        var minOpacity = 0.03;
 
         function mTransfer(x) {
             //transfer function y= 0.5*sin(1.5*pi+x*pi*2)+0.5
-            return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2) + +0.5+minOpacity
+            return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2) + +0.5 + minOpacity
 
 
         }
 
         let y = mTransfer(l);
-        super.setLOD(y* this.maxOpacity);
+        super.setLOD(y * this.maxOpacity);
 
 
-        if (l < 0.3) this.mesh.geometry = this.geometryLowPoly;
-        if (l >= 0.3 && l <= 0.7) this.mesh.geometry = this.geometryAveragePoly;
-        if (l > 0.7) this.mesh.geometry = this.geometryHighPoly
+        /*     if (l < 0.8) this.mesh.geometry = this.geometryLowPoly;
+         if (l >= 0.8 && l <= 0.95) this.mesh.geometry = this.geometryAveragePoly;
+         if (l > 0.95) this.mesh.geometry = this.geometryHighPoly*/
+
+        if (l < 0.8) this.mesh.geometry = this.geometryLowPoly;
+        if (l >= 0.8) this.mesh.geometry = this.geometryAveragePoly;
+
+
     }
 
 
@@ -131,8 +158,7 @@ class ConvexVolume extends BoxVolume {
     }
 
 
-    dispose()
-    {
+    dispose() {
 
         this.mesh.material.dispose();
 
@@ -144,7 +170,6 @@ class ConvexVolume extends BoxVolume {
             this.parent.remove(this)
 
     }
-
 
 
 }
