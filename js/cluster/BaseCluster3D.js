@@ -45,14 +45,14 @@ class BaseCluster3D extends BaseNode {
         //update lod //TODO the function shoul forwared onBeforeRender args in a way
         this.on("before-render", function () {
 
-         //   if (!this.mHull) return;
+            //   if (!this.mHull) return;
 
             let view = this.getView();
             //based on distance to the camera the LOD is set for the hull object
             let src = view.mCamera.position;
 
             let dst;
-            if (this.mHull&& this.mHull.mesh && this.mHull.mesh.geometry && this.mHull.mesh.geometry.boundingBox)
+            if (this.mHull && this.mHull.mesh && this.mHull.mesh.geometry && this.mHull.mesh.geometry.boundingBox)
                 dst = this.mHull.mesh.geometry.boundingBox.getCenter();
             else
                 dst = this.position;
@@ -71,7 +71,7 @@ class BaseCluster3D extends BaseNode {
 
             var lod = 1 - (distance - minDistance) / (maxDistance - minDistance);
 
-        this.setLOD(lod)
+            this.setLOD(lod)
 
         })
 
@@ -88,22 +88,19 @@ class BaseCluster3D extends BaseNode {
      *
      */
 
-    setLOD(mLOD)
-    {
+    setLOD(mLOD) {
 
 
         if (this.mHull)
-        this.mHull.setLOD(mLOD);
+            this.mHull.setLOD(mLOD);
 
 
-        if (this.isLeaf())
-        {
+        if (this.isLeaf()) {
             this.mLeaf.setLOD(mLOD)
         }
 
 
     }
-
 
 
     /**
@@ -184,7 +181,7 @@ class BaseCluster3D extends BaseNode {
             if (cluster.mHull) {
                 cluster.mHull.dispose();
                 delete (cluster.mHull);
-                cluster.mHull=null;
+                cluster.mHull = null;
             }
 
 
@@ -197,6 +194,12 @@ class BaseCluster3D extends BaseNode {
                 cluster.parent.remove(cluster)
             }
 
+            if (cluster.mChildClustersEdges) cluster.mChildClustersEdges = null; //delete edge references
+            if (cluster.mChildClustersEdgesMesh) {
+                cluster.parent.remove( cluster.mChildClustersEdgesMesh)
+                cluster.mChildClustersEdgesMesh = null; //delete edge-mesh  references
+
+            }
 
         })
 
@@ -406,8 +409,11 @@ class BaseCluster3D extends BaseNode {
                 that.adjustHullSize();
                 that.trigger("hull-updated")
 
-            }, 100,{trailing:true,leading:false}))
+            }, 100, {trailing: true, leading: false}))
         });
+
+
+        this.addChildClusterEdgeMesh();
 
 
         this.setDistributionHandler(entry.distribution, function () {
@@ -418,6 +424,48 @@ class BaseCluster3D extends BaseNode {
         })
 
     }
+
+
+    //TODO refactor into class like EdgesContainer for leaf/node edges
+    addChildClusterEdgeMesh(options) {
+        let edges = this.createEdgesForChildClusters();
+
+
+        var line_geom = new THREE.Geometry();
+        var lineMaterial;
+        var mergedLineMesh;
+
+              defaults = {
+                opacity: 1.0,
+                transparent: true,
+                //lineIsVisible:true, // if disabled the line won't be shown on the scene
+                color: 0xFF0000
+            };
+
+            options = _.extend(defaults, options);
+
+            lineMaterial = new THREE.MeshBasicMaterial({
+                color: options.color,
+                transparent: options.transparent,
+                opacity: options.opacity,
+                depthTest: true,
+                depthWrite: false
+            });
+
+
+        this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
+        this.add(this.mChildClustersEdgesMesh)
+
+    for (let edge of edges)
+    {
+        line_geom.vertices.push(edge.source.position);
+        line_geom.vertices.push(edge.target.position);
+
+    }
+
+
+    }
+
 
     /**
      * the current cluster gets subdivided into smaller clusters
@@ -458,7 +506,6 @@ class BaseCluster3D extends BaseNode {
     }
 
 
-
     //TODO it  seems, the vertices aren't calculated properly
     getCompoundBoundingBoxInfo() {
         var that = this;
@@ -477,7 +524,7 @@ class BaseCluster3D extends BaseNode {
 
             let vert = that.getVerticesFromBoundingBox(boundingBox);
 
-           // let vert = that.mHull.mesh.geometry.vertices;
+            // let vert = that.mHull.mesh.geometry.vertices;
             vertices = vertices.concat(vert);
 
             box.union(boundingBox);
@@ -490,7 +537,6 @@ class BaseCluster3D extends BaseNode {
     }
 
 
-
     /**
      * in case this is a leaf cluster the function
      * returns an array of vertices positioned relative to it's parent
@@ -499,31 +545,29 @@ class BaseCluster3D extends BaseNode {
     getVerticesForLeaf() {
         var that = this;
 
-        var leaf=this.mLeaf;
+        var leaf = this.mLeaf;
 
 
+        let el = leaf.mNodeParticles.pointCloud;
 
-            let el=leaf.mNodeParticles.pointCloud;
-
-            let offset_parent = that.localToWorld(new THREE.Vector3);
-            let offset_world = el.localToWorld(new THREE.Vector3);
+        let offset_parent = that.localToWorld(new THREE.Vector3);
+        let offset_world = el.localToWorld(new THREE.Vector3);
 
 
-            let translateOffset=offset_world.sub(offset_parent);
+        let translateOffset = offset_world.sub(offset_parent);
 
-           let geometry=el.geometry;
-            var attributes = geometry.attributes;
-            var positions = attributes.position.array;
-            let vert=[];
-            for ( var i = 0; i < positions.length; i += 3 ) {
+        let geometry = el.geometry;
+        var attributes = geometry.attributes;
+        var positions = attributes.position.array;
+        let vert = [];
+        for (var i = 0; i < positions.length; i += 3) {
 
-                let v=new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
-                vert.push(  v.add(translateOffset));
-            }
+            let v = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+            vert.push(v.add(translateOffset));
+        }
 
-       return vert
+        return vert
     }
-
 
 
     /**
@@ -557,13 +601,13 @@ class BaseCluster3D extends BaseNode {
         function updateLeafsEdges(cluster) {
 
             //TODO the timeout fixes the problem that the edges aren't on spot but this should be reviewed and fixed without it
-          setTimeout(function(){
+            setTimeout(function () {
 
-            let leafs = cluster.getLeafs();
-            _.each(leafs, function (leaf) {
-                leaf.updateEdges();
-            });
-          },50);
+                let leafs = cluster.getLeafs();
+                _.each(leafs, function (leaf) {
+                    leaf.updateEdges();
+                });
+            }, 50);
         }
 
     }
@@ -594,7 +638,7 @@ class BaseCluster3D extends BaseNode {
 
                 //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
                 info.box.setFromArray(pc.geometry.attributes.position.array);
-               // info.vertices = this.getVerticesFromBoundingBox(info.box)  //TODO get vertices from array
+                // info.vertices = this.getVerticesFromBoundingBox(info.box)  //TODO get vertices from array
                 info.vertices = this.getVerticesForLeaf();
 
                 pc.geometry.boundingBox = info.box
@@ -643,7 +687,7 @@ class BaseCluster3D extends BaseNode {
             //TODO this is currently used for the mouse interactions but should be refactored and removed
             var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
             sphereGeometry.boundingBox = boundingBox;
-           this.geometry = sphereGeometry;
+            this.geometry = sphereGeometry;
         }
 
         //notify listeners that the hull size changed
@@ -724,14 +768,16 @@ class BaseCluster3D extends BaseNode {
 
 
     /**
-     * creates edegse from nodes
+     * creates edges from nodes
      * the edges can be inner edges only from nodes within cluster to other nodes within
      * or external edges leading into nodes from other clusters
      */
 
     createEdgesForChildClusters() {
 
-        return EdgeUtil.createEdgesBetweenClustersFromMap(this.mClusters);
+        if (this.mChildClustersEdges) return this.mChildClustersEdges
+
+        return this.mChildClustersEdges = EdgeUtil.createEdgesBetweenClustersFromMap(this.mClusters);
 
     }
 
