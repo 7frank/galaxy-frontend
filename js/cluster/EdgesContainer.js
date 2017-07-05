@@ -19,41 +19,56 @@ class EdgesContainer extends THREE.Object3D {
         super(...args);
         this.initLineMesh();
 
-        this.mExternalNodesHelpers=[]
+        this.mExternalNodesHelpers = [];
 
 
-        this.skipEdges=100;
-        this.drawInternalEdges=true;
-        this.drawOutgoingEdges=true;
-        this.drawIngoingEdges=true;
+        this.setSkipParams(1);
+
+        this.setRenderMode(true, true, true)
+
 
     }
+
+    setSkipParams(numSkipEdges, numDefaultMinimum = 20) {
+        if (numSkipEdges < 1) numSkipEdges = 1
+
+
+        this.skipEdges = numSkipEdges;
+        this.numDefaultMinimum = numDefaultMinimum;
+        return this;
+    }
+
+
+    setRenderMode(drawInternalEdges, drawOutgoingEdges, drawIngoingEdges) {
+        this.drawInternalEdges = drawInternalEdges;
+        this.drawOutgoingEdges = drawOutgoingEdges;
+        this.drawIngoingEdges = drawIngoingEdges;
+
+        return this;
+    }
+
 
     addEdge(_edge) {
 
 
-        var that = this
+        var that = this;
 
-        function createExternalNodeHelper(node,internalOtherNode) {
-            var nPos = node._bubble.position
-            var adjustedPos = new THREE.Vector3
+        function createExternalNodeHelper(node, internalOtherNode) {
+            var nPos = node._bubble.position;
+            var adjustedPos = new THREE.Vector3;
 
             return {
                 position: adjustedPos,
                 update: function () {
 
-                    //FIXME currently does not match with arrowhelpers so .. invalid
+                    if (!node.getParentCluster()) return; //not connected
+                    if (!internalOtherNode.getParentCluster()) return; //not connected
 
-                    if (!node.getParentCluster()) return //not connected
-
-
-                    adjustedPos.setFromMatrixPosition( node.getParentCluster().matrixWorld );
-
+                    adjustedPos.setFromMatrixPosition(node.getParentCluster().matrixWorld);
                     //setFromMatrix
-                    adjustedPos.add(nPos)
-                    let other=new THREE.Vector3
-                    other.setFromMatrixPosition( internalOtherNode.getParentCluster().matrixWorld );
-
+                    adjustedPos.add(nPos);
+                    let other = new THREE.Vector3;
+                    other.setFromMatrixPosition(internalOtherNode.getParentCluster().matrixWorld);
                     adjustedPos.sub(other)
 
 
@@ -69,21 +84,19 @@ class EdgesContainer extends THREE.Object3D {
         let newEdge = new BaseEdge(_edge.source._bubble.position, _edge.target._bubble.position);
 
 
-        if (!_edge.isSrcInternalNode)
-        {
-            let helper = createExternalNodeHelper(_edge.source,_edge.target)
-            this.mExternalNodesHelpers.push(helper)
+        if (!_edge.isSrcInternalNode) {
+            let helper = createExternalNodeHelper(_edge.source, _edge.target);
+            this.mExternalNodesHelpers.push(helper);
             this.mEdges.geometry.vertices.push(helper.position);
 
-         }
-         else
-        this.mEdges.geometry.vertices.push(newEdge.getStart());
+        }
+        else
+            this.mEdges.geometry.vertices.push(newEdge.getStart());
 
 
-        if (!_edge.isTrgInternalNode)
-        {
-            let helper = createExternalNodeHelper(_edge.target,_edge.source)
-            this.mExternalNodesHelpers.push(helper)
+        if (!_edge.isTrgInternalNode) {
+            let helper = createExternalNodeHelper(_edge.target, _edge.source);
+            this.mExternalNodesHelpers.push(helper);
             this.mEdges.geometry.vertices.push(helper.position);
 
         }
@@ -91,12 +104,8 @@ class EdgesContainer extends THREE.Object3D {
             this.mEdges.geometry.vertices.push(newEdge.getEnd());
 
 
-
-
-
-
-       // this.mEdges.geometry.vertices.push(newEdge.getStart());
-       // this.mEdges.geometry.vertices.push(newEdge.getEnd());
+        // this.mEdges.geometry.vertices.push(newEdge.getStart());
+        // this.mEdges.geometry.vertices.push(newEdge.getEnd());
 
 
         return newEdge;
@@ -104,8 +113,8 @@ class EdgesContainer extends THREE.Object3D {
 
     updateEdges() {
 
-        _.each(this.mExternalNodesHelpers,helper => helper.update())
-
+        if (this.mExternalNodesHelpers.length == 0) return;
+        _.each(this.mExternalNodesHelpers, helper => helper.update());
         this.mEdges.geometry.verticesNeedUpdate = true;
 
     }
@@ -113,15 +122,19 @@ class EdgesContainer extends THREE.Object3D {
     setFromNodes(nodes) {
 
 
+        let edges = EdgeUtil.getEdgesForNodes(nodes, this.drawInternalEdges, this.drawOutgoingEdges, this.drawIngoingEdges);
 
 
-
-        let edges = EdgeUtil.getEdgesForNodes(nodes, this.drawInternalEdges,this.drawOutgoingEdges,this.drawIngoingEdges);
-
-    //skip edges for better performance
+        //skip edges for better performance
         //TODO option to filter by size and take only most relevant n elements
-        let edgeCounter=0;
-        edges= edges.filter( e => edgeCounter++%this.skipEdges==0 )
+        let edgeCounter = 0;
+
+        let skip = this.skipEdges;
+
+        if (nodes.length / this.skipEdges < this.numDefaultMinimum)
+            skip = Math.floor(nodes.length / this.numDefaultMinimum, 1)
+
+        edges = edges.filter(e => edgeCounter++ % skip == 0);
 
 
         for (let edge of edges)
@@ -137,8 +150,8 @@ class EdgesContainer extends THREE.Object3D {
     initLineMesh() {
 
         var line_geom = new THREE.Geometry();
-        var lineMaterial
-        var mergedLineMesh
+        var lineMaterial;
+        var mergedLineMesh;
 
         function initLineGroup(options) {
 
@@ -148,9 +161,9 @@ class EdgesContainer extends THREE.Object3D {
                 transparent: true,
                 //lineIsVisible:true, // if disabled the line won't be shown on the scene
                 color: 0xffffff
-            }
+            };
 
-            options = _.extend(defaults, options)
+            options = _.extend(defaults, options);
 
             lineMaterial = new THREE.MeshBasicMaterial({
                 color: options.color,
@@ -176,7 +189,7 @@ class EdgesContainer extends THREE.Object3D {
             opacity: 0.2,
             color: 0x49616C,
             transparent: true,
-        })
+        });
 
         this.add(this.mEdges)
 

@@ -12,18 +12,24 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
         this.mNodes = nodes;
+
+
+
+
         this.mNodeParticles = this.createParticleNodeCloud();
 
 
         this.add(this.mNodeParticles.pointCloud);
 
 
-        //TODO this still has mayor performance impact but is needed for counting the companies
-        //we'll use lod non the nodes as well therewore nodes forther away in the background wont count towards the coumpany count
+        // add the nodes to the leaf
         this.appendNodes(nodes);
 
 
-        this.createEdgesFromNodes(nodes)
+        //add edges to the leaf
+        this.createEdgesFromNodes(nodes);
+
+
 
     }
 
@@ -39,8 +45,22 @@ export default class ClusterLeafElement extends THREE.Mesh {
             this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
-        if (this.mEdgesContainer)
-            this.mEdgesContainer.visible = levelOfDetail > 0.3;
+        let edgeFadeLOD=0.3;
+        let crossfade=0.2;
+
+        if (this.mEdgesContainer) {
+
+         this.mEdgesContainer.visible = levelOfDetail >= edgeFadeLOD;
+
+            this.mEdgesContainer.mEdges.material.opacity=(levelOfDetail-edgeFadeLOD)/edgeFadeLOD;
+        }
+
+        if (this.mEdgesContainer2) {
+
+            this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
+
+            this.mEdgesContainer2.mEdges.material.opacity=  1-levelOfDetail/edgeFadeLOD;
+        }
 
 
         if (this.mNodeMeshes)
@@ -68,6 +88,16 @@ export default class ClusterLeafElement extends THREE.Mesh {
         this.mEdgesContainer.geometry.dispose();
         this.mEdgesContainer = null;
      }
+
+
+
+        if (this.mEdgesContainer2&&this.mEdgesContainer2.geometry) {
+
+
+            this.mEdgesContainer2.geometry.dispose();
+            this.mEdgesContainer2 = null;
+        }
+
 
         if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
             this.mNodeMeshes.geometry.dispose();
@@ -113,11 +143,14 @@ export default class ClusterLeafElement extends THREE.Mesh {
     createEdgesFromNodes(nodes) {
 
         this.mEdgesContainer = new EdgesContainer();
-
-        this.mEdgesContainer.setFromNodes(nodes);
-
-
+        this.mEdgesContainer.setRenderMode(true,false,false).setSkipParams(30,40).setFromNodes(nodes);
         this.add(this.mEdgesContainer)
+
+        this.mEdgesContainer2 = new EdgesContainer();
+        this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
+        this.add(this.mEdgesContainer2)
+
+
 
     }
 
@@ -144,8 +177,13 @@ export default class ClusterLeafElement extends THREE.Mesh {
     }
 
     updateEdges() {
+
+
         if (this.mEdgesContainer)
             this.mEdgesContainer.updateEdges();
+
+        if (this.mEdgesContainer2)
+            this.mEdgesContainer2.updateEdges();
 
     }
 

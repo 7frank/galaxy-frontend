@@ -64,7 +64,7 @@ class BaseCluster3D extends BaseNode {
 
             //TODO how to handle max/ind distance with the lod approach of meshes
             let maxDistance = this.getRadius() * 25;
-            let minDistance = 0//this.getRadius() ;
+            let minDistance = 0;//this.getRadius() ;
 
             let L = maxDistance - minDistance;
 
@@ -546,21 +546,24 @@ class BaseCluster3D extends BaseNode {
                 },
                 function onStep() {
 
-                    updateLeafsEdges(that)
+                    updateLeafsEdges(that);
 
                 }, function () {
-                    onComplete()
+                    onComplete();
                 });
 
 
         //FIXME redundant updating multiple edges and potentially leafs
         function updateLeafsEdges(cluster) {
-            let leafs = cluster.getLeafs();
 
+            //TODO the timeout fixes the problem that the edges aren't on spot but this should be reviewed and fixed without it
+          setTimeout(function(){
+
+            let leafs = cluster.getLeafs();
             _.each(leafs, function (leaf) {
                 leaf.updateEdges();
-            })
-
+            });
+          },50);
         }
 
     }
