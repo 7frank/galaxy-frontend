@@ -99,6 +99,17 @@ class BaseCluster3D extends BaseNode {
             this.mLeaf.setLOD(mLOD)
         }
 
+        if (this.mChildClustersEdgesMesh) {
+
+            let vis=(1-mLOD)/2;
+
+            this.mChildClustersEdgesMesh.material.opacity=vis;
+            this.mChildClustersEdgesMesh.material.visible=vis>0.05 && vis<0.9;
+
+        }
+
+
+
 
     }
 
@@ -409,17 +420,18 @@ class BaseCluster3D extends BaseNode {
                 that.adjustHullSize();
                 that.trigger("hull-updated")
 
+               that.addChildClusterEdgeMesh()
+
+
+
             }, 100, {trailing: true, leading: false}))
         });
 
 
-        this.addChildClusterEdgeMesh();
 
 
         this.setDistributionHandler(entry.distribution, function () {
-
             that.mClusterRule = entry
-
 
         })
 
@@ -428,6 +440,15 @@ class BaseCluster3D extends BaseNode {
 
     //TODO refactor into class like EdgesContainer for leaf/node edges
     addChildClusterEdgeMesh(options) {
+
+
+        //TODO
+        if (this.mChildClustersEdgesMesh) {
+
+        this.mChildClustersEdgesMesh.geometry.verticesNeedUpdate = true;
+            return;
+        }
+
         let edges = this.createEdgesForChildClusters();
 
 
@@ -439,7 +460,7 @@ class BaseCluster3D extends BaseNode {
                 opacity: 1.0,
                 transparent: true,
                 //lineIsVisible:true, // if disabled the line won't be shown on the scene
-                color: 0xFF0000
+                color: 0x999999
             };
 
             options = _.extend(defaults, options);
@@ -454,12 +475,23 @@ class BaseCluster3D extends BaseNode {
 
 
         this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
-        this.add(this.mChildClustersEdgesMesh)
+        this.mChildClustersEdgesMesh.geometry.boundingBox=new THREE.Box3;
+        this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
+
+
+        this.add(this.mChildClustersEdgesMesh);
 
     for (let edge of edges)
     {
-        line_geom.vertices.push(edge.source.position);
-        line_geom.vertices.push(edge.target.position);
+        //TODO we should unify the edges to not always have 2 separate ways to access certain elements
+        //TODO also we should use the center of the hull feature instead
+        let src=edge.source.position||edge.source._el.position;
+        let dst=edge.target.position||edge.target._el.position;
+
+
+
+        line_geom.vertices.push(src);
+        line_geom.vertices.push(dst);
 
     }
 
@@ -738,6 +770,7 @@ class BaseCluster3D extends BaseNode {
         this.adjustHullSize();
         this._initDotParticles();
         this.updateDotParticles()
+
 
 
     }
