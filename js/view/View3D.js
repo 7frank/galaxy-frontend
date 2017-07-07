@@ -13,10 +13,10 @@ class View3D extends HTMLElement
 {
 
     constructor(...args){
-    super(...args)
+    super(...args);
 
 
-        this.createCSSRule()
+        this.createCSSRule();
         this.mTime=-1;
         this.mActualFPS=0;
         this.showFPSCounter=false;
@@ -82,12 +82,12 @@ class View3D extends HTMLElement
             background: "rgba(255,255,255,0.3)",
             left: "0px",
             "z-index": 1
-        }
+        };
 
         if (!this.mCaption)
-            this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
+            this.mCaption=$("<span></span>").html(this.name).css(captionCSS);
 
-        this.mCaption.html("").append(text)
+        this.mCaption.html("").append(text);
         return this
     }
 
@@ -101,14 +101,15 @@ class View3D extends HTMLElement
     initStatic() {
 
          if (this._inited_static_) return;
-         var that=this
+         var that=this;
+
 
         this.mFPS=0.5;
         this.minFPS=this.minFPS||0;
         this.maxFPS=this.maxFPS||144;
 
 
-        this.mLastFrameTime=-1
+        this.mLastFrameTime=-1;
 
         let captionCSS= {
             "pointer-events": "none",
@@ -121,12 +122,12 @@ class View3D extends HTMLElement
             background: "rgba(255,255,255,0.3)",
             left: "0px",
             "z-index": 1
-        }
+        };
 
     if (!this.mCaption)
-        this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
+        this.mCaption=$("<span></span>").html(this.name).css(captionCSS);
 
-        $(this).append(   this.mCaption).addClass("view-3d")
+        $(this).append(   this.mCaption).addClass("view-3d");
 
 
 
@@ -161,7 +162,7 @@ class View3D extends HTMLElement
 
 
 
-        $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"})
+        $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"});
 
 
         //init basic keyboard io
@@ -181,27 +182,49 @@ class View3D extends HTMLElement
         $(this).append(this.mFpsCounter);
 
 
+        //------------------------------------------------
+        //throttle move events to about 50 fps
+        let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
+        THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
+        {
+            var mouseCoords = this._getRelativeMouseXY(domEvent);
+            this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
+            this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
+            this._onMove('mouseout' , mouseCoords.x, mouseCoords.y, domEvent);
+        },40);  //25 (f)ps
 
         //init domEnvents
-        this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement)
+        this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
+
+        //Note: have a factory in case we need this kind of injection multiple times
+       // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations
+
+
+        //------------------------------------------------
 
 
 
         //FIXME binding events will interfere with controls
-        $(this.mRenderer.domElement).on("mouseover",_.throttle(function(e){
-            e.stopPropagation()
-            that.setActive()
+        $(this.mRenderer.domElement).on("mouseover",function(e){
 
-            $(that).attr("hasFocus",true)
+            if (that.isMaximised()) return;
+
+            e.stopPropagation();
+            that.setActive();
+
+            $(that).attr("hasFocus",true);
 
 
             that.mCaption.stop(true,false).fadeOut(200)
 
 
-        },20))
+        });
 
 
         $(this.mRenderer.domElement).on("mouseout",function(e) {
+
+            if (that.isMaximised()) return;
+
             e.stopPropagation();
 
 
@@ -216,7 +239,7 @@ class View3D extends HTMLElement
 
             }
 
-        })
+        });
 
 
         // Add camera interaction
@@ -229,17 +252,17 @@ class View3D extends HTMLElement
 
 
 
-        this.resizeCanvas()
+        this.resizeCanvas();
 
-        this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  )
-
-
+       this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  );
 
 
 
 
 
-        this._inited_static_=true
+
+
+        this._inited_static_=true;
 
     return this
 
@@ -253,10 +276,10 @@ class View3D extends HTMLElement
         var accTime=0,accFrames=0;
 
       function animate(time) {
-        that.mTime=time
+        that.mTime=time;
 
 
-          initialFrames--
+          initialFrames--;
           if (that.mFPS==0) {
 
               if (initialFrames<0)
@@ -282,10 +305,10 @@ class View3D extends HTMLElement
 
           if (accTime>1000)
           {
-              that.mActualFPS=accFrames
+              that.mActualFPS=accFrames;
 
               if (that.showFPSCounter)
-              that.mFpsCounter.html(that.mActualFPS)
+              that.mFpsCounter.html(that.mActualFPS);
 
               accTime=0;
               accFrames=0;
@@ -295,12 +318,12 @@ class View3D extends HTMLElement
 
 
 
-          that.mLastFrameTime = time
+          that.mLastFrameTime = time;
 
           that.mControls.update();
 
 
-          $(that).trigger("before-render",time)
+          $(that).trigger("before-render",time);
          // $(that).trigger("animate")
 
           that.mRenderer.render(that.mScene, that.mCamera);
@@ -322,7 +345,9 @@ class View3D extends HTMLElement
 
 
     maximise() {
-        $(this).addClass("view-3d-maximised")
+        $(this).addClass("view-3d-maximised");
+
+     this.mCaption.fadeOut();
 
         this.setActive()
 
@@ -337,7 +362,7 @@ class View3D extends HTMLElement
 
 
     undoMaximise() {
-        $(this).removeClass("view-3d-maximised")
+        $(this).removeClass("view-3d-maximised");
 
         this.setInactive()
 
@@ -352,9 +377,9 @@ class View3D extends HTMLElement
     {
 
         //fps
-        this.mFPS=this.maxFPS
+        this.mFPS=this.maxFPS;
 
-        this.resizeCanvas()
+        this.resizeCanvas();
         this.start();
 
     }
@@ -362,7 +387,7 @@ class View3D extends HTMLElement
     setInactive()
     {
       //  $(this).removeClass("view-3d-maximised")
-        this.mFPS=this.minFPS
+        this.mFPS=this.minFPS;
 
         this.resizeCanvas()
     }
@@ -370,7 +395,7 @@ class View3D extends HTMLElement
 
     start(){
 
-    this.stop()
+    this.stop();
 
      this.animate()
 
@@ -401,11 +426,13 @@ class View3D extends HTMLElement
 
     connectedCallback(){
 
-        this.createTooltip()
+        this.createTooltip();
 
 
         this.initStatic();
         this.start();
+
+        $(this).trigger("connected")
 
 
     }
@@ -414,7 +441,7 @@ class View3D extends HTMLElement
     createTooltip() {
 
         // Setup tooltip
-        if ( this.toolTipElem ) return
+        if ( this.toolTipElem ) return;
 
         this.toolTipElem = document.createElement('div');
         this.toolTipElem.classList.add('graph-tooltip');
@@ -423,7 +450,7 @@ class View3D extends HTMLElement
             "z-index":1,
             position:"relative",
             "user-select": "none"
-        })
+        });
 
         this.appendChild(this.toolTipElem);
 
