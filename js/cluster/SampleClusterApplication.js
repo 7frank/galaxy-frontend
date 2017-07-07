@@ -352,16 +352,11 @@ export class MyMain {
 
             //FIXME
        if (isMaximised)
-           $(mGraphView).on("loaded",function (){
+           $(mGraphView).on("loaded connected",function (){
 
-               setTimeout(function(){
-
-
-                   maximiseView.bind(mGraphView)()
-
-               },2000)
-
+                     maximiseView.bind(mGraphView)()
            } );
+
 
 
             return mGraphView
@@ -435,7 +430,7 @@ export class MyMain {
 
             //NOTE: target rendering
              var speccs = this.getForceSpeccs();
-             let view2 = createView("new force-graph", speccs)
+             let view2 = createView("new force-graph", speccs,true)
              .loadDataSet(this.getDSByID(0));
              views.push(view2)
 

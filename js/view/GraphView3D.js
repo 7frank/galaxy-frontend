@@ -70,7 +70,7 @@ class GraphView3D extends View3D
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
         res.applyClustering(speccs);
-        //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
+        //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this);
 
         var that=this;
@@ -146,9 +146,9 @@ class GraphView3D extends View3D
 
 
     maximise() {
-
-
+        
         var  root = this.mRootCluster;
+
         super.maximise();
 
             if (root.mParentView && root.mGlobalTextNodesContainer) {
