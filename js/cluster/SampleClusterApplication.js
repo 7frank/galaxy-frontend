@@ -46,6 +46,7 @@ import SimpleForceGraphView3D from "../view/SimpleForceGraphView3D"
 
 
 import BoxVolume from "./hull/BoxVolume"
+import BaseVolume from "./hull/BaseVolume"
 import ConvexVolume from "./hull/ConvexVolume"
 
 //-----------------------------------------
@@ -179,7 +180,7 @@ export class MyMain {
 
 
             var container = $("<div>")
-                .css(containerCSS)
+                .css(containerCSS)//.hide()
                 .appendTo("body");
 
             let title = $("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
@@ -232,7 +233,7 @@ export class MyMain {
 
                     if (mGraphView.isMaximised()) return;
 
-                    container.toggle();
+                    container.hide();
 
                     let maximisedContainer = $("#3d-graph");
 
@@ -273,7 +274,33 @@ export class MyMain {
 
 
 
-        function createView(name = "View3D", speccs) {
+
+
+        function createView(name = "View3D", speccs,isMaximised=false) {
+
+            function maximiseView() {
+
+                if (mGraphView.isMaximised()) return;
+                container.hide();
+
+                let maximisedContainer = $("#3d-graph");
+                //globalEnv.scene=mGraphView.mScene
+                var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
+
+                _.each(prevMaximisedElement, function (view) {
+
+                    view.undoMaximise()
+
+                });
+
+                container.append(prevMaximisedElement);
+                maximisedContainer.append(this);
+
+
+                this.maximise()
+
+            }
+
 
             let mGraphView = document.createElement("graph-view-3d");
             mGraphView.setCaption(name);
@@ -292,28 +319,7 @@ export class MyMain {
             $(mGraphView)
                 .css(thumbCSS);
 
-            $(mGraphView).on("dblclick", function () {
-
-                if (mGraphView.isMaximised()) return;
-                container.toggle();
-
-                let maximisedContainer = $("#3d-graph");
-                //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
-
-                _.each(prevMaximisedElement, function (view) {
-
-                    view.undoMaximise()
-
-                });
-
-                container.append(prevMaximisedElement);
-                maximisedContainer.append(this);
-
-
-                this.maximise()
-
-            });
+            $(mGraphView).on("dblclick",maximiseView );
 
 
             mGraphView.setSpeccs(speccs);
@@ -326,8 +332,9 @@ export class MyMain {
             events.bind("e",function(){
                 edgesVisible=!edgesVisible;
                 _.each(mGraphView.mRootCluster.getLeafs(),function(leaf){
-
+        console.log("TODO toggling edges won't work because of LOD impl")
                     leaf.mEdgesContainer.visible=edgesVisible
+                    leaf.mEdgesContainer2.visible=edgesVisible
 
                 })
 
@@ -343,7 +350,18 @@ export class MyMain {
             });
 
 
+            //FIXME
+       if (isMaximised)
+           $(mGraphView).on("loaded",function (){
 
+               setTimeout(function(){
+
+
+                   maximiseView.bind(mGraphView)()
+
+               },2000)
+
+           } );
 
 
             return mGraphView
@@ -360,7 +378,7 @@ export class MyMain {
 
             //NOTE: target rendering
             var speccs = this.getForceSpeccs();
-            let view2 = createView("new force-graph", speccs)
+            let view2 = createView("new force-graph", speccs,true)
                 .loadDataSet(this.getDSByID(1));
             views.push(view2);
 
@@ -595,13 +613,14 @@ export class MyMain {
         //but is necessary for other components like picking and tet rendering
 
 
+        let rootHull=this.isDebug()?BoxVolume:BaseVolume;
 
         return [
 
            {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: BoxVolume }
+                options: {minClusterSize: 40, hull: rootHull }
             },
             {
                 generator: industrySetGenerator,

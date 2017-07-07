@@ -24,7 +24,7 @@ class ForceGraphDistribution extends BaseDistribution {
         this.initialEngineTicks = 1;
 
     // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime=3000//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeTime=3000;//ms ... 5 seconds upper bound for loading phase
         this.maxConvergeFrames=90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
@@ -41,22 +41,19 @@ class ForceGraphDistribution extends BaseDistribution {
 
 
 
-        var that=this
+        var that=this;
 
         // Add force-directed layout
         let layout = d3_force.forceSimulation();
 
 
-        var scale = this.mScale
+        var scale = this.mScale;
 
-
-        //FIXME containers need links
+        //TODO containers need links
         layout
             .numDimensions(this.dimensions)
             .nodes(nodes)
             .force('link', d3_force.forceLink().id(function (d) {
-
-
                 return d._id
             })
                 .distance(function computeLinkDistance() {
@@ -65,11 +62,29 @@ class ForceGraphDistribution extends BaseDistribution {
                 })
                .links(edges)
             )
-            .force("collide", d3_force.forceCollide(scale / 10)
-                .iterations(1))
             .force('charge', (node) => -scale / 50)
             .force('linkStrength', (link) => 1)
+            .force("collide", d3_force.forceCollide(scale/10).iterations(3))
             .stop();
+
+
+            /*
+            //TODO the actual collision does not create a good visualisation so until then this is disabled
+            if (nodes[0].size)
+                    layout.force("collide", d3_force.forceCollide().radius(function(node){
+
+                        //TODO improve node size value
+
+                        //NOTE: can't use radius here because it is not already generated
+
+                     //   let backupVal=1//that.dimensions*scale/nodes.length;
+                     //   let rad=backupVal//node._el?node._el.getRadius()*10: backupVal;
+
+                        return node.size*10||1//rad
+                    })
+                        .iterations(3))
+            */
+
 
 
         for (let i = 0; i < this.initialEngineTicks; i++) {
@@ -104,17 +119,16 @@ class ForceGraphDistribution extends BaseDistribution {
     setNodes(nodes, onNodePositionChange, onStep, onComplete) {
 
 
-        if (!nodes instanceof BaseCluster3D && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
+        if (!nodes instanceof BaseCluster3D && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D");
 
 
-        let mEdges = []
-
-        var mNodes = [];
+        let mEdges = [];
+        let mNodes = [];
         //in case nodes are instance of BaseNode3D
         if (nodes instanceof BaseCluster3D) {
 
 
-            //TODO this part seems not to be used at all currently
+            //TODO this part might not to be used at all currently
             mEdges = nodes.createEdgesForChildClusters();
 
 
@@ -122,10 +136,11 @@ class ForceGraphDistribution extends BaseDistribution {
                 edge.source=edge.source.position;
                 edge.target=edge.target.position;
 
-            })
+            });
 
             mNodes = Object.values(nodes.mClusters).map(function (n) {
-           //     n.position.copy(new THREE.Vector3(0, 0, 0));
+               //add a back reference to the cluster
+                n.position._el=n;
 
                 return n.position;
             });
@@ -147,22 +162,8 @@ class ForceGraphDistribution extends BaseDistribution {
 
         this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {
 
-            // Update nodes position
-            //TODO remove this when particle node groups work with picking and selecting
-            /*  d3Nodes.forEach(node => {
-
-             const sphere = node._bubble;
-             sphere.position.x = node.x;
-             sphere.position.y = node.y || 0;
-             sphere.position.z = node.z || 0;
-
-             });*/
-
-
-
-
             //handle each node callback
-            _.each(d3Nodes, onNodePositionChange)
+            _.each(d3Nodes, onNodePositionChange);
             //handle step callback
             if (onStep)
                 onStep()
@@ -172,9 +173,8 @@ class ForceGraphDistribution extends BaseDistribution {
 
     }
 
-    //TODO this should be called to distribute the elements of the country layer when finished
-    //TODO also it will be useful to add rotation as well in the future
-
+    //this is called to distribute the elements
+    //TODO add rotation as well in the future
 
     distribute(node, dx, dy, dz) {
 

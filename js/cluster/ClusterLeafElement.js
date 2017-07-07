@@ -46,7 +46,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
         //TODO nodes,edges, ... as well
 
         let edgeFadeLOD=0.3;
-        let crossfade=0.2;
+        let crossfade=0.2;//TODO add crossfade
 
         if (this.mEdgesContainer) {
 
@@ -146,10 +146,10 @@ export default class ClusterLeafElement extends THREE.Mesh {
         this.mEdgesContainer.setRenderMode(true,false,false).setSkipParams(30,40).setFromNodes(nodes);
         this.add(this.mEdgesContainer)
 
-        this.mEdgesContainer2 = new EdgesContainer();
+       /* this.mEdgesContainer2 = new EdgesContainer();
         this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
         this.add(this.mEdgesContainer2)
-
+*/
 
 
     }

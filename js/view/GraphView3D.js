@@ -17,7 +17,7 @@ class GraphView3D extends View3D
 
     constructor(...args)
     {
-        super(...args)
+        super(...args);
 
         this.mRootCluster=null
 
@@ -45,14 +45,14 @@ class GraphView3D extends View3D
     initClusterForView(rawGraphData,parentEl3D) {
 
 
-        if (!rawGraphData) return
+        if (!rawGraphData) return;
 
         let speccs = this.getSpeccs();
 
-        let graphData = new GraphData(rawGraphData)
+        let graphData = new GraphData(rawGraphData);
 
 
-        let preparedData = graphData.createClusterNodesAndEdges(this)
+        let preparedData = graphData.createClusterNodesAndEdges(this);
 
         var res = new RootCluster(preparedData.nodes,undefined,this);
 
@@ -64,17 +64,17 @@ class GraphView3D extends View3D
             node.get3DRoot().onBeforeRender=function(){
                 visibleNodes.push(node);
             }
-        })
+        });
 //--
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
-        res.applyClustering(speccs)
+        res.applyClustering(speccs);
         //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
-        res.attachToView3D(this)
+        res.attachToView3D(this);
 
-        var that=this
-        var _____skipFrames=0
+        var that=this;
+        var _____skipFrames=0;
 
         $(that).on("before-render",function(){
 
@@ -87,15 +87,15 @@ class GraphView3D extends View3D
 
             if (that.isMaximised()) {
 
-                   _____skipFrames++
+                   _____skipFrames++;
                 //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-             let prev_vis=preparedData.nodes[0]._bubble.material.visible
-                let _vis= (_____skipFrames % 20) ? false : true
-                preparedData.nodes[0]._bubble.material.visible = _vis
+             let prev_vis=preparedData.nodes[0]._bubble.material.visible;
+                let _vis= (_____skipFrames % 20) ? false : true;
+                preparedData.nodes[0]._bubble.material.visible = _vis;
 
                 if (prev_vis)
                 {
-                GUI.updateFromVisibleNodes(visibleNodes)
+                GUI.updateFromVisibleNodes(visibleNodes);
                  //   that.mVisibleNodes=[].concat(visibleNodes)
                 //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
                     that.mRootCluster.updateRootTextNodes(visibleNodes);
@@ -104,10 +104,10 @@ class GraphView3D extends View3D
             }
             visibleNodes=[] //reset count
 
-        })
+        });
 
 
-        this.start()
+        this.start();
 
         return res
 
@@ -120,8 +120,9 @@ class GraphView3D extends View3D
         this.initStatic();
 
         if (!this.mRootCluster)
-        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene)
+        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
 
+        $(this).trigger("loaded")
 
 
 
@@ -129,12 +130,12 @@ class GraphView3D extends View3D
 
     loadDataSet(ds){
 
-      var that = this
+      var that = this;
 
         ds(null,function onSuccess(mGraphData)
         {
-            console.log("data loaded")
-            that.setData(mGraphData)
+            console.log("data loaded");
+            that.setData(mGraphData);
 
             $(".cloudNodeColorSelect").val("group").trigger("change")
 
@@ -146,25 +147,30 @@ class GraphView3D extends View3D
 
     maximise() {
 
-        super.maximise()
 
-        let root = this.mRootCluster
-        if (root.mParentView && root.mGlobalTextNodesContainer) {
+        var  root = this.mRootCluster;
+        super.maximise();
 
-            root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight)
-            root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
-            console.log("maximised", root.mGlobalTextNodesContainer)
-        }
+            if (root.mParentView && root.mGlobalTextNodesContainer) {
+
+                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
+                root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth);
+                console.log("maximised")
+            }
+
+
+
+
     }
 
     undoMaximise(){
-            super.undoMaximise()
+            super.undoMaximise();
 
 
-            let root=this.mRootCluster
+            let root=this.mRootCluster;
             if (root.mParentView && root.mGlobalTextNodesContainer) {
 
-                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight)
+                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
                 root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
             }
 

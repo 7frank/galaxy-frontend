@@ -789,16 +789,6 @@ switching versions takes too long
 \end_deeper
 \begin_layout Itemize
 edges
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
- 
 \end_layout
 
 \begin_deeper
@@ -819,7 +809,52 @@ if edges arent visible they are not updated?
 could be because the nodes where put into another container
 \end_layout
 
+\begin_layout Itemize
+running following code will position edges the way they should
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+function updateLeafsEdges(cluster) { let leafs = cluster.getLeafs();
+\end_layout
+
+\begin_layout Plain Layout
+_.each(leafs, function (leaf) { leaf.updateEdges(); })
+\end_layout
+
+\begin_layout Plain Layout
+};updateLeafsEdges(main.getCurrentView().mRootCluster)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_deeper
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Plain Layout
+NOTE: probably occured because the elements where not connected in a vertain
+ way (having a timeout will fix it so this can be assumed for now)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
 \begin_layout Itemize
 redist of clusters
 \end_layout
@@ -842,6 +877,189 @@ FIXME
 \end_inset
 
 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+improve collision and collision radius as well as prevent single nodes from
+ straying apart too much from their peer 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://github.com/d3/d3-force#collision
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME feedback
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+remove toggle menu from production
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+needs some changes to underlying structure...
+ see connectedCallback
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+in between clusters when redist
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+not animating repositioning
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+remove boxvolume from root 
+\end_layout
+
+\begin_layout Itemize
+country wrapper seems missing (bug?) might be to small
+\end_layout
+
+\begin_layout Itemize
+we need another approach to compute the currently visible countries
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+for all leafs that are drawn we should test the frustum, if it's fully within
+ we can add all nodes of it to the set for all other 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO feedback on performance vs exact values
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+text of sector vs country text
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+!
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+show sector on focus (? hide country)
+\end_layout
+
+\begin_layout Itemize
+find a meaningful way to show/hide text and remove clutter
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+focus on 3d first (then 2d) (usable but bugs to fix)
+\end_layout
+
+\begin_layout Itemize
+count clusters in background that would count towards visible countries
+ but are invis for performance
+\end_layout
+
+\begin_layout Itemize
+2d - white background
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+no country cluster but only industry
+\end_layout
+
+\begin_layout Itemize
+if we can have a transparent color wrappers for sector
+\end_layout
+
+\begin_layout Itemize
+for country we can we say show all for US companies
+\end_layout
+
+\begin_layout Itemize
+though 
+\bar under
+collapsed 
+\bar default
+by sectors and other countries, 
+\end_layout
+
+\begin_layout Itemize
+the whole country will be collapsed let's try first, Frank to see how it
+ feel and we can make changes to i
+\end_layout
+
+\begin_layout Itemize
+t i just want to experience it first then we can make tweak to it
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+performance for good response time and cosmetic 
+\end_layout
+
+\begin_layout Itemize
+changes we discussed 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+then let's do 2D like:
+\end_layout
+
+\begin_layout Itemize
+http://bl.ocks.org/GerHobbelt/3071239 to start I don't feel comfortable with
+ the current 3D at the moment so I won't show it today yet
 \end_layout
 
 \end_deeper
@@ -904,6 +1122,24 @@ this issue didn't appear any longer
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+text stops animating for clusters when zoomed in further
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+text layer isn't maximised properly in default visu resulting in clipping
+\end_layout
+
 \begin_layout Itemize
 
 \strikeout on

@@ -439,6 +439,11 @@ class BaseCluster3D extends BaseNode {
 
 
     //TODO refactor into class like EdgesContainer for leaf/node edges
+
+    /**
+     * generated and updates edges between clusters
+     *
+     */
     addChildClusterEdgeMesh(options) {
 
 

@@ -72,10 +72,10 @@ var clusters =
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(4);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -122,14 +122,14 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         //update lod //TODO the function shoul forwared onBeforeRender args in a way
         this.on("before-render", function () {
 
-         //   if (!this.mHull) return;
+            //   if (!this.mHull) return;
 
             let view = this.getView();
             //based on distance to the camera the LOD is set for the hull object
             let src = view.mCamera.position;
 
             let dst;
-            if (this.mHull&& this.mHull.mesh && this.mHull.mesh.geometry && this.mHull.mesh.geometry.boundingBox)
+            if (this.mHull && this.mHull.mesh && this.mHull.mesh.geometry && this.mHull.mesh.geometry.boundingBox)
                 dst = this.mHull.mesh.geometry.boundingBox.getCenter();
             else
                 dst = this.position;
@@ -141,14 +141,14 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             //TODO how to handle max/ind distance with the lod approach of meshes
             let maxDistance = this.getRadius() * 25;
-            let minDistance = 0//this.getRadius() ;
+            let minDistance = 0;//this.getRadius() ;
 
             let L = maxDistance - minDistance;
 
 
             var lod = 1 - (distance - minDistance) / (maxDistance - minDistance);
 
-        this.setLOD(lod)
+            this.setLOD(lod)
 
         })
 
@@ -165,22 +165,30 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      *
      */
 
-    setLOD(mLOD)
-    {
+    setLOD(mLOD) {
 
 
         if (this.mHull)
-        this.mHull.setLOD(mLOD);
+            this.mHull.setLOD(mLOD);
 
 
-        if (this.isLeaf())
-        {
+        if (this.isLeaf()) {
             this.mLeaf.setLOD(mLOD)
         }
 
+        if (this.mChildClustersEdgesMesh) {
+
+            let vis=(1-mLOD)/2;
+
+            this.mChildClustersEdgesMesh.material.opacity=vis;
+            this.mChildClustersEdgesMesh.material.visible=vis>0.05 && vis<0.9;
+
+        }
+
+
+
 
     }
-
 
 
     /**
@@ -261,7 +269,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             if (cluster.mHull) {
                 cluster.mHull.dispose();
                 delete (cluster.mHull);
-                cluster.mHull=null;
+                cluster.mHull = null;
             }
 
 
@@ -274,6 +282,12 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 cluster.parent.remove(cluster)
             }
 
+            if (cluster.mChildClustersEdges) cluster.mChildClustersEdges = null; //delete edge references
+            if (cluster.mChildClustersEdgesMesh) {
+                cluster.parent.remove( cluster.mChildClustersEdgesMesh)
+                cluster.mChildClustersEdgesMesh = null; //delete edge-mesh  references
+
+            }
 
         })
 
@@ -483,18 +497,89 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 that.adjustHullSize();
                 that.trigger("hull-updated")
 
-            }, 100,{trailing:true,leading:false}))
+               that.addChildClusterEdgeMesh()
+
+
+
+            }, 100, {trailing: true, leading: false}))
         });
 
 
+
+
         this.setDistributionHandler(entry.distribution, function () {
-
             that.mClusterRule = entry
-
 
         })
 
     }
+
+
+    //TODO refactor into class like EdgesContainer for leaf/node edges
+
+    /**
+     * generated and updates edges between clusters
+     *
+     */
+    addChildClusterEdgeMesh(options) {
+
+
+        //TODO
+        if (this.mChildClustersEdgesMesh) {
+
+        this.mChildClustersEdgesMesh.geometry.verticesNeedUpdate = true;
+            return;
+        }
+
+        let edges = this.createEdgesForChildClusters();
+
+
+        var line_geom = new THREE.Geometry();
+        var lineMaterial;
+        var mergedLineMesh;
+
+              defaults = {
+                opacity: 1.0,
+                transparent: true,
+                //lineIsVisible:true, // if disabled the line won't be shown on the scene
+                color: 0x999999
+            };
+
+            options = _.extend(defaults, options);
+
+            lineMaterial = new THREE.MeshBasicMaterial({
+                color: options.color,
+                transparent: options.transparent,
+                opacity: options.opacity,
+                depthTest: true,
+                depthWrite: false
+            });
+
+
+        this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
+        this.mChildClustersEdgesMesh.geometry.boundingBox=new THREE.Box3;
+        this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
+
+
+        this.add(this.mChildClustersEdgesMesh);
+
+    for (let edge of edges)
+    {
+        //TODO we should unify the edges to not always have 2 separate ways to access certain elements
+        //TODO also we should use the center of the hull feature instead
+        let src=edge.source.position||edge.source._el.position;
+        let dst=edge.target.position||edge.target._el.position;
+
+
+
+        line_geom.vertices.push(src);
+        line_geom.vertices.push(dst);
+
+    }
+
+
+    }
+
 
     /**
      * the current cluster gets subdivided into smaller clusters
@@ -535,7 +620,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
-
     //TODO it  seems, the vertices aren't calculated properly
     getCompoundBoundingBoxInfo() {
         var that = this;
@@ -554,7 +638,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             let vert = that.getVerticesFromBoundingBox(boundingBox);
 
-           // let vert = that.mHull.mesh.geometry.vertices;
+            // let vert = that.mHull.mesh.geometry.vertices;
             vertices = vertices.concat(vert);
 
             box.union(boundingBox);
@@ -567,7 +651,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
-
     /**
      * in case this is a leaf cluster the function
      * returns an array of vertices positioned relative to it's parent
@@ -576,31 +659,29 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     getVerticesForLeaf() {
         var that = this;
 
-        var leaf=this.mLeaf;
+        var leaf = this.mLeaf;
 
 
+        let el = leaf.mNodeParticles.pointCloud;
 
-            let el=leaf.mNodeParticles.pointCloud;
-
-            let offset_parent = that.localToWorld(new THREE.Vector3);
-            let offset_world = el.localToWorld(new THREE.Vector3);
+        let offset_parent = that.localToWorld(new THREE.Vector3);
+        let offset_world = el.localToWorld(new THREE.Vector3);
 
 
-            let translateOffset=offset_world.sub(offset_parent);
+        let translateOffset = offset_world.sub(offset_parent);
 
-           let geometry=el.geometry;
-            var attributes = geometry.attributes;
-            var positions = attributes.position.array;
-            let vert=[];
-            for ( var i = 0; i < positions.length; i += 3 ) {
+        let geometry = el.geometry;
+        var attributes = geometry.attributes;
+        var positions = attributes.position.array;
+        let vert = [];
+        for (var i = 0; i < positions.length; i += 3) {
 
-                let v=new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
-                vert.push(  v.add(translateOffset));
-            }
+            let v = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+            vert.push(v.add(translateOffset));
+        }
 
-       return vert
+        return vert
     }
-
 
 
     /**
@@ -623,21 +704,24 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 },
                 function onStep() {
 
-                    updateLeafsEdges(that)
+                    updateLeafsEdges(that);
 
                 }, function () {
-                    onComplete()
+                    onComplete();
                 });
 
 
         //FIXME redundant updating multiple edges and potentially leafs
         function updateLeafsEdges(cluster) {
-            let leafs = cluster.getLeafs();
 
-            _.each(leafs, function (leaf) {
-                leaf.updateEdges();
-            })
+            //TODO the timeout fixes the problem that the edges aren't on spot but this should be reviewed and fixed without it
+            setTimeout(function () {
 
+                let leafs = cluster.getLeafs();
+                _.each(leafs, function (leaf) {
+                    leaf.updateEdges();
+                });
+            }, 50);
         }
 
     }
@@ -668,7 +752,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
                 //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
                 info.box.setFromArray(pc.geometry.attributes.position.array);
-               // info.vertices = this.getVerticesFromBoundingBox(info.box)  //TODO get vertices from array
+                // info.vertices = this.getVerticesFromBoundingBox(info.box)  //TODO get vertices from array
                 info.vertices = this.getVerticesForLeaf();
 
                 pc.geometry.boundingBox = info.box
@@ -717,7 +801,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             //TODO this is currently used for the mouse interactions but should be refactored and removed
             var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
             sphereGeometry.boundingBox = boundingBox;
-           this.geometry = sphereGeometry;
+            this.geometry = sphereGeometry;
         }
 
         //notify listeners that the hull size changed
@@ -770,6 +854,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         this.updateDotParticles()
 
 
+
     }
 
     /**
@@ -798,14 +883,16 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
     /**
-     * creates edegse from nodes
+     * creates edges from nodes
      * the edges can be inner edges only from nodes within cluster to other nodes within
      * or external edges leading into nodes from other clusters
      */
 
     createEdgesForChildClusters() {
 
-        return __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__["a" /* default */].createEdgesBetweenClustersFromMap(this.mClusters);
+        if (this.mChildClustersEdges) return this.mChildClustersEdges
+
+        return this.mChildClustersEdges = __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__["a" /* default */].createEdgesBetweenClustersFromMap(this.mClusters);
 
     }
 
@@ -1736,9 +1823,132 @@ class GraphData
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/**
+ * Created by Frank on 22.06.2017.
+ */
+
+/**
+ * the default implementation for a hull/volume around a cluster/sub-cluster
+ *
+ *
+ */
+
+
+
+class BaseVolume extends THREE.Object3D {
+
+    constructor(...args) {
+        super(...args);
+        this.lod=1;
+        this.maxOpacity=0.0
+    }
+
+
+    /**
+     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
+     * eg. depending on the distance of camera and object
+     *
+     * @param newLOD
+     */
+    setLOD(newLOD)
+    {
+        if (newLOD<0) newLOD=0;
+        if (newLOD>1) newLOD=1;
+
+
+        this.lod=newLOD
+
+
+    }
+
+
+
+    /**
+     * determines if the volume is can be made visible to the user
+     *
+     * @returns {boolean}
+     */
+
+    canBeVisible()
+    {
+        return false
+    }
+
+
+//FIXME have a better approach to generate the hull
+//? rather: create from vertices
+    createFromBoundingBox(vertices,boundingBox) {
+
+        let _center = boundingBox.getCenter();
+        let _size = boundingBox.getSize();
+
+        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
+
+        let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
+
+        let mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: true});
+
+        let wireframe = new THREE.LineSegments(geo, mat);
+        wireframe.position.add(_center);
+        wireframe.geometry.boundingBox=boundingBox;
+
+
+        if (this.mesh) this.remove(this.mesh);
+        this.mesh=wireframe;
+        this.add(wireframe);
+
+
+        return this.mesh
+
+
+
+
+    }
+
+
+
+
+    setActive(){
+
+        this.maxOpacity=1
+
+    }
+
+
+    setInactive(){
+
+        this.maxOpacity=0.3
+
+    }
+
+
+    dispose()
+    {
+        this.mesh.geometry.dispose()
+        this.mesh.material.dispose()
+
+        if (this.parent)
+            this.parent.remove(this)
+
+    }
+
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = BaseVolume;
+
+
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(10);
 /**
  * Created by Frank on 06.06.2017.
@@ -2076,6 +2286,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
        // let maxDistance = minDistance * 10
 
+
         if (!this.mTextNodes)
             this.mTextNodes = TextNodes(env, {
                 maxVisibleCount: 50,
@@ -2194,7 +2405,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2213,18 +2424,24 @@ class ClusterLeafElement extends THREE.Mesh {
 
 
         this.mNodes = nodes;
+
+
+
+
         this.mNodeParticles = this.createParticleNodeCloud();
 
 
         this.add(this.mNodeParticles.pointCloud);
 
 
-        //TODO this still has mayor performance impact but is needed for counting the companies
-        //we'll use lod non the nodes as well therewore nodes forther away in the background wont count towards the coumpany count
+        // add the nodes to the leaf
         this.appendNodes(nodes);
 
 
-        this.createEdgesFromNodes(nodes)
+        //add edges to the leaf
+        this.createEdgesFromNodes(nodes);
+
+
 
     }
 
@@ -2240,8 +2457,22 @@ class ClusterLeafElement extends THREE.Mesh {
             this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
-        if (this.mEdgesContainer)
-            this.mEdgesContainer.visible = levelOfDetail > 0.3;
+        let edgeFadeLOD=0.3;
+        let crossfade=0.2;//TODO add crossfade
+
+        if (this.mEdgesContainer) {
+
+         this.mEdgesContainer.visible = levelOfDetail >= edgeFadeLOD;
+
+            this.mEdgesContainer.mEdges.material.opacity=(levelOfDetail-edgeFadeLOD)/edgeFadeLOD;
+        }
+
+        if (this.mEdgesContainer2) {
+
+            this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
+
+            this.mEdgesContainer2.mEdges.material.opacity=  1-levelOfDetail/edgeFadeLOD;
+        }
 
 
         if (this.mNodeMeshes)
@@ -2269,6 +2500,16 @@ class ClusterLeafElement extends THREE.Mesh {
         this.mEdgesContainer.geometry.dispose();
         this.mEdgesContainer = null;
      }
+
+
+
+        if (this.mEdgesContainer2&&this.mEdgesContainer2.geometry) {
+
+
+            this.mEdgesContainer2.geometry.dispose();
+            this.mEdgesContainer2 = null;
+        }
+
 
         if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
             this.mNodeMeshes.geometry.dispose();
@@ -2314,11 +2555,14 @@ class ClusterLeafElement extends THREE.Mesh {
     createEdgesFromNodes(nodes) {
 
         this.mEdgesContainer = new __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__["a" /* default */]();
-
-        this.mEdgesContainer.setFromNodes(nodes);
-
-
+        this.mEdgesContainer.setRenderMode(true,false,false).setSkipParams(30,40).setFromNodes(nodes);
         this.add(this.mEdgesContainer)
+
+       /* this.mEdgesContainer2 = new EdgesContainer();
+        this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
+        this.add(this.mEdgesContainer2)
+*/
+
 
     }
 
@@ -2345,8 +2589,13 @@ class ClusterLeafElement extends THREE.Mesh {
     }
 
     updateEdges() {
+
+
         if (this.mEdgesContainer)
             this.mEdgesContainer.updateEdges();
+
+        if (this.mEdgesContainer2)
+            this.mEdgesContainer2.updateEdges();
 
     }
 
@@ -2376,11 +2625,11 @@ class ClusterLeafElement extends THREE.Mesh {
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(5);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -2638,7 +2887,7 @@ var that=this
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2670,7 +2919,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
         this.initialEngineTicks = 1;
 
     // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime=3000//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeTime=3000;//ms ... 5 seconds upper bound for loading phase
         this.maxConvergeFrames=90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
@@ -2687,22 +2936,19 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 
 
-        var that=this
+        var that=this;
 
         // Add force-directed layout
         let layout = d3_force.forceSimulation();
 
 
-        var scale = this.mScale
+        var scale = this.mScale;
 
-
-        //FIXME containers need links
+        //TODO containers need links
         layout
             .numDimensions(this.dimensions)
             .nodes(nodes)
             .force('link', d3_force.forceLink().id(function (d) {
-
-
                 return d._id
             })
                 .distance(function computeLinkDistance() {
@@ -2711,11 +2957,29 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
                 })
                .links(edges)
             )
-            .force("collide", d3_force.forceCollide(scale / 10)
-                .iterations(1))
             .force('charge', (node) => -scale / 50)
             .force('linkStrength', (link) => 1)
+            .force("collide", d3_force.forceCollide(scale/10).iterations(3))
             .stop();
+
+
+            /*
+            //TODO the actual collision does not create a good visualisation so until then this is disabled
+            if (nodes[0].size)
+                    layout.force("collide", d3_force.forceCollide().radius(function(node){
+
+                        //TODO improve node size value
+
+                        //NOTE: can't use radius here because it is not already generated
+
+                     //   let backupVal=1//that.dimensions*scale/nodes.length;
+                     //   let rad=backupVal//node._el?node._el.getRadius()*10: backupVal;
+
+                        return node.size*10||1//rad
+                    })
+                        .iterations(3))
+            */
+
 
 
         for (let i = 0; i < this.initialEngineTicks; i++) {
@@ -2750,17 +3014,16 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
     setNodes(nodes, onNodePositionChange, onStep, onComplete) {
 
 
-        if (!nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */] && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D")
+        if (!nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */] && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D");
 
 
-        let mEdges = []
-
-        var mNodes = [];
+        let mEdges = [];
+        let mNodes = [];
         //in case nodes are instance of BaseNode3D
         if (nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */]) {
 
 
-            //TODO this part seems not to be used at all currently
+            //TODO this part might not to be used at all currently
             mEdges = nodes.createEdgesForChildClusters();
 
 
@@ -2768,10 +3031,11 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
                 edge.source=edge.source.position;
                 edge.target=edge.target.position;
 
-            })
+            });
 
             mNodes = Object.values(nodes.mClusters).map(function (n) {
-           //     n.position.copy(new THREE.Vector3(0, 0, 0));
+               //add a back reference to the cluster
+                n.position._el=n;
 
                 return n.position;
             });
@@ -2793,22 +3057,8 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
         this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {
 
-            // Update nodes position
-            //TODO remove this when particle node groups work with picking and selecting
-            /*  d3Nodes.forEach(node => {
-
-             const sphere = node._bubble;
-             sphere.position.x = node.x;
-             sphere.position.y = node.y || 0;
-             sphere.position.z = node.z || 0;
-
-             });*/
-
-
-
-
             //handle each node callback
-            _.each(d3Nodes, onNodePositionChange)
+            _.each(d3Nodes, onNodePositionChange);
             //handle step callback
             if (onStep)
                 onStep()
@@ -2818,9 +3068,8 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
     }
 
-    //TODO this should be called to distribute the elements of the country layer when finished
-    //TODO also it will be useful to add rotation as well in the future
-
+    //this is called to distribute the elements
+    //TODO add rotation as well in the future
 
     distribute(node, dx, dy, dz) {
 
@@ -2836,11 +3085,11 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseVolume__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseVolume__ = __webpack_require__(4);
 /**
  * Created by Frank on 22.06.2017.
  */
@@ -2902,129 +3151,6 @@ class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* defaul
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BoxVolume;
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * Created by Frank on 22.06.2017.
- */
-
-/**
- * the default implementation for a hull/volume around a cluster/sub-cluster
- *
- *
- */
-
-
-
-class BaseVolume extends THREE.Object3D {
-
-    constructor(...args) {
-        super(...args);
-        this.lod=1;
-        this.maxOpacity=0.0
-    }
-
-
-    /**
-     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
-     * eg. depending on the distance of camera and object
-     *
-     * @param newLOD
-     */
-    setLOD(newLOD)
-    {
-        if (newLOD<0) newLOD=0;
-        if (newLOD>1) newLOD=1;
-
-
-        this.lod=newLOD
-
-
-    }
-
-
-
-    /**
-     * determines if the volume is can be made visible to the user
-     *
-     * @returns {boolean}
-     */
-
-    canBeVisible()
-    {
-        return false
-    }
-
-
-//FIXME have a better approach to generate the hull
-//? rather: create from vertices
-    createFromBoundingBox(vertices,boundingBox) {
-
-        let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize();
-
-        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
-
-        let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
-
-        let mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: true});
-
-        let wireframe = new THREE.LineSegments(geo, mat);
-        wireframe.position.add(_center);
-        wireframe.geometry.boundingBox=boundingBox;
-
-
-        if (this.mesh) this.remove(this.mesh);
-        this.mesh=wireframe;
-        this.add(wireframe);
-
-
-        return this.mesh
-
-
-
-
-    }
-
-
-
-
-    setActive(){
-
-        this.maxOpacity=1
-
-    }
-
-
-    setInactive(){
-
-        this.maxOpacity=0.3
-
-    }
-
-
-    dispose()
-    {
-        this.mesh.geometry.dispose()
-        this.mesh.material.dispose()
-
-        if (this.parent)
-            this.parent.remove(this)
-
-    }
-
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = BaseVolume;
-
-
 
 
 /***/ }),
@@ -3843,7 +3969,7 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(9);
 /**
  * Created by Frank on 23.06.2017.
  */
@@ -3867,7 +3993,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
     //eg. if lod <0.3 this.mesh.geometry=this.lowpolyMesh
 
     constructor(...args) {
-        super(...args)
+        super(...args);
 
         this.maxOpacity = 0.6
 
@@ -3876,24 +4002,87 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
     createFromBoundingBox(vertices, boundingBox) {
 
+
+
+        //geometry ... at best a convexGeometry
+        //numSegments ... determines the smoothing of the rounded edges
+        //margin ... the margin of the convex geometry around the original geometry
+       function  myModifier(geometry,numSegments,margin)
+       {
+
+           let marginGeo = new THREE.Geometry();
+
+           for (let v of geometry.vertices) {
+               let sphere = new THREE.SphereGeometry(margin,numSegments, numSegments);
+               sphere.translate(v.x, v.y, v.z);
+
+               marginGeo.merge(sphere, sphere.matrix)
+
+           }
+
+
+
+           let convexGeoWithMargin = new THREE.ConvexGeometry(marginGeo.vertices);
+
+
+           return convexGeoWithMargin
+
+       }
+
         //ConvexGeometry does need at least 4 vertices
         //so in case we don't have as much we do use the boundingbox instead to generate some more vertices
         if (vertices.length < 4)
-            vertices = this.getVerticesFromBoundingBox(boundingBox)
+            vertices = this.getVerticesFromBoundingBox(boundingBox);
 
 
-        let geo = new THREE.ConvexGeometry(vertices);
-         geo.computeBoundingBox();
+        //we will create a sphere geometry with a radius==margin for each vertice and merge them beforehand
+
+        //reduce the vertice count before adding margin
+        let geo0 = new THREE.ConvexGeometry(vertices);
+        let margin = boundingBox.getSize().length()/10;
+
+/*
+        let marginGeo = new THREE.Geometry();
+
+        for (let v of geo0.vertices) {
+            let sphere = new THREE.SphereGeometry(margin, 8, 6);
+            sphere.translate(v.x, v.y, v.z);
+
+            marginGeo.merge(sphere, sphere.matrix)
+
+        }
+
+        //let alteredVertices=vertices
+        let alteredVertices = marginGeo.vertices
+
+        let geo = new THREE.ConvexGeometry(alteredVertices);
+*/
+
+        let geo= myModifier(geo0,5,margin)
+        geo.computeBoundingBox();
+        this.geometryLowPoly=geo;
+
+
+        let geo2= myModifier(geo0,10,margin)
+        geo2.computeBoundingBox();
+        this.geometryAveragePoly=geo2;
+
+
+/*
 
         let modifier = new THREE.SubdivisionModifier(1);
-        modifier.modify(geo);
+
+        //  modifier.modify(geo);
 
         this.geometryLowPoly = geo.clone();
 
         modifier.modify(geo);
         this.geometryAveragePoly = geo.clone();
-        modifier.modify(geo);
-        this.geometryHighPoly = geo.clone();
+
+*/
+
+        //  modifier.modify(geo);
+        //  this.geometryHighPoly = geo.clone();
 
         //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
         let mat = new THREE.MeshBasicMaterial({
@@ -3902,6 +4091,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
             transparent: true,
             depthWrite: false,
             side: THREE.BackSide
+            //  ,   wireframe:true
         });
 
         //   let mesh = new THREE.Mesh(geo, mat);
@@ -3933,8 +4123,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
 
     //TODO
-    transferFunction(x)
-    {
+    transferFunction(x) {
         return x
     }
 
@@ -3944,25 +4133,31 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
     setLOD(l) {
 
 
-        if (l < 0) l = 0
-        if (l > 1) l = 1
+        if (l < 0) l = 0;
+        if (l > 1) l = 1;
 
-        var minOpacity=0.03;
+        var minOpacity = 0.03;
 
         function mTransfer(x) {
             //transfer function y= 0.5*sin(1.5*pi+x*pi*2)+0.5
-            return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2) + +0.5+minOpacity
+            return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2) + +0.5 + minOpacity
 
 
         }
 
-        let y = mTransfer(l)
-        super.setLOD(y* this.maxOpacity);
+        let y = mTransfer(l);
+
+        super.setLOD(y * this.maxOpacity);
 
 
-        if (l < 0.3) this.mesh.geometry = this.geometryLowPoly;
-        if (l >= 0.3 && l <= 0.7) this.mesh.geometry = this.geometryAveragePoly;
-        if (l > 0.7) this.mesh.geometry = this.geometryHighPoly
+        /*     if (l < 0.8) this.mesh.geometry = this.geometryLowPoly;
+         if (l >= 0.8 && l <= 0.95) this.mesh.geometry = this.geometryAveragePoly;
+         if (l > 0.95) this.mesh.geometry = this.geometryHighPoly*/
+
+        if (l < 0.6) this.mesh.geometry = this.geometryLowPoly;
+        if (l >= 0.6) this.mesh.geometry = this.geometryAveragePoly;
+
+
     }
 
 
@@ -3976,20 +4171,21 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
     }
 
 
-    dispose()
-    {
+    dispose() {
 
-        this.mesh.material.dispose()
+        this.mesh.material.dispose();
 
-        this.geometryLowPoly.dispose()
-        this.geometryAveragePoly.dispose()
-        this.geometryHighPoly.dispose()
+        if (this.geometryLowPoly)
+        this.geometryLowPoly.dispose();
+        if (this.geometryAveragePoly)
+        this.geometryAveragePoly.dispose();
+        if (this.geometryHighPoly)
+        this.geometryHighPoly.dispose();
 
         if (this.parent)
             this.parent.remove(this)
 
     }
-
 
 
 }
@@ -4002,7 +4198,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(3);
 /**
  * Created by Frank on 13.06.2017.
@@ -4022,7 +4218,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     constructor(...args)
     {
-        super(...args)
+        super(...args);
 
         this.mRootCluster=null
 
@@ -4050,14 +4246,14 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
     initClusterForView(rawGraphData,parentEl3D) {
 
 
-        if (!rawGraphData) return
+        if (!rawGraphData) return;
 
         let speccs = this.getSpeccs();
 
-        let graphData = new __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__["a" /* default */](rawGraphData)
+        let graphData = new __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__["a" /* default */](rawGraphData);
 
 
-        let preparedData = graphData.createClusterNodesAndEdges(this)
+        let preparedData = graphData.createClusterNodesAndEdges(this);
 
         var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes,undefined,this);
 
@@ -4069,17 +4265,17 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
             node.get3DRoot().onBeforeRender=function(){
                 visibleNodes.push(node);
             }
-        })
+        });
 //--
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
-        res.applyClustering(speccs)
+        res.applyClustering(speccs);
         //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
-        res.attachToView3D(this)
+        res.attachToView3D(this);
 
-        var that=this
-        var _____skipFrames=0
+        var that=this;
+        var _____skipFrames=0;
 
         $(that).on("before-render",function(){
 
@@ -4092,15 +4288,15 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
             if (that.isMaximised()) {
 
-                   _____skipFrames++
+                   _____skipFrames++;
                 //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-             let prev_vis=preparedData.nodes[0]._bubble.material.visible
-                let _vis= (_____skipFrames % 20) ? false : true
-                preparedData.nodes[0]._bubble.material.visible = _vis
+             let prev_vis=preparedData.nodes[0]._bubble.material.visible;
+                let _vis= (_____skipFrames % 20) ? false : true;
+                preparedData.nodes[0]._bubble.material.visible = _vis;
 
                 if (prev_vis)
                 {
-                GUI.updateFromVisibleNodes(visibleNodes)
+                GUI.updateFromVisibleNodes(visibleNodes);
                  //   that.mVisibleNodes=[].concat(visibleNodes)
                 //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
                     that.mRootCluster.updateRootTextNodes(visibleNodes);
@@ -4109,10 +4305,10 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
             }
             visibleNodes=[] //reset count
 
-        })
+        });
 
 
-        this.start()
+        this.start();
 
         return res
 
@@ -4125,8 +4321,9 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
         this.initStatic();
 
         if (!this.mRootCluster)
-        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene)
+        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
 
+        $(this).trigger("loaded")
 
 
 
@@ -4134,12 +4331,12 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     loadDataSet(ds){
 
-      var that = this
+      var that = this;
 
         ds(null,function onSuccess(mGraphData)
         {
-            console.log("data loaded")
-            that.setData(mGraphData)
+            console.log("data loaded");
+            that.setData(mGraphData);
 
             $(".cloudNodeColorSelect").val("group").trigger("change")
 
@@ -4151,25 +4348,30 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     maximise() {
 
-        super.maximise()
 
-        let root = this.mRootCluster
-        if (root.mParentView && root.mGlobalTextNodesContainer) {
+        var  root = this.mRootCluster;
+        super.maximise();
 
-            root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight)
-            root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
-            console.log("maximised", root.mGlobalTextNodesContainer)
-        }
+            if (root.mParentView && root.mGlobalTextNodesContainer) {
+
+                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
+                root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth);
+                console.log("maximised")
+            }
+
+
+
+
     }
 
     undoMaximise(){
-            super.undoMaximise()
+            super.undoMaximise();
 
 
-            let root=this.mRootCluster
+            let root=this.mRootCluster;
             if (root.mParentView && root.mGlobalTextNodesContainer) {
 
-                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight)
+                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
                 root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
             }
 
@@ -5406,7 +5608,7 @@ class BaseNode extends THREE.Mesh {
             if (this.isCustomEvent(eName))
                 this.onCustomEvent(eName, eventhandler);
             else if (this.isMouseEvent(eName))
-                this.getDOMEvents().addEventListener(this, eName, eventhandler.bind(this), false);
+                this.getDOMEvents().addEventListener(this, eName, _.debounce(eventhandler.bind(this),20), false);
             else
                 this.onKey(eName, eventhandler)
 
@@ -5426,7 +5628,7 @@ class BaseNode extends THREE.Mesh {
                 if (this.isCustomEvent(eName))
                     this.offCustomEvent(eName, eventhandler);
                 else if (this.isMouseEvent(eName))
-                    this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
+                    this.getDOMEvents().removeEventListener(this, eName,  _.debounce(eventhandler.bind(this),20), false);
                 else
                     this.offKey(eName, eventhandler)
 
@@ -5660,41 +5862,56 @@ class EdgesContainer extends THREE.Object3D {
         super(...args);
         this.initLineMesh();
 
-        this.mExternalNodesHelpers=[]
+        this.mExternalNodesHelpers = [];
 
 
-        this.skipEdges=100;
-        this.drawInternalEdges=true;
-        this.drawOutgoingEdges=true;
-        this.drawIngoingEdges=true;
+        this.setSkipParams(1);
+
+        this.setRenderMode(true, true, true)
+
 
     }
+
+    setSkipParams(numSkipEdges, numDefaultMinimum = 20) {
+        if (numSkipEdges < 1) numSkipEdges = 1
+
+
+        this.skipEdges = numSkipEdges;
+        this.numDefaultMinimum = numDefaultMinimum;
+        return this;
+    }
+
+
+    setRenderMode(drawInternalEdges, drawOutgoingEdges, drawIngoingEdges) {
+        this.drawInternalEdges = drawInternalEdges;
+        this.drawOutgoingEdges = drawOutgoingEdges;
+        this.drawIngoingEdges = drawIngoingEdges;
+
+        return this;
+    }
+
 
     addEdge(_edge) {
 
 
-        var that = this
+        var that = this;
 
-        function createExternalNodeHelper(node,internalOtherNode) {
-            var nPos = node._bubble.position
-            var adjustedPos = new THREE.Vector3
+        function createExternalNodeHelper(node, internalOtherNode) {
+            var nPos = node._bubble.position;
+            var adjustedPos = new THREE.Vector3;
 
             return {
                 position: adjustedPos,
                 update: function () {
 
-                    //FIXME currently does not match with arrowhelpers so .. invalid
+                    if (!node.getParentCluster()) return; //not connected
+                    if (!internalOtherNode.getParentCluster()) return; //not connected
 
-                    if (!node.getParentCluster()) return //not connected
-
-
-                    adjustedPos.setFromMatrixPosition( node.getParentCluster().matrixWorld );
-
+                    adjustedPos.setFromMatrixPosition(node.getParentCluster().matrixWorld);
                     //setFromMatrix
-                    adjustedPos.add(nPos)
-                    let other=new THREE.Vector3
-                    other.setFromMatrixPosition( internalOtherNode.getParentCluster().matrixWorld );
-
+                    adjustedPos.add(nPos);
+                    let other = new THREE.Vector3;
+                    other.setFromMatrixPosition(internalOtherNode.getParentCluster().matrixWorld);
                     adjustedPos.sub(other)
 
 
@@ -5710,21 +5927,19 @@ class EdgesContainer extends THREE.Object3D {
         let newEdge = new __WEBPACK_IMPORTED_MODULE_0__BaseEdge__["a" /* default */](_edge.source._bubble.position, _edge.target._bubble.position);
 
 
-        if (!_edge.isSrcInternalNode)
-        {
-            let helper = createExternalNodeHelper(_edge.source,_edge.target)
-            this.mExternalNodesHelpers.push(helper)
+        if (!_edge.isSrcInternalNode) {
+            let helper = createExternalNodeHelper(_edge.source, _edge.target);
+            this.mExternalNodesHelpers.push(helper);
             this.mEdges.geometry.vertices.push(helper.position);
 
-         }
-         else
-        this.mEdges.geometry.vertices.push(newEdge.getStart());
+        }
+        else
+            this.mEdges.geometry.vertices.push(newEdge.getStart());
 
 
-        if (!_edge.isTrgInternalNode)
-        {
-            let helper = createExternalNodeHelper(_edge.target,_edge.source)
-            this.mExternalNodesHelpers.push(helper)
+        if (!_edge.isTrgInternalNode) {
+            let helper = createExternalNodeHelper(_edge.target, _edge.source);
+            this.mExternalNodesHelpers.push(helper);
             this.mEdges.geometry.vertices.push(helper.position);
 
         }
@@ -5732,12 +5947,8 @@ class EdgesContainer extends THREE.Object3D {
             this.mEdges.geometry.vertices.push(newEdge.getEnd());
 
 
-
-
-
-
-       // this.mEdges.geometry.vertices.push(newEdge.getStart());
-       // this.mEdges.geometry.vertices.push(newEdge.getEnd());
+        // this.mEdges.geometry.vertices.push(newEdge.getStart());
+        // this.mEdges.geometry.vertices.push(newEdge.getEnd());
 
 
         return newEdge;
@@ -5745,8 +5956,8 @@ class EdgesContainer extends THREE.Object3D {
 
     updateEdges() {
 
-        _.each(this.mExternalNodesHelpers,helper => helper.update())
-
+        if (this.mExternalNodesHelpers.length == 0) return;
+        _.each(this.mExternalNodesHelpers, helper => helper.update());
         this.mEdges.geometry.verticesNeedUpdate = true;
 
     }
@@ -5754,15 +5965,19 @@ class EdgesContainer extends THREE.Object3D {
     setFromNodes(nodes) {
 
 
+        let edges = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, this.drawInternalEdges, this.drawOutgoingEdges, this.drawIngoingEdges);
 
 
-
-        let edges = __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__["a" /* default */].getEdgesForNodes(nodes, this.drawInternalEdges,this.drawOutgoingEdges,this.drawIngoingEdges);
-
-    //skip edges for better performance
+        //skip edges for better performance
         //TODO option to filter by size and take only most relevant n elements
-        let edgeCounter=0;
-        edges= edges.filter( e => edgeCounter++%this.skipEdges==0 )
+        let edgeCounter = 0;
+
+        let skip = this.skipEdges;
+
+        if (nodes.length / this.skipEdges < this.numDefaultMinimum)
+            skip = Math.floor(nodes.length / this.numDefaultMinimum, 1)
+
+        edges = edges.filter(e => edgeCounter++ % skip == 0);
 
 
         for (let edge of edges)
@@ -5778,8 +5993,8 @@ class EdgesContainer extends THREE.Object3D {
     initLineMesh() {
 
         var line_geom = new THREE.Geometry();
-        var lineMaterial
-        var mergedLineMesh
+        var lineMaterial;
+        var mergedLineMesh;
 
         function initLineGroup(options) {
 
@@ -5789,9 +6004,9 @@ class EdgesContainer extends THREE.Object3D {
                 transparent: true,
                 //lineIsVisible:true, // if disabled the line won't be shown on the scene
                 color: 0xffffff
-            }
+            };
 
-            options = _.extend(defaults, options)
+            options = _.extend(defaults, options);
 
             lineMaterial = new THREE.MeshBasicMaterial({
                 color: options.color,
@@ -5817,7 +6032,7 @@ class EdgesContainer extends THREE.Object3D {
             opacity: 0.2,
             color: 0x49616C,
             transparent: true,
-        })
+        });
 
         this.add(this.mEdges)
 
@@ -5839,18 +6054,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ClusterLeafElement__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ClusterLeafElement__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__GraphData__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__view_GraphView3D__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__view_SimpleForceGraphView3D__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__hull_ConvexVolume__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__hull_BaseVolume__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__hull_ConvexVolume__ = __webpack_require__(16);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
@@ -5877,6 +6093,7 @@ THREE.EllipsoidGeometry = function (width, height, depth, widthSegments, heightS
 };
 
 THREE.EllipsoidGeometry.prototype = Object.create(THREE.Geometry.prototype);
+
 
 
 
@@ -6033,7 +6250,7 @@ class MyMain {
 
 
             var container = $("<div>")
-                .css(containerCSS)
+                .css(containerCSS)//.hide()
                 .appendTo("body");
 
             let title = $("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
@@ -6086,7 +6303,7 @@ class MyMain {
 
                     if (mGraphView.isMaximised()) return;
 
-                    container.toggle();
+                    container.hide();
 
                     let maximisedContainer = $("#3d-graph");
 
@@ -6127,7 +6344,33 @@ class MyMain {
 
 
 
-        function createView(name = "View3D", speccs) {
+
+
+        function createView(name = "View3D", speccs,isMaximised=false) {
+
+            function maximiseView() {
+
+                if (mGraphView.isMaximised()) return;
+                container.hide();
+
+                let maximisedContainer = $("#3d-graph");
+                //globalEnv.scene=mGraphView.mScene
+                var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
+
+                _.each(prevMaximisedElement, function (view) {
+
+                    view.undoMaximise()
+
+                });
+
+                container.append(prevMaximisedElement);
+                maximisedContainer.append(this);
+
+
+                this.maximise()
+
+            }
+
 
             let mGraphView = document.createElement("graph-view-3d");
             mGraphView.setCaption(name);
@@ -6146,28 +6389,7 @@ class MyMain {
             $(mGraphView)
                 .css(thumbCSS);
 
-            $(mGraphView).on("dblclick", function () {
-
-                if (mGraphView.isMaximised()) return;
-                container.toggle();
-
-                let maximisedContainer = $("#3d-graph");
-                //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
-
-                _.each(prevMaximisedElement, function (view) {
-
-                    view.undoMaximise()
-
-                });
-
-                container.append(prevMaximisedElement);
-                maximisedContainer.append(this);
-
-
-                this.maximise()
-
-            });
+            $(mGraphView).on("dblclick",maximiseView );
 
 
             mGraphView.setSpeccs(speccs);
@@ -6180,8 +6402,9 @@ class MyMain {
             events.bind("e",function(){
                 edgesVisible=!edgesVisible;
                 _.each(mGraphView.mRootCluster.getLeafs(),function(leaf){
-
+        console.log("TODO toggling edges won't work because of LOD impl")
                     leaf.mEdgesContainer.visible=edgesVisible
+                    leaf.mEdgesContainer2.visible=edgesVisible
 
                 })
 
@@ -6197,7 +6420,18 @@ class MyMain {
             });
 
 
+            //FIXME
+       if (isMaximised)
+           $(mGraphView).on("loaded",function (){
 
+               setTimeout(function(){
+
+
+                   maximiseView.bind(mGraphView)()
+
+               },2000)
+
+           } );
 
 
             return mGraphView
@@ -6214,7 +6448,7 @@ class MyMain {
 
             //NOTE: target rendering
             var speccs = this.getForceSpeccs();
-            let view2 = createView("new force-graph", speccs)
+            let view2 = createView("new force-graph", speccs,true)
                 .loadDataSet(this.getDSByID(1));
             views.push(view2);
 
@@ -6449,18 +6683,19 @@ class MyMain {
         //but is necessary for other components like picking and tet rendering
 
 
+        let rootHull=this.isDebug()?__WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]:__WEBPACK_IMPORTED_MODULE_14__hull_BaseVolume__["a" /* default */];
 
         return [
 
            {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */] }
+                options: {minClusterSize: 40, hull: rootHull }
             },
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
-                options: {minClusterSize: 15,hull:__WEBPACK_IMPORTED_MODULE_14__hull_ConvexVolume__["a" /* default */] }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
+                options: {minClusterSize: 15,hull:__WEBPACK_IMPORTED_MODULE_15__hull_ConvexVolume__["a" /* default */] }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
             , {distribution: nodesWithinIndustryDistribution, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */] }  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
