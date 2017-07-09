@@ -16,7 +16,7 @@
  */
 
 
-function TextNodes(env = globalEnv, options) {
+function TextNodes(env, options) {
 	var domEl = env.renderer.domElement
 
 		options = _.extend({
@@ -279,12 +279,10 @@ function TextNodes(env = globalEnv, options) {
 	function simpleUpdate() {
 
 		//let's take the result set of the last renderer loop as a start
-		//the data is in approximate descending distance from farthest to closest
+		//the data is ordered in approximate descending distance from farthest to closest
 		var mNodes = options.getNodes();
        // console.error("textnodes",mNodes.length)
 		var maxVisibleTextNodes = options.maxVisibleCount;
-
-
 
 
 		//next let's find the closest x nodes that match the criterias to be displayed
@@ -292,11 +290,7 @@ function TextNodes(env = globalEnv, options) {
 
 		for (var i = mNodes.length - 1; i >= 0 && maxVisibleTextNodes > nodesCurrentBatch.length; i--) {
 
-
-
 			let node = mNodes[i];
-
-
 
 			var res = testIfRelevantNode(node);
 			if (res.addNodeToSet)

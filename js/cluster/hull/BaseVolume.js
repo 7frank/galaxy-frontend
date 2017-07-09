@@ -38,6 +38,15 @@ class BaseVolume extends THREE.Object3D {
     }
 
 
+    getMaterial()
+    {
+        if (this.mMaterial) return this.mMaterial;
+
+      return  this.mMaterial= new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: false});
+
+
+    }
+
 
     /**
      * determines if the volume is can be made visible to the user
@@ -62,7 +71,7 @@ class BaseVolume extends THREE.Object3D {
 
         let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
 
-        let mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: true});
+        let mat = this.getMaterial();
 
         let wireframe = new THREE.LineSegments(geo, mat);
         wireframe.position.add(_center);

@@ -9,6 +9,7 @@
     <script src="./js/lib/d3-force-3d.bundle.min.js"></script>
     <script src="./js/lib/three.min.js"></script>
     <script src="./js/lib/threex.domevents.js"></script>
+    <script src="./js/lib/threex.domevents_alt.js"></script>
 
     <script src="./js/THREE.MeshLine.js"></script>
     <script src="./js/ConvexGeometry.js"></script>

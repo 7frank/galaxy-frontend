@@ -62,8 +62,8 @@ class BaseCluster3D extends BaseNode {
 
             let distance = dst.sub(src).length();
 
-            //TODO how to handle max/ind distance with the lod approach of meshes
-            let maxDistance = this.getRadius() * 25;
+            //TODO how to handle max distance with the lod approach of meshes
+            let maxDistance = this.getRadius(this.mNodes.length) * 25;
             let minDistance = 0;//this.getRadius() ;
 
             let L = maxDistance - minDistance;
@@ -198,12 +198,6 @@ class BaseCluster3D extends BaseNode {
 
             if (cluster == self) return;//don't detach the current root element
 
-            if (cluster.parent) {
-
-                if (cluster.parent.mClusters && cluster.name)
-                    delete(cluster.parent.mClusters[cluster.name]);
-                cluster.parent.remove(cluster)
-            }
 
             if (cluster.mChildClustersEdges) cluster.mChildClustersEdges = null; //delete edge references
             if (cluster.mChildClustersEdgesMesh) {
@@ -211,6 +205,15 @@ class BaseCluster3D extends BaseNode {
                 cluster.mChildClustersEdgesMesh = null; //delete edge-mesh  references
 
             }
+
+            if (cluster.parent) {
+
+                if (cluster.parent.mClusters && cluster.name)
+                    delete(cluster.parent.mClusters[cluster.name]);
+                cluster.parent.remove(cluster)
+            }
+
+
 
         })
 
@@ -418,13 +421,9 @@ class BaseCluster3D extends BaseNode {
         _.each(this.mClusters, function (childCluster) {
             childCluster.on("hull-updated", _.throttle(function () {
                 that.adjustHullSize();
-                that.trigger("hull-updated")
-
-               that.addChildClusterEdgeMesh()
-
-
-
-            }, 100, {trailing: true, leading: false}))
+                that.trigger("hull-updated");
+                that.addChildClusterEdgeMesh();
+            }, 500, {trailing: true, leading: false}))
         });
 
 
@@ -432,7 +431,6 @@ class BaseCluster3D extends BaseNode {
 
         this.setDistributionHandler(entry.distribution, function () {
             that.mClusterRule = entry
-
         })
 
     }
@@ -629,6 +627,9 @@ class BaseCluster3D extends BaseNode {
 
                     updateLeafsEdges(that);
 
+                    that.addChildClusterEdgeMesh();
+
+
                 }, function () {
                     onComplete();
                 });
@@ -767,6 +768,19 @@ class BaseCluster3D extends BaseNode {
 
 
         })
+
+
+/*
+      let dom=this.getDOMEvents()
+
+          dom.addEventListener(leaf.mNodeParticles.pointCloud, "mousemove",function(...args){
+
+                console.log(args)
+
+
+          }.bind(this), false);
+*/
+
 
     }
 

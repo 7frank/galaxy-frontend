@@ -146,12 +146,12 @@ class GraphView3D extends View3D
 
 
     maximise() {
-        
+
         var  root = this.mRootCluster;
 
         super.maximise();
 
-            if (root.mParentView && root.mGlobalTextNodesContainer) {
+            if (root && root.mParentView && root.mGlobalTextNodesContainer) {
 
                 root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
                 root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth);
@@ -168,7 +168,7 @@ class GraphView3D extends View3D
 
 
             let root=this.mRootCluster;
-            if (root.mParentView && root.mGlobalTextNodesContainer) {
+            if (root&& root.mParentView && root.mGlobalTextNodesContainer) {
 
                 root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
                 root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)

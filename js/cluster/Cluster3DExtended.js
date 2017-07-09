@@ -153,6 +153,15 @@ class Cluster3DExtended extends BaseCluster3D {
                 let name = (this.name ? this.name : this.id);
 
             let parents = this.getParents();
+
+
+            //hide tooltip for root cluster
+            if (parents.length==0)
+            {
+                this.getView().setTooltip("");
+                return
+            }
+
             parents.shift();
             let root = parents.map(p => p.name ? p.name : p.id).join(" - ");
             //TODO public setter function
@@ -338,8 +347,8 @@ class Cluster3DExtended extends BaseCluster3D {
         if (!this.mTextNodes)
             this.mTextNodes = TextNodes(env, {
                 maxVisibleCount: 50,
-                maxDistance: ()=> this.getRadius() / 3*10,//30000
-                minDistance:  ()=> this.getRadius() / 3, //3000
+                maxDistance: ()=> this.getRadius(this.mNodes.length) / 3*10,//30000
+                minDistance:  ()=> this.getRadius(this.mNodes.length) / 3, //3000
                 getNodes: function () {
 
                     return nodes

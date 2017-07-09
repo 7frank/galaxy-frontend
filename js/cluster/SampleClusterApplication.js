@@ -294,8 +294,10 @@ export class MyMain {
                 });
 
                 container.append(prevMaximisedElement);
-                maximisedContainer.append(this);
 
+
+                //TODO remove small bug with connectCallback in view3D recursion
+                maximisedContainer.append(this);
 
                 this.maximise()
 
@@ -352,7 +354,7 @@ export class MyMain {
 
             //FIXME
        if (isMaximised)
-           $(mGraphView).on("loaded connected",function (){
+           $(mGraphView).on("loaded",function (){
 
                      maximiseView.bind(mGraphView)()
            } );
@@ -443,6 +445,7 @@ export class MyMain {
 
 
         _.each(views, function (view) {
+            if ($(view).parent().length==0)
             container.append(view)
         })
 

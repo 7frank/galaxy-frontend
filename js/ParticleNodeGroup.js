@@ -252,11 +252,17 @@ function ParticleNodeGroup(nodes, options) {
 	geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
 
 	var particleSystem = new THREE.Points(geometry, shaderMaterial);
+
+	//TODO we might be able to remove the meshes and enable the raycasting in here again
+
+	//prevent raycasting nodes// this actually does not give the intended effect and we added invisible meshes instead
+    //particleSystem.raycast=function(){}
+
 	//added to be able to retrieve the original node from the point within the raycaster code
 	particleSystem.srcNodes = nodes
 		particleSystem.frustrumCulled = true;
 
-	//for now just have a huge bounding volume //TODO recalc sphere every nowad then
+	//for now just have a huge bounding volume //TODO recalc sphere every now and then
 	particleSystem.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
 
 	for (let i = 0; i < nCount; i++)
@@ -356,6 +362,7 @@ function ParticleNodeGroup(nodes, options) {
 			}
 
 	}
+
 
 	function updateCloudOpacityBasedOnDistance() {
 		//FIXME refactor? and fix opa
@@ -487,7 +494,8 @@ function createParticleSystemsByGroupAttr(allNodes, options) {
 	}
 
 	function updateCrossFade() {
-
+		console.warn("deprecated")
+		return;
 		_.each(groupContainer, function (el) {
 			el.particles.updateCrossFade()
 		})

@@ -148,6 +148,11 @@ function getParticleShaderMaterial()
             geometry.addAttribute( 'size', new THREE.BufferAttribute( values_size, 1 ) );
 
            var  particleSystem = new THREE.Points( geometry, shaderMaterial );
+
+           //override raycaster
+            particleSystem.raycast=function(){}
+
+
             particleSystem.frustrumCulled=true;
             
 		

@@ -463,6 +463,45 @@ The backlog contains potential features sorted by it's priority to the product
  subject.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+he user would be to use this product to get all real times news and all
+ the connected companies for a company that they are interested understanding
+ the sentiment they can see who customer/supplier of each company also they
+ can also get of sense of big picture of what's going on in the economy
+ that why blinking star would be good so that they can recent breaking news
+ about that company and understand all the connected companies so it's news
+ and market surveillance there are roughly 8,000 news a day about companies
+ and business as well as being able to back to history as well
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+I'm in process of creating other pieces of the product That will do a more
+ deep dive analysis For each company 
+\end_layout
+
+\begin_layout Enumerate
+And this galaxy version would be like a launching pad To understand the
+ big picture Of what is going on the world economy
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Itemize
 programmer wants different forms of tests to improve stability and code
  quality
@@ -524,6 +563,178 @@ if possible we should define about sprints of equal length.
 \end_layout
 
 \begin_layout Subsection
+next sprint 2d features primarily 24.07.
+ 1
+\end_layout
+
+\begin_layout Itemize
+feedback 2d- white background
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+focus on 2d if 3d is working properly
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+So we can target a complete 2D version by 21 
+\end_layout
+
+\begin_layout Itemize
+with all the data hook up 19 for all the UI, functionaries and visualization
+ And then live data connection
+\end_layout
+
+\begin_layout Itemize
+24th deadline
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+no country cluster but only industry
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if we can have a transparent color wrappers for sector
+\end_layout
+
+\begin_layout Itemize
+for country we can we say show all for US companies
+\end_layout
+
+\begin_layout Itemize
+though 
+\bar under
+collapsed 
+\bar default
+by sectors and other countries, 
+\end_layout
+
+\begin_layout Itemize
+the whole country will be collapsed let's try first, Frank to see how it
+ feel and we can make changes to it
+\end_layout
+
+\begin_layout Itemize
+t i just want to experience it first then we can make tweak to it
+\end_layout
+
+\begin_layout Itemize
+changing 2d >3d will have wrong leaf edges shown
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+more 2d infos !!!
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+we can leverage the hull feature from http://bl.ocks.org/GerHobbelt/3071239
+ and we can leverage the node effects we already in the 3D version
+\end_layout
+
+\begin_layout Enumerate
+also since it's 2D, we can introduce the the node size dimension.
+ The size will be based on the size of the company, sector, country which
+ we can classify as small, medium, and large
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+basically be based on market value size (For company with stock) and revenue
+ (For private company) in case the of company
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+expandable/collapsible node would be sector and country as similar to 3D
+ we would have sector hulls within a country
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+blue ring like in mockup around collapsed nodes again
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+colors of nodes the color of the node will be based on at least 3 things
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+1.
+ live stock price performance % change compare to opening price of that
+ day for intraday.
+ or close price % if market closes.
+ i creating a database that you can connect to get that data 
+\end_layout
+
+\begin_layout Enumerate
+2.
+ sentiment of that company based on news.
+ I have already set up news feed in database.
+ however, I am still working on creating sentiment 
+\end_layout
+
+\begin_layout Enumerate
+3.
+ revenue trend of that company
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+news update
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+possibly real time
+\end_layout
+
+\begin_layout Enumerate
+current database mysql websocket nodejs
+\end_layout
+
+\begin_layout Enumerate
+i will also add blinking features if there is a recent news coming in for
+ that 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+pulsing effect/animated nodes
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Subsection
 current 
 \begin_inset Quotes eld
 \end_inset
@@ -535,8 +746,578 @@ sprint
  
 \end_layout
 
+\begin_layout Standard
+chatlog:
+\end_layout
+
+\begin_layout Standard
+[7/8/2017 9:55:29 PM] Nat Sap: this is a rough sketch of the 2D version
+ [7/8/2017 9:56:02 PM] Nat Sap: we can leverage the hull feature from http://bl.o
+cks.org/GerHobbelt/3071239 [7/8/2017 9:56:48 PM] Nat Sap: and we can leverage
+ the node effects we already in the 3D version [7/8/2017 9:57:05 PM] Nat
+ Sap: all the features like glowing, etc...
+ [7/8/2017 9:57:34 PM] Nat Sap: also since it's 2D, we can introduce the
+ the node size dimension.
+ [7/8/2017 9:58:02 PM] Nat Sap: The size will be based on the size of the
+ company, sector, country [7/8/2017 9:58:18 PM] Nat Sap: which we can classify
+ as small, medium, and large [7/8/2017 9:59:21 PM] Nat Sap: based on the
+ data which I can provide to you but it would basically be based on market
+ value size (For company with stock) and revenue (For private company) in
+ case the of company [7/8/2017 9:59:38 PM] Nat Sap: let me know when you
+ are back, Frank [7/8/2017 10:03:42 PM] Frank Reimann: ok so the company-size
+ probably should be another value in the existing dataset [7/8/2017 10:04:10
+ PM] Nat Sap: yes [7/8/2017 10:04:20 PM] Nat Sap: I can insert additional
+ columns [7/8/2017 10:04:22 PM] Nat Sap: for that [7/8/2017 10:04:29 PM]
+ Nat Sap: indicating the company size [7/8/2017 10:04:47 PM] Nat Sap: and
+ colors of the nodes [7/8/2017 10:04:53 PM] Frank Reimann: that would be
+ the easiest for now i guess [7/8/2017 10:05:11 PM] Nat Sap: yes we will
+ have to connect to the database later [7/8/2017 10:06:03 PM] Nat Sap: expandabl
+e/collapsible node would be sector and country [7/8/2017 10:06:34 PM] Nat
+ Sap: as similar to 3D [7/8/2017 10:07:25 PM] Nat Sap: we would have sector
+ hulls within a country [7/8/2017 10:10:34 PM] Frank Reimann: ok so the
+ collapse of nodes is still something you want to see in the 2d? [7/8/2017
+ 10:10:56 PM] Frank Reimann: i mean via clicking the hull [7/8/2017 10:11:53
+ PM] Frank Reimann: because currently in 3d the nodes basically "collapse/exand"
+ by fading in/out [7/8/2017 10:12:57 PM] Frank Reimann: so if it is a perfomance
+ thing we shouldn't need it.
+ if you want to have it for interaction/usability i'll add it again [7/8/2017
+ 10:12:57 PM] Nat Sap: something like this [7/8/2017 10:13:33 PM] Nat Sap:
+ for 2D, it would be via clicking the hull to collapse [7/8/2017 10:13:57
+ PM] Nat Sap: for 3D, I am aware we have collapse/expand feature.
+ Where do I see that Fran [7/8/2017 10:14:50 PM] Frank Reimann: no no i
+ meant we don't have collapse/expand but instead fadein/out when zoomin
+ in/out [7/8/2017 10:14:54 PM] Frank Reimann: in 3d [7/8/2017 10:15:35 PM]
+ Nat Sap: right [7/8/2017 10:15:41 PM] Nat Sap: I see [7/8/2017 10:15:42
+ PM] Frank Reimann: by that it serves the same purpose, to hide unneccessary
+ stuff and increase performance [7/8/2017 10:15:47 PM] Nat Sap: yes [7/8/2017
+ 10:16:04 PM] Nat Sap: for 2D, we can do collapse/expand via clicking is
+ good [7/8/2017 10:16:08 PM] Frank Reimann: ok [7/8/2017 10:16:27 PM] Nat
+ Sap: the color of the node [7/8/2017 10:16:38 PM] Nat Sap: will be based
+ on at least 3 things [7/8/2017 10:17:17 PM] Nat Sap: 1.
+ live stock price performance % change compare to opening price of that
+ day [7/8/2017 10:17:27 PM] Nat Sap: for intraday.
+ [7/8/2017 10:18:11 PM] Nat Sap: or close price % if market closes.
+ i creating a database that you can connect to get that data [7/8/2017 10:19:07
+ PM] Nat Sap: 2.
+ sentiment of that company based on news.
+ I have already set up news feed in database.
+ however, I am still working on creating sentiment [7/8/2017 10:19:15 PM]
+ Nat Sap: 3.
+ revenue trend of that company [7/8/2017 10:20:25 PM] Nat Sap: also in term
+ edge color and transparency [7/8/2017 10:20:32 PM] Nat Sap: the mock up
+ above is quite messy [7/8/2017 10:21:07 PM] Nat Sap: so we can probably
+ do something like in 3D [7/8/2017 10:21:19 PM] Nat Sap: where we highlight
+ the edge upon hovering [7/8/2017 10:21:27 PM] Nat Sap: to keep things clean
+ and neat [7/8/2017 10:24:58 PM] Nat Sap: once we finish with these, I'd
+ like to connect to live news [7/8/2017 10:25:10 PM] Nat Sap: which is already
+ in the database I already created [7/8/2017 10:25:26 PM] Nat Sap: based
+ on what currently shows up on the screen [7/8/2017 10:26:36 PM] Frank Reimann:
+ so how live will the current state of the graph be? once per website reload
+ or realtime? [7/8/2017 10:27:00 PM] Nat Sap: so let's wrap up 3D piece
+ soon Frank.
+ and we can move on to the 2D one [7/8/2017 10:27:09 PM] Nat Sap: in realtime
+ I hope [7/8/2017 10:27:10 PM] Nat Sap: for news [7/8/2017 10:27:18 PM]
+ Nat Sap: the news will get push through [7/8/2017 10:27:25 PM] Nat Sap:
+ with auto update [7/8/2017 10:28:20 PM] Nat Sap: if the news that comes
+ through matches the criteria currently on the screen (for examples, company
+ mentioned, sector and so on).
+ news will have tags already for everything [7/8/2017 10:29:08 PM] Nat Sap:
+ the news sentiment piece will be something that based on historical analysis
+ that I will do a cron job say everything week or so [7/8/2017 10:30:05
+ PM] Nat Sap: in the 3D version, I noticed that you already list of companies
+ and we already that sector stats and countries, so that can be map the
+ news dynamically [7/8/2017 10:30:40 PM] Nat Sap: i will also add blinking
+ features [7/8/2017 10:30:56 PM] Nat Sap: if there is a recent news coming
+ in for that company [7/8/2017 10:31:07 PM] Nat Sap: like a star blinking,
+ Frank [7/8/2017 10:32:34 PM] Frank Reimann: ok so for realtime something
+ like nodejs and websocket would be neat [7/8/2017 10:33:03 PM] Nat Sap:
+ yes [7/8/2017 10:33:12 PM] Nat Sap: i already have websocket setup [7/8/2017
+ 10:33:24 PM] Nat Sap: now, it is stored in the database [7/8/2017 10:33:28
+ PM] Frank Reimann: i don't know what you are currently using for the database
+ and how many users should access the webservice simultaniously [7/8/2017
+ 10:33:28 PM] Nat Sap: for all the lives news [7/8/2017 10:33:39 PM] Frank
+ Reimann: gr8 [7/8/2017 10:33:41 PM] Nat Sap: it is mysql [7/8/2017 10:34:37
+ PM] Nat Sap: probably under a 500 users simultaneously to start [7/8/2017
+ 10:34:57 PM] Frank Reimann: ok but if you are already using nodejs/websockets
+ that will definitly improve latency [7/8/2017 10:35:13 PM] Nat Sap: yes
+ [7/8/2017 10:35:27 PM] Nat Sap: i used nodejs for all the data feeds [7/8/2017
+ 10:35:34 PM] Nat Sap: real time stock price [7/8/2017 10:35:36 PM] Nat
+ Sap: news feed [7/8/2017 10:36:45 PM] Nat Sap: and blinking features for
+ companies with recent news [7/8/2017 10:36:58 PM] Nat Sap: we can implement
+ that right, Frank [7/8/2017 10:37:03 PM] Nat Sap: for 2D or 3D [7/8/2017
+ 10:37:21 PM] Nat Sap: I remember you sent me a link to something like that
+ before [7/8/2017 10:38:16 PM] Frank Reimann: well we can make things blink
+ yeah [7/8/2017 10:38:38 PM] Frank Reimann: i don't remember what I sent
+ you though^^ [7/8/2017 10:39:12 PM] Frank Reimann: it might have been something
+ with animated nodes [7/8/2017 10:39:19 PM] Nat Sap: yes it was a while
+ back [7/8/2017 10:39:26 PM] Frank Reimann: the pulsing? [7/8/2017 10:39:30
+ PM] Nat Sap: yes [7/8/2017 10:39:31 PM] Frank Reimann: effect? [7/8/2017
+ 10:39:34 PM] Frank Reimann: ah kk [7/8/2017 10:39:36 PM] Nat Sap: that
+ was it I think [7/8/2017 10:40:03 PM] Nat Sap: may be [7/8/2017 10:41:07
+ PM] Nat Sap: i just check [7/8/2017 10:41:08 PM] Nat Sap: ed [7/8/2017
+ 10:41:14 PM] Nat Sap: probably not it [7/8/2017 10:41:52 PM] Nat Sap: http://ds
+space.wzb.eu/d3-svgmap/ [7/8/2017 10:42:00 PM] Nat Sap: this one has some
+ blnking [7/8/2017 10:42:08 PM] Nat Sap: but not so good [7/8/2017 10:42:56
+ PM] Frank Reimann: well we can make it blink via the color.
+ opacity and the image/texture components [7/8/2017 10:43:26 PM] Nat Sap:
+ okay [7/8/2017 10:43:33 PM] Frank Reimann: the pulsing effect used the
+ texture to basically loop like a gif
+\end_layout
+
+\begin_layout Subsubsection
+todo
+\end_layout
+
 \begin_layout Itemize
-[x]fix force layout to use edges
+feedback 3d 8.7.
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+remove blue lines
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+check if there are still edges that don't match
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+performance (see below for details)
+\end_layout
+
+\begin_layout Enumerate
+we can should make all hull at distance super transparent.
+ right now, they are very clutter
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+feedback 3d
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+focus on 3d first (then 2d) (usable, but bugs to fix)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+we need another approach to compute the currently visible countries
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+for all leafs that are drawn we should test the frustum, if it's fully within
+ we can add all nodes of it to the set for all other 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO feedback on performance vs exact values
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+text of sector vs country text
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+!
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+show sector on focus (? hide country)
+\end_layout
+
+\begin_layout Itemize
+find a meaningful way to show/hide text and remove clutter
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+count clusters in background that would count towards visible countries
+ but are invis for performance
+\end_layout
+
+\begin_layout Itemize
+changes we discussed 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+then let's do 2D like:
+\end_layout
+
+\begin_layout Itemize
+http://bl.ocks.org/GerHobbelt/3071239 to start I don't feel comfortable with
+ the current 3D at the moment so I won't show it today yet
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+performance (for good response time and cosmetic)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+ text nodes has a way to heavy performance impact..
+ 20% upwards ..
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+rootcluster text seems to be the mayor factor here
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+also text nodes appears to be broken currently ....
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+nodes weren't always used for calculating visible items.
+ because we skip calculating visible nodes to only occure every 20 frames
+ the nodes reset itself with the next iteration being length==0
+\end_layout
+
+\begin_layout Itemize
+if the rootcluster is not visible (is the boundingvolume not calculated
+ properly) the text nodes won't be updated
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+this might be a problem
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+raycaster/domeEvents
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+
+\strikeout on
+fixed threejs.domeEvents raycaster by restricting mouse move events to 25
+ fps
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+try override function raycast( raycaster, intersects ){ } to prevent unneccessar
+y comparisions
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok we need either reuse the domevents library or use the ParticleNodeGroup::crea
+teParticleNodeGroupIntersectionHelper
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+rewrite of domEvents with treelike structure instead of flat array
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+necessary for better mousemove performance when raycasting 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Made some changes to the domEvents Library (2-3 lines in the raytracing
+ part) it now needs a scene to initialise the raytracer from
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+initial loading times
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+ok so the initial loading times might get perceived shorter if we make the
+ animation going again below is a list of potential starting points from
+ the debug log
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+data loaded 
+\end_layout
+
+\begin_layout Itemize
+maximised
+\end_layout
+
+\begin_layout Itemize
+'mousemove' handler took 591ms 
+\end_layout
+
+\begin_layout Itemize
+'requestAnimationFrame' handler took 7313ms
+\end_layout
+
+\begin_layout Itemize
+addNodeCaptions 
+\end_layout
+
+\begin_layout Itemize
+'requestAnimationFrame' handler took 1041ms
+\end_layout
+
+\begin_layout Itemize
+'requestAnimationFrame' handler took 453ms 
+\end_layout
+
+\begin_layout Itemize
+'requestAnimationFrame' handler took 469ms
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+usability
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Nat Sap: Quite difficult to use 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+see elaboration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+find a way to not get click triggered if dblclick is triggered when both
+ are bound to same element 
+\end_layout
+
+\begin_layout Itemize
+also dragging will trigger click events
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+redistribution of clusters
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+hull takes quite some time to generate or does not show up
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+...50 sec plus
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+improve collision and collision radius as well as prevent single nodes from
+ straying apart too much from their peer 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://github.com/d3/d3-force#collision
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+smaller bugs
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+elements/particles sometimes don't show up
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+we need another transfer function with with visiblilty for minDistance always
+ true
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+clicking a node then following the edge and clicking the target will hide
+ edges at first
+\end_layout
+
+\begin_layout Itemize
+in the big graph, searching for 
+\begin_inset Quotes eld
+\end_inset
+
+micros
+\begin_inset Quotes erd
+\end_inset
+
+ will not show the dropdown without pressing 
+\begin_inset Quotes eld
+\end_inset
+
+down
+\begin_inset Quotes erd
+\end_inset
+
+ key first
+\end_layout
+
+\begin_layout Itemize
+node selected particles invis
+\end_layout
+
+\begin_layout Itemize
+unselect arrow when elements position changes
+\end_layout
+
+\begin_layout Itemize
+text stops animating for clusters when zoomed in further
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+where is the tooltip per cluster...
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+done
+\end_layout
+
+\begin_layout Itemize
+fix force layout to use edges
 \end_layout
 
 \begin_deeper
@@ -585,8 +1366,17 @@ changing the source and target of the edge to link to the nodes/positions
 \end_layout
 
 \begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
 NOTE: using values lower than 3000ms and 90 frames to stop the force graph
  will sometimes still show the graph in a line
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_deeper
@@ -645,7 +1435,7 @@ leaf > nodes meshes:
 status open
 
 \begin_layout Plain Layout
-we'll use lod non the nodes as well therewore nodes forther away in the
+we'll use lod non the nodes as well therewore nodes further away in the
  background wont count towards the coumpany count 
 \end_layout
 
@@ -655,122 +1445,11 @@ we'll use lod non the nodes as well therewore nodes forther away in the
 \end_layout
 
 \end_deeper
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO
-\end_layout
-
-\end_inset
-
- text nodes has a way to heavy performance impact..
- 20% upwards ..
- 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-rootcluster text seems to be the mayor factor here
-\end_layout
-
-\begin_layout Itemize
-
-\strikeout on
-also text nodes appears to be broken currently ....
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-
-\strikeout on
-nodes weren't always used for calculating visible items.
- because we skip calculating visible nodes to only occure every 20 frames
- the nodes reset itself with the next iteration being length==0
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
- if the rootcluster is not visible (is the boundingvolume not calculated
- properly) the text nodes won't be updated
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-this might be a problem
-\end_layout
-
-\end_deeper
-\end_deeper
-\end_deeper
-\end_deeper
-\begin_layout Itemize
-The usability isn't very good
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Nat Sap: Quite difficult to use 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-see elaboration
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Greyedout
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-find a way to not get click triggered if dblclick is triggered when both
- are bound to same element 
-\end_layout
-
-\begin_layout Itemize
-also dragging will trigger click events
-\end_layout
-
-\end_deeper
 \end_deeper
 \begin_layout Itemize
 
 \strikeout on
-So we will 1
-\begin_inset Note Greyedout
-status open
-
-\begin_layout Plain Layout
-(2? probably)
-\end_layout
-
-\end_inset
-
-d option as well 
+So we will 2d option as well 
 \end_layout
 
 \begin_deeper
@@ -788,28 +1467,40 @@ switching versions takes too long
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 edges
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 it might be that throttling hull updates and updating edges produce a minor
  bug where the edges don't match the nodes after animation is finished
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 also when loading and maximising while loading this occured
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 if edges arent visible they are not updated?
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 could be because the nodes where put into another container
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 running following code will position edges the way they should
 \end_layout
 
@@ -841,7 +1532,7 @@ _.each(leafs, function (leaf) { leaf.updateEdges(); })
 status open
 
 \begin_layout Plain Layout
-NOTE: probably occured because the elements where not connected in a vertain
+NOTE: probably occured because the elements where not connected in a certain
  way (having a timeout will fix it so this can be assumed for now)
 \end_layout
 
@@ -852,122 +1543,48 @@ NOTE: probably occured because the elements where not connected in a vertain
 
 \end_deeper
 \begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Itemize
-redist of clusters
+todo from feedback
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-hull takes quite some time to generate or does not show up
-\end_layout
 
-\begin_deeper
-\begin_layout Itemize
-...50 sec plus
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-improve collision and collision radius as well as prevent single nodes from
- straying apart too much from their peer 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-https://github.com/d3/d3-force#collision
-\end_layout
-
-\end_deeper
-\end_deeper
-\end_deeper
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME feedback
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
+\strikeout on
 remove toggle menu from production
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 needs some changes to underlying structure...
  see connectedCallback
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
-in between clusters when redist
-\begin_inset Note Note
-status open
 
-\begin_layout Plain Layout
-not animating repositioning
-\end_layout
-
-\end_inset
-
-
+\strikeout on
+in between clusters when redi
+\strikeout default
+st
+\strikeout on
+ not animating repositioning
 \end_layout
 
 \begin_layout Itemize
 
 \strikeout on
-remove boxvolume from root 
+remove boxvolume from root (basevolume instead)
 \end_layout
 
 \begin_layout Itemize
-country wrapper seems missing (bug?) might be to small
-\end_layout
-
-\begin_layout Itemize
-we need another approach to compute the currently visible countries
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-for all leafs that are drawn we should test the frustum, if it's fully within
- we can add all nodes of it to the set for all other 
-\begin_inset Note Note
+\begin_inset Note Greyedout
 status open
 
 \begin_layout Plain Layout
-TODO feedback on performance vs exact values
+country wrapper seems missing (bug?) might be to small (could not reproduce
+ error)
 \end_layout
 
 \end_inset
@@ -975,94 +1592,6 @@ TODO feedback on performance vs exact values
 
 \end_layout
 
-\end_deeper
-\begin_layout Itemize
-text of sector vs country text
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-!
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-show sector on focus (? hide country)
-\end_layout
-
-\begin_layout Itemize
-find a meaningful way to show/hide text and remove clutter
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-focus on 3d first (then 2d) (usable but bugs to fix)
-\end_layout
-
-\begin_layout Itemize
-count clusters in background that would count towards visible countries
- but are invis for performance
-\end_layout
-
-\begin_layout Itemize
-2d - white background
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-no country cluster but only industry
-\end_layout
-
-\begin_layout Itemize
-if we can have a transparent color wrappers for sector
-\end_layout
-
-\begin_layout Itemize
-for country we can we say show all for US companies
-\end_layout
-
-\begin_layout Itemize
-though 
-\bar under
-collapsed 
-\bar default
-by sectors and other countries, 
-\end_layout
-
-\begin_layout Itemize
-the whole country will be collapsed let's try first, Frank to see how it
- feel and we can make changes to i
-\end_layout
-
-\begin_layout Itemize
-t i just want to experience it first then we can make tweak to it
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-performance for good response time and cosmetic 
-\end_layout
-
-\begin_layout Itemize
-changes we discussed 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-then let's do 2D like:
-\end_layout
-
-\begin_layout Itemize
-http://bl.ocks.org/GerHobbelt/3071239 to start I don't feel comfortable with
- the current 3D at the moment so I won't show it today yet
-\end_layout
-
-\end_deeper
 \end_deeper
 \begin_layout Itemize
 smaller bugs
@@ -1073,32 +1602,6 @@ smaller bugs
 
 \strikeout on
 [x]particles are not within node
-\end_layout
-
-\begin_layout Itemize
-elements/particles sometimes don't show up
-\begin_inset Note Greyedout
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-we need another transfer function with with visiblilty for minDistance always
- true
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-clicking a node then following the edge and clicking the target will hide
- edges at first
 \end_layout
 
 \begin_layout Itemize
@@ -1123,21 +1626,17 @@ this issue didn't appear any longer
 
 \end_deeper
 \begin_layout Itemize
-text stops animating for clusters when zoomed in further
-\begin_inset Note Note
+\begin_inset Note Greyedout
 status open
 
 \begin_layout Plain Layout
-TODO
+text layer isn't maximised properly in default visu resulting in clipping
+ (we won't need that anymore)
 \end_layout
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Itemize
-text layer isn't maximised properly in default visu resulting in clipping
 \end_layout
 
 \begin_layout Itemize
@@ -1173,14 +1672,6 @@ NOTE: currently solved by havning mouseover bound to clusters and mousemove
 \end_deeper
 \end_deeper
 \begin_layout Itemize
-node selected particles invis
-\end_layout
-
-\begin_layout Itemize
-unselect arrow when elements position changes
-\end_layout
-
-\begin_layout Itemize
 
 \strikeout on
 [x]see where get3DRoot has to be refactored into getParentCluster (we changed
@@ -1188,29 +1679,9 @@ unselect arrow when elements position changes
 \end_layout
 
 \begin_layout Itemize
-in the big graph, searching for 
-\begin_inset Quotes eld
-\end_inset
-
-micros
-\begin_inset Quotes erd
-\end_inset
-
- will not show the dropdown without pressing 
-\begin_inset Quotes eld
-\end_inset
-
-down
-\begin_inset Quotes erd
-\end_inset
-
- key first
-\end_layout
-
-\begin_layout Itemize
 
 \strikeout on
-the other boundingvolume disappears ...
+the outer boundingvolume disappears ...
 \end_layout
 
 \begin_deeper

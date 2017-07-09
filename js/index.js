@@ -4,9 +4,9 @@ var main = null;
 
 
 function setMode(mode) {
-    var env = globalEnv;
 
-    if (!cameraModi) cameraModi = new CameraObserverMode(env);
+
+  //  if (!cameraModi) cameraModi = new CameraObserverMode(env);
 
     if (mode == "3d") {
         main.setGraph3D()
@@ -18,7 +18,9 @@ function setMode(mode) {
 
         //   env.controls.target.set(new THREE.Vector3(0,0,0));
 
-        doZoomToPos(new THREE.Vector3(0, 0, 5000));
+  //      doZoomToPos(new THREE.Vector3(0, 0, 5000));
+        main.getCurrentView().mRootCluster.zoomToCluster()
+
 
         //   env.controls.noRotate=false
         //TODO for orbit controls controls.mouseButtons = { PAN: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, ORBIT: THREE.MOUSE.RIGHT }; // swapping left and right buttons
@@ -31,7 +33,11 @@ function setMode(mode) {
         //Graph.numDimensions(2);
         $("body").addClass("inverted");
         //  env.controls.target.set(new THREE.Vector3(0,0,0));
-        doZoomToPos(new THREE.Vector3(0, 0, 3000));
+     main.getCurrentView().mRootCluster.zoomToCluster()
+      //  doZoomToPos(new THREE.Vector3(0, 0, 3000));
+
+
+
 
         //   env.controls.noRotate=true
 

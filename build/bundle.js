@@ -139,8 +139,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             let distance = dst.sub(src).length();
 
-            //TODO how to handle max/ind distance with the lod approach of meshes
-            let maxDistance = this.getRadius() * 25;
+            //TODO how to handle max distance with the lod approach of meshes
+            let maxDistance = this.getRadius(this.mNodes.length) * 25;
             let minDistance = 0;//this.getRadius() ;
 
             let L = maxDistance - minDistance;
@@ -275,12 +275,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             if (cluster == self) return;//don't detach the current root element
 
-            if (cluster.parent) {
-
-                if (cluster.parent.mClusters && cluster.name)
-                    delete(cluster.parent.mClusters[cluster.name]);
-                cluster.parent.remove(cluster)
-            }
 
             if (cluster.mChildClustersEdges) cluster.mChildClustersEdges = null; //delete edge references
             if (cluster.mChildClustersEdgesMesh) {
@@ -288,6 +282,15 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 cluster.mChildClustersEdgesMesh = null; //delete edge-mesh  references
 
             }
+
+            if (cluster.parent) {
+
+                if (cluster.parent.mClusters && cluster.name)
+                    delete(cluster.parent.mClusters[cluster.name]);
+                cluster.parent.remove(cluster)
+            }
+
+
 
         })
 
@@ -495,13 +498,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         _.each(this.mClusters, function (childCluster) {
             childCluster.on("hull-updated", _.throttle(function () {
                 that.adjustHullSize();
-                that.trigger("hull-updated")
-
-               that.addChildClusterEdgeMesh()
-
-
-
-            }, 100, {trailing: true, leading: false}))
+                that.trigger("hull-updated");
+                that.addChildClusterEdgeMesh();
+            }, 500, {trailing: true, leading: false}))
         });
 
 
@@ -509,7 +508,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         this.setDistributionHandler(entry.distribution, function () {
             that.mClusterRule = entry
-
         })
 
     }
@@ -706,6 +704,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
                     updateLeafsEdges(that);
 
+                    that.addChildClusterEdgeMesh();
+
+
                 }, function () {
                     onComplete();
                 });
@@ -844,6 +845,19 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
         })
+
+
+/*
+      let dom=this.getDOMEvents()
+
+          dom.addEventListener(leaf.mNodeParticles.pointCloud, "mousemove",function(...args){
+
+                console.log(args)
+
+
+          }.bind(this), false);
+*/
+
 
     }
 
@@ -1862,6 +1876,15 @@ class BaseVolume extends THREE.Object3D {
     }
 
 
+    getMaterial()
+    {
+        if (this.mMaterial) return this.mMaterial;
+
+      return  this.mMaterial= new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: false});
+
+
+    }
+
 
     /**
      * determines if the volume is can be made visible to the user
@@ -1886,7 +1909,7 @@ class BaseVolume extends THREE.Object3D {
 
         let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
 
-        let mat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: true});
+        let mat = this.getMaterial();
 
         let wireframe = new THREE.LineSegments(geo, mat);
         wireframe.position.add(_center);
@@ -2104,6 +2127,15 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
                 let name = (this.name ? this.name : this.id);
 
             let parents = this.getParents();
+
+
+            //hide tooltip for root cluster
+            if (parents.length==0)
+            {
+                this.getView().setTooltip("");
+                return
+            }
+
             parents.shift();
             let root = parents.map(p => p.name ? p.name : p.id).join(" - ");
             //TODO public setter function
@@ -2286,12 +2318,11 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
        // let maxDistance = minDistance * 10
 
-
         if (!this.mTextNodes)
             this.mTextNodes = TextNodes(env, {
                 maxVisibleCount: 50,
-                maxDistance: ()=> this.getRadius() / 3*10,//30000
-                minDistance:  ()=> this.getRadius() / 3, //3000
+                maxDistance: ()=> this.getRadius(this.mNodes.length) / 3*10,//30000
+                minDistance:  ()=> this.getRadius(this.mNodes.length) / 3, //3000
                 getNodes: function () {
 
                     return nodes
@@ -2650,7 +2681,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
     {
         super(...args)
 
-
+        this.useClusterText=true;
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
@@ -2662,6 +2693,23 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
     }
+
+    addListeners() {
+
+        super.addListeners();
+
+
+        this.on("u", e=>{
+            e.stopPropagation();
+
+            this.useClusterText=!this.useClusterText;
+            console.log("useClusterText", this.useClusterText)
+        });
+
+    }
+
+
+
 
 
     addColorHandler()
@@ -2831,7 +2879,7 @@ var that=this
 
         }
 
-        if (!this.tn)
+       if (!this.tn)
             this.tn = TextNodes(env, {
                 maxVisibleCount: 10,
                 onNodeText: function (node) {
@@ -2843,6 +2891,10 @@ var that=this
 
                 },
                 getNodes: function(){
+
+                    if (!that.useClusterText)
+                   return []
+
                     //FIXME use only visible nodes to improve performance
                     //TODO also have a per cluster approach for further performance improvements
                     let root=that.getRoot()
@@ -2878,6 +2930,25 @@ var that=this
         super.applyClustering(mClusteringSpeccsArray)
 
         this.restoreNodePositionFromExParent()
+    }
+
+
+    testRaycaster(x=0,y=0){
+
+
+       let view=this.getView();
+
+        var mouse = new THREE.Vector2(x,y);
+        var raycaster = new THREE.Raycaster();
+        let intersections=[];
+        raycaster.setFromCamera(mouse, view.mCamera);
+
+        intersections= raycaster.intersectObjects( view.mRootCluster,true)
+        console.log(intersections)
+      //  view.mRootCluster.raycast(raycaster,intersections)
+
+       // console.log(intersections)
+
     }
 
 
@@ -3104,9 +3175,9 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* default */] {
 
     constructor(...args) {
-        super(...args)
-        this.maxOpacity=0.1
-
+        super(...args);
+        this.maxOpacity=0.1;
+        this.getMaterial().transparent=true;
     }
 
 
@@ -3284,10 +3355,10 @@ class View3D extends HTMLElement
 {
 
     constructor(...args){
-    super(...args)
+    super(...args);
 
 
-        this.createCSSRule()
+        this.createCSSRule();
         this.mTime=-1;
         this.mActualFPS=0;
         this.showFPSCounter=false;
@@ -3353,12 +3424,12 @@ class View3D extends HTMLElement
             background: "rgba(255,255,255,0.3)",
             left: "0px",
             "z-index": 1
-        }
+        };
 
         if (!this.mCaption)
-            this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
+            this.mCaption=$("<span></span>").html(this.name).css(captionCSS);
 
-        this.mCaption.html("").append(text)
+        this.mCaption.html("").append(text);
         return this
     }
 
@@ -3372,14 +3443,15 @@ class View3D extends HTMLElement
     initStatic() {
 
          if (this._inited_static_) return;
-         var that=this
+         var that=this;
+
 
         this.mFPS=0.5;
         this.minFPS=this.minFPS||0;
         this.maxFPS=this.maxFPS||144;
 
 
-        this.mLastFrameTime=-1
+        this.mLastFrameTime=-1;
 
         let captionCSS= {
             "pointer-events": "none",
@@ -3392,12 +3464,12 @@ class View3D extends HTMLElement
             background: "rgba(255,255,255,0.3)",
             left: "0px",
             "z-index": 1
-        }
+        };
 
     if (!this.mCaption)
-        this.mCaption=$("<span></span>").html(this.name).css(captionCSS)
+        this.mCaption=$("<span></span>").html(this.name).css(captionCSS);
 
-        $(this).append(   this.mCaption).addClass("view-3d")
+        $(this).append(   this.mCaption).addClass("view-3d");
 
 
 
@@ -3419,7 +3491,7 @@ class View3D extends HTMLElement
 
         this.mCamera.lookAt(this.mScene.position);
 
-        this.mCamera.position.z = 9000;
+        this.mCamera.position.z = 150000;
 
 
 
@@ -3432,7 +3504,7 @@ class View3D extends HTMLElement
 
 
 
-        $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"})
+        $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"});
 
 
         //init basic keyboard io
@@ -3452,27 +3524,51 @@ class View3D extends HTMLElement
         $(this).append(this.mFpsCounter);
 
 
+        //------------------------------------------------
+        //throttle move events to about 50 fps
+        //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
+        THREEx.DomEventsAlt.prototype._onMouseMove	=_.throttle(function(domEvent)
+        //THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
+        {
+            var mouseCoords = this._getRelativeMouseXY(domEvent);
+            this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
+            this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
+            this._onMove('mouseout' , mouseCoords.x, mouseCoords.y, domEvent);
+        },40);  //25 (f)ps
 
         //init domEnvents
-        this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement)
+        //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
+        this.mDomEvents = new THREEx.DomEventsAlt(this.mCamera,this.mRenderer.domElement,this.mScene);
+
+        //Note: have a factory in case we need this kind of injection multiple times
+       // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations
+
+
+        //------------------------------------------------
 
 
 
         //FIXME binding events will interfere with controls
-        $(this.mRenderer.domElement).on("mouseover",_.throttle(function(e){
-            e.stopPropagation()
-            that.setActive()
+        $(this.mRenderer.domElement).on("mouseover",function(e){
 
-            $(that).attr("hasFocus",true)
+            if (that.isMaximised()) return;
+
+            e.stopPropagation();
+            that.setActive();
+
+            $(that).attr("hasFocus",true);
 
 
             that.mCaption.stop(true,false).fadeOut(200)
 
 
-        },20))
+        });
 
 
         $(this.mRenderer.domElement).on("mouseout",function(e) {
+
+            if (that.isMaximised()) return;
+
             e.stopPropagation();
 
 
@@ -3487,7 +3583,7 @@ class View3D extends HTMLElement
 
             }
 
-        })
+        });
 
 
         // Add camera interaction
@@ -3500,17 +3596,17 @@ class View3D extends HTMLElement
 
 
 
-        this.resizeCanvas()
+        this.resizeCanvas();
 
-        this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  )
-
-
+       this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  );
 
 
 
 
 
-        this._inited_static_=true
+
+
+        this._inited_static_=true;
 
     return this
 
@@ -3524,10 +3620,10 @@ class View3D extends HTMLElement
         var accTime=0,accFrames=0;
 
       function animate(time) {
-        that.mTime=time
+        that.mTime=time;
 
 
-          initialFrames--
+          initialFrames--;
           if (that.mFPS==0) {
 
               if (initialFrames<0)
@@ -3553,10 +3649,10 @@ class View3D extends HTMLElement
 
           if (accTime>1000)
           {
-              that.mActualFPS=accFrames
+              that.mActualFPS=accFrames;
 
               if (that.showFPSCounter)
-              that.mFpsCounter.html(that.mActualFPS)
+              that.mFpsCounter.html(that.mActualFPS);
 
               accTime=0;
               accFrames=0;
@@ -3566,12 +3662,15 @@ class View3D extends HTMLElement
 
 
 
-          that.mLastFrameTime = time
+          that.mLastFrameTime = time;
 
           that.mControls.update();
 
+             console.log( that.mLastFrameTime );
 
-          $(that).trigger("before-render",time)
+
+
+          $(that).trigger("before-render",time);
          // $(that).trigger("animate")
 
           that.mRenderer.render(that.mScene, that.mCamera);
@@ -3593,7 +3692,9 @@ class View3D extends HTMLElement
 
 
     maximise() {
-        $(this).addClass("view-3d-maximised")
+        $(this).addClass("view-3d-maximised");
+
+     this.mCaption.fadeOut();
 
         this.setActive()
 
@@ -3608,7 +3709,7 @@ class View3D extends HTMLElement
 
 
     undoMaximise() {
-        $(this).removeClass("view-3d-maximised")
+        $(this).removeClass("view-3d-maximised");
 
         this.setInactive()
 
@@ -3623,9 +3724,9 @@ class View3D extends HTMLElement
     {
 
         //fps
-        this.mFPS=this.maxFPS
+        this.mFPS=this.maxFPS;
 
-        this.resizeCanvas()
+        this.resizeCanvas();
         this.start();
 
     }
@@ -3633,7 +3734,7 @@ class View3D extends HTMLElement
     setInactive()
     {
       //  $(this).removeClass("view-3d-maximised")
-        this.mFPS=this.minFPS
+        this.mFPS=this.minFPS;
 
         this.resizeCanvas()
     }
@@ -3641,7 +3742,7 @@ class View3D extends HTMLElement
 
     start(){
 
-    this.stop()
+    this.stop();
 
      this.animate()
 
@@ -3672,11 +3773,13 @@ class View3D extends HTMLElement
 
     connectedCallback(){
 
-        this.createTooltip()
+        this.createTooltip();
 
 
         this.initStatic();
         this.start();
+
+        $(this).trigger("connected")
 
 
     }
@@ -3685,7 +3788,7 @@ class View3D extends HTMLElement
     createTooltip() {
 
         // Setup tooltip
-        if ( this.toolTipElem ) return
+        if ( this.toolTipElem ) return;
 
         this.toolTipElem = document.createElement('div');
         this.toolTipElem.classList.add('graph-tooltip');
@@ -3694,7 +3797,7 @@ class View3D extends HTMLElement
             "z-index":1,
             position:"relative",
             "user-select": "none"
-        })
+        });
 
         this.appendChild(this.toolTipElem);
 
@@ -3707,7 +3810,7 @@ class View3D extends HTMLElement
             // update the mouse pos
 
 
-            //$(env.toolTipElem).show()
+           // $(env.toolTipElem).show()
 
             const offset = getOffset(this),
                 relPos = {
@@ -3744,7 +3847,7 @@ class View3D extends HTMLElement
     setTooltip(text)
     {
 
-        $(this.toolTipElem).html("").append(text)
+        $(this.toolTipElem).html("").append(text).show()
 
     }
 
@@ -3995,7 +4098,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
     constructor(...args) {
         super(...args);
 
-        this.maxOpacity = 0.6
+        this.setInactive();
 
     }
 
@@ -4067,22 +4170,6 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
         geo2.computeBoundingBox();
         this.geometryAveragePoly=geo2;
 
-
-/*
-
-        let modifier = new THREE.SubdivisionModifier(1);
-
-        //  modifier.modify(geo);
-
-        this.geometryLowPoly = geo.clone();
-
-        modifier.modify(geo);
-        this.geometryAveragePoly = geo.clone();
-
-*/
-
-        //  modifier.modify(geo);
-        //  this.geometryHighPoly = geo.clone();
 
         //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
         let mat = new THREE.MeshBasicMaterial({
@@ -4271,7 +4358,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
         res.applyClustering(speccs);
-        //IMPORTANT: must attach after clustering is applied becaouse "tn" aka. globalTextNodes gets removed at the start of the clustering
+        //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this);
 
         var that=this;
@@ -4348,11 +4435,11 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     maximise() {
 
-
         var  root = this.mRootCluster;
+
         super.maximise();
 
-            if (root.mParentView && root.mGlobalTextNodesContainer) {
+            if (root && root.mParentView && root.mGlobalTextNodesContainer) {
 
                 root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
                 root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth);
@@ -4369,7 +4456,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
 
             let root=this.mRootCluster;
-            if (root.mParentView && root.mGlobalTextNodesContainer) {
+            if (root&& root.mParentView && root.mGlobalTextNodesContainer) {
 
                 root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
                 root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
@@ -5608,7 +5695,7 @@ class BaseNode extends THREE.Mesh {
             if (this.isCustomEvent(eName))
                 this.onCustomEvent(eName, eventhandler);
             else if (this.isMouseEvent(eName))
-                this.getDOMEvents().addEventListener(this, eName, _.debounce(eventhandler.bind(this),20), false);
+                this.getDOMEvents().addEventListener(this, eName, eventhandler.bind(this), false);
             else
                 this.onKey(eName, eventhandler)
 
@@ -5628,7 +5715,7 @@ class BaseNode extends THREE.Mesh {
                 if (this.isCustomEvent(eName))
                     this.offCustomEvent(eName, eventhandler);
                 else if (this.isMouseEvent(eName))
-                    this.getDOMEvents().removeEventListener(this, eName,  _.debounce(eventhandler.bind(this),20), false);
+                    this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
                 else
                     this.offKey(eName, eventhandler)
 
@@ -6364,8 +6451,10 @@ class MyMain {
                 });
 
                 container.append(prevMaximisedElement);
-                maximisedContainer.append(this);
 
+
+                //TODO remove small bug with connectCallback in view3D recursion
+                maximisedContainer.append(this);
 
                 this.maximise()
 
@@ -6424,14 +6513,9 @@ class MyMain {
        if (isMaximised)
            $(mGraphView).on("loaded",function (){
 
-               setTimeout(function(){
-
-
-                   maximiseView.bind(mGraphView)()
-
-               },2000)
-
+                     maximiseView.bind(mGraphView)()
            } );
+
 
 
             return mGraphView
@@ -6505,7 +6589,7 @@ class MyMain {
 
             //NOTE: target rendering
              var speccs = this.getForceSpeccs();
-             let view2 = createView("new force-graph", speccs)
+             let view2 = createView("new force-graph", speccs,true)
              .loadDataSet(this.getDSByID(0));
              views.push(view2)
 
@@ -6518,6 +6602,7 @@ class MyMain {
 
 
         _.each(views, function (view) {
+            if ($(view).parent().length==0)
             container.append(view)
         })
 

@@ -149,7 +149,7 @@ class View3D extends HTMLElement
 
         this.mCamera.lookAt(this.mScene.position);
 
-        this.mCamera.position.z = 9000;
+        this.mCamera.position.z = 150000;
 
 
 
@@ -184,8 +184,9 @@ class View3D extends HTMLElement
 
         //------------------------------------------------
         //throttle move events to about 50 fps
-        let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
-        THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
+        //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
+        THREEx.DomEventsAlt.prototype._onMouseMove	=_.throttle(function(domEvent)
+        //THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
         {
             var mouseCoords = this._getRelativeMouseXY(domEvent);
             this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
@@ -194,7 +195,8 @@ class View3D extends HTMLElement
         },40);  //25 (f)ps
 
         //init domEnvents
-        this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
+        //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
+        this.mDomEvents = new THREEx.DomEventsAlt(this.mCamera,this.mRenderer.domElement,this.mScene);
 
         //Note: have a factory in case we need this kind of injection multiple times
        // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations
@@ -321,6 +323,9 @@ class View3D extends HTMLElement
           that.mLastFrameTime = time;
 
           that.mControls.update();
+
+             console.log( that.mLastFrameTime );
+
 
 
           $(that).trigger("before-render",time);
@@ -500,7 +505,7 @@ class View3D extends HTMLElement
     setTooltip(text)
     {
 
-        $(this.toolTipElem).html("").append(text)
+        $(this.toolTipElem).html("").append(text).show()
 
     }
 

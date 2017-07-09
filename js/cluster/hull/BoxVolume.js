@@ -13,9 +13,9 @@ export default
 class BoxVolume extends  BaseVolume {
 
     constructor(...args) {
-        super(...args)
-        this.maxOpacity=0.1
-
+        super(...args);
+        this.maxOpacity=0.1;
+        this.getMaterial().transparent=true;
     }
 
 

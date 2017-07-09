@@ -19,7 +19,7 @@ class RootCluster extends Cluster3DExtended {
     {
         super(...args)
 
-
+        this.useClusterText=true;
 
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
@@ -31,6 +31,23 @@ class RootCluster extends Cluster3DExtended {
 
 
     }
+
+    addListeners() {
+
+        super.addListeners();
+
+
+        this.on("u", e=>{
+            e.stopPropagation();
+
+            this.useClusterText=!this.useClusterText;
+            console.log("useClusterText", this.useClusterText)
+        });
+
+    }
+
+
+
 
 
     addColorHandler()
@@ -200,7 +217,7 @@ var that=this
 
         }
 
-        if (!this.tn)
+       if (!this.tn)
             this.tn = TextNodes(env, {
                 maxVisibleCount: 10,
                 onNodeText: function (node) {
@@ -212,6 +229,10 @@ var that=this
 
                 },
                 getNodes: function(){
+
+                    if (!that.useClusterText)
+                   return []
+
                     //FIXME use only visible nodes to improve performance
                     //TODO also have a per cluster approach for further performance improvements
                     let root=that.getRoot()

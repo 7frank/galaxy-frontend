@@ -24,7 +24,7 @@ class ConvexVolume extends BoxVolume {
     constructor(...args) {
         super(...args);
 
-        this.maxOpacity = 0.6
+        this.setInactive();
 
     }
 
@@ -96,22 +96,6 @@ class ConvexVolume extends BoxVolume {
         geo2.computeBoundingBox();
         this.geometryAveragePoly=geo2;
 
-
-/*
-
-        let modifier = new THREE.SubdivisionModifier(1);
-
-        //  modifier.modify(geo);
-
-        this.geometryLowPoly = geo.clone();
-
-        modifier.modify(geo);
-        this.geometryAveragePoly = geo.clone();
-
-*/
-
-        //  modifier.modify(geo);
-        //  this.geometryHighPoly = geo.clone();
 
         //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
         let mat = new THREE.MeshBasicMaterial({
