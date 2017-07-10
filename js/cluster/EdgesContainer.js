@@ -113,9 +113,11 @@ class EdgesContainer extends THREE.Object3D {
 
     updateEdges() {
 
+        this.mEdges.geometry.verticesNeedUpdate = true;
+
         if (this.mExternalNodesHelpers.length == 0) return;
         _.each(this.mExternalNodesHelpers, helper => helper.update());
-        this.mEdges.geometry.verticesNeedUpdate = true;
+
 
     }
 
