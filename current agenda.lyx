@@ -882,12 +882,43 @@ remove blue lines
 check if there are still edges that don't match
 \end_layout
 
+\begin_layout Itemize
+it seems that the leaf edges need to be updated
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Note: the problem does occure not all the time so improving loading procedures
+ could point in the right direction
+\end_layout
+
+\begin_layout Itemize
+ClusterLeafElement::updateEges did not recreate geometry
+\end_layout
+
 \end_deeper
 \begin_layout Enumerate
 performance (see below for details)
 \end_layout
 
+\begin_deeper
 \begin_layout Enumerate
+loading performance and text nodes (see below)
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+\strikeout on
 we can should make all hull at distance super transparent.
  right now, they are very clutter
 \end_layout
@@ -1144,7 +1175,51 @@ addNodeCaptions
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+the items potentially being the cause are hull updates, particles and others
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME further investiage on this
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+baseDistribution tween creates too many instances updating thus might take
+ far too long
+\end_layout
+
+\begin_layout Itemize
+might be by using nodes to many comparisons are made instead of only updating
+ x,y,z
+\end_layout
+
+\begin_layout Itemize
+setLOD of nodes and cluster edges should be overridden and visible while
+ loading hull and node-inner-edges should be generated later
+\end_layout
+
 \end_deeper
+\begin_layout Itemize
+mem leaks with huge data set
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Itemize
 usability
 \end_layout
@@ -1238,6 +1313,19 @@ https://github.com/d3/d3-force#collision
 
 \end_deeper
 \end_deeper
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+might be ok now after cleaning the leaf cache of getLeaf()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_deeper
 \end_inset
 
@@ -1307,10 +1395,93 @@ TODO
 
 \end_layout
 
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+not rendered clusters should hide its text nodes..
+ alternativly a per-root element text ahndler might even be better where
+ elements register their potentially visible text nodes
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
 \begin_layout Itemize
 where is the tooltip per cluster...
 \end_layout
 
+\begin_deeper
+\begin_layout Itemize
+might occur not all the time
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+particles are not all where thes should be
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+when hull is clicked tween starts? or is it generated delayed?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+totally different tween incluster text nodes=> zoom triggers onComplete
+ of ParticleSystem
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+used static TWEEN.update instead of instance.update
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+might be scaling/positioning?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+
+\strikeout on
+when repositioned, the particles are at the correct position
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+when calling particles.start() they are positioned correctly
+\end_layout
+
+\end_deeper
+\end_deeper
 \end_deeper
 \begin_layout Subsubsection
 done
