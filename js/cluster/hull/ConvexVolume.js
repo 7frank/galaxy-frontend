@@ -29,72 +29,80 @@ class ConvexVolume extends BoxVolume {
     }
 
 
+
+    //geometry ... at best a convexGeometry
+    //numSegments ... determines the smoothing of the rounded edges
+    //margin ... the margin of the convex geometry around the original geometry
+    myModifier(geometry,numSegments,margin)
+    {
+
+    let marginGeo = new THREE.Geometry();
+
+    for (let v of geometry.vertices) {
+        let sphere = new THREE.SphereGeometry(margin,numSegments, numSegments);
+        sphere.translate(v.x, v.y, v.z);
+
+        marginGeo.merge(sphere, sphere.matrix)
+
+    }
+
+
+
+    let convexGeoWithMargin = new THREE.ConvexGeometry(marginGeo.vertices);
+
+
+    return convexGeoWithMargin
+
+    }
+
+
     createFromBoundingBox(vertices, boundingBox) {
+//FIXME performance myMod gets called too often initially
 
 
 
-        //geometry ... at best a convexGeometry
-        //numSegments ... determines the smoothing of the rounded edges
-        //margin ... the margin of the convex geometry around the original geometry
-       function  myModifier(geometry,numSegments,margin)
-       {
 
-           let marginGeo = new THREE.Geometry();
 
-           for (let v of geometry.vertices) {
-               let sphere = new THREE.SphereGeometry(margin,numSegments, numSegments);
-               sphere.translate(v.x, v.y, v.z);
 
-               marginGeo.merge(sphere, sphere.matrix)
+        console.log("FIXME convexVolume",vertices,boundingBox)
+            //getVerticesFormLeaf in adjustHullSize does generate false values sometimes maybe due to some runtime concurrency problem
+            //FIXME from time ti time this does not compute which will break the graph
+
+           let vert= vertices.filter(v => !(v.x==0 &&v.y==0 &&v.z==0 ) )
+
+            if (vert.length<4 && vertices.length>4) {
+                vertices = [];
+                boundingBox.min=new THREE.Vector3(-1,-1,-1);
+                boundingBox.max=new THREE.Vector3(1,1,1);
 
            }
 
 
 
-           let convexGeoWithMargin = new THREE.ConvexGeometry(marginGeo.vertices);
-
-
-           return convexGeoWithMargin
-
-       }
 
         //ConvexGeometry does need at least 4 vertices
         //so in case we don't have as much we do use the boundingbox instead to generate some more vertices
-        if (vertices.length < 4)
+          if (vertices.length < 4)
             vertices = this.getVerticesFromBoundingBox(boundingBox);
-
 
         //we will create a sphere geometry with a radius==margin for each vertice and merge them beforehand
 
         //reduce the vertice count before adding margin
-        let geo0 = new THREE.ConvexGeometry(vertices);
-        let margin = boundingBox.getSize().length()/10;
-
-/*
-        let marginGeo = new THREE.Geometry();
-
-        for (let v of geo0.vertices) {
-            let sphere = new THREE.SphereGeometry(margin, 8, 6);
-            sphere.translate(v.x, v.y, v.z);
-
-            marginGeo.merge(sphere, sphere.matrix)
+        let geo0
+        try{
+            geo0 =this.mGeometryZero= new THREE.ConvexGeometry(vertices);
+        }
+        catch(e){
+            geo0=this.mGeometryZero=this.createBoxGeometryFromBoundingBox(boundingBox);
+            console.warn(e)
 
         }
 
-        //let alteredVertices=vertices
-        let alteredVertices = marginGeo.vertices
-
-        let geo = new THREE.ConvexGeometry(alteredVertices);
-*/
-
-        let geo= myModifier(geo0,5,margin)
-        geo.computeBoundingBox();
-        this.geometryLowPoly=geo;
 
 
-        let geo2= myModifier(geo0,10,margin)
-        geo2.computeBoundingBox();
-        this.geometryAveragePoly=geo2;
+      this.mBoundingBox=boundingBox;
+
+
 
 
         //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
@@ -108,7 +116,7 @@ class ConvexVolume extends BoxVolume {
         });
 
         //   let mesh = new THREE.Mesh(geo, mat);
-        let mesh = new THREE.Mesh(this.geometryLowPoly, mat);
+        let mesh = new THREE.Mesh(this.geo0, mat);
 
         mesh.geometry.boundingBox = boundingBox;
 
@@ -120,16 +128,21 @@ class ConvexVolume extends BoxVolume {
 
     }
 
-
-    getVerticesFromBoundingBox(boundingBox) {
-
-
+    createBoxGeometryFromBoundingBox(boundingBox)
+    {
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize();
 
         let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
 
         box.translate(_center.x, _center.y, _center.z);
+    return box;
+    }
+
+    getVerticesFromBoundingBox(boundingBox) {
+
+       let box= this.createBoxGeometryFromBoundingBox(boundingBox);
+
 
         return box.vertices
     }
@@ -138,6 +151,23 @@ class ConvexVolume extends BoxVolume {
     //TODO
     transferFunction(x) {
         return x
+    }
+
+
+
+
+
+    createResolutionGeometry(name,resolution){
+
+        if (!this['geometry'+name]) {
+            let margin = this.mBoundingBox.getSize().length() / 10;
+
+            let geo2 = this.myModifier(this.mGeometryZero,resolution , margin);
+            geo2.computeBoundingBox();
+            this['geometry'+name] = geo2;
+
+        }
+        return this['geometry'+name]
     }
 
 
@@ -167,8 +197,18 @@ class ConvexVolume extends BoxVolume {
          if (l >= 0.8 && l <= 0.95) this.mesh.geometry = this.geometryAveragePoly;
          if (l > 0.95) this.mesh.geometry = this.geometryHighPoly*/
 
-        if (l < 0.6) this.mesh.geometry = this.geometryLowPoly;
-        if (l >= 0.6) this.mesh.geometry = this.geometryAveragePoly;
+        if (l < 0.2)
+            this.mesh.geometry = this.createResolutionGeometry("Least",2);
+       else
+        if (l > 0.2 && l < 0.6)
+            this.mesh.geometry = this.createResolutionGeometry("Low",5);
+        else
+        if (l >= 0.6)
+            this.mesh.geometry =  this.createResolutionGeometry("Average",10);
+
+
+
+
 
 
     }

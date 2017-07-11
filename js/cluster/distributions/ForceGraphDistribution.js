@@ -21,6 +21,7 @@ class ForceGraphDistribution extends BaseDistribution {
     constructor(scale = 50, dimensions = 1) {
         super(scale, dimensions);
 
+
         this.initialEngineTicks = 1;
 
     // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead

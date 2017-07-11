@@ -251,6 +251,8 @@ function createTween(duration=1000,easing) {
 
    // console.log("createParticleTween",positions,destination,duration,Date.now())
 
+	if (tween) tween.stop()
+
     tween = new TWEEN.Tween(positions)
         .to(destination, duration);
 
@@ -260,10 +262,10 @@ function createTween(duration=1000,easing) {
     tween.onUpdate(function(){
          //   console.log("updateParticleTween",positions,destination,Date.now())
             geometry.attributes.position.needsUpdate = true;
+
 		}).onComplete(() => {
     	isRunning=false;
-        geometry.attributes.position.needsUpdate = true;
-    } )
+    })
 
 
     return tween

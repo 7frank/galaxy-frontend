@@ -19,7 +19,7 @@ function setMode(mode) {
         //   env.controls.target.set(new THREE.Vector3(0,0,0));
 
   //      doZoomToPos(new THREE.Vector3(0, 0, 5000));
-        main.getCurrentView().mRootCluster.zoomToCluster()
+     //   main.getCurrentView().mRootCluster.zoomToCluster()
 
 
         //   env.controls.noRotate=false
@@ -33,7 +33,7 @@ function setMode(mode) {
         //Graph.numDimensions(2);
         $("body").addClass("inverted");
         //  env.controls.target.set(new THREE.Vector3(0,0,0));
-     main.getCurrentView().mRootCluster.zoomToCluster()
+     //main.getCurrentView().mRootCluster.zoomToCluster()
       //  doZoomToPos(new THREE.Vector3(0, 0, 3000));
 
 

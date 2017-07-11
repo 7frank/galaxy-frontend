@@ -109,7 +109,15 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         super(view);
         this.addNodes(nodes);
 
+
+        //initially have a value to ignore the lod while loading to make the animations visible for certain elements
+        this.useLOD=false;
+
+
+
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
+
+        this.registerCustomEvent("cluster-ready"); //if the cluster animation is finished
 
         this.mClusters = {};
         //Cluster if present, use to cluster nodes into sub-clusters
@@ -176,9 +184,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             this.mLeaf.setLOD(mLOD)
         }
 
-        if (this.mChildClustersEdgesMesh) {
+        if ( this.mChildClustersEdgesMesh) {
 
-            let vis=(1-mLOD)/2;
+            let vis= (1-mLOD)/2;
 
             this.mChildClustersEdgesMesh.material.opacity=vis;
             this.mChildClustersEdgesMesh.material.visible=vis>0.05 && vis<0.9;
@@ -289,6 +297,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                     delete(cluster.parent.mClusters[cluster.name]);
                 cluster.parent.remove(cluster)
             }
+
+
+            delete cluster._LeafsCached;
 
 
 
@@ -490,6 +501,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         _.extend(this.mClusters, _clustersObj);
 
 
+
+
+
         /**
          * add listeners to child elements if the hull was update
          * in which case we bubble up the tree to notify for changes and readjust parent elements
@@ -499,8 +513,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             childCluster.on("hull-updated", _.throttle(function () {
                 that.adjustHullSize();
                 that.trigger("hull-updated");
-                that.addChildClusterEdgeMesh();
-            }, 500, {trailing: true, leading: false}))
+            },50, {trailing: true, leading: false}))  //if leading is true it won't build up the hulls in a progressive manner
         });
 
 
@@ -508,6 +521,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         this.setDistributionHandler(entry.distribution, function () {
             that.mClusterRule = entry
+
+            that.trigger("cluster-ready")
         })
 
     }
@@ -703,11 +718,10 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 function onStep() {
 
                     updateLeafsEdges(that);
-
                     that.addChildClusterEdgeMesh();
 
-
                 }, function () {
+
                     onComplete();
                 });
 
@@ -738,7 +752,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
 
     adjustHullSize() {
-
+        //FIXME performance
+//return;
 
         let info = {box: new THREE.Box3, vertices: []};
 
@@ -840,7 +855,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         leaf.setDistributionHandler(entry.distribution, function () {
 
             //create/update the hull element after the animation has finished
+            that.adjustHullSize();
 
+            if (that.isLeaf())
             that.updateIfIsLeaf()
 
 
@@ -863,9 +880,13 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
     updateIfIsLeaf() {
-        this.adjustHullSize();
-        this._initDotParticles();
-        this.updateDotParticles()
+     //   this.adjustHullSize();
+
+
+        if (!this.mLeaf) return
+
+      //  this.mLeaf._initDotParticles();
+        this.mLeaf.updateDotParticlesColor()
 
 
 
@@ -1191,6 +1212,9 @@ class BaseDistribution {
 
         var tweens = this.mTweens = []
 
+        var srcs= [],dsts=[]
+
+
         _.each(nodes, function (n) {
 
             if (i > _len) {
@@ -1217,6 +1241,14 @@ class BaseDistribution {
             var mc = c;
             let origPos = (n.position) ? n.position : n
 
+
+        /*    srcs.push(origPos.x)
+            srcs.push(origPos.y)
+            srcs.push(origPos.z)
+            dsts.push(dist.position.x)
+            dsts.push(dist.position.y)
+            dsts.push(dist.position.z)
+*/
 
             let tween = new TWEEN.Tween(origPos)
                 .easing(that.mEasingFunction)
@@ -1251,6 +1283,8 @@ class BaseDistribution {
                 })
                 .start();
 
+
+
             //------------------------
             //------------------------
 
@@ -1260,18 +1294,74 @@ class BaseDistribution {
             c++;
         })
 
+/*
+        let tween_sum = new TWEEN.Tween(srcs)
+            .easing(that.mEasingFunction)
+            .to(dsts, mDuration)
+            .onUpdate(function () {
+
+
+
+
+
+
+                for (let i=0,len=srcs.length/3;i<len;i+=3) {
+
+                    let n=nodes[i]
+                    let origPos = (n.position) ? n.position : n;
+
+                    origPos.x = srcs[i*3]
+                    origPos.y=srcs[i*3+1]
+                    origPos.z=srcs[i*3+2]
+                    onNodePositionChange(origPos, i)
+                }
+
+
+
+
+
+
+
+                if (onStepComplete)
+                    onStepComplete()
+
+
+            }).onComplete(function () {
+
+
+                if (notTweenFinished) {
+                    notTweenFinished = false;
+
+                    that.stop();
+                    //   console.warn("onEnd",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
+                    if (onEnd) onEnd()
+
+
+                    //console.log("cancel",mTimeout)
+                    cancelAnimationFrame(mTimeout)
+                }
+
+
+            })
+            .start();
+*/
+
+
 
         mTimeout = requestAnimationFrame(animate);
 //FIXME stop updating tweens if no longer necessary
         function animate(time) {
 
-            //console.log("anmiate",mTimeout)
-            _.each(tweens, function (tween) {
-                tween.update(time)
+
+           // tween_sum.update(time)
+
+           _.each(tweens, function (tween) {
+               tween.update(time)
+              //  tween.end(time)
 
             })
 
-            if (notTweenFinished)
+           if (notTweenFinished)
                 mTimeout = requestAnimationFrame(animate);
 
         }
@@ -2048,6 +2138,8 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
                 console.log("setting distribution function", _dist);
                 res.setDistributionHandler(_dist, function onComplete() {
 
+
+                    res.adjustHullSize();
                     //distribution-complete
                     if (res.isLeaf()) {
                         res.updateIfIsLeaf()
@@ -2178,16 +2270,23 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         super.update();
 
         //TODO have a "cluster-ready" event
-        this.addNodeCaptions();
+
+        this.on("cluster-ready",function(){
+
+            this.addNodeCaptions();
+
+        })
+
 
 
         if (this.mTextNodes)
             this.mTextNodes.update();
 
 
+    //FIXME performance
         if (this.isLeaf())
-            if (this.mParticles && this.getView())
-                this.mParticles.update(this.getView().mTime);
+            if (this.mLeaf&& this.getView())
+                this.mLeaf.updateDots(this.getView().mTime);
 
 
     }
@@ -2205,65 +2304,6 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
 
     }
-
-
-    updateDotParticles() {
-        if (this.isLeaf())
-            if (this.mParticles) {
-                this.mParticles.updateColors();
-
-
-                //  this.mParticles.pointCloud.position.sub(this.position);
-            }
-
-
-    }
-
-    //create/update particleSystem (little dots inside nodes)
-    //potentially add them at specific time
-    _initDotParticles() {
-
-        if (this.mParticles) this.mParticles.start();
-
-
-        if (this.isLeaf() && !this.mParticles) {
-
-            var nodes = this.mLeaf.mNodes;
-            var demoOptions = {
-                increment: 1,
-                duration: 1000,
-                easing: TWEEN.Easing.Exponential.Out
-            };
-
-            if (!nodes) //FIXME this only works that way because to realData is not generated properly
-                demoOptions.npc = function (n) {
-
-                    return n.itemCount || 5
-                    //return 5
-                };
-
-
-            //TODO refactor force-graph-utils
-
-            var particles = createParticleSystemForNodes(nodes, demoOptions);
-            this.add(particles.pointCloud);
-
-
-            particles.start();
-            //TODO call start if distribution function is finished
-            this.on("distribution-complete", function () {
-
-                particles.start()
-
-
-            });
-
-
-            this.mParticles = particles;
-        }
-
-    }
-
 
     /**
      * add some text to the sub-clusters providing informations
@@ -2456,12 +2496,7 @@ class ClusterLeafElement extends THREE.Mesh {
 
         this.mNodes = nodes;
 
-
-
-
         this.mNodeParticles = this.createParticleNodeCloud();
-
-
         this.add(this.mNodeParticles.pointCloud);
 
 
@@ -2484,7 +2519,7 @@ class ClusterLeafElement extends THREE.Mesh {
     }
 
     setLOD(levelOfDetail) {
-        if (this.mNodeParticles)
+        if (this.mNodeParticles&&   this.parent.useLOD)
             this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
@@ -2525,6 +2560,13 @@ class ClusterLeafElement extends THREE.Mesh {
             this.mNodeParticles = null;
         }
 
+        if (this.mParticles) {
+            this.mParticles.remove();
+            this.mParticles.pointCloud.geometry.dispose();
+            this.mParticles = null;
+        }
+
+
         if (this.mEdgesContainer&&this.mEdgesContainer.geometry) {
 
 
@@ -2546,11 +2588,10 @@ class ClusterLeafElement extends THREE.Mesh {
             this.mNodeMeshes.geometry.dispose();
             this.mNodeMeshes = null;
         }
-        if (this.parent && this.parent.mParticles) {
-            this.parent.mParticles.remove();
-            this.parent.mParticles.pointCloud.geometry.dispose();
-            this.parent.mParticles = null;
-        }
+
+
+
+
 
         if (this.geometry)
         this.geometry.dispose();
@@ -2615,7 +2656,17 @@ class ClusterLeafElement extends THREE.Mesh {
             that.updateEdges();
 
 
-        }, onComplete);
+        }, function(){
+
+
+            that._initDotParticles();
+
+            onComplete()
+
+
+
+
+        });
 
     }
 
@@ -2629,6 +2680,14 @@ class ClusterLeafElement extends THREE.Mesh {
             this.mEdgesContainer2.updateEdges();
 
     }
+
+    updateDots(time)
+    {
+            if ( this.mParticles )
+                this.mParticles.update(time);
+    }
+
+
 
 
     /**
@@ -2648,6 +2707,72 @@ class ClusterLeafElement extends THREE.Mesh {
 
         return elem
     }
+
+
+    //create/update particleSystem (little dots inside nodes)
+    //potentially add them at specific time
+    _initDotParticles() {
+
+        if (this.mParticles)
+            this.mParticles.start();
+
+
+        if (!this.mParticles) {
+
+            var nodes = this.mNodes;
+            var demoOptions = {
+                increment: 1,
+                duration: 1000,
+                easing: TWEEN.Easing.Exponential.Out
+            };
+
+            if (!nodes) //FIXME this only works that way because to realData is not generated properly
+                demoOptions.npc = function (n) {
+
+                    return n.itemCount || 5
+                    //return 5
+                };
+
+
+            //TODO refactor force-graph-utils
+
+            var particles = createParticleSystemForNodes(nodes, demoOptions);
+            this.add(particles.pointCloud);
+
+
+            //TODO this timeout currently fixes wrong positioning bug..
+            setTimeout(function(){
+                particles.start();
+            },10)
+
+            //TODO call start if distribution function is finished
+            /*this.parent.on("distribution-complete", function () {
+
+                particles.start()
+
+
+            });*/
+
+
+            this.mParticles = particles;
+        }
+
+    }
+
+
+    updateDotParticlesColor() {
+
+            if (this.mParticles) {
+                this.mParticles.updateColors();
+
+
+                //  this.mParticles.pointCloud.position.sub(this.position); //this.parent.position
+            }
+
+
+    }
+
+
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
@@ -2686,8 +2811,16 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
        // setTimeout(()=> this.onAfterClusteredAndDistributed(),5000)
+        // "cluster-ready" as alternative event
+        this.on("hull-updated",function(){
 
 
+         this.findClusters("*").forEach(function(cluster){
+             cluster.useLOD=true
+         })
+
+
+        })
 
        this.addColorHandler()
 
@@ -2732,6 +2865,8 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
         function updateParticles(leaf)
         {
+//FIXME performance
+          //  return;
         if (leaf && leaf.parent && leaf.parent.mParticles) {
 
             leaf.parent.mParticles.updateColors();
@@ -2802,8 +2937,6 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
      */
     attachToView3D(view3D){
         this.mParentView=view3D
-
-        this.addGlobalNodeCaptions()
 
     }
 
@@ -2933,25 +3066,6 @@ var that=this
     }
 
 
-    testRaycaster(x=0,y=0){
-
-
-       let view=this.getView();
-
-        var mouse = new THREE.Vector2(x,y);
-        var raycaster = new THREE.Raycaster();
-        let intersections=[];
-        raycaster.setFromCamera(mouse, view.mCamera);
-
-        intersections= raycaster.intersectObjects( view.mRootCluster,true)
-        console.log(intersections)
-      //  view.mRootCluster.raycast(raycaster,intersections)
-
-       // console.log(intersections)
-
-    }
-
-
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = RootCluster;
@@ -2986,6 +3100,7 @@ var that=this
 class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */] {
     constructor(scale = 50, dimensions = 1) {
         super(scale, dimensions);
+
 
         this.initialEngineTicks = 1;
 
@@ -3288,6 +3403,7 @@ class ZoomUtil {
     moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
     }) {
 
+
         var mTimeout;
 
         var cameraTargetPosition = controls.target
@@ -3326,7 +3442,8 @@ class ZoomUtil {
 
         function animate(time) {
             mTimeout = requestAnimationFrame(animate);
-            TWEEN.update(time);
+            tween.update(time);
+            tween2.update(time);
         }
 
 
@@ -3810,7 +3927,7 @@ class View3D extends HTMLElement
             // update the mouse pos
 
 
-           // $(env.toolTipElem).show()
+            //$(env.toolTipElem).show()
 
             const offset = getOffset(this),
                 relPos = {
@@ -4103,72 +4220,80 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
     }
 
 
+
+    //geometry ... at best a convexGeometry
+    //numSegments ... determines the smoothing of the rounded edges
+    //margin ... the margin of the convex geometry around the original geometry
+    myModifier(geometry,numSegments,margin)
+    {
+
+    let marginGeo = new THREE.Geometry();
+
+    for (let v of geometry.vertices) {
+        let sphere = new THREE.SphereGeometry(margin,numSegments, numSegments);
+        sphere.translate(v.x, v.y, v.z);
+
+        marginGeo.merge(sphere, sphere.matrix)
+
+    }
+
+
+
+    let convexGeoWithMargin = new THREE.ConvexGeometry(marginGeo.vertices);
+
+
+    return convexGeoWithMargin
+
+    }
+
+
     createFromBoundingBox(vertices, boundingBox) {
+//FIXME performance myMod gets called too often initially
 
 
 
-        //geometry ... at best a convexGeometry
-        //numSegments ... determines the smoothing of the rounded edges
-        //margin ... the margin of the convex geometry around the original geometry
-       function  myModifier(geometry,numSegments,margin)
-       {
 
-           let marginGeo = new THREE.Geometry();
 
-           for (let v of geometry.vertices) {
-               let sphere = new THREE.SphereGeometry(margin,numSegments, numSegments);
-               sphere.translate(v.x, v.y, v.z);
 
-               marginGeo.merge(sphere, sphere.matrix)
+        console.log("FIXME convexVolume",vertices,boundingBox)
+            //getVerticesFormLeaf in adjustHullSize does generate false values sometimes maybe due to some runtime concurrency problem
+            //FIXME from time ti time this does not compute which will break the graph
+
+           let vert= vertices.filter(v => !(v.x==0 &&v.y==0 &&v.z==0 ) )
+
+            if (vert.length<4 && vertices.length>4) {
+                vertices = [];
+                boundingBox.min=new THREE.Vector3(-1,-1,-1);
+                boundingBox.max=new THREE.Vector3(1,1,1);
 
            }
 
 
 
-           let convexGeoWithMargin = new THREE.ConvexGeometry(marginGeo.vertices);
-
-
-           return convexGeoWithMargin
-
-       }
 
         //ConvexGeometry does need at least 4 vertices
         //so in case we don't have as much we do use the boundingbox instead to generate some more vertices
-        if (vertices.length < 4)
+          if (vertices.length < 4)
             vertices = this.getVerticesFromBoundingBox(boundingBox);
-
 
         //we will create a sphere geometry with a radius==margin for each vertice and merge them beforehand
 
         //reduce the vertice count before adding margin
-        let geo0 = new THREE.ConvexGeometry(vertices);
-        let margin = boundingBox.getSize().length()/10;
-
-/*
-        let marginGeo = new THREE.Geometry();
-
-        for (let v of geo0.vertices) {
-            let sphere = new THREE.SphereGeometry(margin, 8, 6);
-            sphere.translate(v.x, v.y, v.z);
-
-            marginGeo.merge(sphere, sphere.matrix)
+        let geo0
+        try{
+            geo0 =this.mGeometryZero= new THREE.ConvexGeometry(vertices);
+        }
+        catch(e){
+            geo0=this.mGeometryZero=this.createBoxGeometryFromBoundingBox(boundingBox);
+            console.warn(e)
 
         }
 
-        //let alteredVertices=vertices
-        let alteredVertices = marginGeo.vertices
-
-        let geo = new THREE.ConvexGeometry(alteredVertices);
-*/
-
-        let geo= myModifier(geo0,5,margin)
-        geo.computeBoundingBox();
-        this.geometryLowPoly=geo;
 
 
-        let geo2= myModifier(geo0,10,margin)
-        geo2.computeBoundingBox();
-        this.geometryAveragePoly=geo2;
+      this.mBoundingBox=boundingBox;
+
+
 
 
         //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
@@ -4182,7 +4307,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
         });
 
         //   let mesh = new THREE.Mesh(geo, mat);
-        let mesh = new THREE.Mesh(this.geometryLowPoly, mat);
+        let mesh = new THREE.Mesh(this.geo0, mat);
 
         mesh.geometry.boundingBox = boundingBox;
 
@@ -4194,16 +4319,21 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
     }
 
-
-    getVerticesFromBoundingBox(boundingBox) {
-
-
+    createBoxGeometryFromBoundingBox(boundingBox)
+    {
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize();
 
         let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
 
         box.translate(_center.x, _center.y, _center.z);
+    return box;
+    }
+
+    getVerticesFromBoundingBox(boundingBox) {
+
+       let box= this.createBoxGeometryFromBoundingBox(boundingBox);
+
 
         return box.vertices
     }
@@ -4212,6 +4342,23 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
     //TODO
     transferFunction(x) {
         return x
+    }
+
+
+
+
+
+    createResolutionGeometry(name,resolution){
+
+        if (!this['geometry'+name]) {
+            let margin = this.mBoundingBox.getSize().length() / 10;
+
+            let geo2 = this.myModifier(this.mGeometryZero,resolution , margin);
+            geo2.computeBoundingBox();
+            this['geometry'+name] = geo2;
+
+        }
+        return this['geometry'+name]
     }
 
 
@@ -4241,8 +4388,18 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
          if (l >= 0.8 && l <= 0.95) this.mesh.geometry = this.geometryAveragePoly;
          if (l > 0.95) this.mesh.geometry = this.geometryHighPoly*/
 
-        if (l < 0.6) this.mesh.geometry = this.geometryLowPoly;
-        if (l >= 0.6) this.mesh.geometry = this.geometryAveragePoly;
+        if (l < 0.2)
+            this.mesh.geometry = this.createResolutionGeometry("Least",2);
+       else
+        if (l > 0.2 && l < 0.6)
+            this.mesh.geometry = this.createResolutionGeometry("Low",5);
+        else
+        if (l >= 0.6)
+            this.mesh.geometry =  this.createResolutionGeometry("Average",10);
+
+
+
+
 
 
     }
@@ -4357,16 +4514,20 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
-        res.applyClustering(speccs);
+
+        //FIXME workflow below ..
         //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this);
+        res.applyClustering(speccs);
+
+        res.addGlobalNodeCaptions();
+
+
 
         var that=this;
         var _____skipFrames=0;
 
         $(that).on("before-render",function(){
-
-
 
 
 
@@ -6043,9 +6204,11 @@ class EdgesContainer extends THREE.Object3D {
 
     updateEdges() {
 
+        this.mEdges.geometry.verticesNeedUpdate = true;
+
         if (this.mExternalNodesHelpers.length == 0) return;
         _.each(this.mExternalNodesHelpers, helper => helper.update());
-        this.mEdges.geometry.verticesNeedUpdate = true;
+
 
     }
 
@@ -6437,7 +6600,7 @@ class MyMain {
 
             function maximiseView() {
 
-                if (mGraphView.isMaximised()) return;
+                if (this.isMaximised()) return;
                 container.hide();
 
                 let maximisedContainer = $("#3d-graph");
@@ -6511,11 +6674,12 @@ class MyMain {
 
             //FIXME
        if (isMaximised)
-           $(mGraphView).on("loaded",function (){
+           maximiseView.bind(mGraphView)()
+           /*$(mGraphView).on("loaded",function (){
 
                      maximiseView.bind(mGraphView)()
            } );
-
+*/
 
 
             return mGraphView
@@ -6537,30 +6701,35 @@ class MyMain {
             views.push(view2);
 
 
+            //TODO views should only be loaded when visible
+/*
             var speccs = this.getPossibleClusterSpeccsArray();
             let view1 = createView("dist test", speccs)
                 .loadDataSet(this.getDSByID(1));
             views.push(view1)
+*/
 
-
-
+/*
             let view0 = createDefaultView("previous force-graph")
                 .loadDataSet(this.getDSByID(1));
             views.push(view0);
 
+*/
 
+/*
 
-
-            /*
                         let view3 = createView("node distribution test case",
                             [{
-                                distribution: new BaseDistribution(2000, 3),
+                                 distribution: new BaseDistribution(2000, 3),
                                 options: { hull: new BoxVolume()}
                             }])
                             .loadDataSet(this.getDSByID(1))
 
                         views.push(view3)
+       */
 
+
+/*
 
                         var speccs = this.get2DChartSortedSpeccsArray()
 
@@ -6838,7 +7007,7 @@ class MyMain {
        // doZoomToPos(new THREE.Vector3(0,0,10000));
         //view.mControls.target.set(new THREE.Vector3(0,0,0));
       //  view.mControls.noRotate=true;
-        doZoomToPos(new THREE.Vector3(0,0,0),10000);
+        this.getCurrentView().mRootCluster.zoomToCluster()
 
 
     }
@@ -6863,8 +7032,8 @@ class MyMain {
         view.mControls.noRotate=false;
 
 
-        doZoomToPos(new THREE.Vector3(0,0,0),10000);
-
+    //    doZoomToPos(new THREE.Vector3(0,0,0),10000);
+        this.getCurrentView().mRootCluster.zoomToCluster()
     }
 
 

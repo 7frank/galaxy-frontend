@@ -74,6 +74,8 @@ class Cluster3DExtended extends BaseCluster3D {
                 console.log("setting distribution function", _dist);
                 res.setDistributionHandler(_dist, function onComplete() {
 
+
+                    res.adjustHullSize();
                     //distribution-complete
                     if (res.isLeaf()) {
                         res.updateIfIsLeaf()
@@ -204,16 +206,23 @@ class Cluster3DExtended extends BaseCluster3D {
         super.update();
 
         //TODO have a "cluster-ready" event
-        this.addNodeCaptions();
+
+        this.on("cluster-ready",function(){
+
+            this.addNodeCaptions();
+
+        })
+
 
 
         if (this.mTextNodes)
             this.mTextNodes.update();
 
 
+    //FIXME performance
         if (this.isLeaf())
-            if (this.mParticles && this.getView())
-                this.mParticles.update(this.getView().mTime);
+            if (this.mLeaf&& this.getView())
+                this.mLeaf.updateDots(this.getView().mTime);
 
 
     }
@@ -231,65 +240,6 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
     }
-
-
-    updateDotParticles() {
-        if (this.isLeaf())
-            if (this.mParticles) {
-                this.mParticles.updateColors();
-
-
-                //  this.mParticles.pointCloud.position.sub(this.position);
-            }
-
-
-    }
-
-    //create/update particleSystem (little dots inside nodes)
-    //potentially add them at specific time
-    _initDotParticles() {
-
-        if (this.mParticles) this.mParticles.start();
-
-
-        if (this.isLeaf() && !this.mParticles) {
-
-            var nodes = this.mLeaf.mNodes;
-            var demoOptions = {
-                increment: 1,
-                duration: 1000,
-                easing: TWEEN.Easing.Exponential.Out
-            };
-
-            if (!nodes) //FIXME this only works that way because to realData is not generated properly
-                demoOptions.npc = function (n) {
-
-                    return n.itemCount || 5
-                    //return 5
-                };
-
-
-            //TODO refactor force-graph-utils
-
-            var particles = createParticleSystemForNodes(nodes, demoOptions);
-            this.add(particles.pointCloud);
-
-
-            particles.start();
-            //TODO call start if distribution function is finished
-            this.on("distribution-complete", function () {
-
-                particles.start()
-
-
-            });
-
-
-            this.mParticles = particles;
-        }
-
-    }
-
 
     /**
      * add some text to the sub-clusters providing informations

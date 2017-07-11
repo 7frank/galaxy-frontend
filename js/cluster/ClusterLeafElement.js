@@ -13,12 +13,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         this.mNodes = nodes;
 
-
-
-
         this.mNodeParticles = this.createParticleNodeCloud();
-
-
         this.add(this.mNodeParticles.pointCloud);
 
 
@@ -41,7 +36,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
     }
 
     setLOD(levelOfDetail) {
-        if (this.mNodeParticles)
+        if (this.mNodeParticles&&   this.parent.useLOD)
             this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
@@ -82,6 +77,13 @@ export default class ClusterLeafElement extends THREE.Mesh {
             this.mNodeParticles = null;
         }
 
+        if (this.mParticles) {
+            this.mParticles.remove();
+            this.mParticles.pointCloud.geometry.dispose();
+            this.mParticles = null;
+        }
+
+
         if (this.mEdgesContainer&&this.mEdgesContainer.geometry) {
 
 
@@ -103,11 +105,10 @@ export default class ClusterLeafElement extends THREE.Mesh {
             this.mNodeMeshes.geometry.dispose();
             this.mNodeMeshes = null;
         }
-        if (this.parent && this.parent.mParticles) {
-            this.parent.mParticles.remove();
-            this.parent.mParticles.pointCloud.geometry.dispose();
-            this.parent.mParticles = null;
-        }
+
+
+
+
 
         if (this.geometry)
         this.geometry.dispose();
@@ -172,7 +173,17 @@ export default class ClusterLeafElement extends THREE.Mesh {
             that.updateEdges();
 
 
-        }, onComplete);
+        }, function(){
+
+
+            that._initDotParticles();
+
+            onComplete()
+
+
+
+
+        });
 
     }
 
@@ -186,6 +197,14 @@ export default class ClusterLeafElement extends THREE.Mesh {
             this.mEdgesContainer2.updateEdges();
 
     }
+
+    updateDots(time)
+    {
+            if ( this.mParticles )
+                this.mParticles.update(time);
+    }
+
+
 
 
     /**
@@ -205,6 +224,72 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         return elem
     }
+
+
+    //create/update particleSystem (little dots inside nodes)
+    //potentially add them at specific time
+    _initDotParticles() {
+
+        if (this.mParticles)
+            this.mParticles.start();
+
+
+        if (!this.mParticles) {
+
+            var nodes = this.mNodes;
+            var demoOptions = {
+                increment: 1,
+                duration: 1000,
+                easing: TWEEN.Easing.Exponential.Out
+            };
+
+            if (!nodes) //FIXME this only works that way because to realData is not generated properly
+                demoOptions.npc = function (n) {
+
+                    return n.itemCount || 5
+                    //return 5
+                };
+
+
+            //TODO refactor force-graph-utils
+
+            var particles = createParticleSystemForNodes(nodes, demoOptions);
+            this.add(particles.pointCloud);
+
+
+            //TODO this timeout currently fixes wrong positioning bug..
+            setTimeout(function(){
+                particles.start();
+            },10)
+
+            //TODO call start if distribution function is finished
+            /*this.parent.on("distribution-complete", function () {
+
+                particles.start()
+
+
+            });*/
+
+
+            this.mParticles = particles;
+        }
+
+    }
+
+
+    updateDotParticlesColor() {
+
+            if (this.mParticles) {
+                this.mParticles.updateColors();
+
+
+                //  this.mParticles.pointCloud.position.sub(this.position); //this.parent.position
+            }
+
+
+    }
+
+
 
 }
 

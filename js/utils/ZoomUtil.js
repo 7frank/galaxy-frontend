@@ -58,6 +58,7 @@ class ZoomUtil {
     moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
     }) {
 
+
         var mTimeout;
 
         var cameraTargetPosition = controls.target
@@ -96,7 +97,8 @@ class ZoomUtil {
 
         function animate(time) {
             mTimeout = requestAnimationFrame(animate);
-            TWEEN.update(time);
+            tween.update(time);
+            tween2.update(time);
         }
 
 

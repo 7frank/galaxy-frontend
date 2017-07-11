@@ -69,16 +69,20 @@ class GraphView3D extends View3D
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
-        res.applyClustering(speccs);
+
+        //FIXME workflow below ..
         //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this);
+        res.applyClustering(speccs);
+
+        res.addGlobalNodeCaptions();
+
+
 
         var that=this;
         var _____skipFrames=0;
 
         $(that).on("before-render",function(){
-
-
 
 
 

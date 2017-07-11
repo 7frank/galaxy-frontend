@@ -24,8 +24,16 @@ class RootCluster extends Cluster3DExtended {
 
         //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
        // setTimeout(()=> this.onAfterClusteredAndDistributed(),5000)
+        // "cluster-ready" as alternative event
+        this.on("hull-updated",function(){
 
 
+         this.findClusters("*").forEach(function(cluster){
+             cluster.useLOD=true
+         })
+
+
+        })
 
        this.addColorHandler()
 
@@ -70,6 +78,8 @@ class RootCluster extends Cluster3DExtended {
 
         function updateParticles(leaf)
         {
+//FIXME performance
+          //  return;
         if (leaf && leaf.parent && leaf.parent.mParticles) {
 
             leaf.parent.mParticles.updateColors();
@@ -140,8 +150,6 @@ class RootCluster extends Cluster3DExtended {
      */
     attachToView3D(view3D){
         this.mParentView=view3D
-
-        this.addGlobalNodeCaptions()
 
     }
 

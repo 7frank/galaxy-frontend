@@ -42,7 +42,7 @@
 
     <script src="./js/lib/jquery-ui.min.js"></script>
 
-    <script src="./js/lib/Tween.min.js"></script>
+    <script src="./js/lib/Tween.js"></script>
 
     <script src="./js/gpu-info.js"></script>
 

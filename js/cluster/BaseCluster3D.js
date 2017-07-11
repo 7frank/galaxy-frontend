@@ -32,7 +32,15 @@ class BaseCluster3D extends BaseNode {
         super(view);
         this.addNodes(nodes);
 
+
+        //initially have a value to ignore the lod while loading to make the animations visible for certain elements
+        this.useLOD=false;
+
+
+
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
+
+        this.registerCustomEvent("cluster-ready"); //if the cluster animation is finished
 
         this.mClusters = {};
         //Cluster if present, use to cluster nodes into sub-clusters
@@ -99,9 +107,9 @@ class BaseCluster3D extends BaseNode {
             this.mLeaf.setLOD(mLOD)
         }
 
-        if (this.mChildClustersEdgesMesh) {
+        if ( this.mChildClustersEdgesMesh) {
 
-            let vis=(1-mLOD)/2;
+            let vis= (1-mLOD)/2;
 
             this.mChildClustersEdgesMesh.material.opacity=vis;
             this.mChildClustersEdgesMesh.material.visible=vis>0.05 && vis<0.9;
@@ -212,6 +220,9 @@ class BaseCluster3D extends BaseNode {
                     delete(cluster.parent.mClusters[cluster.name]);
                 cluster.parent.remove(cluster)
             }
+
+
+            delete cluster._LeafsCached;
 
 
 
@@ -413,6 +424,9 @@ class BaseCluster3D extends BaseNode {
         _.extend(this.mClusters, _clustersObj);
 
 
+
+
+
         /**
          * add listeners to child elements if the hull was update
          * in which case we bubble up the tree to notify for changes and readjust parent elements
@@ -422,8 +436,7 @@ class BaseCluster3D extends BaseNode {
             childCluster.on("hull-updated", _.throttle(function () {
                 that.adjustHullSize();
                 that.trigger("hull-updated");
-                that.addChildClusterEdgeMesh();
-            }, 500, {trailing: true, leading: false}))
+            },50, {trailing: true, leading: false}))  //if leading is true it won't build up the hulls in a progressive manner
         });
 
 
@@ -431,6 +444,8 @@ class BaseCluster3D extends BaseNode {
 
         this.setDistributionHandler(entry.distribution, function () {
             that.mClusterRule = entry
+
+            that.trigger("cluster-ready")
         })
 
     }
@@ -626,11 +641,10 @@ class BaseCluster3D extends BaseNode {
                 function onStep() {
 
                     updateLeafsEdges(that);
-
                     that.addChildClusterEdgeMesh();
 
-
                 }, function () {
+
                     onComplete();
                 });
 
@@ -661,7 +675,8 @@ class BaseCluster3D extends BaseNode {
      */
 
     adjustHullSize() {
-
+        //FIXME performance
+//return;
 
         let info = {box: new THREE.Box3, vertices: []};
 
@@ -763,7 +778,9 @@ class BaseCluster3D extends BaseNode {
         leaf.setDistributionHandler(entry.distribution, function () {
 
             //create/update the hull element after the animation has finished
+            that.adjustHullSize();
 
+            if (that.isLeaf())
             that.updateIfIsLeaf()
 
 
@@ -786,9 +803,13 @@ class BaseCluster3D extends BaseNode {
 
 
     updateIfIsLeaf() {
-        this.adjustHullSize();
-        this._initDotParticles();
-        this.updateDotParticles()
+     //   this.adjustHullSize();
+
+
+        if (!this.mLeaf) return
+
+      //  this.mLeaf._initDotParticles();
+        this.mLeaf.updateDotParticlesColor()
 
 
 

@@ -280,7 +280,7 @@ export class MyMain {
 
             function maximiseView() {
 
-                if (mGraphView.isMaximised()) return;
+                if (this.isMaximised()) return;
                 container.hide();
 
                 let maximisedContainer = $("#3d-graph");
@@ -354,11 +354,12 @@ export class MyMain {
 
             //FIXME
        if (isMaximised)
-           $(mGraphView).on("loaded",function (){
+           maximiseView.bind(mGraphView)()
+           /*$(mGraphView).on("loaded",function (){
 
                      maximiseView.bind(mGraphView)()
            } );
-
+*/
 
 
             return mGraphView
@@ -380,30 +381,35 @@ export class MyMain {
             views.push(view2);
 
 
+            //TODO views should only be loaded when visible
+/*
             var speccs = this.getPossibleClusterSpeccsArray();
             let view1 = createView("dist test", speccs)
                 .loadDataSet(this.getDSByID(1));
             views.push(view1)
+*/
 
-
-
+/*
             let view0 = createDefaultView("previous force-graph")
                 .loadDataSet(this.getDSByID(1));
             views.push(view0);
 
+*/
 
+/*
 
-
-            /*
                         let view3 = createView("node distribution test case",
                             [{
-                                distribution: new BaseDistribution(2000, 3),
+                                 distribution: new BaseDistribution(2000, 3),
                                 options: { hull: new BoxVolume()}
                             }])
                             .loadDataSet(this.getDSByID(1))
 
                         views.push(view3)
+       */
 
+
+/*
 
                         var speccs = this.get2DChartSortedSpeccsArray()
 
@@ -681,7 +687,7 @@ export class MyMain {
        // doZoomToPos(new THREE.Vector3(0,0,10000));
         //view.mControls.target.set(new THREE.Vector3(0,0,0));
       //  view.mControls.noRotate=true;
-        doZoomToPos(new THREE.Vector3(0,0,0),10000);
+        this.getCurrentView().mRootCluster.zoomToCluster()
 
 
     }
@@ -706,8 +712,8 @@ export class MyMain {
         view.mControls.noRotate=false;
 
 
-        doZoomToPos(new THREE.Vector3(0,0,0),10000);
-
+    //    doZoomToPos(new THREE.Vector3(0,0,0),10000);
+        this.getCurrentView().mRootCluster.zoomToCluster()
     }
 
 
