@@ -8,13 +8,14 @@
     <script src="./js/lib/papaparse.min.js"></script>
     <script src="./js/lib/d3-force-3d.bundle.min.js"></script>
     <script src="./js/lib/three.min.js"></script>
+   <!-- <script src="./js/lib/TrackballControls.js"></script> -->
     <script src="./js/lib/threex.domevents.js"></script>
     <script src="./js/lib/threex.domevents_alt.js"></script>
 
     <script src="./js/THREE.MeshLine.js"></script>
-    <script src="./js/ConvexGeometry.js"></script>
+    <script src="js/lib/ConvexGeometry.js"></script>
 
-    <script src="./js/QuickHull.js"></script>
+    <script src="js/lib/QuickHull.js"></script>
 
 
     <script src="./js/CameraObserverMode.js"></script>
@@ -55,7 +56,7 @@
     <script src="./js/ParticleSystem.js"></script>
     <script src="./js/ParticleNodeGroup.js"></script>
     <script src="./js/SpecificDataUtils.js"></script>
-    <script src="./js/TextNodesImpl.js"></script>
+
 
 
     <script src="./js/AppDataService.js"></script>
