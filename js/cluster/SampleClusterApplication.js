@@ -42,7 +42,7 @@ import GraphData from "./GraphData"
 
 
 import GraphView3D from "../view/GraphView3D"
-import SimpleForceGraphView3D from "../view/SimpleForceGraphView3D"
+
 
 
 import BoxVolume from "./hull/BoxVolume"
@@ -213,63 +213,7 @@ export class MyMain {
         var container = createContainer();
 
 
-        function createDefaultView(name = "View3D") {
 
-            let mGraphView = document.createElement("simple-force-graph-view-3d");//("view-3d")
-
-            if (that.isDebug())
-                mGraphView.maxFPS=10;
-
-            customElements.whenDefined("simple-force-graph-view-3d").then(function () {
-
-
-                if (mGraphView.setCaption)
-                    mGraphView.setCaption(name);
-
-                $(mGraphView)
-                    .css(thumbCSS);
-
-                $(mGraphView).on("dblclick", function () {
-
-                    if (mGraphView.isMaximised()) return;
-
-                    container.hide();
-
-                    let maximisedContainer = $("#3d-graph");
-
-                    var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
-
-                    _.each(prevMaximisedElement, function (view) {
-
-                        view.undoMaximise() //
-
-                    });
-
-                    container.append(prevMaximisedElement);
-
-                    //--------
-                    maximisedContainer.append(this);
-                    this.maximise()
-
-
-                })
-
-
-            });
-            var setData = mGraphView.setData;
-            mGraphView.setData = function (data) {
-
-                customElements.whenDefined("simple-force-graph-view-3d").then(function () {
-
-                    setData.call(mGraphView, data)
-
-                })
-
-            };
-
-            return mGraphView
-
-        }
 
 
 
@@ -389,12 +333,7 @@ export class MyMain {
             views.push(view1)
 */
 
-/*
-            let view0 = createDefaultView("previous force-graph")
-                .loadDataSet(this.getDSByID(1));
-            views.push(view0);
 
-*/
 
 /*
 
