@@ -227,7 +227,8 @@ function ParticleNodeGroup(nodes, options) {
 				vertexShader: vertexShader,
 				fragmentShader: fragmentShader,
 
-				blending: THREE.AdditiveBlending,
+				//blending: THREE.AdditiveBlending,
+			 blending: THREE.NormalBlending,
 
 				depthTest: true,
 				depthWrite: false,

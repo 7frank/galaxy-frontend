@@ -17,12 +17,14 @@ export default class ClusterLeafElement extends THREE.Mesh {
         this.add(this.mNodeParticles.pointCloud);
 
 
+        //add edges to the leaf
+        this.createEdgesFromNodes(nodes);
+
+
         // add the nodes to the leaf
         this.appendNodes(nodes);
 
 
-        //add edges to the leaf
-        this.createEdgesFromNodes(nodes);
 
 
 
