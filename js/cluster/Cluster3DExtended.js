@@ -61,6 +61,16 @@ class Cluster3DExtended extends BaseCluster3D {
     addListeners() {
 
 
+        //have a "cluster-ready" event
+        this.on("cluster-ready",function(){
+
+            this.addNodeCaptions();
+
+        });
+
+
+
+
         var curr = 0;
 
         function onClickFactory(res, speccs) {
@@ -205,18 +215,7 @@ class Cluster3DExtended extends BaseCluster3D {
 
         super.update();
 
-        //TODO have a "cluster-ready" event
 
-        this.on("cluster-ready",function(){
-
-            this.addNodeCaptions();
-
-        })
-
-
-
-        if (this.mTextNodes)
-            this.mTextNodes.update();
 
 
     //FIXME performance
@@ -284,61 +283,7 @@ class Cluster3DExtended extends BaseCluster3D {
         };
 
 
-        //TODO make sure radius is dynamically changed when cluster radius changes
 
-        //let minDistance = this.getRadius() / 3
-
-        // TODO the bounding volume determines the visibility of the text nodes
-        //TODO so currently with no volume generated properly the text nodes are invisible
-        //  if (minDistance<10000) minDistance=10000
-
-       // let maxDistance = minDistance * 10
-
-        if (!this.mTextNodes)
-            this.mTextNodes = TextNodes(env, {
-                maxVisibleCount: 50,
-                maxDistance: ()=> this.getRadius(this.mNodes.length) / 3*10,//30000
-                minDistance:  ()=> this.getRadius(this.mNodes.length) / 3, //3000
-                getNodes: function () {
-
-                    return nodes
-
-                },
-                onNodeText: function (node) {
-
-                    if (node.name) return node.name;
-
-                    return node.id;
-
-                },
-                getCSSClasses: function () {
-                    return 'graph-country-caption'
-
-                },
-                getNodePosition: _getNodePosition,
-                interactable: true,
-                onAfterCreateTextField: function (node, el) {
-
-                    var newSize;
-                    if (node instanceof Cluster3DExtended) {
-                        newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
-
-
-                    }
-                    else
-                        newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
-
-                    newSize = _.round(newSize / 12, 3) + "em";
-
-                    el.css("font-size", newSize);
-
-                    el.on("click", function () {
-                        node.zoomToCluster();
-                        //  doZoomToPos(_getNodePosition(node))
-                    })
-
-                }
-            })
 
 
     }

@@ -191,10 +191,6 @@ class BaseCluster3D extends BaseNode {
                 cluster.tn.remove();
                 delete (cluster.tn)
             }
-            if (cluster.mTextNodes) {
-                cluster.mTextNodes.remove();
-                delete (cluster.mTextNodes)
-            }
 
 
             if (cluster.mHull) {

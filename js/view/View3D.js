@@ -324,8 +324,6 @@ class View3D extends HTMLElement
 
           that.mControls.update();
 
-             console.log( that.mLastFrameTime );
-
 
 
           $(that).trigger("before-render",time);
@@ -333,6 +331,7 @@ class View3D extends HTMLElement
 
           that.mRenderer.render(that.mScene, that.mCamera);
 
+          $(that).trigger("after-render",time);
 
           that.mFrameId = requestAnimationFrame(animate);
       }

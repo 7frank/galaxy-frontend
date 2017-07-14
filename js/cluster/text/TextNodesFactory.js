@@ -15,6 +15,10 @@
  *  }
  */
 
+
+
+
+
 export default
 function TextNodesFactory(env, options) {
 	var domEl = env.renderer.domElement
@@ -149,8 +153,8 @@ function TextNodesFactory(env, options) {
 		var size = 12
 
 
-		let _minDistance=typeof options.minDistance=="function"?options.minDistance():options.minDistance
-        let _maxDistance=typeof options.maxDistance=="function"?options.maxDistance():options.maxDistance
+		let _minDistance=typeof options.minDistance=="function"?options.minDistance(node):options.minDistance
+        let _maxDistance=typeof options.maxDistance=="function"?options.maxDistance(node):options.maxDistance
 
         //return the result of the comparision
 		//angle  90° == pi/4 => 45° fov for text nodes to each side

@@ -75,7 +75,6 @@ class GraphView3D extends View3D
         res.attachToView3D(this);
         res.applyClustering(speccs);
 
-        res.addGlobalNodeCaptions();
 
 
 
@@ -102,7 +101,7 @@ class GraphView3D extends View3D
                 GUI.updateFromVisibleNodes(visibleNodes);
                  //   that.mVisibleNodes=[].concat(visibleNodes)
                 //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
-                    that.mRootCluster.updateRootTextNodes(visibleNodes);
+                  //  that.mRootCluster.updateRootTextNodes(visibleNodes);
 
                 }
             }
@@ -155,10 +154,10 @@ class GraphView3D extends View3D
 
         super.maximise();
 
-            if (root && root.mParentView && root.mGlobalTextNodesContainer) {
+            if (root && root.mParentView && root.mTextOverlay) {
 
-                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
-                root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth);
+                root.mTextOverlay.height(root.mParentView.clientHeight);
+                root.mTextOverlay.width(root.mParentView.clientWidth);
                 console.log("maximised")
             }
 
@@ -172,10 +171,10 @@ class GraphView3D extends View3D
 
 
             let root=this.mRootCluster;
-            if (root&& root.mParentView && root.mGlobalTextNodesContainer) {
+            if (root&& root.mParentView && root.mTextOverlay) {
 
-                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
-                root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
+                root.mTextOverlay.height(root.mParentView.clientHeight);
+                root.mTextOverlay.width(root.mParentView.clientWidth)
             }
 
 

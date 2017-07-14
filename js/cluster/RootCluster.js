@@ -6,6 +6,9 @@
 //TODO refactor RootCluster
 import Cluster3DExtended from "./Cluster3DExtended"
 
+import ClusterTextOverlay from "./text/ClusterTextOverlay"
+
+
 /**
  *
  *  a RootCluster is a root node that contains additional rendering infos over multiple nodes
@@ -151,121 +154,16 @@ class RootCluster extends Cluster3DExtended {
     attachToView3D(view3D){
         this.mParentView=view3D
 
-    }
 
-    /**
-     *
-     * TODO the root cluster manages the visibility of all of it's currently visible nodes
-     * we do have a hierarchical structure that we can use to speed up the rendering a bit
-     *
-     */
+        this.mTextOverlay=$("<cluster-text-overlay>");
 
-
-    addGlobalNodeCaptions() {
-
-        if (!this.mParentView) {
-            console.warn("use attachToView3D() to attach cluster to a view container first")
-            return
-        }
-
-        function createTextNodeContainer() {
-
-            //create container for text elements
-
-            var textElementsContainer = $("<div>").addClass("graph-captions-container").css({
-                width: "100%",
-                height: "100%",
-               // top: 0,
-               // left: 0,
-                overflow: "hidden",
-                position: "absolute",
-                "pointer-events": "none"//, border: "1px solid red"
-            })
-
-            return textElementsContainer
-        }
-
-        /**
-         * for the method to work env  needs to contain the following paraams :
-         * env={
-         *  renderer.domElement,  for get dimensions and text pos
-         *   currentNodesVisible,   // ... nodes visible==all nodes in set is to harsh let rootcluster handle it probably
-         *	textNode,               // node container that is overlay with pointerevents none
-         *  camera
-         *  }
-         */
-
-
-        var mTextNode = $(this.mParentView.mRenderer.domElement).parent().children(".graph-captions-container")
-
-       if (mTextNode.length == 0) {
-
-            mTextNode = createTextNodeContainer(this.mParentView.mRenderer.domElement);
-            $(this.mParentView.mRenderer.domElement).parent().append(mTextNode)
-            this.mTextNodesContainer=mTextNode
-
-        }
-
-        this.mGlobalTextNodesContainer=mTextNode
-
-        mTextNode.height(this.mParentView.clientHeight)
-        mTextNode.width(this.mParentView.clientWidth)
-
-
-       mTextNode.empty()
-
-
-
-var that=this
-        let env={
-            renderer:this.mParentView.mRenderer,
-            currentNodesVisible:[],//can be left empty if below nodes function is used
-            textNode:mTextNode,
-            camera:this.mParentView.mCamera
-
-        }
-
-       if (!this.tn)
-            this.tn = TextNodes(env, {
-                maxVisibleCount: 10,
-                onNodeText: function (node) {
-
-                    if (node.name)
-                        return node.name
-
-                    return node.id
-
-                },
-                getNodes: function(){
-
-                    if (!that.useClusterText)
-                   return []
-
-                    //FIXME use only visible nodes to improve performance
-                    //TODO also have a per cluster approach for further performance improvements
-                    let root=that.getRoot()
-
-                   let res=(root&&_.isArray(root.mVisibleRootTextNodes))?root.mVisibleRootTextNodes:[]
-                    if (res==undefined) console.warn("!")
-                    return res
-
-                }
-            })
-
+        $(this.mParentView).append(this.mTextOverlay)
 
     }
-    updateRootTextNodes(nodes) {
-            this.mVisibleRootTextNodes=nodes
-    }
-
-    update(){
-        super.update()
 
 
-        if (this.tn)
-       this.tn.update();
 
-    }
+
 
 
 
