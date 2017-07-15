@@ -171,19 +171,50 @@ class ClusterTextOverlay extends HTMLElement {
         };
 
 
+
+        function getDistance(cluster){
+            let point1 = view.mCamera.position;
+            let point2 = cluster.localToWorld(new THREE.Vector3);
+            let distance = point1.distanceTo(point2);
+
+          return distance
+
+        }
+
+        function getNodesForLeaf() {
+            //return only the closest cluster
+            if (!that.possibleLeafClusters) return [];
+
+            // get closest leaf only
+
+            var res=_.map(that.possibleLeafClusters,function(leaf){
+
+            return{item:leaf,distance:getDistance(leaf)}
+            })
+            res= _.sortBy(res, [function(o) { return o.distance; }]);
+
+            //TODO nodes aren't in order so we should sort them also
+
+            let leaf1 =res[0].item;
+            return leaf1.mNodes ? leaf1.mNodes : []
+
+
+        }
+
+
         //the handler for the leaf text
         if (!this.tn)
             this.tn = TextNodesFactory(env, {
                 maxVisibleCount: 10,
                 onNodeText: (node) => node.name ? node.name : node.id,
-                getNodes: () => !this.possibleLeafClusters ? [] : this.possibleLeafClusters[0].mNodes   //return only the clostest cluster
+                getNodes:getNodesForLeaf
             });
 
 
         // TODO the bounding volume determines the visibility of the text nodes
         //TODO so currently with no volume generated properly the text nodes are invisible
 
-        
+
         //the handler for the cluster text
         this.mTextNodes = TextNodesFactory(env, {
             maxVisibleCount: 50,
@@ -191,7 +222,7 @@ class ClusterTextOverlay extends HTMLElement {
                 return node.parent.getRadius(node.parent.mNodes.length) / 3 * 10
             },//30000
             minDistance: function (node) {
-                return  node.parent.getRadius(node.parent.mNodes.length) / 3
+                return node.parent.getRadius(node.parent.mNodes.length) / 3 * 3
             }, //3000
             getNodes: function () {
                 return that.possibleClusters
@@ -212,6 +243,9 @@ class ClusterTextOverlay extends HTMLElement {
                 var mVec3 = new THREE.Vector3();
                 mVec3.setFromMatrixPosition(node.matrixWorld);
 
+                //fixing the offset/position as soon as the hull is created
+                if (node.mHull)
+                    mVec3.add(node.mHull.mBoundingBox.getCenter())
 
                 return mVec3; //node.position.clone()
             },
