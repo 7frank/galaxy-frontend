@@ -48,6 +48,17 @@
     <script src="./js/gpu-info.js"></script>
 
 
+
+    <script src="./js/f0-basic-element-3d-classes.js"></script>
+    <script src="./js/f0_nodemixin.js"></script>
+    <script src="./js/f0_linkmixin.js"></script>
+    <script src="./js/f0_TextureAnimator.js.js"></script>
+
+    <script src="./js/f1.js"></script>
+    <script src="./js/f2-zoom.js"></script>
+    <script src="./js/f5-arrows.js"></script>
+
+
     <script src="./js/force-graph-utils.js"></script>
 
     <script src="./js/gui/searchbar.js"></script>
