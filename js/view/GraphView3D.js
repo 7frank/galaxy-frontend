@@ -10,6 +10,8 @@ import View3D from "./View3D"
 import RootCluster from "../cluster/RootCluster"
 import GraphData from "../cluster/GraphData"
 
+import skyDomeImage from "./coordinates.png"
+
 
 export default
 class GraphView3D extends View3D
@@ -19,7 +21,8 @@ class GraphView3D extends View3D
     {
         super(...args);
 
-        this.mRootCluster=null
+        this.mRootCluster=null;
+
 
 
 
@@ -39,6 +42,31 @@ class GraphView3D extends View3D
     }
 
 
+
+createSkyDome()
+{
+
+    let scene=this.mScene;
+
+    var ambientLight = new THREE.AmbientLight(0x333333);
+    scene.add(ambientLight);
+    var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(5, 3, 5);
+    scene.add(dirLight);
+    var geometry = new THREE.SphereGeometry(300000, 60, 40);
+    var material = new THREE.MeshBasicMaterial();
+
+   material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
+    material.side = THREE.BackSide;
+    material.opacity=0.05;
+    material.transparent=true;
+    var skydome = new THREE.Mesh(geometry, material);
+
+    this.mSkyDome=skydome
+
+    scene.add(skydome);
+
+}
 
 
 
@@ -121,6 +149,10 @@ class GraphView3D extends View3D
     setData(mGraphData)
     {
         this.initStatic();
+
+
+        this.createSkyDome();
+
 
         if (!this.mRootCluster)
         this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
