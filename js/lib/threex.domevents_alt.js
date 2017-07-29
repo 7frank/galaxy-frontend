@@ -267,7 +267,20 @@ THREEx.DomEventsAlt.prototype._onMove	= function(eventName, mouseX, mouseY, orig
 
 	// update the picking ray with the camera and mouse position
 	vector.set( mouseX, mouseY );
-	this._raycaster.setFromCamera( vector, this._camera );
+
+ let mCamera;
+
+	if (this._camera instanceof THREE.CombinedCamera)
+	{
+
+        if (this._camera.inPerspectiveMode) mCamera=this._camera.cameraP;
+        if (this._camera.inOrthographicMode) mCamera=this._camera.cameraO;
+
+    }
+	else
+		mCamera=this._camera;
+
+	this._raycaster.setFromCamera( vector, mCamera);
 
 	//@frank4711 altering intersection from flat array will improve mouse move performance for many elements bound
     var intersects = this._raycaster.intersectObjects( this.scene.children,true );
@@ -326,7 +339,21 @@ THREEx.DomEventsAlt.prototype._onEvent	= function(eventName, mouseX, mouseY, ori
 
 	// update the picking ray with the camera and mouse position
 	vector.set( mouseX, mouseY );
-	this._raycaster.setFromCamera( vector, this._camera );	
+
+
+    let mCamera;
+
+    if (this._camera instanceof THREE.CombinedCamera)
+    {
+
+        if (this._camera.inPerspectiveMode) mCamera=this._camera.cameraP;
+        if (this._camera.inOrthographicMode) mCamera=this._camera.cameraO;
+
+    }
+    else
+        mCamera=this._camera
+
+	this._raycaster.setFromCamera( vector,mCamera );
 
 	//var intersects = this._raycaster.intersectObjects( boundObjs, true);
 
