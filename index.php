@@ -8,14 +8,11 @@
     <script src="./js/lib/papaparse.min.js"></script>
     <script src="./js/lib/d3-force-3d.bundle.min.js"></script>
     <script src="./js/lib/three.min.js"></script>
-   <!-- <script src="./js/lib/TrackballControls.js"></script> -->
+
     <script src="./js/lib/threex.domevents.js"></script>
     <script src="./js/lib/threex.domevents_alt.js"></script>
 
-    <script src="./js/THREE.MeshLine.js"></script>
-    <script src="js/lib/ConvexGeometry.js"></script>
-
-    <script src="js/lib/QuickHull.js"></script>
+    <!--   <script src="./js/THREE.MeshLine.js"></script>    -->
 
 
     <script src="./js/CameraObserverMode.js"></script>
@@ -23,14 +20,15 @@
 
     <!-- <script src="./dist/js/NodesContainer.js"></script> -->
     <script src="./build/bundle.js"></script>
-    <script src="./js/lib/SubdivisionModifier.js"></script>
+    <!--   <script src="./js/lib/SubdivisionModifier.js"></script> -->
 
 
-    <script src="./js/THREE.ArrowExt.js"></script>
-    <script src="./js/CustomAnimatedLineMesh.js"></script>
+   <!-- <script src="./js/THREE.ArrowExt.js"></script>
+       <script src="./js/CustomAnimatedLineMesh.js"></script> -->
 
 
-    <script src="./js/lib/three-trackballcontrols.min.js"></script>
+
+
     <script src="./js/data-set-loader.js"></script>
 
 
@@ -48,11 +46,10 @@
     <script src="./js/gpu-info.js"></script>
 
 
-
     <script src="./js/f0-basic-element-3d-classes.js"></script>
     <script src="./js/f0_nodemixin.js"></script>
     <script src="./js/f0_linkmixin.js"></script>
-    <script src="./js/f0_TextureAnimator.js.js"></script>
+    <script src="./js/f0_TextureAnimator.js"></script>
 
     <script src="./js/f1.js"></script>
     <script src="./js/f2-zoom.js"></script>
@@ -67,7 +64,6 @@
     <script src="./js/ParticleSystem.js"></script>
     <script src="./js/ParticleNodeGroup.js"></script>
     <script src="./js/SpecificDataUtils.js"></script>
-
 
 
     <script src="./js/AppDataService.js"></script>

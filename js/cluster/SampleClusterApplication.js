@@ -25,6 +25,26 @@ THREE.EllipsoidGeometry = function (width, height, depth, widthSegments, heightS
 THREE.EllipsoidGeometry.prototype = Object.create(THREE.Geometry.prototype);
 
 
+//--------------------------------
+
+//TODO find a better way to import libraries as simple scripts
+//NOTE:don't remove imports
+
+
+//import THREE0 from "../lib/three.min"
+
+//used by View3D
+import CombinedCamera from "../lib/CombinedCamera"
+import TrackballControls from "../lib/TrackballControls"
+
+//used by ConvexVolume
+import ConvexGeometry from "../lib/ConvexGeometry"
+import QuickHull from "../lib/QuickHull"
+
+
+// --------------------------------
+
+
 import BaseDistribution from "./distributions/BaseDistribution"
 import DefaultDistribution from "./distributions/DefaultDistribution"
 import RandomDistribution from "./distributions/RandomDistribution"
@@ -44,10 +64,12 @@ import GraphData from "./GraphData"
 import GraphView3D from "../view/GraphView3D"
 
 
-
 import BoxVolume from "./hull/BoxVolume"
 import BaseVolume from "./hull/BaseVolume"
 import ConvexVolume from "./hull/ConvexVolume"
+
+
+import ZoomUtil from "../utils/ZoomUtil"
 
 //-----------------------------------------
 //-----------DEBUG-------------------------
@@ -100,8 +122,6 @@ export class MyMain {
     }
 
 
-
-
     getRingHull(boundingBox) {
 
         let boundingSphere = new THREE.Sphere;
@@ -133,13 +153,11 @@ export class MyMain {
         return hull
     }
 
-    isDebug()
-    {
+    isDebug() {
 
-       return window.location.hash=="#debug"
+        return window.location.hash == "#debug"
 
     }
-
 
 
     setupViews() {
@@ -213,14 +231,7 @@ export class MyMain {
         var container = createContainer();
 
 
-
-
-
-
-
-
-
-        function createView(name = "View3D", speccs,isMaximised=false) {
+        function createView(name = "View3D", speccs, isMaximised = false) {
 
             function maximiseView() {
 
@@ -252,58 +263,64 @@ export class MyMain {
             mGraphView.setCaption(name);
 
 
-
-            if (that.isDebug())
-            {
-                mGraphView.maxFPS=10;
+            if (that.isDebug()) {
+                mGraphView.maxFPS = 10;
 
             }
 
-            mGraphView.showFPSCounter=that.isDebug()
+            mGraphView.showFPSCounter = that.isDebug();
 
 
             $(mGraphView)
                 .css(thumbCSS);
 
-            $(mGraphView).on("dblclick",maximiseView );
+            $(mGraphView).on("dblclick", maximiseView);
 
 
             mGraphView.setSpeccs(speccs);
 
             //TODO per view ... mGraphView.mRenderer.domElement
-            let events= new Mousetrap();
+            let events = new Mousetrap();
 
 
-           var edgesVisible=true;
-            events.bind("e",function(){
-                edgesVisible=!edgesVisible;
-                _.each(mGraphView.mRootCluster.getLeafs(),function(leaf){
-        console.log("TODO toggling edges won't work because of LOD impl")
-                    leaf.mEdgesContainer.visible=edgesVisible
-                    leaf.mEdgesContainer2.visible=edgesVisible
+            var edgesVisible = true;
+            events.bind("e", function () {
+                edgesVisible = !edgesVisible;
+                _.each(mGraphView.mRootCluster.getLeafs(), function (leaf) {
+                    console.log("TODO toggling edges won't work because of LOD impl");
+                    leaf.mEdgesContainer.visible = edgesVisible;
+                    leaf.mEdgesContainer2.visible = edgesVisible
 
                 })
 
 
             });
 
-            var infoVisible=true;
-            events.bind("h",function(){
-                infoVisible=!infoVisible;
+            var infoVisible = true;
+            events.bind("h", function () {
+                infoVisible = !infoVisible;
                 $(".info-panel").toggle(infoVisible)
 
 
             });
 
-
             //FIXME
-       if (isMaximised)
-           maximiseView.bind(mGraphView)()
-           /*$(mGraphView).on("loaded",function (){
+            if (isMaximised)
+                maximiseView.bind(mGraphView)();
+            /*$(mGraphView).on("loaded",function (){
 
-                     maximiseView.bind(mGraphView)()
-           } );
-*/
+             maximiseView.bind(mGraphView)()
+             } );
+             */
+
+            $(window).on("resize", _.throttle(function () {
+                //TODO use native events
+
+                if (!mGraphView.isMaximised()) return;
+
+                $(mGraphView).trigger("resize")
+                //console.warn("TODO handle window resize + (f11)")
+            }, 100));
 
 
             return mGraphView
@@ -314,49 +331,46 @@ export class MyMain {
         let views = [];
 
 
-
-        if(that.isDebug()) {
+        if (that.isDebug()) {
 
 
             //NOTE: target rendering
             var speccs = this.getForceSpeccs();
-            let view2 = createView("new force-graph", speccs,true)
+            let view2 = createView("new force-graph", speccs, true)
                 .loadDataSet(this.getDSByID(1));
             views.push(view2);
 
 
             //TODO views should only be loaded when visible
-/*
-            var speccs = this.getPossibleClusterSpeccsArray();
-            let view1 = createView("dist test", speccs)
-                .loadDataSet(this.getDSByID(1));
-            views.push(view1)
-*/
+            /*
+             var speccs = this.getPossibleClusterSpeccsArray();
+             let view1 = createView("dist test", speccs)
+             .loadDataSet(this.getDSByID(1));
+             views.push(view1)
+             */
 
 
+            /*
 
-/*
+             let view3 = createView("node distribution test case",
+             [{
+             distribution: new BaseDistribution(2000, 3),
+             options: { hull: new BoxVolume()}
+             }])
+             .loadDataSet(this.getDSByID(1))
 
-                        let view3 = createView("node distribution test case",
-                            [{
-                                 distribution: new BaseDistribution(2000, 3),
-                                options: { hull: new BoxVolume()}
-                            }])
-                            .loadDataSet(this.getDSByID(1))
-
-                        views.push(view3)
-       */
+             views.push(view3)
+             */
 
 
-/*
+            /*
 
-                        var speccs = this.get2DChartSortedSpeccsArray()
+             var speccs = this.get2DChartSortedSpeccsArray()
 
-                        let view4 = createView("2d-Barchart", speccs)
-                            .loadDataSet(this.getDSByID(1))
-                        views.push(view4)
-            */
-
+             let view4 = createView("2d-Barchart", speccs)
+             .loadDataSet(this.getDSByID(1))
+             views.push(view4)
+             */
 
 
             /*  var speccs = this.getPossibleClusterSpeccsArray();
@@ -376,22 +390,18 @@ export class MyMain {
 
 
             //NOTE: target rendering
-             var speccs = this.getForceSpeccs();
-             let view2 = createView("new force-graph", speccs,true)
-             .loadDataSet(this.getDSByID(0));
-             views.push(view2)
-
+            var speccs = this.getForceSpeccs();
+            let view2 = createView("new force-graph", speccs, true)
+                .loadDataSet(this.getDSByID(0));
+            views.push(view2)
 
 
         }
 
 
-
-
-
         _.each(views, function (view) {
-            if ($(view).parent().length==0)
-            container.append(view)
+            if ($(view).parent().length == 0)
+                container.append(view)
         })
 
 
@@ -419,7 +429,7 @@ export class MyMain {
             {
                 generator: countrySetGenerator,
                 distribution: new BaseDistribution(4000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull:  BoxVolume}
+                options: {minClusterSize: 15, hull: BoxVolume}
             },
             {
                 generator: industrySetGenerator,
@@ -458,7 +468,7 @@ export class MyMain {
                 distribution: new BaseDistribution(2000, 2).onSort(mySort),
                 options: {minClusterSize: 15, hull: BoxVolume}
             },
-            {distribution: new BaseDistribution(400, 2),  options: { hull:  new BoxVolume()}}
+            {distribution: new BaseDistribution(400, 2), options: {hull: new BoxVolume()}}
 
 
         ]
@@ -485,9 +495,9 @@ export class MyMain {
         //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1,     options: {minClusterSize: 5, hull: BoxVolume}},
-            {generator: industrySetGenerator, distribution: sample2,      options: {minClusterSize: 5, hull: BoxVolume}},
-            {distribution: sample3,      options: {hull: BoxVolume}}
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 5, hull: BoxVolume}},
+            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 5, hull: BoxVolume}},
+            {distribution: sample3, options: {hull: BoxVolume}}
 
 
         ]
@@ -495,16 +505,16 @@ export class MyMain {
     }
 
 
-    getForceSpeccs2DChangesOnly(){
+    getForceSpeccs2DChangesOnly() {
 
-        let speccs=this.getForceSpeccs()
+        let speccs = this.getForceSpeccs();
 
 
         speccs[0].distribution = new BaseDistribution(45000, 2); // countries get placed equally on a plane of size 15k X 15k
         speccs[1].distribution = new BaseDistribution(10000, 2);// industries within countries use the Force-Graph approach to position elements
         speccs[2].distribution = new BaseDistribution(500, 3);//same g
 
-           return speccs
+        return speccs
 
     }
 
@@ -533,7 +543,6 @@ export class MyMain {
         }
 
 
-
         //there are several distribution classes defined
         //these handle how the current cluster positions it's sub-clusters when rendering
         //basically a distribution function does have 2 parameters
@@ -556,21 +565,83 @@ export class MyMain {
         //but is necessary for other components like picking and tet rendering
 
 
-        let rootHull=this.isDebug()?BoxVolume:BaseVolume;
+        let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
 
         return [
 
-           {
+            {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: rootHull }
+                options: {minClusterSize: 40, hull: rootHull}
             },
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
-                options: {minClusterSize: 15,hull:ConvexVolume }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
+                options: {minClusterSize: 15, hull: ConvexVolume}// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: nodesWithinIndustryDistribution, hull: BoxVolume }  // this.getEllipsoidHull.bind(this)
+            , {distribution: nodesWithinIndustryDistribution, hull: BoxVolume}  // this.getEllipsoidHull.bind(this)
+            //FIXME getEllipsoidHullis not used
+
+        ]
+
+    }
+
+
+    get2DPlaneForceSpeccs() {
+
+
+        //the function that is called to create the  country groups
+        function countrySetGenerator(groupFunction, node) {
+            // the group function takes 2 arguments
+            // the first is the value that will determine the key of the group
+            //in this case node.group contains country names
+            //the second argument is the node itself that is passed into the group created
+            groupFunction(node.group, node)
+        }
+
+        //same goes for the industy clusters that are sub-clusters of the country clusters in this example
+        function industrySetGenerator(groupFunction, node) {
+            groupFunction(node.industry, node)
+        }
+
+
+        //there are several distribution classes defined
+        //these handle how the current cluster positions it's sub-clusters when rendering
+        //basically a distribution function does have 2 parameters
+        // the first is the maximum size in x/y/z direction the elements within can be placed
+        // the second defined the dimensions 1/2/3 that get used for the element placement
+
+
+        //  let countryDistribution = new BaseDistribution(45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new BaseDistribution(80000, 2);// industries within countries use the Force-Graph approach to position elements
+        let nodesWithinIndustryDistribution = new ForceGraphDistribution(1000, 2);//same goes for the nodes within each industry
+
+        //the final configuration for rendering
+        //it contains an additional options attribute per array entry
+
+        // @param options.minClusterSize ... is the lower bound for the nodes within the cluster
+        // if the cluster has fewer elements all clusters previously generated are places within this "other" cluster
+        // @param options. defaultMergeGroupName the name of the "other" cluster can be changed by this value
+        // @param options.hull can be used to add a volume around the cluster
+        //by default if no value gets set, the BaseVolume class is used which is invisible by default
+        //but is necessary for other components like picking and tet rendering
+
+
+        let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
+
+        return [
+
+            /* {
+             generator: countrySetGenerator,
+             distribution: countryDistribution,
+             options: {minClusterSize: 40, hull: rootHull }
+             },*/
+            {
+                generator: industrySetGenerator,
+                distribution: industryDistribution,
+                options: {minClusterSize: 15, hull: ConvexVolume}// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
+            }
+            , {distribution: nodesWithinIndustryDistribution, hull: BoxVolume}  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
 
         ]
@@ -589,14 +660,23 @@ export class MyMain {
     }
 
 //-------------------------------
-     getCurrentView()
-    {
+
+
+    zoomToPosition(position, onComplete) {
+
+
+        let view = this.getCurrentView();
+
+        ZoomUtil.moveToPosition(position, view.mCamera, view.mControls, 0, onComplete)
+    }
+
+
+    getCurrentView() {
         return $(".view-3d.view-3d-maximised").get(0)
 
     }
 
-    setGraph2D()
-    {
+    setGraph2D() {
 
 
         /**
@@ -610,10 +690,11 @@ export class MyMain {
 
             //   let speccs=this.getPossibleClusterSpeccsArray();
 
-         let speccs=this.getForceSpeccs2DChangesOnly();
+            //  let speccs=this.getForceSpeccs2DChangesOnly();
+        let speccs = this.get2DPlaneForceSpeccs();
 
-        let view= this.getCurrentView();
-        let rootCluster=view.mRootCluster;
+        let view = this.getCurrentView();
+        let rootCluster = view.mRootCluster;
 
         rootCluster.cleanUpLeafs();
         //clean up previous clusters
@@ -622,39 +703,51 @@ export class MyMain {
 
         rootCluster.applyClustering(speccs);
 
+        //TODO
+        $(view).trigger("graph-changed");
 
-       // doZoomToPos(new THREE.Vector3(0,0,10000));
-        //view.mControls.target.set(new THREE.Vector3(0,0,0));
-      //  view.mControls.noRotate=true;
-        this.getCurrentView().mRootCluster.zoomToCluster()
 
+        this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
+            //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
+            this.getCurrentView().mRootCluster.zoomToCluster(150000)
+
+        });
+
+        view.mControls.target.set(new THREE.Vector3(0, 0, 0));
+        view.mControls.noRotate = true;
+        view.mControls.reset();
+
+
+
+        view.mSkyDome.visible=false;
 
     }
 
 
+    setGraph3D() {
 
-    setGraph3D()
-    {
-
-        let speccs=this.getForceSpeccs();
-        let view= this.getCurrentView();
-        let rootCluster=view.mRootCluster;
+        let speccs = this.getForceSpeccs();
+        let view = this.getCurrentView();
+        let rootCluster = view.mRootCluster;
 
         rootCluster.cleanUpLeafs();
         //clean up previous clusters
         BaseCluster3D.cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
 
 
-
         rootCluster.applyClustering(speccs);
 
-        view.mControls.noRotate=false;
+        //TODO text is shown to early on update
+        $(view).trigger("graph-changed");
 
 
-    //    doZoomToPos(new THREE.Vector3(0,0,0),10000);
+        view.mControls.noRotate = false;
+
+        view.mSkyDome.visible=true;
+
+
         this.getCurrentView().mRootCluster.zoomToCluster()
     }
-
 
 
 }
