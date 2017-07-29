@@ -1,12 +1,14 @@
 /**
  *	@author zz85 / http://twitter.com/blurspline / http://www.lab4games.net/zz85/blog
  *
- *	A general perpose camera, for setting FOV, Lens Focal Length,
+ *	A general purpose camera, for setting FOV, Lens Focal Length,
  *		and switching between perspective and orthographic views easily.
  *		Use this only if you do not wish to manage
  *		both a Orthographic and Perspective Camera
  *
  */
+
+
 
 
 THREE.CombinedCamera = function ( width, height, fov, near, far, orthoNear, orthoFar ) {
@@ -57,10 +59,6 @@ THREE.CombinedCamera.prototype.toPerspective = function () {
 	this.inOrthographicMode = false;
 
 
-	this.isPerspectiveCamera=true;
-    this.isOrthographicCamera=false;
-
-
    // The renderer needs world matrix data for the raycasting to work. Make the following modification to the CombinedCamera code:
 
 	// Add to the .toPerspective() method:
@@ -106,15 +104,14 @@ THREE.CombinedCamera.prototype.toOrthographic = function () {
 	this.inPerspectiveMode = false;
 	this.inOrthographicMode = true;
 
-    this.isPerspectiveCamera=false;
-   this.isOrthographicCamera=true;
-
-    // and to the .toOrthographic() method add:
+     // and to the .toOrthographic() method add:
     this.matrixWorldInverse = this.cameraO.matrixWorldInverse; //
     this.matrixWorld = this.cameraO.matrixWorld;               //
 
 
 };
+
+
 
 THREE.CombinedCamera.prototype.copy = function ( source ) {
 
@@ -177,11 +174,13 @@ THREE.CombinedCamera.prototype.clearViewOffset = function() {
 
 THREE.CombinedCamera.prototype.setSize = function( width, height ) {
 
-	this.cameraP.aspect = width / height;
+	this.cameraP.aspect =this.aspect= width / height;
 	this.left = - width / 2;
 	this.right = width / 2;
 	this.top = height / 2;
 	this.bottom = - height / 2;
+
+
 
 };
 
@@ -190,17 +189,51 @@ THREE.CombinedCamera.prototype.setFov = function( fov ) {
 
 	this.fov = fov;
 
-	if ( this.inPerspectiveMode ) {
-
-		this.toPerspective();
-
-	} else {
-
-		this.toOrthographic();
-
-	}
+	this.update();
 
 };
+
+
+
+THREE.CombinedCamera.prototype.setFar = function( far ) {
+
+	this.cameraP.far=this.far=far;
+    this.cameraO.far=this.far=far;
+    this.update();
+
+};
+
+THREE.CombinedCamera.prototype.setNear = function( near ) {
+
+    this.cameraP.near=this.near=near;
+    this.update();
+
+};
+
+
+
+
+THREE.CombinedCamera.prototype.update = function(  ) {
+
+
+    if ( this.inPerspectiveMode ) {
+
+        this.toPerspective();
+
+    } else {
+
+        this.toOrthographic();
+
+    }
+
+};
+
+
+
+
+
+
+
 
 // For maintaining similar API with PerspectiveCamera
 
@@ -243,17 +276,7 @@ THREE.CombinedCamera.prototype.setLens = function ( focalLength, filmGauge ) {
 THREE.CombinedCamera.prototype.setZoom = function( zoom ) {
 
 	this.zoom = zoom;
-
-	if ( this.inPerspectiveMode ) {
-
-		this.toPerspective();
-
-	} else {
-
-		this.toOrthographic();
-
-	}
-
+	this.update();
 };
 
 THREE.CombinedCamera.prototype.toFrontView = function() {
