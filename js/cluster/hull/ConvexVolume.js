@@ -5,11 +5,7 @@
 
 import BoxVolume from "./BoxVolume"
 
-/**
- *
- *
- *
- */
+
 
 export default
 class ConvexVolume extends BoxVolume {
@@ -57,12 +53,6 @@ class ConvexVolume extends BoxVolume {
 
 
     createFromBoundingBox(vertices, boundingBox) {
-//FIXME performance myMod gets called too often initially
-
-
-
-
-
 
         console.log("FIXME convexVolume",vertices,boundingBox)
             //getVerticesFormLeaf in adjustHullSize does generate false values sometimes maybe due to some runtime concurrency problem

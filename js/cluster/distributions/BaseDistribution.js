@@ -134,7 +134,7 @@ export default  class BaseDistribution {
                         if (onStepComplete)
                             onStepComplete()
 
-                       // console.warn("Step",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
+                        // console.warn("Step",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
                     }
 
                     onNodePositionChange(origPos, mc)
@@ -145,7 +145,7 @@ export default  class BaseDistribution {
                     if (notTweenFinished) {
                         notTweenFinished = false;
                         that.stop();
-                     //   console.warn("onEnd",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
+                        //   console.warn("onEnd",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
                         if (onEnd) onEnd()
 
 
@@ -156,6 +156,7 @@ export default  class BaseDistribution {
 
                 })
                 .start();
+
 
             //------------------------
             //------------------------
@@ -168,12 +169,13 @@ export default  class BaseDistribution {
 
 
         mTimeout = requestAnimationFrame(animate);
-//FIXME stop updating tweens if no longer necessary
+
         function animate(time) {
 
-            //console.log("anmiate",mTimeout)
+
             _.each(tweens, function (tween) {
                 tween.update(time)
+                //  tween.end(time)
 
             })
 

@@ -5,6 +5,7 @@
 
 //Feature 2 zoom and search
 //@deprecated use ZoomUtil instead
+//currently still in use in f1.js
 function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
 
 

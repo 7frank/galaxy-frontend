@@ -10,6 +10,9 @@ import EdgeUtil from "./EdgeUtil"
 /**
  * NOTE: the nodes for this container need to be child elements of the  same cluster
  *
+ *  TODO the edgescontainer should have some sort of line factory which we can plugin a specific line implementation
+ *  this way we can have something like the basic line which does have a geometry for each line
+ *  and alternativly some implementation like the line-mesh
  *
  */
 
