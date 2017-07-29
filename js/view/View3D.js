@@ -1,77 +1,206 @@
 /**
  * Created by Frank on 13.06.2017.
+ *
+ * a view class to be able to use multiple views and switch between them
+ * also can limit fps to lower gpu impact
+ * see shadertoy for possible usage as thumbnail or preview
  */
 
 
-//a view class to be able to use multiple views and switch between them
-//limit fps
-//see shadertoy for usage as thumbnail and such
+
+
 
 
 export default
-class View3D extends HTMLElement
-{
+class View3D extends HTMLElement {
 
-    constructor(...args){
-    super(...args);
+    constructor(...args) {
+        super(...args);
 
 
         this.createCSSRule();
-        this.mTime=-1;
-        this.mActualFPS=0;
-        this.showFPSCounter=false;
+        this.mTime = -1;
+        this.mActualFPS = 0;
+        this.showFPSCounter = false;
 
-    //   this.initStatic()
+        //   this.initStatic()
 
         // Setup renderer
         this.mRenderer = new THREE.WebGLRenderer({
             antialias: true
         });
 
+        $(this).on("resize", () => this.resizeCanvas())
+
+
+    }
+
+
+    //FIXME have accesss methods for camera controls and domEvents to be able to change controls and camera mode
+
+    initCamera() {
+
+        // Setup camera
+         this.mCameraP = new THREE.PerspectiveCamera();
+
+
+        this.mCameraO = new THREE.OrthographicCamera();
+        this.mCameraO.far = 5000000;
+        this.mCameraO.lookAt(this.mScene.position);
+        this.mCameraO.position.z = 150000;
+
+
+
+        this.mCamera =    new THREE.CombinedCamera();
+
+       // this.mCamera =   this.mCameraO// new THREE.CombinedCamera();
+
+
+        if (this.mCamera instanceof THREE.CombinedCamera) {
+            this.mCamera.setFar(5000000);
+
+            this.mCamera.setFov(50);
+        }
+        else
+            this.mCamera.far = 5000000;
+
+
+        this.mCamera.lookAt(this.mScene.position);
+        this.mCamera.position.z = 150000;
+
+
+    }
+
+    setControls() {
+        // Add camera interaction
+        this.mControls = new THREE.TrackballControls(this.mCamera, this.mRenderer.domElement);
+        // this.mControls.rotateSpeed = 0.3
+        this.mControls.maxDistance = Math.min(this.mCamera.far,200000);
+
+
+        this.mControls.addEventListener("change", (...args) => $(this).trigger("change", ...args));
+
+
+    }
+
+    setDomEvents() {
+
+        //throttle move events to about 50 fps
+        //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
+        THREEx.DomEventsAlt.prototype._onMouseMove = _.throttle(function (domEvent)
+            //THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
+        {
+            var mouseCoords = this._getRelativeMouseXY(domEvent);
+            this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
+            this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
+            this._onMove('mouseout', mouseCoords.x, mouseCoords.y, domEvent);
+        }, 40);  //25 (f)ps
+
+        //init domEnvents
+        //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
+        this.mDomEvents = new THREEx.DomEventsAlt(this.mCamera, this.mRenderer.domElement, this.mScene);
+
+        //Note: have a factory in case we need this kind of injection multiple times
+        // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations
+
 
     }
 
 
 
-    //TODO remove little redundancy
-    createCSSRule()
+     updateCamera()
+     {
+         this.mCamera.updateProjectionMatrix();
+
+
+     //update controls
+     this.mControls.object=this.mCamera
+
+     //update domEvents camera with current camera
+     this.mDomEvents._camera=this.mCamera
+
+
+     }
+
+    set2D()
     {
+
+     //   this.mCameraO.copy( this.mCamera);
+
+        this.mCamera=this.mCameraO
+
+
+
+        this.updateCamera()
+
+    }
+
+    set3D()
+    {
+      //  this.mCameraP.copy( this.mCamera);
+
+        this.mCamera=this.mCameraP
+
+        this.updateCamera()
+
+    }
+
+
+
+
+
+
+    //TODO remove little redundancy
+    createCSSRule() {
+
         var style = document.createElement('style');
         style.type = 'text/css';
-        style.innerHTML = '.view-3d-maximised { position: absolute !important;   top: 0  !important;   left: 0  !important;   height: 100% !important;    width: 100% !important; }';
+        style.innerHTML = '.view-3d-maximised {  border: 0px solid rgba(128, 128, 128, 0.5) !important; margin: 0 !important; position: absolute !important;   top: 0  !important;   left: 0  !important;   height: 100% !important;    width: 100% !important; }';
         document.getElementsByTagName('head')[0].appendChild(style);
-
 
 
     }
 
 
     resizeCanvas() {
-    if (this.mRenderer) {
-        this.mRenderer.setSize(this.clientWidth, this.clientHeight);
-        this.mCamera.aspect = this.clientWidth /this.clientHeight;
-        this.mCamera.updateProjectionMatrix();
-    }
+        if (this.mRenderer) {
+            this.mRenderer.setSize(this.clientWidth, this.clientHeight);
+            this.mCamera.aspect = this.clientWidth / this.clientHeight;
+
+
+            if (this.mCamera instanceof THREE.CombinedCamera)
+                this.mCamera.setSize(this.clientWidth, this.clientHeight);
+            this.mCamera.updateProjectionMatrix();
+
+            //adjust orthographic camera
+        let camFactor=2
+            this.mCameraO.left = - this.clientWidth / camFactor;
+            this.mCameraO.right =  this.clientWidth / camFactor;
+            this.mCameraO.top =  this.clientHeight / camFactor;
+            this.mCameraO.bottom = - this.clientHeight / camFactor;
+            this.mCameraO.updateProjectionMatrix();
+
+
+        }
 
         if (this.mRenderer)
-            this.mControls.panSpeed =  this.mControls.rotateSpeed = 1600/this.clientWidth*0.3
+            this.mControls.panSpeed = this.mControls.rotateSpeed = 1600 / this.clientWidth * 0.3
 
 
     }
 
 
-   /* get scene() {
-        return ""+ this.mScene
-    }
-    set scene(scene) {
-        this.mScene=scene
-    }
-*/
-    setCaption(text)
-    {
+    /* get scene() {
+     return ""+ this.mScene
+     }
+     set scene(scene) {
+     this.mScene=scene
+     }
+     */
+    setCaption(text) {
 
 
-        let captionCSS= {
+        let captionCSS = {
             "pointer-events": "none",
             position: "relative",
             padding: "1em",
@@ -85,13 +214,11 @@ class View3D extends HTMLElement
         };
 
         if (!this.mCaption)
-            this.mCaption=$("<span></span>").html(this.name).css(captionCSS);
+            this.mCaption = $("<span></span>").html(this.name).css(captionCSS);
 
         this.mCaption.html("").append(text);
         return this
     }
-
-
 
 
     /**
@@ -100,18 +227,18 @@ class View3D extends HTMLElement
      */
     initStatic() {
 
-         if (this._inited_static_) return;
-         var that=this;
+        if (this._inited_static_) return;
+        var that = this;
 
 
-        this.mFPS=0.5;
-        this.minFPS=this.minFPS||0;
-        this.maxFPS=this.maxFPS||144;
+        this.mFPS = 0.5;
+        this.minFPS = this.minFPS || 0;
+        this.maxFPS = this.maxFPS || 144;
 
 
-        this.mLastFrameTime=-1;
+        this.mLastFrameTime = -1;
 
-        let captionCSS= {
+        let captionCSS = {
             "pointer-events": "none",
             position: "relative",
             padding: "1em",
@@ -124,106 +251,71 @@ class View3D extends HTMLElement
             "z-index": 1
         };
 
-    if (!this.mCaption)
-        this.mCaption=$("<span></span>").html(this.name).css(captionCSS);
+        if (!this.mCaption)
+            this.mCaption = $("<span></span>").html(this.name).css(captionCSS);
 
-        $(this).append(   this.mCaption).addClass("view-3d");
-
-
-
-        // Add nav info section
-
-
-        //createTooltip()
-
-        // Setup camera
-        this.mCamera = new THREE.PerspectiveCamera();
-        this.mCamera.far = 200000;
+        $(this).append(this.mCaption).addClass("view-3d");
 
 
         // Setup scene
 
         this.mScene = new THREE.Scene();
 
+        // Add nav info section
+        //createTooltip()
 
+        this.initCamera();
 
-        this.mCamera.lookAt(this.mScene.position);
-
-        this.mCamera.position.z = 150000;
-
-
-
-
-        this.mRenderer.setClearColor( 0x000000 );
-        this.mRenderer.setPixelRatio( window.devicePixelRatio );
+        this.mRenderer.setClearColor(0x000000);
+        this.mRenderer.setPixelRatio(window.devicePixelRatio);
 
         this.appendChild(this.mRenderer.domElement);
 
 
-
-
-        $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"});
+        $(this.mRenderer.domElement).css({position: "absolute", width: "100%", height: "100%"});
 
 
         //init basic keyboard io
-      //FIXME this probably interferes with domEvents here..
+        //FIXME this probably interferes with domEvents here..
         /*
 
          this.mOtherEvents = new Mousetrap(this.mRenderer.domElement);
-          //  this.mOtherEvents
-            Mousetrap .bind("shift+r",function(e){
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("actualFPS",   that.mActualFPS)
+         //  this.mOtherEvents
+         Mousetrap .bind("shift+r",function(e){
+         e.preventDefault();
+         e.stopPropagation();
+         console.log("actualFPS",   that.mActualFPS)
 
-        })*/
+         })*/
 
-        this.mFpsCounter=$("<span     style='color: white;position: absolute;' >");
+        this.mFpsCounter = $("<span     style='color: white;position: absolute;' >");
         $(this).append(this.mFpsCounter);
 
 
         //------------------------------------------------
-        //throttle move events to about 50 fps
-        //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
-        THREEx.DomEventsAlt.prototype._onMouseMove	=_.throttle(function(domEvent)
-        //THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
-        {
-            var mouseCoords = this._getRelativeMouseXY(domEvent);
-            this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
-            this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
-            this._onMove('mouseout' , mouseCoords.x, mouseCoords.y, domEvent);
-        },40);  //25 (f)ps
-
-        //init domEnvents
-        //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
-        this.mDomEvents = new THREEx.DomEventsAlt(this.mCamera,this.mRenderer.domElement,this.mScene);
-
-        //Note: have a factory in case we need this kind of injection multiple times
-       // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations
-
+        this.setDomEvents();
 
         //------------------------------------------------
 
 
-
         //FIXME binding events will interfere with controls
-        $(this.mRenderer.domElement).on("mouseover",function(e){
+        $(this.mRenderer.domElement).on("mouseover", function (e) {
 
             if (that.isMaximised()) return;
 
             e.stopPropagation();
             that.setActive();
 
-            $(that).attr("hasFocus",true);
+            $(that).attr("hasFocus", true);
 
 
-            that.mCaption.stop(true,false).fadeOut(200)
+            that.mCaption.stop(true, false).fadeOut(200)
 
 
         });
 
 
-        $(this.mRenderer.domElement).on("mouseout",function(e) {
+        $(this.mRenderer.domElement).on("mouseout", function (e) {
 
             if (that.isMaximised()) return;
 
@@ -233,10 +325,10 @@ class View3D extends HTMLElement
             $(that).removeAttr("hasFocus");
             if (!$(that).hasClass("view-3d-maximised")) {
 
-            that.mCaption.stop(true, false).delay(400).fadeIn();
+                that.mCaption.stop(true, false).delay(400).fadeIn();
 
-            //keep maximised element active or whatever state it currently holds
-            that.setInactive();
+                //keep maximised element active or whatever state it currently holds
+                that.setInactive();
 
 
             }
@@ -244,105 +336,85 @@ class View3D extends HTMLElement
         });
 
 
-        // Add camera interaction
-        this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
-       // this.mControls.rotateSpeed = 0.3
-
-        this.mControls.maxDistance = this.mCamera.far;
-
-
-
-
+        this.setControls();
 
         this.resizeCanvas();
 
-       this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  );
 
+        this._inited_static_ = true;
 
-
-
-
-
-
-        this._inited_static_=true;
-
-    return this
+        return this
 
     }
 
-         // Kick-off renderer
+    // Kick-off renderer
     animate() {
 
-        var initialFrames=1;
-        var that=this;
-        var accTime=0,accFrames=0;
+        var initialFrames = 1;
+        var that = this;
+        var accTime = 0, accFrames = 0;
 
-      function animate(time) {
-        that.mTime=time;
-
-
-          initialFrames--;
-          if (that.mFPS==0) {
-
-              if (initialFrames<0)
-              {
-                  that.mFrameId = requestAnimationFrame(animate);
-                  return;
-              }
-          }
-          else {
-
-              let nextTime = that.mLastFrameTime + (1000 / that.mFPS);
-              if (nextTime > time) {
-
-                  that.mFrameId = requestAnimationFrame(animate);
-                  return;
-              }
-          }
+        function animate(time) {
+            that.mTime = time;
 
 
-          //count frames
-          accTime+=time-that.mLastFrameTime;
-          accFrames++;
+            initialFrames--;
+            if (that.mFPS == 0) {
 
-          if (accTime>1000)
-          {
-              that.mActualFPS=accFrames;
+                if (initialFrames < 0) {
+                    that.mFrameId = requestAnimationFrame(animate);
+                    return;
+                }
+            }
+            else {
 
-              if (that.showFPSCounter)
-              that.mFpsCounter.html(that.mActualFPS);
+                let nextTime = that.mLastFrameTime + (1000 / that.mFPS);
+                if (nextTime > time) {
 
-              accTime=0;
-              accFrames=0;
-
-
-          }
-
-
-
-          that.mLastFrameTime = time;
-
-          that.mControls.update();
+                    that.mFrameId = requestAnimationFrame(animate);
+                    return;
+                }
+            }
 
 
+            //count frames
+            accTime += time - that.mLastFrameTime;
+            accFrames++;
 
-          $(that).trigger("before-render",time);
-         // $(that).trigger("animate")
+            if (accTime > 1000) {
+                that.mActualFPS = accFrames;
 
-          that.mRenderer.render(that.mScene, that.mCamera);
+                if (that.showFPSCounter)
+                    that.mFpsCounter.html(that.mActualFPS);
 
-          $(that).trigger("after-render",time);
+                accTime = 0;
+                accFrames = 0;
 
-          that.mFrameId = requestAnimationFrame(animate);
-      }
+
+            }
+
+
+            that.mLastFrameTime = time;
+
+            that.mControls.update();
+
+
+            $(that).trigger("before-render", time);
+            // $(that).trigger("animate")
+
+            that.mRenderer.render(that.mScene, that.mCamera);
+
+            $(that).trigger("after-render", time);
+
+            that.mFrameId = requestAnimationFrame(animate);
+        }
 
         animate(-1)
 
     }
 
 
-    add(object3D)
-    {
+    add(object3D) {
         this.mScene.add(object3D)
 
     }
@@ -351,16 +423,16 @@ class View3D extends HTMLElement
     maximise() {
         $(this).addClass("view-3d-maximised");
 
-     this.mCaption.fadeOut();
+        this.mCaption.fadeOut();
 
         this.setActive()
 
 
     }
 
-    isMaximised(){
+    isMaximised() {
 
-     return   $(this).hasClass("view-3d-maximised")
+        return $(this).hasClass("view-3d-maximised")
 
     }
 
@@ -374,50 +446,45 @@ class View3D extends HTMLElement
     }
 
 
-
-
-
-    setActive()
-    {
+    setActive() {
 
         //fps
-        this.mFPS=this.maxFPS;
+        this.mFPS = this.maxFPS;
 
         this.resizeCanvas();
         this.start();
 
     }
 
-    setInactive()
-    {
-      //  $(this).removeClass("view-3d-maximised")
-        this.mFPS=this.minFPS;
+    setInactive() {
+        //  $(this).removeClass("view-3d-maximised")
+        this.mFPS = this.minFPS;
 
         this.resizeCanvas()
     }
 
 
-    start(){
+    start() {
 
-    this.stop();
+        this.stop();
 
-     this.animate()
+        this.animate()
 
 
     }
 
-    stop(){
-        window.cancelAnimationFrame( this.mFrameId)
+    stop() {
+        window.cancelAnimationFrame(this.mFrameId)
     }
 
-    resume(){
+    resume() {
 
-       this.start()
+        this.start()
 
     }
 
 
-    show(){
+    show() {
         this.resume()
 
 
@@ -428,7 +495,7 @@ class View3D extends HTMLElement
     }
 
 
-    connectedCallback(){
+    connectedCallback() {
 
         this.createTooltip();
 
@@ -445,14 +512,14 @@ class View3D extends HTMLElement
     createTooltip() {
 
         // Setup tooltip
-        if ( this.toolTipElem ) return;
+        if (this.toolTipElem) return;
 
         this.toolTipElem = document.createElement('div');
         this.toolTipElem.classList.add('graph-tooltip');
 
         $(this.toolTipElem).css({
-            "z-index":1,
-            position:"relative",
+            "z-index": 1,
+            position: "relative",
             "user-select": "none"
         });
 
@@ -475,7 +542,7 @@ class View3D extends HTMLElement
                     y: ev.pageY - offset.top
                 };
             this.mouse.x = (relPos.x / this.clientWidth) * 2 - 1;
-            this.mouse.y =  - (relPos.y / this.clientHeight) * 2 + 1;
+            this.mouse.y = -(relPos.y / this.clientHeight) * 2 + 1;
             //console.log(offset);
             // Move tooltip
             this.toolTipElem.style.top = (relPos.y - 40) + 'px';
@@ -501,13 +568,11 @@ class View3D extends HTMLElement
      *
      * @param text
      */
-    setTooltip(text)
-    {
+    setTooltip(text) {
 
         $(this.toolTipElem).html("").append(text).show()
 
     }
-
 
 
 }

@@ -155,25 +155,38 @@ class RootCluster extends Cluster3DExtended {
         this.mParentView=view3D
 
 
-        this.mTextOverlay=$("<cluster-text-overlay>");
 
-        $(this.mParentView).append(this.mTextOverlay)
 
     }
 
 
 
+   resetTextOverlay(){
 
+
+        if (this.mTextOverlay) this.mTextOverlay.remove()
+
+       this.mTextOverlay=$("<cluster-text-overlay>");
+
+       $(this.mParentView).append(this.mTextOverlay)
+
+   }
 
 
 
 
     applyClustering(mClusteringSpeccsArray) {
 
-        this.storeParentPositionInNodes()
+       //FIXME transitions betweens graphs
+      //this.storeParentPositionInNodes()
         super.applyClustering(mClusteringSpeccsArray)
 
-        this.restoreNodePositionFromExParent()
+        this.resetTextOverlay()
+
+
+
+
+       // this.restoreNodePositionFromExParent()
     }
 
 

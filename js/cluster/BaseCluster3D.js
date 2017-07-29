@@ -111,6 +111,9 @@ class BaseCluster3D extends BaseNode {
 
             let vis= (1-mLOD)/2;
 
+
+
+
             this.mChildClustersEdgesMesh.material.opacity=vis;
             this.mChildClustersEdgesMesh.material.visible=vis>0.05 && vis<0.9;
 
@@ -200,15 +203,12 @@ class BaseCluster3D extends BaseNode {
             }
 
 
+
+            cluster.removeEdges();
+
+
             if (cluster == self) return;//don't detach the current root element
 
-
-            if (cluster.mChildClustersEdges) cluster.mChildClustersEdges = null; //delete edge references
-            if (cluster.mChildClustersEdgesMesh) {
-                cluster.parent.remove( cluster.mChildClustersEdgesMesh)
-                cluster.mChildClustersEdgesMesh = null; //delete edge-mesh  references
-
-            }
 
             if (cluster.parent) {
 
@@ -431,10 +431,13 @@ class BaseCluster3D extends BaseNode {
         _.each(this.mClusters, function (childCluster) {
             childCluster.on("hull-updated", _.throttle(function () {
                 that.adjustHullSize();
+
+                that.addChildClusterEdgeMesh();
+                that.updateChildClusterEdgeMeshWithHull();
+
                 that.trigger("hull-updated");
             },50, {trailing: true, leading: false}))  //if leading is true it won't build up the hulls in a progressive manner
         });
-
 
 
 
@@ -447,6 +450,93 @@ class BaseCluster3D extends BaseNode {
     }
 
 
+
+    removeEdges()
+    {
+
+        if (this.mChildClustersEdges) this.mChildClustersEdges = null; //delete edge references
+        if (this.mChildClustersEdgesMesh) {
+            this.mChildClustersEdgesMesh.geometry.dispose();
+
+            this.remove( this.mChildClustersEdgesMesh)
+            this.mChildClustersEdgesMesh = null; //delete edge-mesh  references
+
+        }
+
+    }
+
+
+
+
+    /**
+     * updates the edges of the clusters as soon as the hullf feature is rendered
+     *
+     *
+     * @param options
+     */
+
+
+    updateChildClusterEdgeMeshWithHull(options) {
+
+
+
+        //TODO
+        if (!this.mChildClustersEdgesMesh) throw new Error("BaseCluster::addChildClusterEdgeMesh must be called first")
+
+        let edges = this.createEdgesForChildClusters();
+
+
+        var line_geom =new THREE.Geometry();
+
+
+        this.mChildClustersEdgesMesh.geometry.dispose()
+        this.mChildClustersEdgesMesh.geometry= line_geom
+
+
+        for (let edge of edges)
+        {
+            //TODO we should unify the edges to not always have 2 separate ways to access certain elements
+            //TODO also we should use the center of the hull feature instead
+            //FIXME for cluster: add edges only if mHull exists
+
+            let src,dst;
+
+
+
+            if (edge.source._el && edge.target._el)
+            {
+                src=edge.source._el.mHull.mBoundingBox.getCenter();
+                dst=edge.target._el.mHull.mBoundingBox.getCenter();
+            }
+            else if (edge.source.mHull &&  edge.target.mHull)
+            {
+                src=edge.source.mHull.mBoundingBox.getCenter();
+                dst=edge.target.mHull.mBoundingBox.getCenter();
+            }
+            else
+            {
+
+                continue;
+              //  throw new Error("hull should exist before calling this function...")
+
+            }
+
+
+            let src0=edge.source.position||edge.source._el.position;
+            let dst0=edge.target.position||edge.target._el.position;
+            src.add(src0)
+            dst.add(dst0)
+
+            line_geom.vertices.push(src);
+            line_geom.vertices.push(dst);
+
+        }
+
+
+    }
+
+
+
     //TODO refactor into class like EdgesContainer for leaf/node edges
 
     /**
@@ -454,6 +544,8 @@ class BaseCluster3D extends BaseNode {
      *
      */
     addChildClusterEdgeMesh(options) {
+
+
 
 
         //TODO
@@ -499,10 +591,12 @@ class BaseCluster3D extends BaseNode {
     {
         //TODO we should unify the edges to not always have 2 separate ways to access certain elements
         //TODO also we should use the center of the hull feature instead
-        let src=edge.source.position||edge.source._el.position;
-        let dst=edge.target.position||edge.target._el.position;
+        //FIXME for cluster: add edges only if mHull exists
 
+        let src,dst;
 
+            src=edge.source.position||edge.source._el.position;
+            dst=edge.target.position||edge.target._el.position;
 
         line_geom.vertices.push(src);
         line_geom.vertices.push(dst);
@@ -637,7 +731,8 @@ class BaseCluster3D extends BaseNode {
                 function onStep() {
 
                     updateLeafsEdges(that);
-                    that.addChildClusterEdgeMesh();
+
+                    //that.addChildClusterEdgeMesh();
 
                 }, function () {
 
@@ -671,8 +766,7 @@ class BaseCluster3D extends BaseNode {
      */
 
     adjustHullSize() {
-        //FIXME performance
-//return;
+
 
         let info = {box: new THREE.Box3, vertices: []};
 
@@ -778,6 +872,7 @@ class BaseCluster3D extends BaseNode {
 
             if (that.isLeaf())
             that.updateIfIsLeaf()
+
 
 
         })

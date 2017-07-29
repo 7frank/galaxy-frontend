@@ -25,9 +25,6 @@ export default class ClusterLeafElement extends THREE.Mesh {
         this.appendNodes(nodes);
 
 
-
-
-
     }
 
 
@@ -38,25 +35,25 @@ export default class ClusterLeafElement extends THREE.Mesh {
     }
 
     setLOD(levelOfDetail) {
-        if (this.mNodeParticles&&   this.parent.useLOD)
+        if (this.mNodeParticles && this.parent.useLOD)
             this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
-        let edgeFadeLOD=0.3;
-        let crossfade=0.2;//TODO add crossfade
+        let edgeFadeLOD = 0.3;
+        let crossfade = 0.2;//TODO add crossfade
 
         if (this.mEdgesContainer) {
 
-         this.mEdgesContainer.visible = levelOfDetail >= edgeFadeLOD;
+            this.mEdgesContainer.visible = levelOfDetail >= edgeFadeLOD;
 
-            this.mEdgesContainer.mEdges.material.opacity=(levelOfDetail-edgeFadeLOD)/edgeFadeLOD;
+            this.mEdgesContainer.mEdges.material.opacity = (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
         }
 
         if (this.mEdgesContainer2) {
 
             this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
 
-            this.mEdgesContainer2.mEdges.material.opacity=  1-levelOfDetail/edgeFadeLOD;
+            this.mEdgesContainer2.mEdges.material.opacity = 1 - levelOfDetail / edgeFadeLOD;
         }
 
 
@@ -86,16 +83,16 @@ export default class ClusterLeafElement extends THREE.Mesh {
         }
 
 
-        if (this.mEdgesContainer&&this.mEdgesContainer.geometry) {
+        if (this.mEdgesContainer && this.mEdgesContainer.geometry) {
+
+            this.remove(this.mEdgesContainer);
+
+            this.mEdgesContainer.geometry.dispose();
+            this.mEdgesContainer = null;
+        }
 
 
-        this.mEdgesContainer.geometry.dispose();
-        this.mEdgesContainer = null;
-     }
-
-
-
-        if (this.mEdgesContainer2&&this.mEdgesContainer2.geometry) {
+        if (this.mEdgesContainer2 && this.mEdgesContainer2.geometry) {
 
 
             this.mEdgesContainer2.geometry.dispose();
@@ -109,11 +106,8 @@ export default class ClusterLeafElement extends THREE.Mesh {
         }
 
 
-
-
-
         if (this.geometry)
-        this.geometry.dispose();
+            this.geometry.dispose();
         if (this.parent)
             this.parent.remove(this)
 
@@ -146,13 +140,13 @@ export default class ClusterLeafElement extends THREE.Mesh {
     createEdgesFromNodes(nodes) {
 
         this.mEdgesContainer = new EdgesContainer();
-        this.mEdgesContainer.setRenderMode(true,false,false).setSkipParams(30,40).setFromNodes(nodes);
+        this.mEdgesContainer.setRenderMode(true, false, false).setSkipParams(30, 40).setFromNodes(nodes);
         this.add(this.mEdgesContainer)
 
-       /* this.mEdgesContainer2 = new EdgesContainer();
-        this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
-        this.add(this.mEdgesContainer2)
-*/
+        /* this.mEdgesContainer2 = new EdgesContainer();
+         this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
+         this.add(this.mEdgesContainer2)
+         */
 
 
     }
@@ -175,14 +169,12 @@ export default class ClusterLeafElement extends THREE.Mesh {
             that.updateEdges();
 
 
-        }, function(){
+        }, function () {
 
 
             that._initDotParticles();
 
             onComplete()
-
-
 
 
         });
@@ -200,13 +192,10 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
     }
 
-    updateDots(time)
-    {
-            if ( this.mParticles )
-                this.mParticles.update(time);
+    updateDots(time) {
+        if (this.mParticles)
+            this.mParticles.update(time);
     }
-
-
 
 
     /**
@@ -260,17 +249,17 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
             //TODO this timeout currently fixes wrong positioning bug..
-            setTimeout(function(){
+            setTimeout(function () {
                 particles.start();
-            },10)
+            }, 10)
 
             //TODO call start if distribution function is finished
             /*this.parent.on("distribution-complete", function () {
 
-                particles.start()
+             particles.start()
 
 
-            });*/
+             });*/
 
 
             this.mParticles = particles;
@@ -281,16 +270,15 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
     updateDotParticlesColor() {
 
-            if (this.mParticles) {
-                this.mParticles.updateColors();
+        if (this.mParticles) {
+            this.mParticles.updateColors();
 
 
-                //  this.mParticles.pointCloud.position.sub(this.position); //this.parent.position
-            }
+            //  this.mParticles.pointCloud.position.sub(this.position); //this.parent.position
+        }
 
 
     }
-
 
 
 }
