@@ -734,6 +734,231 @@ pulsing effect/animated nodes
 \end_deeper
 \end_deeper
 \end_deeper
+\begin_layout Itemize
+network
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+see coverage tab of chrome console 2/2.8 mb of code arent used and can be
+ optimised when loading or delayed
+\end_layout
+
+\begin_layout Itemize
+main.css
+\end_layout
+
+\begin_layout Itemize
+trackballcontrols
+\end_layout
+
+\begin_layout Itemize
+highstock (delayed loading)
+\end_layout
+
+\begin_layout Itemize
+jquery ui js and css
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+pack libraries in separate step?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+additionally see audit tab for 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:47:37 PM] Nat Sap: It we optimize loading time so we won't
+ need any loading screen 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:47:45 PM] Nat Sap: Ah I see 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:47:59 PM] Nat Sap: So about 5 seconds 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:48:15 PM] Nat Sap: Ideally 1 second would be great
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:48:19 PM] Frank Reimann: and about another3-4 seconds for the
+ graph to run the animation and create the hull, etc.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:48:34 PM] Nat Sap: What if we stored all the initial positions
+ of the nodes
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:49:06 PM] Nat Sap: So up to 10 seconds 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:49:11 PM] Nat Sap: Total loading time 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:49:18 PM] Nat Sap: Which is quite long 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:49:42 PM] Frank Reimann: well depending on the internet connection
+ it might take longer to load the data and javvascript, css files (remember
+ this is from chache)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:50:22 PM] Nat Sap: And storing the initial positions would
+ help reduce the loading time Frank 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:50:48 PM] Frank Reimann: I think it would be ok to have a loading
+ screen, or something for the user to read while stuff loads in the backgroud
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:51:19 PM] Nat Sap: 10 seconds is definitely too long 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:51:48 PM] Nat Sap: If we can think of ways to optimize to keep
+ it under 2-3 seconds total
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:52:03 PM] Nat Sap: For 10k nodes
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:52:19 PM] Nat Sap: We can do it after 2D phase 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 3:53:28 PM] Nat Sap: If all the data preparation can all be precalcul
+ated and stored 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 4:01:18 PM] Frank Reimann: ok i'll go try to nibble on the loading
+ times here and there after the 2d.
+ but we should at least consider having somekind of thing for the user to
+ look at while loading.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 4:05:03 PM] Frank Reimann: I've ran a sample in the chrome console
+ with network throttling enabled to "DSL" we can reduce loading times by
+ packing elements.
+ but i think the bottleneck will be the internet connection.
+ currently it takes 12+ seconds with DSL speed to only load all the files
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+[7/13/2017 4:07:08 PM] Frank Reimann: ok I'll have a look into the matter
+ later.
+ for now i'll focus on the 2d parts as you said.
+\end_layout
+
+\begin_layout Itemize
+After the UI and functionalities are built We can focus on really optimizing
+ the performance And loading for under few seconds for 15k nodes loading
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+potential improvements
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+GraphData createClusterNodesAndEdges takes about 1.5 seconds to init nodes
+ and edges
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+maybe we can get it down .5 or so by improving node and linkmixins
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
 \begin_layout Subsection
 current 
 \begin_inset Quotes eld
@@ -869,26 +1094,91 @@ todo
 \end_layout
 
 \begin_layout Itemize
-feedback 3d 8.7.
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-remove blue lines
+camera
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-check if there are still edges that don't match
+combinedcamera is partially working in ortho mode but does have weird clipping
+ when zooming
 \end_layout
 
 \begin_layout Itemize
-it seems that the leaf edges need to be updated
+alternative approach P and O camera does not show elements on ortho mode
+ atm.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+minify and optimisation
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+uglify needs separate plugin for es6
+\end_layout
+
+\begin_layout Itemize
+dependencies from node modules don't work 100% for three.min.js and others
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+2d bugs
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+switching from 3d => 2d will show too many edges
+\end_layout
+
+\begin_layout Itemize
+selecting a cluster or node rotates the camera like in 3d but should maintain
+ the previous camera direction
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+2d mode different zoom method
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
 \begin_inset Note Note
 status open
 
+\begin_layout Itemize
+text nodes overlay => view.trigger
+\begin_inset Quotes eld
+\end_inset
+
+loaded
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+//TODO text is shown to early on update
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
 \begin_layout Plain Layout
-TODO
+currently no transitions betweens different graphs we'll keeo it that way
+ ...
+ for now
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -897,30 +1187,78 @@ TODO
 \end_layout
 
 \begin_layout Itemize
+feedback 3d 8.7.
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\strikeout on
+remove blue lines
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+check if there are still edges that don't match
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+it seems that the leaf edges need to be updated
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
 Note: the problem does occure not all the time so improving loading procedures
  could point in the right direction
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 ClusterLeafElement::updateEges did not recreate geometry
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-performance (see below for details)
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-loading performance and text nodes (see below)
 \end_layout
 
 \end_deeper
 \begin_layout Enumerate
 
 \strikeout on
+performance (see below for details)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\strikeout on
+loading performance and text nodes (see below)
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
 we can should make all hull at distance super transparent.
  right now, they are very clutter
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+get feedback for the the 
+\begin_inset Quotes eld
+\end_inset
+
+at distance
+\begin_inset Quotes erd
+\end_inset
+
+ part
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_deeper
@@ -943,11 +1281,155 @@ focus on 3d first (then 2d) (usable, but bugs to fix)
 \end_layout
 
 \begin_layout Itemize
+count clusters in background that would count towards visible countries
+ but are invis for performance
+\end_layout
+
+\begin_layout Itemize
+changes we discussed 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+then let's do 2D like:
+\end_layout
+
+\begin_layout Itemize
+http://bl.ocks.org/GerHobbelt/3071239 to start I don't feel comfortable with
+ the current 3D at the moment so I won't show it today yet
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+text nodes
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+performance 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+ text nodes has a way to heavy performance impact..
+ 20% upwards ..
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+rootcluster text seems to be the mayor factor here
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+also text nodes appears to be broken currently ....
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+nodes weren't always used for calculating visible items.
+ because we skip calculating visible nodes to only occure every 20 frames
+ the nodes reset itself with the next iteration being length==0
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+if the rootcluster is not visible (is the boundingvolume not calculated
+ properly) the text nodes won't be updated
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+this might be a problem
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+text stops animating for clusters when zoomed in further
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+not rendered clusters should hide its text nodes..
+ alternativly a per-root element text ahndler might even be better where
+ elements register their potentially visible text nodes
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+where is the tooltip per cluster...
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+does not occur all the time
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
 we need another approach to compute the currently visible countries
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 for all leafs that are drawn we should test the frustum, if it's fully within
  we can add all nodes of it to the set for all other 
 \begin_inset Note Note
@@ -988,32 +1470,251 @@ find a meaningful way to show/hide text and remove clutter
 
 \end_deeper
 \begin_layout Itemize
-count clusters in background that would count towards visible countries
- but are invis for performance
+leaf text not visible all the time
 \end_layout
 
 \begin_layout Itemize
-changes we discussed 
+leaf nodes aren't in order so we should sort them also
+\end_layout
+
+\begin_layout Itemize
+todo minTextNodes to bypass the distance check so that at least some text
+ is shown
+\end_layout
+
+\begin_layout Itemize
+have an additional 
+\begin_inset Quotes eld
+\end_inset
+
+stay on time
+\begin_inset Quotes erd
+\end_inset
+
+ so text elements don't flicker when zooming
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+//FIXME deplace overlay after changing 3d => 2d view or have an event to
+ track changing leafs/clusters
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-then let's do 2D like:
+text won't appear for obs reasons
+\end_layout
+
+\end_deeper
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
-http://bl.ocks.org/GerHobbelt/3071239 to start I don't feel comfortable with
- the current 3D at the moment so I won't show it today yet
+mem leaks with huge data set
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+usability
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Nat Sap: Quite difficult to use 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+see elaboration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+find a way to not get click triggered if dblclick is triggered when both
+ are bound to same element 
+\end_layout
+
+\begin_layout Itemize
+also dragging will trigger click events
 \end_layout
 
 \end_deeper
 \end_deeper
 \begin_layout Itemize
-performance (for good response time and cosmetic)
+
+\strikeout on
+redistribution of clusters
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
+hull takes quite some time to generate or does not show up
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+...50 sec plus
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+improve collision and collision radius as well as prevent single nodes from
+ straying apart too much from their peer 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+https://github.com/d3/d3-force#collision
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+
+\strikeout on
+might be ok now after cleaning the leaf cache of getLeaf()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+loading
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+better looking initial graph
+\end_layout
+
+\begin_layout Itemize
+fade in or scale in of hulls
+\end_layout
+
+\begin_layout Itemize
+have only particles visible
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+smaller bugs
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+elements/particles sometimes don't show up
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+we need another transfer function with with visiblilty for minDistance always
+ true
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+clicking a node then following the edge and clicking the target will hide
+ edges at first
+\end_layout
+
+\begin_layout Itemize
+in the big graph, searching for 
+\begin_inset Quotes eld
+\end_inset
+
+micros
+\begin_inset Quotes erd
+\end_inset
+
+ will not show the dropdown without pressing 
+\begin_inset Quotes eld
+\end_inset
+
+down
+\begin_inset Quotes erd
+\end_inset
+
+ key first
+\end_layout
+
+\begin_layout Itemize
+node selected particles invis
+\end_layout
+
+\begin_layout Itemize
+unselect arrow when elements position changes
+\end_layout
+
+\begin_layout Itemize
+arrows don't show proprly if leaf edges are rendered
+\end_layout
+
+\begin_layout Itemize
+use line mesh group instead of default linesfor edges
 \begin_inset Note Note
 status open
 
@@ -1023,44 +1724,87 @@ TODO
 
 \end_inset
 
- text nodes has a way to heavy performance impact..
- 20% upwards ..
- 
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-rootcluster text seems to be the mayor factor here
+currently mergedLineMesh is created within GraphData but not used anywhere.
+ instead basicMeshLine is used for rendering which shiuld be slightly less
+ performance wise
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+particles are not all where thes should be
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+when hull is clicked tween starts? or is it generated delayed?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+totally different tween incluster text nodes=> zoom triggers onComplete
+ of ParticleSystem
 \end_layout
 
 \begin_layout Itemize
 
 \strikeout on
-also text nodes appears to be broken currently ....
+used static TWEEN.update instead of instance.update
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+might be scaling/positioning?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+
+\strikeout on
+when repositioned, the particles are at the correct position
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 
 \strikeout on
-nodes weren't always used for calculating visible items.
- because we skip calculating visible nodes to only occure every 20 frames
- the nodes reset itself with the next iteration being length==0
+when calling particles.start() they are positioned correctly
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Subsubsection
+done
 \end_layout
 
 \begin_layout Itemize
-if the rootcluster is not visible (is the boundingvolume not calculated
- properly) the text nodes won't be updated
+performance (for good response time and cosmetic)
 \end_layout
 
 \begin_deeper
-\begin_layout Itemize
-this might be a problem
-\end_layout
-
-\end_deeper
-\end_deeper
-\end_deeper
 \begin_layout Itemize
 
 \strikeout on
@@ -1131,11 +1875,15 @@ Made some changes to the domEvents Library (2-3 lines in the raytracing
 \end_deeper
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 initial loading times
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 ok so the initial loading times might get perceived shorter if we make the
  animation going again below is a list of potential starting points from
  the debug log
@@ -1143,182 +1891,89 @@ ok so the initial loading times might get perceived shorter if we make the
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 data loaded 
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 maximised
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 'mousemove' handler took 591ms 
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 'requestAnimationFrame' handler took 7313ms
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 addNodeCaptions 
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 'requestAnimationFrame' handler took 1041ms
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 'requestAnimationFrame' handler took 453ms 
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 'requestAnimationFrame' handler took 469ms
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 the items potentially being the cause are hull updates, particles and others
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME further investiage on this
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 baseDistribution tween creates too many instances updating thus might take
  far too long
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 might be by using nodes to many comparisons are made instead of only updating
  x,y,z
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 setLOD of nodes and cluster edges should be overridden and visible while
  loading hull and node-inner-edges should be generated later
 \end_layout
 
-\end_deeper
-\begin_layout Itemize
-mem leaks with huge data set
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-usability
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Nat Sap: Quite difficult to use 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-see elaboration
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Greyedout
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-find a way to not get click triggered if dblclick is triggered when both
- are bound to same element 
-\end_layout
-
-\begin_layout Itemize
-also dragging will trigger click events
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Itemize
-redistribution of clusters
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-hull takes quite some time to generate or does not show up
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-...50 sec plus
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-improve collision and collision radius as well as prevent single nodes from
- straying apart too much from their peer 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-https://github.com/d3/d3-force#collision
-\end_layout
-
-\end_deeper
-\end_deeper
 \begin_layout Itemize
 \begin_inset Note Comment
 status open
 
 \begin_layout Plain Layout
-might be ok now after cleaning the leaf cache of getLeaf()
+by creating the hull on demand and fixing animations partially we reduced
+ the (perceived) time drastically 
 \end_layout
 
 \end_inset
@@ -1327,166 +1982,6 @@ might be ok now after cleaning the leaf cache of getLeaf()
 \end_layout
 
 \end_deeper
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-smaller bugs
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-elements/particles sometimes don't show up
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-we need another transfer function with with visiblilty for minDistance always
- true
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-clicking a node then following the edge and clicking the target will hide
- edges at first
-\end_layout
-
-\begin_layout Itemize
-in the big graph, searching for 
-\begin_inset Quotes eld
-\end_inset
-
-micros
-\begin_inset Quotes erd
-\end_inset
-
- will not show the dropdown without pressing 
-\begin_inset Quotes eld
-\end_inset
-
-down
-\begin_inset Quotes erd
-\end_inset
-
- key first
-\end_layout
-
-\begin_layout Itemize
-node selected particles invis
-\end_layout
-
-\begin_layout Itemize
-unselect arrow when elements position changes
-\end_layout
-
-\begin_layout Itemize
-text stops animating for clusters when zoomed in further
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-not rendered clusters should hide its text nodes..
- alternativly a per-root element text ahndler might even be better where
- elements register their potentially visible text nodes
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-where is the tooltip per cluster...
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-might occur not all the time
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-
-\strikeout on
-particles are not all where thes should be
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-
-\strikeout on
-when hull is clicked tween starts? or is it generated delayed?
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-
-\strikeout on
-totally different tween incluster text nodes=> zoom triggers onComplete
- of ParticleSystem
-\end_layout
-
-\begin_layout Itemize
-
-\strikeout on
-used static TWEEN.update instead of instance.update
-\end_layout
-
-\begin_layout Itemize
-
-\strikeout on
-might be scaling/positioning?
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-
-\strikeout on
-\begin_inset Note Comment
-status open
-
-\begin_layout Plain Layout
-
-\strikeout on
-when repositioned, the particles are at the correct position
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-
-\strikeout on
-when calling particles.start() they are positioned correctly
-\end_layout
-
-\end_deeper
-\end_deeper
-\end_deeper
-\begin_layout Subsubsection
-done
-\end_layout
-
 \begin_layout Itemize
 fix force layout to use edges
 \end_layout

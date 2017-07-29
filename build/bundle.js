@@ -61,10 +61,10 @@ var clusters =
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/ 	__webpack_require__.p = "/test_app/build/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 22);
+/******/ 	return __webpack_require__(__webpack_require__.s = 24);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -72,8 +72,8 @@ var clusters =
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(4);
 /**
@@ -188,6 +188,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             let vis= (1-mLOD)/2;
 
+
+
+
             this.mChildClustersEdgesMesh.material.opacity=vis;
             this.mChildClustersEdgesMesh.material.visible=vis>0.05 && vis<0.9;
 
@@ -268,10 +271,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 cluster.tn.remove();
                 delete (cluster.tn)
             }
-            if (cluster.mTextNodes) {
-                cluster.mTextNodes.remove();
-                delete (cluster.mTextNodes)
-            }
 
 
             if (cluster.mHull) {
@@ -281,15 +280,12 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             }
 
 
+
+            cluster.removeEdges();
+
+
             if (cluster == self) return;//don't detach the current root element
 
-
-            if (cluster.mChildClustersEdges) cluster.mChildClustersEdges = null; //delete edge references
-            if (cluster.mChildClustersEdgesMesh) {
-                cluster.parent.remove( cluster.mChildClustersEdgesMesh)
-                cluster.mChildClustersEdgesMesh = null; //delete edge-mesh  references
-
-            }
 
             if (cluster.parent) {
 
@@ -512,10 +508,13 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         _.each(this.mClusters, function (childCluster) {
             childCluster.on("hull-updated", _.throttle(function () {
                 that.adjustHullSize();
+
+                that.addChildClusterEdgeMesh();
+                that.updateChildClusterEdgeMeshWithHull();
+
                 that.trigger("hull-updated");
             },50, {trailing: true, leading: false}))  //if leading is true it won't build up the hulls in a progressive manner
         });
-
 
 
 
@@ -528,6 +527,93 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
+
+    removeEdges()
+    {
+
+        if (this.mChildClustersEdges) this.mChildClustersEdges = null; //delete edge references
+        if (this.mChildClustersEdgesMesh) {
+            this.mChildClustersEdgesMesh.geometry.dispose();
+
+            this.remove( this.mChildClustersEdgesMesh)
+            this.mChildClustersEdgesMesh = null; //delete edge-mesh  references
+
+        }
+
+    }
+
+
+
+
+    /**
+     * updates the edges of the clusters as soon as the hullf feature is rendered
+     *
+     *
+     * @param options
+     */
+
+
+    updateChildClusterEdgeMeshWithHull(options) {
+
+
+
+        //TODO
+        if (!this.mChildClustersEdgesMesh) throw new Error("BaseCluster::addChildClusterEdgeMesh must be called first")
+
+        let edges = this.createEdgesForChildClusters();
+
+
+        var line_geom =new THREE.Geometry();
+
+
+        this.mChildClustersEdgesMesh.geometry.dispose()
+        this.mChildClustersEdgesMesh.geometry= line_geom
+
+
+        for (let edge of edges)
+        {
+            //TODO we should unify the edges to not always have 2 separate ways to access certain elements
+            //TODO also we should use the center of the hull feature instead
+            //FIXME for cluster: add edges only if mHull exists
+
+            let src,dst;
+
+
+
+            if (edge.source._el && edge.target._el)
+            {
+                src=edge.source._el.mHull.mBoundingBox.getCenter();
+                dst=edge.target._el.mHull.mBoundingBox.getCenter();
+            }
+            else if (edge.source.mHull &&  edge.target.mHull)
+            {
+                src=edge.source.mHull.mBoundingBox.getCenter();
+                dst=edge.target.mHull.mBoundingBox.getCenter();
+            }
+            else
+            {
+
+                continue;
+              //  throw new Error("hull should exist before calling this function...")
+
+            }
+
+
+            let src0=edge.source.position||edge.source._el.position;
+            let dst0=edge.target.position||edge.target._el.position;
+            src.add(src0)
+            dst.add(dst0)
+
+            line_geom.vertices.push(src);
+            line_geom.vertices.push(dst);
+
+        }
+
+
+    }
+
+
+
     //TODO refactor into class like EdgesContainer for leaf/node edges
 
     /**
@@ -535,6 +621,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      *
      */
     addChildClusterEdgeMesh(options) {
+
+
 
 
         //TODO
@@ -580,10 +668,12 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     {
         //TODO we should unify the edges to not always have 2 separate ways to access certain elements
         //TODO also we should use the center of the hull feature instead
-        let src=edge.source.position||edge.source._el.position;
-        let dst=edge.target.position||edge.target._el.position;
+        //FIXME for cluster: add edges only if mHull exists
 
+        let src,dst;
 
+            src=edge.source.position||edge.source._el.position;
+            dst=edge.target.position||edge.target._el.position;
 
         line_geom.vertices.push(src);
         line_geom.vertices.push(dst);
@@ -718,7 +808,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 function onStep() {
 
                     updateLeafsEdges(that);
-                    that.addChildClusterEdgeMesh();
+
+                    //that.addChildClusterEdgeMesh();
 
                 }, function () {
 
@@ -752,8 +843,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      */
 
     adjustHullSize() {
-        //FIXME performance
-//return;
+
 
         let info = {box: new THREE.Box3, vertices: []};
 
@@ -859,6 +949,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             if (that.isLeaf())
             that.updateIfIsLeaf()
+
 
 
         })
@@ -1212,8 +1303,6 @@ class BaseDistribution {
 
         var tweens = this.mTweens = []
 
-        var srcs= [],dsts=[]
-
 
         _.each(nodes, function (n) {
 
@@ -1242,14 +1331,6 @@ class BaseDistribution {
             let origPos = (n.position) ? n.position : n
 
 
-        /*    srcs.push(origPos.x)
-            srcs.push(origPos.y)
-            srcs.push(origPos.z)
-            dsts.push(dist.position.x)
-            dsts.push(dist.position.y)
-            dsts.push(dist.position.z)
-*/
-
             let tween = new TWEEN.Tween(origPos)
                 .easing(that.mEasingFunction)
                 .to(dist.position, mDuration)
@@ -1260,7 +1341,7 @@ class BaseDistribution {
                         if (onStepComplete)
                             onStepComplete()
 
-                       // console.warn("Step",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
+                        // console.warn("Step",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
                     }
 
                     onNodePositionChange(origPos, mc)
@@ -1271,7 +1352,7 @@ class BaseDistribution {
                     if (notTweenFinished) {
                         notTweenFinished = false;
                         that.stop();
-                     //   console.warn("onEnd",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
+                        //   console.warn("onEnd",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
                         if (onEnd) onEnd()
 
 
@@ -1284,7 +1365,6 @@ class BaseDistribution {
                 .start();
 
 
-
             //------------------------
             //------------------------
 
@@ -1294,74 +1374,21 @@ class BaseDistribution {
             c++;
         })
 
-/*
-        let tween_sum = new TWEEN.Tween(srcs)
-            .easing(that.mEasingFunction)
-            .to(dsts, mDuration)
-            .onUpdate(function () {
-
-
-
-
-
-
-                for (let i=0,len=srcs.length/3;i<len;i+=3) {
-
-                    let n=nodes[i]
-                    let origPos = (n.position) ? n.position : n;
-
-                    origPos.x = srcs[i*3]
-                    origPos.y=srcs[i*3+1]
-                    origPos.z=srcs[i*3+2]
-                    onNodePositionChange(origPos, i)
-                }
-
-
-
-
-
-
-
-                if (onStepComplete)
-                    onStepComplete()
-
-
-            }).onComplete(function () {
-
-
-                if (notTweenFinished) {
-                    notTweenFinished = false;
-
-                    that.stop();
-                    //   console.warn("onEnd",origPos.x,origPos.y,origPos.z,dist.position.x,dist.position.y,dist.position.z)
-                    if (onEnd) onEnd()
-
-
-                    //console.log("cancel",mTimeout)
-                    cancelAnimationFrame(mTimeout)
-                }
-
-
-            })
-            .start();
-*/
-
-
 
         mTimeout = requestAnimationFrame(animate);
-//FIXME stop updating tweens if no longer necessary
+
         function animate(time) {
 
 
-           // tween_sum.update(time)
+            // tween_sum.update(time)
 
-           _.each(tweens, function (tween) {
-               tween.update(time)
-              //  tween.end(time)
+            _.each(tweens, function (tween) {
+                tween.update(time)
+                //  tween.end(time)
 
             })
 
-           if (notTweenFinished)
+            if (notTweenFinished)
                 mTimeout = requestAnimationFrame(animate);
 
         }
@@ -1640,6 +1667,800 @@ class EdgeUtil {
 
 /***/ }),
 /* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(10);
+/**
+ * Created by Frank on 06.06.2017.
+ */
+
+
+
+
+
+
+
+
+
+
+/**
+ * extended cluster
+
+ */
+
+//refactoring current cluster structure
+class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */] {
+
+
+    constructor(nodes, clusteringHandlers, view) {
+        super(nodes, clusteringHandlers, view);
+
+
+        this.selected = false;
+
+
+        this.addListeners();
+
+
+    }
+
+
+    /**
+     *   have a dynamic distance based on the size of the cluster
+     *
+     */
+    zoomToCluster(defaultDistance = 400) {
+
+
+        let view = this.getView();
+
+        var distance = this.getRadius(defaultDistance) * 3;
+
+
+        __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__["a" /* default */].moveToCluster(this, {distance})
+    }
+
+
+
+    /**
+     * adds some listeners and actions
+     *  - zoom via keyboard default hotkey "space"
+     *  - show hide cluster border defaults to "mouseover"/"mouseout"
+     *  - change ordering/distibution of child clusters defaults to "dblclick"
+     */
+
+
+    addListeners() {
+
+
+        //have a "cluster-ready" event
+        this.on("cluster-ready",function(){
+
+            this.addNodeCaptions();
+
+        });
+
+
+
+
+        var curr = 0;
+
+        function onClickFactory(res, speccs) {
+
+
+            return function clickAndSpeccHandler() {
+
+
+                var _dist = speccs[curr++ % speccs.length].distribution;
+
+                console.log("setting distribution function", _dist);
+                res.setDistributionHandler(_dist, function onComplete() {
+
+
+                    res.adjustHullSize();
+                    //distribution-complete
+                    if (res.isLeaf()) {
+                        res.updateIfIsLeaf()
+                    }
+
+                    //res.onAfterClusteredAndDistributed()
+
+
+                })
+
+                //FIXME add complete handler
+                /*                setTimeout(function()
+                 {
+
+                 res.onAfterClusteredAndDistributed()
+
+                 },1000 )
+                 */
+            }
+        }
+
+        //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
+        // also dragging will trigger click events
+        this.on("z dblclick", function (e) {
+             e.stopPropagation();
+
+            this.zoomToCluster()
+
+        });
+
+        var diameter = null;
+        this.on("s", function (e) {
+            e.stopPropagation();
+            if (!diameter)
+                diameter = this.geometry.boundingSphere.radius * 2;
+            console.log("clicky clicky", diameter);
+            let speccsRoot = [
+                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter, 1)},
+                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter * 0.66, 2)},
+                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter * 0.33, 3)},
+                {distribution: new __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__["a" /* default */](diameter * 0.66, 3)}
+            ];
+
+
+            var fn = onClickFactory(this, speccsRoot);
+
+            fn()
+        });
+
+
+        this.on("a", function (e) {
+            e.stopPropagation();
+            if (!diameter)
+                diameter = this.geometry.boundingSphere.radius * 2;
+            console.log("clicky clicky", diameter);
+            let speccsRoot = [
+                {distribution: new __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__["a" /* default */](diameter * 0.66, 3)}
+            ];
+
+
+            var fn = onClickFactory(this, speccsRoot);
+
+            fn()
+        });
+
+
+        this.on("mouseover", function (e) {
+            e.stopPropagation();
+
+            if (this.mHull) {
+
+                this.mHull.mesh.material.visible=  this.mHull.canBeVisible();
+                this.mHull.setActive();
+
+            }
+
+                let name = (this.name ? this.name : this.id);
+
+            let parents = this.getParents();
+
+
+            //hide tooltip for root cluster
+            if (parents.length==0)
+            {
+                this.getView().setTooltip("");
+                return
+            }
+
+            parents.shift();
+            let root = parents.map(p => p.name ? p.name : p.id).join(" - ");
+            //TODO public setter function
+
+
+           // let lod=(this.mHull)? this.mHull.lod:-1;
+
+
+            this.getView().setTooltip(root + " " + name) //+" LOD:"+lod
+
+
+        });
+
+
+        this.on("mouseout", function (e) {
+            e.stopPropagation();
+            if (this.mHull)
+            {
+                this.mHull.setInactive();
+            }
+
+            this.getView().setTooltip("")
+        });
+
+        this.on("t", function (e) {
+            e.stopPropagation();
+            this.toggleSelect()
+        })
+
+
+    }
+
+
+    /**
+     *  NOTE:don't call update for any cluster directly,it will be called via before-render
+     *
+     */
+    update() {
+
+        super.update();
+
+
+
+
+    //FIXME performance
+        if (this.isLeaf())
+            if (this.mLeaf&& this.getView())
+                this.mLeaf.updateDots(this.getView().mTime);
+
+
+    }
+
+
+    appendNodes(nodes) {
+
+        var that = this;
+        _.each(nodes, function (node) {
+            if (node && node._bubble)
+                that.add(node._bubble)
+
+
+        })
+
+
+    }
+
+    /**
+     * add some text to the sub-clusters providing informations
+     *
+     *
+     *
+     */
+
+
+    addNodeCaptions() {
+
+        if (this._hasNodeCaptions_) return;
+        console.log("addNodeCaptions");
+        this._hasNodeCaptions_=true;
+        var rootCluster = this.getRoot();
+        if (!rootCluster.mParentView) return;
+
+
+        function _getNodePosition(node) {
+
+            var mVec3 = new THREE.Vector3();
+            mVec3.setFromMatrixPosition(node.matrixWorld);
+
+
+            return mVec3; //node.position.clone()
+        }
+
+        var nodes = Object.values(this.mClusters);
+
+        //TODO remove global dependency in TextNodes
+
+
+        var mTextNode = $(rootCluster.mParentView.mRenderer.domElement).parent().children(".graph-captions-container");
+
+
+        let env = {
+            renderer: rootCluster.mParentView.mRenderer,
+            currentNodesVisible: [],//can be left empty if below nodes function is used
+            textNode: mTextNode,
+            camera: rootCluster.mParentView.mCamera
+
+        };
+
+
+
+
+
+    }
+
+    isSelected() {
+        return this.selected
+
+    }
+
+    toggleSelect() {
+        if (this.isSelected())
+            this.unselectCluster();
+        else
+            this.selectCluster()
+
+
+    }
+
+    /**
+     * selecting a cluster will show all child elements of this sub-cluster and hide all other branches of the root-cluster
+     *
+     *
+     */
+
+    selectCluster() {
+
+        if (this.isSelected()) return;
+
+
+        var allLeafs = this.getRoot().getLeafs();
+        var mLeafs = this.getLeafs();
+
+
+        _.each(allLeafs, function (other) {
+
+            let isChildOfCluster = mLeafs.indexOf(other) >= 0;
+
+            other.parent.visible = isChildOfCluster
+            //other.material.visible=isChildOfCluster
+
+        });
+
+
+        this.selected = true
+
+    }
+
+
+    unselectCluster() {
+
+        if (!this.isSelected()) return;
+
+
+        var allLeafs = this.getRoot().getLeafs();
+
+
+        _.each(allLeafs, function (other) {
+
+            other.parent.visible = true
+
+        });
+
+
+        this.selected = false
+
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Cluster3DExtended;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by Frank on 22.06.2017.
+ */
+
+/**
+ * the default implementation for a hull/volume around a cluster/sub-cluster
+ *
+ *
+ */
+
+
+
+class BaseVolume extends THREE.Object3D {
+
+    constructor(...args) {
+        super(...args);
+        this.lod=1;
+        this.maxOpacity=0.0
+    }
+
+
+    /**
+     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
+     * eg. depending on the distance of camera and object
+     *
+     * @param newLOD
+     */
+    setLOD(newLOD)
+    {
+        if (newLOD<0) newLOD=0;
+        if (newLOD>1) newLOD=1;
+
+
+        this.lod=newLOD
+
+
+    }
+
+
+    getMaterial()
+    {
+        if (this.mMaterial) return this.mMaterial;
+
+      return  this.mMaterial= new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: false});
+
+
+    }
+
+
+    /**
+     * determines if the volume is can be made visible to the user
+     *
+     * @returns {boolean}
+     */
+
+    canBeVisible()
+    {
+        return false
+    }
+
+
+//FIXME have a better approach to generate the hull
+//? rather: create from vertices
+    createFromBoundingBox(vertices,boundingBox) {
+
+        let _center = boundingBox.getCenter();
+        let _size = boundingBox.getSize();
+
+        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
+
+        let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
+
+        let mat = this.getMaterial();
+
+        let wireframe = new THREE.LineSegments(geo, mat);
+        wireframe.position.add(_center);
+        wireframe.geometry.boundingBox=boundingBox;
+
+
+        if (this.mesh) this.remove(this.mesh);
+        this.mesh=wireframe;
+        this.add(wireframe);
+
+
+        return this.mesh
+
+
+
+
+    }
+
+
+
+
+    setActive(){
+
+        this.maxOpacity=1
+
+    }
+
+
+    setInactive(){
+
+        this.maxOpacity=0.3
+
+    }
+
+
+    dispose()
+    {
+        this.mesh.geometry.dispose()
+        this.mesh.material.dispose()
+
+        if (this.parent)
+            this.parent.remove(this)
+
+    }
+
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = BaseVolume;
+
+
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(23);
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+
+
+class ClusterLeafElement extends THREE.Mesh {
+    constructor(nodes) {
+        super();
+
+
+        this.mNodes = nodes;
+
+        this.mNodeParticles = this.createParticleNodeCloud();
+        this.add(this.mNodeParticles.pointCloud);
+
+
+        //add edges to the leaf
+        this.createEdgesFromNodes(nodes);
+
+
+        // add the nodes to the leaf
+        this.appendNodes(nodes);
+
+
+    }
+
+
+    getView() {
+        return this.parent.getView()
+
+
+    }
+
+    setLOD(levelOfDetail) {
+        if (this.mNodeParticles && this.parent.useLOD)
+            this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
+        //TODO nodes,edges, ... as well
+
+        let edgeFadeLOD = 0.3;
+        let crossfade = 0.2;//TODO add crossfade
+
+        if (this.mEdgesContainer) {
+
+            this.mEdgesContainer.visible = levelOfDetail >= edgeFadeLOD;
+
+            this.mEdgesContainer.mEdges.material.opacity = (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
+        }
+
+        if (this.mEdgesContainer2) {
+
+            this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
+
+            this.mEdgesContainer2.mEdges.material.opacity = 1 - levelOfDetail / edgeFadeLOD;
+        }
+
+
+        if (this.mNodeMeshes)
+            this.mNodeMeshes.visible = levelOfDetail > 0.2;
+
+        // if (this.parent && this.parent.mParticles)
+        // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
+
+
+    }
+
+
+    cleanUp() {
+
+
+        if (this.mNodeParticles) {
+            this.mNodeParticles.remove();
+            this.mNodeParticles.pointCloud.geometry.dispose();
+            this.mNodeParticles = null;
+        }
+
+        if (this.mParticles) {
+            this.mParticles.remove();
+            this.mParticles.pointCloud.geometry.dispose();
+            this.mParticles = null;
+        }
+
+
+        if (this.mEdgesContainer && this.mEdgesContainer.geometry) {
+
+            this.remove(this.mEdgesContainer);
+
+            this.mEdgesContainer.geometry.dispose();
+            this.mEdgesContainer = null;
+        }
+
+
+        if (this.mEdgesContainer2 && this.mEdgesContainer2.geometry) {
+
+
+            this.mEdgesContainer2.geometry.dispose();
+            this.mEdgesContainer2 = null;
+        }
+
+
+        if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
+            this.mNodeMeshes.geometry.dispose();
+            this.mNodeMeshes = null;
+        }
+
+
+        if (this.geometry)
+            this.geometry.dispose();
+        if (this.parent)
+            this.parent.remove(this)
+
+
+    }
+
+
+    appendNodes(nodes) {
+
+
+        if (!this.mNodeMeshes) {
+            this.mNodeMeshes = new THREE.Object3D;
+            this.add(this.mNodeMeshes)
+
+        }
+
+
+        var that = this.mNodeMeshes;//this;
+        _.each(nodes, function (node) {
+            if (node && node._bubble)
+                that.add(node._bubble)
+
+
+        })
+
+
+    }
+
+
+    createEdgesFromNodes(nodes) {
+
+        this.mEdgesContainer = new __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__["a" /* default */]();
+        this.mEdgesContainer.setRenderMode(true, false, false).setSkipParams(30, 40).setFromNodes(nodes);
+        this.add(this.mEdgesContainer)
+
+        /* this.mEdgesContainer2 = new EdgesContainer();
+         this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
+         this.add(this.mEdgesContainer2)
+         */
+
+
+    }
+
+
+    //TODO refactor
+    setDistributionHandler(distribution, onComplete = function () {
+    }) {
+
+        var that = this;
+        distribution.setNodes(this.mNodes, function (vec, i) {
+
+            let n = that.mNodes[i];
+            if (n._bubble) n._bubble.position.set(n.x, n.y, n.z);
+            that.mNodeParticles.updateNodePosition(i);
+
+        }, function onStep() {
+
+
+            that.updateEdges();
+
+
+        }, function () {
+
+
+            that._initDotParticles();
+
+            onComplete()
+
+
+        });
+
+    }
+
+    updateEdges() {
+
+
+        if (this.mEdgesContainer)
+            this.mEdgesContainer.updateEdges();
+
+        if (this.mEdgesContainer2)
+            this.mEdgesContainer2.updateEdges();
+
+    }
+
+    updateDots(time) {
+        if (this.mParticles)
+            this.mParticles.update(time);
+    }
+
+
+    /**
+     * creates a structure that contains a point cloud for the nodes for mre effiecient rendering
+     *
+     * @returns {{nodes, pointCloud, updateCrossFade, update, updateNode, updateNodePosition, updateNodeColor, updateNodeSize, on, remove}|*}
+     */
+
+    createParticleNodeCloud() {
+
+        var elem = ParticleNodeGroup(this.mNodes, {
+            nodeDefaultSize: 10,
+            nodeDefaultScale: 10,
+            nodeTexture: "img/dot7.png"
+        });
+
+
+        return elem
+    }
+
+
+    //create/update particleSystem (little dots inside nodes)
+    //potentially add them at specific time
+    _initDotParticles() {
+
+        if (this.mParticles)
+            this.mParticles.start();
+
+
+        if (!this.mParticles) {
+
+            var nodes = this.mNodes;
+            var demoOptions = {
+                increment: 1,
+                duration: 1000,
+                easing: TWEEN.Easing.Exponential.Out
+            };
+
+            if (!nodes) //FIXME this only works that way because to realData is not generated properly
+                demoOptions.npc = function (n) {
+
+                    return n.itemCount || 5
+                    //return 5
+                };
+
+
+            //TODO refactor force-graph-utils
+
+            var particles = createParticleSystemForNodes(nodes, demoOptions);
+            this.add(particles.pointCloud);
+
+
+            //TODO this timeout currently fixes wrong positioning bug..
+            setTimeout(function () {
+                particles.start();
+            }, 10)
+
+            //TODO call start if distribution function is finished
+            /*this.parent.on("distribution-complete", function () {
+
+             particles.start()
+
+
+             });*/
+
+
+            this.mParticles = particles;
+        }
+
+    }
+
+
+    updateDotParticlesColor() {
+
+        if (this.mParticles) {
+            this.mParticles.updateColors();
+
+
+            //  this.mParticles.pointCloud.position.sub(this.position); //this.parent.position
+        }
+
+
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
+
+
+
+
+/***/ }),
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1923,875 +2744,21 @@ class GraphData
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * Created by Frank on 22.06.2017.
- */
-
-/**
- * the default implementation for a hull/volume around a cluster/sub-cluster
- *
- *
- */
-
-
-
-class BaseVolume extends THREE.Object3D {
-
-    constructor(...args) {
-        super(...args);
-        this.lod=1;
-        this.maxOpacity=0.0
-    }
-
-
-    /**
-     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
-     * eg. depending on the distance of camera and object
-     *
-     * @param newLOD
-     */
-    setLOD(newLOD)
-    {
-        if (newLOD<0) newLOD=0;
-        if (newLOD>1) newLOD=1;
-
-
-        this.lod=newLOD
-
-
-    }
-
-
-    getMaterial()
-    {
-        if (this.mMaterial) return this.mMaterial;
-
-      return  this.mMaterial= new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: false});
-
-
-    }
-
-
-    /**
-     * determines if the volume is can be made visible to the user
-     *
-     * @returns {boolean}
-     */
-
-    canBeVisible()
-    {
-        return false
-    }
-
-
-//FIXME have a better approach to generate the hull
-//? rather: create from vertices
-    createFromBoundingBox(vertices,boundingBox) {
-
-        let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize();
-
-        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
-
-        let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
-
-        let mat = this.getMaterial();
-
-        let wireframe = new THREE.LineSegments(geo, mat);
-        wireframe.position.add(_center);
-        wireframe.geometry.boundingBox=boundingBox;
-
-
-        if (this.mesh) this.remove(this.mesh);
-        this.mesh=wireframe;
-        this.add(wireframe);
-
-
-        return this.mesh
-
-
-
-
-    }
-
-
-
-
-    setActive(){
-
-        this.maxOpacity=1
-
-    }
-
-
-    setInactive(){
-
-        this.maxOpacity=0.3
-
-    }
-
-
-    dispose()
-    {
-        this.mesh.geometry.dispose()
-        this.mesh.material.dispose()
-
-        if (this.parent)
-            this.parent.remove(this)
-
-    }
-
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = BaseVolume;
-
-
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(10);
-/**
- * Created by Frank on 06.06.2017.
- */
-
-
-
-
-
-
-
-
-
-
-/**
- * extended cluster
-
- */
-
-//refactoring current cluster structure
-class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */] {
-
-
-    constructor(nodes, clusteringHandlers, view) {
-        super(nodes, clusteringHandlers, view);
-
-
-        this.selected = false;
-
-
-        this.addListeners();
-
-
-    }
-
-
-    /**
-     *   have a dynamic distance based on the size of the cluster
-     *
-     */
-    zoomToCluster(defaultDistance = 400) {
-
-
-        let view = this.getView();
-
-        var distance = this.getRadius(defaultDistance) * 3;
-
-
-        __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__["a" /* default */].moveToCluster(this, {distance})
-    }
-
-
-    /**
-     * adds some listeners and actions
-     *  - zoom via keyboard default hotkey "space"
-     *  - show hide cluster border defaults to "mouseover"/"mouseout"
-     *  - change ordering/distibution of child clusters defaults to "dblclick"
-     */
-
-
-    addListeners() {
-
-
-        var curr = 0;
-
-        function onClickFactory(res, speccs) {
-
-
-            return function clickAndSpeccHandler() {
-
-
-                var _dist = speccs[curr++ % speccs.length].distribution;
-
-                console.log("setting distribution function", _dist);
-                res.setDistributionHandler(_dist, function onComplete() {
-
-
-                    res.adjustHullSize();
-                    //distribution-complete
-                    if (res.isLeaf()) {
-                        res.updateIfIsLeaf()
-                    }
-
-                    //res.onAfterClusteredAndDistributed()
-
-
-                })
-
-                //FIXME add complete handler
-                /*                setTimeout(function()
-                 {
-
-                 res.onAfterClusteredAndDistributed()
-
-                 },1000 )
-                 */
-            }
-        }
-
-        //FIXME find a way to not get click triggered if dblclick is triggered when both are bound to same element
-        // also dragging will trigger click events
-        this.on("z dblclick", function (e) {
-             e.stopPropagation();
-
-            this.zoomToCluster()
-
-        });
-
-        var diameter = null;
-        this.on("s", function (e) {
-            e.stopPropagation();
-            if (!diameter)
-                diameter = this.geometry.boundingSphere.radius * 2;
-            console.log("clicky clicky", diameter);
-            let speccsRoot = [
-                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter, 1)},
-                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter * 0.66, 2)},
-                {distribution: new __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__["a" /* default */](diameter * 0.33, 3)},
-                {distribution: new __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__["a" /* default */](diameter * 0.66, 3)}
-            ];
-
-
-            var fn = onClickFactory(this, speccsRoot);
-
-            fn()
-        });
-
-
-        this.on("a", function (e) {
-            e.stopPropagation();
-            if (!diameter)
-                diameter = this.geometry.boundingSphere.radius * 2;
-            console.log("clicky clicky", diameter);
-            let speccsRoot = [
-                {distribution: new __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__["a" /* default */](diameter * 0.66, 3)}
-            ];
-
-
-            var fn = onClickFactory(this, speccsRoot);
-
-            fn()
-        });
-
-
-        this.on("mouseover", function (e) {
-            e.stopPropagation();
-
-            if (this.mHull) {
-
-                this.mHull.mesh.material.visible=  this.mHull.canBeVisible();
-                this.mHull.setActive();
-
-            }
-
-                let name = (this.name ? this.name : this.id);
-
-            let parents = this.getParents();
-
-
-            //hide tooltip for root cluster
-            if (parents.length==0)
-            {
-                this.getView().setTooltip("");
-                return
-            }
-
-            parents.shift();
-            let root = parents.map(p => p.name ? p.name : p.id).join(" - ");
-            //TODO public setter function
-
-
-           // let lod=(this.mHull)? this.mHull.lod:-1;
-
-
-            this.getView().setTooltip(root + " " + name) //+" LOD:"+lod
-
-
-        });
-
-
-        this.on("mouseout", function (e) {
-            e.stopPropagation();
-            if (this.mHull)
-            {
-                this.mHull.setInactive();
-            }
-
-            this.getView().setTooltip("")
-        });
-
-        this.on("t", function (e) {
-            e.stopPropagation();
-            this.toggleSelect()
-        })
-
-
-    }
-
-
-    /**
-     *  NOTE:don't call update for any cluster directly,it will be called via before-render
-     *
-     */
-    update() {
-
-        super.update();
-
-        //TODO have a "cluster-ready" event
-
-        this.on("cluster-ready",function(){
-
-            this.addNodeCaptions();
-
-        })
-
-
-
-        if (this.mTextNodes)
-            this.mTextNodes.update();
-
-
-    //FIXME performance
-        if (this.isLeaf())
-            if (this.mLeaf&& this.getView())
-                this.mLeaf.updateDots(this.getView().mTime);
-
-
-    }
-
-
-    appendNodes(nodes) {
-
-        var that = this;
-        _.each(nodes, function (node) {
-            if (node && node._bubble)
-                that.add(node._bubble)
-
-
-        })
-
-
-    }
-
-    /**
-     * add some text to the sub-clusters providing informations
-     *
-     *
-     *
-     */
-
-
-    addNodeCaptions() {
-
-        if (this._hasNodeCaptions_) return;
-        console.log("addNodeCaptions");
-        this._hasNodeCaptions_=true;
-        var rootCluster = this.getRoot();
-        if (!rootCluster.mParentView) return;
-
-
-        function _getNodePosition(node) {
-
-            var mVec3 = new THREE.Vector3();
-            mVec3.setFromMatrixPosition(node.matrixWorld);
-
-
-            return mVec3; //node.position.clone()
-        }
-
-        var nodes = Object.values(this.mClusters);
-
-        //TODO remove global dependency in TextNodes
-
-
-        var mTextNode = $(rootCluster.mParentView.mRenderer.domElement).parent().children(".graph-captions-container");
-
-
-        let env = {
-            renderer: rootCluster.mParentView.mRenderer,
-            currentNodesVisible: [],//can be left empty if below nodes function is used
-            textNode: mTextNode,
-            camera: rootCluster.mParentView.mCamera
-
-        };
-
-
-        //TODO make sure radius is dynamically changed when cluster radius changes
-
-        //let minDistance = this.getRadius() / 3
-
-        // TODO the bounding volume determines the visibility of the text nodes
-        //TODO so currently with no volume generated properly the text nodes are invisible
-        //  if (minDistance<10000) minDistance=10000
-
-       // let maxDistance = minDistance * 10
-
-        if (!this.mTextNodes)
-            this.mTextNodes = TextNodes(env, {
-                maxVisibleCount: 50,
-                maxDistance: ()=> this.getRadius(this.mNodes.length) / 3*10,//30000
-                minDistance:  ()=> this.getRadius(this.mNodes.length) / 3, //3000
-                getNodes: function () {
-
-                    return nodes
-
-                },
-                onNodeText: function (node) {
-
-                    if (node.name) return node.name;
-
-                    return node.id;
-
-                },
-                getCSSClasses: function () {
-                    return 'graph-country-caption'
-
-                },
-                getNodePosition: _getNodePosition,
-                interactable: true,
-                onAfterCreateTextField: function (node, el) {
-
-                    var newSize;
-                    if (node instanceof Cluster3DExtended) {
-                        newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
-
-
-                    }
-                    else
-                        newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
-
-                    newSize = _.round(newSize / 12, 3) + "em";
-
-                    el.css("font-size", newSize);
-
-                    el.on("click", function () {
-                        node.zoomToCluster();
-                        //  doZoomToPos(_getNodePosition(node))
-                    })
-
-                }
-            })
-
-
-    }
-
-    isSelected() {
-        return this.selected
-
-    }
-
-    toggleSelect() {
-        if (this.isSelected())
-            this.unselectCluster();
-        else
-            this.selectCluster()
-
-
-    }
-
-    /**
-     * selecting a cluster will show all child elements of this sub-cluster and hide all other branches of the root-cluster
-     *
-     *
-     */
-
-    selectCluster() {
-
-        if (this.isSelected()) return;
-
-
-        var allLeafs = this.getRoot().getLeafs();
-        var mLeafs = this.getLeafs();
-
-
-        _.each(allLeafs, function (other) {
-
-            let isChildOfCluster = mLeafs.indexOf(other) >= 0;
-
-            other.parent.visible = isChildOfCluster
-            //other.material.visible=isChildOfCluster
-
-        });
-
-
-        this.selected = true
-
-    }
-
-
-    unselectCluster() {
-
-        if (!this.isSelected()) return;
-
-
-        var allLeafs = this.getRoot().getLeafs();
-
-
-        _.each(allLeafs, function (other) {
-
-            other.parent.visible = true
-
-        });
-
-
-        this.selected = false
-
-    }
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Cluster3DExtended;
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(21);
-/**
- * Created by Frank on 30.05.2017.
- */
-
-
-
-
-
-class ClusterLeafElement extends THREE.Mesh {
-    constructor(nodes) {
-        super();
-
-
-        this.mNodes = nodes;
-
-        this.mNodeParticles = this.createParticleNodeCloud();
-        this.add(this.mNodeParticles.pointCloud);
-
-
-        // add the nodes to the leaf
-        this.appendNodes(nodes);
-
-
-        //add edges to the leaf
-        this.createEdgesFromNodes(nodes);
-
-
-
-    }
-
-
-    getView() {
-        return this.parent.getView()
-
-
-    }
-
-    setLOD(levelOfDetail) {
-        if (this.mNodeParticles&&   this.parent.useLOD)
-            this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
-        //TODO nodes,edges, ... as well
-
-        let edgeFadeLOD=0.3;
-        let crossfade=0.2;//TODO add crossfade
-
-        if (this.mEdgesContainer) {
-
-         this.mEdgesContainer.visible = levelOfDetail >= edgeFadeLOD;
-
-            this.mEdgesContainer.mEdges.material.opacity=(levelOfDetail-edgeFadeLOD)/edgeFadeLOD;
-        }
-
-        if (this.mEdgesContainer2) {
-
-            this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
-
-            this.mEdgesContainer2.mEdges.material.opacity=  1-levelOfDetail/edgeFadeLOD;
-        }
-
-
-        if (this.mNodeMeshes)
-            this.mNodeMeshes.visible = levelOfDetail > 0.2;
-
-        // if (this.parent && this.parent.mParticles)
-        // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
-
-
-    }
-
-
-    cleanUp() {
-
-
-        if (this.mNodeParticles) {
-            this.mNodeParticles.remove();
-            this.mNodeParticles.pointCloud.geometry.dispose();
-            this.mNodeParticles = null;
-        }
-
-        if (this.mParticles) {
-            this.mParticles.remove();
-            this.mParticles.pointCloud.geometry.dispose();
-            this.mParticles = null;
-        }
-
-
-        if (this.mEdgesContainer&&this.mEdgesContainer.geometry) {
-
-
-        this.mEdgesContainer.geometry.dispose();
-        this.mEdgesContainer = null;
-     }
-
-
-
-        if (this.mEdgesContainer2&&this.mEdgesContainer2.geometry) {
-
-
-            this.mEdgesContainer2.geometry.dispose();
-            this.mEdgesContainer2 = null;
-        }
-
-
-        if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
-            this.mNodeMeshes.geometry.dispose();
-            this.mNodeMeshes = null;
-        }
-
-
-
-
-
-        if (this.geometry)
-        this.geometry.dispose();
-        if (this.parent)
-            this.parent.remove(this)
-
-
-    }
-
-
-    appendNodes(nodes) {
-
-
-        if (!this.mNodeMeshes) {
-            this.mNodeMeshes = new THREE.Object3D;
-            this.add(this.mNodeMeshes)
-
-        }
-
-
-        var that = this.mNodeMeshes;//this;
-        _.each(nodes, function (node) {
-            if (node && node._bubble)
-                that.add(node._bubble)
-
-
-        })
-
-
-    }
-
-
-    createEdgesFromNodes(nodes) {
-
-        this.mEdgesContainer = new __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__["a" /* default */]();
-        this.mEdgesContainer.setRenderMode(true,false,false).setSkipParams(30,40).setFromNodes(nodes);
-        this.add(this.mEdgesContainer)
-
-       /* this.mEdgesContainer2 = new EdgesContainer();
-        this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
-        this.add(this.mEdgesContainer2)
-*/
-
-
-    }
-
-
-    //TODO refactor
-    setDistributionHandler(distribution, onComplete = function () {
-    }) {
-
-        var that = this;
-        distribution.setNodes(this.mNodes, function (vec, i) {
-
-            let n = that.mNodes[i];
-            if (n._bubble) n._bubble.position.set(n.x, n.y, n.z);
-            that.mNodeParticles.updateNodePosition(i);
-
-        }, function onStep() {
-
-
-            that.updateEdges();
-
-
-        }, function(){
-
-
-            that._initDotParticles();
-
-            onComplete()
-
-
-
-
-        });
-
-    }
-
-    updateEdges() {
-
-
-        if (this.mEdgesContainer)
-            this.mEdgesContainer.updateEdges();
-
-        if (this.mEdgesContainer2)
-            this.mEdgesContainer2.updateEdges();
-
-    }
-
-    updateDots(time)
-    {
-            if ( this.mParticles )
-                this.mParticles.update(time);
-    }
-
-
-
-
-    /**
-     * creates a structure that contains a point cloud for the nodes for mre effiecient rendering
-     *
-     * @returns {{nodes, pointCloud, updateCrossFade, update, updateNode, updateNodePosition, updateNodeColor, updateNodeSize, on, remove}|*}
-     */
-
-    createParticleNodeCloud() {
-
-        var elem = ParticleNodeGroup(this.mNodes, {
-            nodeDefaultSize: 10,
-            nodeDefaultScale: 10,
-            nodeTexture: "img/dot7.png"
-        });
-
-
-        return elem
-    }
-
-
-    //create/update particleSystem (little dots inside nodes)
-    //potentially add them at specific time
-    _initDotParticles() {
-
-        if (this.mParticles)
-            this.mParticles.start();
-
-
-        if (!this.mParticles) {
-
-            var nodes = this.mNodes;
-            var demoOptions = {
-                increment: 1,
-                duration: 1000,
-                easing: TWEEN.Easing.Exponential.Out
-            };
-
-            if (!nodes) //FIXME this only works that way because to realData is not generated properly
-                demoOptions.npc = function (n) {
-
-                    return n.itemCount || 5
-                    //return 5
-                };
-
-
-            //TODO refactor force-graph-utils
-
-            var particles = createParticleSystemForNodes(nodes, demoOptions);
-            this.add(particles.pointCloud);
-
-
-            //TODO this timeout currently fixes wrong positioning bug..
-            setTimeout(function(){
-                particles.start();
-            },10)
-
-            //TODO call start if distribution function is finished
-            /*this.parent.on("distribution-complete", function () {
-
-                particles.start()
-
-
-            });*/
-
-
-            this.mParticles = particles;
-        }
-
-    }
-
-
-    updateDotParticlesColor() {
-
-            if (this.mParticles) {
-                this.mParticles.updateColors();
-
-
-                //  this.mParticles.pointCloud.position.sub(this.position); //this.parent.position
-            }
-
-
-    }
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
-
-
-
-
-/***/ }),
 /* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(25);
 /**
  * Created by Frank on 06.06.2017.
  */
 
 
 //TODO refactor RootCluster
+
+
+
 
 
 /**
@@ -2938,131 +2905,39 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
     attachToView3D(view3D){
         this.mParentView=view3D
 
-    }
 
-    /**
-     *
-     * TODO the root cluster manages the visibility of all of it's currently visible nodes
-     * we do have a hierarchical structure that we can use to speed up the rendering a bit
-     *
-     */
-
-
-    addGlobalNodeCaptions() {
-
-        if (!this.mParentView) {
-            console.warn("use attachToView3D() to attach cluster to a view container first")
-            return
-        }
-
-        function createTextNodeContainer() {
-
-            //create container for text elements
-
-            var textElementsContainer = $("<div>").addClass("graph-captions-container").css({
-                width: "100%",
-                height: "100%",
-               // top: 0,
-               // left: 0,
-                overflow: "hidden",
-                position: "absolute",
-                "pointer-events": "none"//, border: "1px solid red"
-            })
-
-            return textElementsContainer
-        }
-
-        /**
-         * for the method to work env  needs to contain the following paraams :
-         * env={
-         *  renderer.domElement,  for get dimensions and text pos
-         *   currentNodesVisible,   // ... nodes visible==all nodes in set is to harsh let rootcluster handle it probably
-         *	textNode,               // node container that is overlay with pointerevents none
-         *  camera
-         *  }
-         */
-
-
-        var mTextNode = $(this.mParentView.mRenderer.domElement).parent().children(".graph-captions-container")
-
-       if (mTextNode.length == 0) {
-
-            mTextNode = createTextNodeContainer(this.mParentView.mRenderer.domElement);
-            $(this.mParentView.mRenderer.domElement).parent().append(mTextNode)
-            this.mTextNodesContainer=mTextNode
-
-        }
-
-        this.mGlobalTextNodesContainer=mTextNode
-
-        mTextNode.height(this.mParentView.clientHeight)
-        mTextNode.width(this.mParentView.clientWidth)
-
-
-       mTextNode.empty()
-
-
-
-var that=this
-        let env={
-            renderer:this.mParentView.mRenderer,
-            currentNodesVisible:[],//can be left empty if below nodes function is used
-            textNode:mTextNode,
-            camera:this.mParentView.mCamera
-
-        }
-
-       if (!this.tn)
-            this.tn = TextNodes(env, {
-                maxVisibleCount: 10,
-                onNodeText: function (node) {
-
-                    if (node.name)
-                        return node.name
-
-                    return node.id
-
-                },
-                getNodes: function(){
-
-                    if (!that.useClusterText)
-                   return []
-
-                    //FIXME use only visible nodes to improve performance
-                    //TODO also have a per cluster approach for further performance improvements
-                    let root=that.getRoot()
-
-                   let res=(root&&_.isArray(root.mVisibleRootTextNodes))?root.mVisibleRootTextNodes:[]
-                    if (res==undefined) console.warn("!")
-                    return res
-
-                }
-            })
 
 
     }
-    updateRootTextNodes(nodes) {
-            this.mVisibleRootTextNodes=nodes
-    }
-
-    update(){
-        super.update()
 
 
-        if (this.tn)
-       this.tn.update();
 
-    }
+   resetTextOverlay(){
+
+
+        if (this.mTextOverlay) this.mTextOverlay.remove()
+
+       this.mTextOverlay=$("<cluster-text-overlay>");
+
+       $(this.mParentView).append(this.mTextOverlay)
+
+   }
 
 
 
 
     applyClustering(mClusteringSpeccsArray) {
 
-        this.storeParentPositionInNodes()
+       //FIXME transitions betweens graphs
+      //this.storeParentPositionInNodes()
         super.applyClustering(mClusteringSpeccsArray)
 
-        this.restoreNodePositionFromExParent()
+        this.resetTextOverlay()
+
+
+
+
+       // this.restoreNodePositionFromExParent()
     }
 
 
@@ -3458,524 +3333,230 @@ class ZoomUtil {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__coordinates_png__);
 /**
  * Created by Frank on 13.06.2017.
  */
 
 
-//a view class to be able to use multiple views and switch between them
-//limit fps
-//see shadertoy for usage as thumbnail and such
 
 
-class View3D extends HTMLElement
+
+
+
+
+
+
+
+
+class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default */]
 {
 
-    constructor(...args){
-    super(...args);
-
-
-        this.createCSSRule();
-        this.mTime=-1;
-        this.mActualFPS=0;
-        this.showFPSCounter=false;
-
-    //   this.initStatic()
-
-        // Setup renderer
-        this.mRenderer = new THREE.WebGLRenderer({
-            antialias: true
-        });
-
-
-    }
-
-
-
-    //TODO remove little redundancy
-    createCSSRule()
+    constructor(...args)
     {
-        var style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = '.view-3d-maximised { position: absolute !important;   top: 0  !important;   left: 0  !important;   height: 100% !important;    width: 100% !important; }';
-        document.getElementsByTagName('head')[0].appendChild(style);
+        super(...args);
+
+        this.mRootCluster=null;
 
 
-
-    }
-
-
-    resizeCanvas() {
-    if (this.mRenderer) {
-        this.mRenderer.setSize(this.clientWidth, this.clientHeight);
-        this.mCamera.aspect = this.clientWidth /this.clientHeight;
-        this.mCamera.updateProjectionMatrix();
-    }
-
-        if (this.mRenderer)
-            this.mControls.panSpeed =  this.mControls.rotateSpeed = 1600/this.clientWidth*0.3
 
 
     }
 
 
-   /* get scene() {
-        return ""+ this.mScene
-    }
-    set scene(scene) {
-        this.mScene=scene
-    }
-*/
-    setCaption(text)
+    setSpeccs(speccs)
     {
-
-
-        let captionCSS= {
-            "pointer-events": "none",
-            position: "relative",
-            padding: "1em",
-            "font-size": "2em",
-            top: "30%",
-            height: "3em",
-            width: "100%",
-            background: "rgba(255,255,255,0.3)",
-            left: "0px",
-            "z-index": 1
-        };
-
-        if (!this.mCaption)
-            this.mCaption=$("<span></span>").html(this.name).css(captionCSS);
-
-        this.mCaption.html("").append(text);
+        this.mSpeccs=speccs;
         return this
     }
 
+    getSpeccs()
+    {
 
+        return this.mSpeccs
+    }
 
 
-    /**
-     *   set up controls,  scene,   renderer,     animation
-     *
-     */
-    initStatic() {
 
-         if (this._inited_static_) return;
-         var that=this;
+createSkyDome()
+{
 
+    let scene=this.mScene;
 
-        this.mFPS=0.5;
-        this.minFPS=this.minFPS||0;
-        this.maxFPS=this.maxFPS||144;
+    var ambientLight = new THREE.AmbientLight(0x333333);
+    scene.add(ambientLight);
+    var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(5, 3, 5);
+    scene.add(dirLight);
+    var geometry = new THREE.SphereGeometry(300000, 60, 40);
+    var material = new THREE.MeshBasicMaterial();
 
+   material.map = THREE.ImageUtils.loadTexture(__WEBPACK_IMPORTED_MODULE_3__coordinates_png___default.a);
+    material.side = THREE.BackSide;
+    material.opacity=0.05;
+    material.transparent=true;
+    var skydome = new THREE.Mesh(geometry, material);
 
-        this.mLastFrameTime=-1;
+    this.mSkyDome=skydome
 
-        let captionCSS= {
-            "pointer-events": "none",
-            position: "relative",
-            padding: "1em",
-            "font-size": "2em",
-            top: "30%",
-            height: "3em",
-            width: "100%",
-            background: "rgba(255,255,255,0.3)",
-            left: "0px",
-            "z-index": 1
-        };
+    scene.add(skydome);
 
-    if (!this.mCaption)
-        this.mCaption=$("<span></span>").html(this.name).css(captionCSS);
+}
 
-        $(this).append(   this.mCaption).addClass("view-3d");
 
 
+    initClusterForView(rawGraphData,parentEl3D) {
 
-        // Add nav info section
 
+        if (!rawGraphData) return;
 
-        //createTooltip()
+        let speccs = this.getSpeccs();
 
-        // Setup camera
-        this.mCamera = new THREE.PerspectiveCamera();
-        this.mCamera.far = 200000;
+        let graphData = new __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__["a" /* default */](rawGraphData);
 
 
-        // Setup scene
+        let preparedData = graphData.createClusterNodesAndEdges(this);
 
-        this.mScene = new THREE.Scene();
+        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes,undefined,this);
 
 
-
-        this.mCamera.lookAt(this.mScene.position);
-
-        this.mCamera.position.z = 150000;
-
-
-
-
-        this.mRenderer.setClearColor( 0x000000 );
-        this.mRenderer.setPixelRatio( window.devicePixelRatio );
-
-        this.appendChild(this.mRenderer.domElement);
-
-
-
-
-        $(this.mRenderer.domElement).css({    position: "absolute",width:"100%",height:"100%"});
-
-
-        //init basic keyboard io
-      //FIXME this probably interferes with domEvents here..
-        /*
-
-         this.mOtherEvents = new Mousetrap(this.mRenderer.domElement);
-          //  this.mOtherEvents
-            Mousetrap .bind("shift+r",function(e){
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("actualFPS",   that.mActualFPS)
-
-        })*/
-
-        this.mFpsCounter=$("<span     style='color: white;position: absolute;' >");
-        $(this).append(this.mFpsCounter);
-
-
-        //------------------------------------------------
-        //throttle move events to about 50 fps
-        //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
-        THREEx.DomEventsAlt.prototype._onMouseMove	=_.throttle(function(domEvent)
-        //THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
-        {
-            var mouseCoords = this._getRelativeMouseXY(domEvent);
-            this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
-            this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
-            this._onMove('mouseout' , mouseCoords.x, mouseCoords.y, domEvent);
-        },40);  //25 (f)ps
-
-        //init domEnvents
-        //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
-        this.mDomEvents = new THREEx.DomEventsAlt(this.mCamera,this.mRenderer.domElement,this.mScene);
-
-        //Note: have a factory in case we need this kind of injection multiple times
-       // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations
-
-
-        //------------------------------------------------
-
-
-
-        //FIXME binding events will interfere with controls
-        $(this.mRenderer.domElement).on("mouseover",function(e){
-
-            if (that.isMaximised()) return;
-
-            e.stopPropagation();
-            that.setActive();
-
-            $(that).attr("hasFocus",true);
-
-
-            that.mCaption.stop(true,false).fadeOut(200)
-
-
-        });
-
-
-        $(this.mRenderer.domElement).on("mouseout",function(e) {
-
-            if (that.isMaximised()) return;
-
-            e.stopPropagation();
-
-
-            $(that).removeAttr("hasFocus");
-            if (!$(that).hasClass("view-3d-maximised")) {
-
-            that.mCaption.stop(true, false).delay(400).fadeIn();
-
-            //keep maximised element active or whatever state it currently holds
-            that.setInactive();
-
-
+//-- count visible nodes
+   //TODO check if this interferes with the nodeMixin and the default implementation
+      var visibleNodes=[];
+        _.each(preparedData.nodes,function(node){
+            node.get3DRoot().onBeforeRender=function(){
+                visibleNodes.push(node);
             }
+        });
+//--
+
+        parentEl3D.add(res);
+        res.position.set(0, 0, 0);
+
+        //FIXME workflow below ..
+        //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
+        res.attachToView3D(this);
+        res.applyClustering(speccs);
+
+
+
+
+        var that=this;
+        var _____skipFrames=0;
+
+        $(that).on("before-render",function(){
+
+
+
+           // res.update()
+
+
+            if (that.isMaximised()) {
+
+                   _____skipFrames++;
+                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
+             let prev_vis=preparedData.nodes[0]._bubble.material.visible;
+                let _vis= (_____skipFrames % 20) ? false : true;
+                preparedData.nodes[0]._bubble.material.visible = _vis;
+
+                if (prev_vis)
+                {
+                GUI.updateFromVisibleNodes(visibleNodes);
+                 //   that.mVisibleNodes=[].concat(visibleNodes)
+                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
+                  //  that.mRootCluster.updateRootTextNodes(visibleNodes);
+
+                }
+            }
+            visibleNodes=[] //reset count
 
         });
 
 
-        // Add camera interaction
-        this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
-       // this.mControls.rotateSpeed = 0.3
+        this.start();
 
-        this.mControls.maxDistance = this.mCamera.far;
+        return res
 
 
+    }
+
+
+    setData(mGraphData)
+    {
+        this.initStatic();
+
+
+        this.createSkyDome();
+
+
+        if (!this.mRootCluster)
+        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
+
+        $(this).trigger("loaded")
 
 
 
-        this.resizeCanvas();
+    }
 
-       this.mControls.addEventListener("change", (...args)=> $(this).trigger("change",...args)  );
+    loadDataSet(ds){
 
+      var that = this;
 
+        ds(null,function onSuccess(mGraphData)
+        {
+            console.log("data loaded");
+            that.setData(mGraphData);
 
+            $(".cloudNodeColorSelect").val("group").trigger("change")
 
-
-
-
-        this._inited_static_=true;
+        });
 
     return this
-
-    }
-
-         // Kick-off renderer
-    animate() {
-
-        var initialFrames=1;
-        var that=this;
-        var accTime=0,accFrames=0;
-
-      function animate(time) {
-        that.mTime=time;
-
-
-          initialFrames--;
-          if (that.mFPS==0) {
-
-              if (initialFrames<0)
-              {
-                  that.mFrameId = requestAnimationFrame(animate);
-                  return;
-              }
-          }
-          else {
-
-              let nextTime = that.mLastFrameTime + (1000 / that.mFPS);
-              if (nextTime > time) {
-
-                  that.mFrameId = requestAnimationFrame(animate);
-                  return;
-              }
-          }
-
-
-          //count frames
-          accTime+=time-that.mLastFrameTime;
-          accFrames++;
-
-          if (accTime>1000)
-          {
-              that.mActualFPS=accFrames;
-
-              if (that.showFPSCounter)
-              that.mFpsCounter.html(that.mActualFPS);
-
-              accTime=0;
-              accFrames=0;
-
-
-          }
-
-
-
-          that.mLastFrameTime = time;
-
-          that.mControls.update();
-
-             console.log( that.mLastFrameTime );
-
-
-
-          $(that).trigger("before-render",time);
-         // $(that).trigger("animate")
-
-          that.mRenderer.render(that.mScene, that.mCamera);
-
-
-          that.mFrameId = requestAnimationFrame(animate);
-      }
-
-        animate(-1)
-
-    }
-
-
-    add(object3D)
-    {
-        this.mScene.add(object3D)
-
     }
 
 
     maximise() {
-        $(this).addClass("view-3d-maximised");
 
-     this.mCaption.fadeOut();
+        var  root = this.mRootCluster;
 
-        this.setActive()
+        super.maximise();
 
+            if (root && root.mParentView && root.mTextOverlay) {
 
-    }
-
-    isMaximised(){
-
-     return   $(this).hasClass("view-3d-maximised")
-
-    }
-
-
-    undoMaximise() {
-        $(this).removeClass("view-3d-maximised");
-
-        this.setInactive()
-
-
-    }
-
-
-
-
-
-    setActive()
-    {
-
-        //fps
-        this.mFPS=this.maxFPS;
-
-        this.resizeCanvas();
-        this.start();
-
-    }
-
-    setInactive()
-    {
-      //  $(this).removeClass("view-3d-maximised")
-        this.mFPS=this.minFPS;
-
-        this.resizeCanvas()
-    }
-
-
-    start(){
-
-    this.stop();
-
-     this.animate()
-
-
-    }
-
-    stop(){
-        window.cancelAnimationFrame( this.mFrameId)
-    }
-
-    resume(){
-
-       this.start()
-
-    }
-
-
-    show(){
-        this.resume()
-
-
-    }
-
-    hide() {
-        this.stop()
-    }
-
-
-    connectedCallback(){
-
-        this.createTooltip();
-
-
-        this.initStatic();
-        this.start();
-
-        $(this).trigger("connected")
-
-
-    }
-
-
-    createTooltip() {
-
-        // Setup tooltip
-        if ( this.toolTipElem ) return;
-
-        this.toolTipElem = document.createElement('div');
-        this.toolTipElem.classList.add('graph-tooltip');
-
-        $(this.toolTipElem).css({
-            "z-index":1,
-            position:"relative",
-            "user-select": "none"
-        });
-
-        this.appendChild(this.toolTipElem);
-
-        // Capture mouse coords on move
-
-        this.mouse = new THREE.Vector2();
-        this.mouse.x = -2; // Initialize off canvas
-        this.mouse.y = -2;
-        this.addEventListener("mousemove", ev => {
-            // update the mouse pos
-
-
-            //$(env.toolTipElem).show()
-
-            const offset = getOffset(this),
-                relPos = {
-                    x: ev.pageX - offset.left,
-                    y: ev.pageY - offset.top
-                };
-            this.mouse.x = (relPos.x / this.clientWidth) * 2 - 1;
-            this.mouse.y =  - (relPos.y / this.clientHeight) * 2 + 1;
-            //console.log(offset);
-            // Move tooltip
-            this.toolTipElem.style.top = (relPos.y - 40) + 'px';
-            this.toolTipElem.style.left = (relPos.x - 20) + 'px';
-
-            function getOffset(el) {
-                const rect = el.getBoundingClientRect(),
-                    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
-                    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                return {
-                    top: rect.top + scrollTop,
-                    left: rect.left + scrollLeft
-                };
+                root.mTextOverlay.height(root.mParentView.clientHeight);
+                root.mTextOverlay.width(root.mParentView.clientWidth);
+                console.log("maximised")
             }
-        }, false);
+
+
+
 
     }
 
+    undoMaximise(){
+            super.undoMaximise();
 
-    /**
-     * set the content of the tooltip
-     *
-     *
-     * @param text
-     */
-    setTooltip(text)
-    {
 
-        $(this.toolTipElem).html("").append(text).show()
+            let root=this.mRootCluster;
+            if (root&& root.mParentView && root.mTextOverlay) {
+
+                root.mTextOverlay.height(root.mParentView.clientHeight);
+                root.mTextOverlay.width(root.mParentView.clientWidth)
+            }
+
 
     }
-
 
 
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = View3D;
+/* harmony export (immutable) */ __webpack_exports__["a"] = GraphView3D;
 
 
-
-customElements.define("view-3d", View3D);
+customElements.define("graph-view-3d", GraphView3D);
 
 
 /***/ }),
@@ -4197,11 +3778,7 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 
 
 
-/**
- *
- *
- *
- */
+
 
 class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* default */] {
 
@@ -4248,12 +3825,6 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
 
     createFromBoundingBox(vertices, boundingBox) {
-//FIXME performance myMod gets called too often initially
-
-
-
-
-
 
         console.log("FIXME convexVolume",vertices,boundingBox)
             //getVerticesFormLeaf in adjustHullSize does generate false values sometimes maybe due to some runtime concurrency problem
@@ -4438,1273 +4009,2287 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
 /***/ }),
 /* 17 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(3);
 /**
- * Created by Frank on 13.06.2017.
+ *	@author zz85 / http://twitter.com/blurspline / http://www.lab4games.net/zz85/blog
+ *
+ *	A general purpose camera, for setting FOV, Lens Focal Length,
+ *		and switching between perspective and orthographic views easily.
+ *		Use this only if you do not wish to manage
+ *		both a Orthographic and Perspective Camera
+ *
  */
 
 
 
 
+THREE.CombinedCamera = function ( width, height, fov, near, far, orthoNear, orthoFar ) {
+
+	THREE.Camera.call( this );
+
+	this.fov = fov;
+
+	this.far = far;
+	this.near = near;
+
+	this.left = - width / 2;
+	this.right = width / 2;
+	this.top = height / 2;
+	this.bottom = - height / 2;
+
+	this.aspect =  width / height;
+	this.zoom = 1;
+	this.view = null;
+	// We could also handle the projectionMatrix internally, but just wanted to test nested camera objects
+
+	this.cameraO = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 	orthoNear, orthoFar );
+	this.cameraP = new THREE.PerspectiveCamera( fov, width / height, near, far );
+
+	this.toPerspective();
+
+};
+
+THREE.CombinedCamera.prototype = Object.create( THREE.Camera.prototype );
+THREE.CombinedCamera.prototype.constructor = THREE.CombinedCamera;
+
+THREE.CombinedCamera.prototype.toPerspective = function () {
+
+	// Switches to the Perspective Camera
+
+	this.near = this.cameraP.near;
+	this.far = this.cameraP.far;
+
+	this.cameraP.aspect = this.aspect;
+	this.cameraP.fov =  this.fov / this.zoom ;
+	this.cameraP.view = this.view;
+
+	this.cameraP.updateProjectionMatrix();
+
+	this.projectionMatrix = this.cameraP.projectionMatrix;
+
+	this.inPerspectiveMode = true;
+	this.inOrthographicMode = false;
+
+
+   // The renderer needs world matrix data for the raycasting to work. Make the following modification to the CombinedCamera code:
+
+	// Add to the .toPerspective() method:
+	this.matrixWorldInverse = this.cameraP.matrixWorldInverse; //
+    this.matrixWorld = this.cameraP.matrixWorld;               //
 
 
 
 
+};
+
+THREE.CombinedCamera.prototype.toOrthographic = function () {
+
+	// Switches to the Orthographic camera estimating viewport from Perspective
+
+	var fov = this.fov;
+	var aspect = this.cameraP.aspect;
+	var near = this.cameraP.near;
+	var far = this.cameraP.far;
+
+	// The size that we set is the mid plane of the viewing frustum
+
+	var hyperfocus = ( near + far ) / 2;
+
+	var halfHeight = Math.tan( fov * Math.PI / 180 / 2 ) * hyperfocus;
+	var halfWidth = halfHeight * aspect;
+
+	halfHeight /= this.zoom;
+	halfWidth /= this.zoom;
+
+	this.cameraO.left = - halfWidth;
+	this.cameraO.right = halfWidth;
+	this.cameraO.top = halfHeight;
+	this.cameraO.bottom = - halfHeight;
+	this.cameraO.view = this.view;
+
+	this.cameraO.updateProjectionMatrix();
+
+	this.near = this.cameraO.near;
+	this.far = this.cameraO.far;
+	this.projectionMatrix = this.cameraO.projectionMatrix;
+
+	this.inPerspectiveMode = false;
+	this.inOrthographicMode = true;
+
+     // and to the .toOrthographic() method add:
+    this.matrixWorldInverse = this.cameraO.matrixWorldInverse; //
+    this.matrixWorld = this.cameraO.matrixWorld;               //
 
 
-class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default */]
-{
-
-    constructor(...args)
-    {
-        super(...args);
-
-        this.mRootCluster=null
+};
 
 
+
+THREE.CombinedCamera.prototype.copy = function ( source ) {
+
+	THREE.Camera.prototype.copy.call( this, source );
+
+	this.fov = source.fov;
+	this.far = source.far;
+	this.near = source.near;
+
+	this.left = source.left;
+	this.right = source.right;
+	this.top = source.top;
+	this.bottom = source.bottom;
+
+	this.zoom = source.zoom;
+	this.view = source.view === null ? null : Object.assign( {}, source.view );
+	this.aspect = source.aspect;
+
+	this.cameraO.copy( source.cameraO );
+	this.cameraP.copy( source.cameraP );
+
+	this.inOrthographicMode = source.inOrthographicMode;
+	this.inPerspectiveMode = source.inPerspectiveMode;
+
+	return this;
+
+};
+
+THREE.CombinedCamera.prototype.setViewOffset = function( fullWidth, fullHeight, x, y, width, height ) {
+
+	this.view = {
+		fullWidth: fullWidth,
+		fullHeight: fullHeight,
+		offsetX: x,
+		offsetY: y,
+		width: width,
+		height: height
+	};
+
+	if ( this.inPerspectiveMode ) {
+
+		this.aspect = fullWidth / fullHeight;
+
+		this.toPerspective();
+
+	} else {
+
+		this.toOrthographic();
+
+	}
+
+};
+
+THREE.CombinedCamera.prototype.clearViewOffset = function() {
+
+	this.view = null;
+	this.updateProjectionMatrix();
+
+};
+
+THREE.CombinedCamera.prototype.setSize = function( width, height ) {
+
+	this.cameraP.aspect =this.aspect= width / height;
+	this.left = - width / 2;
+	this.right = width / 2;
+	this.top = height / 2;
+	this.bottom = - height / 2;
+
+
+
+};
+
+
+THREE.CombinedCamera.prototype.setFov = function( fov ) {
+
+	this.fov = fov;
+
+	this.update();
+
+};
+
+
+
+THREE.CombinedCamera.prototype.setFar = function( far ) {
+
+	this.cameraP.far=this.far=far;
+    this.cameraO.far=this.far=far;
+    this.update();
+
+};
+
+THREE.CombinedCamera.prototype.setNear = function( near ) {
+
+    this.cameraP.near=this.near=near;
+    this.update();
+
+};
+
+
+
+
+THREE.CombinedCamera.prototype.update = function(  ) {
+
+
+    if ( this.inPerspectiveMode ) {
+
+        this.toPerspective();
+
+    } else {
+
+        this.toOrthographic();
 
     }
 
+};
 
-    setSpeccs(speccs)
-    {
-        this.mSpeccs=speccs;
-        return this
-    }
 
-    getSpeccs()
-    {
 
-        return this.mSpeccs
-    }
 
 
 
 
 
-    initClusterForView(rawGraphData,parentEl3D) {
+// For maintaining similar API with PerspectiveCamera
 
+THREE.CombinedCamera.prototype.updateProjectionMatrix = function() {
 
-        if (!rawGraphData) return;
+	if ( this.inPerspectiveMode ) {
 
-        let speccs = this.getSpeccs();
+		this.toPerspective();
 
-        let graphData = new __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__["a" /* default */](rawGraphData);
+	} else {
 
+		this.toPerspective();
+		this.toOrthographic();
 
-        let preparedData = graphData.createClusterNodesAndEdges(this);
+	}
 
-        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes,undefined,this);
+};
 
+/*
+* Uses Focal Length (in mm) to estimate and set FOV
+* 35mm (full frame) camera is used if frame size is not specified;
+* Formula based on http://www.bobatkins.com/photography/technical/field_of_view.html
+*/
+THREE.CombinedCamera.prototype.setLens = function ( focalLength, filmGauge ) {
 
-//-- count visible nodes
-   //TODO check if this interferes with the nodeMixin and the default implementation
-      var visibleNodes=[];
-        _.each(preparedData.nodes,function(node){
-            node.get3DRoot().onBeforeRender=function(){
-                visibleNodes.push(node);
-            }
-        });
-//--
+	if ( filmGauge === undefined ) filmGauge = 35;
 
-        parentEl3D.add(res);
-        res.position.set(0, 0, 0);
+	var vExtentSlope = 0.5 * filmGauge /
+			( focalLength * Math.max( this.cameraP.aspect, 1 ) );
 
-        //FIXME workflow below ..
-        //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
-        res.attachToView3D(this);
-        res.applyClustering(speccs);
+	var fov = THREE.Math.RAD2DEG * 2 * Math.atan( vExtentSlope );
 
-        res.addGlobalNodeCaptions();
+	this.setFov( fov );
 
+	return fov;
 
+};
 
-        var that=this;
-        var _____skipFrames=0;
 
-        $(that).on("before-render",function(){
+THREE.CombinedCamera.prototype.setZoom = function( zoom ) {
 
+	this.zoom = zoom;
+	this.update();
+};
 
+THREE.CombinedCamera.prototype.toFrontView = function() {
 
-           // res.update()
+	this.rotation.x = 0;
+	this.rotation.y = 0;
+	this.rotation.z = 0;
 
+	// should we be modifing the matrix instead?
 
-            if (that.isMaximised()) {
+};
 
-                   _____skipFrames++;
-                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-             let prev_vis=preparedData.nodes[0]._bubble.material.visible;
-                let _vis= (_____skipFrames % 20) ? false : true;
-                preparedData.nodes[0]._bubble.material.visible = _vis;
+THREE.CombinedCamera.prototype.toBackView = function() {
 
-                if (prev_vis)
-                {
-                GUI.updateFromVisibleNodes(visibleNodes);
-                 //   that.mVisibleNodes=[].concat(visibleNodes)
-                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
-                    that.mRootCluster.updateRootTextNodes(visibleNodes);
+	this.rotation.x = 0;
+	this.rotation.y = Math.PI;
+	this.rotation.z = 0;
 
-                }
-            }
-            visibleNodes=[] //reset count
+};
 
-        });
+THREE.CombinedCamera.prototype.toLeftView = function() {
 
+	this.rotation.x = 0;
+	this.rotation.y = - Math.PI / 2;
+	this.rotation.z = 0;
 
-        this.start();
+};
 
-        return res
+THREE.CombinedCamera.prototype.toRightView = function() {
 
+	this.rotation.x = 0;
+	this.rotation.y = Math.PI / 2;
+	this.rotation.z = 0;
 
-    }
+};
 
+THREE.CombinedCamera.prototype.toTopView = function() {
 
-    setData(mGraphData)
-    {
-        this.initStatic();
+	this.rotation.x = - Math.PI / 2;
+	this.rotation.y = 0;
+	this.rotation.z = 0;
 
-        if (!this.mRootCluster)
-        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
+};
 
-        $(this).trigger("loaded")
+THREE.CombinedCamera.prototype.toBottomView = function() {
 
+	this.rotation.x = Math.PI / 2;
+	this.rotation.y = 0;
+	this.rotation.z = 0;
 
-
-    }
-
-    loadDataSet(ds){
-
-      var that = this;
-
-        ds(null,function onSuccess(mGraphData)
-        {
-            console.log("data loaded");
-            that.setData(mGraphData);
-
-            $(".cloudNodeColorSelect").val("group").trigger("change")
-
-        });
-
-    return this
-    }
-
-
-    maximise() {
-
-        var  root = this.mRootCluster;
-
-        super.maximise();
-
-            if (root && root.mParentView && root.mGlobalTextNodesContainer) {
-
-                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
-                root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth);
-                console.log("maximised")
-            }
-
-
-
-
-    }
-
-    undoMaximise(){
-            super.undoMaximise();
-
-
-            let root=this.mRootCluster;
-            if (root&& root.mParentView && root.mGlobalTextNodesContainer) {
-
-                root.mGlobalTextNodesContainer.height(root.mParentView.clientHeight);
-                root.mGlobalTextNodesContainer.width(root.mParentView.clientWidth)
-            }
-
-
-    }
-
-
-}
-/* unused harmony export default */
-
-
-customElements.define("graph-view-3d", GraphView3D);
+};
 
 
 /***/ }),
 /* 18 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(3);
-/**
- * Created by Frank on 15.06.2017.
- */
-
-
+/***/ (function(module, exports) {
 
 /**
- * Created by Frank on 13.06.2017.
+ * @author Mugen87 / https://github.com/Mugen87
  */
 
+( function() {
 
+	// ConvexGeometry
 
+	function ConvexGeometry( points ) {
 
+		THREE.Geometry.call( this );
 
+		this.type = 'ConvexGeometry';
 
+		this.fromBufferGeometry( new ConvexBufferGeometry( points ) );
+		this.mergeVertices();
 
+	}
 
+	ConvexGeometry.prototype = Object.create( THREE.Geometry.prototype );
+	ConvexGeometry.prototype.constructor = ConvexGeometry;
 
+	// ConvexBufferGeometry
 
+	function ConvexBufferGeometry( points ) {
 
+	  THREE.BufferGeometry.call( this );
 
-class SimpleForceGraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default */]
-{
+		this.type = 'ConvexBufferGeometry';
 
-    constructor(...args)
-    {
-        super(...args)
+	  // buffers
 
-        this.mRootCluster=null
+	  var vertices = [];
+	  var normals = [];
 
-    }
+	  // execute QuickHull
 
+		if ( THREE.QuickHull === undefined ) {
 
+			console.error( 'THREE.ConvexBufferGeometry: ConvexBufferGeometry relies on THREE.QuickHull' );
 
-    initForceGraphView(rawGraphData,parentEl3D) {
+		}
 
-        var graph=this.mSimpleGraph
+	  var quickHull = new THREE.QuickHull().setFromPoints( points );
 
-        if (!graph)
-            graph=this.mSimpleGraph=new DefaultForceGraph(this)
-            .numDimensions(3)
-            (this);
+	  // generate vertices and normals
 
+	  var faces = quickHull.faces;
 
-        graph
-            .resetState()
-            .nameAccessor(node => node.id)
-            .colorAccessor(function (node) {
-                if (node.color) return node.color
+	  for ( var i = 0; i < faces.length; i ++ ) {
 
-                if (typeof node.group == "undefined") {
-                    node.group = 0;
-                    return Math.round(Math.random() * 256 * 256 * 256)
-                }
+	    var face = faces[ i ];
+	    var edge = face.edge;
 
-                if (typeof node.group!="string")
-                    return parseInt(colors[node.group % colors.length].slice(1), 16)
-                else
-                    return 0xffffff
-            })
+	    // we move along a doubly-connected edge list to access all face points (see HalfEdge docs)
 
-            .shapeAccessor(node => node.shape ? node.shape : "sphere")
-            .graphData(rawGraphData);
+	    do {
 
+	      var point = edge.head().point;
 
+	      vertices.push( point.x, point.y, point.z );
+	      normals.push( face.normal.x, face.normal.y, face.normal.z );
 
-        $(window).on("node-color-change",function(e,val){
+	      edge = edge.next;
 
+	    } while ( edge !== face.edge );
 
-        var helper=computeGroupNodeColorHelper( graph.env.nodeClouds.groupIdList)
+	  }
 
+	  // build geometry
 
-        if (val=="group")
-            graph.env._nodes.forEach(function(v){ v.color=helper.getColor(v.group)});
-        else
-            graph.env._nodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
+	  this.addAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+	  this.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
 
-            graph.env.nodeClouds.update()
+	}
 
-            graph.env.particles.updateColors()
+	ConvexBufferGeometry.prototype = Object.create( THREE.BufferGeometry.prototype );
+	ConvexBufferGeometry.prototype.constructor = ConvexBufferGeometry;
 
-        })
+	// export
 
-        return graph
-    }
+	THREE.ConvexGeometry = ConvexGeometry;
+	THREE.ConvexBufferGeometry = ConvexBufferGeometry;
 
-
-    setData(mGraphData)
-    {
-        this.initStatic();
-
-        if (!this.mRootCluster)
-            this.mRootCluster= this.initForceGraphView(mGraphData,this.mScene)
-
-
-
-
-    }
-
-
-    loadDataSet(ds){
-
-        var that = this
-
-        ds(null,function onSuccess(mGraphData)
-        {
-            console.log("data loaded")
-            that.setData(mGraphData)
-
-            $(".cloudNodeColorSelect").val("group").trigger("change")
-
-        });
-
-        return this
-    }
-
-
-}
-/* unused harmony export default */
-
-
-customElements.define("simple-force-graph-view-3d", SimpleForceGraphView3D);
-
-
-
-//------------------------------------------------
-//------------------------------------------------
-//------------------------------------------------
-
-
-
-
-
-function DefaultForceGraph(view3d) {
-
-    var digest=_.debounce(__digest,20)
-
-
-    const CAMERA_DISTANCE2NODES_FACTOR = 150;
-
-    class CompProp {
-        constructor(name, initVal = null, redigest = true, onChange = newVal => {}) {
-            this.name = name;
-            this.initVal = initVal;
-            this.redigest = redigest;
-            this.onChange = onChange;
-        }
-    }
-
-    const env = { // Holds component state
-        initialised: false,
-        onFrame: () => {}
-    };
-
-    //TODO remove and forward env to modules
-   // globalEnv = env
-
-    const exposeProps = [
-        new CompProp('width', view3d.clientWidth, false, resizeCanvas),
-        new CompProp('height', view3d.clientHeight, false, resizeCanvas),
-        new CompProp('graphData', {
-            nodes: {
-                1: {
-                    name: 'mock',
-                    val: 1
-                }
-            },
-            links: [[1, 1]]// [from, to]
-        }),
-        new CompProp('numDimensions', 3),
-        new CompProp('numSkipEdgesRendered', 5, false),
-
-        new CompProp('nodeRelSize', 4), // volume per val unit
-        new CompProp('lineOpacity', 0.1),
-        new CompProp('valAccessor', node => node.val),
-        new CompProp('nameAccessor', node => node.name),
-        new CompProp('groupAccessor', node => node.group),
-        new CompProp('colorAccessor', node => node.color),
-        new CompProp('shapeAccessor', node => node.shape),
-        new CompProp('initialEngineTicks', 0), // how many times to tick the force engine at init before starting to render
-        new CompProp('maxConvergeTime', 2 * 7500), // ms
-        new CompProp('maxConvergeFrames', 2 * 150),
-
-        new CompProp('useLineWidthFeature', false),
-        new CompProp('useNodeTextFeature', true, false),
-        new CompProp('convexHullFeature', "none"),
-        new CompProp('useDebugSphere', false),
-        new CompProp('useTooltip', true),
-        new CompProp('highlightArrowType', "line"), //line,animated,simple,mesh
-
-        new CompProp('useLineGroup', true)
-
-    ];
-    //----------------------------------------
-    function createTooltip() {
-
-        // Setup tooltip
-
-        var tt=$("<div>")
-        $(view3d).append(tt)
-
-        env.toolTipElem = tt.get(0)//document.createElement('div');
-        env.toolTipElem.classList.add('graph-tooltip');
-
-        env.domNode.appendChild(env.toolTipElem);
-
-        // Capture mouse coords on move
-        env.raycaster = new THREE.Raycaster();
-        env.mouse = new THREE.Vector2();
-        env.mouse.x = -2; // Initialize off canvas
-        env.mouse.y = -2;
-        env.domNode.addEventListener("mousemove", ev => {
-            // update the mouse pos
-
-            if (!env.useTooltip) {
-                $(env.toolTipElem).hide()
-                return
-
-            } else
-                $(env.toolTipElem).show()
-
-            const offset = getOffset(env.domNode),
-                relPos = {
-                    x: ev.pageX - offset.left,
-                    y: ev.pageY - offset.top
-                };
-            env.mouse.x = (relPos.x / env.width) * 2 - 1;
-            env.mouse.y =  - (relPos.y / env.height) * 2 + 1;
-            //console.log(offset);
-            // Move tooltip
-            env.toolTipElem.style.top = (relPos.y - 40) + 'px';
-            env.toolTipElem.style.left = (relPos.x - 20) + 'px';
-
-            function getOffset(el) {
-                const rect = el.getBoundingClientRect(),
-                    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
-                    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                return {
-                    top: rect.top + scrollTop,
-                    left: rect.left + scrollLeft
-                };
-            }
-        }, false);
-
-    }
-    //----------------------------------------
-    //init
-
-
-
-    function initStatic() {
-        // Wipe DOM
-       // env.domNode.innerHTML = '';
-        // Add nav info section
-
-        createTooltip()
-
-        // Setup camera
-        env.camera =view3d.mCamera
-        env.camera.far = 100000;
-
-        // Setup scene
-        env.scene =view3d.mScene
-
-        // Setup renderer
-        env.renderer =view3d.mRenderer
-
-        env.controls =view3d.mControls
-        env.domEvents=view3d.mDomEvents
-
-
-        env.initialised = true;
-
-
-
-        function _updateFromVisibleNodes() {
-
-            GUI.updateFromVisibleNodes(env.currentNodesVisible)
-
-        }
-
-        var throttled_GUI_updateFromVisibleNodes = _.throttle(_updateFromVisibleNodes, 300)
-
-        function _Node_Texts() {
-
-            if (env.tn && env.useNodeTextFeature)
-                env.tn.update();
-
-            if (env.tn && !env.useNodeTextFeature)
-                env.tn.remove();
-
-            if (env.countryTextNodes && env.useNodeTextFeature && !env.demoDisabled)
-                env.countryTextNodes.update();
-
-            if (env.countryTextNodes && !env.useNodeTextFeature)
-                env.countryTextNodes.remove();
-
-        }
-
-        var throttled_Node_Texts = _.throttle(_Node_Texts, 10)
-
-        //used within utils too
-        //FIXME this is only currently there for the search function to trigger text generation because the onComplete Mehthod might have a problem
-        function updateTextWhenCameraIsMoving2() {
-            console.error("!")
-            setTimeout(function(){
-                _updateFromVisibleNodes()
-
-                _Node_Texts()
-
-            },600)
-
-
-        }
-
-        function updateTextWhenCameraIsMoving() {
-
-            throttled_GUI_updateFromVisibleNodes()
-            throttled_Node_Texts()
-        }
-
-        env.updateTextWhenCameraIsMoving = updateTextWhenCameraIsMoving
-        env.updateTextWhenCameraIsMoving2 = updateTextWhenCameraIsMoving2
-
-        env.controls.addEventListener("change", updateTextWhenCameraIsMoving)
-
-
-
-
-
-
-
-
-        var _____skipFrames = 0;
-        $(view3d).on("before-render",function(){
-
-            env.onFrame();
-
-            // Frame cycle
-            env.controls.update();
-
-
-
-            if (env.nodeClouds && env.nodeClouds.raytracer)
-                env.nodeClouds.raytracer.raycast(console.log)
-
-            //skip onBeforeRenderFor NumberOfFrames
-            _____skipFrames++
-
-            // if (window['globalNodes'])
-            //    globalNodes.forEach((n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-
-            //TODO what we want here instead is, a probably already existsing list of sorted visible meshes
-            // so we only have to determine which ones are nodes
-
-            //if we can do this, we can skip the onBeforeRender stuff
-            //also we can speed uo a lot of gui relevant code
-
-            //the nodecounter gets filled by the meshes that trigger a onBeforeRender event if they are visible
-            //TODO refactor ... bad practice though
-            env._nodeCounter = []
-            env.renderer.render(env.scene, env.camera);
-            if (env._nodeCounter.length > 0)
-                env.currentNodesVisible = env._nodeCounter
-
-            if (env.nodeClouds)
-                env.nodeClouds.updateCrossFade()
-
-        })
-
-        // Kick-off renderer
-
-
-   /*     (function animate() { // IIFE
-
-
-            requestAnimationFrame(animate);
-        })()*/
-    }
-
-    //----------------------------------------
-    function __digest() {
-
-
-        if (!env.initialised) {
-            return
-        }
-
-        console.log("digest")
-
-        //remove previous text nodes
-        if (env.textNode)
-            env.textNode.empty()
-
-        env.onFrame = () => {}; // Clear previous frame hook
-
-      _.each(env.scene.children,function(el){
-          env.scene.remove(el)
-      })
-
-     //   env.scene = new THREE.Scene(); // Clear the place
-
-        var mNodes=_.extend({},env.graphData.nodes)
-
-
-        // Build graph with data
-       var d3Nodes =  []; //globalNodes
-        for (let nodeId in mNodes) { // Turn nodes into array
-            const node = _.extend({},mNodes[nodeId]);
-            //const node = env.graphData.nodes[nodeId];
-            mNodes[nodeId]=node;
-            node._id = nodeId;
-            d3Nodes.push(node);
-        }
-
-        if (!d3Nodes.length) {
-            return;
-        } //if no data is present return for now
-
-        env._nodes=d3Nodes
-
-//TODO
-        var d3Links
-
-
-            //This is for the network/group part working
-            d3Links = env.graphData.links.map(link => { //globalLinks
-                return {
-                    source: mNodes[link[0]],
-                    target: mNodes[link[1]]
-                };
-            })
-
-
-
-
-
-
-        //---------------------
-        //adding grouping feature
-
-        env.digest = digest
-
-
-
-        function countVisibleNodes(node) {
-
-            env._nodeCounter.push(node)
-
-        }
-
-        // Add WebGL objects
-        d3Nodes.forEach(node => {
-
-            node = nodeMixin(env, node, {
-                onDrawNode: countVisibleNodes
-            })
-            node._bubble.name = env.nameAccessor(node) || '';
-
-            //FIXME have a second scene atop the particle node and edges for easier interaction
-            env.scene.add(node._bubble);
-
-            let bubble,
-                bubble_geometry;
-
-            //TODO not highlighted group nodes should be rendered with separate point cloud
-            if (node.isGroupNode) {
-
-                //node.addClass("basic-sprite-collapsed")
-                node.addClass("basic-ring")
-
-                //node.on("mouseover",()=> node.addClass("basic-animated"))
-                //node.on("mouseout",()=> node.removeClass("basic-animated"))
-                node.on("mouseover", () => node.addClass("basic-ring-2"))
-                node.on("mouseout", () => node.removeClass("basic-ring-2"))
-
-            } else {
-
-                //TODO specific renderings for node should be handled via class property at node data itself
-                //NOTE: the default node/group nodes/links will be put inside a point  cloud for each so we woud need a point cloud for each 3d-class that generates a points object
-
-                //node.addClass("basic-sphere")
-
-                // nothing to begin with
-                //node.addClass("basic-sprite")
-
-            }
-
-        });
-
-        //-----------------------------------------------
-
-        //init mesh for groupline
-        if (env.useLineGroup)
-            initLineGroup(env,{
-                opacity:0.01,
-                color:0x49616C,
-                transparent: true,
-            })
-
-        var linecount = 0;
-        var skipLines = env.numSkipEdgesRendered + 1;
-        if (skipLines < 1)
-            skipLines = 1
-        function shouldLineByVisible(link, id) {
-
-            return !(linecount++ % skipLines)
-        }
-
-        //d3Links.forEach(link => {
-        _.each(d3Links, (link, id) => {
-
-            //FIXME ... if we... use an external heuristic to change visibility of lines
-            /*
-             graph.setEdgeVisMod(function(edge){})
-
-
-
-             */
-            var bVisible = shouldLineByVisible()
-
-            linkMixin(env, link, {
-                lineIsVisible: bVisible,
-                color: 0xff0000,
-                opacity: 1
-            })
-
-            if (!env.useLineGroup && bVisible)
-                env.scene.add(link._line);
-
-        });
-
-        env.camera.lookAt(env.scene.position);
-        //env.camera.position.z = Math.cbrt(d3Nodes.length) * CAMERA_DISTANCE2NODES_FACTOR;
-        env.camera.position.z = 5000;
-
-        //----------------------------------------
-
-        //demo impl of better/more performant nodes
-        //add some color for now
-        //globalNodes.forEach( function(v) { if (!v.size) v.size=_.random(1,20); if (!v.color) v.color=_.random(50,255)*_.random(50,255)*_.random(50,255) })
-
-        //create the grouped pointclouds
-        var nodeClouds = createParticleSystemsByGroupAttr(d3Nodes);
-        env.nodeClouds = nodeClouds;
-        //add it to the scene
-        var group = new THREE.Group;
-        //group.position.x+=100
-        env.scene.add(group);
-        nodeClouds.attachTo(group);
-
-        //----------------------
-
-
-        function initRandomNodePositions(dimensions=3)
-        {
-
-            //test to init group positions
-            for (let gID of nodeClouds.groupIdList) {
-                var x = _.random(-5000, 5000),
-                    y = dimensions>1? _.random(-5000, 5000):0,
-                    z = dimensions>2?_.random(-5000, 5000):0;
-                for (let node of nodeClouds.container[gID].nodes) {
-
-                    node.x = x + _.random(-100, 100);
-                    node.y = dimensions>1? y + _.random(-100, 100):0;
-                    node.z =  dimensions>2?z + _.random(-100, 100):0;
-
-                }
-            }
-
-        }
-
-
-        initRandomNodePositions(env.numDimensions)
-
-
-//---------------------------
-
-        if (!env.tn)
-            env.tn = TextNodes(env, {
-                maxVisibleCount: 10,
-                onNodeText: function (node) {
-
-                    if (node.name)
-                        return node.name
-
-                    return node.id
-
-                }
-            })
-
-        function _getCountryNodePosition(node) {
-            return node.particles.pointCloud.geometry.boundingSphere.center.clone()
-        }
-
-        function zoomToCountryNode(node) {
-
-            var position = new THREE.Vector3();
-            position.setFromMatrixPosition(node.particles.pointCloud.matrixWorld);
-            position.add(node.particles.pointCloud.geometry.boundingSphere.center)
-
-            __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__["a" /* default */].moveToPosition(position,env.camera,env.controls)
-
-            //doZoomToPos(_getCountryNodePosition(node))
-
-        }
-
-
-
-        if (!env.countryTextNodes)
-            env.countryTextNodes = TextNodes(env, {
-                maxVisibleCount: 50,
-                maxDistance: 30000,
-                minDistance: 3000,
-                getNodes: function () {
-
-                    return _.map(env.nodeClouds.container, function (v, k) {
-                        return v
-                    }).filter(function (v, k) {
-                        return v.nodes.length > 10
-                    })
-
-                },
-                onNodeText: function (node) {
-
-                    return node.id
-
-                },
-                getCSSClasses: function () {
-                    return 'graph-country-caption'
-
-                },
-                getNodePosition: _getCountryNodePosition,
-                interactable: true,
-                onAfterCreateTextField: function (node, el) {
-
-                    var newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
-
-                    newSize = _.round(newSize / 12, 3) + "em";
-
-                    el.css("font-size", newSize);
-
-                    el.on("click", function () {
-
-                     zoomToCountryNode(node)
-
-                    })
-
-                }
-            })
-
-
-
-        // Add force-directed layout
-        const layout = env.layout = d3_force.forceSimulation();
-
-        //in case the data contains an initial alpha value we'll use that one
-        if (typeof env.graphData.alpha == "number")
-            layout.alpha(env.graphData.alpha)
-
-        layout
-            .numDimensions(env.numDimensions)
-            .nodes(d3Nodes)
-            .force('link', d3_force.forceLink().id(function (d) {
-                return d._id
-            }).distance(computeLinkDistance).links(d3Links))
-            .force("collide", d3_force.forceCollide(60).iterations(1))
-            //.force('charge', d3_force.forceManyBody())
-            .force('charge', function (node) {
-
-                return -300
-
-            })
-            .force('linkStrength', function (link) {
-
-                return 1
-
-            })
-            .stop();
-
-        //nodes are prepared by previous step for further altering
-        extendGraphElements(d3Nodes, d3Links, env)
-
-        //
-        handleConvexHullFeature()
-
-        for (let i = 0; i < env.initialEngineTicks; i++) {
-            layout.tick();
-        } // Initial ticks before starting to render
-
-
-
-        //hide text overlay and show after layout finishes
-        env.textNode.hide()
-        layout.on("tick", function () {
-
-            layoutTick(layout, d3Nodes, d3Links)
-        }).on('end', function () {
-            // Run this when the layout has finished!
-            console.log("rendering graph finished.. use 'ctrl+s' to download result ")
-
-            //set link positions for final node/link positions
-            d3Links.forEach(link => {
-
-                link.setStartEnd(link.source, link.target)
-
-            });
-
-
-            //trigger coloring //TODO this should be done earlier
-            $(".cloudNodeColorSelect").val("group").trigger("change")
-
-            //set update the cloud to be able to use it for text positioning
-            if (env.nodeClouds)
-                env.nodeClouds.updateBoundingSpheres();
-
-            //start the node particle effect
-            //setTimeout(function () {
-
-
-                //FIXME see flickering bug
-
-                if (env.particles)
-                    env.particles.start()
-
-           // }, 1000)
-
-            if (env.particles)
-                env.particles.update()
-
-
-            //set the text labels to the correct positions
-
-            env.updateTextWhenCameraIsMoving()
-            env.textNode.fadeIn(200)
-
-            //createCloudCenterSphereForGroupsByID()
-            //globalEnv.particles.pointCloud.visible=false;setVisibleGroups(null,false);setVisibleGroups(["United States"],true);createCloudCenterSphereForGroups(["United States"])
-
-        }).restart();
-
-        //
-        initDotParticles(d3Nodes)
-
-    }
-
-    //----------------------------------------
-    //----------------------------------------
-    //----------------------------------------
-
-
-    function computeLinkDistance(l, i) {
-
-        var n1 = l.source,
-            n2 = l.target;
-        // larger distance for bigger groups:
-        // both between single nodes and _other_ groups (where size of own node group still counts),
-        // and between two group nodes.
-        //
-        // reduce distance for groups with very few outer links,
-        // again both in expanded and grouped form, i.e. between individual nodes of a group and
-        // nodes of another group or other group node or between two group nodes.
-        //
-        // The latter was done to keep the single-link groups ('blue', rose, ...) close.
-
-        if (env.graphData.hasCountryGroups) {
-            if (n1.group && n2.group && n1.group != n2.group)
-            //return 2500 + (mGraph.dist.getDistance(n1.group, n2.group)|| 2000) //*2/3
-                return 1500 // + mGraph.dist.getDistance(n1.group, n2.group) //*2/3
-            else
-                return 50 //50
-        }
-
-        //if (n1.group == n2.group) return 100
-        //if (n1.group != n2.group) return 4000
-
-
-        var groupDataSize1 = (n1.group_data && n1.group_data.size ? n1.group_data.size : 0)
-        var groupDataSize2 = (n2.group_data && n2.group_data.size ? n2.group_data.size : 0)
-        //var groupDataSize1=(n1.group_data)?n1.size*2:0
-        //var groupDataSize2=(n2.group_data)?n2.size*2:0
-
-
-        var groupDataLS1 = (n1.group_data && n1.group_data.link_count ? n1.group_data.link_count : 0)
-        var groupDataLS2 = (n2.group_data && n2.group_data.link_count ? n2.group_data.link_count : 0)
-
-        var scale = 2
-        return scale * 60 +
-            Math.min(20 * Math.min((n1.size || (n1.group != n2.group ? groupDataSize1 : 0)),
-                    (n2.size || (n1.group != n2.group ? groupDataSize2 : 0))),
-                -30 +
-                30 * Math.min((n1.link_count || (n1.group != n2.group ? groupDataLS1 : 0)),
-                    (n2.link_count || (n1.group != n2.group ? groupDataLS2 : 0))),
-                150);
-
-    }
-
-    //---------------------------------------
-
-    function handleConvexHullFeature() {
-
-        //add/update hull meshes
-        if (env.convexHullFeature == "simple")
-            setTimeout(function () {
-
-                updateHullsForExpandedGroups(d3Nodes, env.expand, env.scene, env)
-
-            }, 500);
-        else if (env.convexHullFeature == "advanced") {
-
-            multiHullTestCase()
-
-        }
-
-    }
-
-    //---------------------------------------
-    let cntTicks = 0;
-    const startTickTime = new Date();
-    function layoutTick(layout, d3Nodes, d3Links) {
-
-        //console.error("tick tack", new Date() - startTickTime)
-
-        if (cntTicks++ > env.maxConvergeFrames || (new Date()) - startTickTime > env.maxConvergeTime) {
-            layout.alpha(0); //trigger end
-            layout.stop(); // Stop ticking graph
-        }
-
-        // Update nodes position
-
-        //TODO remove this when particle node groups work with picking and selecting
-        d3Nodes.forEach(node => {
-
-            const sphere = node._bubble;
-            sphere.position.x = node.x;
-            sphere.position.y = node.y || 0;
-            sphere.position.z = node.z || 0;
-
-        });
-
-        env.nodeClouds.update()
-
-        //todo animationg this will currently not work
-        /*	// Update links position
-         d3Links.forEach(link => {
-
-         link.setStartEnd(link.source, link.target)
-
-         });
-
-         */
-
-    }
-
-    //---------------------------------------
-
-    function resizeCanvas() {
-        if (env.width && env.height && env.renderer) {
-            env.renderer.setSize(env.width, env.height);
-            env.camera.aspect = env.width / env.height;
-            env.camera.updateProjectionMatrix();
-        }
-
-        if(env.textNode)
-        {
-           // $(env.textNode).height(env.height)
-           // $(env.textNode).width(env.width)
-
-
-        }
-
-
-    }
-
-    //---------------------------------------
-
-    //create/update particleSystem (little dots inside nodes)
-    //potentially add them at specific time
-    function initDotParticles(d3Nodes) {
-        var demoOptions = {}
-
-        if (!d3Nodes[0].nodes) //FIXME this only works that way because to realData is not generated properly
-            demoOptions.npc = function (n) {
-
-                return n.itemCount
-                //return 5
-            }
-
-        if (env.particles)
-            env.particles.remove();
-        var particles = createParticleSystemForNodes(d3Nodes, demoOptions);
-        env.scene.add(particles.pointCloud);
-
-        //FIXME currently does not animate
-        //particles.start()
-
-        env.particles = particles;
-    }
-
-    //----------------------------------------
-
-    function initTextNodeContainer(nodeElement) {
-
-        //add container for text elements
-        if ($(nodeElement)//.parent()
-                .children(".textElements").length == 0) {
-            var textElementsContainer = $("<div>").addClass("textElements").css({
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
-                overflow: "hidden",
-                position: "absolute",
-                "pointer-events": "none"
-            })
-            env.textNode = textElementsContainer;
-            $(nodeElement)//.parent()
-                .append(textElementsContainer)
-
-        }
-    }
-
-    //----------------------------------------
-
-    var initialisedLineGroup = false
-    var line_geom = new THREE.Geometry();
-    var lineMaterial
-    var mergedLineMesh
-    function initLineGroup(env, options) {
-        if (initialisedLineGroup)
-        {
-
-
-            if (env.useLineGroup)
-                env.scene.add(mergedLineMesh);
-
-            return
-        }
-
-
-
-        let defaults = {
-            opacity: 0.01,
-            transparent: true,
-            //lineIsVisible:true, // if disabled the line won't be shown on the scene
-            color: 0xffffff
-        }
-
-        options = _.extend(defaults, options)
-
-        lineMaterial = new THREE.MeshBasicMaterial({
-            color: options.color,
-            transparent: options.transparent,
-            opacity: options.opacity,
-            depthTest: false,
-            depthWrite: false
-        });
-
-        /*var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,visible:true,opacity:env.useDebugSphere?1:0,transparent:true ,
-         alphaTest: 1
-         //blending:THREE.SubtractiveBlending
-         //depthTest:      false, //	depthTest:      false,
-         //						depthWrite: false
-
-         } );*/
-
-        lineMaterial.opacity = env.lineOpacity;
-        mergedLineMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
-
-        mergedLineMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
-
-        //TODO
-
-        env.lineMesh = mergedLineMesh;
-
-        //mergedLineMesh.visible=false
-
-
-        if (env.useLineGroup)
-            env.scene.add(mergedLineMesh);
-
-        env.mergedLineMesh = mergedLineMesh;
-
-        initialisedLineGroup = true;
-
-    }
-
-    //------------------------------------------
-
-    // Component constructor
-    function chart(nodeElement) {
-        env.domNode = nodeElement;
-        env._nodeCounter = []
-        env.currentNodesVisible = []
-        initTextNodeContainer(nodeElement)
-
-        initStatic();
-
-        digest();
-
-        resizeCanvas();
-
-        return chart;
-    }
-
-    //----------------------------------------
-    // Getter/setter methods
-    exposeProps.forEach(prop => {
-        chart[prop.name] = getSetEnv(prop.name, prop.redigest, prop.onChange);
-        env[prop.name] = prop.initVal;
-        prop.onChange(prop.initVal);
-
-        function getSetEnv(prop, redigest = false, onChange = newVal => {}) {
-            return _ => {
-                if (!arguments.length) {
-                    return env[prop]
-                }
-                env[prop] = _;
-                onChange(_);
-                if (redigest) {
-                    digest()
-
-                }
-                return chart;
-            }
-        }
-    });
-
-    // Reset to default state
-    chart.resetState = function () {
-
-        this.graphData({
-            nodes: [],
-            links: []
-        })
-            .nodeRelSize(4)
-            .lineOpacity(0.1)
-            .valAccessor(node => node.val)
-            .nameAccessor(node => node.name)
-            .colorAccessor(node => node.color)
-            .shapeAccessor(node => node.shape)
-            .groupAccessor(node => node.group)
-            .initialEngineTicks(0) //TODO fiddle with values to find a nice approximation for different graphs
-            .maxConvergeTime(7500) // ms
-            .maxConvergeFrames(150);
-
-        env.expand = undefined;
-        env.net = undefined;
-
-        return this;
-    };
-
-    chart.env = env;
-
-    chart.resetState(); // Set defaults at instantiation
-
-    return chart;
-}
+} ) ();
 
 
 /***/ }),
 /* 19 */
+/***/ (function(module, exports) {
+
+/**
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * Ported from: https://github.com/maurizzzio/quickhull3d/ by Mauricio Poppe (https://github.com/maurizzzio)
+ *
+ */
+
+( function() {
+
+	var Visible = 0;
+	var Deleted = 1;
+
+	function QuickHull() {
+
+		this.tolerance = - 1;
+
+		this.faces = []; // the generated faces of the convex hull
+		this.newFaces = []; // this array holds the faces that are generated within a single iteration
+
+		// the vertex lists work as follows:
+		//
+		// let 'a' and 'b' be 'Face' instances
+		// let 'v' be points wrapped as instance of 'Vertex'
+		//
+		//     [v, v, ..., v, v, v, ...]
+		//      ^             ^
+		//      |             |
+		//  a.outside     b.outside
+		//
+		this.assigned = new VertexList();
+		this.unassigned = new VertexList();
+
+		this.vertices = []; 	// vertices of the hull (internal representation of given geometry data)
+
+	}
+
+	Object.assign( QuickHull.prototype, {
+
+		setFromPoints: function ( points ) {
+
+			if ( Array.isArray( points ) !== true ) {
+
+				console.error( 'THREE.QuickHull: Points parameter is not an array.' );
+
+			}
+
+			if ( points.length < 4 ) {
+
+				console.error( 'THREE.QuickHull: The algorithm needs at least four points.' );
+
+			}
+
+			this.makeEmpty();
+
+			for ( var i = 0, l = points.length; i < l; i ++ ) {
+
+				this.vertices.push( new VertexNode( points[ i ] ) );
+
+			}
+
+			this.compute();
+
+			return this;
+
+		},
+
+		setFromObject: function ( object ) {
+
+			var points = [];
+
+			object.updateMatrixWorld( true );
+
+			object.traverse( function ( node ) {
+
+				var i, l, point;
+
+				var geometry = node.geometry;
+
+				if ( geometry !== undefined ) {
+
+					if ( geometry.isGeometry ) {
+
+						var vertices = geometry.vertices;
+
+						for ( i = 0, l = vertices.length; i < l; i ++ ) {
+
+							point = vertices[ i ].clone();
+							point.applyMatrix4( node.matrixWorld );
+
+							points.push( point );
+
+						}
+
+					} else if ( geometry.isBufferGeometry ) {
+
+						var attribute = geometry.attributes.position;
+
+						if ( attribute !== undefined ) {
+
+							for ( i = 0, l = attribute.count; i < l; i ++ ) {
+
+								point = new THREE.Vector3();
+
+								point.fromBufferAttribute( attribute, i ).applyMatrix4( node.matrixWorld );
+
+								points.push( point );
+
+							}
+
+						}
+
+					}
+
+				}
+
+			} );
+
+			return this.setFromPoints( points );
+
+		},
+
+		makeEmpty: function () {
+
+			this.faces = [];
+			this.vertices = [];
+
+			return this;
+
+		},
+
+		// Adds a vertex to the 'assigned' list of vertices and assigns it to the given face
+
+		addVertexToFace: function ( vertex, face ) {
+
+			vertex.face = face;
+
+			if ( face.outside === null ) {
+
+				this.assigned.append( vertex );
+
+			} else {
+
+				this.assigned.insertBefore( face.outside, vertex );
+
+			}
+
+			face.outside = vertex;
+
+			return this;
+
+		},
+
+		// Removes a vertex from the 'assigned' list of vertices and from the given face
+
+		removeVertexFromFace: function ( vertex, face ) {
+
+			if ( vertex === face.outside ) {
+
+				// fix face.outside link
+
+				if ( vertex.next !== null && vertex.next.face === face ) {
+
+					// face has at least 2 outside vertices, move the 'outside' reference
+
+					face.outside = vertex.next;
+
+				} else {
+
+					// vertex was the only outside vertex that face had
+
+					face.outside = null;
+
+				}
+
+			}
+
+			this.assigned.remove( vertex );
+
+			return this;
+
+		},
+
+		// Removes all the visible vertices that a given face is able to see which are stored in the 'assigned' vertext list
+
+		removeAllVerticesFromFace: function ( face ) {
+
+			if ( face.outside !== null ) {
+
+				// reference to the first and last vertex of this face
+
+				var start = face.outside;
+				var end = face.outside;
+
+				while ( end.next !== null && end.next.face === face ) {
+
+					end = end.next;
+
+				}
+
+				this.assigned.removeSubList( start, end );
+
+				// fix references
+
+				start.prev = end.next = null;
+				face.outside = null;
+
+				return start;
+
+			}
+
+		},
+
+		// Removes all the visible vertices that 'face' is able to see
+
+		deleteFaceVertices: function ( face, absorbingFace ) {
+
+			var faceVertices = this.removeAllVerticesFromFace( face );
+
+			if ( faceVertices !== undefined ) {
+
+				if ( absorbingFace === undefined ) {
+
+					// mark the vertices to be reassigned to some other face
+
+					this.unassigned.appendChain( faceVertices );
+
+
+				} else {
+
+					// if there's an absorbing face try to assign as many vertices as possible to it
+
+					var vertex = faceVertices;
+
+					do {
+
+						// we need to buffer the subsequent vertex at this point because the 'vertex.next' reference
+						// will be changed by upcoming method calls
+
+						var nextVertex = vertex.next;
+
+						var distance = absorbingFace.distanceToPoint( vertex.point );
+
+						// check if 'vertex' is able to see 'absorbingFace'
+
+						if ( distance > this.tolerance ) {
+
+							this.addVertexToFace( vertex, absorbingFace );
+
+						} else {
+
+							this.unassigned.append( vertex );
+
+						}
+
+						// now assign next vertex
+
+						vertex = nextVertex;
+
+					} while ( vertex !== null );
+
+				}
+
+			}
+
+			return this;
+
+		},
+
+		// Reassigns as many vertices as possible from the unassigned list to the new faces
+
+		resolveUnassignedPoints: function ( newFaces ) {
+
+			if ( this.unassigned.isEmpty() === false ) {
+
+				var vertex = this.unassigned.first();
+
+				do {
+
+					// buffer 'next' reference, see .deleteFaceVertices()
+
+					var nextVertex = vertex.next;
+
+					var maxDistance = this.tolerance;
+
+					var maxFace = null;
+
+					for ( var i = 0; i < newFaces.length; i ++ ) {
+
+						var face = newFaces[ i ];
+
+						if ( face.mark === Visible ) {
+
+							var distance = face.distanceToPoint( vertex.point );
+
+							if ( distance > maxDistance ) {
+
+								maxDistance = distance;
+								maxFace = face;
+
+							}
+
+							if ( maxDistance > 1000 * this.tolerance ) break;
+
+						}
+
+					}
+
+					// 'maxFace' can be null e.g. if there are identical vertices
+
+					if ( maxFace !== null ) {
+
+						this.addVertexToFace( vertex, maxFace );
+
+					}
+
+					vertex = nextVertex;
+
+				} while ( vertex !== null );
+
+			}
+
+			return this;
+
+		},
+
+		// Computes the extremes of a simplex which will be the initial hull
+
+		computeExtremes: function () {
+
+			var min = new THREE.Vector3();
+			var max = new THREE.Vector3();
+
+			var minVertices = [];
+			var maxVertices = [];
+
+			var i, l, j;
+
+			// initially assume that the first vertex is the min/max
+
+			for ( i = 0; i < 3; i ++ ) {
+
+				minVertices[ i ] = maxVertices[ i ] = this.vertices[ 0 ];
+
+			}
+
+			min.copy( this.vertices[ 0 ].point );
+			max.copy( this.vertices[ 0 ].point );
+
+			// compute the min/max vertex on all six directions
+
+			for ( i = 0, l = this.vertices.length; i < l ; i ++ ) {
+
+				var vertex = this.vertices[ i ];
+				var point = vertex.point;
+
+				// update the min coordinates
+
+				for ( j = 0; j < 3; j ++ ) {
+
+					if ( point.getComponent( j ) < min.getComponent( j ) ) {
+
+						min.setComponent( j, point.getComponent( j ) );
+						minVertices[ j ] = vertex;
+
+					}
+
+				}
+
+				// update the max coordinates
+
+				for ( j = 0; j < 3; j ++ ) {
+
+					if ( point.getComponent( j ) > max.getComponent( j ) ) {
+
+						max.setComponent( j, point.getComponent( j ) );
+						maxVertices[ j ] = vertex;
+
+					}
+
+				}
+
+			}
+
+			// use min/max vectors to compute an optimal epsilon
+
+			this.tolerance = 3 * Number.EPSILON * (
+				Math.max( Math.abs( min.x ), Math.abs( max.x ) ) +
+				Math.max( Math.abs( min.y ), Math.abs( max.y ) ) +
+				Math.max( Math.abs( min.z ), Math.abs( max.z ) )
+			);
+
+			return { min: minVertices, max: maxVertices };
+
+		},
+
+		// Computes the initial simplex assigning to its faces all the points
+		// that are candidates to form part of the hull
+
+		computeInitialHull: function () {
+
+			var line3, plane, closestPoint;
+
+			return function computeInitialHull () {
+
+				if ( line3 === undefined ) {
+
+					line3 = new THREE.Line3();
+					plane = new THREE.Plane();
+					closestPoint = new THREE.Vector3();
+
+				}
+
+				var vertex, vertices = this.vertices;
+				var extremes = this.computeExtremes();
+				var min = extremes.min;
+				var max = extremes.max;
+
+				var v0, v1, v2, v3;
+				var i, l, j;
+
+				// 1. Find the two vertices 'v0' and 'v1' with the greatest 1d separation
+				// (max.x - min.x)
+				// (max.y - min.y)
+				// (max.z - min.z)
+
+				var distance, maxDistance = 0;
+				var index = 0;
+
+				for ( i = 0; i < 3; i ++ ) {
+
+					distance = max[ i ].point.getComponent( i ) - min[ i ].point.getComponent( i );
+
+					if ( distance > maxDistance ) {
+
+						maxDistance = distance;
+						index = i;
+
+					}
+
+				}
+
+				v0 = min[ index ];
+				v1 = max[ index ];
+
+				// 2. The next vertex 'v2' is the one farthest to the line formed by 'v0' and 'v1'
+
+				maxDistance = 0;
+				line3.set( v0.point, v1.point );
+
+				for ( i = 0, l = this.vertices.length; i < l; i ++ ) {
+
+					vertex = vertices[ i ];
+
+					if ( vertex !== v0 && vertex !== v1 ) {
+
+						line3.closestPointToPoint( vertex.point, true, closestPoint );
+
+						distance = closestPoint.distanceToSquared( vertex.point );
+
+						if ( distance > maxDistance ) {
+
+							maxDistance = distance;
+							v2 = vertex;
+
+						}
+
+					}
+
+				}
+
+				// 3. The next vertex 'v3' is the one farthest to the plane 'v0', 'v1', 'v2'
+
+				maxDistance = 0;
+				plane.setFromCoplanarPoints( v0.point, v1.point, v2.point );
+
+				for ( i = 0, l = this.vertices.length; i < l; i ++ ) {
+
+					vertex = vertices[ i ];
+
+					if ( vertex !== v0 && vertex !== v1 && vertex !== v2 ) {
+
+						distance = Math.abs( plane.distanceToPoint( vertex.point ) );
+
+						if ( distance > maxDistance ) {
+
+							maxDistance = distance;
+							v3 = vertex;
+
+						}
+
+					}
+
+				}
+
+				var faces = [];
+
+				if ( plane.distanceToPoint( v3.point ) < 0 ) {
+
+					// the face is not able to see the point so 'plane.normal' is pointing outside the tetrahedron
+
+					faces.push(
+						Face.create( v0, v1, v2 ),
+						Face.create( v3, v1, v0 ),
+						Face.create( v3, v2, v1 ),
+						Face.create( v3, v0, v2 )
+					);
+
+					// set the twin edge
+
+					for ( i = 0; i < 3; i ++ ) {
+
+						j = ( i + 1 ) % 3;
+
+						// join face[ i ] i > 0, with the first face
+
+						faces[ i + 1 ].getEdge( 2 ).setTwin( faces[ 0 ].getEdge( j ) );
+
+						// join face[ i ] with face[ i + 1 ], 1 <= i <= 3
+
+						faces[ i + 1 ].getEdge( 1 ).setTwin( faces[ j + 1 ].getEdge( 0 ) );
+
+					}
+
+				} else {
+
+					// the face is able to see the point so 'plane.normal' is pointing inside the tetrahedron
+
+					faces.push(
+						Face.create( v0, v2, v1 ),
+						Face.create( v3, v0, v1 ),
+						Face.create( v3, v1, v2 ),
+						Face.create( v3, v2, v0 )
+					);
+
+					// set the twin edge
+
+					for ( i = 0; i < 3; i ++ ) {
+
+						j = ( i + 1 ) % 3;
+
+						// join face[ i ] i > 0, with the first face
+
+						faces[ i + 1 ].getEdge( 2 ).setTwin( faces[ 0 ].getEdge( ( 3 - i ) % 3 ) );
+
+						// join face[ i ] with face[ i + 1 ]
+
+						faces[ i + 1 ].getEdge( 0 ).setTwin( faces[ j + 1 ].getEdge( 1 ) );
+
+					}
+
+				}
+
+				// the initial hull is the tetrahedron
+
+				for ( i = 0; i < 4; i ++ ) {
+
+					this.faces.push( faces[ i ] );
+
+				}
+
+				// initial assignment of vertices to the faces of the tetrahedron
+
+				for ( i = 0, l = vertices.length; i < l; i ++ ) {
+
+					vertex = vertices[i];
+
+					if ( vertex !== v0 && vertex !== v1 && vertex !== v2 && vertex !== v3 ) {
+
+						maxDistance = this.tolerance;
+						var maxFace = null;
+
+						for ( j = 0; j < 4; j ++ ) {
+
+							distance = this.faces[ j ].distanceToPoint( vertex.point );
+
+							if ( distance > maxDistance ) {
+
+								maxDistance = distance;
+								maxFace = this.faces[ j ];
+
+							}
+
+						}
+
+						if ( maxFace !== null ) {
+
+	          	this.addVertexToFace( vertex, maxFace );
+
+	        	}
+
+					}
+
+				}
+
+				return this;
+
+			};
+
+		}(),
+
+		// Removes inactive faces
+
+		reindexFaces: function () {
+
+			var activeFaces = [];
+
+			for ( var i = 0; i < this.faces.length; i ++ ) {
+
+				var face = this.faces[ i ];
+
+				if ( face.mark === Visible ) {
+
+					activeFaces.push( face );
+
+				}
+
+			}
+
+			this.faces = activeFaces;
+
+			return this;
+
+		},
+
+		// Finds the next vertex to create faces with the current hull
+
+		nextVertexToAdd: function () {
+
+			// if the 'assigned' list of vertices is empty, no vertices are left. return with 'undefined'
+
+			if ( this.assigned.isEmpty() === false ) {
+
+				var eyeVertex, maxDistance = 0;
+
+				// grap the first available face and start with the first visible vertex of that face
+
+				var eyeFace = this.assigned.first().face;
+				var vertex = eyeFace.outside;
+
+				// now calculate the farthest vertex that face can see
+
+				do {
+
+					var distance = eyeFace.distanceToPoint( vertex.point );
+
+					if ( distance > maxDistance ) {
+
+						maxDistance = distance;
+						eyeVertex = vertex;
+
+					}
+
+					vertex = vertex.next;
+
+				} while ( vertex !== null && vertex.face === eyeFace );
+
+				return eyeVertex;
+
+			}
+
+		},
+
+		// Computes a chain of half edges in CCW order called the 'horizon'.
+		// For an edge to be part of the horizon it must join a face that can see
+		// 'eyePoint' and a face that cannot see 'eyePoint'.
+
+		computeHorizon: function ( eyePoint, crossEdge, face, horizon ) {
+
+			// moves face's vertices to the 'unassigned' vertex list
+
+			this.deleteFaceVertices( face );
+
+			face.mark = Deleted;
+
+			var edge;
+
+			if ( crossEdge === null ) {
+
+				edge = crossEdge = face.getEdge( 0 );
+
+			} else {
+
+				// start from the next edge since 'crossEdge' was already analyzed
+				// (actually 'crossEdge.twin' was the edge who called this method recursively)
+
+				edge = crossEdge.next;
+
+			}
+
+			do {
+
+				var twinEdge = edge.twin;
+				var oppositeFace = twinEdge.face;
+
+				if ( oppositeFace.mark === Visible ) {
+
+					if ( oppositeFace.distanceToPoint( eyePoint ) > this.tolerance ) {
+
+						// the opposite face can see the vertex, so proceed with next edge
+
+						this.computeHorizon( eyePoint, twinEdge, oppositeFace, horizon );
+
+					} else {
+
+						// the opposite face can't see the vertex, so this edge is part of the horizon
+
+						horizon.push( edge );
+
+					}
+
+				}
+
+				edge = edge.next;
+
+			} while ( edge !== crossEdge );
+
+			return this;
+
+		},
+
+		// Creates a face with the vertices 'eyeVertex.point', 'horizonEdge.tail' and 'horizonEdge.head' in CCW order
+
+		addAdjoiningFace: function ( eyeVertex, horizonEdge ) {
+
+			// all the half edges are created in ccw order thus the face is always pointing outside the hull
+
+			var face = Face.create( eyeVertex, horizonEdge.tail(), horizonEdge.head() );
+
+			this.faces.push( face );
+
+			// join face.getEdge( - 1 ) with the horizon's opposite edge face.getEdge( - 1 ) = face.getEdge( 2 )
+
+			face.getEdge( - 1 ).setTwin( horizonEdge.twin );
+
+			return face.getEdge( 0 ); // the half edge whose vertex is the eyeVertex
+
+
+		},
+
+		//  Adds 'horizon.length' faces to the hull, each face will be linked with the
+		//  horizon opposite face and the face on the left/right
+
+		addNewFaces: function ( eyeVertex, horizon ) {
+
+			this.newFaces = [];
+
+			var firstSideEdge = null;
+			var previousSideEdge = null;
+
+			for ( var i = 0; i < horizon.length; i ++ ) {
+
+				var horizonEdge = horizon[ i ];
+
+				// returns the right side edge
+
+				var sideEdge = this.addAdjoiningFace( eyeVertex, horizonEdge );
+
+				if ( firstSideEdge === null ) {
+
+					firstSideEdge = sideEdge;
+
+				} else {
+
+					// joins face.getEdge( 1 ) with previousFace.getEdge( 0 )
+
+					sideEdge.next.setTwin( previousSideEdge );
+
+				}
+
+				this.newFaces.push( sideEdge.face );
+				previousSideEdge = sideEdge;
+
+			}
+
+			// perform final join of new faces
+
+			firstSideEdge.next.setTwin( previousSideEdge );
+
+			return this;
+
+		},
+
+		// Adds a vertex to the hull
+
+		addVertexToHull: function ( eyeVertex ) {
+
+			var horizon = [];
+			var i, face;
+
+			this.unassigned.clear();
+
+			// remove 'eyeVertex' from 'eyeVertex.face' so that it can't be added to the 'unassigned' vertex list
+
+			this.removeVertexFromFace( eyeVertex, eyeVertex.face );
+
+			this.computeHorizon( eyeVertex.point, null, eyeVertex.face, horizon );
+
+			this.addNewFaces( eyeVertex, horizon );
+
+			// reassign 'unassigned' vertices to the new faces
+
+			this.resolveUnassignedPoints( this.newFaces );
+
+			return	this;
+
+		},
+
+		cleanup: function () {
+
+			this.assigned.clear();
+			this.unassigned.clear();
+			this.newFaces = [];
+
+			return this;
+
+		},
+
+		compute: function () {
+
+			var vertex;
+
+			this.computeInitialHull();
+
+			// add all available vertices gradually to the hull
+
+			while ( ( vertex = this.nextVertexToAdd() ) !== undefined ) {
+
+				this.addVertexToHull( vertex );
+
+			}
+
+			this.reindexFaces();
+
+			this.cleanup();
+
+			return this;
+
+		}
+
+	} );
+
+	//
+
+	function Face() {
+
+		this.normal = new THREE.Vector3();
+		this.midpoint = new THREE.Vector3();
+		this.area = 0;
+
+		this.constant = 0; // signed distance from face to the origin
+		this.outside = null; // reference to a vertex in a vertex list this face can see
+		this.mark = Visible;
+		this.edge = null;
+
+	}
+
+	Object.assign( Face, {
+
+		create: function( a, b, c ) {
+
+			var face = new Face();
+
+			var e0 = new HalfEdge( a, face );
+			var e1 = new HalfEdge( b, face );
+			var e2 = new HalfEdge( c, face );
+
+			// join edges
+
+			e0.next = e2.prev = e1;
+			e1.next = e0.prev = e2;
+			e2.next = e1.prev = e0;
+
+			// main half edge reference
+
+			face.edge = e0;
+
+			return face.compute();
+
+		}
+
+	} );
+
+	Object.assign( Face.prototype, {
+
+		getEdge: function ( i ) {
+
+			var edge = this.edge;
+
+			while ( i > 0 ) {
+
+				edge = edge.next;
+				i --;
+
+			}
+
+			while ( i < 0 ) {
+
+				edge = edge.prev;
+				i ++;
+
+			}
+
+			return edge;
+
+		},
+
+		compute: function () {
+
+			var triangle;
+
+			return function compute () {
+
+				if ( triangle === undefined ) triangle = new THREE.Triangle();
+
+				var a = this.edge.tail();
+				var b = this.edge.head();
+				var c = this.edge.next.head();
+
+				triangle.set( a.point, b.point, c.point );
+
+				triangle.normal( this.normal );
+				triangle.midpoint( this.midpoint );
+				this.area = triangle.area();
+
+				this.constant = this.normal.dot( this.midpoint );
+
+				return this;
+
+			};
+
+		}(),
+
+		distanceToPoint: function ( point ) {
+
+			return this.normal.dot( point ) - this.constant;
+
+		}
+
+	} );
+
+	// Entity for a Doubly-Connected Edge List (DCEL).
+
+	function HalfEdge( vertex, face ) {
+
+		this.vertex = vertex;
+		this.prev = null;
+		this.next = null;
+		this.twin = null;
+		this.face = face;
+
+	}
+
+	Object.assign( HalfEdge.prototype, {
+
+		head: function () {
+
+			return this.vertex;
+
+		},
+
+		tail: function () {
+
+			return this.prev ? this.prev.vertex : null;
+
+		},
+
+		length: function () {
+
+			var head = this.head();
+			var tail = this.tail();
+
+			if ( tail !== null ) {
+
+				return tail.point.distanceTo( head.point );
+
+			}
+
+			return - 1;
+
+		},
+
+		lengthSquared: function () {
+
+			var head = this.head();
+			var tail = this.tail();
+
+			if ( tail !== null ) {
+
+				return tail.point.distanceToSquared( head.point );
+
+			}
+
+			return - 1;
+
+		},
+
+		setTwin: function ( edge ) {
+
+			this.twin = edge;
+			edge.twin = this;
+
+			return this;
+
+		}
+
+	} );
+
+	// A vertex as a double linked list node.
+
+	function VertexNode( point ) {
+
+		this.point = point;
+		this.prev = null;
+		this.next = null;
+		this.face = null; // the face that is able to see this vertex
+
+	}
+
+	// A double linked list that contains vertex nodes.
+
+	function VertexList() {
+
+		this.head = null;
+		this.tail = null;
+
+	}
+
+	Object.assign( VertexList.prototype, {
+
+		first: function () {
+
+			return this.head;
+
+		},
+
+		last: function () {
+
+			return this.tail;
+
+		},
+
+		clear: function () {
+
+			this.head = this.tail = null;
+
+			return this;
+
+		},
+
+		// Inserts a vertex before the target vertex
+
+		insertBefore: function ( target, vertex ) {
+
+			vertex.prev = target.prev;
+			vertex.next = target;
+
+			if ( vertex.prev === null ) {
+
+				this.head = vertex;
+
+			} else {
+
+				vertex.prev.next = vertex;
+
+			}
+
+			target.prev = vertex;
+
+			return this;
+
+		},
+
+		// Inserts a vertex after the target vertex
+
+		insertAfter: function ( target, vertex ) {
+
+			vertex.prev = target;
+			vertex.next = target.next;
+
+			if ( vertex.next === null ) {
+
+				this.tail = vertex;
+
+			} else {
+
+				vertex.next.prev = vertex;
+
+			}
+
+			target.next = vertex;
+
+			return this;
+
+		},
+
+		// Appends a vertex to the end of the linked list
+
+		append: function ( vertex ) {
+
+			if ( this.head === null ) {
+
+				this.head = vertex;
+
+			} else {
+
+				this.tail.next = vertex;
+
+			}
+
+			vertex.prev = this.tail;
+			vertex.next = null; // the tail has no subsequent vertex
+
+			this.tail = vertex;
+
+			return this;
+
+		},
+
+		// Appends a chain of vertices where 'vertex' is the head.
+
+		appendChain: function ( vertex ) {
+
+			if ( this.head === null ) {
+
+				this.head = vertex;
+
+			} else {
+
+				this.tail.next = vertex;
+
+			}
+
+			vertex.prev = this.tail;
+
+			// ensure that the 'tail' reference points to the last vertex of the chain
+
+			while ( vertex.next !== null ) {
+
+				vertex = vertex.next;
+
+			}
+
+			this.tail = vertex;
+
+			return this;
+
+		},
+
+		// Removes a vertex from the linked list
+
+		remove: function ( vertex ) {
+
+			if ( vertex.prev === null ) {
+
+				this.head = vertex.next;
+
+			} else {
+
+				vertex.prev.next = vertex.next;
+
+			}
+
+			if ( vertex.next === null ) {
+
+				this.tail = vertex.prev;
+
+			} else {
+
+				vertex.next.prev = vertex.prev;
+
+			}
+
+			return this;
+
+		},
+
+		// Removes a list of vertices whose 'head' is 'a' and whose 'tail' is b
+
+		removeSubList: function ( a, b ) {
+
+			if ( a.prev === null ) {
+
+				this.head = b.next;
+
+			} else {
+
+				a.prev.next = b.next;
+
+			}
+
+			if ( b.next === null ) {
+
+				this.tail = a.prev;
+
+			} else {
+
+				b.next.prev = a.prev;
+
+			}
+
+			return this;
+
+		},
+
+		isEmpty: function() {
+
+			return this.head === null;
+
+		}
+
+	} );
+
+	// export
+
+	THREE.QuickHull = QuickHull;
+
+
+} ) ();
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports) {
+
+/**
+ * @author Eberhard Graether / http://egraether.com/
+ * @author Mark Lundin 	/ http://mark-lundin.com
+ * @author Simone Manini / http://daron1337.github.io
+ * @author Luca Antiga 	/ http://lantiga.github.io
+ */
+
+THREE.TrackballControls = function ( object, domElement ) {
+
+    var _this = this;
+    var STATE = { NONE: - 1, ROTATE: 0, ZOOM: 1, PAN: 2, TOUCH_ROTATE: 3, TOUCH_ZOOM_PAN: 4 };
+
+    this.object = object;
+    this.domElement = ( domElement !== undefined ) ? domElement : document;
+
+    // API
+
+    this.enabled = true;
+
+    this.screen = { left: 0, top: 0, width: 0, height: 0 };
+
+    this.rotateSpeed = 1.0;
+    this.zoomSpeed = 1.2;
+    this.panSpeed = 0.3;
+
+    this.noRotate = false;
+    this.noZoom = false;
+    this.noPan = false;
+
+    this.staticMoving = false;
+    this.dynamicDampingFactor = 0.2;
+
+    this.minDistance = 0;
+    this.maxDistance = Infinity;
+
+    this.keys = [ 65 /*A*/, 83 /*S*/, 68 /*D*/ ];
+
+    // internals
+
+    this.target = new THREE.Vector3();
+
+    var EPS = 0.000001;
+
+    var lastPosition = new THREE.Vector3();
+
+    var _state = STATE.NONE,
+        _prevState = STATE.NONE,
+
+        _eye = new THREE.Vector3(),
+
+        _movePrev = new THREE.Vector2(),
+        _moveCurr = new THREE.Vector2(),
+
+        _lastAxis = new THREE.Vector3(),
+        _lastAngle = 0,
+
+        _zoomStart = new THREE.Vector2(),
+        _zoomEnd = new THREE.Vector2(),
+
+        _touchZoomDistanceStart = 0,
+        _touchZoomDistanceEnd = 0,
+
+        _panStart = new THREE.Vector2(),
+        _panEnd = new THREE.Vector2();
+
+    // for reset
+
+    this.target0 = this.target.clone();
+    this.position0 = this.object.position.clone();
+    this.up0 = this.object.up.clone();
+
+    // events
+
+    var changeEvent = { type: 'change' };
+    var startEvent = { type: 'start' };
+    var endEvent = { type: 'end' };
+
+
+    // methods
+
+    this.handleResize = function () {
+
+        if ( this.domElement === document ) {
+
+            this.screen.left = 0;
+            this.screen.top = 0;
+            this.screen.width = window.innerWidth;
+            this.screen.height = window.innerHeight;
+
+        } else {
+
+            var box = this.domElement.getBoundingClientRect();
+            // adjustments come from similar code in the jquery offset() function
+            var d = this.domElement.ownerDocument.documentElement;
+            this.screen.left = box.left + window.pageXOffset - d.clientLeft;
+            this.screen.top = box.top + window.pageYOffset - d.clientTop;
+            this.screen.width = box.width;
+            this.screen.height = box.height;
+
+        }
+
+    };
+
+    this.handleEvent = function ( event ) {
+
+        if ( typeof this[ event.type ] == 'function' ) {
+
+            this[ event.type ]( event );
+
+        }
+
+    };
+
+    var getMouseOnScreen = ( function () {
+
+        var vector = new THREE.Vector2();
+
+        return function getMouseOnScreen( pageX, pageY ) {
+
+            vector.set(
+                ( pageX - _this.screen.left ) / _this.screen.width,
+                ( pageY - _this.screen.top ) / _this.screen.height
+            );
+
+            return vector;
+
+        };
+
+    }() );
+
+    var getMouseOnCircle = ( function () {
+
+        var vector = new THREE.Vector2();
+
+        return function getMouseOnCircle( pageX, pageY ) {
+
+            vector.set(
+                ( ( pageX - _this.screen.width * 0.5 - _this.screen.left ) / ( _this.screen.width * 0.5 ) ),
+                ( ( _this.screen.height + 2 * ( _this.screen.top - pageY ) ) / _this.screen.width ) // screen.width intentional
+            );
+
+            return vector;
+
+        };
+
+    }() );
+
+    this.rotateCamera = ( function() {
+
+        var axis = new THREE.Vector3(),
+            quaternion = new THREE.Quaternion(),
+            eyeDirection = new THREE.Vector3(),
+            objectUpDirection = new THREE.Vector3(),
+            objectSidewaysDirection = new THREE.Vector3(),
+            moveDirection = new THREE.Vector3(),
+            angle;
+
+        return function rotateCamera() {
+
+            moveDirection.set( _moveCurr.x - _movePrev.x, _moveCurr.y - _movePrev.y, 0 );
+            angle = moveDirection.length();
+
+            if ( angle ) {
+
+                _eye.copy( _this.object.position ).sub( _this.target );
+
+                eyeDirection.copy( _eye ).normalize();
+                objectUpDirection.copy( _this.object.up ).normalize();
+                objectSidewaysDirection.crossVectors( objectUpDirection, eyeDirection ).normalize();
+
+                objectUpDirection.setLength( _moveCurr.y - _movePrev.y );
+                objectSidewaysDirection.setLength( _moveCurr.x - _movePrev.x );
+
+                moveDirection.copy( objectUpDirection.add( objectSidewaysDirection ) );
+
+                axis.crossVectors( moveDirection, _eye ).normalize();
+
+                angle *= _this.rotateSpeed;
+                quaternion.setFromAxisAngle( axis, angle );
+
+                _eye.applyQuaternion( quaternion );
+                _this.object.up.applyQuaternion( quaternion );
+
+                _lastAxis.copy( axis );
+                _lastAngle = angle;
+
+            } else if ( ! _this.staticMoving && _lastAngle ) {
+
+                _lastAngle *= Math.sqrt( 1.0 - _this.dynamicDampingFactor );
+                _eye.copy( _this.object.position ).sub( _this.target );
+                quaternion.setFromAxisAngle( _lastAxis, _lastAngle );
+                _eye.applyQuaternion( quaternion );
+                _this.object.up.applyQuaternion( quaternion );
+
+            }
+
+            _movePrev.copy( _moveCurr );
+
+        };
+
+    }() );
+
+
+    this.zoomCamera = function () {
+
+        var factor;
+
+        if ( _state === STATE.TOUCH_ZOOM_PAN ) {
+
+            factor = _touchZoomDistanceStart / _touchZoomDistanceEnd;
+            _touchZoomDistanceStart = _touchZoomDistanceEnd;
+            _eye.multiplyScalar( factor );
+
+        } else {
+
+            factor = 1.0 + ( _zoomEnd.y - _zoomStart.y ) * _this.zoomSpeed;
+
+            if ( factor !== 1.0 && factor > 0.0 ) {
+
+                _eye.multiplyScalar( factor );
+
+            }
+
+            if ( _this.staticMoving ) {
+
+                _zoomStart.copy( _zoomEnd );
+
+            } else {
+
+                _zoomStart.y += ( _zoomEnd.y - _zoomStart.y ) * this.dynamicDampingFactor;
+
+            }
+
+        }
+
+    };
+
+    this.panCamera = ( function() {
+
+        var mouseChange = new THREE.Vector2(),
+            objectUp = new THREE.Vector3(),
+            pan = new THREE.Vector3();
+
+        return function panCamera() {
+
+            mouseChange.copy( _panEnd ).sub( _panStart );
+
+            if ( mouseChange.lengthSq() ) {
+
+                mouseChange.multiplyScalar( _eye.length() * _this.panSpeed );
+
+                pan.copy( _eye ).cross( _this.object.up ).setLength( mouseChange.x );
+                pan.add( objectUp.copy( _this.object.up ).setLength( mouseChange.y ) );
+
+                _this.object.position.add( pan );
+                _this.target.add( pan );
+
+                if ( _this.staticMoving ) {
+
+                    _panStart.copy( _panEnd );
+
+                } else {
+
+                    _panStart.add( mouseChange.subVectors( _panEnd, _panStart ).multiplyScalar( _this.dynamicDampingFactor ) );
+
+                }
+
+            }
+
+        };
+
+    }() );
+
+    this.checkDistances = function () {
+
+        if ( ! _this.noZoom || ! _this.noPan ) {
+
+            if ( _eye.lengthSq() > _this.maxDistance * _this.maxDistance ) {
+
+                _this.object.position.addVectors( _this.target, _eye.setLength( _this.maxDistance ) );
+                _zoomStart.copy( _zoomEnd );
+
+            }
+
+            if ( _eye.lengthSq() < _this.minDistance * _this.minDistance ) {
+
+                _this.object.position.addVectors( _this.target, _eye.setLength( _this.minDistance ) );
+                _zoomStart.copy( _zoomEnd );
+
+            }
+
+        }
+
+    };
+
+    this.update = function () {
+
+        _eye.subVectors( _this.object.position, _this.target );
+
+        if ( ! _this.noRotate ) {
+
+            _this.rotateCamera();
+
+        }
+
+        if ( ! _this.noZoom ) {
+
+            _this.zoomCamera();
+
+        }
+
+        if ( ! _this.noPan ) {
+
+            _this.panCamera();
+
+        }
+
+        _this.object.position.addVectors( _this.target, _eye );
+
+        _this.checkDistances();
+
+        _this.object.lookAt( _this.target );
+
+        if ( lastPosition.distanceToSquared( _this.object.position ) > EPS ) {
+
+            _this.dispatchEvent( changeEvent );
+
+            lastPosition.copy( _this.object.position );
+
+        }
+
+    };
+
+    this.reset = function () {
+
+        _state = STATE.NONE;
+        _prevState = STATE.NONE;
+
+        _this.target.copy( _this.target0 );
+        _this.object.position.copy( _this.position0 );
+        _this.object.up.copy( _this.up0 );
+
+        _eye.subVectors( _this.object.position, _this.target );
+
+        _this.object.lookAt( _this.target );
+
+        _this.dispatchEvent( changeEvent );
+
+        lastPosition.copy( _this.object.position );
+
+    };
+
+    // listeners
+
+    function keydown( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        window.removeEventListener( 'keydown', keydown );
+
+        _prevState = _state;
+
+        if ( _state !== STATE.NONE ) {
+
+            return;
+
+        } else if ( event.keyCode === _this.keys[ STATE.ROTATE ] && ! _this.noRotate ) {
+
+            _state = STATE.ROTATE;
+
+        } else if ( event.keyCode === _this.keys[ STATE.ZOOM ] && ! _this.noZoom ) {
+
+            _state = STATE.ZOOM;
+
+        } else if ( event.keyCode === _this.keys[ STATE.PAN ] && ! _this.noPan ) {
+
+            _state = STATE.PAN;
+
+        }
+
+    }
+
+    function keyup( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        _state = _prevState;
+
+        window.addEventListener( 'keydown', keydown, false );
+
+    }
+
+    function mousedown( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if ( _state === STATE.NONE ) {
+
+            _state = event.button;
+
+        }
+
+        if ( _state === STATE.ROTATE && ! _this.noRotate ) {
+
+            _moveCurr.copy( getMouseOnCircle( event.pageX, event.pageY ) );
+            _movePrev.copy( _moveCurr );
+
+        } else if ( _state === STATE.ZOOM && ! _this.noZoom ) {
+
+            _zoomStart.copy( getMouseOnScreen( event.pageX, event.pageY ) );
+            _zoomEnd.copy( _zoomStart );
+
+        } else if ( _state === STATE.PAN && ! _this.noPan ) {
+
+            _panStart.copy( getMouseOnScreen( event.pageX, event.pageY ) );
+            _panEnd.copy( _panStart );
+
+        }
+
+        document.addEventListener( 'mousemove', mousemove, false );
+        document.addEventListener( 'mouseup', mouseup, false );
+
+        _this.dispatchEvent( startEvent );
+
+    }
+
+    function mousemove( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if ( _state === STATE.ROTATE && ! _this.noRotate ) {
+
+            _movePrev.copy( _moveCurr );
+            _moveCurr.copy( getMouseOnCircle( event.pageX, event.pageY ) );
+
+        } else if ( _state === STATE.ZOOM && ! _this.noZoom ) {
+
+            _zoomEnd.copy( getMouseOnScreen( event.pageX, event.pageY ) );
+
+        } else if ( _state === STATE.PAN && ! _this.noPan ) {
+
+            _panEnd.copy( getMouseOnScreen( event.pageX, event.pageY ) );
+
+        }
+
+    }
+
+    function mouseup( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        _state = STATE.NONE;
+
+        document.removeEventListener( 'mousemove', mousemove );
+        document.removeEventListener( 'mouseup', mouseup );
+        _this.dispatchEvent( endEvent );
+
+    }
+
+    function mousewheel( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        switch ( event.deltaMode ) {
+
+            case 2:
+                // Zoom in pages
+                _zoomStart.y -= event.deltaY * 0.025;
+                break;
+
+            case 1:
+                // Zoom in lines
+                _zoomStart.y -= event.deltaY * 0.01;
+                break;
+
+            default:
+                // undefined, 0, assume pixels
+                _zoomStart.y -= event.deltaY * 0.00025;
+                break;
+
+        }
+
+        _this.dispatchEvent( startEvent );
+        _this.dispatchEvent( endEvent );
+
+    }
+
+    function touchstart( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        switch ( event.touches.length ) {
+
+            case 1:
+                _state = STATE.TOUCH_ROTATE;
+                _moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+                _movePrev.copy( _moveCurr );
+                break;
+
+            default: // 2 or more
+                _state = STATE.TOUCH_ZOOM_PAN;
+                var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+                var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+                _touchZoomDistanceEnd = _touchZoomDistanceStart = Math.sqrt( dx * dx + dy * dy );
+
+                var x = ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX ) / 2;
+                var y = ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY ) / 2;
+                _panStart.copy( getMouseOnScreen( x, y ) );
+                _panEnd.copy( _panStart );
+                break;
+
+        }
+
+        _this.dispatchEvent( startEvent );
+
+    }
+
+    function touchmove( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        switch ( event.touches.length ) {
+
+            case 1:
+                _movePrev.copy( _moveCurr );
+                _moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+                break;
+
+            default: // 2 or more
+                var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+                var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+                _touchZoomDistanceEnd = Math.sqrt( dx * dx + dy * dy );
+
+                var x = ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX ) / 2;
+                var y = ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY ) / 2;
+                _panEnd.copy( getMouseOnScreen( x, y ) );
+                break;
+
+        }
+
+    }
+
+    function touchend( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        switch ( event.touches.length ) {
+
+            case 0:
+                _state = STATE.NONE;
+                break;
+
+            case 1:
+                _state = STATE.TOUCH_ROTATE;
+                _moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+                _movePrev.copy( _moveCurr );
+                break;
+
+        }
+
+        _this.dispatchEvent( endEvent );
+
+    }
+
+    function contextmenu( event ) {
+
+        if ( _this.enabled === false ) return;
+
+        event.preventDefault();
+
+    }
+
+    this.dispose = function() {
+
+        this.domElement.removeEventListener( 'contextmenu', contextmenu, false );
+        this.domElement.removeEventListener( 'mousedown', mousedown, false );
+        this.domElement.removeEventListener( 'wheel', mousewheel, false );
+
+        this.domElement.removeEventListener( 'touchstart', touchstart, false );
+        this.domElement.removeEventListener( 'touchend', touchend, false );
+        this.domElement.removeEventListener( 'touchmove', touchmove, false );
+
+        document.removeEventListener( 'mousemove', mousemove, false );
+        document.removeEventListener( 'mouseup', mouseup, false );
+
+        window.removeEventListener( 'keydown', keydown, false );
+        window.removeEventListener( 'keyup', keyup, false );
+
+    };
+
+    this.domElement.addEventListener( 'contextmenu', contextmenu, false );
+    this.domElement.addEventListener( 'mousedown', mousedown, false );
+    this.domElement.addEventListener( 'wheel', mousewheel, false );
+
+    this.domElement.addEventListener( 'touchstart', touchstart, false );
+    this.domElement.addEventListener( 'touchend', touchend, false );
+    this.domElement.addEventListener( 'touchmove', touchmove, false );
+
+    window.addEventListener( 'keydown', keydown, false );
+    window.addEventListener( 'keyup', keyup, false );
+
+    this.handleResize();
+
+    // force an update at start
+    this.update();
+
+};
+
+THREE.TrackballControls.prototype = Object.create( THREE.EventDispatcher.prototype );
+THREE.TrackballControls.prototype.constructor = THREE.TrackballControls;
+
+/***/ }),
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5746,7 +6331,7 @@ class BaseEdge {
 
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6084,11 +6669,11 @@ class BaseNode extends THREE.Mesh {
 
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 08.06.2017.
@@ -6102,6 +6687,9 @@ class BaseNode extends THREE.Mesh {
 /**
  * NOTE: the nodes for this container need to be child elements of the  same cluster
  *
+ *  TODO the edgescontainer should have some sort of line factory which we can plugin a specific line implementation
+ *  this way we can have something like the basic line which does have a geometry for each line
+ *  and alternativly some implementation like the line-mesh
  *
  */
 
@@ -6296,28 +6884,36 @@ class EdgesContainer extends THREE.Object3D {
 
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_DefaultDistribution__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_RandomDistribution__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_SphericalDistribution__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__ClusterNodeArray__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__ClusterLeafElement__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__RootCluster__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__GraphData__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__view_GraphView3D__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__view_SimpleForceGraphView3D__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__hull_BaseVolume__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__hull_ConvexVolume__ = __webpack_require__(16);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_8__Cluster3DExtended__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_CombinedCamera__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_CombinedCamera___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__lib_CombinedCamera__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_TrackballControls__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_TrackballControls___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__lib_TrackballControls__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_ConvexGeometry__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_ConvexGeometry___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__lib_ConvexGeometry__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_QuickHull__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_QuickHull___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__lib_QuickHull__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__distributions_DefaultDistribution__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__distributions_RandomDistribution__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__distributions_ForceGraphDistribution__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__distributions_SphericalDistribution__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__ClusterNodeArray__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__ClusterLeafElement__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__BaseCluster3D__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__Cluster3DExtended__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__RootCluster__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__GraphData__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__view_GraphView3D__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__hull_BaseVolume__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__hull_ConvexVolume__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__utils_ZoomUtil__ = __webpack_require__(10);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_12__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
  * -into graph + subgraphs or simply multiple graphs
@@ -6343,6 +6939,28 @@ THREE.EllipsoidGeometry = function (width, height, depth, widthSegments, heightS
 };
 
 THREE.EllipsoidGeometry.prototype = Object.create(THREE.Geometry.prototype);
+
+
+//--------------------------------
+
+//TODO find a better way to import libraries as simple scripts
+//NOTE:don't remove imports
+
+
+//import THREE0 from "../lib/three.min"
+
+//used by View3D
+
+
+
+//used by ConvexVolume
+
+
+
+
+// --------------------------------
+
+
 
 
 
@@ -6420,8 +7038,6 @@ class MyMain {
     }
 
 
-
-
     getRingHull(boundingBox) {
 
         let boundingSphere = new THREE.Sphere;
@@ -6453,13 +7069,11 @@ class MyMain {
         return hull
     }
 
-    isDebug()
-    {
+    isDebug() {
 
-       return window.location.hash=="#debug"
+        return window.location.hash == "#debug"
 
     }
-
 
 
     setupViews() {
@@ -6533,70 +7147,7 @@ class MyMain {
         var container = createContainer();
 
 
-        function createDefaultView(name = "View3D") {
-
-            let mGraphView = document.createElement("simple-force-graph-view-3d");//("view-3d")
-
-            if (that.isDebug())
-                mGraphView.maxFPS=10;
-
-            customElements.whenDefined("simple-force-graph-view-3d").then(function () {
-
-
-                if (mGraphView.setCaption)
-                    mGraphView.setCaption(name);
-
-                $(mGraphView)
-                    .css(thumbCSS);
-
-                $(mGraphView).on("dblclick", function () {
-
-                    if (mGraphView.isMaximised()) return;
-
-                    container.hide();
-
-                    let maximisedContainer = $("#3d-graph");
-
-                    var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
-
-                    _.each(prevMaximisedElement, function (view) {
-
-                        view.undoMaximise() //
-
-                    });
-
-                    container.append(prevMaximisedElement);
-
-                    //--------
-                    maximisedContainer.append(this);
-                    this.maximise()
-
-
-                })
-
-
-            });
-            var setData = mGraphView.setData;
-            mGraphView.setData = function (data) {
-
-                customElements.whenDefined("simple-force-graph-view-3d").then(function () {
-
-                    setData.call(mGraphView, data)
-
-                })
-
-            };
-
-            return mGraphView
-
-        }
-
-
-
-
-
-
-        function createView(name = "View3D", speccs,isMaximised=false) {
+        function createView(name = "View3D", speccs, isMaximised = false) {
 
             function maximiseView() {
 
@@ -6628,58 +7179,64 @@ class MyMain {
             mGraphView.setCaption(name);
 
 
-
-            if (that.isDebug())
-            {
-                mGraphView.maxFPS=10;
+            if (that.isDebug()) {
+                mGraphView.maxFPS = 10;
 
             }
 
-            mGraphView.showFPSCounter=that.isDebug()
+            mGraphView.showFPSCounter = that.isDebug();
 
 
             $(mGraphView)
                 .css(thumbCSS);
 
-            $(mGraphView).on("dblclick",maximiseView );
+            $(mGraphView).on("dblclick", maximiseView);
 
 
             mGraphView.setSpeccs(speccs);
 
             //TODO per view ... mGraphView.mRenderer.domElement
-            let events= new Mousetrap();
+            let events = new Mousetrap();
 
 
-           var edgesVisible=true;
-            events.bind("e",function(){
-                edgesVisible=!edgesVisible;
-                _.each(mGraphView.mRootCluster.getLeafs(),function(leaf){
-        console.log("TODO toggling edges won't work because of LOD impl")
-                    leaf.mEdgesContainer.visible=edgesVisible
-                    leaf.mEdgesContainer2.visible=edgesVisible
+            var edgesVisible = true;
+            events.bind("e", function () {
+                edgesVisible = !edgesVisible;
+                _.each(mGraphView.mRootCluster.getLeafs(), function (leaf) {
+                    console.log("TODO toggling edges won't work because of LOD impl");
+                    leaf.mEdgesContainer.visible = edgesVisible;
+                    leaf.mEdgesContainer2.visible = edgesVisible
 
                 })
 
 
             });
 
-            var infoVisible=true;
-            events.bind("h",function(){
-                infoVisible=!infoVisible;
+            var infoVisible = true;
+            events.bind("h", function () {
+                infoVisible = !infoVisible;
                 $(".info-panel").toggle(infoVisible)
 
 
             });
 
-
             //FIXME
-       if (isMaximised)
-           maximiseView.bind(mGraphView)()
-           /*$(mGraphView).on("loaded",function (){
+            if (isMaximised)
+                maximiseView.bind(mGraphView)();
+            /*$(mGraphView).on("loaded",function (){
 
-                     maximiseView.bind(mGraphView)()
-           } );
-*/
+             maximiseView.bind(mGraphView)()
+             } );
+             */
+
+            $(window).on("resize", _.throttle(function () {
+                //TODO use native events
+
+                if (!mGraphView.isMaximised()) return;
+
+                $(mGraphView).trigger("resize")
+                //console.warn("TODO handle window resize + (f11)")
+            }, 100));
 
 
             return mGraphView
@@ -6690,54 +7247,46 @@ class MyMain {
         let views = [];
 
 
-
-        if(that.isDebug()) {
+        if (that.isDebug()) {
 
 
             //NOTE: target rendering
             var speccs = this.getForceSpeccs();
-            let view2 = createView("new force-graph", speccs,true)
+            let view2 = createView("new force-graph", speccs, true)
                 .loadDataSet(this.getDSByID(1));
             views.push(view2);
 
 
             //TODO views should only be loaded when visible
-/*
-            var speccs = this.getPossibleClusterSpeccsArray();
-            let view1 = createView("dist test", speccs)
-                .loadDataSet(this.getDSByID(1));
-            views.push(view1)
-*/
-
-/*
-            let view0 = createDefaultView("previous force-graph")
-                .loadDataSet(this.getDSByID(1));
-            views.push(view0);
-
-*/
-
-/*
-
-                        let view3 = createView("node distribution test case",
-                            [{
-                                 distribution: new BaseDistribution(2000, 3),
-                                options: { hull: new BoxVolume()}
-                            }])
-                            .loadDataSet(this.getDSByID(1))
-
-                        views.push(view3)
-       */
+            /*
+             var speccs = this.getPossibleClusterSpeccsArray();
+             let view1 = createView("dist test", speccs)
+             .loadDataSet(this.getDSByID(1));
+             views.push(view1)
+             */
 
 
-/*
+            /*
 
-                        var speccs = this.get2DChartSortedSpeccsArray()
+             let view3 = createView("node distribution test case",
+             [{
+             distribution: new BaseDistribution(2000, 3),
+             options: { hull: new BoxVolume()}
+             }])
+             .loadDataSet(this.getDSByID(1))
 
-                        let view4 = createView("2d-Barchart", speccs)
-                            .loadDataSet(this.getDSByID(1))
-                        views.push(view4)
-            */
+             views.push(view3)
+             */
 
+
+            /*
+
+             var speccs = this.get2DChartSortedSpeccsArray()
+
+             let view4 = createView("2d-Barchart", speccs)
+             .loadDataSet(this.getDSByID(1))
+             views.push(view4)
+             */
 
 
             /*  var speccs = this.getPossibleClusterSpeccsArray();
@@ -6757,22 +7306,18 @@ class MyMain {
 
 
             //NOTE: target rendering
-             var speccs = this.getForceSpeccs();
-             let view2 = createView("new force-graph", speccs,true)
-             .loadDataSet(this.getDSByID(0));
-             views.push(view2)
-
+            var speccs = this.getForceSpeccs();
+            let view2 = createView("new force-graph", speccs, true)
+                .loadDataSet(this.getDSByID(0));
+            views.push(view2)
 
 
         }
 
 
-
-
-
         _.each(views, function (view) {
-            if ($(view).parent().length==0)
-            container.append(view)
+            if ($(view).parent().length == 0)
+                container.append(view)
         })
 
 
@@ -6799,15 +7344,15 @@ class MyMain {
         return [
             {
                 generator: countrySetGenerator,
-                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](4000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull:  __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]}
+                distribution: new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](4000, 2).onSort(mySort),
+                options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}
             },
             {
                 generator: industrySetGenerator,
-                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 1).onSort(mySort),
-                options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]}
+                distribution: new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](2000, 1).onSort(mySort),
+                options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](200, 3), options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]}}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](200, 3), options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}}
 
 
         ]
@@ -6836,10 +7381,10 @@ class MyMain {
         return [
             {
                 generator: countrySetGenerator,
-                distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](2000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]}
+                distribution: new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](2000, 2).onSort(mySort),
+                options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}
             },
-            {distribution: new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](400, 2),  options: { hull:  new __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]()}}
+            {distribution: new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](400, 2), options: {hull: new __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]()}}
 
 
         ]
@@ -6859,16 +7404,16 @@ class MyMain {
         }
 
         //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](40000, 2); //1000
-        let sample2 = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](5000, 2);//200
-        let sample3 = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](100, 3);//50
+        let sample1 = new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](40000, 2); //1000
+        let sample2 = new __WEBPACK_IMPORTED_MODULE_7__distributions_ForceGraphDistribution__["a" /* default */](5000, 2);//200
+        let sample3 = new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](100, 3);//50
 
         //  let rand2 = new RandomDistribution(200, 2)
 
         return [
-            {generator: countrySetGenerator, distribution: sample1,     options: {minClusterSize: 5, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]}},
-            {generator: industrySetGenerator, distribution: sample2,      options: {minClusterSize: 5, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]}},
-            {distribution: sample3,      options: {hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]}}
+            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 5, hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}},
+            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 5, hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}},
+            {distribution: sample3, options: {hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}}
 
 
         ]
@@ -6876,16 +7421,16 @@ class MyMain {
     }
 
 
-    getForceSpeccs2DChangesOnly(){
+    getForceSpeccs2DChangesOnly() {
 
-        let speccs=this.getForceSpeccs()
+        let speccs = this.getForceSpeccs();
 
 
-        speccs[0].distribution = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](45000, 2); // countries get placed equally on a plane of size 15k X 15k
-        speccs[1].distribution = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](10000, 2);// industries within countries use the Force-Graph approach to position elements
-        speccs[2].distribution = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](500, 3);//same g
+        speccs[0].distribution = new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        speccs[1].distribution = new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](10000, 2);// industries within countries use the Force-Graph approach to position elements
+        speccs[2].distribution = new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](500, 3);//same g
 
-           return speccs
+        return speccs
 
     }
 
@@ -6914,7 +7459,6 @@ class MyMain {
         }
 
 
-
         //there are several distribution classes defined
         //these handle how the current cluster positions it's sub-clusters when rendering
         //basically a distribution function does have 2 parameters
@@ -6922,9 +7466,9 @@ class MyMain {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__["a" /* default */](45000, 2); // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](15000, 3);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_3__distributions_ForceGraphDistribution__["a" /* default */](500, 3);//same goes for the nodes within each industry
+        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new __WEBPACK_IMPORTED_MODULE_7__distributions_ForceGraphDistribution__["a" /* default */](15000, 3);// industries within countries use the Force-Graph approach to position elements
+        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_7__distributions_ForceGraphDistribution__["a" /* default */](500, 3);//same goes for the nodes within each industry
 
         //the final configuration for rendering
         //it contains an additional options attribute per array entry
@@ -6937,21 +7481,83 @@ class MyMain {
         //but is necessary for other components like picking and tet rendering
 
 
-        let rootHull=this.isDebug()?__WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */]:__WEBPACK_IMPORTED_MODULE_14__hull_BaseVolume__["a" /* default */];
+        let rootHull = this.isDebug() ? __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */] : __WEBPACK_IMPORTED_MODULE_17__hull_BaseVolume__["a" /* default */];
 
         return [
 
-           {
+            {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: rootHull }
+                options: {minClusterSize: 40, hull: rootHull}
             },
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
-                options: {minClusterSize: 15,hull:__WEBPACK_IMPORTED_MODULE_15__hull_ConvexVolume__["a" /* default */] }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
+                options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_18__hull_ConvexVolume__["a" /* default */]}// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: nodesWithinIndustryDistribution, hull: __WEBPACK_IMPORTED_MODULE_13__hull_BoxVolume__["a" /* default */] }  // this.getEllipsoidHull.bind(this)
+            , {distribution: nodesWithinIndustryDistribution, hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}  // this.getEllipsoidHull.bind(this)
+            //FIXME getEllipsoidHullis not used
+
+        ]
+
+    }
+
+
+    get2DPlaneForceSpeccs() {
+
+
+        //the function that is called to create the  country groups
+        function countrySetGenerator(groupFunction, node) {
+            // the group function takes 2 arguments
+            // the first is the value that will determine the key of the group
+            //in this case node.group contains country names
+            //the second argument is the node itself that is passed into the group created
+            groupFunction(node.group, node)
+        }
+
+        //same goes for the industy clusters that are sub-clusters of the country clusters in this example
+        function industrySetGenerator(groupFunction, node) {
+            groupFunction(node.industry, node)
+        }
+
+
+        //there are several distribution classes defined
+        //these handle how the current cluster positions it's sub-clusters when rendering
+        //basically a distribution function does have 2 parameters
+        // the first is the maximum size in x/y/z direction the elements within can be placed
+        // the second defined the dimensions 1/2/3 that get used for the element placement
+
+
+        //  let countryDistribution = new BaseDistribution(45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__["a" /* default */](80000, 2);// industries within countries use the Force-Graph approach to position elements
+        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_7__distributions_ForceGraphDistribution__["a" /* default */](1000, 2);//same goes for the nodes within each industry
+
+        //the final configuration for rendering
+        //it contains an additional options attribute per array entry
+
+        // @param options.minClusterSize ... is the lower bound for the nodes within the cluster
+        // if the cluster has fewer elements all clusters previously generated are places within this "other" cluster
+        // @param options. defaultMergeGroupName the name of the "other" cluster can be changed by this value
+        // @param options.hull can be used to add a volume around the cluster
+        //by default if no value gets set, the BaseVolume class is used which is invisible by default
+        //but is necessary for other components like picking and tet rendering
+
+
+        let rootHull = this.isDebug() ? __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */] : __WEBPACK_IMPORTED_MODULE_17__hull_BaseVolume__["a" /* default */];
+
+        return [
+
+            /* {
+             generator: countrySetGenerator,
+             distribution: countryDistribution,
+             options: {minClusterSize: 40, hull: rootHull }
+             },*/
+            {
+                generator: industrySetGenerator,
+                distribution: industryDistribution,
+                options: {minClusterSize: 15, hull: __WEBPACK_IMPORTED_MODULE_18__hull_ConvexVolume__["a" /* default */]}// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
+            }
+            , {distribution: nodesWithinIndustryDistribution, hull: __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__["a" /* default */]}  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
 
         ]
@@ -6970,14 +7576,23 @@ class MyMain {
     }
 
 //-------------------------------
-     getCurrentView()
-    {
+
+
+    zoomToPosition(position, onComplete) {
+
+
+        let view = this.getCurrentView();
+
+        __WEBPACK_IMPORTED_MODULE_19__utils_ZoomUtil__["a" /* default */].moveToPosition(position, view.mCamera, view.mControls, 0, onComplete)
+    }
+
+
+    getCurrentView() {
         return $(".view-3d.view-3d-maximised").get(0)
 
     }
 
-    setGraph2D()
-    {
+    setGraph2D() {
 
 
         /**
@@ -6991,51 +7606,64 @@ class MyMain {
 
             //   let speccs=this.getPossibleClusterSpeccsArray();
 
-         let speccs=this.getForceSpeccs2DChangesOnly();
+            //  let speccs=this.getForceSpeccs2DChangesOnly();
+        let speccs = this.get2DPlaneForceSpeccs();
 
-        let view= this.getCurrentView();
-        let rootCluster=view.mRootCluster;
+        let view = this.getCurrentView();
+        let rootCluster = view.mRootCluster;
 
         rootCluster.cleanUpLeafs();
         //clean up previous clusters
-        __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__["a" /* default */].cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
+        __WEBPACK_IMPORTED_MODULE_11__BaseCluster3D__["a" /* default */].cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
 
 
         rootCluster.applyClustering(speccs);
 
+        //TODO
+        $(view).trigger("graph-changed");
 
-       // doZoomToPos(new THREE.Vector3(0,0,10000));
-        //view.mControls.target.set(new THREE.Vector3(0,0,0));
-      //  view.mControls.noRotate=true;
-        this.getCurrentView().mRootCluster.zoomToCluster()
 
+        this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
+            //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
+            this.getCurrentView().mRootCluster.zoomToCluster(150000)
+
+        });
+
+        view.mControls.target.set(new THREE.Vector3(0, 0, 0));
+        view.mControls.noRotate = true;
+        view.mControls.reset();
+
+
+
+        view.mSkyDome.visible=false;
 
     }
 
 
+    setGraph3D() {
 
-    setGraph3D()
-    {
-
-        let speccs=this.getForceSpeccs();
-        let view= this.getCurrentView();
-        let rootCluster=view.mRootCluster;
+        let speccs = this.getForceSpeccs();
+        let view = this.getCurrentView();
+        let rootCluster = view.mRootCluster;
 
         rootCluster.cleanUpLeafs();
         //clean up previous clusters
-        __WEBPACK_IMPORTED_MODULE_7__BaseCluster3D__["a" /* default */].cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
-
+        __WEBPACK_IMPORTED_MODULE_11__BaseCluster3D__["a" /* default */].cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
 
 
         rootCluster.applyClustering(speccs);
 
-        view.mControls.noRotate=false;
+        //TODO text is shown to early on update
+        $(view).trigger("graph-changed");
 
 
-    //    doZoomToPos(new THREE.Vector3(0,0,0),10000);
+        view.mControls.noRotate = false;
+
+        view.mSkyDome.visible=true;
+
+
         this.getCurrentView().mRootCluster.zoomToCluster()
     }
-
 
 
 }
@@ -7046,6 +7674,1260 @@ class MyMain {
 
 
 	
+
+/***/ }),
+/* 25 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__ = __webpack_require__(3);
+/**
+ * Created by Frank on 12.07.2017.
+ */
+
+
+
+/**
+ * the text overlay class can be used to put text elements on top of an other container element
+ *
+ *
+ *
+ *  ...
+ *  TODO
+ collect onbefore render of eeach cluster and nodeMixin(
+ order from node which is more relevant to cluster
+ if visible nodes => show them else show cluster elements
+ *
+ */
+
+
+
+
+
+
+
+
+class ClusterTextOverlay extends HTMLElement {
+
+    constructor() {
+        super();
+
+        this.possibleClusters = [];
+        this.possibleLeafClusters = [];
+
+    }
+
+    /**
+     *
+     * init css and wait for data/graph to be loaded
+     * then create overlay
+     */
+
+    connectedCallback() {
+        let view = this.parentElement;
+        if (!view instanceof __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__["a" /* default */])
+            throw new Error("parent must be instance of GraphView3D");
+
+
+        this.initCSS();
+
+        $(view).on("loaded graph-changed", () => {
+
+            if (!this.parentElement) return ;
+
+        this.bindToCluster(this.parentElement.mRootCluster);
+            this.addGlobalNodeCaptions(this.parentElement)
+
+       })
+
+    }
+
+
+    /**
+     *
+     * add listeners to collect the visible cluster and leaf elements
+     *
+     */
+
+
+    bindToCluster(rootcluster) {
+
+
+        var $view = $(rootcluster.getView());
+
+        var that = this;
+
+
+        $view.on("before-render", function () {
+
+            //reset nodes
+            that.possibleClusters = [];
+            that.possibleLeafClusters = [];
+        });
+
+
+        $view.on("after-render", () => {
+
+            this.tn.update();
+            this.mTextNodes.update();
+
+        });
+
+
+        rootcluster.findClusters().forEach(function (cluster) {
+
+            //push clusters that are rendered and therefore are within frustum
+            cluster.on("before-render", function () {
+
+                //in any case push the cluster to the potential visible clusters
+                that.possibleClusters.push(this);
+
+                //in addition push it onto the leaf stack
+                if (this.isLeaf()) {
+
+                    //TODO make a distance check for the leaf including the boundingbox
+                    that.possibleLeafClusters.push(this)
+
+                }
+            })
+
+        })
+
+
+    }
+
+    /**
+     * add style attributes to the overlay
+     *
+     * TODO import css directly
+     *
+     */
+    initCSS() {
+
+
+        $(this).addClass("graph-captions-container").css({
+            width: "100%",
+            height: "100%",
+            // top: 0,
+            // left: 0,
+            overflow: "hidden",
+            position: "absolute",
+            "pointer-events": "none"//, border: "1px solid red"
+        });
+
+    }
+
+
+    /**
+     *
+     * TODO the root cluster manages the visibility of all of it's currently visible nodes
+     * we do have a hierarchical structure that we can use to speed up the rendering a bit
+     *
+     */
+
+    addGlobalNodeCaptions(view) {
+
+
+        /**
+         * for the method to work the "env" object  needs to contain the following params :
+         * env={
+         *  renderer.domElement,  for get dimensions and text pos
+         *   currentNodesVisible,   // ... nodes visible==all nodes in set is to harsh let rootcluster handle it probably
+         *	textNode,               // node container that is overlay with pointerevents none
+         *  camera
+         *  }
+         */
+
+
+        var mTextNode = $(this)
+            .height(view.clientHeight)
+            .width(view.clientWidth)
+            .empty();
+
+
+        var that = this;
+        let env = {
+            renderer: view.mRenderer,
+            currentNodesVisible: [],//can be left empty if below nodes function is used
+            textNode: mTextNode,
+            camera: view.mCamera
+
+        };
+
+
+
+        function getDistance(cluster){
+            let point1 = view.mCamera.position;
+            let point2 = cluster.localToWorld(new THREE.Vector3);
+            let distance = point1.distanceTo(point2);
+
+          return distance
+
+        }
+
+        function getNodesForLeaf() {
+            //return only the closest cluster
+            if (!that.possibleLeafClusters) return [];
+
+            // get closest leaf only
+
+            var res=_.map(that.possibleLeafClusters,function(leaf){
+
+            return{item:leaf,distance:getDistance(leaf)}
+            })
+            res= _.sortBy(res, [function(o) { return o.distance; }]);
+
+            //TODO nodes aren't in order so we should sort them also
+
+            //FIXME deplace overlay after changing 3d => 2d view or have an event to track changing leafs/clusters
+            //check for empty array which can happen if graph data changes and clusters get deleted
+            if (!res[0] ||!res[0] .item) return [];
+
+            let leaf1 =res[0].item;
+            return leaf1.mNodes ? leaf1.mNodes : []
+
+
+        }
+
+
+        //the handler for the leaf text
+        if (!this.tn)
+            this.tn = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__["a" /* default */])(env, {
+                maxVisibleCount: 10,
+                onNodeText: (node) => node.name ? node.name : node.id,
+                getNodes:getNodesForLeaf
+            });
+
+
+        // TODO the bounding volume determines the visibility of the text nodes
+        //TODO so currently with no volume generated properly the text nodes are invisible
+
+
+        //the handler for the cluster text
+        this.mTextNodes = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__["a" /* default */])(env, {
+            maxVisibleCount: 50,
+            maxDistance: function (node) {
+                return node.parent.getRadius(node.parent.mNodes.length) / 3 * 10
+            },//30000
+            minDistance: function (node) {
+                return node.parent.getRadius(node.parent.mNodes.length) / 3 * 3
+            }, //3000
+            getNodes: function () {
+                return that.possibleClusters
+            },
+            onNodeText: function (node) {
+
+                if (node.name) return node.name;
+
+                return node.id;
+
+            },
+            getCSSClasses: function () {
+                return 'graph-country-caption'
+
+            },
+            getNodePosition: function (node) {
+
+                var mVec3 = new THREE.Vector3();
+                mVec3.setFromMatrixPosition(node.matrixWorld);
+
+                //fixing the offset/position as soon as the hull is created
+                if (node.mHull)
+                    mVec3.add(node.mHull.mBoundingBox.getCenter())
+
+                return mVec3; //node.position.clone()
+            },
+            interactable: true,
+            onAfterCreateTextField: function (node, el) {
+
+                var newSize;
+                if (node instanceof __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__["a" /* default */]) {
+                    newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
+
+
+                }
+                else
+                    newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
+
+                newSize = _.round(newSize / 12, 3) + "em";
+
+                el.css("font-size", newSize);
+
+                el.on("click", function () {
+                    node.zoomToCluster();
+                })
+
+            }
+        })
+
+
+    }
+
+}
+/* unused harmony export default */
+
+
+
+customElements.define("cluster-text-overlay", ClusterTextOverlay);
+
+
+
+
+
+
+
+
+
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = TextNodesFactory;
+
+/**
+ * 2.5d text feature
+ * text nodes get rendered from a finite subset of given nodes depending on parameters like min/max distance
+ */
+
+/**
+ *
+ * for the method to work env  needs to contain the following paraams :
+ * env={..
+ *  renderer.domElement
+ *   currentNodesVisible to select visible text nodes from
+ *	textNode node container that is overlay with pointerevents none
+ *  camera
+ *  }
+ */
+
+
+
+
+
+function TextNodesFactory(env, options) {
+	var domEl = env.renderer.domElement
+
+		options = _.extend({
+			interactable: false, //node can't be clicked, selected
+			minVisibleCount:0, //the minimum amount of items ignoring distance
+			maxVisibleCount: 10, //the max amount of rendered text labels
+			maxDistance: 700, //the maximum distance between the node and the observer/camera to be accepted as a valid visible node
+			minDistance: 10, //the minimum distance between the node and the observer/camera to be accepted as a valid visible node
+			getNodes: function () {
+				//the default implementation to retrieve the set of nodes for the text labels
+				//override to implement any other
+				return env.currentNodesVisible ? env.currentNodesVisible : nodes
+
+			},
+			getCSSClasses: function () {
+				//the css class which gets applied to the text label
+				return 'node-caption'
+
+			},
+			getNodePosition: function (node) {
+				//should return a THREE.Vector3 represention the source nodes poistion in 3d space
+
+                var vector = new THREE.Vector3();
+                vector.setFromMatrixPosition( node._bubble.matrixWorld );
+				return vector;
+
+				//return node._bubble.position
+			},
+			onAfterCreateTextField: function (node, el) {}, //gets called after a text label is generated to be able to make adjustments
+			onNodeText: function (node) {
+				return node.id //returns the text shown by the text label
+			}
+		}, options)
+
+		//--------------------------------
+		//create text node
+
+		var lastNodeID,
+	lastNode;
+
+	function createTextNode(node) {
+
+		if (typeof node.text != "undefined")
+			return node.text
+
+			var _id = options.onNodeText(node)
+
+				lastNodeID = _id
+				lastNode = node;
+
+		node.text = $("<span>").hide().addClass(options.getCSSClasses())
+			.addClass("noselect").
+			on("mousewheel", e => e.preventDefault())
+			.attr('unselectable', 'on')
+			.css('user-select', 'none')
+			.on('selectstart', false)
+			.html(_id).css({
+				position: "absolute"
+			});
+
+		if (options.interactable)
+			node.text.css({
+				"pointer-events": "all"
+			});
+		else
+			node.text.css({
+				"pointer-events": "none"
+			});
+
+		options.onAfterCreateTextField(node, node.text);
+
+		//TODO make the container variable
+		env.textNode.append(node.text);
+		return node.text;
+	}
+
+	//--------------------------------
+	//update text nodes
+
+	//@deprecated
+	function getScreenPos2(p, domEl) {
+
+		var vector = p.clone();
+
+		vector.project(env.camera);
+
+		vector.x = (vector.x + 1) / 2 * domEl.offsetWidth + domEl.offsetLeft;
+		vector.y =  - (vector.y - 1) / 2 * domEl.offsetHeight + domEl.offsetTop;
+
+		return vector;
+	}
+
+
+    /**
+	 *
+	 *
+     * @param p THREE.Vector3 .. position of element
+     * @param camera ... camera object
+     * @param viewOffsetWidthBy2  .. the relative screen offset of the container (view) divided by two
+     * @param viewOffsetHeightBy2 .. the relative screen offset of the container (view)divided by two
+     */
+    function getScreenPos(p, camera,viewOffsetWidthBy2,viewOffsetHeightBy2,viewOffsetX,viewOffsetY) {
+
+        var vector = p.clone();
+
+        vector.project(camera);
+
+        vector.x = (vector.x + 1) * viewOffsetWidthBy2 + viewOffsetX
+        vector.y =  - (vector.y - 1) * viewOffsetHeightBy2 +viewOffsetY
+
+        return vector;
+    }
+
+	//--------------------------------
+	//test if node matches criterias to be part of the current text node set
+	function testIfRelevantNode(node) {
+
+		var point1 = env.camera.position;
+		var point2 = options.getNodePosition(node);
+		var distance = point1.distanceTo(point2);
+		//var scaling=1
+		//var size=500/distance*10*scaling
+
+        //calc angle to discard nodes that are to far at the sides of the screen or possible behind the camera
+		let dir1=new THREE.Vector3().copy(point2).sub(point1)
+		let dir2=env.camera.getWorldDirection()
+		var angle = dir1.angleTo(dir2)
+
+
+		//TODO is size still relevant somehow?
+		var size = 12
+
+
+		let _minDistance=typeof options.minDistance=="function"?options.minDistance(node):options.minDistance
+        let _maxDistance=typeof options.maxDistance=="function"?options.maxDistance(node):options.maxDistance
+
+        //return the result of the comparision
+		//angle  90° == pi/4 => 45° fov for text nodes to each side
+			if (size < 10 || size > 80 || angle>Math.PI/4 ||distance > _maxDistance || distance <_minDistance)
+				return {
+					distance,angle,
+					addNodeToSet: false,
+					node
+				};
+			else
+				return {
+					distance,angle,
+					addNodeToSet: true,
+					node
+				};
+
+	}
+
+	//--------------------------------
+
+
+	var previousVisibleNodes = []
+
+	var maxVisibleTextNodes = options.maxVisibleCount
+
+	function compareAndHidePreviousBatch(nodeInfosCurrentBatch) {
+
+
+
+
+  if (previousVisibleNodes.length == 0 && nodeInfosCurrentBatch.length == 0  ) return;
+
+
+    	// vars to safe some ms later on
+		var camera=env.camera;
+
+        var dw=domEl.offsetWidth /2;
+        var dh=domEl.offsetHeight /2;
+
+        var dl=domEl.offsetLeft;
+        var dt=domEl.offsetTop;
+
+
+
+		//updates the positions of the text labels matching it's 3d node counterparts positions
+		function updatePos(node, distance = 0) {
+
+			if (typeof node.text == "undefined")
+				return;
+
+			var pos = options.getNodePosition(node);
+		//	var coords = getScreenPos(pos, domEl);
+
+			var coords = getScreenPos(pos,camera,dw,dh,dl,dt);
+
+			//TODO this offset stuff might need some parameters in the options section
+			var centered = coords.x - node.text.width() / 2;
+			var adjustedTop = coords.y - 500 / distance * 10
+
+				node.text.css({
+					top: adjustedTop,
+					left: centered
+				})
+
+		}
+
+		//contains the new node array that will be the previous nodes to run tests against in the next iteration
+		var newPreviousVisibleNodes = []
+
+		for (var preNode of previousVisibleNodes) {
+
+			//hide prevNode, if the current batch does not contain the prevNode
+
+			var mPos = nodeInfosCurrentBatch.findIndex((i) => i.node == preNode)
+				if (mPos < 0) //not element of next iteration
+				{
+
+					if (typeof preNode.text != "undefined") {
+
+						preNode.text.stop().hide()
+						preNode.text.remove();
+						delete (preNode.text)
+
+						//FIXME elements wont disappear the way they are supposed to
+
+						/*
+						preNode.text._marked_for_deletion_=true
+
+
+						preNode.text.stop().fadeOut(100
+					, function() { $(this).remove(); delete(preNode.text) ;preNode.text=undefined  }
+						);
+
+						if (typeof preNode.text!="undefined")
+					{
+						updatePos(preNode)
+						newPreviousVisibleNodes.push(preNode) //re-add the previous node that needs to be rendered/handled until it is deleted
+						// preNode.text=null
+						}
+						 */
+
+					}
+
+				}
+
+		}
+
+		var nodesCurrentBatch = nodeInfosCurrentBatch.map((v) => v.node);
+
+		previousVisibleNodes = newPreviousVisibleNodes.concat(nodesCurrentBatch)
+
+			for (var nodeInfo of nodeInfosCurrentBatch) {
+				if (nodeInfo.node.text && !nodeInfo.node.text._marked_for_deletion_)
+
+                    if (!nodeInfo.node.text.is( ":animated"))
+                    nodeInfo.node.text.stop().fadeIn(100);
+
+				updatePos(nodeInfo.node, nodeInfo.distance);
+			}
+
+
+
+	}
+	//--------------------------------
+	//update function that finds relevant text labels and positions them on top of the 3d elements
+	function simpleUpdate() {
+
+		//let's take the result set of the last renderer loop as a start
+		//the data is ordered in approximate descending distance from farthest to closest
+		var mNodes = options.getNodes();
+       // console.error("textnodes",mNodes.length)
+		var maxVisibleTextNodes = options.maxVisibleCount;
+
+
+		//next let's find the closest x nodes that match the criterias to be displayed
+		var nodesCurrentBatch = [];
+
+		for (var i = mNodes.length - 1; i >= 0 && maxVisibleTextNodes > nodesCurrentBatch.length; i--) {
+
+			let node = mNodes[i];
+
+			var res = testIfRelevantNode(node);
+			if (res.addNodeToSet)
+				nodesCurrentBatch.push(res);
+
+			if (res.distance > options.maxDistance * 1.5)
+				break; //shorten the search for large graphs
+
+
+		}
+
+
+
+		//TODO keep track of potential nodes that where discarded due to distance but should be readded due to minVisibleCount
+
+		//------------------------------------------
+		//now that we should have an array containing only relevant nodes, let's create and (compare+ update) nodes
+		//ok node is relevant, so first of all check if node text element needs to be created
+
+		nodesCurrentBatch = _.uniq(nodesCurrentBatch)
+
+			if (nodesCurrentBatch.length > 0)
+				for (var nodeInfo of nodesCurrentBatch)
+					if (typeof nodeInfo.node.text == "undefined")
+						createTextNode(nodeInfo.node); //.stop().fadeIn(150)
+
+
+			//second compare and hide/show nodes
+			compareAndHidePreviousBatch(nodesCurrentBatch);
+
+
+
+
+	}
+
+	return {
+		update: _.throttle(simpleUpdate, 20, {
+			leading: true,
+			trailing: false
+		}),
+		remove: function () {
+
+			compareAndHidePreviousBatch([])
+
+		}
+	}
+}
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by Frank on 13.06.2017.
+ *
+ * a view class to be able to use multiple views and switch between them
+ * also can limit fps to lower gpu impact
+ * see shadertoy for possible usage as thumbnail or preview
+ */
+
+
+
+
+
+
+class View3D extends HTMLElement {
+
+    constructor(...args) {
+        super(...args);
+
+
+        this.createCSSRule();
+        this.mTime = -1;
+        this.mActualFPS = 0;
+        this.showFPSCounter = false;
+
+        //   this.initStatic()
+
+        // Setup renderer
+        this.mRenderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+
+        $(this).on("resize", () => this.resizeCanvas())
+
+
+    }
+
+
+    //FIXME have accesss methods for camera controls and domEvents to be able to change controls and camera mode
+
+    initCamera() {
+
+        // Setup camera
+         this.mCameraP = new THREE.PerspectiveCamera();
+
+
+        this.mCameraO = new THREE.OrthographicCamera();
+        this.mCameraO.far = 5000000;
+        this.mCameraO.lookAt(this.mScene.position);
+        this.mCameraO.position.z = 150000;
+
+
+
+        this.mCamera =    new THREE.CombinedCamera();
+
+       // this.mCamera =   this.mCameraO// new THREE.CombinedCamera();
+
+
+        if (this.mCamera instanceof THREE.CombinedCamera) {
+            this.mCamera.setFar(5000000);
+
+            this.mCamera.setFov(50);
+        }
+        else
+            this.mCamera.far = 5000000;
+
+
+        this.mCamera.lookAt(this.mScene.position);
+        this.mCamera.position.z = 150000;
+
+
+    }
+
+    setControls() {
+        // Add camera interaction
+        this.mControls = new THREE.TrackballControls(this.mCamera, this.mRenderer.domElement);
+        // this.mControls.rotateSpeed = 0.3
+        this.mControls.maxDistance = Math.min(this.mCamera.far,200000);
+
+
+        this.mControls.addEventListener("change", (...args) => $(this).trigger("change", ...args));
+
+
+    }
+
+    setDomEvents() {
+
+        //throttle move events to about 50 fps
+        //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
+        THREEx.DomEventsAlt.prototype._onMouseMove = _.throttle(function (domEvent)
+            //THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
+        {
+            var mouseCoords = this._getRelativeMouseXY(domEvent);
+            this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
+            this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
+            this._onMove('mouseout', mouseCoords.x, mouseCoords.y, domEvent);
+        }, 40);  //25 (f)ps
+
+        //init domEnvents
+        //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
+        this.mDomEvents = new THREEx.DomEventsAlt(this.mCamera, this.mRenderer.domElement, this.mScene);
+
+        //Note: have a factory in case we need this kind of injection multiple times
+        // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations
+
+
+    }
+
+
+
+     updateCamera()
+     {
+         this.mCamera.updateProjectionMatrix();
+
+
+     //update controls
+     this.mControls.object=this.mCamera
+
+     //update domEvents camera with current camera
+     this.mDomEvents._camera=this.mCamera
+
+
+     }
+
+    set2D()
+    {
+
+     //   this.mCameraO.copy( this.mCamera);
+
+        this.mCamera=this.mCameraO
+
+
+
+        this.updateCamera()
+
+    }
+
+    set3D()
+    {
+      //  this.mCameraP.copy( this.mCamera);
+
+        this.mCamera=this.mCameraP
+
+        this.updateCamera()
+
+    }
+
+
+
+
+
+
+    //TODO remove little redundancy
+    createCSSRule() {
+
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = '.view-3d-maximised {  border: 0px solid rgba(128, 128, 128, 0.5) !important; margin: 0 !important; position: absolute !important;   top: 0  !important;   left: 0  !important;   height: 100% !important;    width: 100% !important; }';
+        document.getElementsByTagName('head')[0].appendChild(style);
+
+
+    }
+
+
+    resizeCanvas() {
+        if (this.mRenderer) {
+            this.mRenderer.setSize(this.clientWidth, this.clientHeight);
+            this.mCamera.aspect = this.clientWidth / this.clientHeight;
+
+
+            if (this.mCamera instanceof THREE.CombinedCamera)
+                this.mCamera.setSize(this.clientWidth, this.clientHeight);
+            this.mCamera.updateProjectionMatrix();
+
+            //adjust orthographic camera
+        let camFactor=2
+            this.mCameraO.left = - this.clientWidth / camFactor;
+            this.mCameraO.right =  this.clientWidth / camFactor;
+            this.mCameraO.top =  this.clientHeight / camFactor;
+            this.mCameraO.bottom = - this.clientHeight / camFactor;
+            this.mCameraO.updateProjectionMatrix();
+
+
+        }
+
+        if (this.mRenderer)
+            this.mControls.panSpeed = this.mControls.rotateSpeed = 1600 / this.clientWidth * 0.3
+
+
+    }
+
+
+    /* get scene() {
+     return ""+ this.mScene
+     }
+     set scene(scene) {
+     this.mScene=scene
+     }
+     */
+    setCaption(text) {
+
+
+        let captionCSS = {
+            "pointer-events": "none",
+            position: "relative",
+            padding: "1em",
+            "font-size": "2em",
+            top: "30%",
+            height: "3em",
+            width: "100%",
+            background: "rgba(255,255,255,0.3)",
+            left: "0px",
+            "z-index": 1
+        };
+
+        if (!this.mCaption)
+            this.mCaption = $("<span></span>").html(this.name).css(captionCSS);
+
+        this.mCaption.html("").append(text);
+        return this
+    }
+
+
+    /**
+     *   set up controls,  scene,   renderer,     animation
+     *
+     */
+    initStatic() {
+
+        if (this._inited_static_) return;
+        var that = this;
+
+
+        this.mFPS = 0.5;
+        this.minFPS = this.minFPS || 0;
+        this.maxFPS = this.maxFPS || 144;
+
+
+        this.mLastFrameTime = -1;
+
+        let captionCSS = {
+            "pointer-events": "none",
+            position: "relative",
+            padding: "1em",
+            "font-size": "2em",
+            top: "30%",
+            height: "3em",
+            width: "100%",
+            background: "rgba(255,255,255,0.3)",
+            left: "0px",
+            "z-index": 1
+        };
+
+        if (!this.mCaption)
+            this.mCaption = $("<span></span>").html(this.name).css(captionCSS);
+
+        $(this).append(this.mCaption).addClass("view-3d");
+
+
+        // Setup scene
+
+        this.mScene = new THREE.Scene();
+
+        // Add nav info section
+        //createTooltip()
+
+        this.initCamera();
+
+        this.mRenderer.setClearColor(0x000000);
+        this.mRenderer.setPixelRatio(window.devicePixelRatio);
+
+        this.appendChild(this.mRenderer.domElement);
+
+
+        $(this.mRenderer.domElement).css({position: "absolute", width: "100%", height: "100%"});
+
+
+        //init basic keyboard io
+        //FIXME this probably interferes with domEvents here..
+        /*
+
+         this.mOtherEvents = new Mousetrap(this.mRenderer.domElement);
+         //  this.mOtherEvents
+         Mousetrap .bind("shift+r",function(e){
+         e.preventDefault();
+         e.stopPropagation();
+         console.log("actualFPS",   that.mActualFPS)
+
+         })*/
+
+        this.mFpsCounter = $("<span     style='color: white;position: absolute;' >");
+        $(this).append(this.mFpsCounter);
+
+
+        //------------------------------------------------
+        this.setDomEvents();
+
+        //------------------------------------------------
+
+
+        //FIXME binding events will interfere with controls
+        $(this.mRenderer.domElement).on("mouseover", function (e) {
+
+            if (that.isMaximised()) return;
+
+            e.stopPropagation();
+            that.setActive();
+
+            $(that).attr("hasFocus", true);
+
+
+            that.mCaption.stop(true, false).fadeOut(200)
+
+
+        });
+
+
+        $(this.mRenderer.domElement).on("mouseout", function (e) {
+
+            if (that.isMaximised()) return;
+
+            e.stopPropagation();
+
+
+            $(that).removeAttr("hasFocus");
+            if (!$(that).hasClass("view-3d-maximised")) {
+
+                that.mCaption.stop(true, false).delay(400).fadeIn();
+
+                //keep maximised element active or whatever state it currently holds
+                that.setInactive();
+
+
+            }
+
+        });
+
+
+        this.setControls();
+
+        this.resizeCanvas();
+
+
+        this._inited_static_ = true;
+
+        return this
+
+    }
+
+    // Kick-off renderer
+    animate() {
+
+        var initialFrames = 1;
+        var that = this;
+        var accTime = 0, accFrames = 0;
+
+        function animate(time) {
+            that.mTime = time;
+
+
+            initialFrames--;
+            if (that.mFPS == 0) {
+
+                if (initialFrames < 0) {
+                    that.mFrameId = requestAnimationFrame(animate);
+                    return;
+                }
+            }
+            else {
+
+                let nextTime = that.mLastFrameTime + (1000 / that.mFPS);
+                if (nextTime > time) {
+
+                    that.mFrameId = requestAnimationFrame(animate);
+                    return;
+                }
+            }
+
+
+            //count frames
+            accTime += time - that.mLastFrameTime;
+            accFrames++;
+
+            if (accTime > 1000) {
+                that.mActualFPS = accFrames;
+
+                if (that.showFPSCounter)
+                    that.mFpsCounter.html(that.mActualFPS);
+
+                accTime = 0;
+                accFrames = 0;
+
+
+            }
+
+
+            that.mLastFrameTime = time;
+
+            that.mControls.update();
+
+
+            $(that).trigger("before-render", time);
+            // $(that).trigger("animate")
+
+            that.mRenderer.render(that.mScene, that.mCamera);
+
+            $(that).trigger("after-render", time);
+
+            that.mFrameId = requestAnimationFrame(animate);
+        }
+
+        animate(-1)
+
+    }
+
+
+    add(object3D) {
+        this.mScene.add(object3D)
+
+    }
+
+
+    maximise() {
+        $(this).addClass("view-3d-maximised");
+
+        this.mCaption.fadeOut();
+
+        this.setActive()
+
+
+    }
+
+    isMaximised() {
+
+        return $(this).hasClass("view-3d-maximised")
+
+    }
+
+
+    undoMaximise() {
+        $(this).removeClass("view-3d-maximised");
+
+        this.setInactive()
+
+
+    }
+
+
+    setActive() {
+
+        //fps
+        this.mFPS = this.maxFPS;
+
+        this.resizeCanvas();
+        this.start();
+
+    }
+
+    setInactive() {
+        //  $(this).removeClass("view-3d-maximised")
+        this.mFPS = this.minFPS;
+
+        this.resizeCanvas()
+    }
+
+
+    start() {
+
+        this.stop();
+
+        this.animate()
+
+
+    }
+
+    stop() {
+        window.cancelAnimationFrame(this.mFrameId)
+    }
+
+    resume() {
+
+        this.start()
+
+    }
+
+
+    show() {
+        this.resume()
+
+
+    }
+
+    hide() {
+        this.stop()
+    }
+
+
+    connectedCallback() {
+
+        this.createTooltip();
+
+
+        this.initStatic();
+        this.start();
+
+        $(this).trigger("connected")
+
+
+    }
+
+
+    createTooltip() {
+
+        // Setup tooltip
+        if (this.toolTipElem) return;
+
+        this.toolTipElem = document.createElement('div');
+        this.toolTipElem.classList.add('graph-tooltip');
+
+        $(this.toolTipElem).css({
+            "z-index": 1,
+            position: "relative",
+            "user-select": "none"
+        });
+
+        this.appendChild(this.toolTipElem);
+
+        // Capture mouse coords on move
+
+        this.mouse = new THREE.Vector2();
+        this.mouse.x = -2; // Initialize off canvas
+        this.mouse.y = -2;
+        this.addEventListener("mousemove", ev => {
+            // update the mouse pos
+
+
+            //$(env.toolTipElem).show()
+
+            const offset = getOffset(this),
+                relPos = {
+                    x: ev.pageX - offset.left,
+                    y: ev.pageY - offset.top
+                };
+            this.mouse.x = (relPos.x / this.clientWidth) * 2 - 1;
+            this.mouse.y = -(relPos.y / this.clientHeight) * 2 + 1;
+            //console.log(offset);
+            // Move tooltip
+            this.toolTipElem.style.top = (relPos.y - 40) + 'px';
+            this.toolTipElem.style.left = (relPos.x - 20) + 'px';
+
+            function getOffset(el) {
+                const rect = el.getBoundingClientRect(),
+                    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+                    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                return {
+                    top: rect.top + scrollTop,
+                    left: rect.left + scrollLeft
+                };
+            }
+        }, false);
+
+    }
+
+
+    /**
+     * set the content of the tooltip
+     *
+     *
+     * @param text
+     */
+    setTooltip(text) {
+
+        $(this.toolTipElem).html("").append(text).show()
+
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = View3D;
+
+
+
+customElements.define("view-3d", View3D);
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "3b30479746a603ca6eeb0fa522427a01.png";
 
 /***/ })
 /******/ ]);
