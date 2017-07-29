@@ -25,6 +25,7 @@ function TextNodesFactory(env, options) {
 
 		options = _.extend({
 			interactable: false, //node can't be clicked, selected
+			minVisibleCount:0, //the minimum amount of items ignoring distance
 			maxVisibleCount: 10, //the max amount of rendered text labels
 			maxDistance: 700, //the maximum distance between the node and the observer/camera to be accepted as a valid visible node
 			minDistance: 10, //the minimum distance between the node and the observer/camera to be accepted as a valid visible node
@@ -305,6 +306,10 @@ function TextNodesFactory(env, options) {
 
 
 		}
+
+
+
+		//TODO keep track of potential nodes that where discarded due to distance but should be readded due to minVisibleCount
 
 		//------------------------------------------
 		//now that we should have an array containing only relevant nodes, let's create and (compare+ update) nodes

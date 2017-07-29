@@ -49,12 +49,14 @@ class ClusterTextOverlay extends HTMLElement {
 
         this.initCSS();
 
-        $(view).on("loaded", () => {
+        $(view).on("loaded graph-changed", () => {
 
-            this.bindToCluster(this.parentElement.mRootCluster);
+            if (!this.parentElement) return ;
+
+        this.bindToCluster(this.parentElement.mRootCluster);
             this.addGlobalNodeCaptions(this.parentElement)
 
-        })
+       })
 
     }
 
@@ -194,6 +196,10 @@ class ClusterTextOverlay extends HTMLElement {
             res= _.sortBy(res, [function(o) { return o.distance; }]);
 
             //TODO nodes aren't in order so we should sort them also
+
+            //FIXME deplace overlay after changing 3d => 2d view or have an event to track changing leafs/clusters
+            //check for empty array which can happen if graph data changes and clusters get deleted
+            if (!res[0] ||!res[0] .item) return [];
 
             let leaf1 =res[0].item;
             return leaf1.mNodes ? leaf1.mNodes : []
