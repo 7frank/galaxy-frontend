@@ -719,7 +719,7 @@ export class MyMain {
 
 
 
-        view.mSkyDome.visible=false;
+       // view.mSkyDome.visible=false;
 
     }
 
@@ -743,7 +743,7 @@ export class MyMain {
 
         view.mControls.noRotate = false;
 
-        view.mSkyDome.visible=true;
+        //view.mSkyDome.visible=true;
 
 
         this.getCurrentView().mRootCluster.zoomToCluster()

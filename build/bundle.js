@@ -64,7 +64,7 @@ var clusters =
 /******/ 	__webpack_require__.p = "/test_app/build/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 24);
+/******/ 	return __webpack_require__(__webpack_require__.s = 25);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -72,8 +72,8 @@ var clusters =
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(4);
 /**
@@ -188,6 +188,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
             let vis= (1-mLOD)/2;
 
+
+         //TODO the cluster edges should partially be dependant on the size of the hull..
 
 
 
@@ -1303,7 +1305,6 @@ class BaseDistribution {
 
         var tweens = this.mTweens = []
 
-
         _.each(nodes, function (n) {
 
             if (i > _len) {
@@ -1379,8 +1380,6 @@ class BaseDistribution {
 
         function animate(time) {
 
-
-            // tween_sum.update(time)
 
             _.each(tweens, function (tween) {
                 tween.update(time)
@@ -1672,8 +1671,8 @@ class EdgeUtil {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(11);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -1723,7 +1722,6 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 
         __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__["a" /* default */].moveToCluster(this, {distance})
     }
-
 
 
     /**
@@ -2166,10 +2164,138 @@ class BaseVolume extends THREE.Object3D {
 
 /***/ }),
 /* 5 */
+/***/ (function(module, exports) {
+
+var Point = function(x,y,z){
+    if(x !== undefined && y !== undefined && z !== undefined){
+        this.x = x.toFixed(3);
+        this.y = y.toFixed(3);
+        this.z = z.toFixed(3);
+    }
+
+    this.faces = [];
+}
+
+Point.prototype.subdivide = function(point, count, checkPoint){
+
+    var segments = [];
+    segments.push(this);
+
+    for(var i = 1; i< count; i++){
+        var np = new Point(this.x * (1-(i/count)) + point.x * (i/count),
+            this.y * (1-(i/count)) + point.y * (i/count),
+            this.z * (1-(i/count)) + point.z * (i/count));
+        np = checkPoint(np);
+        segments.push(np);
+    }
+
+    segments.push(point);
+
+    return segments;
+
+}
+
+Point.prototype.segment = function(point, percent){
+    percent = Math.max(0.01, Math.min(1, percent));
+
+    var x = point.x * (1-percent) + this.x * percent;
+    var y = point.y * (1-percent) + this.y * percent;
+    var z = point.z * (1-percent) + this.z * percent;
+
+    var newPoint = new Point(x,y,z);
+    return newPoint;
+
+};
+
+Point.prototype.midpoint = function(point, location){
+    return this.segment(point, .5);
+}
+
+
+Point.prototype.project = function(radius, percent){
+    if(percent == undefined){
+        percent = 1.0;
+    }
+
+    percent = Math.max(0, Math.min(1, percent));
+    var yx = this.y / this.x;
+    var zx = this.z / this.x;
+    var yz = this.z / this.y;
+
+    var mag = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+    var ratio = radius/ mag;
+
+    this.x = this.x * ratio * percent;
+    this.y = this.y * ratio * percent;
+    this.z = this.z * ratio * percent;
+    return this;
+
+};
+
+Point.prototype.registerFace = function(face){
+    this.faces.push(face);
+}
+
+Point.prototype.getOrderedFaces = function(){
+    var workingArray = this.faces.slice();
+    var ret = [];
+
+    var i = 0;
+    while(i < this.faces.length){
+        if(i == 0){
+            ret.push(workingArray[i]);
+            workingArray.splice(i,1);
+        } else {
+            var hit = false;
+            var j = 0;
+            while(j < workingArray.length && !hit){
+                if(workingArray[j].isAdjacentTo(ret[i-1])){
+                    hit = true;
+                    ret.push(workingArray[j]);
+                    workingArray.splice(j, 1);
+                }
+                j++;
+            }
+        }
+        i++;
+    }
+
+    return ret;
+}
+
+Point.prototype.findCommonFace = function(other, notThisFace){
+    for(var i = 0; i< this.faces.length; i++){
+        for(var j = 0; j< other.faces.length; j++){
+            if(this.faces[i].id === other.faces[j].id && this.faces[i].id !== notThisFace.id){
+                return this.faces[i];
+            }
+        }
+    }
+
+    return null;
+}
+
+Point.prototype.toJson = function(){
+    return {
+        x: this.x,
+        y: this.y,
+        z: this.z
+    };
+}
+
+Point.prototype.toString = function(){
+    return '' + this.x + ',' + this.y + ',' + this.z;
+}
+
+module.exports = Point;
+
+
+/***/ }),
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(24);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -2460,7 +2586,7 @@ class ClusterLeafElement extends THREE.Mesh {
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2744,12 +2870,12 @@ class GraphData
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(26);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -2947,7 +3073,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3146,7 +3272,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3215,7 +3341,7 @@ class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* defaul
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3329,18 +3455,22 @@ class ZoomUtil {
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__coordinates_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_hexasphere_js__);
 /**
  * Created by Frank on 13.06.2017.
  */
+
+
 
 
 
@@ -3385,8 +3515,13 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 createSkyDome()
 {
 
-    let scene=this.mScene;
 
+
+    var material = new THREE.MeshBasicMaterial();
+
+
+    let scene=this.mScene;
+/*
     var ambientLight = new THREE.AmbientLight(0x333333);
     scene.add(ambientLight);
     var dirLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -3395,7 +3530,7 @@ createSkyDome()
     var geometry = new THREE.SphereGeometry(300000, 60, 40);
     var material = new THREE.MeshBasicMaterial();
 
-   material.map = THREE.ImageUtils.loadTexture(__WEBPACK_IMPORTED_MODULE_3__coordinates_png___default.a);
+   material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
     material.side = THREE.BackSide;
     material.opacity=0.05;
     material.transparent=true;
@@ -3403,7 +3538,78 @@ createSkyDome()
 
     this.mSkyDome=skydome
 
-    scene.add(skydome);
+
+*/
+ //   scene.add(skydome);
+
+
+    //--------------------------------
+    var meshMaterials = [];
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x7cfc00, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x397d02, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x77ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x61b329, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x4cbb17, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x00ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x00aa11, transparent: true}));
+
+    var oceanMaterial = []
+    oceanMaterial.push(new THREE.MeshBasicMaterial({color: 0x0f2342, transparent: true}));
+    oceanMaterial.push(new THREE.MeshBasicMaterial({color: 0x0f1e38, transparent: true}));
+
+
+    var radius = 300000;        // Radius used to calculate position of tiles
+    var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
+    var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
+
+
+    function isLand(){
+
+        return _.random(0,1)
+
+    }
+
+    var hexaGroup=new THREE.Group();
+
+    var hexasphere = new __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default.a(radius, subDivisions, tileSize);
+    for(var i = 0; i< hexasphere.tiles.length; i++){
+        var t = hexasphere.tiles[i];
+        var latLon = t.getLatLon(hexasphere.radius);
+
+        var geometry = new THREE.Geometry();
+
+        for(var j = 0; j< t.boundary.length; j++){
+            var bp = t.boundary[j];
+            geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
+        }
+        geometry.faces.push(new THREE.Face3(0,1,2));
+        geometry.faces.push(new THREE.Face3(0,2,3));
+        geometry.faces.push(new THREE.Face3(0,3,4));
+        if(geometry.vertices.length > 5){
+            geometry.faces.push(new THREE.Face3(0,4,5));
+        }
+
+        if(isLand(latLon.lat, latLon.lon)){
+            material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
+        } else {
+            material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
+        }
+
+        material.opacity = 0.3;
+
+        material.side = THREE.BackSide;
+
+        var mesh = new THREE.Mesh(geometry, material.clone());
+        hexaGroup.add(mesh);
+        hexasphere.tiles[i].mesh = mesh;
+
+    }
+    scene.add(hexaGroup);
+    this.mSkyDome=hexaGroup
+
+
 
 }
 
@@ -3560,7 +3766,7 @@ customElements.define("graph-view-3d", GraphView3D);
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3597,7 +3803,7 @@ class ClusterNodeArray extends Array //List<Node>
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3666,7 +3872,7 @@ class ClusterNodeArray extends Array //List<Node>
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3708,7 +3914,7 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3766,11 +3972,11 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(10);
 /**
  * Created by Frank on 23.06.2017.
  */
@@ -4008,7 +4214,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 /**
@@ -4344,7 +4550,7 @@ THREE.CombinedCamera.prototype.toBottomView = function() {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 /**
@@ -4435,7 +4641,7 @@ THREE.CombinedCamera.prototype.toBottomView = function() {
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 /**
@@ -5659,7 +5865,7 @@ THREE.CombinedCamera.prototype.toBottomView = function() {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports) {
 
 /**
@@ -6289,7 +6495,7 @@ THREE.TrackballControls.prototype = Object.create( THREE.EventDispatcher.prototy
 THREE.TrackballControls.prototype.constructor = THREE.TrackballControls;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6331,7 +6537,7 @@ class BaseEdge {
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6669,11 +6875,11 @@ class BaseNode extends THREE.Mesh {
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(2);
 /**
  * Created by Frank on 08.06.2017.
@@ -6884,35 +7090,35 @@ class EdgesContainer extends THREE.Object3D {
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_CombinedCamera__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_CombinedCamera__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_CombinedCamera___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__lib_CombinedCamera__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_TrackballControls__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_TrackballControls__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_TrackballControls___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__lib_TrackballControls__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_ConvexGeometry__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_ConvexGeometry__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_ConvexGeometry___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__lib_ConvexGeometry__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_QuickHull__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_QuickHull__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_QuickHull___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__lib_QuickHull__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__distributions_BaseDistribution__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__distributions_DefaultDistribution__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__distributions_RandomDistribution__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__distributions_ForceGraphDistribution__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__distributions_SphericalDistribution__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__ClusterNodeArray__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__ClusterLeafElement__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__distributions_DefaultDistribution__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__distributions_RandomDistribution__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__distributions_ForceGraphDistribution__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__distributions_SphericalDistribution__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__ClusterNodeArray__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__ClusterLeafElement__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__BaseCluster3D__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__Cluster3DExtended__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__RootCluster__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__GraphData__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__view_GraphView3D__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__RootCluster__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__GraphData__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__view_GraphView3D__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__hull_BoxVolume__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__hull_BaseVolume__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__hull_ConvexVolume__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__utils_ZoomUtil__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__hull_ConvexVolume__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__utils_ZoomUtil__ = __webpack_require__(11);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_12__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
@@ -7635,7 +7841,7 @@ class MyMain {
 
 
 
-        view.mSkyDome.visible=false;
+       // view.mSkyDome.visible=false;
 
     }
 
@@ -7659,7 +7865,7 @@ class MyMain {
 
         view.mControls.noRotate = false;
 
-        view.mSkyDome.visible=true;
+        //view.mSkyDome.visible=true;
 
 
         this.getCurrentView().mRootCluster.zoomToCluster()
@@ -7676,12 +7882,12 @@ class MyMain {
 	
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__ = __webpack_require__(3);
 /**
  * Created by Frank on 12.07.2017.
@@ -7983,7 +8189,7 @@ customElements.define("cluster-text-overlay", ClusterTextOverlay);
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8335,7 +8541,7 @@ function TextNodesFactory(env, options) {
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8924,7 +9130,399 @@ customElements.define("view-3d", View3D);
 
 
 /***/ }),
-/* 28 */
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Point = __webpack_require__(5);
+
+var _faceCount = 0;
+
+var Face = function(point1, point2, point3, register){
+    this.id = _faceCount++;
+
+    if(register == undefined){
+        register = true;
+    }
+
+    this.points = [
+        point1,
+        point2,
+        point3
+        ];
+    if(register){
+        point1.registerFace(this);
+        point2.registerFace(this);
+        point3.registerFace(this);
+    }
+};
+
+Face.prototype.getOtherPoints = function(point1){
+    var other = [];
+    for(var i = 0; i < this.points.length; i++){
+        if(this.points[i].toString() !== point1.toString()){
+            other.push(this.points[i]);
+        }
+    }
+    return other;
+}
+
+Face.prototype.findThirdPoint = function(point1, point2){
+    for(var i = 0; i < this.points.length; i++){
+        if(this.points[i].toString() !== point1.toString() && this.points[i].toString() !== point2.toString()){
+            return this.points[i];
+        }
+    }
+}
+
+Face.prototype.isAdjacentTo = function(face2){
+    // adjacent if 2 of the points are the same
+    
+    var count = 0;
+    for(var i = 0; i< this.points.length; i++){
+        for(var j =0 ; j< face2.points.length; j++){
+            if(this.points[i].toString() == face2.points[j].toString()){
+                count++;
+                
+            }
+        }
+    }
+
+    return (count == 2);
+}
+
+Face.prototype.getCentroid = function(clear){
+    if(this.centroid && !clear){
+        return this.centroid;
+    }
+
+    var x = (this.points[0].x + this.points[1].x + this.points[2].x)/3;
+    var y = (this.points[0].y + this.points[1].y + this.points[2].y)/3;
+    var z = (this.points[0].z + this.points[1].z + this.points[2].z)/3;
+
+    var centroid = new Point(x,y,z);
+
+    this.centroid = centroid;
+
+    return centroid;
+
+}
+
+module.exports = Face;
+
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Tile = __webpack_require__(31),
+    Face = __webpack_require__(29),
+    Point = __webpack_require__(5);
+
+var Hexasphere = function(radius, numDivisions, hexSize){
+
+    this.radius = radius;
+    var tao = 1.61803399;
+    var corners = [
+        new Point(1000, tao * 1000, 0),
+        new Point(-1000, tao * 1000, 0),
+        new Point(1000,-tao * 1000,0),
+        new Point(-1000,-tao * 1000,0),
+        new Point(0,1000,tao * 1000),
+        new Point(0,-1000,tao * 1000),
+        new Point(0,1000,-tao * 1000),
+        new Point(0,-1000,-tao * 1000),
+        new Point(tao * 1000,0,1000),
+        new Point(-tao * 1000,0,1000),
+        new Point(tao * 1000,0,-1000),
+        new Point(-tao * 1000,0,-1000)
+    ];
+
+    var points = {};
+
+    for(var i = 0; i< corners.length; i++){
+        points[corners[i]] = corners[i];
+    }
+
+    var faces = [
+        new Face(corners[0], corners[1], corners[4], false),
+        new Face(corners[1], corners[9], corners[4], false),
+        new Face(corners[4], corners[9], corners[5], false),
+        new Face(corners[5], corners[9], corners[3], false),
+        new Face(corners[2], corners[3], corners[7], false),
+        new Face(corners[3], corners[2], corners[5], false),
+        new Face(corners[7], corners[10], corners[2], false),
+        new Face(corners[0], corners[8], corners[10], false),
+        new Face(corners[0], corners[4], corners[8], false),
+        new Face(corners[8], corners[2], corners[10], false),
+        new Face(corners[8], corners[4], corners[5], false),
+        new Face(corners[8], corners[5], corners[2], false),
+        new Face(corners[1], corners[0], corners[6], false),
+        new Face(corners[11], corners[1], corners[6], false),
+        new Face(corners[3], corners[9], corners[11], false),
+        new Face(corners[6], corners[10], corners[7], false),
+        new Face(corners[3], corners[11], corners[7], false),
+        new Face(corners[11], corners[6], corners[7], false),
+        new Face(corners[6], corners[0], corners[10], false),
+        new Face(corners[9], corners[1], corners[11], false)
+    ];
+
+    var getPointIfExists = function(point){
+        if(points[point]){
+            // console.log("EXISTING!");
+            return points[point];
+        } else {
+            // console.log("NOT EXISTING!");
+            points[point] = point;
+            return point;
+        }
+    };
+
+
+    var newFaces = [];
+
+    for(var f = 0; f< faces.length; f++){
+        // console.log("-0---");
+        var prev = null;
+        var bottom = [faces[f].points[0]];
+        var left = faces[f].points[0].subdivide(faces[f].points[1], numDivisions, getPointIfExists);
+        var right = faces[f].points[0].subdivide(faces[f].points[2], numDivisions, getPointIfExists);
+        for(var i = 1; i<= numDivisions; i++){
+            prev = bottom;
+            bottom = left[i].subdivide(right[i], i, getPointIfExists);
+            for(var j = 0; j< i; j++){
+                var nf = new Face(prev[j], bottom[j], bottom[j+1]); 
+                newFaces.push(nf);
+
+                if(j > 0){
+                    nf = new Face(prev[j-1], prev[j], bottom[j]);
+                    newFaces.push(nf);
+                }
+            }
+        }
+    }
+
+    faces = newFaces;
+
+    var newPoints = {};
+    for(var p in points){
+        var np = points[p].project(radius);
+        newPoints[np] = np;
+    }
+
+    points = newPoints;
+
+    this.tiles = [];
+    this.tileLookup = {};
+
+    // create tiles and store in a lookup for references
+    for(var p in points){
+        var newTile = new Tile(points[p], hexSize);
+        this.tiles.push(newTile);
+        this.tileLookup[newTile.toString()] = newTile;
+    }
+
+    // resolve neighbor references now that all have been created
+    for(var t in this.tiles){
+        var _this = this;
+        this.tiles[t].neighbors = this.tiles[t].neighborIds.map(function(item){return _this.tileLookup[item]});
+    }
+
+};
+
+Hexasphere.prototype.toJson = function() {
+
+    return JSON.stringify({
+        radius: this.radius,
+        tiles: this.tiles.map(function(tile){return tile.toJson()})
+    });
+}
+
+Hexasphere.prototype.toObj = function() {
+
+    var objV = [];
+    var objF = [];
+    var objText = "# vertices \n";
+    var vertexIndexMap = {};
+
+    for(var i = 0; i< this.tiles.length; i++){
+        var t = this.tiles[i];
+        
+        var F = []
+        for(var j = 0; j< t.boundary.length; j++){
+            var index = vertexIndexMap[t.boundary[j]];
+            if(index == undefined){
+                objV.push(t.boundary[j]);
+                index = objV.length;
+                vertexIndexMap[t.boundary[j]] = index;
+            }
+            F.push(index)
+        }
+
+        objF.push(F);
+    }
+
+    for(var i =0; i< objV.length; i++){
+        objText += 'v ' + objV[i].x + ' ' + objV[i].y + ' ' + objV[i].z + '\n';
+    }
+
+    objText += '\n# faces\n';
+    for(var i =0; i< objF.length; i++){
+        faceString = 'f';
+        for(var j = 0; j < objF[i].length; j++){
+            faceString = faceString + ' ' + objF[i][j];
+        }
+        objText += faceString + '\n';
+    }
+
+    return objText;
+}
+
+module.exports = Hexasphere;
+
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Point = __webpack_require__(5);
+
+function vector(p1, p2){
+    return {
+        x: p2.x - p1.x,
+        y: p2.y - p1.y,
+        z: p2.z - p1.z
+    }
+
+}
+
+// https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
+// Set Vector U to (Triangle.p2 minus Triangle.p1)
+// Set Vector V to (Triangle.p3 minus Triangle.p1)
+// Set Normal.x to (multiply U.y by V.z) minus (multiply U.z by V.y)
+// Set Normal.y to (multiply U.z by V.x) minus (multiply U.x by V.z)
+// Set Normal.z to (multiply U.x by V.y) minus (multiply U.y by V.x)
+function calculateSurfaceNormal(p1, p2, p3){
+
+    U = vector(p1, p2)
+    V = vector(p1, p3)
+    
+    N = {
+        x: U.y * V.z - U.z * V.y,
+        y: U.z * V.x - U.x * V.z,
+        z: U.x * V.y - U.y * V.x
+    };
+
+    return N;
+
+}
+
+function pointingAwayFromOrigin(p, v){
+    return ((p.x * v.x) >= 0) && ((p.y * v.y) >= 0) && ((p.z * v.z) >= 0)
+}
+
+function normalizeVector(v){
+    var m = Math.sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+
+    return {
+        x: (v.x/m),
+        y: (v.y/m),
+        z: (v.z/m)
+    };
+
+}
+
+var Tile = function(centerPoint, hexSize){
+    
+    if(hexSize == undefined){
+        hexSize = 1;
+    }
+
+    hexSize = Math.max(.01, Math.min(1.0, hexSize));
+
+    this.centerPoint = centerPoint;
+    this.faces = centerPoint.getOrderedFaces();
+    this.boundary = [];
+    this.neighborIds = []; // this holds the centerpoints, will resolve to references after
+    this.neighbors = []; // this is filled in after all the tiles have been created
+
+    var neighborHash = {};
+    for(var f=0; f< this.faces.length; f++){
+        // build boundary
+        this.boundary.push(this.faces[f].getCentroid().segment(this.centerPoint, hexSize));
+
+        // get neighboring tiles
+        var otherPoints = this.faces[f].getOtherPoints(this.centerPoint);
+        for(var o = 0; o < 2; o++){
+            neighborHash[otherPoints[o]] = 1;
+        }
+
+    }
+
+    this.neighborIds = Object.keys(neighborHash);
+
+    // Some of the faces are pointing in the wrong direction
+    // Fix this.  Should be a better way of handling it
+    // than flipping them around afterwards
+
+    var normal = calculateSurfaceNormal(this.boundary[1], this.boundary[2], this.boundary[3]);
+
+    if(!pointingAwayFromOrigin(this.centerPoint, normal)){
+        this.boundary.reverse();
+    }
+
+
+
+};
+
+Tile.prototype.getLatLon = function(radius, boundaryNum){
+    var point = this.centerPoint;
+    if(typeof boundaryNum == "number" && boundaryNum < this.boundary.length){
+        point = this.boundary[boundaryNum];
+    }
+    var phi = Math.acos(point.y / radius); //lat 
+    var theta = (Math.atan2(point.x, point.z) + Math.PI + Math.PI / 2) % (Math.PI * 2) - Math.PI; // lon
+    
+    // theta is a hack, since I want to rotate by Math.PI/2 to start.  sorryyyyyyyyyyy
+    return {
+        lat: 180 * phi / Math.PI - 90,
+        lon: 180 * theta / Math.PI
+    };
+};
+
+
+
+Tile.prototype.scaledBoundary = function(scale){
+
+    scale = Math.max(0, Math.min(1, scale));
+
+    var ret = [];
+    for(var i = 0; i < this.boundary.length; i++){
+        ret.push(this.centerPoint.segment(this.boundary[i], 1 - scale));
+    }
+
+    return ret;
+};
+
+Tile.prototype.toJson = function(){
+    // this.centerPoint = centerPoint;
+    // this.faces = centerPoint.getOrderedFaces();
+    // this.boundary = [];
+    return {
+        centerPoint: this.centerPoint.toJson(),
+        boundary: this.boundary.map(function(point){return point.toJson()})
+    };
+
+}
+
+Tile.prototype.toString = function(){
+    return this.centerPoint.toString();
+};
+
+module.exports = Tile;
+
+
+/***/ }),
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "3b30479746a603ca6eeb0fa522427a01.png";

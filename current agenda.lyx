@@ -553,187 +553,6 @@ FIXME if a cluster has subclusters and no clustering is given use the existsing
 \end_layout
 
 \end_deeper
-\begin_layout Section
-Features/Versions/History/sprints
-\end_layout
-
-\begin_layout Standard
-if possible we should define about sprints of equal length.
- about 2 weeks should be the right time for
-\end_layout
-
-\begin_layout Subsection
-next sprint 2d features primarily 24.07.
- 1
-\end_layout
-
-\begin_layout Itemize
-feedback 2d- white background
-\begin_inset Note Comment
-status open
-
-\begin_layout Plain Layout
-focus on 2d if 3d is working properly
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Itemize
-So we can target a complete 2D version by 21 
-\end_layout
-
-\begin_layout Itemize
-with all the data hook up 19 for all the UI, functionaries and visualization
- And then live data connection
-\end_layout
-
-\begin_layout Itemize
-24th deadline
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-no country cluster but only industry
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-if we can have a transparent color wrappers for sector
-\end_layout
-
-\begin_layout Itemize
-for country we can we say show all for US companies
-\end_layout
-
-\begin_layout Itemize
-though 
-\bar under
-collapsed 
-\bar default
-by sectors and other countries, 
-\end_layout
-
-\begin_layout Itemize
-the whole country will be collapsed let's try first, Frank to see how it
- feel and we can make changes to it
-\end_layout
-
-\begin_layout Itemize
-t i just want to experience it first then we can make tweak to it
-\end_layout
-
-\begin_layout Itemize
-changing 2d >3d will have wrong leaf edges shown
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-more 2d infos !!!
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-we can leverage the hull feature from http://bl.ocks.org/GerHobbelt/3071239
- and we can leverage the node effects we already in the 3D version
-\end_layout
-
-\begin_layout Enumerate
-also since it's 2D, we can introduce the the node size dimension.
- The size will be based on the size of the company, sector, country which
- we can classify as small, medium, and large
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-basically be based on market value size (For company with stock) and revenue
- (For private company) in case the of company
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-expandable/collapsible node would be sector and country as similar to 3D
- we would have sector hulls within a country
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-blue ring like in mockup around collapsed nodes again
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-colors of nodes the color of the node will be based on at least 3 things
- 
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-1.
- live stock price performance % change compare to opening price of that
- day for intraday.
- or close price % if market closes.
- i creating a database that you can connect to get that data 
-\end_layout
-
-\begin_layout Enumerate
-2.
- sentiment of that company based on news.
- I have already set up news feed in database.
- however, I am still working on creating sentiment 
-\end_layout
-
-\begin_layout Enumerate
-3.
- revenue trend of that company
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-news update
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-possibly real time
-\end_layout
-
-\begin_layout Enumerate
-current database mysql websocket nodejs
-\end_layout
-
-\begin_layout Enumerate
-i will also add blinking features if there is a recent news coming in for
- that 
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-pulsing effect/animated nodes
-\end_layout
-
-\end_deeper
-\end_deeper
-\end_deeper
 \begin_layout Itemize
 network
 \begin_inset Note Note
@@ -791,12 +610,115 @@ additionally see audit tab for
 
 \end_layout
 
+\begin_layout Itemize
+mem leaks with huge data set
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+usability
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Nat Sap: Quite difficult to use 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+see elaboration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+find a way to not get click triggered if dblclick is triggered when both
+ are bound to same element 
+\end_layout
+
+\begin_layout Itemize
+also dragging will trigger click events
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+camera
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+combinedcamera is partially working in ortho mode but does have weird clipping
+ when zooming
+\end_layout
+
+\begin_layout Itemize
+alternative approach P and O camera does not show elements on ortho mode
+ atm.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+minify and optimisation
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+uglify needs separate plugin for es6
+\end_layout
+
+\begin_layout Itemize
+dependencies from node modules don't work 100% for three.min.js and others
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+feedback 2d- white back
+\end_layout
+
 \begin_deeper
 \begin_layout Itemize
 
 \series bold
-[7/13/2017 3:47:37 PM] Nat Sap: It we optimize loading time so we won't
- need any loading screen 
+[7/13/2017 3:47:37 PM] Nat Sap: It we optimize loading time so
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\series bold
+ we won't need any loading screen 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -814,7 +736,19 @@ additionally see audit tab for
 \begin_layout Itemize
 
 \series bold
-[7/13/2017 3:48:15 PM] Nat Sap: Ideally 1 second would be great
+[7/13/2017 3:48:15 PM] Nat Sap:
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\series bold
+ Ideally 1 second 
+\end_layout
+
+\end_inset
+
+would be great
 \end_layout
 
 \begin_layout Itemize
@@ -959,8 +893,343 @@ maybe we can get it down .5 or so by improving node and linkmixins
 \end_layout
 
 \end_deeper
+\begin_layout Section
+Features/Versions/History/sprints
+\end_layout
+
+\begin_layout Standard
+if possible we should define about sprints of equal length.
+ about 2 weeks should be the right time for
+\end_layout
+
 \begin_layout Subsection
-current 
+small Sprint 31.07.
+ - 4.8.
+\end_layout
+
+\begin_layout Itemize
+look& feel: improve rendering while loading
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+monday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+better looking initial graph
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+currently edges/hull does 
+\begin_inset Quotes eld
+\end_inset
+
+pop up
+\begin_inset Quotes erd
+\end_inset
+
+ which doesn't look good
+\end_layout
+
+\begin_layout Itemize
+fade in or scale in of hulls
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+have only particles visible or particles in from of edges 
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+no? country cluster but only industry
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+get feedback
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+for country can we say show all for US companies
+\end_layout
+
+\begin_layout Itemize
+though 
+\bar under
+collapsed 
+\bar default
+by sectors and other countries, 
+\end_layout
+
+\begin_layout Itemize
+the whole country will be collapsed to see how it feel and we can make changes
+ to it
+\end_layout
+
+\begin_layout Itemize
+have a SphereGeometry the size of the ConxevHull if the country is collapsed
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+monday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+2d changes
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\strikeout on
+we can leverage the hull feature from http://bl.ocks.org/GerHobbelt/3071239
+ and we can leverage the node effects we already in the 3D version
+\end_layout
+
+\begin_layout Enumerate
+also since it's 2D, we can introduce the the node size dimension.
+ The size will be based on the size of the company, sector, country which
+ we can classify as small, medium, and large
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+basically be based on market value size (For company with stock) and revenue
+ (For private company) in case the of company
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+expandable/collapsible node would be sector and country as similar to 3D
+ we would have sector hulls within a country
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+monday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+blue ring like in mockup around collapsed nodes again
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+monday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+database
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+tuesday/wednesday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+colors of nodes the color of the node will be based on at least 3 things
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+1.
+ live stock price performance % change compare to opening price of that
+ day for intraday.
+ or close price % if market closes.
+ i creating a database that you can connect to get that data 
+\end_layout
+
+\begin_layout Enumerate
+2.
+ sentiment of that company based on news.
+ I have already set up news feed in database.
+ however, I am still working on creating sentiment 
+\end_layout
+
+\begin_layout Enumerate
+3.
+ revenue trend of that company
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+news update
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+possibly real time
+\end_layout
+
+\begin_layout Enumerate
+current database mysql websocket nodejs
+\end_layout
+
+\begin_layout Enumerate
+i will also add blinking features if there is a recent news coming in for
+ that 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+pulsing effect/animated nodes
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+count clusters in background that would count towards visible countries
+ but are invisible for performance reasons
+\end_layout
+
+\begin_layout Itemize
+bugs
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+changing 2d >3d will have wrong leaf edges shown
+\end_layout
+
+\begin_layout Itemize
+switching from 3d to 2d will result in showing too many edges
+\end_layout
+
+\begin_layout Itemize
+selecting a cluster or node rotates the camera like in 3d but should maintain
+ the previous camera direction
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+especially 2d mode needs different zoom method/behaviour
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+elements/particles sometimes don't show up
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+we need another transfer function with visiblilty for the parameter 
+\begin_inset Quotes eld
+\end_inset
+
+minDistance
+\begin_inset Quotes erd
+\end_inset
+
+ always true
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+clicking a node then following the edge and clicking the target will hide
+ edges at first
+\end_layout
+
+\begin_layout Itemize
+in the big graph, searching for eg.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+micros
+\begin_inset Quotes erd
+\end_inset
+
+ will not show the dropdown without pressing 
+\begin_inset Quotes eld
+\end_inset
+
+down
+\begin_inset Quotes erd
+\end_inset
+
+ key first
+\end_layout
+
+\begin_layout Itemize
+selecteded node: particles invisible are invisible/hidden by second node
+ texture
+\end_layout
+
+\begin_layout Itemize
+unselect arrow when elements position changes
+\end_layout
+
+\begin_layout Itemize
+arrows don't show proprly if leaf edges are rendered
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+check interference
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+use line mesh group instead of default lines for edges
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+sprint 2d features primarily 24.07.
+ 
+\end_layout
+
+\begin_layout Itemize
+sprint failed due to being sick for tooo long and some rather unfortunate
+ stress stuff...
+\end_layout
+
+\begin_layout Subsection
+another 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1094,57 +1363,6 @@ todo
 \end_layout
 
 \begin_layout Itemize
-camera
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-combinedcamera is partially working in ortho mode but does have weird clipping
- when zooming
-\end_layout
-
-\begin_layout Itemize
-alternative approach P and O camera does not show elements on ortho mode
- atm.
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-minify and optimisation
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-uglify needs separate plugin for es6
-\end_layout
-
-\begin_layout Itemize
-dependencies from node modules don't work 100% for three.min.js and others
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-2d bugs
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-switching from 3d => 2d will show too many edges
-\end_layout
-
-\begin_layout Itemize
-selecting a cluster or node rotates the camera like in 3d but should maintain
- the previous camera direction
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-2d mode different zoom method
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Itemize
 \begin_inset Note Note
 status open
 
@@ -1261,45 +1479,6 @@ at distance
 
 \end_layout
 
-\end_deeper
-\begin_layout Itemize
-feedback 3d
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-\begin_inset Note Comment
-status open
-
-\begin_layout Plain Layout
-focus on 3d first (then 2d) (usable, but bugs to fix)
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-count clusters in background that would count towards visible countries
- but are invis for performance
-\end_layout
-
-\begin_layout Itemize
-changes we discussed 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-then let's do 2D like:
-\end_layout
-
-\begin_layout Itemize
-http://bl.ocks.org/GerHobbelt/3071239 to start I don't feel comfortable with
- the current 3D at the moment so I won't show it today yet
-\end_layout
-
-\end_deeper
 \end_deeper
 \begin_layout Itemize
 \begin_inset Note Note
@@ -1512,64 +1691,6 @@ text won't appear for obs reasons
 \end_layout
 
 \begin_layout Itemize
-mem leaks with huge data set
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-usability
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Nat Sap: Quite difficult to use 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-see elaboration
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Greyedout
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-find a way to not get click triggered if dblclick is triggered when both
- are bound to same element 
-\end_layout
-
-\begin_layout Itemize
-also dragging will trigger click events
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Itemize
 
 \strikeout on
 redistribution of clusters
@@ -1643,88 +1764,7 @@ might be ok now after cleaning the leaf cache of getLeaf()
 
 \end_deeper
 \begin_layout Itemize
-loading
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-better looking initial graph
-\end_layout
-
-\begin_layout Itemize
-fade in or scale in of hulls
-\end_layout
-
-\begin_layout Itemize
-have only particles visible
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
 smaller bugs
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-elements/particles sometimes don't show up
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-we need another transfer function with with visiblilty for minDistance always
- true
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-clicking a node then following the edge and clicking the target will hide
- edges at first
-\end_layout
-
-\begin_layout Itemize
-in the big graph, searching for 
-\begin_inset Quotes eld
-\end_inset
-
-micros
-\begin_inset Quotes erd
-\end_inset
-
- will not show the dropdown without pressing 
-\begin_inset Quotes eld
-\end_inset
-
-down
-\begin_inset Quotes erd
-\end_inset
-
- key first
-\end_layout
-
-\begin_layout Itemize
-node selected particles invis
-\end_layout
-
-\begin_layout Itemize
-unselect arrow when elements position changes
-\end_layout
-
-\begin_layout Itemize
-arrows don't show proprly if leaf edges are rendered
-\end_layout
-
-\begin_layout Itemize
-use line mesh group instead of default linesfor edges
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -1734,7 +1774,6 @@ currently mergedLineMesh is created within GraphData but not used anywhere.
  performance wise
 \end_layout
 
-\end_deeper
 \begin_layout Itemize
 
 \strikeout on

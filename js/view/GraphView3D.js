@@ -12,6 +12,8 @@ import GraphData from "../cluster/GraphData"
 
 import skyDomeImage from "./coordinates.png"
 
+import Hexasphere from "hexasphere.js"
+
 
 export default
 class GraphView3D extends View3D
@@ -46,8 +48,13 @@ class GraphView3D extends View3D
 createSkyDome()
 {
 
-    let scene=this.mScene;
 
+
+    var material = new THREE.MeshBasicMaterial();
+
+
+    let scene=this.mScene;
+/*
     var ambientLight = new THREE.AmbientLight(0x333333);
     scene.add(ambientLight);
     var dirLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -64,7 +71,78 @@ createSkyDome()
 
     this.mSkyDome=skydome
 
-    scene.add(skydome);
+
+*/
+ //   scene.add(skydome);
+
+
+    //--------------------------------
+    var meshMaterials = [];
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x7cfc00, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x397d02, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x77ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x61b329, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x4cbb17, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x00ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x00aa11, transparent: true}));
+
+    var oceanMaterial = []
+    oceanMaterial.push(new THREE.MeshBasicMaterial({color: 0x0f2342, transparent: true}));
+    oceanMaterial.push(new THREE.MeshBasicMaterial({color: 0x0f1e38, transparent: true}));
+
+
+    var radius = 300000;        // Radius used to calculate position of tiles
+    var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
+    var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
+
+
+    function isLand(){
+
+        return _.random(0,1)
+
+    }
+
+    var hexaGroup=new THREE.Group();
+
+    var hexasphere = new Hexasphere(radius, subDivisions, tileSize);
+    for(var i = 0; i< hexasphere.tiles.length; i++){
+        var t = hexasphere.tiles[i];
+        var latLon = t.getLatLon(hexasphere.radius);
+
+        var geometry = new THREE.Geometry();
+
+        for(var j = 0; j< t.boundary.length; j++){
+            var bp = t.boundary[j];
+            geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
+        }
+        geometry.faces.push(new THREE.Face3(0,1,2));
+        geometry.faces.push(new THREE.Face3(0,2,3));
+        geometry.faces.push(new THREE.Face3(0,3,4));
+        if(geometry.vertices.length > 5){
+            geometry.faces.push(new THREE.Face3(0,4,5));
+        }
+
+        if(isLand(latLon.lat, latLon.lon)){
+            material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
+        } else {
+            material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
+        }
+
+        material.opacity = 0.3;
+
+        material.side = THREE.BackSide;
+
+        var mesh = new THREE.Mesh(geometry, material.clone());
+        hexaGroup.add(mesh);
+        hexasphere.tiles[i].mesh = mesh;
+
+    }
+    scene.add(hexaGroup);
+    this.mSkyDome=hexaGroup
+
+
 
 }
 

@@ -112,6 +112,8 @@ class BaseCluster3D extends BaseNode {
             let vis= (1-mLOD)/2;
 
 
+         //TODO the cluster edges should partially be dependant on the size of the hull..
+
 
 
             this.mChildClustersEdgesMesh.material.opacity=vis;

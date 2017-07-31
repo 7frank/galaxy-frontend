@@ -29,6 +29,7 @@
     "webpack": "^2.6.1"
   },
   "dependencies": {
+    "hexasphere.js": "^0.2.2",
     "three": "^0.86.0"
   }
 }
