@@ -175,11 +175,11 @@ class RootCluster extends Cluster3DExtended {
 
 
 
-    applyClustering(mClusteringSpeccsArray) {
+    applyClustering(mClusteringSpeccsArray,overrideExpand=false) {
 
        //FIXME transitions betweens graphs
       //this.storeParentPositionInNodes()
-        super.applyClustering(mClusteringSpeccsArray)
+        super.applyClustering(mClusteringSpeccsArray,overrideExpand)
 
         this.resetTextOverlay()
 
