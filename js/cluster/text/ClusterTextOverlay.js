@@ -220,15 +220,21 @@ class ClusterTextOverlay extends HTMLElement {
         // TODO the bounding volume determines the visibility of the text nodes
         //TODO so currently with no volume generated properly the text nodes are invisible
 
+        function getNodeParentCluster(node)
+        {
+            return node.parent.parent
+
+        }
+
 
         //the handler for the cluster text
         this.mTextNodes = TextNodesFactory(env, {
             maxVisibleCount: 50,
             maxDistance: function (node) {
-                return node.parent.getRadius(node.parent.mNodes.length) / 3 * 10
+                return getNodeParentCluster(node).getRadius(getNodeParentCluster(node).mNodes.length) / 3 * 10
             },//30000
             minDistance: function (node) {
-                return node.parent.getRadius(node.parent.mNodes.length) / 3 * 3
+                return getNodeParentCluster(node).getRadius(getNodeParentCluster(node).mNodes.length) / 3 * 3
             }, //3000
             getNodes: function () {
                 return that.possibleClusters

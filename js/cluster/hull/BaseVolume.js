@@ -64,6 +64,9 @@ class BaseVolume extends THREE.Object3D {
 //? rather: create from vertices
     createFromBoundingBox(vertices,boundingBox) {
 
+        this.mBoundingBox=boundingBox;
+
+
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize();
 
