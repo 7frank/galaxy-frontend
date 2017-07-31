@@ -284,8 +284,8 @@ THREEx.DomEventsAlt.prototype._onMove	= function(eventName, mouseX, mouseY, orig
 
 	//@frank4711 altering intersection from flat array will improve mouse move performance for many elements bound
     var intersects = this._raycaster.intersectObjects( this.scene.children,true );
-    intersects=  intersects.filter( i => this._objectCtxIsInit(i.object) );
-
+   // intersects=  intersects.filter( i => this._objectCtxIsInit(i.object) );
+    intersects=  this.getRelevantIntersections(intersects)
 	//var intersects = this._raycaster.intersectObjects( boundObjs );
 
 	var oldSelected	= this._selected;
@@ -322,6 +322,41 @@ THREEx.DomEventsAlt.prototype._onMove	= function(eventName, mouseX, mouseY, orig
 }
 
 
+
+//@author frank1147
+//retrieves the bound objects for the intersected elements using the recursive approach
+THREEx.DomEventsAlt.prototype.getRelevantIntersections= function getRelevantIntersections(intersects){
+
+	var relevant=[];
+	var that=this;
+    intersects.forEach(function(i){
+
+
+    	if (that._objectCtxIsInit(i.object))relevant.push(i)
+		else {
+    		var el=i.object
+    		while( el=el.parent)
+			{
+		//NOTE: using this recursive approach will return parent element of a intersected element that has the context
+				//this can result in a difference between the clicked point of a child element and the assumed point of the bound geometry of the parent element
+                if (that._objectCtxIsInit(el)) {
+                   i.object=el
+                    relevant.push(i);
+                break;//we found the parent element that has the given context, so we can break the loop
+                }
+			}
+
+
+
+		}
+
+    });
+
+
+    return relevant;
+
+}
+
 /********************************************************************************/
 /*		onEvent								*/
 /********************************************************************************/
@@ -332,6 +367,8 @@ THREEx.DomEventsAlt.prototype._onEvent	= function(eventName, mouseX, mouseY, ori
 {
 	//console.log('eventName', eventName, 'boundObjs', this._boundObjs[eventName])
 	// get objects bound to this event
+
+
 	var boundObjs	= this._boundObjs[eventName];
 	if( boundObjs === undefined || boundObjs.length === 0 )	return;
 	// compute the intersection
@@ -359,7 +396,8 @@ THREEx.DomEventsAlt.prototype._onEvent	= function(eventName, mouseX, mouseY, ori
 
     //@frank4711 altering intersection from flat array will improve mouse move performance for many elements bound
     var intersects = this._raycaster.intersectObjects( this.scene.children,true );
-    intersects=  intersects.filter( i => this._objectCtxIsInit(i.object) );
+   // intersects=  intersects.filter( i => this._objectCtxIsInit(i.object) );
+    intersects=  this.getRelevantIntersections(intersects)
 
 	// if there are no intersections, return now
 	if( intersects.length === 0 )	return;
