@@ -40,6 +40,9 @@ class View3D extends HTMLElement {
 
     initCamera() {
 
+        var initialCameraPosition= new THREE.Vector3(-5500,-4000, 60000);
+
+
         // Setup camera
          this.mCameraP = new THREE.PerspectiveCamera();
 
@@ -47,7 +50,7 @@ class View3D extends HTMLElement {
         this.mCameraO = new THREE.OrthographicCamera();
         this.mCameraO.far = 5000000;
         this.mCameraO.lookAt(this.mScene.position);
-        this.mCameraO.position.z = 150000;
+        this.mCameraO.position.copy(initialCameraPosition)
 
 
 
@@ -66,7 +69,7 @@ class View3D extends HTMLElement {
 
 
         this.mCamera.lookAt(this.mScene.position);
-        this.mCamera.position.z = 150000;
+        this.mCamera.position.copy(initialCameraPosition)
 
 
     }

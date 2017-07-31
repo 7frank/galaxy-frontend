@@ -948,22 +948,26 @@ fade in or scale in of hulls
 have only particles visible or particles in from of edges 
 \end_layout
 
+\begin_layout Itemize
+add robust fade for elements
+\end_layout
+
 \end_deeper
 \begin_layout Enumerate
-no? country cluster but only industry
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-get feedback
+2d like in the screenshots provided
 \end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Graphics
+	filename eingefügt1.png
+	lyxscale 40
 
 \end_inset
 
 
 \end_layout
 
-\begin_deeper
 \begin_layout Itemize
 for country can we say show all for US companies
 \end_layout
@@ -981,13 +985,93 @@ the whole country will be collapsed to see how it feel and we can make changes
  to it
 \end_layout
 
+\end_deeper
+\begin_layout Enumerate
+ccollapse/expand
+\end_layout
+
+\begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 have a SphereGeometry the size of the ConxevHull if the country is collapsed
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
 monday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+expandable/collapsible node would be sector and country as similar to 3D
+ we would have sector hulls within a country
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+monday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\strikeout on
+blue ring like in mockup around collapsed nodes again
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+monday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+fix offset between collapsed geometry and cluster when expanded
+\end_layout
+
+\begin_layout Itemize
+fix text nodes not being rendered when initially collapsed
+\end_layout
+
+\begin_layout Itemize
+fix leafs not having correct geometry for collapse to work
+\end_layout
+
+\begin_layout Itemize
+fix changing 3d => 2d will not show clusters with collapse/expand feature
+\end_layout
+
+\begin_layout Itemize
+fix no edges between clollapsed neighbors
+\end_layout
+
+\begin_layout Itemize
+add click event to cluster options and test toggle collapse for relevant
+ elements
+\end_layout
+
+\begin_layout Itemize
+have something like a ghost for clusters that are invisible for the user
+ tohave somekind of orientation
 \end_layout
 
 \end_inset
@@ -1018,37 +1102,6 @@ also since it's 2D, we can introduce the the node size dimension.
 \begin_layout Itemize
 basically be based on market value size (For company with stock) and revenue
  (For private company) in case the of company
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-expandable/collapsible node would be sector and country as similar to 3D
- we would have sector hulls within a country
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-monday
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-blue ring like in mockup around collapsed nodes again
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-monday
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \end_deeper

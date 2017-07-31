@@ -232,7 +232,7 @@ class Cluster3DExtended extends BaseCluster3D {
         var that = this;
         _.each(nodes, function (node) {
             if (node && node._bubble)
-                that.add(node._bubble)
+                that.mExpandedGroup.add(node._bubble)
 
 
         })

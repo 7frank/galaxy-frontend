@@ -111,8 +111,16 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
         //initially have a value to ignore the lod while loading to make the animations visible for certain elements
-        this.useLOD=false;
+        this.useLOD = false;
 
+
+        //add collapse/expand stuff
+        this.mExpanded = true;
+        this.mClusterClusteringApplied = false;
+        this.mCollapsedGroup = new THREE.Group();
+        this.mExpandedGroup = new THREE.Group();
+        this.add(this.mCollapsedGroup);
+        this.add(this.mExpandedGroup);
 
 
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
@@ -125,6 +133,16 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             this.applyClustering(clusteringHandlers);
         }
         // else this.updateCluster()
+
+
+        //add collapse behaviour to left click
+        //TODO this interferes with zoom.. we can't bind everything from the gerhobelt demo to the same mouse button
+
+        this.on("click", function (e) {
+
+            e.stopPropagation();
+            this.toggleCollapse()
+        });
 
 
         //update lod //TODO the function shoul forwared onBeforeRender args in a way
@@ -164,6 +182,187 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
+    //TODO update position and radius
+    getSphereHull(boundingBox) {
+        let boundingSphere;
+
+        if (this.mCollapsedClusterHull != null) {
+
+            //FIXME hull offset
+            if (this.mHull) {
+                let boundingBox = this.mHull.mBoundingBox;
+                boundingSphere = boundingBox.getBoundingSphere();
+                this.mCollapsedClusterHull.position.copy(boundingSphere.center);
+            }
+
+
+            return this.mCollapsedClusterHull
+        }
+
+
+        let material = new THREE.MeshPhongMaterial({
+            color: 0xfaebd7, //antique-white
+            wireframe: false,
+            transparent: true,
+            opacity: 0.8,
+            visible: true,
+            polygonOffset: true,
+            polygonOffsetFactor: -4
+        });
+
+
+        let materialOtherBlue = new THREE.MeshBasicMaterial({
+            color: 0x6a5acd, //slate-blue
+            wireframe: false,
+            transparent: true,
+            opacity: 0.8,
+            visible: true,
+            polygonOffset: true,
+            polygonOffsetFactor: -4
+        });
+
+
+        if (boundingBox)
+            boundingSphere = boundingBox.getBoundingSphere();
+        else
+            boundingSphere = new THREE.Sphere(new THREE.Vector3, this.mNodes.length * 10);
+
+
+        let ringGeometryOuter = new THREE.RingGeometry(boundingSphere.radius * 0.85, boundingSphere.radius, 64);
+        //  ringGeometryOuter.boundingSphere = boundingSphere;
+
+
+        let ringGeometryInner = new THREE.CircleGeometry(boundingSphere.radius * 0.85, 64);
+        //  ringGeometryInner.boundingSphere = boundingSphere;
+
+
+        let inner = new THREE.Mesh(ringGeometryInner, material);
+        let outer = new THREE.Mesh(ringGeometryOuter, materialOtherBlue);
+
+        let hull = new THREE.Group();
+
+        hull.add(outer);
+        hull.add(inner);
+
+
+        inner.onBeforeRender = outer.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
+            //billboard effect
+            this.setRotationFromQuaternion(camera.quaternion)
+
+
+        };
+
+
+        hull.position.copy(boundingSphere.center);
+
+        //inner.geometry.boundingSphere=boundingSphere;
+        //inner.geometry.boundingBox=boundingSphere.getBoundingBox();
+
+        //FIXME creates problems with interactions
+        //the geometry that is necessary to be able to click stuff is generated in ajdustHullSize which isn't called when cluster is collapsed
+        //TODO make it more robust
+
+        if (!this.geometry) this.geometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
+        if (!this.geometry.boundingSphere)
+            this.geometry.boundingSphere = boundingSphere;
+        if (!this.geometry.boundingBox)
+            this.geometry.boundingBox = boundingSphere.getBoundingBox();
+
+
+        //------
+        this.mCollapsedClusterHull = hull;
+        this.mCollapsedGroup.add(this.mCollapsedClusterHull);
+        //------
+
+        return hull
+
+    }
+
+
+    toggleCollapse() {
+        this.mExpanded = !this.mExpanded;
+
+
+        if (this.mExpanded)
+            this.expand();
+        else
+            this.collapse();
+
+
+    }
+
+
+    collapse() {
+        //create/show collapse element (SphereGeometry)
+        //if cluster is not initialised and no hull exists then use the node count to aproximate the size
+        //use SphereHullGeometry
+
+        //hide group/countainer that holds
+        // -child edges
+        // -subclusters
+        // - mHull
+
+        //hide all child elements
+        //TODO have a container for children so deferred elements are hidden too
+        // _.each(this.children,el => el.visible=false )
+        this.mExpandedGroup.visible = false;
+
+
+        this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
+
+        if (this.mCollapsedGroup)
+            this.mCollapsedGroup.visible = true
+      //  this.fadeMesh(this.mCollapsedClusterHull.children[0],1,200)
+      //  this.fadeMesh(this.mCollapsedClusterHull.children[1],1,200)
+
+    }
+
+
+    expand() {
+
+        if (this.mCollapsedGroup)
+          this.mCollapsedGroup.visible = false
+
+        //this.fadeMesh(this.mCollapsedClusterHull.children[0],0,200)
+        //this.fadeMesh(this.mCollapsedClusterHull.children[1],0,200)
+        if (!this.mClusterClusteringApplied) {
+
+
+            this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
+        }
+
+        this.mExpandedGroup.visible = true;
+
+
+    }
+
+//TODO refactor
+    fadeMesh(mesh, trgOpacity, mDuration) {
+        var mTimeout;
+
+        let tween = new TWEEN.Tween(mesh.material)
+        //.easing(that.mEasingFunction)
+            .to({opacity: trgOpacity}, mDuration)
+            .onUpdate(function () {
+            }).onComplete(function () {
+                mesh.material.visible=mesh.material.opacity//FIXME
+                cancelAnimationFrame(mTimeout)
+            })
+            .start();
+
+
+        mTimeout = requestAnimationFrame(animate);
+
+        function animate(time) {
+            tween.update(time)
+            mTimeout = requestAnimationFrame(animate);
+
+        }
+
+
+    }
+
+
     /**
      *
      *
@@ -184,21 +383,18 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             this.mLeaf.setLOD(mLOD)
         }
 
-        if ( this.mChildClustersEdgesMesh) {
+        if (this.mChildClustersEdgesMesh) {
 
-            let vis= (1-mLOD)/2;
-
-
-         //TODO the cluster edges should partially be dependant on the size of the hull..
+            let vis = (1 - mLOD) / 2;
 
 
+            //TODO the cluster edges should partially be dependant on the size of the hull..
 
-            this.mChildClustersEdgesMesh.material.opacity=vis;
-            this.mChildClustersEdgesMesh.material.visible=vis>0.05 && vis<0.9;
+
+            this.mChildClustersEdgesMesh.material.opacity = vis;
+            this.mChildClustersEdgesMesh.material.visible = vis > 0.05 && vis < 0.9;
 
         }
-
-
 
 
     }
@@ -242,7 +438,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
     addAllSubClustersToContainer() {
 
-        _.each(this.mClusters, (cluster) => this.add(cluster))
+        _.each(this.mClusters, (cluster) => this.mExpandedGroup.add(cluster))
 
     }
 
@@ -261,13 +457,17 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      * free the given gclusters again
      *
      *
-     *
+     * TODO check if changes to collapsed/expanded groups are relevant to cleaning up clusters
      */
 
     static cleanUpClusters(clusters, self) {
         clusters.push(self);
 
         _.each(clusters, function (cluster) {
+
+            cluster.mClusterClusteringApplied = false;//reset initial state
+            cluster.mCollapsedClusterHull = null
+
 
             if (cluster.tn) {
                 cluster.tn.remove();
@@ -280,7 +480,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 delete (cluster.mHull);
                 cluster.mHull = null;
             }
-
 
 
             cluster.removeEdges();
@@ -298,7 +497,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
             delete cluster._LeafsCached;
-
 
 
         })
@@ -378,12 +576,29 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         this.mEntry = entry
     }
 
+    getEntry() {
+        return this.mEntry
+    }
+
+    setEntries(entries) {
+        this.mEntrys = entries;
+        this.setEntry(entries[0])
+
+    }
+
+    getEntries() {
+        return this.mEntrys || []
+    }
+
+
     getClusterOptions() {
 
         let options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
-            hull: __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__["a" /* default */]
+            hull: __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__["a" /* default */],
+            //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
+            expanded: true  //determines if a cluster is initially expanded or not
 
         }, this.mEntry.options);
 
@@ -400,13 +615,23 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      *
      */
 
-    applyClustering(mClusteringSpeccsArray) {
+    applyClustering(mClusteringSpeccsArray, overrideExpand = false) {
 
-        if (mClusteringSpeccsArray.length >= 0)
-            this.setEntry(mClusteringSpeccsArray[0]);
+        if (mClusteringSpeccsArray.length >= 0) {
+            this.setEntries(mClusteringSpeccsArray);
+        }
+        else throw new Error("must be array of length > 0");
 
 
-//FIXME currently only working in root
+        //delay clustering if options expanded == false
+        if (!overrideExpand)
+            if (this.getClusterOptions().expanded == false) {
+                this.getSphereHull(); //create the placeholder for the cluster instead
+
+                return;
+            }
+
+        //FIXME currently only working in root
         //  this.storeParentPositionInNodes()
 
         //e. g. result should be .. {china:instanceof BaseCluster3D}
@@ -453,7 +678,10 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
         //clean up previous clusters
-        BaseCluster3D.cleanUpClusters(prevClusters, this)
+        BaseCluster3D.cleanUpClusters(prevClusters, this);
+
+
+        this.mClusterClusteringApplied = true;
 
         //adjust positions if cluster gets re-clustered
         // this.restoreNodePositionFromExParent()
@@ -499,9 +727,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         _.extend(this.mClusters, _clustersObj);
 
 
-
-
-
         /**
          * add listeners to child elements if the hull was update
          * in which case we bubble up the tree to notify for changes and readjust parent elements
@@ -515,13 +740,12 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                 that.updateChildClusterEdgeMeshWithHull();
 
                 that.trigger("hull-updated");
-            },50, {trailing: true, leading: false}))  //if leading is true it won't build up the hulls in a progressive manner
+            }, 50, {trailing: true, leading: false}))  //if leading is true it won't build up the hulls in a progressive manner
         });
 
 
-
         this.setDistributionHandler(entry.distribution, function () {
-            that.mClusterRule = entry
+            that.mClusterRule = entry;
 
             that.trigger("cluster-ready")
         })
@@ -529,22 +753,18 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
     }
 
 
-
-    removeEdges()
-    {
+    removeEdges() {
 
         if (this.mChildClustersEdges) this.mChildClustersEdges = null; //delete edge references
         if (this.mChildClustersEdgesMesh) {
             this.mChildClustersEdgesMesh.geometry.dispose();
 
-            this.remove( this.mChildClustersEdgesMesh)
+            this.remove(this.mChildClustersEdgesMesh);
             this.mChildClustersEdgesMesh = null; //delete edge-mesh  references
 
         }
 
     }
-
-
 
 
     /**
@@ -560,51 +780,46 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
         //TODO
-        if (!this.mChildClustersEdgesMesh) throw new Error("BaseCluster::addChildClusterEdgeMesh must be called first")
+        if (!this.mChildClustersEdgesMesh) throw new Error("BaseCluster::addChildClusterEdgeMesh must be called first");
 
         let edges = this.createEdgesForChildClusters();
 
 
-        var line_geom =new THREE.Geometry();
+        var line_geom = new THREE.Geometry();
 
 
-        this.mChildClustersEdgesMesh.geometry.dispose()
-        this.mChildClustersEdgesMesh.geometry= line_geom
+        this.mChildClustersEdgesMesh.geometry.dispose();
+        this.mChildClustersEdgesMesh.geometry = line_geom;
 
 
-        for (let edge of edges)
-        {
+        for (let edge of edges) {
             //TODO we should unify the edges to not always have 2 separate ways to access certain elements
             //TODO also we should use the center of the hull feature instead
             //FIXME for cluster: add edges only if mHull exists
 
-            let src,dst;
+            let src, dst;
 
 
-
-            if (edge.source._el && edge.target._el)
-            {
-                src=edge.source._el.mHull.mBoundingBox.getCenter();
-                dst=edge.target._el.mHull.mBoundingBox.getCenter();
+            if (edge.source._el && edge.target._el) {
+                src = edge.source._el.mHull.mBoundingBox.getCenter();
+                dst = edge.target._el.mHull.mBoundingBox.getCenter();
             }
-            else if (edge.source.mHull &&  edge.target.mHull)
-            {
-                src=edge.source.mHull.mBoundingBox.getCenter();
-                dst=edge.target.mHull.mBoundingBox.getCenter();
+            else if (edge.source.mHull && edge.target.mHull) {
+                src = edge.source.mHull.mBoundingBox.getCenter();
+                dst = edge.target.mHull.mBoundingBox.getCenter();
             }
-            else
-            {
+            else {
 
                 continue;
-              //  throw new Error("hull should exist before calling this function...")
+                //  throw new Error("hull should exist before calling this function...")
 
             }
 
 
-            let src0=edge.source.position||edge.source._el.position;
-            let dst0=edge.target.position||edge.target._el.position;
-            src.add(src0)
-            dst.add(dst0)
+            let src0 = edge.source.position || edge.source._el.position;
+            let dst0 = edge.target.position || edge.target._el.position;
+            src.add(src0);
+            dst.add(dst0);
 
             line_geom.vertices.push(src);
             line_geom.vertices.push(dst);
@@ -613,7 +828,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
     }
-
 
 
     //TODO refactor into class like EdgesContainer for leaf/node edges
@@ -630,7 +844,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         //TODO
         if (this.mChildClustersEdgesMesh) {
 
-        this.mChildClustersEdgesMesh.geometry.verticesNeedUpdate = true;
+            this.mChildClustersEdgesMesh.geometry.verticesNeedUpdate = true;
             return;
         }
 
@@ -641,46 +855,45 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         var lineMaterial;
         var mergedLineMesh;
 
-              defaults = {
-                opacity: 1.0,
-                transparent: true,
-                //lineIsVisible:true, // if disabled the line won't be shown on the scene
-                color: 0x999999
-            };
+        defaults = {
+            opacity: 1.0,
+            transparent: true,
+            //lineIsVisible:true, // if disabled the line won't be shown on the scene
+            color: 0x999999
+        };
 
-            options = _.extend(defaults, options);
+        options = _.extend(defaults, options);
 
-            lineMaterial = new THREE.MeshBasicMaterial({
-                color: options.color,
-                transparent: options.transparent,
-                opacity: options.opacity,
-                depthTest: true,
-                depthWrite: false
-            });
+        lineMaterial = new THREE.MeshBasicMaterial({
+            color: options.color,
+            transparent: options.transparent,
+            opacity: options.opacity,
+            depthTest: true,
+            depthWrite: false
+        });
 
 
         this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
-        this.mChildClustersEdgesMesh.geometry.boundingBox=new THREE.Box3;
+        this.mChildClustersEdgesMesh.geometry.boundingBox = new THREE.Box3;
         this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
 
 
-        this.add(this.mChildClustersEdgesMesh);
+        this.mExpandedGroup.add(this.mChildClustersEdgesMesh);
 
-    for (let edge of edges)
-    {
-        //TODO we should unify the edges to not always have 2 separate ways to access certain elements
-        //TODO also we should use the center of the hull feature instead
-        //FIXME for cluster: add edges only if mHull exists
+        for (let edge of edges) {
+            //TODO we should unify the edges to not always have 2 separate ways to access certain elements
+            //TODO also we should use the center of the hull feature instead
+            //FIXME for cluster: add edges only if mHull exists
 
-        let src,dst;
+            let src, dst;
 
-            src=edge.source.position||edge.source._el.position;
-            dst=edge.target.position||edge.target._el.position;
+            src = edge.source.position || edge.source._el.position;
+            dst = edge.target.position || edge.target._el.position;
 
-        line_geom.vertices.push(src);
-        line_geom.vertices.push(dst);
+            line_geom.vertices.push(src);
+            line_geom.vertices.push(dst);
 
-    }
+        }
 
 
     }
@@ -887,7 +1100,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             if (__WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__["a" /* default */] == mOptions.hull || __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__["a" /* default */].isPrototypeOf(mOptions.hull)) {
 
                 this.mHull = new mOptions.hull();
-                this.add(this.mHull);
+                this.mExpandedGroup.add(this.mHull);
             }
             else throw new Error("option hull must have superclass BaseVolume");
 
@@ -943,44 +1156,42 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         var that = this;
         let leaf = new __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */](this.mNodes);
         this.mLeaf = leaf;
-        this.add(leaf);
+        this.mExpandedGroup.add(leaf);
         leaf.setDistributionHandler(entry.distribution, function () {
 
             //create/update the hull element after the animation has finished
             that.adjustHullSize();
 
             if (that.isLeaf())
-            that.updateIfIsLeaf()
-
+                that.updateIfIsLeaf()
 
 
         })
 
 
-/*
-      let dom=this.getDOMEvents()
+        /*
+              let dom=this.getDOMEvents()
 
-          dom.addEventListener(leaf.mNodeParticles.pointCloud, "mousemove",function(...args){
+                  dom.addEventListener(leaf.mNodeParticles.pointCloud, "mousemove",function(...args){
 
-                console.log(args)
+                        console.log(args)
 
 
-          }.bind(this), false);
-*/
+                  }.bind(this), false);
+        */
 
 
     }
 
 
     updateIfIsLeaf() {
-     //   this.adjustHullSize();
+        //   this.adjustHullSize();
 
 
-        if (!this.mLeaf) return
+        if (!this.mLeaf) return;
 
-      //  this.mLeaf._initDotParticles();
+        //  this.mLeaf._initDotParticles();
         this.mLeaf.updateDotParticlesColor()
-
 
 
     }
@@ -1018,7 +1229,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
     createEdgesForChildClusters() {
 
-        if (this.mChildClustersEdges) return this.mChildClustersEdges
+        if (this.mChildClustersEdges) return this.mChildClustersEdges;
 
         return this.mChildClustersEdges = __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__["a" /* default */].createEdgesBetweenClustersFromMap(this.mClusters);
 
@@ -1041,6 +1252,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
      * has to be called after initialisation to re-calculate dependent elements
      * like dot clouds and cluster boder and hull
      */
+
     /* onAfterClusteredAndDistributed() {
 
 
@@ -1906,7 +2118,7 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
         var that = this;
         _.each(nodes, function (node) {
             if (node && node._bubble)
-                that.add(node._bubble)
+                that.mExpandedGroup.add(node._bubble)
 
 
         })
@@ -2099,6 +2311,9 @@ class BaseVolume extends THREE.Object3D {
 //FIXME have a better approach to generate the hull
 //? rather: create from vertices
     createFromBoundingBox(vertices,boundingBox) {
+
+        this.mBoundingBox=boundingBox;
+
 
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize();
@@ -3052,11 +3267,11 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
 
 
-    applyClustering(mClusteringSpeccsArray) {
+    applyClustering(mClusteringSpeccsArray,overrideExpand=false) {
 
        //FIXME transitions betweens graphs
       //this.storeParentPositionInNodes()
-        super.applyClustering(mClusteringSpeccsArray)
+        super.applyClustering(mClusteringSpeccsArray,overrideExpand)
 
         this.resetTextOverlay()
 
@@ -3521,13 +3736,19 @@ createSkyDome()
 
 
     let scene=this.mScene;
-/*
-    var ambientLight = new THREE.AmbientLight(0x333333);
+
+    var ambientLight = new THREE.AmbientLight(0xFFFFFF,1.5);
     scene.add(ambientLight);
-    var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(5, 3, 5);
+   /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(0, 10000, 0);
+    dirLight.intensity = 1;
     scene.add(dirLight);
-    var geometry = new THREE.SphereGeometry(300000, 60, 40);
+*/
+   /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
+    pointLight.position.set( 0, 0, 20000 );
+    scene.add(pointLight);
+*/
+  /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
     var material = new THREE.MeshBasicMaterial();
 
    material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
@@ -3545,19 +3766,19 @@ createSkyDome()
 
     //--------------------------------
     var meshMaterials = [];
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x7cfc00, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x397d02, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x77ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x61b329, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x4cbb17, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x00ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x00aa11, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
 
     var oceanMaterial = []
-    oceanMaterial.push(new THREE.MeshBasicMaterial({color: 0x0f2342, transparent: true}));
-    oceanMaterial.push(new THREE.MeshBasicMaterial({color: 0x0f1e38, transparent: true}));
+    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
+    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
 
 
     var radius = 300000;        // Radius used to calculate position of tiles
@@ -8110,15 +8331,21 @@ class ClusterTextOverlay extends HTMLElement {
         // TODO the bounding volume determines the visibility of the text nodes
         //TODO so currently with no volume generated properly the text nodes are invisible
 
+        function getNodeParentCluster(node)
+        {
+            return node.parent.parent
+
+        }
+
 
         //the handler for the cluster text
         this.mTextNodes = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__["a" /* default */])(env, {
             maxVisibleCount: 50,
             maxDistance: function (node) {
-                return node.parent.getRadius(node.parent.mNodes.length) / 3 * 10
+                return getNodeParentCluster(node).getRadius(getNodeParentCluster(node).mNodes.length) / 3 * 10
             },//30000
             minDistance: function (node) {
-                return node.parent.getRadius(node.parent.mNodes.length) / 3 * 3
+                return getNodeParentCluster(node).getRadius(getNodeParentCluster(node).mNodes.length) / 3 * 3
             }, //3000
             getNodes: function () {
                 return that.possibleClusters
@@ -8586,6 +8813,9 @@ class View3D extends HTMLElement {
 
     initCamera() {
 
+        var initialCameraPosition= new THREE.Vector3(-5500,-4000, 60000);
+
+
         // Setup camera
          this.mCameraP = new THREE.PerspectiveCamera();
 
@@ -8593,7 +8823,7 @@ class View3D extends HTMLElement {
         this.mCameraO = new THREE.OrthographicCamera();
         this.mCameraO.far = 5000000;
         this.mCameraO.lookAt(this.mScene.position);
-        this.mCameraO.position.z = 150000;
+        this.mCameraO.position.copy(initialCameraPosition)
 
 
 
@@ -8612,7 +8842,7 @@ class View3D extends HTMLElement {
 
 
         this.mCamera.lookAt(this.mScene.position);
-        this.mCamera.position.z = 150000;
+        this.mCamera.position.copy(initialCameraPosition)
 
 
     }

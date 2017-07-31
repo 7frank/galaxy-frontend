@@ -54,13 +54,19 @@ createSkyDome()
 
 
     let scene=this.mScene;
-/*
-    var ambientLight = new THREE.AmbientLight(0x333333);
+
+    var ambientLight = new THREE.AmbientLight(0xFFFFFF,1.5);
     scene.add(ambientLight);
-    var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(5, 3, 5);
+   /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(0, 10000, 0);
+    dirLight.intensity = 1;
     scene.add(dirLight);
-    var geometry = new THREE.SphereGeometry(300000, 60, 40);
+*/
+   /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
+    pointLight.position.set( 0, 0, 20000 );
+    scene.add(pointLight);
+*/
+  /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
     var material = new THREE.MeshBasicMaterial();
 
    material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
@@ -78,19 +84,19 @@ createSkyDome()
 
     //--------------------------------
     var meshMaterials = [];
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x7cfc00, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x397d02, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x77ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x61b329, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x4cbb17, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x00ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshBasicMaterial({color: 0x00aa11, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
 
     var oceanMaterial = []
-    oceanMaterial.push(new THREE.MeshBasicMaterial({color: 0x0f2342, transparent: true}));
-    oceanMaterial.push(new THREE.MeshBasicMaterial({color: 0x0f1e38, transparent: true}));
+    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
+    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
 
 
     var radius = 300000;        // Radius used to calculate position of tiles
