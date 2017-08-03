@@ -207,17 +207,20 @@ export default class BaseNode extends THREE.Mesh {
 
     addDefaultHandlers() {
 
-        //FIXME something is off with ordering an nesting .. preventing the correct node to be used
+
         //store the current cluster/node
+        //TODO mouseover seems not to work correct  if a childcluster was hovered before
+
         this.on("mouseover", function (e) {
             e.stopPropagation()
             BaseNode.lastHoveredNode = e.target
-            // e.stopPropagation()
 
         })
+
         this.on("mouseout", function (e) {
-            //  BaseNode.lastHoveredNode =null;
-            //  e.stopPropagation()
+            //reset hover state to work if child element was selected
+              BaseNode.lastHoveredNode =null;
+              e.stopPropagation()
 
         })
 

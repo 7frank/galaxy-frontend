@@ -68,8 +68,11 @@ import BoxVolume from "./hull/BoxVolume"
 import BaseVolume from "./hull/BaseVolume"
 import ConvexVolume from "./hull/ConvexVolume"
 
-
 import ZoomUtil from "../utils/ZoomUtil"
+
+
+
+import CompanyNewsDS from "../data/CompanyNewsDS"
 
 //-----------------------------------------
 //-----------DEBUG-------------------------
@@ -89,6 +92,22 @@ export class MyMain {
 
 
         //  this.clusters = this.init();
+
+        this.addNewsListeners()
+    }
+
+
+    addNewsListeners()
+    {
+      var myDS=new CompanyNewsDS('http://localhost:3000')
+
+        myDS.onNewsReceived(function(news){
+
+
+
+
+
+        })
 
 
     }

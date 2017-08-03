@@ -28,6 +28,8 @@ class BaseVolume extends THREE.Object3D {
      */
     setLOD(newLOD)
     {
+
+
         if (newLOD<0) newLOD=0;
         if (newLOD>1) newLOD=1;
 
@@ -42,10 +44,16 @@ class BaseVolume extends THREE.Object3D {
     {
         if (this.mMaterial) return this.mMaterial;
 
-      return  this.mMaterial= new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: false});
+        this.mMaterial= new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: false});
 
+        this.mMaterial.visible=  this.canBeVisible();
+
+        return  this.mMaterial
 
     }
+
+
+
 
 
     /**

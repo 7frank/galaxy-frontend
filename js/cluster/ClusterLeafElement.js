@@ -44,17 +44,17 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         if (this.mEdgesContainer) {
 
-            this.mEdgesContainer.visible = levelOfDetail >= edgeFadeLOD;
+            this.mEdgesContainer.visible = levelOfDetail>0.75// levelOfDetail >= edgeFadeLOD;
 
-            this.mEdgesContainer.mEdges.material.opacity = (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
+            this.mEdgesContainer.mEdges.material.opacity =levelOfDetail/4// (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
         }
 
-        if (this.mEdgesContainer2) {
+     /*   if (this.mEdgesContainer2) {
 
             this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
 
             this.mEdgesContainer2.mEdges.material.opacity = 1 - levelOfDetail / edgeFadeLOD;
-        }
+        }*/
 
 
         if (this.mNodeMeshes)
@@ -92,12 +92,12 @@ export default class ClusterLeafElement extends THREE.Mesh {
         }
 
 
-        if (this.mEdgesContainer2 && this.mEdgesContainer2.geometry) {
+     /*   if (this.mEdgesContainer2 && this.mEdgesContainer2.geometry) {
 
 
             this.mEdgesContainer2.geometry.dispose();
             this.mEdgesContainer2 = null;
-        }
+        }*/
 
 
         if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
@@ -187,8 +187,8 @@ export default class ClusterLeafElement extends THREE.Mesh {
         if (this.mEdgesContainer)
             this.mEdgesContainer.updateEdges();
 
-        if (this.mEdgesContainer2)
-            this.mEdgesContainer2.updateEdges();
+      //  if (this.mEdgesContainer2)
+       //     this.mEdgesContainer2.updateEdges();
 
     }
 
