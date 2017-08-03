@@ -292,7 +292,6 @@ THREEx.DomEventsAlt.prototype._onMove	= function(eventName, mouseX, mouseY, orig
 	
 	if( intersects.length > 0 ){
 
-
 		var notifyOver, notifyOut, notifyMove;
 		var intersect	= intersects[ 0 ];
 		var newSelected	= intersect.object;
@@ -353,8 +352,37 @@ THREEx.DomEventsAlt.prototype.getRelevantIntersections= function getRelevantInte
     });
 
 
-    return relevant;
+    if (relevant.length==0) return relevant
 
+    return this.sortByDepth(relevant);
+
+}
+
+
+THREEx.DomEventsAlt.prototype.sortByDepth=function(intersects){
+
+
+	//calculate depth in scene
+    intersects.forEach(function(i){
+
+            var el=i.object
+			var depth=0;
+            while( el=el.parent)
+            {
+            	depth++;
+            }
+            i.depth=depth;
+
+    });
+
+    //we want to sort elements by ASC distance first like originally
+	// and DESC depth
+	//so elements that are closer and deeper within the scene are more relevant
+
+    intersects= _.sortBy(intersects, [ (o) => -o.depth,o => o.distance]);
+
+
+    return intersects
 }
 
 /********************************************************************************/
