@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "hexasphere.js": "^0.2.2",
+    "socket.io": "^2.0.3",
     "three": "^0.86.0"
   }
 }

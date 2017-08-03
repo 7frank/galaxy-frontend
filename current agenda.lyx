@@ -667,6 +667,10 @@ also dragging will trigger click events
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+add robust fade class for edges hull materials etc
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
 camera
@@ -923,11 +927,15 @@ monday
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 better looking initial graph
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 currently edges/hull does 
 \begin_inset Quotes eld
 \end_inset
@@ -940,16 +948,14 @@ pop up
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 fade in or scale in of hulls
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
 have only particles visible or particles in from of edges 
-\end_layout
-
-\begin_layout Itemize
-add robust fade for elements
 \end_layout
 
 \end_deeper
@@ -987,7 +993,7 @@ the whole country will be collapsed to see how it feel and we can make changes
 
 \end_deeper
 \begin_layout Enumerate
-ccollapse/expand
+collapse/expand
 \end_layout
 
 \begin_deeper
@@ -1106,79 +1112,6 @@ basically be based on market value size (For company with stock) and revenue
 
 \end_deeper
 \end_deeper
-\begin_layout Enumerate
-database
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-tuesday/wednesday
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-colors of nodes the color of the node will be based on at least 3 things
- 
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-1.
- live stock price performance % change compare to opening price of that
- day for intraday.
- or close price % if market closes.
- i creating a database that you can connect to get that data 
-\end_layout
-
-\begin_layout Enumerate
-2.
- sentiment of that company based on news.
- I have already set up news feed in database.
- however, I am still working on creating sentiment 
-\end_layout
-
-\begin_layout Enumerate
-3.
- revenue trend of that company
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-news update
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-possibly real time
-\end_layout
-
-\begin_layout Enumerate
-current database mysql websocket nodejs
-\end_layout
-
-\begin_layout Enumerate
-i will also add blinking features if there is a recent news coming in for
- that 
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-pulsing effect/animated nodes
-\end_layout
-
-\end_deeper
-\end_deeper
-\end_deeper
-\begin_layout Itemize
-count clusters in background that would count towards visible countries
- but are invisible for performance reasons
-\end_layout
-
 \begin_layout Itemize
 bugs
 \end_layout
@@ -1271,6 +1204,118 @@ use line mesh group instead of default lines for edges
 \end_layout
 
 \end_deeper
+\begin_layout Enumerate
+database
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+tuesday/wednesday
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+colors of nodes the color of the node will be based on at least 3 things
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+1.
+ live stock price performance % change compare to opening price of that
+ day for intraday.
+ or close price % if market closes.
+ i creating a database that you can connect to get that data 
+\end_layout
+
+\begin_layout Enumerate
+2.
+ sentiment of that company based on news.
+ I have already set up news feed in database.
+ however, I am still working on creating sentiment 
+\end_layout
+
+\begin_layout Enumerate
+3.
+ revenue trend of that company
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+news update
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+possibly real time
+\end_layout
+
+\begin_layout Enumerate
+current database mysql websocket nodejs
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+connect to the existing websocket script and listen to news
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+i will also add blinking features if there is a recent news coming in for
+ that 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+pulsing effect/animated nodes
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+every new-news entry will be given a maximum lifetime which is the upper
+ limit the blink effect is animated
+\end_layout
+
+\begin_layout Enumerate
+also we'll add a news queue with an upper limit of news blinking
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+count clusters in background that would count towards visible countries
+ but are invisible for performance reasons
+\end_layout
+
+\begin_layout Paragraph
+Database
+\end_layout
+
+\begin_layout Itemize
+problem connecting to mysql database via putty/ssh
+\end_layout
+
+\begin_layout Itemize
+sql workbench can connect via remote 
+\end_layout
+
+\begin_layout Itemize
+nodejs mysql connect says connection lost which implies that a connection
+ attempt at least was made
+\end_layout
+
+\begin_layout Itemize
+deactivating the tunnel will provide a different error message which implies
+ that at least part of the tunnel seems to be working
+\end_layout
+
 \begin_layout Subsection
 sprint 2d features primarily 24.07.
  
