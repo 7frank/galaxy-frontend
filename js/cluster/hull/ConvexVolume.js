@@ -22,6 +22,34 @@ class ConvexVolume extends BoxVolume {
 
         this.setInactive();
 
+
+
+        this.mFadeInVal=0;
+        var mTimeout;
+        //change distance to target
+        var tween = new TWEEN.Tween(this)
+            .to({mFadeInVal:1}, 4000)
+            //.onUpdate(function () {})
+            .onComplete(function () {
+
+                cancelAnimationFrame(mTimeout)
+
+            })
+            .start();
+
+
+        requestAnimationFrame(animate);
+
+        function animate(time) {
+            mTimeout = requestAnimationFrame(animate);
+            tween.update(time);
+        }
+
+
+
+
+
+
     }
 
 
@@ -180,7 +208,7 @@ class ConvexVolume extends BoxVolume {
 
         let y = mTransfer(l);
 
-        super.setLOD(y * this.maxOpacity);
+        super.setLOD(y * this.maxOpacity*this.mFadeInVal);
 
 
         /*     if (l < 0.8) this.mesh.geometry = this.geometryLowPoly;

@@ -307,14 +307,16 @@ export default class BaseCluster3D extends BaseNode {
 
         if (this.mChildClustersEdgesMesh) {
 
-            let vis = (1 - mLOD) / 2;
+            let vis = (1 - mLOD) /2 ;
 
 
             //TODO the cluster edges should partially be dependant on the size of the hull..
 
+            let opa=vis
+    if (opa>0.2) opa = 0.2;
 
-            this.mChildClustersEdgesMesh.material.opacity = vis;
-            this.mChildClustersEdgesMesh.material.visible = vis > 0.05 && vis < 0.9;
+            this.mChildClustersEdgesMesh.material.opacity =opa*this.mEdgeFadeInVal ;
+            this.mChildClustersEdgesMesh.material.visible = vis > 0.02 && vis < 0.9;
 
         }
 
@@ -816,6 +818,30 @@ export default class BaseCluster3D extends BaseNode {
             line_geom.vertices.push(dst);
 
         }
+
+
+        this.mEdgeFadeInVal=0;
+        var mTimeout;
+        //change distance to target
+        var tween = new TWEEN.Tween(this)
+            .to({mEdgeFadeInVal:1}, 4000)
+            //.onUpdate(function () {})
+           .onComplete(function () {
+
+               cancelAnimationFrame(mTimeout)
+
+            })
+            .start();
+
+
+    requestAnimationFrame(animate);
+
+    function animate(time) {
+        mTimeout = requestAnimationFrame(animate);
+        tween.update(time);
+    }
+
+
 
 
     }
