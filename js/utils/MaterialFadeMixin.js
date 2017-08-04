@@ -1,6 +1,6 @@
 /**
   extends any given THREE.Material
- with a fade attribute, fadeIn, and fadeOut methods,
+ with a fadeTo method,
  and overrides opacity attribute
 
  */

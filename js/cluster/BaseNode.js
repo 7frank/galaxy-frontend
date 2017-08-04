@@ -3,7 +3,7 @@
  */
 
 
-import EdgeUtil from "./EdgeUtil"
+import AnimationMixin from "../utils/AnimationMixin"
 
 /**
  * simple node implementation for interaction and basic visualisation
@@ -200,6 +200,10 @@ export default class BaseNode extends THREE.Mesh {
         //keyboard events container
         // TODO to be able to use event bubbling we'd need to append the html elements to the one of the parent cluster
         this.mKeyboardEvents = new Mousetrap(document.createElement("span"));
+
+
+        //add animate method via mixin
+        AnimationMixin(this)
 
 
     }

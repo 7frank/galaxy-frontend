@@ -1,35 +1,108 @@
+/**
+ * extends any given object
+ * with an animate method
+ *
+ * animate(options:Object, mDuration : Number, onComplete:function)
+ *
+ * options does contain all the animated properties
+ */
 
-export default
-function AnimationMixin(origObject){
-        if (!origObject instanceof THREE.Material) throw new Error("must be THREE.Material")
+export default function AnimationMixin(origObject) {
+    if (typeof origObject == "undefined") throw new Error("must be an object");
 
 
-        origObject.animate= function( options={}, mDuration=400,onComplete) {
-            var mTimeout;
-            var that=this
-            let tween = new TWEEN.Tween(this)
-                .to(options, mDuration)
-                .onComplete(function () {
+    //https://github.com/tweenjs/tween.js/issues/78
+    //Flatten/Deflate an object
+    var flatten = function (source, pathArray, result) {
+        pathArray = (typeof pathArray === 'undefined') ? [] : pathArray;
+        result = (typeof result === 'undefined') ? {} : result;
+        var key, value, newKey;
+        for (var i in source) {
+            if (source.hasOwnProperty(i)) {
+                key = i;
+                value = source[i];
+                pathArray.push(key);
 
-                cancelAnimationFrame(mTimeout)
+                if (typeof value === 'object' && value !== null) {
+                    result = flatten(value, pathArray, result);
+                } else {
+                    newKey = pathArray.join('.');
+                    result[newKey] = value;
+                }
+                pathArray.pop();
+            }
+        }
+        return result;
+    };
+
+    function ref(obj, str) {
+        return str.split(".").reduce(function (o, x) {
+            return o[x]
+        }, obj);
+    }
+
+//Move values from a flatten object to its original object
+    function returnValue(obj, flattened, key) {
+        let parts = key.split(/\.(?=[^.]+$)/)  // Split "foo.bar.baz" into ["foo.bar", "baz"]
+        if (parts.length == 1) {
+            obj[parts[0]] = flattened[key];
+        } else {
+            ref(obj, parts[0])[parts[1]] = flattened[key];
+        }
+    }
+
+    function getValue(obj, key) {
+        let parts = key.split(/\.(?=[^.]+$)/)  // Split "foo.bar.baz" into ["foo.bar", "baz"]
+        if (parts.length == 1) {
+            return obj[parts[0]]
+        } else {
+            return ref(obj, parts[0])[parts[1]]
+        }
+    }
+
+
+    origObject.animate = function (options = {}, mDuration = 400, onComplete) {
+        var mTimeout;
+        var that = this;
+
+
+        var flattened_to = flatten(options);
+
+        var keys = Object.keys(flattened_to)
+        var flattened_from = {}
+        keys.forEach(k => flattened_from[k] = getValue(that, k))
+
+        let tween = new TWEEN.Tween(flattened_from)
+            .to(flattened_to, mDuration)
+            .onUpdate(function () {
+
+                //Move the values from the flattened and tweening object
+                //to the original object
+                for (let key in this) {
+                    returnValue(that, this, key);
+                }
+            })
+            .onComplete(function () {
+
+                cancelAnimationFrame(mTimeout);
                 if (typeof onComplete == "function")
                     onComplete()
             })
-                .start();
+            .start();
 
+        mTimeout = requestAnimationFrame(animate);
+
+        function animate(time) {
+            tween.update(time);
             mTimeout = requestAnimationFrame(animate);
 
-            function animate(time) {
-                tween.update(time)
-                mTimeout = requestAnimationFrame(animate);
-
-            }
-
-            return this;
         }
 
-        return origObject
+        return this;
+    };
 
-    }
+    return origObject
+
+}
 
 
