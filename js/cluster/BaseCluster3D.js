@@ -8,6 +8,7 @@ import BaseNode from "./BaseNode"
 import EdgeUtil from "./EdgeUtil"
 import BaseVolume from "./hull/BaseVolume"
 
+import MaterialFadeMixin from "../utils/MaterialFadeMixin"
 
 /**
  * NOTE: possible future work flow/use case
@@ -258,32 +259,6 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-//TODO refactor
-    fadeMesh(mesh, trgOpacity, mDuration) {
-        var mTimeout;
-
-        let tween = new TWEEN.Tween(mesh.material)
-        //.easing(that.mEasingFunction)
-            .to({opacity: trgOpacity}, mDuration)
-            .onUpdate(function () {
-            }).onComplete(function () {
-                mesh.material.visible=mesh.material.opacity//FIXME
-                cancelAnimationFrame(mTimeout)
-            })
-            .start();
-
-
-        mTimeout = requestAnimationFrame(animate);
-
-        function animate(time) {
-            tween.update(time)
-            mTimeout = requestAnimationFrame(animate);
-
-        }
-
-
-    }
-
 
     /**
      *
@@ -315,7 +290,7 @@ export default class BaseCluster3D extends BaseNode {
             let opa=vis
     if (opa>0.2) opa = 0.2;
 
-            this.mChildClustersEdgesMesh.material.opacity =opa*this.mEdgeFadeInVal ;
+            this.mChildClustersEdgesMesh.material.opacity =opa//*this.mEdgeFadeInVal ;
             this.mChildClustersEdgesMesh.material.visible = vis > 0.02 && vis < 0.9;
 
         }
@@ -797,6 +772,9 @@ export default class BaseCluster3D extends BaseNode {
         });
 
 
+        MaterialFadeMixin(lineMaterial);
+
+
         this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
         this.mChildClustersEdgesMesh.geometry.boundingBox = new THREE.Box3;
         this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
@@ -820,28 +798,8 @@ export default class BaseCluster3D extends BaseNode {
         }
 
 
-        this.mEdgeFadeInVal=0;
-        var mTimeout;
-        //change distance to target
-        var tween = new TWEEN.Tween(this)
-            .to({mEdgeFadeInVal:1}, 4000)
-            //.onUpdate(function () {})
-           .onComplete(function () {
-
-               cancelAnimationFrame(mTimeout)
-
-            })
-            .start();
-
-
-    requestAnimationFrame(animate);
-
-    function animate(time) {
-        mTimeout = requestAnimationFrame(animate);
-        tween.update(time);
-    }
-
-
+        lineMaterial.fade=0;
+        lineMaterial.fadeTo(1,4000)
 
 
     }

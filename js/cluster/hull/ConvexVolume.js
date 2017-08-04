@@ -4,7 +4,7 @@
 
 
 import BoxVolume from "./BoxVolume"
-
+import MaterialFadeMixin from "../../utils/MaterialFadeMixin"
 
 
 export default
@@ -21,34 +21,6 @@ class ConvexVolume extends BoxVolume {
         super(...args);
 
         this.setInactive();
-
-
-
-        this.mFadeInVal=0;
-        var mTimeout;
-        //change distance to target
-        var tween = new TWEEN.Tween(this)
-            .to({mFadeInVal:1}, 4000)
-            //.onUpdate(function () {})
-            .onComplete(function () {
-
-                cancelAnimationFrame(mTimeout)
-
-            })
-            .start();
-
-
-        requestAnimationFrame(animate);
-
-        function animate(time) {
-            mTimeout = requestAnimationFrame(animate);
-            tween.update(time);
-        }
-
-
-
-
-
 
     }
 
@@ -133,6 +105,13 @@ class ConvexVolume extends BoxVolume {
             //  ,   wireframe:true
         });
 
+
+        MaterialFadeMixin(mat);
+        mat.fade=0;
+        mat.fadeTo(1,4000);
+
+
+
         //   let mesh = new THREE.Mesh(geo, mat);
         let mesh = new THREE.Mesh(this.geo0, mat);
 
@@ -208,7 +187,7 @@ class ConvexVolume extends BoxVolume {
 
         let y = mTransfer(l);
 
-        super.setLOD(y * this.maxOpacity*this.mFadeInVal);
+        super.setLOD(y * this.maxOpacity );
 
 
         /*     if (l < 0.8) this.mesh.geometry = this.geometryLowPoly;
