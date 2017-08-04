@@ -42,6 +42,10 @@ export default class BaseCluster3D extends BaseNode {
         this.mClusterClusteringApplied = false;
         this.mCollapsedGroup = new THREE.Group();
         this.mExpandedGroup = new THREE.Group();
+
+
+
+
         this.add(this.mCollapsedGroup);
         this.add(this.mExpandedGroup);
 
@@ -64,7 +68,9 @@ export default class BaseCluster3D extends BaseNode {
         this.on("click", function (e) {
 
             e.stopPropagation();
-            this.toggleCollapse()
+
+            this.getClusterOptions().click.bind(this)()
+
         });
 
 
@@ -162,10 +168,19 @@ export default class BaseCluster3D extends BaseNode {
         let inner = new THREE.Mesh(ringGeometryInner, material);
         let outer = new THREE.Mesh(ringGeometryOuter, materialOtherBlue);
 
+        MaterialFadeMixin(material)
+        MaterialFadeMixin(materialOtherBlue)
+
+
         let hull = new THREE.Group();
 
         hull.add(outer);
         hull.add(inner);
+
+        hull.animate = function (fade, duration, onComplete) {
+            material.animate(...arguments)
+            materialOtherBlue.animate(...arguments)
+        }
 
 
         inner.onBeforeRender = outer.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
@@ -216,6 +231,8 @@ export default class BaseCluster3D extends BaseNode {
 
 
     collapse() {
+
+
         //create/show collapse element (SphereGeometry)
         //if cluster is not initialised and no hull exists then use the node count to aproximate the size
         //use SphereHullGeometry
@@ -228,33 +245,43 @@ export default class BaseCluster3D extends BaseNode {
         //hide all child elements
         //TODO have a container for children so deferred elements are hidden too
         // _.each(this.children,el => el.visible=false )
-        this.mExpandedGroup.visible = false;
+
+
+        //this.mExpandedGroup.visible = false;
+        this.animate({mCollapsedGroup:{scale:{x:1,y:1,z:1}}}, 200)
+        this.animate({mExpandedGroup:{scale:{x:0,y:0,z:0}}}, 200)
 
 
         this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
 
-        if (this.mCollapsedGroup)
-            this.mCollapsedGroup.visible = true
-      //  this.fadeMesh(this.mCollapsedClusterHull.children[0],1,200)
-      //  this.fadeMesh(this.mCollapsedClusterHull.children[1],1,200)
+
+        //TODO togging the group will have strange effect
+        //   if (this.mCollapsedGroup)
+        //      this.mCollapsedGroup.visible = true
+
+        this.mCollapsedClusterHull.animate({fade:1}, 200)
+
 
     }
 
 
     expand() {
 
-        if (this.mCollapsedGroup)
-          this.mCollapsedGroup.visible = false
+        var that = this;
 
-        //this.fadeMesh(this.mCollapsedClusterHull.children[0],0,200)
-        //this.fadeMesh(this.mCollapsedClusterHull.children[1],0,200)
+        this.mCollapsedClusterHull.animate({fade:0.1}, 200)
+
+
         if (!this.mClusterClusteringApplied) {
 
 
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
         }
 
-        this.mExpandedGroup.visible = true;
+       // this.mExpandedGroup.visible = true;
+        this.animate({mCollapsedGroup:{scale:{x:0,y:0,z:0}}}, 200)
+
+        this.animate({mExpandedGroup:{scale:{x:1,y:1,z:1}}}, 200)
 
 
     }
@@ -282,15 +309,15 @@ export default class BaseCluster3D extends BaseNode {
 
         if (this.mChildClustersEdgesMesh) {
 
-            let vis = (1 - mLOD) /2 ;
+            let vis = (1 - mLOD) / 2;
 
 
             //TODO the cluster edges should partially be dependant on the size of the hull..
 
-            let opa=vis
-    if (opa>0.2) opa = 0.2;
+            let opa = vis
+            if (opa > 0.2) opa = 0.2;
 
-            this.mChildClustersEdgesMesh.material.opacity =opa//*this.mEdgeFadeInVal ;
+            this.mChildClustersEdgesMesh.material.opacity = opa//*this.mEdgeFadeInVal ;
             this.mChildClustersEdgesMesh.material.visible = vis > 0.02 && vis < 0.9;
 
         }
@@ -497,7 +524,8 @@ export default class BaseCluster3D extends BaseNode {
             defaultMergeGroupName: "other",
             hull: BaseVolume,
             //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
-            expanded: true  //determines if a cluster is initially expanded or not
+            expanded: true,  //determines if a cluster is initially expanded or not
+            click:function(){}
 
         }, this.mEntry.options);
 
@@ -798,8 +826,8 @@ export default class BaseCluster3D extends BaseNode {
         }
 
 
-        lineMaterial.fade=0;
-        lineMaterial.fadeTo(1,4000)
+        lineMaterial.fade = 0;
+        lineMaterial.fadeTo(1, 4000)
 
 
     }

@@ -71,7 +71,6 @@ import ConvexVolume from "./hull/ConvexVolume"
 import ZoomUtil from "../utils/ZoomUtil"
 
 
-
 import CompanyNewsDS from "../data/CompanyNewsDS"
 
 //-----------------------------------------
@@ -97,14 +96,10 @@ export class MyMain {
     }
 
 
-    addNewsListeners()
-    {
-      var myDS=new CompanyNewsDS('http://localhost:3000')
+    addNewsListeners() {
+        var myDS = new CompanyNewsDS('http://localhost:3000')
 
-        myDS.onNewsReceived(function(news){
-
-
-
+        myDS.onNewsReceived(function (news) {
 
 
         })
@@ -596,7 +591,15 @@ export class MyMain {
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
-                options: {minClusterSize: 15, hull: ConvexVolume}// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
+                options: {
+                    minClusterSize: 15,
+                    hull: ConvexVolume,
+                    click: function () {
+
+                        this.toggleCollapse()
+
+                    }
+                }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
             , {distribution: nodesWithinIndustryDistribution, hull: BoxVolume}  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
@@ -737,8 +740,7 @@ export class MyMain {
         view.mControls.reset();
 
 
-
-       // view.mSkyDome.visible=false;
+        // view.mSkyDome.visible=false;
 
     }
 
