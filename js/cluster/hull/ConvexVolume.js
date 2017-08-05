@@ -54,11 +54,7 @@ class ConvexVolume extends BoxVolume {
 
     createFromBoundingBox(vertices, boundingBox) {
 
-        console.log("FIXME convexVolume",vertices,boundingBox)
-            //getVerticesFormLeaf in adjustHullSize does generate false values sometimes maybe due to some runtime concurrency problem
-            //FIXME from time ti time this does not compute which will break the graph
-
-           let vert= vertices.filter(v => !(v.x==0 &&v.y==0 &&v.z==0 ) )
+            let vert= vertices.filter(v => !(v.x==0 &&v.y==0 &&v.z==0 ) )
 
             if (vert.length<4 && vertices.length>4) {
                 vertices = [];

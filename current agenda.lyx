@@ -1071,13 +1071,87 @@ fix no edges between clollapsed neighbors
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 add click event to cluster options and test toggle collapse for relevant
  elements
 \end_layout
 
 \begin_layout Itemize
-have something like a ghost for clusters that are invisible for the user
- tohave somekind of orientation
+have something like a 
+\begin_inset Quotes eld
+\end_inset
+
+ghost
+\begin_inset Quotes erd
+\end_inset
+
+ for clusters that are invisible for the user to have somekind of orientation
+\end_layout
+
+\begin_layout Itemize
+fix hull being black if opacity ==0 && at specific angles
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+this will currently result in flickering and has to do with the group still
+ being technically visible 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+cluster (click) options are used for cluster and subcluster
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+this could have to do something that 
+\begin_inset Quotes eld
+\end_inset
+
+z
+\begin_inset Quotes erd
+\end_inset
+
+ => zoom does not have options to extend from
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+caused by event bubbling which is per se doing what it should do
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+options for leaf are wrong which results in wrong hull,events bound etc.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+on clean up remove previous bound events
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+..
+ it might be better to initialise a different root cluster instead of reusing
+ the existing one
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+leafs are not properly removed
+\end_layout
+
+\begin_layout Itemize
+edges are missing for collapsed nodes
 \end_layout
 
 \end_inset

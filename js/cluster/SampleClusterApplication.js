@@ -593,7 +593,7 @@ export class MyMain {
                 distribution: industryDistribution,
                 events: {
                     click: function () {
-                        this.toggleCollapse()
+                       // this.toggleCollapse()
                     }
                 },
                 options: {
@@ -645,8 +645,8 @@ export class MyMain {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        //  let countryDistribution = new BaseDistribution(45000, 2); // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new BaseDistribution(80000, 2);// industries within countries use the Force-Graph approach to position elements
+          let countryDistribution = new ForceGraphDistribution(180000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new ForceGraphDistribution(30000, 2);// industries within countries use the Force-Graph approach to position elements
         let nodesWithinIndustryDistribution = new ForceGraphDistribution(1000, 2);//same goes for the nodes within each industry
 
         //the final configuration for rendering
@@ -664,17 +664,34 @@ export class MyMain {
 
         return [
 
-            /* {
+             {
              generator: countrySetGenerator,
              distribution: countryDistribution,
              options: {minClusterSize: 40, hull: rootHull }
-             },*/
+             },
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
-                options: {minClusterSize: 15, hull: ConvexVolume}// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
+                events: {
+                    click:function () {
+                        this.toggleCollapse()
+                    }
+                },
+                options: {minClusterSize: 15,
+                    hull: ConvexVolume,
+                    expanded:function(){
+                    return this.name=="United States"
+                }
+                }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: nodesWithinIndustryDistribution, hull: BoxVolume}  // this.getEllipsoidHull.bind(this)
+            , {distribution: nodesWithinIndustryDistribution,  events: {
+                click:function () {
+                    this.toggleCollapse()
+                }},
+                options: {
+                hull: ConvexVolume,
+                    expanded:true
+                }}  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
 
         ]
@@ -727,6 +744,9 @@ export class MyMain {
         let speccs = this.get2DPlaneForceSpeccs();
 
         let view = this.getCurrentView();
+
+
+
         let rootCluster = view.mRootCluster;
 
         rootCluster.cleanUpLeafs();

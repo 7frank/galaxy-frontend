@@ -154,8 +154,8 @@ export default class BaseCluster3D extends BaseNode {
         if (boundingBox)
             boundingSphere = boundingBox.getBoundingSphere();
         else
-            boundingSphere = new THREE.Sphere(new THREE.Vector3, this.mNodes.length * 10);
-
+            boundingSphere = new THREE.Sphere(new THREE.Vector3, this.mNodes.length * 7);
+        //FIXME estimated hull size differs from forcegraph collision box
 
         let ringGeometryOuter = new THREE.RingGeometry(boundingSphere.radius * 0.85, boundingSphere.radius, 64);
         //  ringGeometryOuter.boundingSphere = boundingSphere;
@@ -218,7 +218,12 @@ export default class BaseCluster3D extends BaseNode {
 
 
     toggleCollapse() {
+
+
+
         this.mExpanded = !this.mExpanded;
+
+       console.log(this.name,"expanded:",this.mExpanded )
 
 
         if (this.mExpanded)
@@ -269,18 +274,23 @@ export default class BaseCluster3D extends BaseNode {
 
         var that = this;
 
+
         this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
 
-
         if (!this.mClusterClusteringApplied) {
-
-
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
+
+            // primarily notify text overlay here
+            $(this.getRoot().getView()).trigger("graph-changed");
+
         }
 
-        // this.mExpandedGroup.visible = true;
-        this.animate({mCollapsedGroup: {scale: {x: 0, y: 0, z: 0}}}, 200)
 
+
+        //TODO handle if not created.. via callback/event
+        //also currently if not already created the placeholder sphere gets removed again (restructure)
+
+        this.animate({mCollapsedGroup: {scale: {x: 0, y: 0, z: 0}}}, 200)
         this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
 
 
@@ -392,6 +402,8 @@ export default class BaseCluster3D extends BaseNode {
         _.each(clusters, function (cluster) {
 
             cluster.mClusterClusteringApplied = false;//reset initial state
+
+            cluster.mCollapsedGroup.remove(cluster.mCollapsedClusterHull);
             cluster.mCollapsedClusterHull = null
 
 
@@ -443,7 +455,12 @@ export default class BaseCluster3D extends BaseNode {
             //TODO to leaf specific clean up
 
             //for now at least remove the particle cloud
+            leaf.parent.mLeaf=null;
+
             leaf.cleanUp()
+
+
+
         })
 
     }
@@ -564,19 +581,23 @@ export default class BaseCluster3D extends BaseNode {
 
     addOptionEvents() {
         var that = this;
+
+
+        if ( this.mEventsBound==true) return
+
         //bind event options to cluster
         _.each(this.getEvents(), function (handler, eventName) {
-            console.warn("events:", that.name, eventName, handler)
-            that.on(eventName, function (e) {
+            that.on(eventName, _.debounce(function (e) {
 
                 e.stopPropagation();
 
                 handler.bind(this)()
 
-            });
+            },50));
 
         })
 
+        this.mEventsBound=true
 
     }
 
@@ -601,14 +622,19 @@ export default class BaseCluster3D extends BaseNode {
 
 
         //delay clustering if options expanded == false
-        if (!overrideExpand)
-            if (this.getClusterOptions().expanded == false) {
-                this.getSphereHull(); //create the placeholder for the cluster instead
+        if (!overrideExpand) {
+            let isClusterExpanded=this.getClusterOptions().expanded
+            if (typeof isClusterExpanded =="function")
+                isClusterExpanded=  isClusterExpanded.bind(this)()
 
+            this.mExpanded=isClusterExpanded
+
+            if (isClusterExpanded == false) {
+                this.getSphereHull(); //create the placeholder for the cluster instead
                 return;
             }
 
-
+        }
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
         if (mClusteringSpeccsArray.length == 1) {
@@ -616,7 +642,7 @@ export default class BaseCluster3D extends BaseNode {
             let prevClusters = this.findClusters("*");
             this.cleanUpLeafs();
             this.createParticlePointCloud(mClusteringSpeccsArray[0]);
-            console.warn("leaf:", mClusteringSpeccsArray[0])
+
             //clean up previous clusters if they exist
             BaseCluster3D.cleanUpClusters(prevClusters, this);
 
@@ -640,13 +666,6 @@ export default class BaseCluster3D extends BaseNode {
 
             if (nextDepthSpeccsArray.length >= 1)
                 mCluster.applyClustering(nextDepthSpeccsArray);
-            /*    else {
-                   //  mCluster.setEntry(entry);
-                     mCluster.setEntries(nextDepthSpeccsArray);
-
-                     mCluster.createParticlePointCloud(nextDepthSpeccsArray[0]);
-                     mCluster.addOptionEvents();
-                 }*/
 
         });
 
@@ -733,7 +752,7 @@ export default class BaseCluster3D extends BaseNode {
         if (this.mChildClustersEdgesMesh) {
             this.mChildClustersEdgesMesh.geometry.dispose();
 
-            this.remove(this.mChildClustersEdgesMesh);
+            this.mChildClustersEdgesMesh.parent.remove(this.mChildClustersEdgesMesh);
             this.mChildClustersEdgesMesh = null; //delete edge-mesh  references
 
         }
@@ -742,7 +761,7 @@ export default class BaseCluster3D extends BaseNode {
 
 
     /**
-     * updates the edges of the clusters as soon as the hullf feature is rendered
+     * updates the edges of the clusters as soon as the hull feature is rendered
      *
      *
      * @param options
@@ -774,6 +793,9 @@ export default class BaseCluster3D extends BaseNode {
             let src, dst;
 
 
+
+
+
             if (edge.source._el && edge.target._el) {
                 src = edge.source._el.mHull.mBoundingBox.getCenter();
                 dst = edge.target._el.mHull.mBoundingBox.getCenter();
@@ -782,10 +804,14 @@ export default class BaseCluster3D extends BaseNode {
                 src = edge.source.mHull.mBoundingBox.getCenter();
                 dst = edge.target.mHull.mBoundingBox.getCenter();
             }
-            else {
+            else if (edge.source.mCollapsedClusterHull || edge.target.mCollapsedClusterHull) {
+                src = edge.source.geometry.boundingBox.getCenter();
+                dst = edge.target.geometry.boundingBox.getCenter();
+            }
 
+           else {
+                console.warn("hull should exist before calling this function...")
                 continue;
-                //  throw new Error("hull should exist before calling this function...")
 
             }
 
@@ -1045,6 +1071,10 @@ export default class BaseCluster3D extends BaseNode {
 
         //generate the boundingBox for the node particles if the clster is a leaf
         if (this.isLeaf()) {
+
+
+            if (!this.mLeaf.mNodeParticles) return //FIXME stops thrown errors after 3d -2d -3d
+
             let pc = this.mLeaf.mNodeParticles.pointCloud;
 
             if (!pc) {
