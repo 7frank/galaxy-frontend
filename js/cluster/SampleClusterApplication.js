@@ -591,17 +591,28 @@ export class MyMain {
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
+                events: {
+                    click: function () {
+                        this.toggleCollapse()
+                    }
+                },
                 options: {
                     minClusterSize: 15,
-                    hull: ConvexVolume,
-                    click: function () {
+                    hull: ConvexVolume
 
-                        this.toggleCollapse()
-
-                    }
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: nodesWithinIndustryDistribution, hull: BoxVolume}  // this.getEllipsoidHull.bind(this)
+            , {
+                distribution: nodesWithinIndustryDistribution,
+                options: {
+                 hull: ConvexVolume
+                },
+                events: {
+                    click: function () {
+                      console.log("idle")
+                    }
+                },
+            }  // this.getEllipsoidHull.bind(this)
             //FIXME getEllipsoidHullis not used
 
         ]

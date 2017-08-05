@@ -30,6 +30,7 @@ export default class BaseCluster3D extends BaseNode {
      */
     constructor(nodes, clusteringHandlers, view) {
         super(view);
+
         this.addNodes(nodes);
 
 
@@ -42,8 +43,6 @@ export default class BaseCluster3D extends BaseNode {
         this.mClusterClusteringApplied = false;
         this.mCollapsedGroup = new THREE.Group();
         this.mExpandedGroup = new THREE.Group();
-
-
 
 
         this.add(this.mCollapsedGroup);
@@ -65,13 +64,14 @@ export default class BaseCluster3D extends BaseNode {
         //add collapse behaviour to left click
         //TODO this interferes with zoom.. we can't bind everything from the gerhobelt demo to the same mouse button
 
-        this.on("click", function (e) {
 
-            e.stopPropagation();
+        /*    this.on("click", function (e) {
 
-            this.getClusterOptions().click.bind(this)()
+                e.stopPropagation();
 
-        });
+                this.getClusterOptions().click.bind(this)()
+
+            });*/
 
 
         //update lod //TODO the function shoul forwared onBeforeRender args in a way
@@ -248,8 +248,8 @@ export default class BaseCluster3D extends BaseNode {
 
 
         //this.mExpandedGroup.visible = false;
-        this.animate({mCollapsedGroup:{scale:{x:1,y:1,z:1}}}, 200)
-        this.animate({mExpandedGroup:{scale:{x:0,y:0,z:0}}}, 200)
+        this.animate({mCollapsedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
+        this.animate({mExpandedGroup: {scale: {x: 0, y: 0, z: 0}}}, 200)
 
 
         this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
@@ -259,7 +259,7 @@ export default class BaseCluster3D extends BaseNode {
         //   if (this.mCollapsedGroup)
         //      this.mCollapsedGroup.visible = true
 
-        this.mCollapsedClusterHull.animate({fade:1}, 200)
+        this.mCollapsedClusterHull.animate({fade: 1}, 200)
 
 
     }
@@ -269,7 +269,7 @@ export default class BaseCluster3D extends BaseNode {
 
         var that = this;
 
-        this.mCollapsedClusterHull.animate({fade:0.1}, 200)
+        this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
 
 
         if (!this.mClusterClusteringApplied) {
@@ -278,10 +278,10 @@ export default class BaseCluster3D extends BaseNode {
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
         }
 
-       // this.mExpandedGroup.visible = true;
-        this.animate({mCollapsedGroup:{scale:{x:0,y:0,z:0}}}, 200)
+        // this.mExpandedGroup.visible = true;
+        this.animate({mCollapsedGroup: {scale: {x: 0, y: 0, z: 0}}}, 200)
 
-        this.animate({mExpandedGroup:{scale:{x:1,y:1,z:1}}}, 200)
+        this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
 
 
     }
@@ -525,11 +525,58 @@ export default class BaseCluster3D extends BaseNode {
             hull: BaseVolume,
             //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
             expanded: true,  //determines if a cluster is initially expanded or not
-            click:function(){}
+            click: function () {
+            }
 
         }, this.mEntry.options);
 
         return options
+
+    }
+
+
+    /**
+     * while generating clusters an"events" object can be used to bind events to specific groups of clusters.
+     * the object key in this case is the event name.
+     * this method returns the object for BaseCluster::addOptionEvents to bind them
+     *
+     */
+
+    getEvents() {
+
+        let events = _.extend({
+            click: function () {
+            }
+
+        }, this.mEntry.events);
+
+        return events
+
+    }
+
+
+    /**
+     *
+     * iterates through all given event options and attaches the event handlers  to the cluster
+     * event names can be mouse events, special-events, or keyboard events like "ctrl+a"
+     */
+
+
+    addOptionEvents() {
+        var that = this;
+        //bind event options to cluster
+        _.each(this.getEvents(), function (handler, eventName) {
+            console.warn("events:", that.name, eventName, handler)
+            that.on(eventName, function (e) {
+
+                e.stopPropagation();
+
+                handler.bind(this)()
+
+            });
+
+        })
+
 
     }
 
@@ -550,6 +597,9 @@ export default class BaseCluster3D extends BaseNode {
         else throw new Error("must be array of length > 0");
 
 
+        this.addOptionEvents();
+
+
         //delay clustering if options expanded == false
         if (!overrideExpand)
             if (this.getClusterOptions().expanded == false) {
@@ -558,8 +608,6 @@ export default class BaseCluster3D extends BaseNode {
                 return;
             }
 
-        //FIXME currently only working in root
-        //  this.storeParentPositionInNodes()
 
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
@@ -568,10 +616,8 @@ export default class BaseCluster3D extends BaseNode {
             let prevClusters = this.findClusters("*");
             this.cleanUpLeafs();
             this.createParticlePointCloud(mClusteringSpeccsArray[0]);
-
-            //clean up previous clusters
-
-
+            console.warn("leaf:", mClusteringSpeccsArray[0])
+            //clean up previous clusters if they exist
             BaseCluster3D.cleanUpClusters(prevClusters, this);
 
             return false;
@@ -592,12 +638,15 @@ export default class BaseCluster3D extends BaseNode {
             var nextDepthSpeccsArray = [].concat(mClusteringSpeccsArray);
             nextDepthSpeccsArray.shift();
 
-            if (nextDepthSpeccsArray.length > 1)
+            if (nextDepthSpeccsArray.length >= 1)
                 mCluster.applyClustering(nextDepthSpeccsArray);
-            else {
-                mCluster.setEntry(entry);
-                mCluster.createParticlePointCloud(nextDepthSpeccsArray[0]);
-            }
+            /*    else {
+                   //  mCluster.setEntry(entry);
+                     mCluster.setEntries(nextDepthSpeccsArray);
+
+                     mCluster.createParticlePointCloud(nextDepthSpeccsArray[0]);
+                     mCluster.addOptionEvents();
+                 }*/
 
         });
 
@@ -610,8 +659,6 @@ export default class BaseCluster3D extends BaseNode {
 
         this.mClusterClusteringApplied = true;
 
-        //adjust positions if cluster gets re-clustered
-        // this.restoreNodePositionFromExParent()
     }
 
 
@@ -1102,26 +1149,10 @@ export default class BaseCluster3D extends BaseNode {
 
         })
 
-
-        /*
-              let dom=this.getDOMEvents()
-
-                  dom.addEventListener(leaf.mNodeParticles.pointCloud, "mousemove",function(...args){
-
-                        console.log(args)
-
-
-                  }.bind(this), false);
-        */
-
-
     }
 
 
     updateIfIsLeaf() {
-        //   this.adjustHullSize();
-
-
         if (!this.mLeaf) return;
 
         //  this.mLeaf._initDotParticles();
