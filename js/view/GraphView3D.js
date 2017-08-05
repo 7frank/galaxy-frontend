@@ -235,7 +235,7 @@ createSkyDome()
         this.initStatic();
 
 
-        this.createSkyDome();
+        //this.createSkyDome();
 
 
         if (!this.mRootCluster)

@@ -578,6 +578,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         if (!this.mClusterClusteringApplied) {
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
 
+            // primarily notify text overlay here
             $(this.getRoot().getView()).trigger("graph-changed");
 
         }
@@ -5667,7 +5668,7 @@ createSkyDome()
         this.initStatic();
 
 
-        this.createSkyDome();
+        //this.createSkyDome();
 
 
         if (!this.mRootCluster)
