@@ -975,6 +975,67 @@ have only particles visible or particles in from of edges
 \end_layout
 
 \begin_layout Itemize
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename 893916279039516672.png
+	scale 20
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename 893916279039516672.png
+	scale 10
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename 893916279039516672.png
+	lyxscale 20
+	scale 10
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename 893916279039516672.png
+	lyxscale 40
+	scale 10
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
 for country can we say show all for US companies
 \end_layout
 
@@ -1055,6 +1116,8 @@ fix offset between collapsed geometry and cluster when expanded
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 fix text nodes not being rendered when initially collapsed
 \end_layout
 
@@ -1063,11 +1126,9 @@ fix leafs not having correct geometry for collapse to work
 \end_layout
 
 \begin_layout Itemize
-fix changing 3d => 2d will not show clusters with collapse/expand feature
-\end_layout
 
-\begin_layout Itemize
-fix no edges between clollapsed neighbors
+\strikeout on
+fix changing 3d => 2d will not show clusters with collapse/expand feature
 \end_layout
 
 \begin_layout Itemize
@@ -1151,7 +1212,39 @@ leafs are not properly removed
 \end_layout
 
 \begin_layout Itemize
+fix no edges between collapsed neighbors
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
 edges are missing for collapsed nodes
+\end_layout
+
+\end_deeper
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+feedback 5.8.
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+update the ui like in the screenshot
+\end_layout
+
+\begin_layout Itemize
+improve 2d collapse to be like in the other screenshot
+\end_layout
+
+\begin_layout Itemize
+re-read chat to not forget something and document findings
 \end_layout
 
 \end_inset
@@ -1159,6 +1252,7 @@ edges are missing for collapsed nodes
 
 \end_layout
 
+\end_deeper
 \end_deeper
 \begin_layout Enumerate
 2d changes
