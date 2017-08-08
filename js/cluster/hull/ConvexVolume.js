@@ -54,6 +54,9 @@ class ConvexVolume extends BoxVolume {
 
     createFromBoundingBox(vertices, boundingBox) {
 
+        //adding a timestamp for the different lods of the mesh
+        this.mTime=Date.now();
+
             let vert= vertices.filter(v => !(v.x==0 &&v.y==0 &&v.z==0 ) )
 
             if (vert.length<4 && vertices.length>4) {
@@ -152,11 +155,13 @@ class ConvexVolume extends BoxVolume {
 
     createResolutionGeometry(name,resolution){
 
-        if (!this['geometry'+name]) {
+        if (!this['geometry'+name]||this['geometry'+name].mTime!=this.mTime ) {
+
             let margin = this.mBoundingBox.getSize().length() / 10;
 
             let geo2 = this.myModifier(this.mGeometryZero,resolution , margin);
             geo2.computeBoundingBox();
+            geo2.mTime=this.mTime;
             this['geometry'+name] = geo2;
 
         }
