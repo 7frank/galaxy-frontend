@@ -1,7 +1,7 @@
 /**
  * Created by Frank on 08.06.2017.
  */
-
+//import TWEEN from "@tweenjs/tween.js"
 //TODO refactor existing samples
 export default
 class ZoomUtil {

@@ -10,28 +10,14 @@
 
 
 
-THREE.EllipsoidGeometry = function (width, height, depth, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-
-    THREE.SphereGeometry.call(this, width * 0.5, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength);
-
-    var matrix = new THREE.Matrix4().makeScale(1.0, height / width, depth / width);
-
-    this.applyMatrix(matrix);
-
-    //this.boundingSphere.applyMatrix4( matrix );
-
-};
-
-THREE.EllipsoidGeometry.prototype = Object.create(THREE.Geometry.prototype);
-
-
 //--------------------------------
 
 //TODO find a better way to import libraries as simple scripts
 //NOTE:don't remove imports
 
 
-//import THREE0 from "../lib/three.min"
+
+
 
 //used by View3D
 import CombinedCamera from "../lib/CombinedCamera"
@@ -40,7 +26,6 @@ import TrackballControls from "../lib/TrackballControls"
 //used by ConvexVolume
 import ConvexGeometry from "../lib/ConvexGeometry"
 import QuickHull from "../lib/QuickHull"
-
 
 // --------------------------------
 
@@ -70,8 +55,10 @@ import ConvexVolume from "./hull/ConvexVolume"
 
 import ZoomUtil from "../utils/ZoomUtil"
 
+import ClusterSpeccFacade from "./ClusterSpeccFacade"
 
 import CompanyNewsDS from "../data/CompanyNewsDS"
+
 
 //-----------------------------------------
 //-----------DEBUG-------------------------
@@ -89,9 +76,6 @@ export class MyMain {
         this.setDataSets(datasets);
         this.setupViews()
 
-
-        //  this.clusters = this.init();
-
         this.addNewsListeners()
     }
 
@@ -104,68 +88,9 @@ export class MyMain {
 
         })
 
-
     }
 
 
-    getDefaultHullMaterial() {
-
-        return new THREE.MeshBasicMaterial({
-            color: 0xFFFFFF,
-            wireframe: false,
-            transparent: true,
-            opacity: 0.1,
-            visible: false
-        });
-
-    }
-
-
-    getEllipsoidHull(boundingBox) {
-
-        let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize();
-
-        var sphereGeometry = new THREE.EllipsoidGeometry(_size.x, _size.y, _size.z);
-
-        let hull = new THREE.Mesh(sphereGeometry, this.getDefaultHullMaterial());
-        // hull.position.copy(_center)
-
-        return hull
-
-    }
-
-
-    getRingHull(boundingBox) {
-
-        let boundingSphere = new THREE.Sphere;
-        //get center, radius
-        let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize();
-        let radius = _size.length() / 2;
-        //TODO
-        if (radius < 40) radius = 40;
-
-        boundingSphere.radius = radius;
-
-        let ringGeometry = new THREE.RingGeometry(boundingSphere.radius * 0.95, boundingSphere.radius, 32);
-
-
-        ringGeometry.boundingSphere = boundingSphere;
-
-
-        let hull = new THREE.Mesh(ringGeometry, this.getDefaultHullMaterial());
-
-
-        hull.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
-            //billboard effect
-            this.setRotationFromQuaternion(camera.quaternion)
-            //     console.warn(camera.quaternion.x,camera.quaternion.y)
-
-        };
-
-        return hull
-    }
 
     isDebug() {
 
@@ -356,12 +281,7 @@ export class MyMain {
 
 
             //TODO views should only be loaded when visible
-            /*
-             var speccs = this.getPossibleClusterSpeccsArray();
-             let view1 = createView("dist test", speccs)
-             .loadDataSet(this.getDSByID(1));
-             views.push(view1)
-             */
+
 
 
             /*
@@ -377,25 +297,14 @@ export class MyMain {
              */
 
 
-            /*
 
-             var speccs = this.get2DChartSortedSpeccsArray()
-
-             let view4 = createView("2d-Barchart", speccs)
-             .loadDataSet(this.getDSByID(1))
-             views.push(view4)
-             */
 
 
             /*  var speccs = this.getPossibleClusterSpeccsArray();
              let view1 = createView("View1", speccs)
              views.push(view1)*/
 
-            /*
-             var speccs = this.get2DPlaneCountryOnlySpeccs()
-             let view5 = createView("2d-Plane country-only", speccs)
-             views.push(view5)
-             */
+
 
         } else {
 
@@ -422,101 +331,8 @@ export class MyMain {
     }
 
 
-    get2DChartSortedSpeccsArray() {
 
 
-        function countrySetGenerator(groupFunction, node) {
-
-            groupFunction(node.group, node)
-        }
-
-        function industrySetGenerator(groupFunction, node) {
-            groupFunction(node.industry, node)
-        }
-
-        function mySort(a, b) {
-            return (a.mNodes.length < b.mNodes.length) ? 1 : -1;
-            //return (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1;
-        }
-
-        return [
-            {
-                generator: countrySetGenerator,
-                distribution: new BaseDistribution(4000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull: BoxVolume}
-            },
-            {
-                generator: industrySetGenerator,
-                distribution: new BaseDistribution(2000, 1).onSort(mySort),
-                options: {minClusterSize: 15, hull: BoxVolume}
-            },
-            {distribution: new BaseDistribution(200, 3), options: {minClusterSize: 15, hull: BoxVolume}}
-
-
-        ]
-
-
-    }
-
-
-    get2DPlaneCountryOnlySpeccs() {
-
-
-        function countrySetGenerator(groupFunction, node) {
-
-            groupFunction(node.group, node)
-        }
-
-        function industrySetGenerator(groupFunction, node) {
-            groupFunction(node.industry, node)
-        }
-
-        function mySort(a, b) {
-            return (a.mNodes.length < b.mNodes.length) ? 1 : -1;
-            //return (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1;
-        }
-
-        return [
-            {
-                generator: countrySetGenerator,
-                distribution: new BaseDistribution(2000, 2).onSort(mySort),
-                options: {minClusterSize: 15, hull: BoxVolume}
-            },
-            {distribution: new BaseDistribution(400, 2), options: {hull: new BoxVolume()}}
-
-
-        ]
-
-
-    }
-
-    getPossibleClusterSpeccsArray() {
-
-        function countrySetGenerator(groupFunction, node) {
-
-            groupFunction(node.group, node)
-        }
-
-        function industrySetGenerator(groupFunction, node) {
-            groupFunction(node.industry, node)
-        }
-
-        //using these 2 we should have a 2d plane with 3d cubes on it
-        let sample1 = new BaseDistribution(40000, 2); //1000
-        let sample2 = new ForceGraphDistribution(5000, 2);//200
-        let sample3 = new BaseDistribution(100, 3);//50
-
-        //  let rand2 = new RandomDistribution(200, 2)
-
-        return [
-            {generator: countrySetGenerator, distribution: sample1, options: {minClusterSize: 5, hull: BoxVolume}},
-            {generator: industrySetGenerator, distribution: sample2, options: {minClusterSize: 5, hull: BoxVolume}},
-            {distribution: sample3, options: {hull: BoxVolume}}
-
-
-        ]
-
-    }
 
 
     getForceSpeccs2DChangesOnly() {
@@ -533,6 +349,24 @@ export class MyMain {
     }
 
 
+    getSampleSpeccs() {
+
+
+        //TODO check where a facade could be used to have more stable option generation
+        //also possibly use options as attributes for the graph-view to be able to alter directly
+        /*
+        new ClusterSpeccFacade()
+            .setGenerator(function countrySetGenerator(groupFunction, node) {
+                groupFunction(node.group, node)
+            })
+            .setExpandedFunction(function(){
+                return this.name=="United States"
+            })
+
+        */
+
+    }
+
     /**
      * this is a sample configuration for  the cluster.
      * it contains 2 subdivisions:  -first into countries
@@ -540,6 +374,9 @@ export class MyMain {
      *
      */
     getForceSpeccs() {
+
+
+
 
 
         //the function that is called to create the  country groups
@@ -593,7 +430,7 @@ export class MyMain {
                 distribution: industryDistribution,
                 events: {
                     click: function () {
-                       // this.toggleCollapse()
+                        // this.toggleCollapse()
                     }
                 },
                 options: {
@@ -605,15 +442,14 @@ export class MyMain {
             , {
                 distribution: nodesWithinIndustryDistribution,
                 options: {
-                 hull: ConvexVolume
+                    hull: ConvexVolume
                 },
                 events: {
                     click: function () {
-                      console.log("idle")
+                        console.log("idle")
                     }
                 },
-            }  // this.getEllipsoidHull.bind(this)
-            //FIXME getEllipsoidHullis not used
+            }
 
         ]
 
@@ -645,7 +481,7 @@ export class MyMain {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-          let countryDistribution = new ForceGraphDistribution(180000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let countryDistribution = new ForceGraphDistribution(180000, 2); // countries get placed equally on a plane of size 15k X 15k
         let industryDistribution = new ForceGraphDistribution(30000, 2);// industries within countries use the Force-Graph approach to position elements
         let nodesWithinIndustryDistribution = new ForceGraphDistribution(1000, 2);//same goes for the nodes within each industry
 
@@ -664,35 +500,41 @@ export class MyMain {
 
         return [
 
-             {
-             generator: countrySetGenerator,
-             distribution: countryDistribution,
-             options: {minClusterSize: 40, hull: rootHull }
-             },
+            {
+                generator: countrySetGenerator,
+                distribution: countryDistribution,
+                options: {minClusterSize: 40, hull: rootHull}
+            },
             {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
                 events: {
-                    click:function () {
+                    click: function () {
                         this.toggleCollapse()
                     }
                 },
-                options: {minClusterSize: 15,
+                options: {
+                    minClusterSize: 15,
                     hull: ConvexVolume,
-                    expanded:function(){
-                    return this.name=="United States"
-                }
+                    expanded: function () {
+                        return this.name == "United States"
+                    }
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {distribution: nodesWithinIndustryDistribution,  events: {
-                click:function () {
-                    this.toggleCollapse()
-                }},
+            , {
+                distribution: nodesWithinIndustryDistribution,
+                events: {
+                    click: function () {
+                        this.toggleCollapse()
+                    }
+                },
                 options: {
-                hull: ConvexVolume,
-                    expanded:true
-                }}  // this.getEllipsoidHull.bind(this)
-            //FIXME getEllipsoidHullis not used
+                    hull: ConvexVolume,
+                    expanded:   function () {
+            return false//this.name == "other"
+        }
+                }
+            }
 
         ]
 
@@ -738,13 +580,9 @@ export class MyMain {
          *
          */
 
-            //   let speccs=this.getPossibleClusterSpeccsArray();
-
-            //  let speccs=this.getForceSpeccs2DChangesOnly();
         let speccs = this.get2DPlaneForceSpeccs();
 
         let view = this.getCurrentView();
-
 
 
         let rootCluster = view.mRootCluster;

@@ -7,6 +7,7 @@
  */
 
 
+import DomEventsAlt from "../cluster/utils/DomEventsAlt"
 
 
 
@@ -88,20 +89,10 @@ class View3D extends HTMLElement {
 
     setDomEvents() {
 
-        //throttle move events to about 50 fps
-        //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
-        THREEx.DomEventsAlt.prototype._onMouseMove = _.throttle(function (domEvent)
-            //THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
-        {
-            var mouseCoords = this._getRelativeMouseXY(domEvent);
-            this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
-            this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
-            this._onMove('mouseout', mouseCoords.x, mouseCoords.y, domEvent);
-        }, 40);  //25 (f)ps
 
         //init domEnvents
         //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
-        this.mDomEvents = new THREEx.DomEventsAlt(this.mCamera, this.mRenderer.domElement, this.mScene);
+        this.mDomEvents = new DomEventsAlt(this.mCamera, this.mRenderer.domElement, this.mScene);
 
         //Note: have a factory in case we need this kind of injection multiple times
         // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations

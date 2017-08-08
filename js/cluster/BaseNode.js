@@ -5,6 +5,8 @@
 
 import AnimationMixin from "../utils/AnimationMixin"
 
+import DomEventsAlt from "./utils/DomEventsAlt"
+
 /**
  * simple node implementation for interaction and basic visualisation
  *
@@ -39,7 +41,7 @@ export default class BaseNode extends THREE.Mesh {
     }
 
     isMouseEvent(eventName) {
-        return THREEx.DomEventsAlt.eventNames.indexOf(eventName) >= 0
+        return DomEventsAlt.eventNames.indexOf(eventName) >= 0
     }
 
 
