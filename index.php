@@ -2,49 +2,52 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <script src="./js/lib/lodash.min.js"></script>
+    <!-- TODO refactor -->
+
+    <!--  LOADING -->
 
     <script src="./js/lib/qwest.min.js"></script>
     <script src="./js/lib/papaparse.min.js"></script>
-    <script src="./js/lib/d3-force-3d.bundle.min.js"></script>
-    <script src="./js/lib/three.min.js"></script>
+    <script src="./js/data-set-loader.js"></script>
 
-    <script src="./js/lib/threex.domevents.js"></script>
+    <!--  Rendering -->
+
+  <script src="./js/lib/three.min.js"></script>
+
+
     <script src="./js/lib/threex.domevents_alt.js"></script>
 
-    <!--   <script src="./js/THREE.MeshLine.js"></script>    -->
+    <script src="./js/lib/Tween.js"></script> <!-- TODO npm import won't work for hull feature somehow -->
 
+
+    <!--   <script src="./js/lib/SubdivisionModifier.js"></script> -->
+    <!--   <script src="./js/THREE.MeshLine.js"></script>    -->
+    <!-- <script src="./js/THREE.ArrowExt.js"></script>
+        <script src="./js/CustomAnimatedLineMesh.js"></script> -->
 
     <script src="./js/CameraObserverMode.js"></script>
+    <script src="./js/gpu-info.js"></script>
 
 
-    <!-- <script src="./dist/js/NodesContainer.js"></script> -->
+
+
+
     <script src="./build/bundle.js"></script>
-    <!--   <script src="./js/lib/SubdivisionModifier.js"></script> -->
 
-
-   <!-- <script src="./js/THREE.ArrowExt.js"></script>
-       <script src="./js/CustomAnimatedLineMesh.js"></script> -->
-
-
-
-
-    <script src="./js/data-set-loader.js"></script>
+    <!--  GUI -->
 
 
     <script src="./js/lib/jquery-3.2.0.min.js"></script>
-    <script src="./js/lib/jquery.hotkeys.js"></script>
-
-
-    <script src="./js/lib/mousetrap.js"></script>
-
-
     <script src="./js/lib/jquery-ui.min.js"></script>
 
-    <script src="./js/lib/Tween.js"></script>
+    <script src="./js/gui/searchbar.js"></script>
+    <script src="./js/SpecificDataUtils.js"></script>
+    <script src="./js/AppDataService.js"></script>
 
-    <script src="./js/gpu-info.js"></script>
 
+
+
+    <!-- refactored into f0 - f5 for now <script src="./js/force-graph-utils.js"></script> -->
 
     <script src="./js/f0-basic-element-3d-classes.js"></script>
     <script src="./js/f0_nodemixin.js"></script>
@@ -56,20 +59,7 @@
     <script src="./js/f5-arrows.js"></script>
 
 
-    <script src="./js/force-graph-utils.js"></script>
 
-    <script src="./js/gui/searchbar.js"></script>
-
-
-    <script src="./js/ParticleSystem.js"></script>
-    <script src="./js/ParticleNodeGroup.js"></script>
-    <script src="./js/SpecificDataUtils.js"></script>
-
-
-    <script src="./js/AppDataService.js"></script>
-
-
-    <script src="./js/lib/dat.gui.min.js"></script>
 
 
     <style>
@@ -139,6 +129,11 @@
     </style>
 
     <?php include("header_include.php"); ?>
+
+
+
+
+
 
 </head>
 

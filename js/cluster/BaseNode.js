@@ -39,7 +39,7 @@ export default class BaseNode extends THREE.Mesh {
     }
 
     isMouseEvent(eventName) {
-        return THREEx.DomEvents.eventNames.indexOf(eventName) >= 0
+        return THREEx.DomEventsAlt.eventNames.indexOf(eventName) >= 0
     }
 
 

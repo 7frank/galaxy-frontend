@@ -10,9 +10,11 @@ module.exports = {
         library: 'clusters'
     },
     plugins: [
-        /*    new webpack.ProvidePlugin({
-         THREE: "three"
-         })*/
+        new webpack.ProvidePlugin({
+            _: "lodash",
+            "d3_force":"d3-force-3d",
+            "Mousetrap":"mousetrap"
+        })
     ],
     module: {
         rules: [

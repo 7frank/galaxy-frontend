@@ -4,6 +4,13 @@
 
 
 import EdgesContainer from "./EdgesContainer"
+import NodesParticleSystem from "./particles/NodesParticleSystem"
+import ParticleNodeGroup from "./particles/ParticleNodeGroup"
+
+
+
+
+//import TWEEN from "@tweenjs/tween.js"
 
 
 export default class ClusterLeafElement extends THREE.Mesh {
@@ -244,7 +251,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
             //TODO refactor force-graph-utils
 
-            var particles = createParticleSystemForNodes(nodes, demoOptions);
+            var particles = NodesParticleSystem(nodes, demoOptions);
             this.add(particles.pointCloud);
 
 
