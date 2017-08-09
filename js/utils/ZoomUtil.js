@@ -2,6 +2,9 @@
  * Created by Frank on 08.06.2017.
  */
 //import TWEEN from "@tweenjs/tween.js"
+
+import TWEEN from "../lib/Tween"
+
 //TODO refactor existing samples
 export default
 class ZoomUtil {

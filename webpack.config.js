@@ -15,7 +15,8 @@ module.exports = {
             "d3_force":"d3-force-3d",
             "Mousetrap":"mousetrap",
             "THREE":"three",
-            "$":"jquery"
+            "$":"jquery",
+            "$$":"jquery-ui"
         })
     ],
     module: {
@@ -29,7 +30,12 @@ module.exports = {
                             limit: 8192
                         }
                     }
+
                 ]
+            },
+            {
+                test: /\.css$/,
+                use: [ 'style-loader', 'css-loader' ]
             }
         ]
     }

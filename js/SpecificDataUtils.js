@@ -1,4 +1,12 @@
-//...
+import $ from 'jquery';
+import 'jquery-ui/themes/base/core.css';
+//import 'jquery-ui/themes/base/theme.css';
+//import 'jquery-ui/themes/base/selectable.css';
+import 'jquery-ui/ui/core';
+import 'jquery-ui/ui/widgets/slider';
+import 'jquery-ui/ui/widgets/draggable';
+import 'jquery-ui/ui/widgets/resizable';
+
 function formatNumber (num) {
 	return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 }
@@ -141,7 +149,7 @@ $(function(){
 })
 
 
-
+export
 var GUI={
 	createAccordion(items)
 	{
@@ -159,7 +167,7 @@ var GUI={
 		return section
 		}
 		var acc=$('<div class="ui-accordion ui-widget ui-helper-reset">')
-		for (item of items)
+		for (let item of items)
 		{
 		item=_.extend({caption:"missing 'caption'",content:"missing 'content'"},item)
 		var sec=createSection(item.caption,item.content,item.id)
@@ -173,7 +181,7 @@ var GUI={
 		
 		
 		
-		slider=$("<div>").slider({
+		var slider=$("<div>").slider({
 			min:10,max:1000,
 			slide:function( event, ui ){
 				
@@ -195,7 +203,7 @@ var GUI={
 	},
 	createSample(){
 		
-		a=GUI.createAccordion([{caption:"<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Sectors </span><img src=\"include/images/Triangle.png\" style=\"width:10px;\">",id:"companyIndustry",content:"Technology, 33%<br>Consumer Discretionary, 20%<br>Consumer Staples, 20%"},{caption:"<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Countries</span> <img src=\"include/images/Triangle.png\" style=\"width:10px;\">",id:"companyCountry",content:"United States, 80%<br>Japan, 10%<br>Germany, 4%"}])
+		let a=GUI.createAccordion([{caption:"<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Sectors </span><img src=\"include/images/Triangle.png\" style=\"width:10px;\">",id:"companyIndustry",content:"Technology, 33%<br>Consumer Discretionary, 20%<br>Consumer Staples, 20%"},{caption:"<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Countries</span> <img src=\"include/images/Triangle.png\" style=\"width:10px;\">",id:"companyCountry",content:"United States, 80%<br>Japan, 10%<br>Germany, 4%"}])
 		a.css({top:80,left:10,position:"absolute", zIndex:999,width:200}).appendTo("body")
 		GUI.$el=a
 		

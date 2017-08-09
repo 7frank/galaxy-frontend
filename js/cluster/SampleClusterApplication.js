@@ -9,12 +9,24 @@
  */
 
 
-
 //--------------------------------
 
 //TODO find a better way to import libraries as simple scripts
 //NOTE:don't remove imports
 
+
+import "./SampleClusterApplication.css"
+
+import "../../css/style.css"
+import "../../css/force-graph.css"
+//import "../../css/jquery-ui.css"  //TODO refactor and only use necessary parts
+
+
+import "../gui/searchbar"
+
+
+import "../SpecificDataUtils"
+import "../AppDataService"
 
 
 
@@ -46,7 +58,8 @@ import RootCluster from "./RootCluster"
 import GraphData from "./GraphData"
 
 
-import GraphView3D from "../view/GraphView3D"
+import "../view/GraphView3D"
+import "../gui/ModeSelect"
 
 
 import BoxVolume from "./hull/BoxVolume"
@@ -59,6 +72,8 @@ import ClusterSpeccFacade from "./ClusterSpeccFacade"
 
 import CompanyNewsDS from "../data/CompanyNewsDS"
 
+import {getGraphDataSets} from "../data/data-set-loader"
+
 
 //-----------------------------------------
 //-----------DEBUG-------------------------
@@ -68,15 +83,32 @@ import CompanyNewsDS from "../data/CompanyNewsDS"
 export {Cluster3DExtended}
 
 /**
- * currently used for debugging purposes
+ * currently used for debugging purposes.. shoould receive a mayor overhaul, if used for production
  */
-export class MyMain {
 
-    constructor(datasets) {
+
+export class SampleClusterApplication extends HTMLElement {
+
+    constructor() {
+        super(...arguments)
+
+
+    }
+
+    connectedCallback() {
+
+
+        let datasets = getGraphDataSets()
+
         this.setDataSets(datasets);
         this.setupViews()
 
         this.addNewsListeners()
+
+
+        $(this).append("<mode-select></mode-select>")
+
+
     }
 
 
@@ -89,7 +121,6 @@ export class MyMain {
         })
 
     }
-
 
 
     isDebug() {
@@ -177,7 +208,7 @@ export class MyMain {
                 if (this.isMaximised()) return;
                 container.hide();
 
-                let maximisedContainer = $("#3d-graph");
+                let maximisedContainer = $(that) //$("#3d-graph");
                 //globalEnv.scene=mGraphView.mScene
                 var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
 
@@ -283,7 +314,6 @@ export class MyMain {
             //TODO views should only be loaded when visible
 
 
-
             /*
 
              let view3 = createView("node distribution test case",
@@ -297,13 +327,9 @@ export class MyMain {
              */
 
 
-
-
-
             /*  var speccs = this.getPossibleClusterSpeccsArray();
              let view1 = createView("View1", speccs)
              views.push(view1)*/
-
 
 
         } else {
@@ -329,10 +355,6 @@ export class MyMain {
 
 
     }
-
-
-
-
 
 
     getForceSpeccs2DChangesOnly() {
@@ -530,9 +552,9 @@ export class MyMain {
                 },
                 options: {
                     hull: ConvexVolume,
-                    expanded:   function () {
-            return false//this.name == "other"
-        }
+                    expanded: function () {
+                        return false//this.name == "other"
+                    }
                 }
             }
 
@@ -642,6 +664,8 @@ export class MyMain {
 
 }
 
+
+customElements.define("sample-cluster-application", SampleClusterApplication);
 
 
 

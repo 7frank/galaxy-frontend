@@ -19,7 +19,7 @@ export class HelloComponent implements OnInit {
 
   constructor() {
 
-  //   var main = new clusters.MyMain({});
+  //   var main = new clusters.SampleClusterApplication({});
 
 
   }

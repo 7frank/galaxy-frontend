@@ -17,6 +17,9 @@ import Hexasphere from "hexasphere.js"
 
 import "../gui/GraphHUD"
 
+import {GUI} from "../SpecificDataUtils"
+
+
 
 export default
 class GraphView3D extends View3D

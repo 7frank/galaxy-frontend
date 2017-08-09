@@ -157,7 +157,7 @@ class View3D extends HTMLElement {
 
 
     resizeCanvas() {
-        if (this.mRenderer) {
+        if (this.mRenderer &&  this.mCamera) {
             this.mRenderer.setSize(this.clientWidth, this.clientHeight);
             this.mCamera.aspect = this.clientWidth / this.clientHeight;
 
@@ -177,7 +177,7 @@ class View3D extends HTMLElement {
 
         }
 
-        if (this.mRenderer)
+        if (this.mRenderer &&  this.mControls)
             this.mControls.panSpeed = this.mControls.rotateSpeed = 1600 / this.clientWidth * 0.3
 
 

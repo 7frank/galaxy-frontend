@@ -9,6 +9,8 @@
 * http://www.opensource.org/licenses/mit-license.php
 */
 
+import jQuery from 'jquery';
+
 (function ($) {
 
     $.fn.wikiblurb = function (options) {
