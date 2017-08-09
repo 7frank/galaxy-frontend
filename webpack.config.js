@@ -13,7 +13,9 @@ module.exports = {
         new webpack.ProvidePlugin({
             _: "lodash",
             "d3_force":"d3-force-3d",
-            "Mousetrap":"mousetrap"
+            "Mousetrap":"mousetrap",
+            "THREE":"three",
+            "$":"jquery"
         })
     ],
     module: {

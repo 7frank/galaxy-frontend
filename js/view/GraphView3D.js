@@ -15,6 +15,9 @@ import skyDomeImage from "./coordinates.png"
 import Hexasphere from "hexasphere.js"
 
 
+import "../gui/GraphHUD"
+
+
 export default
 class GraphView3D extends View3D
 {
@@ -28,8 +31,19 @@ class GraphView3D extends View3D
 
 
 
+
+
     }
 
+
+
+    connectedCallback(){
+        super.connectedCallback();
+
+
+        $(this).append("<graph-hud>")
+
+    }
 
     setSpeccs(speccs)
     {

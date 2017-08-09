@@ -12,16 +12,12 @@
 
     <!--  Rendering -->
 
-  <script src="./js/lib/three.min.js"></script>
+  <!--  <script src="./js/lib/three.min.js"></script> -->
+   <script src="./js/lib/Tween.js"></script>    <!-- TODO npm import won't work for hull feature somehow -->
 
 
-    <script src="./js/lib/threex.domevents_alt.js"></script>
 
-    <script src="./js/lib/Tween.js"></script> <!-- TODO npm import won't work for hull feature somehow -->
-
-
-    <!--   <script src="./js/lib/SubdivisionModifier.js"></script> -->
-    <!--   <script src="./js/THREE.MeshLine.js"></script>    -->
+      <!-- <script src="./js/THREE.MeshLine.js"></script>    -->
     <!-- <script src="./js/THREE.ArrowExt.js"></script>
         <script src="./js/CustomAnimatedLineMesh.js"></script> -->
 
@@ -37,26 +33,13 @@
     <!--  GUI -->
 
 
-    <script src="./js/lib/jquery-3.2.0.min.js"></script>
+    <script src="./js/lib/jquery-3.2.0.min.js"></script>     <!--  TODO -->
     <script src="./js/lib/jquery-ui.min.js"></script>
 
     <script src="./js/gui/searchbar.js"></script>
     <script src="./js/SpecificDataUtils.js"></script>
     <script src="./js/AppDataService.js"></script>
 
-
-
-
-    <!-- refactored into f0 - f5 for now <script src="./js/force-graph-utils.js"></script> -->
-
-    <script src="./js/f0-basic-element-3d-classes.js"></script>
-    <script src="./js/f0_nodemixin.js"></script>
-    <script src="./js/f0_linkmixin.js"></script>
-    <script src="./js/f0_TextureAnimator.js"></script>
-
-    <script src="./js/f1.js"></script>
-    <script src="./js/f2-zoom.js"></script>
-    <script src="./js/f5-arrows.js"></script>
 
 
 

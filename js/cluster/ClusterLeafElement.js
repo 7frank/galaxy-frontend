@@ -36,8 +36,8 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
     getView() {
-        return this.parent.getView()
-
+        //TODO
+        return this.parent.parent.getView()
 
     }
 
