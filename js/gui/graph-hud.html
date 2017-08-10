@@ -1,0 +1,63 @@
+
+<style>
+
+    #logo {
+        position: absolute;
+        top: 0px;
+        left: 30;
+        color: #ffffff;
+        z-index: 1;padding: 10px;
+    }
+    #starview {
+        position: absolute;
+        top: 0px;
+        right: 0;
+        color: #ffffff;
+        z-index: 1;padding: 5px 10px 10px 10px;
+    }
+    #sig_menu {
+        font-family:'roboto';
+        position: absolute;
+        top: 13px;
+        left: 650;
+        color: #0490cd;
+        z-index: 1;padding: 10px;
+        font-size:15px;
+        background: rgba(0, 0, 0, 0.51);
+        cursor:pointer;
+    }
+
+
+</style>
+
+
+<div id="sig_menu" onclick="js_menu_sig();">
+    <input type="hidden" id="hid_sig_menu" value="0" />
+    SIGNIFICANT COMPANIES
+    <div id="sig_menu_sub" style="display:none;text-align:left;color:#bfbfbf;" >Customers<br />Suppliers<br />Influencers<br />Active Players<br />Chokepoints</div>
+</div>
+<div id="logo"><img src="img/logo.png" style="height:50px;"></div>
+<div id="starview"><img src="include/images/Starview.png" style="height:35px;"></div>
+
+<!-- the info panel containing rudimentary help for the user -->
+<info-panel></info-panel>
+
+
+
+<!-- TODO refactor parts -->
+
+<div style="position: absolute;top:50;right:320;">
+    <div style="padding-bottom:5px;"><img src="img/zoomin.png" style="width:40px;cursor:pointer;" /></div>
+    <div><img src="img/zoomout.png" style="width:40px;cursor:pointer;" /></div>
+</div>
+
+<div class="bottomCompanyGradient">
+    <span style="width:10%;text-align:right;padding-right:20px;font-size:14px;font-family:'benchnine' !important;">Negative</span>
+    <span style="width:80%" class="companyGradient"></span>
+    <span  style="width:10%;text-align:left;padding-left:20px;font-size:14px;font-family:'benchnine' !important;">Positive</span>
+
+</div>
+
+
+
+<company-info style="max-width:300px; width:300px"></company-info>

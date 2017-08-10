@@ -11,6 +11,8 @@ import 'jquery-ui/themes/base/core.css';
 import 'jquery-ui/ui/core';
 import 'jquery-ui/ui/widgets/autocomplete';
 
+import {highlightNodeElements,unhighlightNodeElements} from "../cluster/refactor/f1"
+
 
 $(function () {
 
@@ -222,7 +224,10 @@ $(function () {
 
     }
 
-    searchbar.on("keyup", null, 'ctrl+f', toggleSearch)
-    $(window).bind('keyup', 'ctrl+f', toggleSearch);
+    Mousetrap.bind('ctrl+f',toggleSearch);
+
+    Mousetrap(searchbar.get(0)).bind('ctrl+f',toggleSearch);
+
+
 
 })

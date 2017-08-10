@@ -5,13 +5,24 @@
 //TODO import css rules
 //TODO import other vusual components and templates
 
+import $ from "jquery"
 
+import template from "./graph-hud.html"
 
-export default
+import "./info-panel/InfoPanel"
+import "./company-info/CompanyInfo"
+
 class GraphHUD extends HTMLElement {
 
     constructor(...args) {
         super(...args);
+
+    }
+
+    connectedCallback(){
+
+        $(this).append(template)
+
 
     }
 
