@@ -1297,6 +1297,32 @@ so before we migrate to angular it would probably enough to write the components
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+to be able to use the component within angular we still need to have to
+ make some more changes 
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+this should be a mid term goal and not for the current iteration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+the datasets should be handled via the graph-data component itself (webcomponent
+)
+\end_layout
+
+\begin_layout Itemize
+and be accessable as a reference for a view 
+\end_layout
+
+\end_deeper
 \begin_layout Subsection
 small Sprint 31.07.
  - 4.8.

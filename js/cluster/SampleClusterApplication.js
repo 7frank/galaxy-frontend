@@ -25,8 +25,8 @@ import "../../css/force-graph.css"
 import "../gui/searchbar"
 
 
-import "../SpecificDataUtils"
-import "../AppDataService"
+import "./refactor/SpecificDataUtils"
+import "./refactor/AppDataService"
 
 
 
@@ -113,6 +113,10 @@ export class SampleClusterApplication extends HTMLElement {
 
 
     addNewsListeners() {
+
+     console.error("fixme addNewsListeners needs socket server and handler if server is not found")
+
+        return
         var myDS = new CompanyNewsDS('http://localhost:3000')
 
         myDS.onNewsReceived(function (news) {

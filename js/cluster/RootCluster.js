@@ -9,6 +9,9 @@ import Cluster3DExtended from "./Cluster3DExtended"
 import ClusterTextOverlay from "./text/ClusterTextOverlay"
 
 
+import {computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
+
+
 /**
  *
  *  a RootCluster is a root node that contains additional rendering infos over multiple nodes

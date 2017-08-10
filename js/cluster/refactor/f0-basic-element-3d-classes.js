@@ -5,6 +5,10 @@
 
 import TextureAnimator from "./f0_TextureAnimator"
 
+import  dot9Image from "../../../img/dot9.png"
+import  dot7Image from "../../../img/dot7.png"
+import  ring2Image from "../../../img/ring2.png"
+import  ring3Image from "../../../img/ring3.png"
 
 //------------------------------------------------
 //helper structures for "class"-like work flow with nodes
@@ -194,7 +198,7 @@ register3DClass("basic-selection", {
 
 //----------------------------------------
 
-var basicCollapsedSprite = new THREE.TextureLoader().load("img/dot9.png");
+var basicCollapsedSprite = new THREE.TextureLoader().load(dot9Image);
 
 register3DClass("basic-sprite-collapsed", {
     geometry: basicSpriteGeometry
@@ -226,7 +230,7 @@ register3DClass("basic-sprite-collapsed", {
 
 
 //----------------------------------------
-var ring3Sprite = new THREE.TextureLoader().load("img/ring3.png");
+var ring3Sprite = new THREE.TextureLoader().load(ring3Image);
 
 register3DClass("basic-ring", {
     geometry: basicSpriteGeometry,
@@ -258,7 +262,7 @@ register3DClass("basic-ring", {
 
 
 //----------------------------------------
-var ring2Sprite = new THREE.TextureLoader().load("img/ring2.png");
+var ring2Sprite = new THREE.TextureLoader().load(ring2Image);
 
 register3DClass("basic-ring-2", {
     geometry: basicSpriteGeometry
@@ -313,7 +317,7 @@ register3DClass("basic-animated", {
         requestAnimationFrame(animate);
 
 
-        //var sprite = new THREE.TextureLoader().load("img/dot9.png");
+        //var sprite = new THREE.TextureLoader().load(dot9Image);
         material = new THREE.PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el),
@@ -369,7 +373,7 @@ register3DClass("basic-sprite-expanded", {
 
 //----------------------------------------
 
-var basicSprite = new THREE.TextureLoader().load("img/dot7.png");
+var basicSprite = new THREE.TextureLoader().load(dot7Image);
 register3DClass("basic-sprite", {
     geometry: basicSpriteGeometry,
     material: function (env, el) {
@@ -401,7 +405,7 @@ register3DClass("basic-sprite", {
 register3DClass("node-highlighted", {
     geometry: basicSpriteGeometry,
     material: function (env, el) {
-        var sprite = new THREE.TextureLoader().load("img/dot7.png");
+        var sprite = new THREE.TextureLoader().load(dot7Image);
         var material = new THREE.PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el) * 1.8,

@@ -16,13 +16,14 @@ module.exports = {
             "Mousetrap":"mousetrap",
             "THREE":"three",
             "$":"jquery",
+            "jQuery":"jquery",
             "$$":"jquery-ui"
         })
     ],
     module: {
         rules: [
             {
-                test: /\.(png|jpg|gif)$/,
+                test: /\.(png|jpg|gif|json)$/,
                 use: [
                     {
                         loader: 'url-loader',
@@ -36,7 +37,17 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [ 'style-loader', 'css-loader' ]
+            },
+            {
+                test: /\.(html)$/,
+                use: {
+                    loader: 'html-loader',
+                    options: {
+                        attrs: [':data-src']
+                    }
+                }
             }
+
         ]
     }
 };

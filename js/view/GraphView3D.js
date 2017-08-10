@@ -17,7 +17,7 @@ import Hexasphere from "hexasphere.js"
 
 import "../gui/GraphHUD"
 
-import {GUI} from "../SpecificDataUtils"
+import {GUI} from "../cluster/refactor/SpecificDataUtils"
 
 
 

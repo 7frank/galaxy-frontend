@@ -64,7 +64,7 @@ var clusters =
 /******/ 	__webpack_require__.p = "/test_app/build/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 89);
+/******/ 	return __webpack_require__(__webpack_require__.s = 90);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71526,7 +71526,7 @@ function CanvasRenderer() {
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4), __webpack_require__(67)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4), __webpack_require__(68)(module)))
 
 /***/ }),
 /* 3 */
@@ -71591,7 +71591,7 @@ module.exports = g;
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(171);
+exports = module.exports = __webpack_require__(176);
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -71771,7 +71771,7 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
 
 /***/ }),
 /* 6 */
@@ -72746,11 +72746,11 @@ return $.widget;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(87);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(20);
+/* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(88);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_MaterialFadeMixin__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_MaterialFadeMixin__ = __webpack_require__(50);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -74368,6 +74368,88 @@ Emitter.prototype.hasListeners = function(event){
 
 /***/ }),
 /* 10 */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -74379,22 +74461,22 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies.
  */
 
-var keys = __webpack_require__(178);
-var hasBinary = __webpack_require__(58);
-var sliceBuffer = __webpack_require__(105);
-var after = __webpack_require__(104);
-var utf8 = __webpack_require__(179);
+var keys = __webpack_require__(183);
+var hasBinary = __webpack_require__(59);
+var sliceBuffer = __webpack_require__(109);
+var after = __webpack_require__(108);
+var utf8 = __webpack_require__(184);
 
 var base64encoder;
 if (global && global.ArrayBuffer) {
-  base64encoder = __webpack_require__(107);
+  base64encoder = __webpack_require__(111);
 }
 
 /**
@@ -74452,7 +74534,7 @@ var err = { type: 'error', data: 'parser error' };
  * Create a blob api even for blob builder when vendor prefixes exist
  */
 
-var Blob = __webpack_require__(108);
+var Blob = __webpack_require__(112);
 
 /**
  * Encodes a packet.
@@ -74992,279 +75074,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 12 */
-/***/ (function(module, exports) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-// css base code, injected by the css-loader
-module.exports = function(useSourceMap) {
-	var list = [];
-
-	// return the list of modules as css string
-	list.toString = function toString() {
-		return this.map(function (item) {
-			var content = cssWithMappingToString(item, useSourceMap);
-			if(item[2]) {
-				return "@media " + item[2] + "{" + content + "}";
-			} else {
-				return content;
-			}
-		}).join("");
-	};
-
-	// import a list of modules into the list
-	list.i = function(modules, mediaQuery) {
-		if(typeof modules === "string")
-			modules = [[null, modules, ""]];
-		var alreadyImportedModules = {};
-		for(var i = 0; i < this.length; i++) {
-			var id = this[i][0];
-			if(typeof id === "number")
-				alreadyImportedModules[id] = true;
-		}
-		for(i = 0; i < modules.length; i++) {
-			var item = modules[i];
-			// skip already imported module
-			// this implementation is not 100% perfect for weird media query combinations
-			//  when a module is imported multiple times with different media queries.
-			//  I hope this will never occur (Hey this way we have smaller bundles)
-			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-				if(mediaQuery && !item[2]) {
-					item[2] = mediaQuery;
-				} else if(mediaQuery) {
-					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-				}
-				list.push(item);
-			}
-		}
-	};
-	return list;
-};
-
-function cssWithMappingToString(item, useSourceMap) {
-	var content = item[1] || '';
-	var cssMapping = item[3];
-	if (!cssMapping) {
-		return content;
-	}
-
-	if (useSourceMap && typeof btoa === 'function') {
-		var sourceMapping = toComment(cssMapping);
-		var sourceURLs = cssMapping.sources.map(function (source) {
-			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
-		});
-
-		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
-	}
-
-	return [content].join('\n');
-}
-
-// Adapted from convert-source-map (MIT)
-function toComment(sourceMap) {
-	// eslint-disable-next-line no-undef
-	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
-	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
-
-	return '/*# ' + data + ' */';
-}
-
-
-/***/ }),
 /* 13 */
-/***/ (function(module, exports) {
-
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-
-/***/ }),
-/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -75310,7 +75120,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(209);
+var	fixUrls = __webpack_require__(219);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -75620,6 +75430,196 @@ function updateLink (link, options, obj) {
 
 	if(oldSrc) URL.revokeObjectURL(oldSrc);
 }
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
 
 
 /***/ }),
@@ -76684,7 +76684,7 @@ TWEEN.Interpolation = {
 
 })(this);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
 
 /***/ }),
 /* 17 */
@@ -76748,8 +76748,8 @@ exports.decode = function(qs){
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_, THREE, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(44);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -77113,1659 +77113,19 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(8);
-/**
- * Created by Frank on 02.06.2017.
- */
-
-
-
-class EdgeUtil {
-
-    /**
-     *
-     *
-     */
-    static getConnectedClusters() {
-
-        //finds external nodes of a cluster
-
-        //look up what cluster the node is in?
-
-
-    }
-
-
-    /*
-     * takes a object containing BaseCluster3D as input and returns
-     * a set of edges
-     *
-     * */
-
-    static createEdgesBetweenClustersFromMap(clustersContainer) {
-
-
-        let info = EdgeUtil.getClusterInfo(clustersContainer)
-
-        let clusterKeys = Object.keys(clustersContainer);
-
-
-        var edgesArray = [];
-        _.each(clusterKeys, function (key) {
-
-            let otherClusterKeys = Object.keys(info[key].clustersConnectedTo);
-
-            _.each(otherClusterKeys, function (otherKey) {
-
-                let otherClusters = info[key].clustersConnectedTo;
-                let edgesForCluster = info[key].edges;
-
-                let linkStrength = Object.keys(edgesForCluster).length
-
-                edgesArray.push({
-                    source: clustersContainer[key],
-                    target: otherClusters[otherKey],
-                    link_strength: linkStrength
-                })
-
-
-            });
-
-
-        });
-
-        return edgesArray;
-    }
-
-    /**
-
-     * @param clustersContainer  ...  Map<name,cluster>
-     * @returns an object containing certain infos about clusters (what clusters are connected, with which edges and nodes within the cluster)
-     */
-    static getClusterInfo(clustersContainer) {
-
-        //find connections between clusters from nodes contained
-
-        var relevantEdgesPerCluster = {}
-        _.each(clustersContainer, function (cluster, id) {
-            relevantEdgesPerCluster[id] = {}
-            let nodes = cluster.getNodes()
-            //get only relevant nodes per cluster that link to/from other clusters
-            let edges = EdgeUtil.getEdgesForNodes(nodes, false, true, true)
-            relevantEdgesPerCluster[id] = edges
-
-        })
-
-
-        function isNodeOfCluster(node, cluster) {
-            return cluster.getNodes().indexOf(node) >= 0
-
-        }
-
-        //just in case clusters can overlap
-        //returns a map of the clusters that contain the node
-        function lookUpClustersOfNode(node) {
-
-            var clustersForNode = {};
-
-            _.each(clustersContainer, function (cluster, id) {
-
-                if (isNodeOfCluster(node, cluster))
-                    clustersForNode[id] = cluster;
-            });
-
-            return clustersForNode;
-
-        }
-
-        var clustersContainerRelationInfo = {};
-
-
-        //get the clusters that connect to each other from the dges between them
-        _.each(relevantEdgesPerCluster, function (clusterExternalEdges, clusterID) {
-
-            clustersContainerRelationInfo[clusterID] = {
-                clustersConnectedTo: {},
-                edges: {},
-                nodes: {}
-
-            };
-
-            //for each edge of the current cluster that connects to another cluster
-            _.each(clusterExternalEdges, function (externalEdge) {
-
-
-
-                //we can ignore the node that is contained within the current cluster
-
-                var testNode = isNodeOfCluster(externalEdge.source, clustersContainer[clusterID]);
-                let otherNode = testNode ? externalEdge.target : externalEdge.source;
-
-
-                let clustersThatContainNode = lookUpClustersOfNode(otherNode);
-                delete (clustersThatContainNode[clusterID]) //undo self reference
-
-                _.extend(clustersContainerRelationInfo[clusterID].clustersConnectedTo, clustersThatContainNode);
-
-                var keys = Object.keys(clustersThatContainNode)
-
-
-                //have some additional infos
-                _.each(keys, function (key) {
-
-                    //the edges that link to the specific cluster
-                    if (!clustersContainerRelationInfo[clusterID].edges[key]) clustersContainerRelationInfo[clusterID].edges[key] = []
-                    clustersContainerRelationInfo[clusterID].edges[key].push(externalEdge)
-
-                    //the nodes the edges connect to
-                    if (!clustersContainerRelationInfo[clusterID].nodes[key]) clustersContainerRelationInfo[clusterID].nodes[key] = []
-                    clustersContainerRelationInfo[clusterID].nodes[key].push(externalEdge)
-
-                })
-
-
-                //all clusters the node links to
-
-            })
-
-
-        });
-
-        return clustersContainerRelationInfo
-
-    }
-
-    /**
-     *  returns all edges for >>contained<< nodes within clusters
-     *  this would be suitable to do force-graph distribution on a cluster and all descendants
-     */
-
-    static getEdgesForNodes(nodes, bInternal = true, bOutgoing = false, bIngoing = false) {
-
-
-
-//a node can be a cluster that represents a set of nodes
-        //   if (nodes instanceof BaseCluster3D) nodes = nodes.mNodes
-
-        if (!bInternal && !bOutgoing && !bIngoing) return []
-        //get relevant edges from
-
-        //a.clusters.mClusters.mClusters["United States"][0].mNodes
-
-        var edges = [];
-
-        _.each(nodes, function (node, id) {
-
-            //check if it is a container element
-            if (node instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */]) {
-                let _edges = EdgeUtil.getEdgesForNodes(node.mNodes, bInternal, bOutgoing, bIngoing)
-                edges = edges.concat(_edges);
-                edges = _.uniq(edges)
-                return
-            }
-
-
-            _.each(node.edges, function (edge, id) {
-
-
-                let srcContained = nodes.indexOf(edge.source) >= 0;
-                let trgContained = nodes.indexOf(edge.target) >= 0;
-
-
-                let isInternalNode = srcContained && trgContained;
-
-
-                let isOutgoing = !isInternalNode && srcContained
-                let isIngoing = !isInternalNode && trgContained
-                //TODO we do want to distinguish between outgoing and ingoing edges
-                // /if (!isInternalNode)
-                //calc direction
-
-
-                // console.log(srcContained,trgContained,isInternalNode)
-                /*   if (bInternal&&bExternal || bInternal && isInternalNode || bExternal && !isInternalNode) {
-                 edges = edges.concat(node.edges);
-                 edges = _.uniq(edges)
-                 }*/
-                function pushit(edge) {
-                    edge.isSrcInternalNode = srcContained
-                    edge.isTrgInternalNode = trgContained
-                    edges.push(edge)
-                }
-
-                if (bInternal && bOutgoing && bIngoing)
-                    pushit(edge)
-                else if (bInternal && isInternalNode || bOutgoing && isOutgoing || bIngoing && isIngoing)
-                    pushit(edge)
-
-            })
-
-        })
-
-
-        return edges
-
-    }
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = EdgeUtil;
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
-
-/***/ }),
-/* 21 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ __webpack_exports__["a"] = (function(node, x0, x1) {
-  this.node = node;
-  this.x0 = x0;
-  this.x1 = x1;
-});
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return prefix; });
-var prefix = "$";
-
-function Map() {}
-
-Map.prototype = map.prototype = {
-  constructor: Map,
-  has: function(key) {
-    return (prefix + key) in this;
-  },
-  get: function(key) {
-    return this[prefix + key];
-  },
-  set: function(key, value) {
-    this[prefix + key] = value;
-    return this;
-  },
-  remove: function(key) {
-    var property = prefix + key;
-    return property in this && delete this[property];
-  },
-  clear: function() {
-    for (var property in this) if (property[0] === prefix) delete this[property];
-  },
-  keys: function() {
-    var keys = [];
-    for (var property in this) if (property[0] === prefix) keys.push(property.slice(1));
-    return keys;
-  },
-  values: function() {
-    var values = [];
-    for (var property in this) if (property[0] === prefix) values.push(this[property]);
-    return values;
-  },
-  entries: function() {
-    var entries = [];
-    for (var property in this) if (property[0] === prefix) entries.push({key: property.slice(1), value: this[property]});
-    return entries;
-  },
-  size: function() {
-    var size = 0;
-    for (var property in this) if (property[0] === prefix) ++size;
-    return size;
-  },
-  empty: function() {
-    for (var property in this) if (property[0] === prefix) return false;
-    return true;
-  },
-  each: function(f) {
-    for (var property in this) if (property[0] === prefix) f(this[property], property.slice(1), this);
-  }
-};
-
-function map(object, f) {
-  var map = new Map;
-
-  // Copy constructor.
-  if (object instanceof Map) object.each(function(value, key) { map.set(key, value); });
-
-  // Index array by numeric index or specified key function.
-  else if (Array.isArray(object)) {
-    var i = -1,
-        n = object.length,
-        o;
-
-    if (f == null) while (++i < n) map.set(i, object[i]);
-    else while (++i < n) map.set(f(o = object[i], i, object), o);
-  }
-
-  // Convert object to map.
-  else if (object) for (var key in object) map.set(key, object[key]);
-
-  return map;
-}
-
-/* harmony default export */ __webpack_exports__["a"] = (map);
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ __webpack_exports__["a"] = (function() {
-  return (Math.random() - 0.5) * 1e-6;
-});
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ __webpack_exports__["a"] = (function(node, x0, y0, z0, x1, y1, z1) {
-  this.node = node;
-  this.x0 = x0;
-  this.y0 = y0;
-  this.z0 = z0;
-  this.x1 = x1;
-  this.y1 = y1;
-  this.z1 = z1;
-});
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ __webpack_exports__["a"] = (function(node, x0, y0, x1, y1) {
-  this.node = node;
-  this.x0 = x0;
-  this.y0 = y0;
-  this.x1 = x1;
-  this.y1 = y1;
-});
-
-
-/***/ }),
-/* 26 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["c"] = now;
-/* harmony export (immutable) */ __webpack_exports__["b"] = Timer;
-/* harmony export (immutable) */ __webpack_exports__["a"] = timer;
-/* unused harmony export timerFlush */
-var frame = 0, // is an animation frame pending?
-    timeout = 0, // is a timeout pending?
-    interval = 0, // are any timers active?
-    pokeDelay = 1000, // how frequently we check for clock skew
-    taskHead,
-    taskTail,
-    clockLast = 0,
-    clockNow = 0,
-    clockSkew = 0,
-    clock = typeof performance === "object" && performance.now ? performance : Date,
-    setFrame = typeof window === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function(f) { setTimeout(f, 17); };
-
-function now() {
-  return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
-}
-
-function clearNow() {
-  clockNow = 0;
-}
-
-function Timer() {
-  this._call =
-  this._time =
-  this._next = null;
-}
-
-Timer.prototype = timer.prototype = {
-  constructor: Timer,
-  restart: function(callback, delay, time) {
-    if (typeof callback !== "function") throw new TypeError("callback is not a function");
-    time = (time == null ? now() : +time) + (delay == null ? 0 : +delay);
-    if (!this._next && taskTail !== this) {
-      if (taskTail) taskTail._next = this;
-      else taskHead = this;
-      taskTail = this;
-    }
-    this._call = callback;
-    this._time = time;
-    sleep();
-  },
-  stop: function() {
-    if (this._call) {
-      this._call = null;
-      this._time = Infinity;
-      sleep();
-    }
-  }
-};
-
-function timer(callback, delay, time) {
-  var t = new Timer;
-  t.restart(callback, delay, time);
-  return t;
-}
-
-function timerFlush() {
-  now(); // Get the current time, if not already set.
-  ++frame; // Pretend we’ve set an alarm, if we haven’t already.
-  var t = taskHead, e;
-  while (t) {
-    if ((e = clockNow - t._time) >= 0) t._call.call(null, e);
-    t = t._next;
-  }
-  --frame;
-}
-
-function wake() {
-  clockNow = (clockLast = clock.now()) + clockSkew;
-  frame = timeout = 0;
-  try {
-    timerFlush();
-  } finally {
-    frame = 0;
-    nap();
-    clockNow = 0;
-  }
-}
-
-function poke() {
-  var now = clock.now(), delay = now - clockLast;
-  if (delay > pokeDelay) clockSkew -= delay, clockLast = now;
-}
-
-function nap() {
-  var t0, t1 = taskHead, t2, time = Infinity;
-  while (t1) {
-    if (t1._call) {
-      if (time > t1._time) time = t1._time;
-      t0 = t1, t1 = t1._next;
-    } else {
-      t2 = t1._next, t1._next = null;
-      t1 = t0 ? t0._next = t2 : taskHead = t2;
-    }
-  }
-  taskTail = t0;
-  sleep(time);
-}
-
-function sleep(time) {
-  if (frame) return; // Soonest alarm already set, or will be.
-  if (timeout) timeout = clearTimeout(timeout);
-  var delay = time - clockNow;
-  if (delay > 24) {
-    if (time < Infinity) timeout = setTimeout(wake, delay);
-    if (interval) interval = clearInterval(interval);
-  } else {
-    if (!interval) clockLast = clockNow, interval = setInterval(poke, pokeDelay);
-    frame = 1, setFrame(wake);
-  }
-}
-
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * Module dependencies.
- */
-
-var parser = __webpack_require__(11);
-var Emitter = __webpack_require__(9);
-
-/**
- * Module exports.
- */
-
-module.exports = Transport;
-
-/**
- * Transport abstract constructor.
- *
- * @param {Object} options.
- * @api private
- */
-
-function Transport (opts) {
-  this.path = opts.path;
-  this.hostname = opts.hostname;
-  this.port = opts.port;
-  this.secure = opts.secure;
-  this.query = opts.query;
-  this.timestampParam = opts.timestampParam;
-  this.timestampRequests = opts.timestampRequests;
-  this.readyState = '';
-  this.agent = opts.agent || false;
-  this.socket = opts.socket;
-  this.enablesXDR = opts.enablesXDR;
-
-  // SSL options for Node.js client
-  this.pfx = opts.pfx;
-  this.key = opts.key;
-  this.passphrase = opts.passphrase;
-  this.cert = opts.cert;
-  this.ca = opts.ca;
-  this.ciphers = opts.ciphers;
-  this.rejectUnauthorized = opts.rejectUnauthorized;
-  this.forceNode = opts.forceNode;
-
-  // other options for Node.js client
-  this.extraHeaders = opts.extraHeaders;
-  this.localAddress = opts.localAddress;
-}
-
-/**
- * Mix in `Emitter`.
- */
-
-Emitter(Transport.prototype);
-
-/**
- * Emits an error.
- *
- * @param {String} str
- * @return {Transport} for chaining
- * @api public
- */
-
-Transport.prototype.onError = function (msg, desc) {
-  var err = new Error(msg);
-  err.type = 'TransportError';
-  err.description = desc;
-  this.emit('error', err);
-  return this;
-};
-
-/**
- * Opens the transport.
- *
- * @api public
- */
-
-Transport.prototype.open = function () {
-  if ('closed' === this.readyState || '' === this.readyState) {
-    this.readyState = 'opening';
-    this.doOpen();
-  }
-
-  return this;
-};
-
-/**
- * Closes the transport.
- *
- * @api private
- */
-
-Transport.prototype.close = function () {
-  if ('opening' === this.readyState || 'open' === this.readyState) {
-    this.doClose();
-    this.onClose();
-  }
-
-  return this;
-};
-
-/**
- * Sends multiple packets.
- *
- * @param {Array} packets
- * @api private
- */
-
-Transport.prototype.send = function (packets) {
-  if ('open' === this.readyState) {
-    this.write(packets);
-  } else {
-    throw new Error('Transport not open');
-  }
-};
-
-/**
- * Called upon open
- *
- * @api private
- */
-
-Transport.prototype.onOpen = function () {
-  this.readyState = 'open';
-  this.writable = true;
-  this.emit('open');
-};
-
-/**
- * Called with data.
- *
- * @param {String} data
- * @api private
- */
-
-Transport.prototype.onData = function (data) {
-  var packet = parser.decodePacket(data, this.socket.binaryType);
-  this.onPacket(packet);
-};
-
-/**
- * Called with a decoded packet.
- */
-
-Transport.prototype.onPacket = function (packet) {
-  this.emit('packet', packet);
-};
-
-/**
- * Called upon close.
- *
- * @api private
- */
-
-Transport.prototype.onClose = function () {
-  this.readyState = 'closed';
-  this.emit('close');
-};
-
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global) {// browser shim for xmlhttprequest module
-
-var hasCORS = __webpack_require__(181);
-
-module.exports = function (opts) {
-  var xdomain = opts.xdomain;
-
-  // scheme must be same when usign XDomainRequest
-  // http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx
-  var xscheme = opts.xscheme;
-
-  // XDomainRequest has a flow of not sending cookie, therefore it should be disabled as a default.
-  // https://github.com/Automattic/engine.io-client/pull/217
-  var enablesXDR = opts.enablesXDR;
-
-  // XMLHttpRequest can be disabled on IE
-  try {
-    if ('undefined' !== typeof XMLHttpRequest && (!xdomain || hasCORS)) {
-      return new XMLHttpRequest();
-    }
-  } catch (e) { }
-
-  // Use XDomainRequest for IE8 if enablesXDR is true
-  // because loading bar keeps flashing when using jsonp-polling
-  // https://github.com/yujiosaka/socke.io-ie8-loading-example
-  try {
-    if ('undefined' !== typeof XDomainRequest && !xscheme && enablesXDR) {
-      return new XDomainRequest();
-    }
-  } catch (e) { }
-
-  if (!xdomain) {
-    try {
-      return new global[['Active'].concat('Object').join('X')]('Microsoft.XMLHTTP');
-    } catch (e) { }
-  }
-};
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports) {
-
-var Point = function(x,y,z){
-    if(x !== undefined && y !== undefined && z !== undefined){
-        this.x = x.toFixed(3);
-        this.y = y.toFixed(3);
-        this.z = z.toFixed(3);
-    }
-
-    this.faces = [];
-}
-
-Point.prototype.subdivide = function(point, count, checkPoint){
-
-    var segments = [];
-    segments.push(this);
-
-    for(var i = 1; i< count; i++){
-        var np = new Point(this.x * (1-(i/count)) + point.x * (i/count),
-            this.y * (1-(i/count)) + point.y * (i/count),
-            this.z * (1-(i/count)) + point.z * (i/count));
-        np = checkPoint(np);
-        segments.push(np);
-    }
-
-    segments.push(point);
-
-    return segments;
-
-}
-
-Point.prototype.segment = function(point, percent){
-    percent = Math.max(0.01, Math.min(1, percent));
-
-    var x = point.x * (1-percent) + this.x * percent;
-    var y = point.y * (1-percent) + this.y * percent;
-    var z = point.z * (1-percent) + this.z * percent;
-
-    var newPoint = new Point(x,y,z);
-    return newPoint;
-
-};
-
-Point.prototype.midpoint = function(point, location){
-    return this.segment(point, .5);
-}
-
-
-Point.prototype.project = function(radius, percent){
-    if(percent == undefined){
-        percent = 1.0;
-    }
-
-    percent = Math.max(0, Math.min(1, percent));
-    var yx = this.y / this.x;
-    var zx = this.z / this.x;
-    var yz = this.z / this.y;
-
-    var mag = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
-    var ratio = radius/ mag;
-
-    this.x = this.x * ratio * percent;
-    this.y = this.y * ratio * percent;
-    this.z = this.z * ratio * percent;
-    return this;
-
-};
-
-Point.prototype.registerFace = function(face){
-    this.faces.push(face);
-}
-
-Point.prototype.getOrderedFaces = function(){
-    var workingArray = this.faces.slice();
-    var ret = [];
-
-    var i = 0;
-    while(i < this.faces.length){
-        if(i == 0){
-            ret.push(workingArray[i]);
-            workingArray.splice(i,1);
-        } else {
-            var hit = false;
-            var j = 0;
-            while(j < workingArray.length && !hit){
-                if(workingArray[j].isAdjacentTo(ret[i-1])){
-                    hit = true;
-                    ret.push(workingArray[j]);
-                    workingArray.splice(j, 1);
-                }
-                j++;
-            }
-        }
-        i++;
-    }
-
-    return ret;
-}
-
-Point.prototype.findCommonFace = function(other, notThisFace){
-    for(var i = 0; i< this.faces.length; i++){
-        for(var j = 0; j< other.faces.length; j++){
-            if(this.faces[i].id === other.faces[j].id && this.faces[i].id !== notThisFace.id){
-                return this.faces[i];
-            }
-        }
-    }
-
-    return null;
-}
-
-Point.prototype.toJson = function(){
-    return {
-        x: this.x,
-        y: this.y,
-        z: this.z
-    };
-}
-
-Point.prototype.toString = function(){
-    return '' + this.x + ',' + this.y + ',' + this.z;
-}
-
-module.exports = Point;
-
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// This file is deprecated in 1.12.0 to be removed in 1.13
-( function() {
-!(__WEBPACK_AMD_DEFINE_FACTORY__ = ([
-	"jquery",
-	"./data",
-	"./disable-selection",
-	"./focusable",
-	"./form",
-	"./ie",
-	"./keycode",
-	"./labels",
-	"./jquery-1-7",
-	"./plugin",
-	"./safe-active-element",
-	"./safe-blur",
-	"./scroll-parent",
-	"./tabbable",
-	"./unique-id",
-	"./version"
-]),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
-				__WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-} )();
-
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
- * jQuery UI Keycode 1.12.1
- * http://jqueryui.com
- *
- * Copyright jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- */
-
-//>>label: Keycode
-//>>group: Core
-//>>description: Provide keycodes as keynames
-//>>docs: http://api.jqueryui.com/jQuery.ui.keyCode/
-
-( function( factory ) {
-	if ( true ) {
-
-		// AMD. Register as an anonymous module.
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(0), __webpack_require__(3) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	} else {
-
-		// Browser globals
-		factory( jQuery );
-	}
-} ( function( $ ) {
-return $.ui.keyCode = {
-	BACKSPACE: 8,
-	COMMA: 188,
-	DELETE: 46,
-	DOWN: 40,
-	END: 35,
-	ENTER: 13,
-	ESCAPE: 27,
-	HOME: 36,
-	LEFT: 37,
-	PAGE_DOWN: 34,
-	PAGE_UP: 33,
-	PERIOD: 190,
-	RIGHT: 39,
-	SPACE: 32,
-	TAB: 9,
-	UP: 38
-};
-
-} ) );
-
-
-/***/ }),
-/* 32 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
-	if ( true ) {
-
-		// AMD. Register as an anonymous module.
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(0), __webpack_require__(3) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	} else {
-
-		// Browser globals
-		factory( jQuery );
-	}
-} ( function( $ ) {
-return $.ui.safeActiveElement = function( document ) {
-	var activeElement;
-
-	// Support: IE 9 only
-	// IE9 throws an "Unspecified error" accessing document.activeElement from an <iframe>
-	try {
-		activeElement = document.activeElement;
-	} catch ( error ) {
-		activeElement = document.body;
-	}
-
-	// Support: IE 9 - 11 only
-	// IE may return null instead of an element
-	// Interestingly, this only seems to occur when NOT in an iframe
-	if ( !activeElement ) {
-		activeElement = document.body;
-	}
-
-	// Support: IE 11 only
-	// IE11 returns a seemingly empty object in some cases when accessing
-	// document.activeElement from an <iframe>
-	if ( !activeElement.nodeName ) {
-		activeElement = document.body;
-	}
-
-	return activeElement;
-};
-
-} ) );
-
-
-/***/ }),
-/* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
- * jQuery UI Mouse 1.12.1
- * http://jqueryui.com
- *
- * Copyright jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- */
-
-//>>label: Mouse
-//>>group: Widgets
-//>>description: Abstracts mouse-based interactions to assist in creating certain widgets.
-//>>docs: http://api.jqueryui.com/mouse/
-
-( function( factory ) {
-	if ( true ) {
-
-		// AMD. Register as an anonymous module.
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-			__webpack_require__(0),
-			__webpack_require__(188),
-			__webpack_require__(3),
-			__webpack_require__(7)
-		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	} else {
-
-		// Browser globals
-		factory( jQuery );
-	}
-}( function( $ ) {
-
-var mouseHandled = false;
-$( document ).on( "mouseup", function() {
-	mouseHandled = false;
-} );
-
-return $.widget( "ui.mouse", {
-	version: "1.12.1",
-	options: {
-		cancel: "input, textarea, button, select, option",
-		distance: 1,
-		delay: 0
-	},
-	_mouseInit: function() {
-		var that = this;
-
-		this.element
-			.on( "mousedown." + this.widgetName, function( event ) {
-				return that._mouseDown( event );
-			} )
-			.on( "click." + this.widgetName, function( event ) {
-				if ( true === $.data( event.target, that.widgetName + ".preventClickEvent" ) ) {
-					$.removeData( event.target, that.widgetName + ".preventClickEvent" );
-					event.stopImmediatePropagation();
-					return false;
-				}
-			} );
-
-		this.started = false;
-	},
-
-	// TODO: make sure destroying one instance of mouse doesn't mess with
-	// other instances of mouse
-	_mouseDestroy: function() {
-		this.element.off( "." + this.widgetName );
-		if ( this._mouseMoveDelegate ) {
-			this.document
-				.off( "mousemove." + this.widgetName, this._mouseMoveDelegate )
-				.off( "mouseup." + this.widgetName, this._mouseUpDelegate );
-		}
-	},
-
-	_mouseDown: function( event ) {
-
-		// don't let more than one widget handle mouseStart
-		if ( mouseHandled ) {
-			return;
-		}
-
-		this._mouseMoved = false;
-
-		// We may have missed mouseup (out of window)
-		( this._mouseStarted && this._mouseUp( event ) );
-
-		this._mouseDownEvent = event;
-
-		var that = this,
-			btnIsLeft = ( event.which === 1 ),
-
-			// event.target.nodeName works around a bug in IE 8 with
-			// disabled inputs (#7620)
-			elIsCancel = ( typeof this.options.cancel === "string" && event.target.nodeName ?
-				$( event.target ).closest( this.options.cancel ).length : false );
-		if ( !btnIsLeft || elIsCancel || !this._mouseCapture( event ) ) {
-			return true;
-		}
-
-		this.mouseDelayMet = !this.options.delay;
-		if ( !this.mouseDelayMet ) {
-			this._mouseDelayTimer = setTimeout( function() {
-				that.mouseDelayMet = true;
-			}, this.options.delay );
-		}
-
-		if ( this._mouseDistanceMet( event ) && this._mouseDelayMet( event ) ) {
-			this._mouseStarted = ( this._mouseStart( event ) !== false );
-			if ( !this._mouseStarted ) {
-				event.preventDefault();
-				return true;
-			}
-		}
-
-		// Click event may never have fired (Gecko & Opera)
-		if ( true === $.data( event.target, this.widgetName + ".preventClickEvent" ) ) {
-			$.removeData( event.target, this.widgetName + ".preventClickEvent" );
-		}
-
-		// These delegates are required to keep context
-		this._mouseMoveDelegate = function( event ) {
-			return that._mouseMove( event );
-		};
-		this._mouseUpDelegate = function( event ) {
-			return that._mouseUp( event );
-		};
-
-		this.document
-			.on( "mousemove." + this.widgetName, this._mouseMoveDelegate )
-			.on( "mouseup." + this.widgetName, this._mouseUpDelegate );
-
-		event.preventDefault();
-
-		mouseHandled = true;
-		return true;
-	},
-
-	_mouseMove: function( event ) {
-
-		// Only check for mouseups outside the document if you've moved inside the document
-		// at least once. This prevents the firing of mouseup in the case of IE<9, which will
-		// fire a mousemove event if content is placed under the cursor. See #7778
-		// Support: IE <9
-		if ( this._mouseMoved ) {
-
-			// IE mouseup check - mouseup happened when mouse was out of window
-			if ( $.ui.ie && ( !document.documentMode || document.documentMode < 9 ) &&
-					!event.button ) {
-				return this._mouseUp( event );
-
-			// Iframe mouseup check - mouseup occurred in another document
-			} else if ( !event.which ) {
-
-				// Support: Safari <=8 - 9
-				// Safari sets which to 0 if you press any of the following keys
-				// during a drag (#14461)
-				if ( event.originalEvent.altKey || event.originalEvent.ctrlKey ||
-						event.originalEvent.metaKey || event.originalEvent.shiftKey ) {
-					this.ignoreMissingWhich = true;
-				} else if ( !this.ignoreMissingWhich ) {
-					return this._mouseUp( event );
-				}
-			}
-		}
-
-		if ( event.which || event.button ) {
-			this._mouseMoved = true;
-		}
-
-		if ( this._mouseStarted ) {
-			this._mouseDrag( event );
-			return event.preventDefault();
-		}
-
-		if ( this._mouseDistanceMet( event ) && this._mouseDelayMet( event ) ) {
-			this._mouseStarted =
-				( this._mouseStart( this._mouseDownEvent, event ) !== false );
-			( this._mouseStarted ? this._mouseDrag( event ) : this._mouseUp( event ) );
-		}
-
-		return !this._mouseStarted;
-	},
-
-	_mouseUp: function( event ) {
-		this.document
-			.off( "mousemove." + this.widgetName, this._mouseMoveDelegate )
-			.off( "mouseup." + this.widgetName, this._mouseUpDelegate );
-
-		if ( this._mouseStarted ) {
-			this._mouseStarted = false;
-
-			if ( event.target === this._mouseDownEvent.target ) {
-				$.data( event.target, this.widgetName + ".preventClickEvent", true );
-			}
-
-			this._mouseStop( event );
-		}
-
-		if ( this._mouseDelayTimer ) {
-			clearTimeout( this._mouseDelayTimer );
-			delete this._mouseDelayTimer;
-		}
-
-		this.ignoreMissingWhich = false;
-		mouseHandled = false;
-		event.preventDefault();
-	},
-
-	_mouseDistanceMet: function( event ) {
-		return ( Math.max(
-				Math.abs( this._mouseDownEvent.pageX - event.pageX ),
-				Math.abs( this._mouseDownEvent.pageY - event.pageY )
-			) >= this.options.distance
-		);
-	},
-
-	_mouseDelayMet: function( /* event */ ) {
-		return this.mouseDelayMet;
-	},
-
-	// These are placeholder methods, to be overriden by extending plugin
-	_mouseStart: function( /* event */ ) {},
-	_mouseDrag: function( /* event */ ) {},
-	_mouseStop: function( /* event */ ) {},
-	_mouseCapture: function( /* event */ ) { return true; }
-} );
-
-} ) );
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-/**
- * Module dependencies.
- */
-
-var debug = __webpack_require__(5)('socket.io-parser');
-var Emitter = __webpack_require__(9);
-var hasBin = __webpack_require__(58);
-var binary = __webpack_require__(206);
-var isBuf = __webpack_require__(66);
-
-/**
- * Protocol version.
- *
- * @api public
- */
-
-exports.protocol = 4;
-
-/**
- * Packet types.
- *
- * @api public
- */
-
-exports.types = [
-  'CONNECT',
-  'DISCONNECT',
-  'EVENT',
-  'ACK',
-  'ERROR',
-  'BINARY_EVENT',
-  'BINARY_ACK'
-];
-
-/**
- * Packet type `connect`.
- *
- * @api public
- */
-
-exports.CONNECT = 0;
-
-/**
- * Packet type `disconnect`.
- *
- * @api public
- */
-
-exports.DISCONNECT = 1;
-
-/**
- * Packet type `event`.
- *
- * @api public
- */
-
-exports.EVENT = 2;
-
-/**
- * Packet type `ack`.
- *
- * @api public
- */
-
-exports.ACK = 3;
-
-/**
- * Packet type `error`.
- *
- * @api public
- */
-
-exports.ERROR = 4;
-
-/**
- * Packet type 'binary event'
- *
- * @api public
- */
-
-exports.BINARY_EVENT = 5;
-
-/**
- * Packet type `binary ack`. For acks with binary arguments.
- *
- * @api public
- */
-
-exports.BINARY_ACK = 6;
-
-/**
- * Encoder constructor.
- *
- * @api public
- */
-
-exports.Encoder = Encoder;
-
-/**
- * Decoder constructor.
- *
- * @api public
- */
-
-exports.Decoder = Decoder;
-
-/**
- * A socket.io Encoder instance
- *
- * @api public
- */
-
-function Encoder() {}
-
-/**
- * Encode a packet as a single string if non-binary, or as a
- * buffer sequence, depending on packet type.
- *
- * @param {Object} obj - packet object
- * @param {Function} callback - function to handle encodings (likely engine.write)
- * @return Calls callback with Array of encodings
- * @api public
- */
-
-Encoder.prototype.encode = function(obj, callback){
-  if ((obj.type === exports.EVENT || obj.type === exports.ACK) && hasBin(obj.data)) {
-    obj.type = obj.type === exports.EVENT ? exports.BINARY_EVENT : exports.BINARY_ACK;
-  }
-
-  debug('encoding packet %j', obj);
-
-  if (exports.BINARY_EVENT === obj.type || exports.BINARY_ACK === obj.type) {
-    encodeAsBinary(obj, callback);
-  }
-  else {
-    var encoding = encodeAsString(obj);
-    callback([encoding]);
-  }
-};
-
-/**
- * Encode packet as string.
- *
- * @param {Object} packet
- * @return {String} encoded
- * @api private
- */
-
-function encodeAsString(obj) {
-
-  // first is type
-  var str = '' + obj.type;
-
-  // attachments if we have them
-  if (exports.BINARY_EVENT === obj.type || exports.BINARY_ACK === obj.type) {
-    str += obj.attachments + '-';
-  }
-
-  // if we have a namespace other than `/`
-  // we append it followed by a comma `,`
-  if (obj.nsp && '/' !== obj.nsp) {
-    str += obj.nsp + ',';
-  }
-
-  // immediately followed by the id
-  if (null != obj.id) {
-    str += obj.id;
-  }
-
-  // json data
-  if (null != obj.data) {
-    str += JSON.stringify(obj.data);
-  }
-
-  debug('encoded %j as %s', obj, str);
-  return str;
-}
-
-/**
- * Encode packet as 'buffer sequence' by removing blobs, and
- * deconstructing packet into object with placeholders and
- * a list of buffers.
- *
- * @param {Object} packet
- * @return {Buffer} encoded
- * @api private
- */
-
-function encodeAsBinary(obj, callback) {
-
-  function writeEncoding(bloblessData) {
-    var deconstruction = binary.deconstructPacket(bloblessData);
-    var pack = encodeAsString(deconstruction.packet);
-    var buffers = deconstruction.buffers;
-
-    buffers.unshift(pack); // add packet info to beginning of data list
-    callback(buffers); // write all the buffers
-  }
-
-  binary.removeBlobs(obj, writeEncoding);
-}
-
-/**
- * A socket.io Decoder instance
- *
- * @return {Object} decoder
- * @api public
- */
-
-function Decoder() {
-  this.reconstructor = null;
-}
-
-/**
- * Mix in `Emitter` with Decoder.
- */
-
-Emitter(Decoder.prototype);
-
-/**
- * Decodes an ecoded packet string into packet JSON.
- *
- * @param {String} obj - encoded packet
- * @return {Object} packet
- * @api public
- */
-
-Decoder.prototype.add = function(obj) {
-  var packet;
-  if (typeof obj === 'string') {
-    packet = decodeString(obj);
-    if (exports.BINARY_EVENT === packet.type || exports.BINARY_ACK === packet.type) { // binary packet's json
-      this.reconstructor = new BinaryReconstructor(packet);
-
-      // no attachments, labeled binary but no binary data to follow
-      if (this.reconstructor.reconPack.attachments === 0) {
-        this.emit('decoded', packet);
-      }
-    } else { // non-binary full packet
-      this.emit('decoded', packet);
-    }
-  }
-  else if (isBuf(obj) || obj.base64) { // raw binary data
-    if (!this.reconstructor) {
-      throw new Error('got binary data when not reconstructing a packet');
-    } else {
-      packet = this.reconstructor.takeBinaryData(obj);
-      if (packet) { // received final buffer
-        this.reconstructor = null;
-        this.emit('decoded', packet);
-      }
-    }
-  }
-  else {
-    throw new Error('Unknown type: ' + obj);
-  }
-};
-
-/**
- * Decode a packet String (JSON data)
- *
- * @param {String} str
- * @return {Object} packet
- * @api private
- */
-
-function decodeString(str) {
-  var i = 0;
-  // look up type
-  var p = {
-    type: Number(str.charAt(0))
-  };
-
-  if (null == exports.types[p.type]) return error();
-
-  // look up attachments if type binary
-  if (exports.BINARY_EVENT === p.type || exports.BINARY_ACK === p.type) {
-    var buf = '';
-    while (str.charAt(++i) !== '-') {
-      buf += str.charAt(i);
-      if (i == str.length) break;
-    }
-    if (buf != Number(buf) || str.charAt(i) !== '-') {
-      throw new Error('Illegal attachments');
-    }
-    p.attachments = Number(buf);
-  }
-
-  // look up namespace (if any)
-  if ('/' === str.charAt(i + 1)) {
-    p.nsp = '';
-    while (++i) {
-      var c = str.charAt(i);
-      if (',' === c) break;
-      p.nsp += c;
-      if (i === str.length) break;
-    }
-  } else {
-    p.nsp = '/';
-  }
-
-  // look up id
-  var next = str.charAt(i + 1);
-  if ('' !== next && Number(next) == next) {
-    p.id = '';
-    while (++i) {
-      var c = str.charAt(i);
-      if (null == c || Number(c) != c) {
-        --i;
-        break;
-      }
-      p.id += str.charAt(i);
-      if (i === str.length) break;
-    }
-    p.id = Number(p.id);
-  }
-
-  // look up json data
-  if (str.charAt(++i)) {
-    p = tryParse(p, str.substr(i));
-  }
-
-  debug('decoded %s as %j', str, p);
-  return p;
-}
-
-function tryParse(p, str) {
-  try {
-    p.data = JSON.parse(str);
-  } catch(e){
-    return error();
-  }
-  return p; 
-}
-
-/**
- * Deallocates a parser's resources
- *
- * @api public
- */
-
-Decoder.prototype.destroy = function() {
-  if (this.reconstructor) {
-    this.reconstructor.finishedReconstruction();
-  }
-};
-
-/**
- * A manager of a binary event's 'buffer sequence'. Should
- * be constructed whenever a packet of type BINARY_EVENT is
- * decoded.
- *
- * @param {Object} packet
- * @return {BinaryReconstructor} initialized reconstructor
- * @api private
- */
-
-function BinaryReconstructor(packet) {
-  this.reconPack = packet;
-  this.buffers = [];
-}
-
-/**
- * Method to be called when binary data received from connection
- * after a BINARY_EVENT packet.
- *
- * @param {Buffer | ArrayBuffer} binData - the raw binary data received
- * @return {null | Object} returns null if more binary data is expected or
- *   a reconstructed packet object if all buffers have been received.
- * @api private
- */
-
-BinaryReconstructor.prototype.takeBinaryData = function(binData) {
-  this.buffers.push(binData);
-  if (this.buffers.length === this.reconPack.attachments) { // done with buffer list
-    var packet = binary.reconstructPacket(this.reconPack, this.buffers);
-    this.finishedReconstruction();
-    return packet;
-  }
-  return null;
-};
-
-/**
- * Cleans up binary packet reconstruction variables.
- *
- * @api private
- */
-
-BinaryReconstructor.prototype.finishedReconstruction = function() {
-  this.reconPack = null;
-  this.buffers = [];
-};
-
-function error() {
-  return {
-    type: exports.ERROR,
-    data: 'parser error'
-  };
-}
-
-
-/***/ }),
-/* 35 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(113);
-if(typeof content === 'string') content = [[module.i, content, '']];
-// Prepare cssTransformation
-var transform;
-
-var options = {}
-options.transform = transform
-// add the styles to the DOM
-var update = __webpack_require__(14)(content, options);
-if(content.locals) module.exports = content.locals;
-// Hot Module Replacement
-if(false) {
-	// When the styles change, update the <style> tags
-	if(!content.locals) {
-		module.hot.accept("!!../../../css-loader/index.js!./core.css", function() {
-			var newContent = require("!!../../../css-loader/index.js!./core.css");
-			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-			update(newContent);
-		});
-	}
-	// When the module is disposed, remove the <style> tags
-	module.hot.dispose(function() { update(); });
-}
-
-/***/ }),
-/* 36 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(_) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return GUI; });
+/* WEBPACK VAR INJECTION */(function(_) {/* harmony export (immutable) */ __webpack_exports__["b"] = computeGroupNodeColorHelper;
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return GUI; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__ = __webpack_require__(197);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__ = __webpack_require__(206);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__ = __webpack_require__(193);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__ = __webpack_require__(202);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__ = __webpack_require__(196);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__ = __webpack_require__(205);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__);
 
 
@@ -78776,83 +77136,79 @@ if(false) {
 
 
 
-function formatNumber (num) {
-	return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+function formatNumber(num) {
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 }
-var curr=0
-var currentGradientColors=[0x218D20,0x439229,0x8CCB84,0x14B0BF,0x9DC9CA,0xCAB81A,0xBBC42D,0xC8A6BF,0xCF73B4,0x816365,0x7D5C53,0xAE5E29,0xB62729]
-function getNextGradient()
-{
-	
-	
-	var availGradients=[
 
-	[0x218D20,0x439229,0x8CCB84,0x14B0BF,0x9DC9CA,0xCAB81A,0xBBC42D,0xC8A6BF,0xCF73B4,0x816365,0x7D5C53,0xAE5E29,0xB62729],
-	[0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0xff0000,0x00ff00,0x0000ff,0xffffff],
-	[0xffffff,0x0000ff,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111,0x111111]
-	]
-	
-	var next=++curr % availGradients.length
-	return currentGradientColors=availGradients[next]
-	
-}			
-	
+var curr = 0
+var currentGradientColors = [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729]
 
-	function computeCompanyNodeColor(val=0,attr="sent"){
+function getNextGradient() {
 
-					
-					var sentRanges= [[92,Number.MAX_SAFE_INTEGER],[85,92],[78,85],[71,78],[64,71],[57,64],[50,57],[43,50],[36,43],[29,36],[22,29],[15,22],[Number.MIN_SAFE_INTEGER,22]]
-					var priceRangesInPct=[[18,Number.MAX_SAFE_INTEGER],[18,15],[12,15],[9,12],[6,9],[3,6],[0,3],[-3,0],[-6,-3],[-9,-6],[-12,-9],[-18,-15],[Number.MIN_SAFE_INTEGER,-18]]
 
-				var arr
+    var availGradients = [
 
-				if (attr=="sent") arr=sentRanges
-				if (attr=="priceRanges") arr=priceRangesInPct;
-				
-				var i;
-				for (i=0;i<arr.length;i++) {
-					var range=arr[i] ;
+        [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729],
+        [0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0xff0000, 0x00ff00, 0x0000ff, 0xffffff],
+        [0xffffff, 0x0000ff, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111]
+    ]
 
-					if (range[0]<val && val<range[1] )
-					return currentGradientColors[i]
-				
-					if (range[1]<val && val<range[0] )
-					return currentGradientColors[i]
-				}
+    var next = ++curr % availGradients.length
+    return currentGradientColors = availGradients[next]
 
-					return 0xffffff
-			}
-			
-				
-			function computeGroupNodeColorHelper(distinctGroupIDS)
-			{
-				var colors=[]
-				
-				for (i in distinctGroupIDS)
-				{
-					colors.push(_.random(0,255)*_.random(0,255)*_.random(0,255))
-					
-				}
-				
-				
-				return {
-					getColor:function (groupID){
-					
-					var i=distinctGroupIDS.indexOf(groupID)
-					return colors[i]|| 0xFFFFFF
-				}
-				
-				}
-				
-			}
-			
+}
 
-		
-function changeGradientBar(colorArray)
-{
-	var gradientString=colorArray.map( (c) => "#"+c.toString(16).padStart(6,"0")  ).join(",")
 
-		var tpl=`.companyGradient {
+function computeCompanyNodeColor(val = 0, attr = "sent") {
+
+
+    var sentRanges = [[92, Number.MAX_SAFE_INTEGER], [85, 92], [78, 85], [71, 78], [64, 71], [57, 64], [50, 57], [43, 50], [36, 43], [29, 36], [22, 29], [15, 22], [Number.MIN_SAFE_INTEGER, 22]]
+    var priceRangesInPct = [[18, Number.MAX_SAFE_INTEGER], [18, 15], [12, 15], [9, 12], [6, 9], [3, 6], [0, 3], [-3, 0], [-6, -3], [-9, -6], [-12, -9], [-18, -15], [Number.MIN_SAFE_INTEGER, -18]]
+
+    var arr
+
+    if (attr == "sent") arr = sentRanges
+    if (attr == "priceRanges") arr = priceRangesInPct;
+
+    var i;
+    for (i = 0; i < arr.length; i++) {
+        var range = arr[i];
+
+        if (range[0] < val && val < range[1])
+            return currentGradientColors[i]
+
+        if (range[1] < val && val < range[0])
+            return currentGradientColors[i]
+    }
+
+    return 0xffffff
+}
+
+function computeGroupNodeColorHelper(distinctGroupIDS) {
+    var colors = []
+
+    for (let i in distinctGroupIDS) {
+        colors.push(_.random(0, 255) * _.random(0, 255) * _.random(0, 255))
+
+    }
+
+
+    return {
+        getColor: function (groupID) {
+
+            var i = distinctGroupIDS.indexOf(groupID)
+            return colors[i] || 0xFFFFFF
+        }
+
+    }
+
+}
+
+
+function changeGradientBar(colorArray) {
+    var gradientString = colorArray.map((c) => "#" + c.toString(16).padStart(6, "0")).join(",")
+
+    var tpl = `.companyGradient {
 		  background: lightgrey;
 		  
 		  background: -webkit-linear-gradient(left,${gradientString});
@@ -78864,2118 +77220,338 @@ function changeGradientBar(colorArray)
 		  background: linear-gradient(to right,${gradientString}); 
 		}
 `
- __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<style>").text(tpl).appendTo("head")
-	
-	
-	
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<style>").text(tpl).appendTo("head")
+
+
 }
-			
-			
-		
-__WEBPACK_IMPORTED_MODULE_0_jquery___default()(function(){
-	
-	var selectTemplate=`
+
+
+__WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
+
+    var selectTemplate = `
 	<select class="cloudNodeColorSelect">
 	<option value="sent">sent</option>
 	<option value="priceRanges">priceRanges</option>
 	<option value="group">group</option>
 	</select> 
 	`
-	var $sel=__WEBPACK_IMPORTED_MODULE_0_jquery___default()(selectTemplate)
-	
-	__WEBPACK_IMPORTED_MODULE_0_jquery___default()(".companyGradient").on("click",function(){
-		
-		var array=getNextGradient()	
-		changeGradientBar(array)
-		$sel.trigger("change")
-	})
-	
-	
-	$sel.on("change",function(e,ui){
-        var val=$sel.val()
+    var $sel = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(selectTemplate)
 
-		__WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).trigger("node-color-change",val)
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(".companyGradient").on("click", function () {
 
-/*
-        var helper=computeGroupNodeColorHelper(globalEnv.nodeClouds.groupIdList)
+        var array = getNextGradient()
+        changeGradientBar(array)
+        $sel.trigger("change")
+    })
 
 
-        if (val=="group")
-            globalNodes.forEach(function(v){ v.color=helper.getColor(v.group)});
-        else
-            globalNodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
+    $sel.on("change", function (e, ui) {
+        var val = $sel.val()
 
-        globalEnv.nodeClouds.update()
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).trigger("node-color-change", val)
 
-        globalEnv.particles.updateColors()
+        /*
+                var helper=computeGroupNodeColorHelper(globalEnv.nodeClouds.groupIdList)
 
-*/
 
+                if (val=="group")
+                    globalNodes.forEach(function(v){ v.color=helper.getColor(v.group)});
+                else
+                    globalNodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
+
+                globalEnv.nodeClouds.update()
+
+                globalEnv.particles.updateColors()
+
+        */
 
 
     }).appendTo("body")
-	
+
 })
 
 
-var GUI={
-	createAccordion(items)
-	{
-		function createSection(caption,content,id)
-		{
-		var sectionTpl=`<h3 class="accordion-header ui-accordion-header ui-helper-reset ui-state-default ui-accordion-icons ui-corner-all" > ${caption}</h3>
+var GUI = {
+    createAccordion(items) {
+        function createSection(caption, content, id) {
+            var sectionTpl = `<h3 class="accordion-header ui-accordion-header ui-helper-reset ui-state-default ui-accordion-icons ui-corner-all" > ${caption}</h3>
 		<div id="${id}" class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom">
 			
 		</div>`
-		 var section=__WEBPACK_IMPORTED_MODULE_0_jquery___default()(sectionTpl)
-		 
-		
-		 section.find(".ui-accordion-content").addBack('.ui-accordion-content').append(content)
-
-		return section
-		}
-		var acc=__WEBPACK_IMPORTED_MODULE_0_jquery___default()('<div class="ui-accordion ui-widget ui-helper-reset">')
-		for (let item of items)
-		{
-		item=_.extend({caption:"missing 'caption'",content:"missing 'content'"},item)
-		var sec=createSection(item.caption,item.content,item.id)
-		acc.append(sec)
-		}
-		
-		//acc.accordion({ header: "h3", active: false, collapsible: true })
-		return acc
-	},
-	createSlider:function(){
-		
-		
-		
-		var slider=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").slider({
-			min:10,max:1000,
-			slide:function( event, ui ){
-				
-				
-				doZoomByVal(ui.value)
-				
-			}
-		
-		}).addClass("zoom-slider")
-		.css({
-		    width: 200,
-    "margin-left": "2em",
-    "margin-top": "0.5em",
-		})
-		
-		slider.appendTo("body")
-		
-		
-	},
-	createSample(){
-		
-		let a=GUI.createAccordion([{caption:"<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Sectors </span><img src=\"include/images/Triangle.png\" style=\"width:10px;\">",id:"companyIndustry",content:"Technology, 33%<br>Consumer Discretionary, 20%<br>Consumer Staples, 20%"},{caption:"<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Countries</span> <img src=\"include/images/Triangle.png\" style=\"width:10px;\">",id:"companyCountry",content:"United States, 80%<br>Japan, 10%<br>Germany, 4%"}])
-		a.css({top:80,left:10,position:"absolute", zIndex:999,width:200}).appendTo("body")
-		GUI.$el=a
-		
-		
-		GUI.createSlider()
-	GUI.info=	GUI.createNodeInfoPanel()
-		
-		
-		
-	},
-	createNodeInfoPanel(){
-		
-		GUI.$info=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>")
-		
-		
-		GUI.$info.hide().appendTo("body")
-		
-		GUI.$info.addClass("graph-node-info").draggable().resizable()
-		
-		var $header=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-header")
-		
-		
-				var $search=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span>").addClass("graph-node-info-search").html("Yahoo Search")
-				var $price=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span>").addClass("graph-node-info-price").html("USD 36.5 (-0.5%)")
-				var $close=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span style=\"margin-left:420px;cursor:pointer;\">").addClass("graph-node-info-close").html("<i class=\"fa fa-times\" aria-hidden=\"true\" style=\"font-family:'FontAwesome' !important;\"></i> CLOSE")
-			
-				var stockPrice = "<span style=\"margin-left:20px;margin-top:7px;\">USD <span style=\"color:#f7685e;font-family:'roboto-bold'  !important;\">36.5</span> (-0.5%)</span>";
-               // var headBar = "<span style=\"margin-left:400px;margin-top:7px;\" ></span>";
-			
-			
-			$close.on("click",function(){
-				GUI.$info.fadeOut(50)
-				
-			})
-			
-		$header.append($search,stockPrice,$close)
-		
-		var $body=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-body")
-		
-		$body.html("COMPANY<br> wikiinfo")
-		
-		var $news=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news")
-		
-		//$news.html("RSS or Twitter or News")
-		
-			var $newsHeader=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news-header").html("News")
-				var $newsBody=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news-body")
-		$news.append($newsHeader,$newsBody)
-		
-		GUI.$info.append($header,$body,$news)
-		
-		
-	return {
-		setNode:function(node)
-		{
-			var news=["U.S., China agree to first trade steps under 100-day plan",
-			"Wall Street falls, department stores take a drubbing",
-			"Behind Kushner Companies, a Chinese agency skirts visa-for-investment rules",
-			"In blow to Trump, GE backs NAFTA and plans growth in Mexico"]
-			
-				lorem="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
-			
-			
-			
-			//header
-			
-			
-			$search.html(__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<a style=\"text-decoration:none;\">").html("<div style=\"float:left;\">Go to Company Page </div><div  style=\"float:right;padding-left:5px;padding-top:1px;\"> >></div>").attr({target:"_blank",href:"#",title:"Open new Tab for "+node.name}))
-			
-			
-			//price
-			
-			var companyLookupName=node.name
-			if (node.ticker)
-				companyLookupName=node.ticker.split(":")[1]
-			
-			AppDataService.getCompanyInfo(companyLookupName).then(function(data){
-			
-			/*if (!data.LastTradePriceOnly)
-			{
-				console.error("'"+node.name+"' not found",data)
-				$price.html("-/-")
-				return
-			}*/
-			
-				var str=`${data.Currency} ${data.LastTradePriceOnly} (${data.ChangeinPercent})`
-				$price.html(str)
-				
-			})
-			
-			
-			
-			//body
-			$body.html("")
-			AppDataService.getWiki(node.name).then(function(data){
-				
-				if (data.content=="Redirect to:")
-				{
-					$body.html("<h2>"+node.name+"</h2><br>").append("TODO handle redirects for wikipedia")
-					/*
-					AppDataService.getWiki(data.page).then(function(data){
-						$body.html("<h2>"+node.name+"</h2><br>").append(data.content)
-						
-					})*/
-				}
-				else
-				$body.html("<h2>"+node.name+"</h2><br>").append(data.content)
-				
-			}).catch(function(e){
-				
-				
-				if (e.code=="missingtitle")
-					$body.html("Wiki info not found for: "+node.name)
-				else
-				$body.html(e.code)
-				
-			})
-			
-			
-			
-			$newsBody.html("")
-			
-			
-			function getNews()
-			{
-				var n=news[_.random(0,3)]
-				var el=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<p>").append(n)
-				$newsBody.append(el)
-			}
-			
-			getNews()
-			
-			getNews()
-			getNews()
-			
-		}
-	}
-		
-	},
-	updateNodeInfo(node,bShow=true){
-		
-		
-		GUI.$info.toggle(bShow)
-		if (bShow)
-		GUI.info.setNode(node)
-		
-		
-	},
-	
-	updateFromVisibleNodes(nodes){
-		
-			if (!GUI.$el) return 
-			
-			
-			
-				GUI.$el.parent().find(".graph-info-companys-visible").html(formatNumber(nodes.length.toLocaleString('en-US')))
-
-			
-	
-		var industries={}
-		var countries={}
-		nodes.forEach(function(n){
-			
-			if (!n.industry) return 
-			
-			if (!n.group) return 
-			
-			if (!industries[n.industry]) industries[n.industry]=0
-			industries[n.industry]++
-			
-			if (!countries[n.group]) countries[n.group]=0
-			countries[n.group]++
-			
-		})
-		
-		
-		var sortedIndustries = _.sortBy(_.toPairs(industries), 1).reverse()
-		var sortedCountries = _.sortBy(_.toPairs(countries), 1).reverse()
-		
-		var totalCountries=_.sum(sortedCountries.map( (v) => v[1]))
-		var totalIndustries=_.sum(sortedIndustries.map( (v) => v[1]))
-		
-		var $industry=GUI.$el.find("#companyIndustry")
-		var $country=GUI.$el.find("#companyCountry")
-		
-		
-		function pct(val,total)
-		{
-			return ", "+_.round(100*val/total,1)+"%"
-			
-		}
-		
-		$industry.html("")
-		for (var industry of sortedIndustries.slice(0,3))
-		{
-			var resHTML="<table style=\"width:100%;padding:0px;margin:0px;\"><tr><td style=\"padding:0px;margin:0px;text-align:center;width:25px;\" ><img src=\"img/industryIcons/"+industry[0]+".png\" style=\"width:22px;height:22px;\"></td><td style=\"width:80%;padding:0px;margin:0px;text-align:left; font-family: 'roboto';color:rgb(208, 206, 206);font-size:14px;\">"+industry[0].trim()+""+pct(industry[1],totalIndustries)+"</td></tr></table>";
-			var $row=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("industry-info-row").append(resHTML)
-			$industry.append($row)		
-		}
-		
-	
-		$country.html("")
-		for (var country of sortedCountries.slice(0,3))
-		{
-			var $row=__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").append("<span style=\" font-family: 'roboto';color:rgb(208, 206, 206);font-size:14px;\">"+country[0]+""+pct(country[1],totalCountries)+"</span>")
-			$country.append($row)
-			
-		}
-		//TODO percentage
-		
-		
-		
-	}
-	
-	
-}
+            var section = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(sectionTpl)
 
 
-__WEBPACK_IMPORTED_MODULE_0_jquery___default()(function(){
-	
-	GUI.createSample()
+            section.find(".ui-accordion-content").addBack('.ui-accordion-content').append(content)
 
-	__WEBPACK_IMPORTED_MODULE_0_jquery___default()(".rightCompanyInfo").draggable()
-	
-
-	
-})
-	
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
-
-/***/ }),
-/* 37 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(88);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__particles_NodesParticleSystem__ = __webpack_require__(90);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__particles_ParticleNodeGroup__ = __webpack_require__(91);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_Tween__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__lib_Tween__);
-/**
- * Created by Frank on 30.05.2017.
- */
-
-
-
-
-
-
-
-
-
-//import TWEEN from "@tweenjs/tween.js"
-
-
-class ClusterLeafElement extends THREE.Mesh {
-    constructor(nodes) {
-        super();
-
-
-        this.mNodes = nodes;
-
-        this.mNodeParticles = this.createParticleNodeCloud();
-        this.add(this.mNodeParticles.pointCloud);
-
-
-        //add edges to the leaf
-        this.createEdgesFromNodes(nodes);
-
-
-        // add the nodes to the leaf
-        this.appendNodes(nodes);
-
-
-    }
-
-
-    getView() {
-        //TODO
-        return this.parent.parent.getView()
-
-    }
-
-    setLOD(levelOfDetail) {
-        if (this.mNodeParticles && this.parent.useLOD)
-            this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
-        //TODO nodes,edges, ... as well
-
-        let edgeFadeLOD = 0.3;
-        let crossfade = 0.2;//TODO add crossfade
-
-        if (this.mEdgesContainer) {
-
-            this.mEdgesContainer.visible = levelOfDetail>0.75// levelOfDetail >= edgeFadeLOD;
-
-            this.mEdgesContainer.mEdges.material.opacity =levelOfDetail/4// (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
+            return section
         }
 
-     /*   if (this.mEdgesContainer2) {
-
-            this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
-
-            this.mEdgesContainer2.mEdges.material.opacity = 1 - levelOfDetail / edgeFadeLOD;
-        }*/
-
-
-        if (this.mNodeMeshes)
-            this.mNodeMeshes.visible = levelOfDetail > 0.2;
-
-        // if (this.parent && this.parent.mParticles)
-        // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
-
-
-    }
-
-
-    cleanUp() {
-
-
-        if (this.mNodeParticles) {
-            this.mNodeParticles.remove();
-            this.mNodeParticles.pointCloud.geometry.dispose();
-            this.mNodeParticles = null;
+        var acc = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<div class="ui-accordion ui-widget ui-helper-reset">')
+        for (let item of items) {
+            item = _.extend({caption: "missing 'caption'", content: "missing 'content'"}, item)
+            var sec = createSection(item.caption, item.content, item.id)
+            acc.append(sec)
         }
 
-        if (this.mParticles) {
-            this.mParticles.remove();
-            this.mParticles.pointCloud.geometry.dispose();
-            this.mParticles = null;
-        }
+        //acc.accordion({ header: "h3", active: false, collapsible: true })
+        return acc
+    },
+    createSlider: function () {
 
 
-        if (this.mEdgesContainer && this.mEdgesContainer.geometry) {
+        var slider = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").slider({
+            min: 10, max: 1000,
+            slide: function (event, ui) {
 
-            this.remove(this.mEdgesContainer);
 
-            this.mEdgesContainer.geometry.dispose();
-            this.mEdgesContainer = null;
-        }
+                doZoomByVal(ui.value)
 
-
-     /*   if (this.mEdgesContainer2 && this.mEdgesContainer2.geometry) {
-
-
-            this.mEdgesContainer2.geometry.dispose();
-            this.mEdgesContainer2 = null;
-        }*/
-
-
-        if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
-            this.mNodeMeshes.geometry.dispose();
-            this.mNodeMeshes = null;
-        }
-
-
-        if (this.geometry)
-            this.geometry.dispose();
-        if (this.parent)
-            this.parent.remove(this)
-
-
-    }
-
-
-    appendNodes(nodes) {
-
-
-        if (!this.mNodeMeshes) {
-            this.mNodeMeshes = new THREE.Object3D;
-            this.add(this.mNodeMeshes)
-
-        }
-
-
-        var that = this.mNodeMeshes;//this;
-        _.each(nodes, function (node) {
-            if (node && node._bubble)
-                that.add(node._bubble)
-
-
-        })
-
-
-    }
-
-
-    createEdgesFromNodes(nodes) {
-
-        this.mEdgesContainer = new __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__["a" /* default */]();
-        this.mEdgesContainer.setRenderMode(true, false, false).setSkipParams(30, 40).setFromNodes(nodes);
-        this.add(this.mEdgesContainer)
-
-        /* this.mEdgesContainer2 = new EdgesContainer();
-         this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
-         this.add(this.mEdgesContainer2)
-         */
-
-
-    }
-
-
-    //TODO refactor
-    setDistributionHandler(distribution, onComplete = function () {
-    }) {
-
-        var that = this;
-        distribution.setNodes(this.mNodes, function (vec, i) {
-
-            let n = that.mNodes[i];
-            if (n._bubble) n._bubble.position.set(n.x, n.y, n.z);
-            that.mNodeParticles.updateNodePosition(i);
-
-        }, function onStep() {
-
-
-            that.updateEdges();
-
-
-        }, function () {
-
-
-            that._initDotParticles();
-
-            onComplete()
-
-
-        });
-
-    }
-
-    updateEdges() {
-
-
-        if (this.mEdgesContainer)
-            this.mEdgesContainer.updateEdges();
-
-      //  if (this.mEdgesContainer2)
-       //     this.mEdgesContainer2.updateEdges();
-
-    }
-
-    updateDots(time) {
-        if (this.mParticles)
-            this.mParticles.update(time);
-    }
-
-
-    /**
-     * creates a structure that contains a point cloud for the nodes for mre effiecient rendering
-     *
-     * @returns {{nodes, pointCloud, updateCrossFade, update, updateNode, updateNodePosition, updateNodeColor, updateNodeSize, on, remove}|*}
-     */
-
-    createParticleNodeCloud() {
-
-        var elem = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__particles_ParticleNodeGroup__["a" /* default */])(this.mNodes, {
-            nodeDefaultSize: 10,
-            nodeDefaultScale: 10,
-            nodeTexture: "img/dot7.png"
-        });
-
-
-        return elem
-    }
-
-
-    //create/update particleSystem (little dots inside nodes)
-    //potentially add them at specific time
-    _initDotParticles() {
-
-        if (this.mParticles)
-            this.mParticles.start();
-
-
-        if (!this.mParticles) {
-
-            var nodes = this.mNodes;
-            var demoOptions = {
-                increment: 1,
-                duration: 1000,
-                easing: __WEBPACK_IMPORTED_MODULE_3__lib_Tween___default.a.Easing.Exponential.Out
-            };
-
-            if (!nodes) //FIXME this only works that way because to realData is not generated properly
-                demoOptions.npc = function (n) {
-
-                    return n.itemCount || 5
-                    //return 5
-                };
-
-
-            //TODO refactor force-graph-utils
-
-            var particles = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__particles_NodesParticleSystem__["a" /* default */])(nodes, demoOptions);
-            this.add(particles.pointCloud);
-
-
-            //TODO this timeout currently fixes wrong positioning bug..
-            setTimeout(function () {
-                particles.start();
-            }, 10)
-
-            //TODO call start if distribution function is finished
-            /*this.parent.on("distribution-complete", function () {
-
-             particles.start()
-
-
-             });*/
-
-
-            this.mParticles = particles;
-        }
-
-    }
-
-
-    updateDotParticlesColor() {
-
-        if (this.mParticles) {
-            this.mParticles.updateColors();
-
-
-            //  this.mParticles.pointCloud.position.sub(this.position); //this.parent.position
-        }
-
-
-    }
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
-
-
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
-
-/***/ }),
-/* 38 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__refactor_f0_linkmixin__ = __webpack_require__(93);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__ = __webpack_require__(94);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_f1__ = __webpack_require__(95);
-/**
- * Created by Frank on 11.06.2017.
- */
-
-
-
-
-
-
-class GraphData
-{
-
-    //constructor(nodes,edges){
-    constructor(graphData){
-            this.mGraphData=graphData
-      /*  this.mNodeData=[];
-        this.mEdgeData=[];
-
-        this.addNodes(nodes);
-        this.addEdges(nodes);*/
-
-    }
-
-    getClonedRawNodes()
-    {
-        var mNodes={}
-
-            _.each(this.mGraphData.nodes,function(node,id){
-                mNodes[id]=_.extend({x:0,y:0,z:0},node)
-
-
-            })
-
-
-
-        this.mDataNodeCopy=mNodes
-
-
-        // Build graph with data
-        var d3Nodes  = [];
-        for (let nodeId in mNodes) { // Turn nodes into array
-            const node =mNodes[nodeId] // _.extend({},mNodes);
-            node._id = nodeId;
-            d3Nodes.push(node);
-        }
-       return d3Nodes
-
-    }
-
-    getAlteredRawLinks(){
-        var mDataNodeCopy= this.mDataNodeCopy
-   // var skipLines=100
-//FIXME filtering visible nodes here will break edge based calculations and arrows
-
-        var links=this.mGraphData.links   //.filter((v,id)=> !(id%skipLines)   )
-
-        //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
-       var  d3Links  = links.map(link => {
-            return {
-                source: mDataNodeCopy[link[0]],
-                target: mDataNodeCopy[link[1]]
-            };
-        })
-
-    return d3Links
-
-
-
-    }
-
-
-  /*  addRawNodeData(nodes){
-      if (_.isArray(nodes)) this.mNodeData=this.mNodeData.concat(nodes)
-
-        return this;
-
-    }
-
-    addRawEdgeData(edges)
-    {
-        if (_.isArray(edges)) this.mEdgeData=this.mEdgeData.concat(edges)
-
-        return this;
-    }*/
-
-    createClusterNodesAndEdges( view3d)
-    {
-        //env=globalEnv
-        //see ForceGraph
-        //TODO minimal env options to create a node
-        var env={
-            nameAccessor:node =>node.name || node.id,
-            colorAccessor: node => node.color,
-            valAccessor:node => node.val,
-
-            sizeAccessor:node => node.itemCount,
-
-            nodeRelSize:4,
-           // useDebugSphere:true,
-            domEvents:view3d.mDomEvents
-        }
-
-
-
-
-   var d3Nodes= this.getClonedRawNodes();
-
-    if (!d3Nodes.length) {
-        return;
-    } //if no data is present return for now
-
-
-    var d3Links =this.getAlteredRawLinks();
-
-
-//TODO
-  /*  function countVisibleNodes(node) {
-
-        env._nodeCounter.push(node)
-
-    }*/
-
-    // Add WebGL objects
-    d3Nodes.forEach(node => {
-
-        node = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__["a" /* default */])(env, node, {
-         //   onDrawNode: countVisibleNodes
-        })
-        node._bubble.name = env.nameAccessor(node) || '';
-
-
-        node.size=env.sizeAccessor(node) || undefined;
-
-
-        //TODO not highlighted group nodes should be rendered with separate point cloud
-        if (node.isGroupNode) {
-
-            //node.addClass("basic-sprite-collapsed")
-            node.addClass("basic-ring")
-
-            //node.on("mouseover",()=> node.addClass("basic-animated"))
-            //node.on("mouseout",()=> node.removeClass("basic-animated"))
-            node.on("mouseover", () => node.addClass("basic-ring-2"))
-            node.on("mouseout", () => node.removeClass("basic-ring-2"))
-
-        } else {
-
-            //TODO specific renderings for node should be handled via class property at node data itself
-            //NOTE: the default node/group nodes/links will be put inside a point  cloud for each so we woud need a point cloud for each 3d-class that generates a points object
-
-            //node.addClass("basic-sphere")
-
-            // nothing to begin with
-            //node.addClass("basic-sprite")
-
-        }
-
-    });
-
-    //-----------------------------------------------
-
-    //init mesh for groupline
-  /*  if (env.useLineGroup)
-        initLineGroup(env,{
-            opacity:0.01,
-            color:0x49616C,
-            transparent: true,
-        })
-
-    var linecount = 0;
-    var skipLines = env.numSkipEdgesRendered + 1;
-    if (skipLines < 1)
-        skipLines = 1
-    function shouldLineByVisible(link, id) {
-
-        return !(linecount++ % skipLines)
-    }
-*/
-
-        //TODO have more thatn one line mesh per rootcluster .. isntead have line meshes per sub-cluster
-       var mLineGroup= this.initLineGroupHelper()
-
-        //used to wrap per cluster functionality
-        function linkMixinExt(link,options)
-        {
-            var env={mergedLineMesh:mLineGroup}
-
-            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__refactor_f0_linkmixin__["a" /* default */])(env,link,options)
-
-        }
-
-
-
-
-        //d3Links.forEach(link => {
-    _.each(d3Links, (link, id) => {
-
-         //TODO have a function within the custer itself that is called
-        //determine by distance or something like that
-        var bVisible = true;// shouldLineByVisible()
-
-        linkMixinExt( link, {
-            lineIsVisible: bVisible,
-            color: 0xff0000,
-            opacity: 1
-        })
-
-
-    });
-
-
-
-
-
-    //----------------------
-
-
-    //nodes are prepared by previous step ? TODO which one was that? for further altering
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__refactor_f1__["a" /* extendGraphElements */])(d3Nodes, d3Links, env)
-
-
-        return {nodes:d3Nodes,edges:d3Links}
-
-}
-
-    //--------------------------------------------
-
-
-    /**
-     * TODO refactor line group into stand alone class to be used per-cluster
-     *
-     *
-     *
-     */
-   initLineGroupHelper( options) {
-
-
-       var line_geom = new THREE.Geometry();
-       var lineMaterial
-       var mergedLineMesh
-
-
-
-
-
-    var defaults = {
-        opacity: 0.01,
-        transparent: true,
-        //lineIsVisible:true, // if disabled the line won't be shown on the scene
-        color: 0xffffff
-    }
-
-    options = _.extend(defaults, options)
-
-    lineMaterial = new THREE.MeshBasicMaterial({
-        color: options.color,
-        transparent: options.transparent,
-        opacity: options.opacity,
-        depthTest: false,
-        depthWrite: false
-    });
-
-
-    mergedLineMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
-
-    mergedLineMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
-
-
-
-  return mergedLineMesh
-
-
-}
-
-
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = GraphData;
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
-
-/***/ }),
-/* 39 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(_, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(98);
-/**
- * Created by Frank on 06.06.2017.
- */
-
-
-//TODO refactor RootCluster
-
-
-
-
-
-/**
- *
- *  a RootCluster is a root node that contains additional rendering infos over multiple nodes
- * for example: it handles node captions (text nodes)
- */
-
-class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /* default */] {
-
-    constructor(...args)
-    {
-        super(...args)
-
-        this.useClusterText=true;
-
-
-        //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
-       // setTimeout(()=> this.onAfterClusteredAndDistributed(),5000)
-        // "cluster-ready" as alternative event
-        this.on("hull-updated",function(){
-
-
-         this.findClusters("*").forEach(function(cluster){
-             cluster.useLOD=true
-         })
-
-
-        })
-
-       this.addColorHandler()
-
-
-    }
-
-    addListeners() {
-
-        super.addListeners();
-
-
-        this.on("u", e=>{
-            e.stopPropagation();
-
-            this.useClusterText=!this.useClusterText;
-            console.log("useClusterText", this.useClusterText)
-        });
-
-    }
-
-
-
-
-
-    addColorHandler()
-    {
-
-   var nodes=this.mNodes;
-   var that=this
-
-
-        function getCountryNamesFromNodes(nodes)
-        {
-            var res={}
-            _.each(nodes,(n) => res[n.group]=true)
-
-         return Object.keys(res)
-        }
-
-
-
-
-        function updateParticles(leaf)
-        {
-//FIXME performance
-          //  return;
-        if (leaf && leaf.parent && leaf.parent.mParticles) {
-
-            leaf.parent.mParticles.updateColors();
-
-
-        }
-            else setTimeout(() => updateParticles(leaf), 100 )
-        }
-
-
-        var countryNames=null;
-
-        $(window).on("node-color-change",function(e,val){
-
-
-          if (!countryNames)countryNames=getCountryNamesFromNodes(nodes)
-
-            var helper=computeGroupNodeColorHelper(countryNames)
-
-
-         //   var val=$sel.val()
-            if (val=="group")
-                nodes.forEach(function(v){ v.color=helper.getColor(v.group)});
-            else
-                nodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
-
-            _.each(that.getLeafs(),function(leaf){
-
-
-                leaf.mNodeParticles.update()
-
-
-                updateParticles(leaf)
-
-
-            })
-
-
-
-
-
-
-        })
-
-
-
-
-    }
-
-
-
-    /**
-     * @override
-     * prevent multiple recursive  root clusters from being created by default
-     */
-
-    getChildClusterConstructor()
-    {
-        return __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /* default */];
-
-    }
-
-
-    /**
-     * attaches to root cluster to a specific View3D element to be able to perform container based operations
-     *
-     *
-     */
-    attachToView3D(view3D){
-        this.mParentView=view3D
-
-
-
-
-    }
-
-
-
-   resetTextOverlay(){
-
-
-        if (this.mTextOverlay) this.mTextOverlay.remove()
-
-       this.mTextOverlay=$("<cluster-text-overlay>");
-
-       $(this.mParentView).append(this.mTextOverlay)
-
-   }
-
-
-
-
-    applyClustering(mClusteringSpeccsArray,overrideExpand=false) {
-
-       //FIXME transitions betweens graphs
-      //this.storeParentPositionInNodes()
-        super.applyClustering(mClusteringSpeccsArray,overrideExpand)
-
-        this.resetTextOverlay()
-
-
-
-
-       // this.restoreNodePositionFromExParent()
-    }
-
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = RootCluster;
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(0)))
-
-/***/ }),
-/* 40 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(d3_force, _, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__ = __webpack_require__(8);
-/**
- * Created by Frank on 02.06.2017.
- */
-
-
-
-
-
-
-
-
-/*
- * TODO the forceGraphDistribution should work like a normal force graph
- * but optimally is could use a initial distribution from another dist function with no animation enabled
- *
- * */
-
-
-class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */] {
-    constructor(scale = 50, dimensions = 1) {
-        super(scale, dimensions);
-
-
-        this.initialEngineTicks = 1;
-
-    // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime=3000;//ms ... 5 seconds upper bound for loading phase
-        this.maxConvergeFrames=90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
-
-    }
-
-    /**
-     * a reduced simulation (for testing)
-     * TODO add edges and rest of original src
-     * @param nodes
-     * @param edges
-     * @param onTick
-     * @param onTICKComplete
-     */
-    startSimulation(nodes, edges = [], onTick, onComplete) {
-
-
-
-        var that=this;
-
-        // Add force-directed layout
-        let layout = d3_force.forceSimulation();
-
-
-        var scale = this.mScale;
-
-        //TODO containers need links
-        layout
-            .numDimensions(this.dimensions)
-            .nodes(nodes)
-            .force('link', d3_force.forceLink().id(function (d) {
-                return d._id
-            })
-                .distance(function computeLinkDistance() {
-                    return scale / 50;
-
-                })
-               .links(edges)
-            )
-            .force('charge', (node) => -scale / 50)
-            .force('linkStrength', (link) => 1)
-            .force("collide", d3_force.forceCollide(scale/10).iterations(3))
-            .stop();
-
-
-            /*
-            //TODO the actual collision does not create a good visualisation so until then this is disabled
-            if (nodes[0].size)
-                    layout.force("collide", d3_force.forceCollide().radius(function(node){
-
-                        //TODO improve node size value
-
-                        //NOTE: can't use radius here because it is not already generated
-
-                     //   let backupVal=1//that.dimensions*scale/nodes.length;
-                     //   let rad=backupVal//node._el?node._el.getRadius()*10: backupVal;
-
-                        return node.size*10||1//rad
-                    })
-                        .iterations(3))
-            */
-
-
-
-        for (let i = 0; i < this.initialEngineTicks; i++) {
-            layout.tick();
-        } // Initial ticks before starting to render
-
-
-        let cntTicks = 0;
-        const startTickTime = new Date();
-
-        layout.on("tick", function () {
-
-           if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
-                layout.alpha(0); //trigger end
-                layout.stop(); // Stop ticking graph
             }
 
-            onTick(layout, nodes, edges)
+        }).addClass("zoom-slider")
+            .css({
+                width: 200,
+                "margin-left": "2em",
+                "margin-top": "0.5em",
+            })
 
-        }).on('end', function () {
-
-            if (onComplete) onComplete()
-
-        }).restart();
-
-    }
-
-
-    //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
-    //in both cases we can determine the edges from it
-
-    setNodes(nodes, onNodePositionChange, onStep, onComplete) {
+        slider.appendTo("body")
 
 
-        if (!nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */] && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D");
+    },
+    createSample() {
+
+        let a = GUI.createAccordion([{
+            caption: "<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Sectors </span><img src=\"include/images/Triangle.png\" style=\"width:10px;\">",
+            id: "companyIndustry",
+            content: "Technology, 33%<br>Consumer Discretionary, 20%<br>Consumer Staples, 20%"
+        }, {
+            caption: "<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Countries</span> <img src=\"include/images/Triangle.png\" style=\"width:10px;\">",
+            id: "companyCountry",
+            content: "United States, 80%<br>Japan, 10%<br>Germany, 4%"
+        }])
+        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo("body")
+        GUI.$el = a
 
 
-        let mEdges = [];
-        let mNodes = [];
-        //in case nodes are instance of BaseNode3D
-        if (nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */]) {
+        GUI.createSlider()
+        GUI.info = GUI.createNodeInfoPanel()
 
 
-            //TODO this part might not to be used at all currently
-            mEdges = nodes.createEdgesForChildClusters();
+    },
+    createNodeInfoPanel() {
+
+        GUI.$info = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>")
 
 
-            mEdges.forEach(function(edge){
-                edge.source=edge.source.position;
-                edge.target=edge.target.position;
+        GUI.$info.hide().appendTo("body")
 
-            });
+        GUI.$info.addClass("graph-node-info").draggable().resizable()
 
-            mNodes = Object.values(nodes.mClusters).map(function (n) {
-               //add a back reference to the cluster
-                n.position._el=n;
-
-                return n.position;
-            });
+        var $header = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-header")
 
 
+        var $search = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span>").addClass("graph-node-info-search").html("Yahoo Search")
+        var $price = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span>").addClass("graph-node-info-price").html("USD 36.5 (-0.5%)")
+        var $close = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span style=\"margin-left:420px;cursor:pointer;\">").addClass("graph-node-info-close").html("<i class=\"fa fa-times\" aria-hidden=\"true\" style=\"font-family:'FontAwesome' !important;\"></i> CLOSE")
 
+        var stockPrice = "<span style=\"margin-left:20px;margin-top:7px;\">USD <span style=\"color:#f7685e;font-family:'roboto-bold'  !important;\">36.5</span> (-0.5%)</span>";
+        // var headBar = "<span style=\"margin-left:400px;margin-top:7px;\" ></span>";
+
+
+        $close.on("click", function () {
+            GUI.$info.fadeOut(50)
+
+        })
+
+        $header.append($search, stockPrice, $close)
+
+        var $body = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-body")
+
+        $body.html("COMPANY<br> wikiinfo")
+
+        var $news = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news")
+
+        //$news.html("RSS or Twitter or News")
+
+        var $newsHeader = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news-header").html("News")
+        var $newsBody = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news-body")
+        $news.append($newsHeader, $newsBody)
+
+        GUI.$info.append($header, $body, $news)
+
+
+        return {
+            setNode: function (node) {
+                var news = ["U.S., China agree to first trade steps under 100-day plan",
+                    "Wall Street falls, department stores take a drubbing",
+                    "Behind Kushner Companies, a Chinese agency skirts visa-for-investment rules",
+                    "In blow to Trump, GE backs NAFTA and plans growth in Mexico"]
+
+                lorem = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+
+
+                //header
+
+
+                $search.html(__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<a style=\"text-decoration:none;\">").html("<div style=\"float:left;\">Go to Company Page </div><div  style=\"float:right;padding-left:5px;padding-top:1px;\"> >></div>").attr({
+                    target: "_blank",
+                    href: "#",
+                    title: "Open new Tab for " + node.name
+                }))
+
+
+                //price
+
+                var companyLookupName = node.name
+                if (node.ticker)
+                    companyLookupName = node.ticker.split(":")[1]
+
+                AppDataService.getCompanyInfo(companyLookupName).then(function (data) {
+
+                    /*if (!data.LastTradePriceOnly)
+                    {
+                        console.error("'"+node.name+"' not found",data)
+                        $price.html("-/-")
+                        return
+                    }*/
+
+                    var str = `${data.Currency} ${data.LastTradePriceOnly} (${data.ChangeinPercent})`
+                    $price.html(str)
+
+                })
+
+
+                //body
+                $body.html("")
+                AppDataService.getWiki(node.name).then(function (data) {
+
+                    if (data.content == "Redirect to:") {
+                        $body.html("<h2>" + node.name + "</h2><br>").append("TODO handle redirects for wikipedia")
+                        /*
+                        AppDataService.getWiki(data.page).then(function(data){
+                            $body.html("<h2>"+node.name+"</h2><br>").append(data.content)
+
+                        })*/
+                    }
+                    else
+                        $body.html("<h2>" + node.name + "</h2><br>").append(data.content)
+
+                }).catch(function (e) {
+
+
+                    if (e.code == "missingtitle")
+                        $body.html("Wiki info not found for: " + node.name)
+                    else
+                        $body.html(e.code)
+
+                })
+
+
+                $newsBody.html("")
+
+
+                function getNews() {
+                    var n = news[_.random(0, 3)]
+                    var el = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<p>").append(n)
+                    $newsBody.append(el)
+                }
+
+                getNews()
+
+                getNews()
+                getNews()
+
+            }
+        }
+
+    },
+    updateNodeInfo(node, bShow = true) {
+
+
+        GUI.$info.toggle(bShow)
+        if (bShow)
+            GUI.info.setNode(node)
+
+
+    },
+
+    updateFromVisibleNodes(nodes) {
+
+        if (!GUI.$el) return
+
+
+        GUI.$el.parent().find(".graph-info-companys-visible").html(formatNumber(nodes.length.toLocaleString('en-US')))
+
+
+        var industries = {}
+        var countries = {}
+        nodes.forEach(function (n) {
+
+            if (!n.industry) return
+
+            if (!n.group) return
+
+            if (!industries[n.industry]) industries[n.industry] = 0
+            industries[n.industry]++
+
+            if (!countries[n.group]) countries[n.group] = 0
+            countries[n.group]++
+
+        })
+
+
+        var sortedIndustries = _.sortBy(_.toPairs(industries), 1).reverse()
+        var sortedCountries = _.sortBy(_.toPairs(countries), 1).reverse()
+
+        var totalCountries = _.sum(sortedCountries.map((v) => v[1]))
+        var totalIndustries = _.sum(sortedIndustries.map((v) => v[1]))
+
+        var $industry = GUI.$el.find("#companyIndustry")
+        var $country = GUI.$el.find("#companyCountry")
+
+
+        function pct(val, total) {
+            return ", " + _.round(100 * val / total, 1) + "%"
 
         }
-        else if (_.isArray(nodes)) {
-            mNodes = nodes.map(function (n) {
-                //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
-                mEdges = mEdges.concat(n.edges);
-                n.x=n.x||0;
-                n.y=n.y||0;
-                n.z=n.z||0;
-                return n;
-            });
+
+        $industry.html("")
+        for (var industry of sortedIndustries.slice(0, 3)) {
+            var resHTML = "<table style=\"width:100%;padding:0px;margin:0px;\"><tr><td style=\"padding:0px;margin:0px;text-align:center;width:25px;\" ><img src=\"img/industryIcons/" + industry[0] + ".png\" style=\"width:22px;height:22px;\"></td><td style=\"width:80%;padding:0px;margin:0px;text-align:left; font-family: 'roboto';color:rgb(208, 206, 206);font-size:14px;\">" + industry[0].trim() + "" + pct(industry[1], totalIndustries) + "</td></tr></table>";
+            var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("industry-info-row").append(resHTML)
+            $industry.append($row)
         }
 
-        this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {
 
-            //handle each node callback
-            _.each(d3Nodes, onNodePositionChange);
-            //handle step callback
-            if (onStep)
-                onStep()
+        $country.html("")
+        for (var country of sortedCountries.slice(0, 3)) {
+            var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").append("<span style=\" font-family: 'roboto';color:rgb(208, 206, 206);font-size:14px;\">" + country[0] + "" + pct(country[1], totalCountries) + "</span>")
+            $country.append($row)
 
-        }, onComplete);
+        }
+        //TODO percentage
 
-
-    }
-
-    //this is called to distribute the elements
-    //TODO add rotation as well in the future
-
-    distribute(node, dx, dy, dz) {
-
-        return {position: new THREE.Vector3(0, 0, 0)}
-
-        //  return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
 
     }
+
+
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = ForceGraphDistribution;
-
-
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(133), __webpack_require__(2), __webpack_require__(1)))
-
-/***/ }),
-/* 41 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseVolume__ = __webpack_require__(15);
-/**
- * Created by Frank on 22.06.2017.
- */
-
-
-/**
- * a slight derivative of it's base class
- * allowing for user to add to sub-cluster
- *
- */
-
-class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* default */] {
-
-    constructor(...args) {
-        super(...args);
-        this.maxOpacity=0.1;
-        this.getMaterial().transparent=true;
-    }
-
-
-
-    transferFunction(x)
-    {
-     return 1
-    }
-
-    /**
-     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
-     * eg. depending on the distance of camera and object
-     *
-     * @param newLOD
-     */
-    setLOD(newLOD)
-    {
-      super.setLOD(newLOD);
-
-        //by default just set the opacity and visibility accordingly
-        let y=this.transferFunction(newLOD)
-        if ( this.mesh && this.mesh.material) {
-            this.mesh.material.opacity =this.maxOpacity*y; //TODO add transferFunction
-
-            if (y<=0)
-                this.mesh.material.visible=false;
-            else
-                this.mesh.material.visible=true;
-
-
-        }
-
-    }
-
-
-
-    canBeVisible()
-    {
-        return true
-    }
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = BoxVolume;
-
-
-/***/ }),
-/* 42 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(35);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete__ = __webpack_require__(192);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete__);
-/**
- * the searchbar for the graph
- *
- *
- */
-
-
-
-//import 'jquery-ui/themes/base/theme.css';
-//import 'jquery-ui/themes/base/selectable.css';
-
-
 
 
 __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
+    GUI.createSample()
 
-    function getNodes() {
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(".rightCompanyInfo").draggable()
 
-        let view = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(".view-3d.view-3d-maximised").get(0)
-
-        return (view && view.mRootCluster && view.mRootCluster.mNodes) ? view.mRootCluster.mNodes : []
-
-
-    }
-
-
-    var filterResult = [];
-
-    var container = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>")
-        .addClass("searchbar-container")
-        .append("<span><span class='searchbar-search'><span>")
-        .prependTo("body")
-
-    var searchbar = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<input placeholder='Search company name, ticker, people, sector, country'>")
-
-    /**
-     *  the actual filter for the graph data
-     */
-
-    //TODO possible "zoom fit" results and highlight
-
-    function doFilterList() {
-
-        if (filterResult)
-            filterResult.forEach(function (v) {
-                unhighlightNodeElements.apply(v)
-            })
-
-        filterResult = getNodes().filter(function (v) {
-            var val = searchbar.val().toLowerCase()
-            //name:r.name,group:r.country,industry:r.industry
-            var isName,
-                isCountry,
-                isId,
-                isIndustry,
-                isTicker;
-            if (typeof v.name == "string")
-                isName = v.name.toLowerCase().indexOf(val) == 0; //only start of string
-
-            if (typeof v.group == "string")
-                isCountry = v.group.toLowerCase().indexOf(val) >= 0;
-
-            if (typeof v.industry == "string")
-                isIndustry = v.industry.toLowerCase().indexOf(val) >= 0;
-
-            if (typeof v.ticker == "string") {
-                var offset = v.ticker.indexOf(":");
-                isTicker = v.ticker.toLowerCase().indexOf(val) >= 0 + offset;
-            }
-
-            if (typeof v.id == "string")
-                isId = v.id.toLowerCase().indexOf(val) >= 0;
-
-            return isName || isCountry || isId || isIndustry || isTicker
-        })
-
-        /*if (filterResult.length > 0) { //doZoomToMesh(filterResult[0]._bubble)
-
-            doOnClickNode(filterResult[0])
-
-        }*/
-
-
-    }
-
-    //
-    function moveToNode(node) {
-        doOnClickNode(node, false, function () {
-
-            setTimeout(function () {
-
-                //defined in force-graph.js
-                globalEnv.updateTextWhenCameraIsMoving()
-
-            }, 400)
-
-        }, false)
-
-    }
-
-    //-----------------
-    //un/highlight all results
-    var lastResults = []
-
-    function showSuggestions(mResult) {
-
-
-        lastResults.forEach(function (v) {
-            unhighlightNodeElements.apply(v)
-        })
-
-
-        mResult.forEach(function (v) {
-            highlightNodeElements.apply(v, [true, false])
-        })
-
-        lastResults = mResult
-
-
-    }
-
-    //-----------------
-    var ac_instance = searchbar.autocomplete({
-        minLength: 3,
-        source: function (request, successCallback) {
-
-            successCallback(filterResult.slice(0, 80))
-
-        },
-        //focus: doFilterList,
-        focus: function (event, ui) {
-
-            searchbar.val(ui.item.name)
-
-
-            //last impl to give the user a feedback
-            //showSuggestions([ui.item])
-
-
-            //doFilterList()
-            //moveToNode(ui.item)
-
-            return false;
-        },
-        select: function (event, ui) {
-
-            searchbar.val(ui.item.name)
-
-            //moveToNode(ui.item)
-            doOnClickNode(ui.item, false, function () {
-                globalEnv.updateTextWhenCameraIsMoving2()
-
-            }, false, false, false, true)
-
-            //we set the selection to false but want the node to appear like it was selected
-            ui.item.addClass("basic-selection")
-
-
-            return false;
-        }
-    }).autocomplete("instance")
-
-    searchbar.on("blur", function () {
-
-        searchbar.val("")
-        showSuggestions([])
-
-    })
-
-
-    ac_instance._renderItem = function (ul, item) {
-
-        var tcr = ""
-        if (item.ticker)
-            tcr = "Ticker:" + item.ticker
-
-        var val = searchbar.val()
-
-        var rowOutput = `<div>  ${item.name} (${tcr})</div>`
-
-        var
-            re = new RegExp(val, "gi");
-
-        rowOutput = _.replace(rowOutput, re, "<b>" + val + "</b>")
-
-        var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<li>").addClass('searchbar-search-row')
-            .append(rowOutput)
-            .appendTo(ul);
-
-        return $row
-    };
-
-    //searchbar initially hidden
-    //container.hide()
-
-
-    searchbar
-        .prependTo(container)
-        .on("keypress", doFilterList)
-
-    //TODO plugin won't trigger ctrl+f without disabling default behaviour in advance
-    window.addEventListener("keydown", function (e) {
-
-        //ignore ctrl+f
-        if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
-            e.preventDefault();
-        }
-        //ignore ctrl+s
-        if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 83)) {
-            e.preventDefault();
-        }
-
-    })
-
-    function toggleSearch(e) {
-
-        container.toggle()
-        searchbar.focus()
-        e.stopPropagation()
-        e.preventDefault()
-
-    }
-
-    searchbar.on("keyup", null, 'ctrl+f', toggleSearch)
-    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).bind('keyup', 'ctrl+f', toggleSearch);
 
 })
-
+	
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
 
 /***/ }),
-/* 43 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__lib_Tween__);
-/**
- * Created by Frank on 08.06.2017.
- */
-//import TWEEN from "@tweenjs/tween.js"
-
-
-
-//TODO refactor existing samples
-class ZoomUtil {
-
-
-    static moveToCluster(cluster, options) {
-
-        let defaults = {
-            complete: function () {
-            },
-            distance: 400
-        }
-        options = _.extend(defaults, options)
-
-        let view = cluster.getView()
-
-        if (!view) {
-            console.warn("cluster must be bound to instanceof View3D")
-            return
-        }
-
-
-        let mesh = cluster;
-        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, options.distance, options.complete);
-
-
-    }
-
-
-
-    static
-    moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
-    }) {
-
-         var position = new THREE.Vector3();
-        position.setFromMatrixPosition(mesh.matrixWorld);
-
-       ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
-
-
-    }
-
-
-    /**
-     *
-     *
-     * @param position must be in world coordiantes
-     * @param camera
-     * @param controls
-     * @param cameraDistanceToMesh
-     * @param onComplete
-     */
-    static
-    moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
-    }) {
-
-
-        var mTimeout;
-
-        var cameraTargetPosition = controls.target
-        var vec3Start = camera.position
-
-
-      //  var vec3End = new THREE.Vector3();
-      //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
-        var vec3End=position
-
-        //we want to have a fixed distance to a node when selecting
-        var distVec = vec3End.clone().sub(vec3Start)
-        var len = distVec.length()
-        distVec.normalize()
-        distVec.multiplyScalar(cameraDistanceToMesh) //apply fixed distance to the target
-
-        var alteredVecEnd = vec3End.clone().sub(distVec)
-
-
-        //change distance to target
-        var tween = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(vec3Start)
-            .to(alteredVecEnd, 400)
-            //.onUpdate(function () {})
-            .onComplete(function () {
-                onComplete.bind(this)();
-                cancelAnimationFrame(mTimeout)
-            })
-            .start();
-
-        //lookat target
-        var tween2 = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(cameraTargetPosition)
-            .to(vec3End, 400)
-            .start();
-
-        requestAnimationFrame(animate);
-
-        function animate(time) {
-            mTimeout = requestAnimationFrame(animate);
-            tween.update(time);
-            tween2.update(time);
-        }
-
-
-    }
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
-
-/***/ }),
-/* 44 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(102);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png__ = __webpack_require__(213);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__coordinates_png__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js__ = __webpack_require__(183);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_hexasphere_js__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__gui_GraphHUD__ = __webpack_require__(101);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__SpecificDataUtils__ = __webpack_require__(36);
-/**
- * Created by Frank on 13.06.2017.
- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default */]
-{
-
-    constructor(...args)
-    {
-        super(...args);
-
-        this.mRootCluster=null;
-
-
-
-
-
-
-    }
-
-
-
-    connectedCallback(){
-        super.connectedCallback();
-
-
-        $(this).append("<graph-hud>")
-
-    }
-
-    setSpeccs(speccs)
-    {
-        this.mSpeccs=speccs;
-        return this
-    }
-
-    getSpeccs()
-    {
-
-        return this.mSpeccs
-    }
-
-
-
-createSkyDome()
-{
-
-
-
-    var material = new THREE.MeshBasicMaterial();
-
-
-    let scene=this.mScene;
-
-    var ambientLight = new THREE.AmbientLight(0xFFFFFF,1.5);
-    scene.add(ambientLight);
-   /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(0, 10000, 0);
-    dirLight.intensity = 1;
-    scene.add(dirLight);
-*/
-   /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
-    pointLight.position.set( 0, 0, 20000 );
-    scene.add(pointLight);
-*/
-  /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
-    var material = new THREE.MeshBasicMaterial();
-
-   material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
-    material.side = THREE.BackSide;
-    material.opacity=0.05;
-    material.transparent=true;
-    var skydome = new THREE.Mesh(geometry, material);
-
-    this.mSkyDome=skydome
-
-
-*/
- //   scene.add(skydome);
-
-
-    //--------------------------------
-    var meshMaterials = [];
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
-
-    var oceanMaterial = []
-    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
-    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
-
-
-    var radius = 300000;        // Radius used to calculate position of tiles
-    var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
-    var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
-
-
-    function isLand(){
-
-        return _.random(0,1)
-
-    }
-
-    var hexaGroup=new THREE.Group();
-
-    var hexasphere = new __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default.a(radius, subDivisions, tileSize);
-    for(var i = 0; i< hexasphere.tiles.length; i++){
-        var t = hexasphere.tiles[i];
-        var latLon = t.getLatLon(hexasphere.radius);
-
-        var geometry = new THREE.Geometry();
-
-        for(var j = 0; j< t.boundary.length; j++){
-            var bp = t.boundary[j];
-            geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
-        }
-        geometry.faces.push(new THREE.Face3(0,1,2));
-        geometry.faces.push(new THREE.Face3(0,2,3));
-        geometry.faces.push(new THREE.Face3(0,3,4));
-        if(geometry.vertices.length > 5){
-            geometry.faces.push(new THREE.Face3(0,4,5));
-        }
-
-        if(isLand(latLon.lat, latLon.lon)){
-            material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
-        } else {
-            material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
-        }
-
-        material.opacity = 0.3;
-
-        material.side = THREE.BackSide;
-
-        var mesh = new THREE.Mesh(geometry, material.clone());
-        hexaGroup.add(mesh);
-        hexasphere.tiles[i].mesh = mesh;
-
-    }
-    scene.add(hexaGroup);
-    this.mSkyDome=hexaGroup
-
-
-
-}
-
-
-
-    initClusterForView(rawGraphData,parentEl3D) {
-
-
-        if (!rawGraphData) return;
-
-        let speccs = this.getSpeccs();
-
-        let graphData = new __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__["a" /* default */](rawGraphData);
-
-
-        let preparedData = graphData.createClusterNodesAndEdges(this);
-
-        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes,undefined,this);
-
-
-//-- count visible nodes
-   //TODO check if this interferes with the nodeMixin and the default implementation
-      var visibleNodes=[];
-        _.each(preparedData.nodes,function(node){
-            node.get3DRoot().onBeforeRender=function(){
-                visibleNodes.push(node);
-            }
-        });
-//--
-
-        parentEl3D.add(res);
-        res.position.set(0, 0, 0);
-
-        //FIXME workflow below ..
-        //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
-        res.attachToView3D(this);
-        res.applyClustering(speccs);
-
-
-
-
-        var that=this;
-        var _____skipFrames=0;
-
-        $(that).on("before-render",function(){
-
-
-
-           // res.update()
-
-
-            if (that.isMaximised()) {
-
-                   _____skipFrames++;
-                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-             let prev_vis=preparedData.nodes[0]._bubble.material.visible;
-                let _vis= (_____skipFrames % 20) ? false : true;
-                preparedData.nodes[0]._bubble.material.visible = _vis;
-
-                if (prev_vis)
-                {
-                __WEBPACK_IMPORTED_MODULE_6__SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(visibleNodes);
-                 //   that.mVisibleNodes=[].concat(visibleNodes)
-                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
-                  //  that.mRootCluster.updateRootTextNodes(visibleNodes);
-
-                }
-            }
-            visibleNodes=[] //reset count
-
-        });
-
-
-        this.start();
-
-        return res
-
-
-    }
-
-
-    setData(mGraphData)
-    {
-        this.initStatic();
-
-
-        //this.createSkyDome();
-
-
-        if (!this.mRootCluster)
-        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
-
-        $(this).trigger("loaded")
-
-
-
-    }
-
-    loadDataSet(ds){
-
-      var that = this;
-
-        ds(null,function onSuccess(mGraphData)
-        {
-            console.log("data loaded");
-            that.setData(mGraphData);
-
-            $(".cloudNodeColorSelect").val("group").trigger("change")
-
-        });
-
-    return this
-    }
-
-
-    maximise() {
-
-        var  root = this.mRootCluster;
-
-        super.maximise();
-
-            if (root && root.mParentView && root.mTextOverlay) {
-
-                root.mTextOverlay.height(root.mParentView.clientHeight);
-                root.mTextOverlay.width(root.mParentView.clientWidth);
-                console.log("maximised")
-            }
-
-
-
-
-    }
-
-    undoMaximise(){
-            super.undoMaximise();
-
-
-            let root=this.mRootCluster;
-            if (root&& root.mParentView && root.mTextOverlay) {
-
-                root.mTextOverlay.height(root.mParentView.clientHeight);
-                root.mTextOverlay.width(root.mParentView.clientWidth)
-            }
-
-
-    }
-
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = GraphView3D;
-
-
-customElements.define("graph-view-3d", GraphView3D);
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(1), __webpack_require__(2)))
-
-/***/ }),
-/* 45 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
@@ -82026,6 +78602,3429 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
 
 
 /***/ }),
+/* 22 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(8);
+/**
+ * Created by Frank on 02.06.2017.
+ */
+
+
+
+class EdgeUtil {
+
+    /**
+     *
+     *
+     */
+    static getConnectedClusters() {
+
+        //finds external nodes of a cluster
+
+        //look up what cluster the node is in?
+
+
+    }
+
+
+    /*
+     * takes a object containing BaseCluster3D as input and returns
+     * a set of edges
+     *
+     * */
+
+    static createEdgesBetweenClustersFromMap(clustersContainer) {
+
+
+        let info = EdgeUtil.getClusterInfo(clustersContainer)
+
+        let clusterKeys = Object.keys(clustersContainer);
+
+
+        var edgesArray = [];
+        _.each(clusterKeys, function (key) {
+
+            let otherClusterKeys = Object.keys(info[key].clustersConnectedTo);
+
+            _.each(otherClusterKeys, function (otherKey) {
+
+                let otherClusters = info[key].clustersConnectedTo;
+                let edgesForCluster = info[key].edges;
+
+                let linkStrength = Object.keys(edgesForCluster).length
+
+                edgesArray.push({
+                    source: clustersContainer[key],
+                    target: otherClusters[otherKey],
+                    link_strength: linkStrength
+                })
+
+
+            });
+
+
+        });
+
+        return edgesArray;
+    }
+
+    /**
+
+     * @param clustersContainer  ...  Map<name,cluster>
+     * @returns an object containing certain infos about clusters (what clusters are connected, with which edges and nodes within the cluster)
+     */
+    static getClusterInfo(clustersContainer) {
+
+        //find connections between clusters from nodes contained
+
+        var relevantEdgesPerCluster = {}
+        _.each(clustersContainer, function (cluster, id) {
+            relevantEdgesPerCluster[id] = {}
+            let nodes = cluster.getNodes()
+            //get only relevant nodes per cluster that link to/from other clusters
+            let edges = EdgeUtil.getEdgesForNodes(nodes, false, true, true)
+            relevantEdgesPerCluster[id] = edges
+
+        })
+
+
+        function isNodeOfCluster(node, cluster) {
+            return cluster.getNodes().indexOf(node) >= 0
+
+        }
+
+        //just in case clusters can overlap
+        //returns a map of the clusters that contain the node
+        function lookUpClustersOfNode(node) {
+
+            var clustersForNode = {};
+
+            _.each(clustersContainer, function (cluster, id) {
+
+                if (isNodeOfCluster(node, cluster))
+                    clustersForNode[id] = cluster;
+            });
+
+            return clustersForNode;
+
+        }
+
+        var clustersContainerRelationInfo = {};
+
+
+        //get the clusters that connect to each other from the dges between them
+        _.each(relevantEdgesPerCluster, function (clusterExternalEdges, clusterID) {
+
+            clustersContainerRelationInfo[clusterID] = {
+                clustersConnectedTo: {},
+                edges: {},
+                nodes: {}
+
+            };
+
+            //for each edge of the current cluster that connects to another cluster
+            _.each(clusterExternalEdges, function (externalEdge) {
+
+
+
+                //we can ignore the node that is contained within the current cluster
+
+                var testNode = isNodeOfCluster(externalEdge.source, clustersContainer[clusterID]);
+                let otherNode = testNode ? externalEdge.target : externalEdge.source;
+
+
+                let clustersThatContainNode = lookUpClustersOfNode(otherNode);
+                delete (clustersThatContainNode[clusterID]) //undo self reference
+
+                _.extend(clustersContainerRelationInfo[clusterID].clustersConnectedTo, clustersThatContainNode);
+
+                var keys = Object.keys(clustersThatContainNode)
+
+
+                //have some additional infos
+                _.each(keys, function (key) {
+
+                    //the edges that link to the specific cluster
+                    if (!clustersContainerRelationInfo[clusterID].edges[key]) clustersContainerRelationInfo[clusterID].edges[key] = []
+                    clustersContainerRelationInfo[clusterID].edges[key].push(externalEdge)
+
+                    //the nodes the edges connect to
+                    if (!clustersContainerRelationInfo[clusterID].nodes[key]) clustersContainerRelationInfo[clusterID].nodes[key] = []
+                    clustersContainerRelationInfo[clusterID].nodes[key].push(externalEdge)
+
+                })
+
+
+                //all clusters the node links to
+
+            })
+
+
+        });
+
+        return clustersContainerRelationInfo
+
+    }
+
+    /**
+     *  returns all edges for >>contained<< nodes within clusters
+     *  this would be suitable to do force-graph distribution on a cluster and all descendants
+     */
+
+    static getEdgesForNodes(nodes, bInternal = true, bOutgoing = false, bIngoing = false) {
+
+
+
+//a node can be a cluster that represents a set of nodes
+        //   if (nodes instanceof BaseCluster3D) nodes = nodes.mNodes
+
+        if (!bInternal && !bOutgoing && !bIngoing) return []
+        //get relevant edges from
+
+        //a.clusters.mClusters.mClusters["United States"][0].mNodes
+
+        var edges = [];
+
+        _.each(nodes, function (node, id) {
+
+            //check if it is a container element
+            if (node instanceof __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a" /* default */]) {
+                let _edges = EdgeUtil.getEdgesForNodes(node.mNodes, bInternal, bOutgoing, bIngoing)
+                edges = edges.concat(_edges);
+                edges = _.uniq(edges)
+                return
+            }
+
+
+            _.each(node.edges, function (edge, id) {
+
+
+                let srcContained = nodes.indexOf(edge.source) >= 0;
+                let trgContained = nodes.indexOf(edge.target) >= 0;
+
+
+                let isInternalNode = srcContained && trgContained;
+
+
+                let isOutgoing = !isInternalNode && srcContained
+                let isIngoing = !isInternalNode && trgContained
+                //TODO we do want to distinguish between outgoing and ingoing edges
+                // /if (!isInternalNode)
+                //calc direction
+
+
+                // console.log(srcContained,trgContained,isInternalNode)
+                /*   if (bInternal&&bExternal || bInternal && isInternalNode || bExternal && !isInternalNode) {
+                 edges = edges.concat(node.edges);
+                 edges = _.uniq(edges)
+                 }*/
+                function pushit(edge) {
+                    edge.isSrcInternalNode = srcContained
+                    edge.isTrgInternalNode = trgContained
+                    edges.push(edge)
+                }
+
+                if (bInternal && bOutgoing && bIngoing)
+                    pushit(edge)
+                else if (bInternal && isInternalNode || bOutgoing && isOutgoing || bIngoing && isIngoing)
+                    pushit(edge)
+
+            })
+
+        })
+
+
+        return edges
+
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = EdgeUtil;
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
+
+/***/ }),
+/* 23 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = (function(node, x0, x1) {
+  this.node = node;
+  this.x0 = x0;
+  this.x1 = x1;
+});
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return prefix; });
+var prefix = "$";
+
+function Map() {}
+
+Map.prototype = map.prototype = {
+  constructor: Map,
+  has: function(key) {
+    return (prefix + key) in this;
+  },
+  get: function(key) {
+    return this[prefix + key];
+  },
+  set: function(key, value) {
+    this[prefix + key] = value;
+    return this;
+  },
+  remove: function(key) {
+    var property = prefix + key;
+    return property in this && delete this[property];
+  },
+  clear: function() {
+    for (var property in this) if (property[0] === prefix) delete this[property];
+  },
+  keys: function() {
+    var keys = [];
+    for (var property in this) if (property[0] === prefix) keys.push(property.slice(1));
+    return keys;
+  },
+  values: function() {
+    var values = [];
+    for (var property in this) if (property[0] === prefix) values.push(this[property]);
+    return values;
+  },
+  entries: function() {
+    var entries = [];
+    for (var property in this) if (property[0] === prefix) entries.push({key: property.slice(1), value: this[property]});
+    return entries;
+  },
+  size: function() {
+    var size = 0;
+    for (var property in this) if (property[0] === prefix) ++size;
+    return size;
+  },
+  empty: function() {
+    for (var property in this) if (property[0] === prefix) return false;
+    return true;
+  },
+  each: function(f) {
+    for (var property in this) if (property[0] === prefix) f(this[property], property.slice(1), this);
+  }
+};
+
+function map(object, f) {
+  var map = new Map;
+
+  // Copy constructor.
+  if (object instanceof Map) object.each(function(value, key) { map.set(key, value); });
+
+  // Index array by numeric index or specified key function.
+  else if (Array.isArray(object)) {
+    var i = -1,
+        n = object.length,
+        o;
+
+    if (f == null) while (++i < n) map.set(i, object[i]);
+    else while (++i < n) map.set(f(o = object[i], i, object), o);
+  }
+
+  // Convert object to map.
+  else if (object) for (var key in object) map.set(key, object[key]);
+
+  return map;
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (map);
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = (function() {
+  return (Math.random() - 0.5) * 1e-6;
+});
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = (function(node, x0, y0, z0, x1, y1, z1) {
+  this.node = node;
+  this.x0 = x0;
+  this.y0 = y0;
+  this.z0 = z0;
+  this.x1 = x1;
+  this.y1 = y1;
+  this.z1 = z1;
+});
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = (function(node, x0, y0, x1, y1) {
+  this.node = node;
+  this.x0 = x0;
+  this.y0 = y0;
+  this.x1 = x1;
+  this.y1 = y1;
+});
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["c"] = now;
+/* harmony export (immutable) */ __webpack_exports__["b"] = Timer;
+/* harmony export (immutable) */ __webpack_exports__["a"] = timer;
+/* unused harmony export timerFlush */
+var frame = 0, // is an animation frame pending?
+    timeout = 0, // is a timeout pending?
+    interval = 0, // are any timers active?
+    pokeDelay = 1000, // how frequently we check for clock skew
+    taskHead,
+    taskTail,
+    clockLast = 0,
+    clockNow = 0,
+    clockSkew = 0,
+    clock = typeof performance === "object" && performance.now ? performance : Date,
+    setFrame = typeof window === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function(f) { setTimeout(f, 17); };
+
+function now() {
+  return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
+}
+
+function clearNow() {
+  clockNow = 0;
+}
+
+function Timer() {
+  this._call =
+  this._time =
+  this._next = null;
+}
+
+Timer.prototype = timer.prototype = {
+  constructor: Timer,
+  restart: function(callback, delay, time) {
+    if (typeof callback !== "function") throw new TypeError("callback is not a function");
+    time = (time == null ? now() : +time) + (delay == null ? 0 : +delay);
+    if (!this._next && taskTail !== this) {
+      if (taskTail) taskTail._next = this;
+      else taskHead = this;
+      taskTail = this;
+    }
+    this._call = callback;
+    this._time = time;
+    sleep();
+  },
+  stop: function() {
+    if (this._call) {
+      this._call = null;
+      this._time = Infinity;
+      sleep();
+    }
+  }
+};
+
+function timer(callback, delay, time) {
+  var t = new Timer;
+  t.restart(callback, delay, time);
+  return t;
+}
+
+function timerFlush() {
+  now(); // Get the current time, if not already set.
+  ++frame; // Pretend we’ve set an alarm, if we haven’t already.
+  var t = taskHead, e;
+  while (t) {
+    if ((e = clockNow - t._time) >= 0) t._call.call(null, e);
+    t = t._next;
+  }
+  --frame;
+}
+
+function wake() {
+  clockNow = (clockLast = clock.now()) + clockSkew;
+  frame = timeout = 0;
+  try {
+    timerFlush();
+  } finally {
+    frame = 0;
+    nap();
+    clockNow = 0;
+  }
+}
+
+function poke() {
+  var now = clock.now(), delay = now - clockLast;
+  if (delay > pokeDelay) clockSkew -= delay, clockLast = now;
+}
+
+function nap() {
+  var t0, t1 = taskHead, t2, time = Infinity;
+  while (t1) {
+    if (t1._call) {
+      if (time > t1._time) time = t1._time;
+      t0 = t1, t1 = t1._next;
+    } else {
+      t2 = t1._next, t1._next = null;
+      t1 = t0 ? t0._next = t2 : taskHead = t2;
+    }
+  }
+  taskTail = t0;
+  sleep(time);
+}
+
+function sleep(time) {
+  if (frame) return; // Soonest alarm already set, or will be.
+  if (timeout) timeout = clearTimeout(timeout);
+  var delay = time - clockNow;
+  if (delay > 24) {
+    if (time < Infinity) timeout = setTimeout(wake, delay);
+    if (interval) interval = clearInterval(interval);
+  } else {
+    if (!interval) clockLast = clockNow, interval = setInterval(poke, pokeDelay);
+    frame = 1, setFrame(wake);
+  }
+}
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Module dependencies.
+ */
+
+var parser = __webpack_require__(12);
+var Emitter = __webpack_require__(9);
+
+/**
+ * Module exports.
+ */
+
+module.exports = Transport;
+
+/**
+ * Transport abstract constructor.
+ *
+ * @param {Object} options.
+ * @api private
+ */
+
+function Transport (opts) {
+  this.path = opts.path;
+  this.hostname = opts.hostname;
+  this.port = opts.port;
+  this.secure = opts.secure;
+  this.query = opts.query;
+  this.timestampParam = opts.timestampParam;
+  this.timestampRequests = opts.timestampRequests;
+  this.readyState = '';
+  this.agent = opts.agent || false;
+  this.socket = opts.socket;
+  this.enablesXDR = opts.enablesXDR;
+
+  // SSL options for Node.js client
+  this.pfx = opts.pfx;
+  this.key = opts.key;
+  this.passphrase = opts.passphrase;
+  this.cert = opts.cert;
+  this.ca = opts.ca;
+  this.ciphers = opts.ciphers;
+  this.rejectUnauthorized = opts.rejectUnauthorized;
+  this.forceNode = opts.forceNode;
+
+  // other options for Node.js client
+  this.extraHeaders = opts.extraHeaders;
+  this.localAddress = opts.localAddress;
+}
+
+/**
+ * Mix in `Emitter`.
+ */
+
+Emitter(Transport.prototype);
+
+/**
+ * Emits an error.
+ *
+ * @param {String} str
+ * @return {Transport} for chaining
+ * @api public
+ */
+
+Transport.prototype.onError = function (msg, desc) {
+  var err = new Error(msg);
+  err.type = 'TransportError';
+  err.description = desc;
+  this.emit('error', err);
+  return this;
+};
+
+/**
+ * Opens the transport.
+ *
+ * @api public
+ */
+
+Transport.prototype.open = function () {
+  if ('closed' === this.readyState || '' === this.readyState) {
+    this.readyState = 'opening';
+    this.doOpen();
+  }
+
+  return this;
+};
+
+/**
+ * Closes the transport.
+ *
+ * @api private
+ */
+
+Transport.prototype.close = function () {
+  if ('opening' === this.readyState || 'open' === this.readyState) {
+    this.doClose();
+    this.onClose();
+  }
+
+  return this;
+};
+
+/**
+ * Sends multiple packets.
+ *
+ * @param {Array} packets
+ * @api private
+ */
+
+Transport.prototype.send = function (packets) {
+  if ('open' === this.readyState) {
+    this.write(packets);
+  } else {
+    throw new Error('Transport not open');
+  }
+};
+
+/**
+ * Called upon open
+ *
+ * @api private
+ */
+
+Transport.prototype.onOpen = function () {
+  this.readyState = 'open';
+  this.writable = true;
+  this.emit('open');
+};
+
+/**
+ * Called with data.
+ *
+ * @param {String} data
+ * @api private
+ */
+
+Transport.prototype.onData = function (data) {
+  var packet = parser.decodePacket(data, this.socket.binaryType);
+  this.onPacket(packet);
+};
+
+/**
+ * Called with a decoded packet.
+ */
+
+Transport.prototype.onPacket = function (packet) {
+  this.emit('packet', packet);
+};
+
+/**
+ * Called upon close.
+ *
+ * @api private
+ */
+
+Transport.prototype.onClose = function () {
+  this.readyState = 'closed';
+  this.emit('close');
+};
+
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {// browser shim for xmlhttprequest module
+
+var hasCORS = __webpack_require__(186);
+
+module.exports = function (opts) {
+  var xdomain = opts.xdomain;
+
+  // scheme must be same when usign XDomainRequest
+  // http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx
+  var xscheme = opts.xscheme;
+
+  // XDomainRequest has a flow of not sending cookie, therefore it should be disabled as a default.
+  // https://github.com/Automattic/engine.io-client/pull/217
+  var enablesXDR = opts.enablesXDR;
+
+  // XMLHttpRequest can be disabled on IE
+  try {
+    if ('undefined' !== typeof XMLHttpRequest && (!xdomain || hasCORS)) {
+      return new XMLHttpRequest();
+    }
+  } catch (e) { }
+
+  // Use XDomainRequest for IE8 if enablesXDR is true
+  // because loading bar keeps flashing when using jsonp-polling
+  // https://github.com/yujiosaka/socke.io-ie8-loading-example
+  try {
+    if ('undefined' !== typeof XDomainRequest && !xscheme && enablesXDR) {
+      return new XDomainRequest();
+    }
+  } catch (e) { }
+
+  if (!xdomain) {
+    try {
+      return new global[['Active'].concat('Object').join('X')]('Microsoft.XMLHTTP');
+    } catch (e) { }
+  }
+};
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports) {
+
+var Point = function(x,y,z){
+    if(x !== undefined && y !== undefined && z !== undefined){
+        this.x = x.toFixed(3);
+        this.y = y.toFixed(3);
+        this.z = z.toFixed(3);
+    }
+
+    this.faces = [];
+}
+
+Point.prototype.subdivide = function(point, count, checkPoint){
+
+    var segments = [];
+    segments.push(this);
+
+    for(var i = 1; i< count; i++){
+        var np = new Point(this.x * (1-(i/count)) + point.x * (i/count),
+            this.y * (1-(i/count)) + point.y * (i/count),
+            this.z * (1-(i/count)) + point.z * (i/count));
+        np = checkPoint(np);
+        segments.push(np);
+    }
+
+    segments.push(point);
+
+    return segments;
+
+}
+
+Point.prototype.segment = function(point, percent){
+    percent = Math.max(0.01, Math.min(1, percent));
+
+    var x = point.x * (1-percent) + this.x * percent;
+    var y = point.y * (1-percent) + this.y * percent;
+    var z = point.z * (1-percent) + this.z * percent;
+
+    var newPoint = new Point(x,y,z);
+    return newPoint;
+
+};
+
+Point.prototype.midpoint = function(point, location){
+    return this.segment(point, .5);
+}
+
+
+Point.prototype.project = function(radius, percent){
+    if(percent == undefined){
+        percent = 1.0;
+    }
+
+    percent = Math.max(0, Math.min(1, percent));
+    var yx = this.y / this.x;
+    var zx = this.z / this.x;
+    var yz = this.z / this.y;
+
+    var mag = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+    var ratio = radius/ mag;
+
+    this.x = this.x * ratio * percent;
+    this.y = this.y * ratio * percent;
+    this.z = this.z * ratio * percent;
+    return this;
+
+};
+
+Point.prototype.registerFace = function(face){
+    this.faces.push(face);
+}
+
+Point.prototype.getOrderedFaces = function(){
+    var workingArray = this.faces.slice();
+    var ret = [];
+
+    var i = 0;
+    while(i < this.faces.length){
+        if(i == 0){
+            ret.push(workingArray[i]);
+            workingArray.splice(i,1);
+        } else {
+            var hit = false;
+            var j = 0;
+            while(j < workingArray.length && !hit){
+                if(workingArray[j].isAdjacentTo(ret[i-1])){
+                    hit = true;
+                    ret.push(workingArray[j]);
+                    workingArray.splice(j, 1);
+                }
+                j++;
+            }
+        }
+        i++;
+    }
+
+    return ret;
+}
+
+Point.prototype.findCommonFace = function(other, notThisFace){
+    for(var i = 0; i< this.faces.length; i++){
+        for(var j = 0; j< other.faces.length; j++){
+            if(this.faces[i].id === other.faces[j].id && this.faces[i].id !== notThisFace.id){
+                return this.faces[i];
+            }
+        }
+    }
+
+    return null;
+}
+
+Point.prototype.toJson = function(){
+    return {
+        x: this.x,
+        y: this.y,
+        z: this.z
+    };
+}
+
+Point.prototype.toString = function(){
+    return '' + this.x + ',' + this.y + ',' + this.z;
+}
+
+module.exports = Point;
+
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// This file is deprecated in 1.12.0 to be removed in 1.13
+( function() {
+!(__WEBPACK_AMD_DEFINE_FACTORY__ = ([
+	"jquery",
+	"./data",
+	"./disable-selection",
+	"./focusable",
+	"./form",
+	"./ie",
+	"./keycode",
+	"./labels",
+	"./jquery-1-7",
+	"./plugin",
+	"./safe-active-element",
+	"./safe-blur",
+	"./scroll-parent",
+	"./tabbable",
+	"./unique-id",
+	"./version"
+]),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} )();
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+ * jQuery UI Keycode 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+//>>label: Keycode
+//>>group: Core
+//>>description: Provide keycodes as keynames
+//>>docs: http://api.jqueryui.com/jQuery.ui.keyCode/
+
+( function( factory ) {
+	if ( true ) {
+
+		// AMD. Register as an anonymous module.
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(0), __webpack_require__(3) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else {
+
+		// Browser globals
+		factory( jQuery );
+	}
+} ( function( $ ) {
+return $.ui.keyCode = {
+	BACKSPACE: 8,
+	COMMA: 188,
+	DELETE: 46,
+	DOWN: 40,
+	END: 35,
+	ENTER: 13,
+	ESCAPE: 27,
+	HOME: 36,
+	LEFT: 37,
+	PAGE_DOWN: 34,
+	PAGE_UP: 33,
+	PERIOD: 190,
+	RIGHT: 39,
+	SPACE: 32,
+	TAB: 9,
+	UP: 38
+};
+
+} ) );
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
+	if ( true ) {
+
+		// AMD. Register as an anonymous module.
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(0), __webpack_require__(3) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else {
+
+		// Browser globals
+		factory( jQuery );
+	}
+} ( function( $ ) {
+return $.ui.safeActiveElement = function( document ) {
+	var activeElement;
+
+	// Support: IE 9 only
+	// IE9 throws an "Unspecified error" accessing document.activeElement from an <iframe>
+	try {
+		activeElement = document.activeElement;
+	} catch ( error ) {
+		activeElement = document.body;
+	}
+
+	// Support: IE 9 - 11 only
+	// IE may return null instead of an element
+	// Interestingly, this only seems to occur when NOT in an iframe
+	if ( !activeElement ) {
+		activeElement = document.body;
+	}
+
+	// Support: IE 11 only
+	// IE11 returns a seemingly empty object in some cases when accessing
+	// document.activeElement from an <iframe>
+	if ( !activeElement.nodeName ) {
+		activeElement = document.body;
+	}
+
+	return activeElement;
+};
+
+} ) );
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+ * jQuery UI Mouse 1.12.1
+ * http://jqueryui.com
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+//>>label: Mouse
+//>>group: Widgets
+//>>description: Abstracts mouse-based interactions to assist in creating certain widgets.
+//>>docs: http://api.jqueryui.com/mouse/
+
+( function( factory ) {
+	if ( true ) {
+
+		// AMD. Register as an anonymous module.
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+			__webpack_require__(0),
+			__webpack_require__(197),
+			__webpack_require__(3),
+			__webpack_require__(7)
+		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else {
+
+		// Browser globals
+		factory( jQuery );
+	}
+}( function( $ ) {
+
+var mouseHandled = false;
+$( document ).on( "mouseup", function() {
+	mouseHandled = false;
+} );
+
+return $.widget( "ui.mouse", {
+	version: "1.12.1",
+	options: {
+		cancel: "input, textarea, button, select, option",
+		distance: 1,
+		delay: 0
+	},
+	_mouseInit: function() {
+		var that = this;
+
+		this.element
+			.on( "mousedown." + this.widgetName, function( event ) {
+				return that._mouseDown( event );
+			} )
+			.on( "click." + this.widgetName, function( event ) {
+				if ( true === $.data( event.target, that.widgetName + ".preventClickEvent" ) ) {
+					$.removeData( event.target, that.widgetName + ".preventClickEvent" );
+					event.stopImmediatePropagation();
+					return false;
+				}
+			} );
+
+		this.started = false;
+	},
+
+	// TODO: make sure destroying one instance of mouse doesn't mess with
+	// other instances of mouse
+	_mouseDestroy: function() {
+		this.element.off( "." + this.widgetName );
+		if ( this._mouseMoveDelegate ) {
+			this.document
+				.off( "mousemove." + this.widgetName, this._mouseMoveDelegate )
+				.off( "mouseup." + this.widgetName, this._mouseUpDelegate );
+		}
+	},
+
+	_mouseDown: function( event ) {
+
+		// don't let more than one widget handle mouseStart
+		if ( mouseHandled ) {
+			return;
+		}
+
+		this._mouseMoved = false;
+
+		// We may have missed mouseup (out of window)
+		( this._mouseStarted && this._mouseUp( event ) );
+
+		this._mouseDownEvent = event;
+
+		var that = this,
+			btnIsLeft = ( event.which === 1 ),
+
+			// event.target.nodeName works around a bug in IE 8 with
+			// disabled inputs (#7620)
+			elIsCancel = ( typeof this.options.cancel === "string" && event.target.nodeName ?
+				$( event.target ).closest( this.options.cancel ).length : false );
+		if ( !btnIsLeft || elIsCancel || !this._mouseCapture( event ) ) {
+			return true;
+		}
+
+		this.mouseDelayMet = !this.options.delay;
+		if ( !this.mouseDelayMet ) {
+			this._mouseDelayTimer = setTimeout( function() {
+				that.mouseDelayMet = true;
+			}, this.options.delay );
+		}
+
+		if ( this._mouseDistanceMet( event ) && this._mouseDelayMet( event ) ) {
+			this._mouseStarted = ( this._mouseStart( event ) !== false );
+			if ( !this._mouseStarted ) {
+				event.preventDefault();
+				return true;
+			}
+		}
+
+		// Click event may never have fired (Gecko & Opera)
+		if ( true === $.data( event.target, this.widgetName + ".preventClickEvent" ) ) {
+			$.removeData( event.target, this.widgetName + ".preventClickEvent" );
+		}
+
+		// These delegates are required to keep context
+		this._mouseMoveDelegate = function( event ) {
+			return that._mouseMove( event );
+		};
+		this._mouseUpDelegate = function( event ) {
+			return that._mouseUp( event );
+		};
+
+		this.document
+			.on( "mousemove." + this.widgetName, this._mouseMoveDelegate )
+			.on( "mouseup." + this.widgetName, this._mouseUpDelegate );
+
+		event.preventDefault();
+
+		mouseHandled = true;
+		return true;
+	},
+
+	_mouseMove: function( event ) {
+
+		// Only check for mouseups outside the document if you've moved inside the document
+		// at least once. This prevents the firing of mouseup in the case of IE<9, which will
+		// fire a mousemove event if content is placed under the cursor. See #7778
+		// Support: IE <9
+		if ( this._mouseMoved ) {
+
+			// IE mouseup check - mouseup happened when mouse was out of window
+			if ( $.ui.ie && ( !document.documentMode || document.documentMode < 9 ) &&
+					!event.button ) {
+				return this._mouseUp( event );
+
+			// Iframe mouseup check - mouseup occurred in another document
+			} else if ( !event.which ) {
+
+				// Support: Safari <=8 - 9
+				// Safari sets which to 0 if you press any of the following keys
+				// during a drag (#14461)
+				if ( event.originalEvent.altKey || event.originalEvent.ctrlKey ||
+						event.originalEvent.metaKey || event.originalEvent.shiftKey ) {
+					this.ignoreMissingWhich = true;
+				} else if ( !this.ignoreMissingWhich ) {
+					return this._mouseUp( event );
+				}
+			}
+		}
+
+		if ( event.which || event.button ) {
+			this._mouseMoved = true;
+		}
+
+		if ( this._mouseStarted ) {
+			this._mouseDrag( event );
+			return event.preventDefault();
+		}
+
+		if ( this._mouseDistanceMet( event ) && this._mouseDelayMet( event ) ) {
+			this._mouseStarted =
+				( this._mouseStart( this._mouseDownEvent, event ) !== false );
+			( this._mouseStarted ? this._mouseDrag( event ) : this._mouseUp( event ) );
+		}
+
+		return !this._mouseStarted;
+	},
+
+	_mouseUp: function( event ) {
+		this.document
+			.off( "mousemove." + this.widgetName, this._mouseMoveDelegate )
+			.off( "mouseup." + this.widgetName, this._mouseUpDelegate );
+
+		if ( this._mouseStarted ) {
+			this._mouseStarted = false;
+
+			if ( event.target === this._mouseDownEvent.target ) {
+				$.data( event.target, this.widgetName + ".preventClickEvent", true );
+			}
+
+			this._mouseStop( event );
+		}
+
+		if ( this._mouseDelayTimer ) {
+			clearTimeout( this._mouseDelayTimer );
+			delete this._mouseDelayTimer;
+		}
+
+		this.ignoreMissingWhich = false;
+		mouseHandled = false;
+		event.preventDefault();
+	},
+
+	_mouseDistanceMet: function( event ) {
+		return ( Math.max(
+				Math.abs( this._mouseDownEvent.pageX - event.pageX ),
+				Math.abs( this._mouseDownEvent.pageY - event.pageY )
+			) >= this.options.distance
+		);
+	},
+
+	_mouseDelayMet: function( /* event */ ) {
+		return this.mouseDelayMet;
+	},
+
+	// These are placeholder methods, to be overriden by extending plugin
+	_mouseStart: function( /* event */ ) {},
+	_mouseDrag: function( /* event */ ) {},
+	_mouseStop: function( /* event */ ) {},
+	_mouseCapture: function( /* event */ ) { return true; }
+} );
+
+} ) );
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * Module dependencies.
+ */
+
+var debug = __webpack_require__(5)('socket.io-parser');
+var Emitter = __webpack_require__(9);
+var hasBin = __webpack_require__(59);
+var binary = __webpack_require__(215);
+var isBuf = __webpack_require__(67);
+
+/**
+ * Protocol version.
+ *
+ * @api public
+ */
+
+exports.protocol = 4;
+
+/**
+ * Packet types.
+ *
+ * @api public
+ */
+
+exports.types = [
+  'CONNECT',
+  'DISCONNECT',
+  'EVENT',
+  'ACK',
+  'ERROR',
+  'BINARY_EVENT',
+  'BINARY_ACK'
+];
+
+/**
+ * Packet type `connect`.
+ *
+ * @api public
+ */
+
+exports.CONNECT = 0;
+
+/**
+ * Packet type `disconnect`.
+ *
+ * @api public
+ */
+
+exports.DISCONNECT = 1;
+
+/**
+ * Packet type `event`.
+ *
+ * @api public
+ */
+
+exports.EVENT = 2;
+
+/**
+ * Packet type `ack`.
+ *
+ * @api public
+ */
+
+exports.ACK = 3;
+
+/**
+ * Packet type `error`.
+ *
+ * @api public
+ */
+
+exports.ERROR = 4;
+
+/**
+ * Packet type 'binary event'
+ *
+ * @api public
+ */
+
+exports.BINARY_EVENT = 5;
+
+/**
+ * Packet type `binary ack`. For acks with binary arguments.
+ *
+ * @api public
+ */
+
+exports.BINARY_ACK = 6;
+
+/**
+ * Encoder constructor.
+ *
+ * @api public
+ */
+
+exports.Encoder = Encoder;
+
+/**
+ * Decoder constructor.
+ *
+ * @api public
+ */
+
+exports.Decoder = Decoder;
+
+/**
+ * A socket.io Encoder instance
+ *
+ * @api public
+ */
+
+function Encoder() {}
+
+/**
+ * Encode a packet as a single string if non-binary, or as a
+ * buffer sequence, depending on packet type.
+ *
+ * @param {Object} obj - packet object
+ * @param {Function} callback - function to handle encodings (likely engine.write)
+ * @return Calls callback with Array of encodings
+ * @api public
+ */
+
+Encoder.prototype.encode = function(obj, callback){
+  if ((obj.type === exports.EVENT || obj.type === exports.ACK) && hasBin(obj.data)) {
+    obj.type = obj.type === exports.EVENT ? exports.BINARY_EVENT : exports.BINARY_ACK;
+  }
+
+  debug('encoding packet %j', obj);
+
+  if (exports.BINARY_EVENT === obj.type || exports.BINARY_ACK === obj.type) {
+    encodeAsBinary(obj, callback);
+  }
+  else {
+    var encoding = encodeAsString(obj);
+    callback([encoding]);
+  }
+};
+
+/**
+ * Encode packet as string.
+ *
+ * @param {Object} packet
+ * @return {String} encoded
+ * @api private
+ */
+
+function encodeAsString(obj) {
+
+  // first is type
+  var str = '' + obj.type;
+
+  // attachments if we have them
+  if (exports.BINARY_EVENT === obj.type || exports.BINARY_ACK === obj.type) {
+    str += obj.attachments + '-';
+  }
+
+  // if we have a namespace other than `/`
+  // we append it followed by a comma `,`
+  if (obj.nsp && '/' !== obj.nsp) {
+    str += obj.nsp + ',';
+  }
+
+  // immediately followed by the id
+  if (null != obj.id) {
+    str += obj.id;
+  }
+
+  // json data
+  if (null != obj.data) {
+    str += JSON.stringify(obj.data);
+  }
+
+  debug('encoded %j as %s', obj, str);
+  return str;
+}
+
+/**
+ * Encode packet as 'buffer sequence' by removing blobs, and
+ * deconstructing packet into object with placeholders and
+ * a list of buffers.
+ *
+ * @param {Object} packet
+ * @return {Buffer} encoded
+ * @api private
+ */
+
+function encodeAsBinary(obj, callback) {
+
+  function writeEncoding(bloblessData) {
+    var deconstruction = binary.deconstructPacket(bloblessData);
+    var pack = encodeAsString(deconstruction.packet);
+    var buffers = deconstruction.buffers;
+
+    buffers.unshift(pack); // add packet info to beginning of data list
+    callback(buffers); // write all the buffers
+  }
+
+  binary.removeBlobs(obj, writeEncoding);
+}
+
+/**
+ * A socket.io Decoder instance
+ *
+ * @return {Object} decoder
+ * @api public
+ */
+
+function Decoder() {
+  this.reconstructor = null;
+}
+
+/**
+ * Mix in `Emitter` with Decoder.
+ */
+
+Emitter(Decoder.prototype);
+
+/**
+ * Decodes an ecoded packet string into packet JSON.
+ *
+ * @param {String} obj - encoded packet
+ * @return {Object} packet
+ * @api public
+ */
+
+Decoder.prototype.add = function(obj) {
+  var packet;
+  if (typeof obj === 'string') {
+    packet = decodeString(obj);
+    if (exports.BINARY_EVENT === packet.type || exports.BINARY_ACK === packet.type) { // binary packet's json
+      this.reconstructor = new BinaryReconstructor(packet);
+
+      // no attachments, labeled binary but no binary data to follow
+      if (this.reconstructor.reconPack.attachments === 0) {
+        this.emit('decoded', packet);
+      }
+    } else { // non-binary full packet
+      this.emit('decoded', packet);
+    }
+  }
+  else if (isBuf(obj) || obj.base64) { // raw binary data
+    if (!this.reconstructor) {
+      throw new Error('got binary data when not reconstructing a packet');
+    } else {
+      packet = this.reconstructor.takeBinaryData(obj);
+      if (packet) { // received final buffer
+        this.reconstructor = null;
+        this.emit('decoded', packet);
+      }
+    }
+  }
+  else {
+    throw new Error('Unknown type: ' + obj);
+  }
+};
+
+/**
+ * Decode a packet String (JSON data)
+ *
+ * @param {String} str
+ * @return {Object} packet
+ * @api private
+ */
+
+function decodeString(str) {
+  var i = 0;
+  // look up type
+  var p = {
+    type: Number(str.charAt(0))
+  };
+
+  if (null == exports.types[p.type]) return error();
+
+  // look up attachments if type binary
+  if (exports.BINARY_EVENT === p.type || exports.BINARY_ACK === p.type) {
+    var buf = '';
+    while (str.charAt(++i) !== '-') {
+      buf += str.charAt(i);
+      if (i == str.length) break;
+    }
+    if (buf != Number(buf) || str.charAt(i) !== '-') {
+      throw new Error('Illegal attachments');
+    }
+    p.attachments = Number(buf);
+  }
+
+  // look up namespace (if any)
+  if ('/' === str.charAt(i + 1)) {
+    p.nsp = '';
+    while (++i) {
+      var c = str.charAt(i);
+      if (',' === c) break;
+      p.nsp += c;
+      if (i === str.length) break;
+    }
+  } else {
+    p.nsp = '/';
+  }
+
+  // look up id
+  var next = str.charAt(i + 1);
+  if ('' !== next && Number(next) == next) {
+    p.id = '';
+    while (++i) {
+      var c = str.charAt(i);
+      if (null == c || Number(c) != c) {
+        --i;
+        break;
+      }
+      p.id += str.charAt(i);
+      if (i === str.length) break;
+    }
+    p.id = Number(p.id);
+  }
+
+  // look up json data
+  if (str.charAt(++i)) {
+    p = tryParse(p, str.substr(i));
+  }
+
+  debug('decoded %s as %j', str, p);
+  return p;
+}
+
+function tryParse(p, str) {
+  try {
+    p.data = JSON.parse(str);
+  } catch(e){
+    return error();
+  }
+  return p; 
+}
+
+/**
+ * Deallocates a parser's resources
+ *
+ * @api public
+ */
+
+Decoder.prototype.destroy = function() {
+  if (this.reconstructor) {
+    this.reconstructor.finishedReconstruction();
+  }
+};
+
+/**
+ * A manager of a binary event's 'buffer sequence'. Should
+ * be constructed whenever a packet of type BINARY_EVENT is
+ * decoded.
+ *
+ * @param {Object} packet
+ * @return {BinaryReconstructor} initialized reconstructor
+ * @api private
+ */
+
+function BinaryReconstructor(packet) {
+  this.reconPack = packet;
+  this.buffers = [];
+}
+
+/**
+ * Method to be called when binary data received from connection
+ * after a BINARY_EVENT packet.
+ *
+ * @param {Buffer | ArrayBuffer} binData - the raw binary data received
+ * @return {null | Object} returns null if more binary data is expected or
+ *   a reconstructed packet object if all buffers have been received.
+ * @api private
+ */
+
+BinaryReconstructor.prototype.takeBinaryData = function(binData) {
+  this.buffers.push(binData);
+  if (this.buffers.length === this.reconPack.attachments) { // done with buffer list
+    var packet = binary.reconstructPacket(this.reconPack, this.buffers);
+    this.finishedReconstruction();
+    return packet;
+  }
+  return null;
+};
+
+/**
+ * Cleans up binary packet reconstruction variables.
+ *
+ * @api private
+ */
+
+BinaryReconstructor.prototype.finishedReconstruction = function() {
+  this.reconPack = null;
+  this.buffers = [];
+};
+
+function error() {
+  return {
+    type: exports.ERROR,
+    data: 'parser error'
+  };
+}
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(118);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(13)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../css-loader/index.js!./core.css", function() {
+			var newContent = require("!!../../../css-loader/index.js!./core.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 38 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(89);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__particles_NodesParticleSystem__ = __webpack_require__(91);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__particles_ParticleNodeGroup__ = __webpack_require__(92);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_Tween__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__lib_Tween__);
+/**
+ * Created by Frank on 30.05.2017.
+ */
+
+
+
+
+
+
+
+
+
+//import TWEEN from "@tweenjs/tween.js"
+
+
+class ClusterLeafElement extends THREE.Mesh {
+    constructor(nodes) {
+        super();
+
+
+        this.mNodes = nodes;
+
+        this.mNodeParticles = this.createParticleNodeCloud();
+        this.add(this.mNodeParticles.pointCloud);
+
+
+        //add edges to the leaf
+        this.createEdgesFromNodes(nodes);
+
+
+        // add the nodes to the leaf
+        this.appendNodes(nodes);
+
+
+    }
+
+
+    getView() {
+        //TODO
+        return this.parent.parent.getView()
+
+    }
+
+    setLOD(levelOfDetail) {
+        if (this.mNodeParticles && this.parent.useLOD)
+            this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
+        //TODO nodes,edges, ... as well
+
+        let edgeFadeLOD = 0.3;
+        let crossfade = 0.2;//TODO add crossfade
+
+        if (this.mEdgesContainer) {
+
+            this.mEdgesContainer.visible = levelOfDetail>0.75// levelOfDetail >= edgeFadeLOD;
+
+            this.mEdgesContainer.mEdges.material.opacity =levelOfDetail/4// (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
+        }
+
+     /*   if (this.mEdgesContainer2) {
+
+            this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
+
+            this.mEdgesContainer2.mEdges.material.opacity = 1 - levelOfDetail / edgeFadeLOD;
+        }*/
+
+
+        if (this.mNodeMeshes)
+            this.mNodeMeshes.visible = levelOfDetail > 0.2;
+
+        // if (this.parent && this.parent.mParticles)
+        // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
+
+
+    }
+
+
+    cleanUp() {
+
+
+        if (this.mNodeParticles) {
+            this.mNodeParticles.remove();
+            this.mNodeParticles.pointCloud.geometry.dispose();
+            this.mNodeParticles = null;
+        }
+
+        if (this.mParticles) {
+            this.mParticles.remove();
+            this.mParticles.pointCloud.geometry.dispose();
+            this.mParticles = null;
+        }
+
+
+        if (this.mEdgesContainer && this.mEdgesContainer.geometry) {
+
+            this.remove(this.mEdgesContainer);
+
+            this.mEdgesContainer.geometry.dispose();
+            this.mEdgesContainer = null;
+        }
+
+
+     /*   if (this.mEdgesContainer2 && this.mEdgesContainer2.geometry) {
+
+
+            this.mEdgesContainer2.geometry.dispose();
+            this.mEdgesContainer2 = null;
+        }*/
+
+
+        if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
+            this.mNodeMeshes.geometry.dispose();
+            this.mNodeMeshes = null;
+        }
+
+
+        if (this.geometry)
+            this.geometry.dispose();
+        if (this.parent)
+            this.parent.remove(this)
+
+
+    }
+
+
+    appendNodes(nodes) {
+
+
+        if (!this.mNodeMeshes) {
+            this.mNodeMeshes = new THREE.Object3D;
+            this.add(this.mNodeMeshes)
+
+        }
+
+
+        var that = this.mNodeMeshes;//this;
+        _.each(nodes, function (node) {
+            if (node && node._bubble)
+                that.add(node._bubble)
+
+
+        })
+
+
+    }
+
+
+    createEdgesFromNodes(nodes) {
+
+        this.mEdgesContainer = new __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__["a" /* default */]();
+        this.mEdgesContainer.setRenderMode(true, false, false).setSkipParams(30, 40).setFromNodes(nodes);
+        this.add(this.mEdgesContainer)
+
+        /* this.mEdgesContainer2 = new EdgesContainer();
+         this.mEdgesContainer2.setRenderMode(false,true,false).setSkipParams(100,1).setFromNodes(nodes);
+         this.add(this.mEdgesContainer2)
+         */
+
+
+    }
+
+
+    //TODO refactor
+    setDistributionHandler(distribution, onComplete = function () {
+    }) {
+
+        var that = this;
+        distribution.setNodes(this.mNodes, function (vec, i) {
+
+            let n = that.mNodes[i];
+            if (n._bubble) n._bubble.position.set(n.x, n.y, n.z);
+            that.mNodeParticles.updateNodePosition(i);
+
+        }, function onStep() {
+
+
+            that.updateEdges();
+
+
+        }, function () {
+
+
+            that._initDotParticles();
+
+            onComplete()
+
+
+        });
+
+    }
+
+    updateEdges() {
+
+
+        if (this.mEdgesContainer)
+            this.mEdgesContainer.updateEdges();
+
+      //  if (this.mEdgesContainer2)
+       //     this.mEdgesContainer2.updateEdges();
+
+    }
+
+    updateDots(time) {
+        if (this.mParticles)
+            this.mParticles.update(time);
+    }
+
+
+    /**
+     * creates a structure that contains a point cloud for the nodes for mre effiecient rendering
+     *
+     * @returns {{nodes, pointCloud, updateCrossFade, update, updateNode, updateNodePosition, updateNodeColor, updateNodeSize, on, remove}|*}
+     */
+
+    createParticleNodeCloud() {
+
+        var elem = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__particles_ParticleNodeGroup__["a" /* default */])(this.mNodes, {
+            nodeDefaultSize: 10,
+            nodeDefaultScale: 10,
+            nodeTexture: "img/dot7.png"
+        });
+
+
+        return elem
+    }
+
+
+    //create/update particleSystem (little dots inside nodes)
+    //potentially add them at specific time
+    _initDotParticles() {
+
+        if (this.mParticles)
+            this.mParticles.start();
+
+
+        if (!this.mParticles) {
+
+            var nodes = this.mNodes;
+            var demoOptions = {
+                increment: 1,
+                duration: 1000,
+                easing: __WEBPACK_IMPORTED_MODULE_3__lib_Tween___default.a.Easing.Exponential.Out
+            };
+
+            if (!nodes) //FIXME this only works that way because to realData is not generated properly
+                demoOptions.npc = function (n) {
+
+                    return n.itemCount || 5
+                    //return 5
+                };
+
+
+            //TODO refactor force-graph-utils
+
+            var particles = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__particles_NodesParticleSystem__["a" /* default */])(nodes, demoOptions);
+            this.add(particles.pointCloud);
+
+
+            //TODO this timeout currently fixes wrong positioning bug..
+            setTimeout(function () {
+                particles.start();
+            }, 10)
+
+            //TODO call start if distribution function is finished
+            /*this.parent.on("distribution-complete", function () {
+
+             particles.start()
+
+
+             });*/
+
+
+            this.mParticles = particles;
+        }
+
+    }
+
+
+    updateDotParticlesColor() {
+
+        if (this.mParticles) {
+            this.mParticles.updateColors();
+
+
+            //  this.mParticles.pointCloud.position.sub(this.position); //this.parent.position
+        }
+
+
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ClusterLeafElement;
+
+
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
+
+/***/ }),
+/* 39 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__refactor_f0_linkmixin__ = __webpack_require__(94);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__ = __webpack_require__(95);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_f1__ = __webpack_require__(47);
+/**
+ * Created by Frank on 11.06.2017.
+ */
+
+
+
+
+
+
+class GraphData
+{
+
+    //constructor(nodes,edges){
+    constructor(graphData){
+            this.mGraphData=graphData
+      /*  this.mNodeData=[];
+        this.mEdgeData=[];
+
+        this.addNodes(nodes);
+        this.addEdges(nodes);*/
+
+    }
+
+    getClonedRawNodes()
+    {
+        var mNodes={}
+
+            _.each(this.mGraphData.nodes,function(node,id){
+                mNodes[id]=_.extend({x:0,y:0,z:0},node)
+
+
+            })
+
+
+
+        this.mDataNodeCopy=mNodes
+
+
+        // Build graph with data
+        var d3Nodes  = [];
+        for (let nodeId in mNodes) { // Turn nodes into array
+            const node =mNodes[nodeId] // _.extend({},mNodes);
+            node._id = nodeId;
+            d3Nodes.push(node);
+        }
+       return d3Nodes
+
+    }
+
+    getAlteredRawLinks(){
+        var mDataNodeCopy= this.mDataNodeCopy
+   // var skipLines=100
+//FIXME filtering visible nodes here will break edge based calculations and arrows
+
+        var links=this.mGraphData.links   //.filter((v,id)=> !(id%skipLines)   )
+
+        //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
+       var  d3Links  = links.map(link => {
+            return {
+                source: mDataNodeCopy[link[0]],
+                target: mDataNodeCopy[link[1]]
+            };
+        })
+
+    return d3Links
+
+
+
+    }
+
+
+  /*  addRawNodeData(nodes){
+      if (_.isArray(nodes)) this.mNodeData=this.mNodeData.concat(nodes)
+
+        return this;
+
+    }
+
+    addRawEdgeData(edges)
+    {
+        if (_.isArray(edges)) this.mEdgeData=this.mEdgeData.concat(edges)
+
+        return this;
+    }*/
+
+    createClusterNodesAndEdges( view3d)
+    {
+        //env=globalEnv
+        //see ForceGraph
+        //TODO minimal env options to create a node
+        var env={
+            nameAccessor:node =>node.name || node.id,
+            colorAccessor: node => node.color,
+            valAccessor:node => node.val,
+
+            sizeAccessor:node => node.itemCount,
+
+            nodeRelSize:4,
+           // useDebugSphere:true,
+            domEvents:view3d.mDomEvents
+        }
+
+
+
+
+   var d3Nodes= this.getClonedRawNodes();
+
+    if (!d3Nodes.length) {
+        return;
+    } //if no data is present return for now
+
+
+    var d3Links =this.getAlteredRawLinks();
+
+
+//TODO
+  /*  function countVisibleNodes(node) {
+
+        env._nodeCounter.push(node)
+
+    }*/
+
+    // Add WebGL objects
+    d3Nodes.forEach(node => {
+
+        node = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__["a" /* default */])(env, node, {
+         //   onDrawNode: countVisibleNodes
+        })
+        node._bubble.name = env.nameAccessor(node) || '';
+
+
+        node.size=env.sizeAccessor(node) || undefined;
+
+
+        //TODO not highlighted group nodes should be rendered with separate point cloud
+        if (node.isGroupNode) {
+
+            //node.addClass("basic-sprite-collapsed")
+            node.addClass("basic-ring")
+
+            //node.on("mouseover",()=> node.addClass("basic-animated"))
+            //node.on("mouseout",()=> node.removeClass("basic-animated"))
+            node.on("mouseover", () => node.addClass("basic-ring-2"))
+            node.on("mouseout", () => node.removeClass("basic-ring-2"))
+
+        } else {
+
+            //TODO specific renderings for node should be handled via class property at node data itself
+            //NOTE: the default node/group nodes/links will be put inside a point  cloud for each so we woud need a point cloud for each 3d-class that generates a points object
+
+            //node.addClass("basic-sphere")
+
+            // nothing to begin with
+            //node.addClass("basic-sprite")
+
+        }
+
+    });
+
+    //-----------------------------------------------
+
+    //init mesh for groupline
+  /*  if (env.useLineGroup)
+        initLineGroup(env,{
+            opacity:0.01,
+            color:0x49616C,
+            transparent: true,
+        })
+
+    var linecount = 0;
+    var skipLines = env.numSkipEdgesRendered + 1;
+    if (skipLines < 1)
+        skipLines = 1
+    function shouldLineByVisible(link, id) {
+
+        return !(linecount++ % skipLines)
+    }
+*/
+
+        //TODO have more thatn one line mesh per rootcluster .. isntead have line meshes per sub-cluster
+       var mLineGroup= this.initLineGroupHelper()
+
+        //used to wrap per cluster functionality
+        function linkMixinExt(link,options)
+        {
+            var env={mergedLineMesh:mLineGroup}
+
+            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__refactor_f0_linkmixin__["a" /* default */])(env,link,options)
+
+        }
+
+
+
+
+        //d3Links.forEach(link => {
+    _.each(d3Links, (link, id) => {
+
+         //TODO have a function within the custer itself that is called
+        //determine by distance or something like that
+        var bVisible = true;// shouldLineByVisible()
+
+        linkMixinExt( link, {
+            lineIsVisible: bVisible,
+            color: 0xff0000,
+            opacity: 1
+        })
+
+
+    });
+
+
+
+
+
+    //----------------------
+
+
+    //nodes are prepared by previous step ? TODO which one was that? for further altering
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__refactor_f1__["a" /* extendGraphElements */])(d3Nodes, d3Links, env)
+
+
+        return {nodes:d3Nodes,edges:d3Links}
+
+}
+
+    //--------------------------------------------
+
+
+    /**
+     * TODO refactor line group into stand alone class to be used per-cluster
+     *
+     *
+     *
+     */
+   initLineGroupHelper( options) {
+
+
+       var line_geom = new THREE.Geometry();
+       var lineMaterial
+       var mergedLineMesh
+
+
+
+
+
+    var defaults = {
+        opacity: 0.01,
+        transparent: true,
+        //lineIsVisible:true, // if disabled the line won't be shown on the scene
+        color: 0xffffff
+    }
+
+    options = _.extend(defaults, options)
+
+    lineMaterial = new THREE.MeshBasicMaterial({
+        color: options.color,
+        transparent: options.transparent,
+        opacity: options.opacity,
+        depthTest: false,
+        depthWrite: false
+    });
+
+
+    mergedLineMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
+
+    mergedLineMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
+
+
+
+  return mergedLineMesh
+
+
+}
+
+
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = GraphData;
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
+
+/***/ }),
+/* 40 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(_, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(98);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_SpecificDataUtils__ = __webpack_require__(20);
+/**
+ * Created by Frank on 06.06.2017.
+ */
+
+
+//TODO refactor RootCluster
+
+
+
+
+
+
+
+
+/**
+ *
+ *  a RootCluster is a root node that contains additional rendering infos over multiple nodes
+ * for example: it handles node captions (text nodes)
+ */
+
+class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /* default */] {
+
+    constructor(...args)
+    {
+        super(...args)
+
+        this.useClusterText=true;
+
+
+        //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
+       // setTimeout(()=> this.onAfterClusteredAndDistributed(),5000)
+        // "cluster-ready" as alternative event
+        this.on("hull-updated",function(){
+
+
+         this.findClusters("*").forEach(function(cluster){
+             cluster.useLOD=true
+         })
+
+
+        })
+
+       this.addColorHandler()
+
+
+    }
+
+    addListeners() {
+
+        super.addListeners();
+
+
+        this.on("u", e=>{
+            e.stopPropagation();
+
+            this.useClusterText=!this.useClusterText;
+            console.log("useClusterText", this.useClusterText)
+        });
+
+    }
+
+
+
+
+
+    addColorHandler()
+    {
+
+   var nodes=this.mNodes;
+   var that=this
+
+
+        function getCountryNamesFromNodes(nodes)
+        {
+            var res={}
+            _.each(nodes,(n) => res[n.group]=true)
+
+         return Object.keys(res)
+        }
+
+
+
+
+        function updateParticles(leaf)
+        {
+//FIXME performance
+          //  return;
+        if (leaf && leaf.parent && leaf.parent.mParticles) {
+
+            leaf.parent.mParticles.updateColors();
+
+
+        }
+            else setTimeout(() => updateParticles(leaf), 100 )
+        }
+
+
+        var countryNames=null;
+
+        $(window).on("node-color-change",function(e,val){
+
+
+          if (!countryNames)countryNames=getCountryNamesFromNodes(nodes)
+
+            var helper=__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__refactor_SpecificDataUtils__["b" /* computeGroupNodeColorHelper */])(countryNames)
+
+
+         //   var val=$sel.val()
+            if (val=="group")
+                nodes.forEach(function(v){ v.color=helper.getColor(v.group)});
+            else
+                nodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
+
+            _.each(that.getLeafs(),function(leaf){
+
+
+                leaf.mNodeParticles.update()
+
+
+                updateParticles(leaf)
+
+
+            })
+
+
+
+
+
+
+        })
+
+
+
+
+    }
+
+
+
+    /**
+     * @override
+     * prevent multiple recursive  root clusters from being created by default
+     */
+
+    getChildClusterConstructor()
+    {
+        return __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /* default */];
+
+    }
+
+
+    /**
+     * attaches to root cluster to a specific View3D element to be able to perform container based operations
+     *
+     *
+     */
+    attachToView3D(view3D){
+        this.mParentView=view3D
+
+
+
+
+    }
+
+
+
+   resetTextOverlay(){
+
+
+        if (this.mTextOverlay) this.mTextOverlay.remove()
+
+       this.mTextOverlay=$("<cluster-text-overlay>");
+
+       $(this.mParentView).append(this.mTextOverlay)
+
+   }
+
+
+
+
+    applyClustering(mClusteringSpeccsArray,overrideExpand=false) {
+
+       //FIXME transitions betweens graphs
+      //this.storeParentPositionInNodes()
+        super.applyClustering(mClusteringSpeccsArray,overrideExpand)
+
+        this.resetTextOverlay()
+
+
+
+
+       // this.restoreNodePositionFromExParent()
+    }
+
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = RootCluster;
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(0)))
+
+/***/ }),
+/* 41 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(d3_force, _, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__ = __webpack_require__(8);
+/**
+ * Created by Frank on 02.06.2017.
+ */
+
+
+
+
+
+
+
+
+/*
+ * TODO the forceGraphDistribution should work like a normal force graph
+ * but optimally is could use a initial distribution from another dist function with no animation enabled
+ *
+ * */
+
+
+class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__["a" /* default */] {
+    constructor(scale = 50, dimensions = 1) {
+        super(scale, dimensions);
+
+
+        this.initialEngineTicks = 1;
+
+    // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
+        this.maxConvergeTime=3000;//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeFrames=90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
+
+    }
+
+    /**
+     * a reduced simulation (for testing)
+     * TODO add edges and rest of original src
+     * @param nodes
+     * @param edges
+     * @param onTick
+     * @param onTICKComplete
+     */
+    startSimulation(nodes, edges = [], onTick, onComplete) {
+
+
+
+        var that=this;
+
+        // Add force-directed layout
+        let layout = d3_force.forceSimulation();
+
+
+        var scale = this.mScale;
+
+        //TODO containers need links
+        layout
+            .numDimensions(this.dimensions)
+            .nodes(nodes)
+            .force('link', d3_force.forceLink().id(function (d) {
+                return d._id
+            })
+                .distance(function computeLinkDistance() {
+                    return scale / 50;
+
+                })
+               .links(edges)
+            )
+            .force('charge', (node) => -scale / 50)
+            .force('linkStrength', (link) => 1)
+            .force("collide", d3_force.forceCollide(scale/10).iterations(3))
+            .stop();
+
+
+            /*
+            //TODO the actual collision does not create a good visualisation so until then this is disabled
+            if (nodes[0].size)
+                    layout.force("collide", d3_force.forceCollide().radius(function(node){
+
+                        //TODO improve node size value
+
+                        //NOTE: can't use radius here because it is not already generated
+
+                     //   let backupVal=1//that.dimensions*scale/nodes.length;
+                     //   let rad=backupVal//node._el?node._el.getRadius()*10: backupVal;
+
+                        return node.size*10||1//rad
+                    })
+                        .iterations(3))
+            */
+
+
+
+        for (let i = 0; i < this.initialEngineTicks; i++) {
+            layout.tick();
+        } // Initial ticks before starting to render
+
+
+        let cntTicks = 0;
+        const startTickTime = new Date();
+
+        layout.on("tick", function () {
+
+           if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
+                layout.alpha(0); //trigger end
+                layout.stop(); // Stop ticking graph
+            }
+
+            onTick(layout, nodes, edges)
+
+        }).on('end', function () {
+
+            if (onComplete) onComplete()
+
+        }).restart();
+
+    }
+
+
+    //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
+    //in both cases we can determine the edges from it
+
+    setNodes(nodes, onNodePositionChange, onStep, onComplete) {
+
+
+        if (!nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */] && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D");
+
+
+        let mEdges = [];
+        let mNodes = [];
+        //in case nodes are instance of BaseNode3D
+        if (nodes instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */]) {
+
+
+            //TODO this part might not to be used at all currently
+            mEdges = nodes.createEdgesForChildClusters();
+
+
+            mEdges.forEach(function(edge){
+                edge.source=edge.source.position;
+                edge.target=edge.target.position;
+
+            });
+
+            mNodes = Object.values(nodes.mClusters).map(function (n) {
+               //add a back reference to the cluster
+                n.position._el=n;
+
+                return n.position;
+            });
+
+
+
+
+        }
+        else if (_.isArray(nodes)) {
+            mNodes = nodes.map(function (n) {
+                //mEdges   = EdgeUtil.getEdgesForNodes(nodes, true, false);
+                mEdges = mEdges.concat(n.edges);
+                n.x=n.x||0;
+                n.y=n.y||0;
+                n.z=n.z||0;
+                return n;
+            });
+        }
+
+        this.startSimulation(mNodes, mEdges, function layoutTick(layout, d3Nodes, d3Links) {
+
+            //handle each node callback
+            _.each(d3Nodes, onNodePositionChange);
+            //handle step callback
+            if (onStep)
+                onStep()
+
+        }, onComplete);
+
+
+    }
+
+    //this is called to distribute the elements
+    //TODO add rotation as well in the future
+
+    distribute(node, dx, dy, dz) {
+
+        return {position: new THREE.Vector3(0, 0, 0)}
+
+        //  return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
+
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ForceGraphDistribution;
+
+
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(138), __webpack_require__(2), __webpack_require__(1)))
+
+/***/ }),
+/* 42 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseVolume__ = __webpack_require__(15);
+/**
+ * Created by Frank on 22.06.2017.
+ */
+
+
+/**
+ * a slight derivative of it's base class
+ * allowing for user to add to sub-cluster
+ *
+ */
+
+class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* default */] {
+
+    constructor(...args) {
+        super(...args);
+        this.maxOpacity=0.1;
+        this.getMaterial().transparent=true;
+    }
+
+
+
+    transferFunction(x)
+    {
+     return 1
+    }
+
+    /**
+     * lod is  value between 0 and 1 that can be used to render elements level-of-detail specific
+     * eg. depending on the distance of camera and object
+     *
+     * @param newLOD
+     */
+    setLOD(newLOD)
+    {
+      super.setLOD(newLOD);
+
+        //by default just set the opacity and visibility accordingly
+        let y=this.transferFunction(newLOD)
+        if ( this.mesh && this.mesh.material) {
+            this.mesh.material.opacity =this.maxOpacity*y; //TODO add transferFunction
+
+            if (y<=0)
+                this.mesh.material.visible=false;
+            else
+                this.mesh.material.visible=true;
+
+
+        }
+
+    }
+
+
+
+    canBeVisible()
+    {
+        return true
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = BoxVolume;
+
+
+/***/ }),
+/* 43 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(_, Mousetrap) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete__ = __webpack_require__(201);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__cluster_refactor_f1__ = __webpack_require__(47);
+/**
+ * the searchbar for the graph
+ *
+ *
+ */
+
+
+
+//import 'jquery-ui/themes/base/theme.css';
+//import 'jquery-ui/themes/base/selectable.css';
+
+
+
+
+
+
+__WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
+
+
+    function getNodes() {
+
+        let view = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(".view-3d.view-3d-maximised").get(0)
+
+        return (view && view.mRootCluster && view.mRootCluster.mNodes) ? view.mRootCluster.mNodes : []
+
+
+    }
+
+
+    var filterResult = [];
+
+    var container = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>")
+        .addClass("searchbar-container")
+        .append("<span><span class='searchbar-search'><span>")
+        .prependTo("body")
+
+    var searchbar = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<input placeholder='Search company name, ticker, people, sector, country'>")
+
+    /**
+     *  the actual filter for the graph data
+     */
+
+    //TODO possible "zoom fit" results and highlight
+
+    function doFilterList() {
+
+        if (filterResult)
+            filterResult.forEach(function (v) {
+                __WEBPACK_IMPORTED_MODULE_4__cluster_refactor_f1__["b" /* unhighlightNodeElements */].apply(v)
+            })
+
+        filterResult = getNodes().filter(function (v) {
+            var val = searchbar.val().toLowerCase()
+            //name:r.name,group:r.country,industry:r.industry
+            var isName,
+                isCountry,
+                isId,
+                isIndustry,
+                isTicker;
+            if (typeof v.name == "string")
+                isName = v.name.toLowerCase().indexOf(val) == 0; //only start of string
+
+            if (typeof v.group == "string")
+                isCountry = v.group.toLowerCase().indexOf(val) >= 0;
+
+            if (typeof v.industry == "string")
+                isIndustry = v.industry.toLowerCase().indexOf(val) >= 0;
+
+            if (typeof v.ticker == "string") {
+                var offset = v.ticker.indexOf(":");
+                isTicker = v.ticker.toLowerCase().indexOf(val) >= 0 + offset;
+            }
+
+            if (typeof v.id == "string")
+                isId = v.id.toLowerCase().indexOf(val) >= 0;
+
+            return isName || isCountry || isId || isIndustry || isTicker
+        })
+
+        /*if (filterResult.length > 0) { //doZoomToMesh(filterResult[0]._bubble)
+
+            doOnClickNode(filterResult[0])
+
+        }*/
+
+
+    }
+
+    //
+    function moveToNode(node) {
+        doOnClickNode(node, false, function () {
+
+            setTimeout(function () {
+
+                //defined in force-graph.js
+                globalEnv.updateTextWhenCameraIsMoving()
+
+            }, 400)
+
+        }, false)
+
+    }
+
+    //-----------------
+    //un/highlight all results
+    var lastResults = []
+
+    function showSuggestions(mResult) {
+
+
+        lastResults.forEach(function (v) {
+            __WEBPACK_IMPORTED_MODULE_4__cluster_refactor_f1__["b" /* unhighlightNodeElements */].apply(v)
+        })
+
+
+        mResult.forEach(function (v) {
+            __WEBPACK_IMPORTED_MODULE_4__cluster_refactor_f1__["c" /* highlightNodeElements */].apply(v, [true, false])
+        })
+
+        lastResults = mResult
+
+
+    }
+
+    //-----------------
+    var ac_instance = searchbar.autocomplete({
+        minLength: 3,
+        source: function (request, successCallback) {
+
+            successCallback(filterResult.slice(0, 80))
+
+        },
+        //focus: doFilterList,
+        focus: function (event, ui) {
+
+            searchbar.val(ui.item.name)
+
+
+            //last impl to give the user a feedback
+            //showSuggestions([ui.item])
+
+
+            //doFilterList()
+            //moveToNode(ui.item)
+
+            return false;
+        },
+        select: function (event, ui) {
+
+            searchbar.val(ui.item.name)
+
+            //moveToNode(ui.item)
+            doOnClickNode(ui.item, false, function () {
+                globalEnv.updateTextWhenCameraIsMoving2()
+
+            }, false, false, false, true)
+
+            //we set the selection to false but want the node to appear like it was selected
+            ui.item.addClass("basic-selection")
+
+
+            return false;
+        }
+    }).autocomplete("instance")
+
+    searchbar.on("blur", function () {
+
+        searchbar.val("")
+        showSuggestions([])
+
+    })
+
+
+    ac_instance._renderItem = function (ul, item) {
+
+        var tcr = ""
+        if (item.ticker)
+            tcr = "Ticker:" + item.ticker
+
+        var val = searchbar.val()
+
+        var rowOutput = `<div>  ${item.name} (${tcr})</div>`
+
+        var
+            re = new RegExp(val, "gi");
+
+        rowOutput = _.replace(rowOutput, re, "<b>" + val + "</b>")
+
+        var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<li>").addClass('searchbar-search-row')
+            .append(rowOutput)
+            .appendTo(ul);
+
+        return $row
+    };
+
+    //searchbar initially hidden
+    //container.hide()
+
+
+    searchbar
+        .prependTo(container)
+        .on("keypress", doFilterList)
+
+    //TODO plugin won't trigger ctrl+f without disabling default behaviour in advance
+    window.addEventListener("keydown", function (e) {
+
+        //ignore ctrl+f
+        if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+            e.preventDefault();
+        }
+        //ignore ctrl+s
+        if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 83)) {
+            e.preventDefault();
+        }
+
+    })
+
+    function toggleSearch(e) {
+
+        container.toggle()
+        searchbar.focus()
+        e.stopPropagation()
+        e.preventDefault()
+
+    }
+
+    Mousetrap.bind('ctrl+f',toggleSearch);
+
+    Mousetrap(searchbar.get(0)).bind('ctrl+f',toggleSearch);
+
+
+
+})
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(21)))
+
+/***/ }),
+/* 44 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__lib_Tween__);
+/**
+ * Created by Frank on 08.06.2017.
+ */
+//import TWEEN from "@tweenjs/tween.js"
+
+
+
+//TODO refactor existing samples
+class ZoomUtil {
+
+
+    static moveToCluster(cluster, options) {
+
+        let defaults = {
+            complete: function () {
+            },
+            distance: 400
+        }
+        options = _.extend(defaults, options)
+
+        let view = cluster.getView()
+
+        if (!view) {
+            console.warn("cluster must be bound to instanceof View3D")
+            return
+        }
+
+
+        let mesh = cluster;
+        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, options.distance, options.complete);
+
+
+    }
+
+
+
+    static
+    moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
+    }) {
+
+         var position = new THREE.Vector3();
+        position.setFromMatrixPosition(mesh.matrixWorld);
+
+       ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
+
+
+    }
+
+
+    /**
+     *
+     *
+     * @param position must be in world coordiantes
+     * @param camera
+     * @param controls
+     * @param cameraDistanceToMesh
+     * @param onComplete
+     */
+    static
+    moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
+    }) {
+
+
+        var mTimeout;
+
+        var cameraTargetPosition = controls.target
+        var vec3Start = camera.position
+
+
+      //  var vec3End = new THREE.Vector3();
+      //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
+        var vec3End=position
+
+        //we want to have a fixed distance to a node when selecting
+        var distVec = vec3End.clone().sub(vec3Start)
+        var len = distVec.length()
+        distVec.normalize()
+        distVec.multiplyScalar(cameraDistanceToMesh) //apply fixed distance to the target
+
+        var alteredVecEnd = vec3End.clone().sub(distVec)
+
+
+        //change distance to target
+        var tween = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(vec3Start)
+            .to(alteredVecEnd, 400)
+            //.onUpdate(function () {})
+            .onComplete(function () {
+                onComplete.bind(this)();
+                cancelAnimationFrame(mTimeout)
+            })
+            .start();
+
+        //lookat target
+        var tween2 = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(cameraTargetPosition)
+            .to(vec3End, 400)
+            .start();
+
+        requestAnimationFrame(animate);
+
+        function animate(time) {
+            mTimeout = requestAnimationFrame(animate);
+            tween.update(time);
+            tween2.update(time);
+        }
+
+
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
+
+/***/ }),
+/* 45 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(106);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png__ = __webpack_require__(228);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__coordinates_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js__ = __webpack_require__(188);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_hexasphere_js__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__gui_GraphHUD__ = __webpack_require__(101);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__ = __webpack_require__(20);
+/**
+ * Created by Frank on 13.06.2017.
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default */]
+{
+
+    constructor(...args)
+    {
+        super(...args);
+
+        this.mRootCluster=null;
+
+
+
+
+
+
+    }
+
+
+
+    connectedCallback(){
+        super.connectedCallback();
+
+
+        $(this).append("<graph-hud>")
+
+    }
+
+    setSpeccs(speccs)
+    {
+        this.mSpeccs=speccs;
+        return this
+    }
+
+    getSpeccs()
+    {
+
+        return this.mSpeccs
+    }
+
+
+
+createSkyDome()
+{
+
+
+
+    var material = new THREE.MeshBasicMaterial();
+
+
+    let scene=this.mScene;
+
+    var ambientLight = new THREE.AmbientLight(0xFFFFFF,1.5);
+    scene.add(ambientLight);
+   /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(0, 10000, 0);
+    dirLight.intensity = 1;
+    scene.add(dirLight);
+*/
+   /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
+    pointLight.position.set( 0, 0, 20000 );
+    scene.add(pointLight);
+*/
+  /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
+    var material = new THREE.MeshBasicMaterial();
+
+   material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
+    material.side = THREE.BackSide;
+    material.opacity=0.05;
+    material.transparent=true;
+    var skydome = new THREE.Mesh(geometry, material);
+
+    this.mSkyDome=skydome
+
+
+*/
+ //   scene.add(skydome);
+
+
+    //--------------------------------
+    var meshMaterials = [];
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
+    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
+
+    var oceanMaterial = []
+    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
+    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
+
+
+    var radius = 300000;        // Radius used to calculate position of tiles
+    var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
+    var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
+
+
+    function isLand(){
+
+        return _.random(0,1)
+
+    }
+
+    var hexaGroup=new THREE.Group();
+
+    var hexasphere = new __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default.a(radius, subDivisions, tileSize);
+    for(var i = 0; i< hexasphere.tiles.length; i++){
+        var t = hexasphere.tiles[i];
+        var latLon = t.getLatLon(hexasphere.radius);
+
+        var geometry = new THREE.Geometry();
+
+        for(var j = 0; j< t.boundary.length; j++){
+            var bp = t.boundary[j];
+            geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
+        }
+        geometry.faces.push(new THREE.Face3(0,1,2));
+        geometry.faces.push(new THREE.Face3(0,2,3));
+        geometry.faces.push(new THREE.Face3(0,3,4));
+        if(geometry.vertices.length > 5){
+            geometry.faces.push(new THREE.Face3(0,4,5));
+        }
+
+        if(isLand(latLon.lat, latLon.lon)){
+            material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
+        } else {
+            material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
+        }
+
+        material.opacity = 0.3;
+
+        material.side = THREE.BackSide;
+
+        var mesh = new THREE.Mesh(geometry, material.clone());
+        hexaGroup.add(mesh);
+        hexasphere.tiles[i].mesh = mesh;
+
+    }
+    scene.add(hexaGroup);
+    this.mSkyDome=hexaGroup
+
+
+
+}
+
+
+
+    initClusterForView(rawGraphData,parentEl3D) {
+
+
+        if (!rawGraphData) return;
+
+        let speccs = this.getSpeccs();
+
+        let graphData = new __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__["a" /* default */](rawGraphData);
+
+
+        let preparedData = graphData.createClusterNodesAndEdges(this);
+
+        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes,undefined,this);
+
+
+//-- count visible nodes
+   //TODO check if this interferes with the nodeMixin and the default implementation
+      var visibleNodes=[];
+        _.each(preparedData.nodes,function(node){
+            node.get3DRoot().onBeforeRender=function(){
+                visibleNodes.push(node);
+            }
+        });
+//--
+
+        parentEl3D.add(res);
+        res.position.set(0, 0, 0);
+
+        //FIXME workflow below ..
+        //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
+        res.attachToView3D(this);
+        res.applyClustering(speccs);
+
+
+
+
+        var that=this;
+        var _____skipFrames=0;
+
+        $(that).on("before-render",function(){
+
+
+
+           // res.update()
+
+
+            if (that.isMaximised()) {
+
+                   _____skipFrames++;
+                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
+             let prev_vis=preparedData.nodes[0]._bubble.material.visible;
+                let _vis= (_____skipFrames % 20) ? false : true;
+                preparedData.nodes[0]._bubble.material.visible = _vis;
+
+                if (prev_vis)
+                {
+                __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(visibleNodes);
+                 //   that.mVisibleNodes=[].concat(visibleNodes)
+                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
+                  //  that.mRootCluster.updateRootTextNodes(visibleNodes);
+
+                }
+            }
+            visibleNodes=[] //reset count
+
+        });
+
+
+        this.start();
+
+        return res
+
+
+    }
+
+
+    setData(mGraphData)
+    {
+        this.initStatic();
+
+
+        //this.createSkyDome();
+
+
+        if (!this.mRootCluster)
+        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
+
+        $(this).trigger("loaded")
+
+
+
+    }
+
+    loadDataSet(ds){
+
+      var that = this;
+
+        ds(null,function onSuccess(mGraphData)
+        {
+            console.log("data loaded");
+            that.setData(mGraphData);
+
+            $(".cloudNodeColorSelect").val("group").trigger("change")
+
+        });
+
+    return this
+    }
+
+
+    maximise() {
+
+        var  root = this.mRootCluster;
+
+        super.maximise();
+
+            if (root && root.mParentView && root.mTextOverlay) {
+
+                root.mTextOverlay.height(root.mParentView.clientHeight);
+                root.mTextOverlay.width(root.mParentView.clientWidth);
+                console.log("maximised")
+            }
+
+
+
+
+    }
+
+    undoMaximise(){
+            super.undoMaximise();
+
+
+            let root=this.mRootCluster;
+            if (root&& root.mParentView && root.mTextOverlay) {
+
+                root.mTextOverlay.height(root.mParentView.clientHeight);
+                root.mTextOverlay.width(root.mParentView.clientWidth)
+            }
+
+
+    }
+
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = GraphView3D;
+
+
+customElements.define("graph-view-3d", GraphView3D);
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(1), __webpack_require__(2)))
+
+/***/ }),
 /* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -82033,10 +82032,22 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
 /* WEBPACK VAR INJECTION */(function(THREE, $, _) {/* unused harmony export register3DClass */
 /* harmony export (immutable) */ __webpack_exports__["b"] = basicSpriteSize;
 /* harmony export (immutable) */ __webpack_exports__["a"] = basicElementExtend;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_TextureAnimator__ = __webpack_require__(92);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_TextureAnimator__ = __webpack_require__(93);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_dot9_png__ = __webpack_require__(224);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_dot9_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__img_dot9_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_dot7_png__ = __webpack_require__(223);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_dot7_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__img_dot7_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_ring2_png__ = __webpack_require__(225);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_ring2_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__img_ring2_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__img_ring3_png__ = __webpack_require__(226);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__img_ring3_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__img_ring3_png__);
 /**
  * Created by Frank on 16.07.2017.
  */
+
+
+
+
 
 
 
@@ -82228,7 +82239,7 @@ register3DClass("basic-selection", {
 
 //----------------------------------------
 
-var basicCollapsedSprite = new THREE.TextureLoader().load("img/dot9.png");
+var basicCollapsedSprite = new THREE.TextureLoader().load(__WEBPACK_IMPORTED_MODULE_1__img_dot9_png___default.a);
 
 register3DClass("basic-sprite-collapsed", {
     geometry: basicSpriteGeometry
@@ -82260,7 +82271,7 @@ register3DClass("basic-sprite-collapsed", {
 
 
 //----------------------------------------
-var ring3Sprite = new THREE.TextureLoader().load("img/ring3.png");
+var ring3Sprite = new THREE.TextureLoader().load(__WEBPACK_IMPORTED_MODULE_4__img_ring3_png___default.a);
 
 register3DClass("basic-ring", {
     geometry: basicSpriteGeometry,
@@ -82292,7 +82303,7 @@ register3DClass("basic-ring", {
 
 
 //----------------------------------------
-var ring2Sprite = new THREE.TextureLoader().load("img/ring2.png");
+var ring2Sprite = new THREE.TextureLoader().load(__WEBPACK_IMPORTED_MODULE_3__img_ring2_png___default.a);
 
 register3DClass("basic-ring-2", {
     geometry: basicSpriteGeometry
@@ -82347,7 +82358,7 @@ register3DClass("basic-animated", {
         requestAnimationFrame(animate);
 
 
-        //var sprite = new THREE.TextureLoader().load("img/dot9.png");
+        //var sprite = new THREE.TextureLoader().load(dot9Image);
         material = new THREE.PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el),
@@ -82403,7 +82414,7 @@ register3DClass("basic-sprite-expanded", {
 
 //----------------------------------------
 
-var basicSprite = new THREE.TextureLoader().load("img/dot7.png");
+var basicSprite = new THREE.TextureLoader().load(__WEBPACK_IMPORTED_MODULE_2__img_dot7_png___default.a);
 register3DClass("basic-sprite", {
     geometry: basicSpriteGeometry,
     material: function (env, el) {
@@ -82435,7 +82446,7 @@ register3DClass("basic-sprite", {
 register3DClass("node-highlighted", {
     geometry: basicSpriteGeometry,
     material: function (env, el) {
-        var sprite = new THREE.TextureLoader().load("img/dot7.png");
+        var sprite = new THREE.TextureLoader().load(__WEBPACK_IMPORTED_MODULE_2__img_dot7_png___default.a);
         var material = new THREE.PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el) * 1.8,
@@ -82572,6 +82583,426 @@ function basicElementExtend(env, obj, _mesh) {
 
 /***/ }),
 /* 47 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function($) {/* harmony export (immutable) */ __webpack_exports__["c"] = highlightNodeElements;
+/* harmony export (immutable) */ __webpack_exports__["b"] = unhighlightNodeElements;
+/* harmony export (immutable) */ __webpack_exports__["a"] = extendGraphElements;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f2_zoom__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__f5_arrows__ = __webpack_require__(97);
+/**
+ * Created by Frank on 16.07.2017.
+ */
+
+/**
+ NOTE: set initialEngineTicks to a appropriate value to speed up bigger graphs
+
+
+ FIXME put arrows nodemixin and linkmixin into separate classes, curent implementations work but are in no way useable for other developers
+
+
+ TODO scale arrow depending on  group link size
+ TODO expanding nodes will result in still showing group tooltips
+ probably remove group nodes from raycaster or something like that
+
+ TODO ?when using hull feature? sometimes nodes cannot be clicked .. probably due to hull back or front preventing events from triggering on nodes
+ TODO search filter for hidden nodes.. expand before zoom
+
+ */
+
+
+
+
+
+
+
+
+//current selected node
+var previousNodeClicked = [];
+var previousNodeDblClicked;
+
+//------------------------------------------------
+//Feature 1
+
+var previousNodes;
+
+
+
+function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) {
+
+
+    //TODO
+    /*if (previousNodes&& previousNodes!=this)
+     {
+     unhighlightNodeElements.apply(previousNodes)
+     previousNodes=this
+
+     }*/
+
+    //console.log("highlighting nodes:" + (this.children.length + this.parents.length))
+
+    this.showHighlight();
+
+
+    if (bShowOtherNodes) {
+        for (let childNode of this.children)
+            childNode.showHighlight()
+
+        for (let parentNode of this.parents)
+            parentNode.showHighlight()
+    }
+
+    //console.log("highlighting edges:" + (this.edges.length))
+
+
+    for (let edge of this.edges)
+        edge.showHighlight()
+
+    if (bShowEdgeArrows)
+        for (let edge of this.edges) {
+            var color = edge.source == this ? 0x99ff99 : 0xffb2b2;
+
+
+            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["a" /* addArrow */])(edge, color)
+        }
+}
+
+function unhighlightNodeElements() {
+    //console.log("unhighlighting nodes:" + (this.children.length + this.parents.length))
+
+    this.hideHighlight();
+
+    for (let childNode of this.children)
+        childNode.hideHighlight()
+
+    for (let parentNode of this.parents)
+        parentNode.hideHighlight()
+
+    //console.log("unhighlighting edges:" + (this.edges.length))
+
+    for (let edge of this.edges)
+        edge.hideHighlight()
+
+    for (let edge of this.edges)
+        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["b" /* removeArrow */])(edge)
+
+}
+
+function highlightEdgeElements() {
+
+    this.showHighlight();
+    this.source.showHighlight();
+    this.target.showHighlight();
+
+
+    var color = 0x666666;
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["a" /* addArrow */])(this, color)
+
+
+}
+
+function unhighlightEdgeElements() {
+
+    this.hideHighlight();
+    this.source.hideHighlight();
+    this.target.hideHighlight();
+
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["b" /* removeArrow */])(this)
+
+}
+
+function extendElement(elements, attrName, options, env) {
+
+    var mDomEvents = env.domEvents;
+
+    function _TODO(typeName) {
+        return function () {
+            console.warn("implement handler for", typeName);
+            console.log(this, arguments)
+        }
+    }
+
+    var defaults = {
+        mousemove: _TODO("mousemove"),
+        mouseleave: _TODO("mouseleave"),
+        click: _TODO("click"),
+        dblclick: _TODO("dblclick")
+    };
+    options = $.extend(true, {}, defaults, options);
+
+
+    for (let el of elements) {
+
+
+        if (el._line && env.useLineGroup) {
+            el.showHighlight = function () {
+            };
+            el.hideHighlight = function () {
+            };
+
+            continue
+
+        }
+        var mesh = el[attrName];
+
+
+        mDomEvents.addEventListener(mesh, 'click', options.click, false);
+        mDomEvents.addEventListener(mesh, 'dblclick', options.dblclick, false);
+
+        mDomEvents.addEventListener(mesh, 'mouseover', function (e) {
+            options.mousemove.apply(e.target.node || e.target.edge)
+        }, false);
+        mDomEvents.addEventListener(mesh, 'mouseout', function (e) {
+            options.mouseleave.apply(e.target.node || e.target.edge)
+        }, false);
+
+
+        el.showHighlight = function () {
+
+            if (this.isHighlighted) return;
+            this.isHighlighted = true;
+
+            if (attrName == "_bubble" && this["_bubble"] == null) console.error("FIXME ");
+
+            if (this._bubble) {
+                this.addClass("node-highlighted")
+
+            }
+
+            if (this._line) {
+                var mesh = this[attrName];
+                mesh.material.visible = false
+
+            }
+
+            if (this.text) {
+                this.text.addClass("node-caption-highlighted")
+            }
+
+
+        };
+
+
+        el.hideHighlight = function () {
+
+
+            if (!this.isHighlighted) return;
+            this.isHighlighted = false;
+
+            if (this._bubble) {
+                this.removeClass("node-highlighted")
+
+            }
+
+            if (this._line) {
+                var mesh = this[attrName];
+                mesh.material.visible = true
+
+            }
+
+            if (this.text) {
+                this.text.removeClass("node-caption-highlighted")
+            }
+
+
+        }
+
+    }
+
+}
+
+
+//helper to being able to handle click events
+//isSelected == false will prevent the actual node selection and only will trigger the zoom+highlight parts
+function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelected = true, doHighlighNeighbours = true, doHighlighEdges = true, doZoomIn = true) {
+
+    if (previousNodeClicked.indexOf(currNodeClicked) < 0)
+    //if (previousNodeClicked!=currNodeClicked)
+    {
+        //node selected
+        highlightNodeElements.apply(currNodeClicked, [doHighlighNeighbours, doHighlighEdges]);
+
+
+        if (doZoomIn)
+            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f2_zoom__["a" /* default */])(currNodeClicked._bubble, onAnimationEnd);
+
+
+        if (isSelected) {
+            //GUI.updateNodeInfo(currNodeClicked)
+
+            currNodeClicked.addClass("basic-selection");
+
+
+            //if (previousNodeClicked)
+            if (!stack)
+                if (previousNodeClicked.length > 0)
+                    for (let p of previousNodeClicked) {
+                        p.removeClass("basic-selection");
+                        unhighlightNodeElements.apply(p)
+                    }
+
+            if (!stack)
+                previousNodeClicked = [currNodeClicked];
+            else
+                previousNodeClicked.push(currNodeClicked)
+
+        }
+
+
+    }
+    else {
+        //GUI.updateNodeInfo(currNodeClicked,false)
+        //node unselected
+        unhighlightNodeElements.apply(currNodeClicked);
+
+        //previousNodeClicked=[]
+        previousNodeClicked.splice(currNodeClicked);
+
+        currNodeClicked.removeClass("basic-selection")
+
+    }
+
+}
+
+/*
+
+ as long as node is current selection => mouse enter return mouse leave return
+
+ if clicked and not current selection trigger mouse leave on last
+
+ */
+//inject additional functionality
+function extendGraphElements(d3Nodes, d3Links, env) {
+
+    addGraphHierarchy(d3Nodes, d3Links);
+
+
+    extendElement(d3Nodes, "_bubble", {
+        mousemove: function (e) {
+
+            if (previousNodeClicked.indexOf(this) >= 0)return;
+            //if (previousNodeClicked==this) return
+
+            highlightNodeElements.apply(this, [true, true])
+
+            //	GUI.updateNodeInfo(this,false)
+
+        },
+        mouseleave: function () {
+
+            //if (previousNodeClicked==this) return
+            if (previousNodeClicked.indexOf(this) >= 0)return;
+
+
+            //if (previousNodeClicked!=this)
+            unhighlightNodeElements.apply(this)
+
+
+        },
+        click: function (e) {
+            var currNodeClicked = e.target.node;
+            e.stopPropagation();
+
+            //if (previousNodeClicked &&previousNodeClicked!=currNodeClicked) 	unhighlightNodeElements.apply(previousNodeClicked)
+            if (previousNodeClicked.length > 0 && previousNodeClicked.indexOf(currNodeClicked) < 0)
+                for (let p of previousNodeClicked)
+                    unhighlightNodeElements.apply(p)
+
+            doOnClickNode(currNodeClicked, e.origDomEvent.ctrlKey);
+
+            return false;
+        },
+        dblclick: function (e) {
+            e.stopPropagation();
+            //setCollapsedSateOfChildNodesAndEdgesOfNode(e.target.node)
+            var currNodeDblClicked = e.target.node;
+
+            GUI.updateNodeInfo(currNodeDblClicked, currNodeDblClicked != previousNodeDblClicked);
+
+            if (previousNodeDblClicked == currNodeDblClicked)
+                previousNodeDblClicked = null;
+            else
+                previousNodeDblClicked = currNodeDblClicked;
+            //unhighlightNodeElements.apply(e.target.node)
+            return false;
+        }
+    }, env);
+
+
+    //FIXME extending attrName sometimes false
+
+    extendElement(d3Links, "_line", {
+        click: function (e) {
+
+        },
+        mousemove: highlightEdgeElements,
+        mouseleave: unhighlightEdgeElements
+
+    }, env)
+
+}
+
+/**
+ * build a helper structure for parent child relation
+ * TODO how to handle/exclude recursive structures
+ */
+
+function addGraphHierarchy(d3Nodes, d3Links) {
+    /*
+     node:
+     group:1
+     id:"2"
+     shape:"sphere" | "cube"
+     _bubble: instanceof THREE.Mesh //SphereGeometry
+     _id:"2"
+
+
+     link:
+     source:"1"
+     target:"3"
+     _line:	 instanceof THREE.Mesh //LineGeometry
+     */
+
+    //prepare nodes
+    for (let node of d3Nodes) {
+
+        if (!node.edges)
+            node.edges = [];
+        if (!node.children)
+            node.children = [];
+        if (!node.parents)
+            node.parents = [];
+
+        node._bubble.node = node
+
+    }
+
+    for (let item of d3Links) {
+
+        item._line.edge = item;
+
+        //add edge list to nodes
+        if (item.source.edges.indexOf(item) < 0)
+            item.source.edges.push(item);
+        if (item.target.edges.indexOf(item) < 0)
+            item.target.edges.push(item);
+
+        //add target of current link to children list of source
+        if (item.source.children.indexOf(item.target) < 0)
+            item.source.children.push(item.target);
+
+        //add source of current link to parent list of target
+        if (item.target.parents.indexOf(item.source) < 0)
+            item.target.parents.push(item.source);
+    }
+
+}
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 48 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -83149,7 +83580,7 @@ DomEventsAlt.prototype._onMouseMove = _.throttle(function (domEvent)
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -83270,12 +83701,12 @@ function AnimationMixin(origObject) {
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(THREE) {/* harmony export (immutable) */ __webpack_exports__["a"] = MaterialFadeMixin;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AnimationMixin__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__AnimationMixin__ = __webpack_require__(49);
 /**
   extends any given THREE.Material
  with a fadeTo method,
@@ -83325,7 +83756,7 @@ function MaterialFadeMixin(material){
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports) {
 
 /**
@@ -83354,31 +83785,31 @@ module.exports = function(obj, fn){
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_binarytree__ = __webpack_require__(115);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_binarytree__ = __webpack_require__(120);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_binarytree__["a"]; });
 
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_nest__ = __webpack_require__(128);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_nest__ = __webpack_require__(133);
 /* unused harmony reexport nest */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_set__ = __webpack_require__(129);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_set__ = __webpack_require__(134);
 /* unused harmony reexport set */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map__ = __webpack_require__(24);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_2__src_map__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_keys__ = __webpack_require__(127);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_keys__ = __webpack_require__(132);
 /* unused harmony reexport keys */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_values__ = __webpack_require__(130);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_values__ = __webpack_require__(135);
 /* unused harmony reexport values */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_entries__ = __webpack_require__(126);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_entries__ = __webpack_require__(131);
 /* unused harmony reexport entries */
 
 
@@ -83389,16 +83820,16 @@ module.exports = function(obj, fn){
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["b"] = x;
 /* harmony export (immutable) */ __webpack_exports__["c"] = y;
 /* harmony export (immutable) */ __webpack_exports__["d"] = z;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_d3_dispatch__ = __webpack_require__(131);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_collection__ = __webpack_require__(52);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_timer__ = __webpack_require__(168);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_d3_dispatch__ = __webpack_require__(136);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_collection__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_timer__ = __webpack_require__(173);
 
 
 
@@ -83579,37 +84010,37 @@ var initialRadius = 10,
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_octree__ = __webpack_require__(146);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_octree__ = __webpack_require__(151);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_octree__["a"]; });
 
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_quadtree__ = __webpack_require__(160);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_quadtree__ = __webpack_require__(165);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_quadtree__["a"]; });
 
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies
  */
 
-var XMLHttpRequest = __webpack_require__(28);
-var XHR = __webpack_require__(176);
-var JSONP = __webpack_require__(175);
-var websocket = __webpack_require__(177);
+var XMLHttpRequest = __webpack_require__(30);
+var XHR = __webpack_require__(181);
+var JSONP = __webpack_require__(180);
+var websocket = __webpack_require__(182);
 
 /**
  * Export transports.
@@ -83659,18 +84090,18 @@ function polling (opts) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(27);
+var Transport = __webpack_require__(29);
 var parseqs = __webpack_require__(18);
-var parser = __webpack_require__(11);
+var parser = __webpack_require__(12);
 var inherit = __webpack_require__(17);
-var yeast = __webpack_require__(68);
+var yeast = __webpack_require__(69);
 var debug = __webpack_require__(5)('engine.io-client:polling');
 
 /**
@@ -83684,7 +84115,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function () {
-  var XMLHttpRequest = __webpack_require__(28);
+  var XMLHttpRequest = __webpack_require__(30);
   var xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -83910,7 +84341,7 @@ Polling.prototype.uri = function () {
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/* global Blob File */
@@ -83919,7 +84350,7 @@ Polling.prototype.uri = function () {
  * Module requirements.
  */
 
-var isArray = __webpack_require__(180);
+var isArray = __webpack_require__(185);
 
 var toString = Object.prototype.toString;
 var withNativeBlob = typeof global.Blob === 'function' || toString.call(global.Blob) === '[object BlobConstructor]';
@@ -83979,7 +84410,7 @@ function hasBinary (obj) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports) {
 
 
@@ -83994,7 +84425,7 @@ module.exports = function(arr, obj){
 };
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
@@ -84047,7 +84478,7 @@ return $.ui.plugin = {
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -84554,7 +84985,7 @@ return $.ui.position;
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports) {
 
 /**
@@ -84599,7 +85030,7 @@ module.exports = function parseuri(str) {
 
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -84607,15 +85038,15 @@ module.exports = function parseuri(str) {
  * Module dependencies.
  */
 
-var eio = __webpack_require__(172);
-var Socket = __webpack_require__(65);
+var eio = __webpack_require__(177);
+var Socket = __webpack_require__(66);
 var Emitter = __webpack_require__(9);
-var parser = __webpack_require__(34);
-var on = __webpack_require__(64);
-var bind = __webpack_require__(50);
+var parser = __webpack_require__(36);
+var on = __webpack_require__(65);
+var bind = __webpack_require__(51);
 var debug = __webpack_require__(5)('socket.io-client:manager');
-var indexOf = __webpack_require__(59);
-var Backoff = __webpack_require__(106);
+var indexOf = __webpack_require__(60);
+var Backoff = __webpack_require__(110);
 
 /**
  * IE6+ hasOwnProperty
@@ -85178,7 +85609,7 @@ Manager.prototype.onreconnect = function () {
 
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports) {
 
 
@@ -85208,7 +85639,7 @@ function on (obj, ev, fn) {
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -85216,11 +85647,11 @@ function on (obj, ev, fn) {
  * Module dependencies.
  */
 
-var parser = __webpack_require__(34);
+var parser = __webpack_require__(36);
 var Emitter = __webpack_require__(9);
-var toArray = __webpack_require__(211);
-var on = __webpack_require__(64);
-var bind = __webpack_require__(50);
+var toArray = __webpack_require__(221);
+var on = __webpack_require__(65);
+var bind = __webpack_require__(51);
 var debug = __webpack_require__(5)('socket.io-client:socket');
 var parseqs = __webpack_require__(18);
 
@@ -85632,7 +86063,7 @@ Socket.prototype.compress = function (compress) {
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -85652,7 +86083,7 @@ function isBuf(obj) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -85680,7 +86111,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -85753,306 +86184,6 @@ yeast.encode = encode;
 yeast.decode = decode;
 module.exports = yeast;
 
-
-/***/ }),
-/* 69 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/*
-* File: jquery.wikiblurb.js
-* Version: 1.0.0
-* Description: A simple jQuery plugin to get sections of Wikipedia and other Wikis
-* Author: 9bit Studios
-* Copyright 2012, 9bit Studios
-* http://www.9bitstudios.com
-* Free to use and abuse under the MIT license.
-* http://www.opensource.org/licenses/mit-license.php
-*/
-
-
-
-(function ($) {
-
-    $.fn.wikiblurb = function (options) {
-
-        var defaults = $.extend({
-	    wikiURL: "http://en.wikipedia.org/",
-	    apiPath: 'w',
-	    section: 0,
-	    page: 'Jimi_Hendrix',
-	    removeLinks: false,	    
-	    type: 'all',
-	    customSelector: '',
-            filterSelector: '', 
-            callback: function(){ }, errorCallback: function(){ }
-        }, options);
-        
-	/******************************
-	Private Variables
-	*******************************/         
-
-	var object = $(this);
-	var settings = $.extend(defaults, options);
-	
-	/******************************
-	Public Methods
-	*******************************/         
-        
-        var methods = {
-        	
-	    init: function() {
-		return this.each(function () {
-		    methods.appendHTML();
-		    methods.initializeItems();
-		});
-	    },
-
-	    /******************************
-	    Utilities
-	    *******************************/			
-
-	    addUnderscores: function(page) {
-		if(page.trim().indexOf(' ') !== -1) {
-                    page.replace(' ', '_');
-                }
-                return page;
-	    },            
-            
-	    /******************************
-	    Append HTML
-	    *******************************/			
-
-	    appendHTML: function() {
-		// nothiing to append
-	    },
-
-	    /******************************
-	    Initialize
-	    *******************************/			
-
-	    initializeItems: function() {
-                
-                var page = methods.addUnderscores(settings.page);
-                
-		$.ajax({
-		    type: "GET",
-		    url: settings.wikiURL + settings.apiPath + "/api.php?action=parse&format=json&prop=text&section="+settings.section+"&page="+settings.page+"&callback=?",
-		    contentType: "application/json; charset=utf-8",
-		    async: true,
-		    dataType: "json",
-		    success: function (data, textStatus, jqXHR) {
-
-			try {
-			    var markup = data.parse.text["*"];
-			    var blurb = $('<div class="nbs-wikiblurb"></div>').html(markup);
-
-			    // remove links?
-
-			    if(settings.removeLinks) {
-				blurb.find('a').each(function() { 
-				    $(this).replaceWith($(this).html()); 
-				});
-			    }
-			    else {
-				blurb.find('a').each(function() {
-				    var link = $(this);
-				    var relativePath = link.attr('href').substring(1); // remove leading slash
-				    link.attr('href', settings.wikiURL + relativePath); 
-				});			    
-			    }
-
-			    // remove any references
-			    blurb.find('sup').remove();
-
-			    // remove cite error
-			    blurb.find('.mw-ext-cite-error').remove();
-
-				// filter elements
-                            if(settings.filterSelector) { 
-                                blurb.find(settings.filterSelector).remove(); 
-                            }
-
-			    switch(settings.type) {
-				case 'text':				
-				    object.html($(blurb).find('p'));
-				    break;
-				    
-				case 'blurb':
-				    object.html($(blurb).find('p:first'));
-				    break;
-				
-				case 'infobox':
-				    object.html($(blurb).find('.infobox'));
-				    break;
-				    
-				case 'custom':
-				    object.html($(blurb).find(settings.customSelector));
-				    break;
-				
-				default:
-				    object.html(blurb);
-				    break;
-			    }
-                            
-                            settings.callback();
-				
-			}
-			catch(e){
-			    methods.showError();
-				settings.errorCallback(e,data)
-			}
-			
-		    },
-		    error: function (jqXHR, textStatus, errorThrown) {
-			methods.showError();
-				settings.errorCallback(errorThrown,jqXHR, textStatus)
-		    }
-		});
-	    },
-	    
-	    showError: function(){
-		object.html('<div class="nbs-wikiblurb-error">There was an error locating your wiki data</div>');
-	    }
-
-        };
-        
-        if (methods[options]) { // $("#element").pluginName('methodName', 'arg1', 'arg2');
-            return methods[options].apply(this, Array.prototype.slice.call(arguments, 1));
-        } else if (typeof options === 'object' || !options) { 	// $("#element").pluginName({ option: 1, option:2 });
-            return methods.init.apply(this);  
-        } else {
-            $.error( 'Method "' +  method + '" does not exist in wikiblurb plugin!');
-        } 
-    };
-
-})(__WEBPACK_IMPORTED_MODULE_0_jquery___default.a);
-//use promise pattern only
-//have all methods return a json object
-//also have a simple check for keys within json =>   getCompanyInfo("Yahoo",['misc.stats','misc.info','stock.price'])
-
-//TODO html5 cors + server side  vs jsonp vulnerabilities
-
-//TODO throttle and stack api calls so they won't be called too often
-//use qwest?
-/*
-var DataService=function(){
-	
-	registerSrc(name,options){
-	
-			//"wiki",{attrs:"",result:"'misc.stats,misc.info,"}
-		//if ()
-			return this
-	}
-	
-	
-	
-}
-AppDataService=new DataService("app").registerSrc("wiki",{required:"page",result:"misc.stats,misc.info",url:"http://fallout.wikia.com/"}) //templateurl?
-AppDataService.getWiki({page:""})
-*/
-
-var AppDataService={
-	getWiki:function(page){
-		
-		
-	return new Promise(function(ok,fail){ 
-		if (!page)fail("no page name")
-		
-		var container=$('<span>');
-		
-		container.wikiblurb({
-			wikiURL:"http://en.wikipedia.org/w/", //"http://fallout.wikia.com/",
-			apiPath: '',
-			section: 0,
-			page: page,
-			removeLinks: false,	    
-			type: 'text',
-			customSelector: '',
-			callback: function(){ 
-			
-			
-			var content=container.text()
-			
-			ok({page,content})
-
-			},errorCallback(e,response){
-				
-				//TODO error.warnings
-				if(response.error.code)
-				if (response.error.code=="missingtitle")
-					fail(response.error)
-				
-				
-				else 
-				{
-					
-				fail(response.error)
-				debugger
-				}
-				
-			}    
-		});
-		
-		})
-		
-	},
-	
-	getCompanyInfo:function(name){
-		
-	return new Promise(function(ok,fail){ 
-		if (!name) fail("no company name")
-			$.ajax({
-				url: "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%3D%22"+encodeURI(name)+"%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=quote",
-				dataType: "jsonp",
-				jsonp: "callback",
-				jsonpCallback: "quote"
-			});
-
-			quote = function(data) {
-				
-				//$(".price").text("$" + data.query.results.quote.AskRealtime);
-			ok(data.query.results.quote)
-			
-			};
-		
-	  })	
-		
-	}
-	
-	/*,
-	getCompanyNews:function(name){
-		
-		
-	return new Promise(function(ok,fail){ 
-		if (!name) fail("no company name")
-			$.ajax({
-				
-						//																							 select%20*%20from%20xml%20where%20url%20%3D%20'https%3A%2F%2Fnews.ycombinator.com%2Frss'&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=mycallback
-				url:"https://news.google.com/news?q="+name+"&output=rss" "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%3D%22"+name+"%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=quote",
-				dataType: "jsonp",
-				jsonp: "callback",
-				jsonpCallback: "quote"
-			});
-
-			quote = function(data) {
-				//$(".price").text("$" + data.query.results.quote.AskRealtime);
-			ok(data.query.results.quote)
-			
-			};
-		
-	  })	
-		
-	}*/
-	
-}
-
-
-
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
 
 /***/ }),
 /* 70 */
@@ -86365,8 +86496,8 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_MaterialFadeMixin__ = __webpack_require__(49);
+/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_MaterialFadeMixin__ = __webpack_require__(50);
 /**
  * Created by Frank on 23.06.2017.
  */
@@ -86617,6 +86748,306 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
+/*
+* File: jquery.wikiblurb.js
+* Version: 1.0.0
+* Description: A simple jQuery plugin to get sections of Wikipedia and other Wikis
+* Author: 9bit Studios
+* Copyright 2012, 9bit Studios
+* http://www.9bitstudios.com
+* Free to use and abuse under the MIT license.
+* http://www.opensource.org/licenses/mit-license.php
+*/
+
+
+
+(function ($) {
+
+    $.fn.wikiblurb = function (options) {
+
+        var defaults = $.extend({
+	    wikiURL: "http://en.wikipedia.org/",
+	    apiPath: 'w',
+	    section: 0,
+	    page: 'Jimi_Hendrix',
+	    removeLinks: false,	    
+	    type: 'all',
+	    customSelector: '',
+            filterSelector: '', 
+            callback: function(){ }, errorCallback: function(){ }
+        }, options);
+        
+	/******************************
+	Private Variables
+	*******************************/         
+
+	var object = $(this);
+	var settings = $.extend(defaults, options);
+	
+	/******************************
+	Public Methods
+	*******************************/         
+        
+        var methods = {
+        	
+	    init: function() {
+		return this.each(function () {
+		    methods.appendHTML();
+		    methods.initializeItems();
+		});
+	    },
+
+	    /******************************
+	    Utilities
+	    *******************************/			
+
+	    addUnderscores: function(page) {
+		if(page.trim().indexOf(' ') !== -1) {
+                    page.replace(' ', '_');
+                }
+                return page;
+	    },            
+            
+	    /******************************
+	    Append HTML
+	    *******************************/			
+
+	    appendHTML: function() {
+		// nothiing to append
+	    },
+
+	    /******************************
+	    Initialize
+	    *******************************/			
+
+	    initializeItems: function() {
+                
+                var page = methods.addUnderscores(settings.page);
+                
+		$.ajax({
+		    type: "GET",
+		    url: settings.wikiURL + settings.apiPath + "/api.php?action=parse&format=json&prop=text&section="+settings.section+"&page="+settings.page+"&callback=?",
+		    contentType: "application/json; charset=utf-8",
+		    async: true,
+		    dataType: "json",
+		    success: function (data, textStatus, jqXHR) {
+
+			try {
+			    var markup = data.parse.text["*"];
+			    var blurb = $('<div class="nbs-wikiblurb"></div>').html(markup);
+
+			    // remove links?
+
+			    if(settings.removeLinks) {
+				blurb.find('a').each(function() { 
+				    $(this).replaceWith($(this).html()); 
+				});
+			    }
+			    else {
+				blurb.find('a').each(function() {
+				    var link = $(this);
+				    var relativePath = link.attr('href').substring(1); // remove leading slash
+				    link.attr('href', settings.wikiURL + relativePath); 
+				});			    
+			    }
+
+			    // remove any references
+			    blurb.find('sup').remove();
+
+			    // remove cite error
+			    blurb.find('.mw-ext-cite-error').remove();
+
+				// filter elements
+                            if(settings.filterSelector) { 
+                                blurb.find(settings.filterSelector).remove(); 
+                            }
+
+			    switch(settings.type) {
+				case 'text':				
+				    object.html($(blurb).find('p'));
+				    break;
+				    
+				case 'blurb':
+				    object.html($(blurb).find('p:first'));
+				    break;
+				
+				case 'infobox':
+				    object.html($(blurb).find('.infobox'));
+				    break;
+				    
+				case 'custom':
+				    object.html($(blurb).find(settings.customSelector));
+				    break;
+				
+				default:
+				    object.html(blurb);
+				    break;
+			    }
+                            
+                            settings.callback();
+				
+			}
+			catch(e){
+			    methods.showError();
+				settings.errorCallback(e,data)
+			}
+			
+		    },
+		    error: function (jqXHR, textStatus, errorThrown) {
+			methods.showError();
+				settings.errorCallback(errorThrown,jqXHR, textStatus)
+		    }
+		});
+	    },
+	    
+	    showError: function(){
+		object.html('<div class="nbs-wikiblurb-error">There was an error locating your wiki data</div>');
+	    }
+
+        };
+        
+        if (methods[options]) { // $("#element").pluginName('methodName', 'arg1', 'arg2');
+            return methods[options].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (typeof options === 'object' || !options) { 	// $("#element").pluginName({ option: 1, option:2 });
+            return methods.init.apply(this);  
+        } else {
+            $.error( 'Method "' +  method + '" does not exist in wikiblurb plugin!');
+        } 
+    };
+
+})(__WEBPACK_IMPORTED_MODULE_0_jquery___default.a);
+//use promise pattern only
+//have all methods return a json object
+//also have a simple check for keys within json =>   getCompanyInfo("Yahoo",['misc.stats','misc.info','stock.price'])
+
+//TODO html5 cors + server side  vs jsonp vulnerabilities
+
+//TODO throttle and stack api calls so they won't be called too often
+//use qwest?
+/*
+var DataService=function(){
+	
+	registerSrc(name,options){
+	
+			//"wiki",{attrs:"",result:"'misc.stats,misc.info,"}
+		//if ()
+			return this
+	}
+	
+	
+	
+}
+AppDataService=new DataService("app").registerSrc("wiki",{required:"page",result:"misc.stats,misc.info",url:"http://fallout.wikia.com/"}) //templateurl?
+AppDataService.getWiki({page:""})
+*/
+
+var AppDataService={
+	getWiki:function(page){
+		
+		
+	return new Promise(function(ok,fail){ 
+		if (!page)fail("no page name")
+		
+		var container=$('<span>');
+		
+		container.wikiblurb({
+			wikiURL:"http://en.wikipedia.org/w/", //"http://fallout.wikia.com/",
+			apiPath: '',
+			section: 0,
+			page: page,
+			removeLinks: false,	    
+			type: 'text',
+			customSelector: '',
+			callback: function(){ 
+			
+			
+			var content=container.text()
+			
+			ok({page,content})
+
+			},errorCallback(e,response){
+				
+				//TODO error.warnings
+				if(response.error.code)
+				if (response.error.code=="missingtitle")
+					fail(response.error)
+				
+				
+				else 
+				{
+					
+				fail(response.error)
+				debugger
+				}
+				
+			}    
+		});
+		
+		})
+		
+	},
+	
+	getCompanyInfo:function(name){
+		
+	return new Promise(function(ok,fail){ 
+		if (!name) fail("no company name")
+			$.ajax({
+				url: "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%3D%22"+encodeURI(name)+"%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=quote",
+				dataType: "jsonp",
+				jsonp: "callback",
+				jsonpCallback: "quote"
+			});
+
+			quote = function(data) {
+				
+				//$(".price").text("$" + data.query.results.quote.AskRealtime);
+			ok(data.query.results.quote)
+			
+			};
+		
+	  })	
+		
+	}
+	
+	/*,
+	getCompanyNews:function(name){
+		
+		
+	return new Promise(function(ok,fail){ 
+		if (!name) fail("no company name")
+			$.ajax({
+				
+						//																							 select%20*%20from%20xml%20where%20url%20%3D%20'https%3A%2F%2Fnews.ycombinator.com%2Frss'&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=mycallback
+				url:"https://news.google.com/news?q="+name+"&output=rss" "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%3D%22"+name+"%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=quote",
+				dataType: "jsonp",
+				jsonp: "callback",
+				jsonpCallback: "quote"
+			});
+
+			quote = function(data) {
+				//$(".price").text("$" + data.query.results.quote.AskRealtime);
+			ok(data.query.results.quote)
+			
+			};
+		
+	  })	
+		
+	}*/
+	
+}
+
+
+
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 77 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Datasource__ = __webpack_require__(100);
 
 
@@ -86674,23 +87105,23 @@ class CompanyNewsDS extends __WEBPACK_IMPORTED_MODULE_0__Datasource__["a" /* def
 
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_) {/* harmony export (immutable) */ __webpack_exports__["a"] = getGraphDataSets;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar__ = __webpack_require__(195);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar__ = __webpack_require__(204);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__gui_searchbar__ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_qwest__ = __webpack_require__(202);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__gui_searchbar__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_qwest__ = __webpack_require__(211);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_qwest___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_qwest__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_papaparse__ = __webpack_require__(199);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_papaparse__ = __webpack_require__(208);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_papaparse___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_papaparse__);
 
 
@@ -87091,11 +87522,11 @@ function getGraphDataSets() {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ModeSelect_css__ = __webpack_require__(208);
+/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ModeSelect_css__ = __webpack_require__(217);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ModeSelect_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__ModeSelect_css__);
 
 
@@ -87164,7 +87595,7 @@ customElements.define("mode-select", ModeSelect);
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(THREE) {/**
@@ -87501,7 +87932,7 @@ THREE.CombinedCamera.prototype.toBottomView = function() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(THREE) {/**
@@ -87593,7 +88024,7 @@ THREE.CombinedCamera.prototype.toBottomView = function() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(THREE) {/**
@@ -88818,7 +89249,7 @@ THREE.CombinedCamera.prototype.toBottomView = function() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 82 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(THREE) {/**
@@ -89449,13 +89880,13 @@ THREE.TrackballControls.prototype.constructor = THREE.TrackballControls;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 83 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(109);
+var content = __webpack_require__(113);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -89463,7 +89894,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(14)(content, options);
+var update = __webpack_require__(13)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -89480,13 +89911,13 @@ if(false) {
 }
 
 /***/ }),
-/* 84 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(110);
+var content = __webpack_require__(114);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -89494,7 +89925,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(14)(content, options);
+var update = __webpack_require__(13)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -89511,13 +89942,13 @@ if(false) {
 }
 
 /***/ }),
-/* 85 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(111);
+var content = __webpack_require__(115);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -89525,7 +89956,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(14)(content, options);
+var update = __webpack_require__(13)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -89542,7 +89973,7 @@ if(false) {
 }
 
 /***/ }),
-/* 86 */
+/* 87 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -89584,12 +90015,12 @@ class BaseEdge {
 
 
 /***/ }),
-/* 87 */
+/* 88 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE, _, $, Mousetrap) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_AnimationMixin__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_DomEventsAlt__ = __webpack_require__(47);
+/* WEBPACK VAR INJECTION */(function(THREE, _, $, Mousetrap) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_AnimationMixin__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_DomEventsAlt__ = __webpack_require__(48);
 /**
  * Created by Frank on 02.06.2017.
  */
@@ -89930,15 +90361,15 @@ class BaseNode extends THREE.Mesh {
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BaseNode;
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0), __webpack_require__(45)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0), __webpack_require__(21)))
 
 /***/ }),
-/* 88 */
+/* 89 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(86);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(20);
+/* WEBPACK VAR INJECTION */(function(THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(87);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(22);
 /**
  * Created by Frank on 08.06.2017.
  */
@@ -90149,48 +90580,48 @@ class EdgesContainer extends THREE.Object3D {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 89 */
+/* 90 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function($, Mousetrap, _, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__SampleClusterApplication_css__ = __webpack_require__(85);
+/* WEBPACK VAR INJECTION */(function($, Mousetrap, _, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__SampleClusterApplication_css__ = __webpack_require__(86);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__SampleClusterApplication_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__SampleClusterApplication_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__css_style_css__ = __webpack_require__(84);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__css_style_css__ = __webpack_require__(85);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__css_style_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__css_style_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__ = __webpack_require__(83);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__ = __webpack_require__(84);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gui_searchbar__ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__SpecificDataUtils__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__AppDataService__ = __webpack_require__(69);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera__ = __webpack_require__(79);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gui_searchbar__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__refactor_SpecificDataUtils__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__refactor_AppDataService__ = __webpack_require__(76);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera__ = __webpack_require__(80);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__lib_TrackballControls__ = __webpack_require__(82);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__lib_TrackballControls__ = __webpack_require__(83);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__lib_TrackballControls___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__lib_TrackballControls__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__lib_ConvexGeometry__ = __webpack_require__(80);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__lib_ConvexGeometry__ = __webpack_require__(81);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__lib_ConvexGeometry___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__lib_ConvexGeometry__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__lib_QuickHull__ = __webpack_require__(81);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__lib_QuickHull__ = __webpack_require__(82);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__lib_QuickHull___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__lib_QuickHull__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__distributions_BaseDistribution__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__distributions_DefaultDistribution__ = __webpack_require__(72);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__distributions_RandomDistribution__ = __webpack_require__(73);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__ = __webpack_require__(41);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__distributions_SphericalDistribution__ = __webpack_require__(74);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__ClusterNodeArray__ = __webpack_require__(70);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__ClusterLeafElement__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__ClusterLeafElement__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__BaseCluster3D__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__Cluster3DExtended__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__RootCluster__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__GraphData__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__view_GraphView3D__ = __webpack_require__(44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__gui_ModeSelect__ = __webpack_require__(78);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__hull_BoxVolume__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__RootCluster__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__GraphData__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__view_GraphView3D__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__gui_ModeSelect__ = __webpack_require__(79);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__hull_BoxVolume__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__hull_BaseVolume__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__hull_ConvexVolume__ = __webpack_require__(75);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__utils_ZoomUtil__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__utils_ZoomUtil__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__ClusterSpeccFacade__ = __webpack_require__(71);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__data_CompanyNewsDS__ = __webpack_require__(76);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__data_data_set_loader__ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__data_CompanyNewsDS__ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__data_data_set_loader__ = __webpack_require__(78);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Cluster3DExtended", function() { return __WEBPACK_IMPORTED_MODULE_18__Cluster3DExtended__["a"]; });
 /**
  *  TODO re-structure graph
@@ -90307,6 +90738,10 @@ class SampleClusterApplication extends HTMLElement {
 
 
     addNewsListeners() {
+
+     console.error("fixme addNewsListeners needs socket server and handler if server is not found")
+
+        return
         var myDS = new __WEBPACK_IMPORTED_MODULE_28__data_CompanyNewsDS__["a" /* default */]('http://localhost:3000')
 
         myDS.onNewsReceived(function (news) {
@@ -90866,15 +91301,15 @@ customElements.define("sample-cluster-application", SampleClusterApplication);
 
 
 	
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(45), __webpack_require__(2), __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(21), __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
-/* 90 */
+/* 91 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(THREE, _) {/* harmony export (immutable) */ __webpack_exports__["a"] = NodesParticleSystem;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tweenjs_tween_js__ = __webpack_require__(103);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tweenjs_tween_js__ = __webpack_require__(107);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tweenjs_tween_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__tweenjs_tween_js__);
 //{groupKeyName:"group_data",groupValueName:"group_data",nodeKey:'size'}
 
@@ -91237,7 +91672,7 @@ if (!mTime) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 91 */
+/* 92 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -91918,7 +92353,7 @@ function createParticleNodeGroupIntersectionHelper(pointclouds, camera) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0)))
 
 /***/ }),
-/* 92 */
+/* 93 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -91972,7 +92407,7 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
 
 /***/ }),
-/* 93 */
+/* 94 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -92175,7 +92610,7 @@ function linkMixin(env, link, options) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
-/* 94 */
+/* 95 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -92406,426 +92841,6 @@ var lastSelectedNode;
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0)))
 
 /***/ }),
-/* 95 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* unused harmony export highlightNodeElements */
-/* unused harmony export unhighlightNodeElements */
-/* harmony export (immutable) */ __webpack_exports__["a"] = extendGraphElements;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f2_zoom__ = __webpack_require__(96);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__f5_arrows__ = __webpack_require__(97);
-/**
- * Created by Frank on 16.07.2017.
- */
-
-/**
- NOTE: set initialEngineTicks to a appropriate value to speed up bigger graphs
-
-
- FIXME put arrows nodemixin and linkmixin into separate classes, curent implementations work but are in no way useable for other developers
-
-
- TODO scale arrow depending on  group link size
- TODO expanding nodes will result in still showing group tooltips
- probably remove group nodes from raycaster or something like that
-
- TODO ?when using hull feature? sometimes nodes cannot be clicked .. probably due to hull back or front preventing events from triggering on nodes
- TODO search filter for hidden nodes.. expand before zoom
-
- */
-
-
-
-
-
-
-
-
-//current selected node
-var previousNodeClicked = [];
-var previousNodeDblClicked;
-
-//------------------------------------------------
-//Feature 1
-
-var previousNodes;
-
-
-
-function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) {
-
-
-    //TODO
-    /*if (previousNodes&& previousNodes!=this)
-     {
-     unhighlightNodeElements.apply(previousNodes)
-     previousNodes=this
-
-     }*/
-
-    //console.log("highlighting nodes:" + (this.children.length + this.parents.length))
-
-    this.showHighlight();
-
-
-    if (bShowOtherNodes) {
-        for (let childNode of this.children)
-            childNode.showHighlight()
-
-        for (let parentNode of this.parents)
-            parentNode.showHighlight()
-    }
-
-    //console.log("highlighting edges:" + (this.edges.length))
-
-
-    for (let edge of this.edges)
-        edge.showHighlight()
-
-    if (bShowEdgeArrows)
-        for (let edge of this.edges) {
-            var color = edge.source == this ? 0x99ff99 : 0xffb2b2;
-
-
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["a" /* addArrow */])(edge, color)
-        }
-}
-
-function unhighlightNodeElements() {
-    //console.log("unhighlighting nodes:" + (this.children.length + this.parents.length))
-
-    this.hideHighlight();
-
-    for (let childNode of this.children)
-        childNode.hideHighlight()
-
-    for (let parentNode of this.parents)
-        parentNode.hideHighlight()
-
-    //console.log("unhighlighting edges:" + (this.edges.length))
-
-    for (let edge of this.edges)
-        edge.hideHighlight()
-
-    for (let edge of this.edges)
-        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["b" /* removeArrow */])(edge)
-
-}
-
-function highlightEdgeElements() {
-
-    this.showHighlight();
-    this.source.showHighlight();
-    this.target.showHighlight();
-
-
-    var color = 0x666666;
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["a" /* addArrow */])(this, color)
-
-
-}
-
-function unhighlightEdgeElements() {
-
-    this.hideHighlight();
-    this.source.hideHighlight();
-    this.target.hideHighlight();
-
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["b" /* removeArrow */])(this)
-
-}
-
-function extendElement(elements, attrName, options, env) {
-
-    var mDomEvents = env.domEvents;
-
-    function _TODO(typeName) {
-        return function () {
-            console.warn("implement handler for", typeName);
-            console.log(this, arguments)
-        }
-    }
-
-    var defaults = {
-        mousemove: _TODO("mousemove"),
-        mouseleave: _TODO("mouseleave"),
-        click: _TODO("click"),
-        dblclick: _TODO("dblclick")
-    };
-    options = $.extend(true, {}, defaults, options);
-
-
-    for (let el of elements) {
-
-
-        if (el._line && env.useLineGroup) {
-            el.showHighlight = function () {
-            };
-            el.hideHighlight = function () {
-            };
-
-            continue
-
-        }
-        var mesh = el[attrName];
-
-
-        mDomEvents.addEventListener(mesh, 'click', options.click, false);
-        mDomEvents.addEventListener(mesh, 'dblclick', options.dblclick, false);
-
-        mDomEvents.addEventListener(mesh, 'mouseover', function (e) {
-            options.mousemove.apply(e.target.node || e.target.edge)
-        }, false);
-        mDomEvents.addEventListener(mesh, 'mouseout', function (e) {
-            options.mouseleave.apply(e.target.node || e.target.edge)
-        }, false);
-
-
-        el.showHighlight = function () {
-
-            if (this.isHighlighted) return;
-            this.isHighlighted = true;
-
-            if (attrName == "_bubble" && this["_bubble"] == null) console.error("FIXME ");
-
-            if (this._bubble) {
-                this.addClass("node-highlighted")
-
-            }
-
-            if (this._line) {
-                var mesh = this[attrName];
-                mesh.material.visible = false
-
-            }
-
-            if (this.text) {
-                this.text.addClass("node-caption-highlighted")
-            }
-
-
-        };
-
-
-        el.hideHighlight = function () {
-
-
-            if (!this.isHighlighted) return;
-            this.isHighlighted = false;
-
-            if (this._bubble) {
-                this.removeClass("node-highlighted")
-
-            }
-
-            if (this._line) {
-                var mesh = this[attrName];
-                mesh.material.visible = true
-
-            }
-
-            if (this.text) {
-                this.text.removeClass("node-caption-highlighted")
-            }
-
-
-        }
-
-    }
-
-}
-
-
-//helper to being able to handle click events
-//isSelected == false will prevent the actual node selection and only will trigger the zoom+highlight parts
-function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelected = true, doHighlighNeighbours = true, doHighlighEdges = true, doZoomIn = true) {
-
-    if (previousNodeClicked.indexOf(currNodeClicked) < 0)
-    //if (previousNodeClicked!=currNodeClicked)
-    {
-        //node selected
-        highlightNodeElements.apply(currNodeClicked, [doHighlighNeighbours, doHighlighEdges]);
-
-
-        if (doZoomIn)
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f2_zoom__["a" /* default */])(currNodeClicked._bubble, onAnimationEnd);
-
-
-        if (isSelected) {
-            //GUI.updateNodeInfo(currNodeClicked)
-
-            currNodeClicked.addClass("basic-selection");
-
-
-            //if (previousNodeClicked)
-            if (!stack)
-                if (previousNodeClicked.length > 0)
-                    for (let p of previousNodeClicked) {
-                        p.removeClass("basic-selection");
-                        unhighlightNodeElements.apply(p)
-                    }
-
-            if (!stack)
-                previousNodeClicked = [currNodeClicked];
-            else
-                previousNodeClicked.push(currNodeClicked)
-
-        }
-
-
-    }
-    else {
-        //GUI.updateNodeInfo(currNodeClicked,false)
-        //node unselected
-        unhighlightNodeElements.apply(currNodeClicked);
-
-        //previousNodeClicked=[]
-        previousNodeClicked.splice(currNodeClicked);
-
-        currNodeClicked.removeClass("basic-selection")
-
-    }
-
-}
-
-/*
-
- as long as node is current selection => mouse enter return mouse leave return
-
- if clicked and not current selection trigger mouse leave on last
-
- */
-//inject additional functionality
-function extendGraphElements(d3Nodes, d3Links, env) {
-
-    addGraphHierarchy(d3Nodes, d3Links);
-
-
-    extendElement(d3Nodes, "_bubble", {
-        mousemove: function (e) {
-
-            if (previousNodeClicked.indexOf(this) >= 0)return;
-            //if (previousNodeClicked==this) return
-
-            highlightNodeElements.apply(this, [true, true])
-
-            //	GUI.updateNodeInfo(this,false)
-
-        },
-        mouseleave: function () {
-
-            //if (previousNodeClicked==this) return
-            if (previousNodeClicked.indexOf(this) >= 0)return;
-
-
-            //if (previousNodeClicked!=this)
-            unhighlightNodeElements.apply(this)
-
-
-        },
-        click: function (e) {
-            var currNodeClicked = e.target.node;
-            e.stopPropagation();
-
-            //if (previousNodeClicked &&previousNodeClicked!=currNodeClicked) 	unhighlightNodeElements.apply(previousNodeClicked)
-            if (previousNodeClicked.length > 0 && previousNodeClicked.indexOf(currNodeClicked) < 0)
-                for (let p of previousNodeClicked)
-                    unhighlightNodeElements.apply(p)
-
-            doOnClickNode(currNodeClicked, e.origDomEvent.ctrlKey);
-
-            return false;
-        },
-        dblclick: function (e) {
-            e.stopPropagation();
-            //setCollapsedSateOfChildNodesAndEdgesOfNode(e.target.node)
-            var currNodeDblClicked = e.target.node;
-
-            GUI.updateNodeInfo(currNodeDblClicked, currNodeDblClicked != previousNodeDblClicked);
-
-            if (previousNodeDblClicked == currNodeDblClicked)
-                previousNodeDblClicked = null;
-            else
-                previousNodeDblClicked = currNodeDblClicked;
-            //unhighlightNodeElements.apply(e.target.node)
-            return false;
-        }
-    }, env);
-
-
-    //FIXME extending attrName sometimes false
-
-    extendElement(d3Links, "_line", {
-        click: function (e) {
-
-        },
-        mousemove: highlightEdgeElements,
-        mouseleave: unhighlightEdgeElements
-
-    }, env)
-
-}
-
-/**
- * build a helper structure for parent child relation
- * TODO how to handle/exclude recursive structures
- */
-
-function addGraphHierarchy(d3Nodes, d3Links) {
-    /*
-     node:
-     group:1
-     id:"2"
-     shape:"sphere" | "cube"
-     _bubble: instanceof THREE.Mesh //SphereGeometry
-     _id:"2"
-
-
-     link:
-     source:"1"
-     target:"3"
-     _line:	 instanceof THREE.Mesh //LineGeometry
-     */
-
-    //prepare nodes
-    for (let node of d3Nodes) {
-
-        if (!node.edges)
-            node.edges = [];
-        if (!node.children)
-            node.children = [];
-        if (!node.parents)
-            node.parents = [];
-
-        node._bubble.node = node
-
-    }
-
-    for (let item of d3Links) {
-
-        item._line.edge = item;
-
-        //add edge list to nodes
-        if (item.source.edges.indexOf(item) < 0)
-            item.source.edges.push(item);
-        if (item.target.edges.indexOf(item) < 0)
-            item.target.edges.push(item);
-
-        //add target of current link to children list of source
-        if (item.source.children.indexOf(item.target) < 0)
-            item.source.children.push(item.target);
-
-        //add source of current link to parent list of target
-        if (item.target.parents.indexOf(item.source) < 0)
-            item.target.parents.push(item.source);
-    }
-
-}
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
-
-/***/ }),
 /* 96 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -93051,7 +93066,7 @@ function removeArrow(d3LinkObj) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(99);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__ = __webpack_require__(19);
 /**
  * Created by Frank on 12.07.2017.
@@ -93717,7 +93732,7 @@ function TextNodesFactory(env, options) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_socket_io_client__ = __webpack_require__(204);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_socket_io_client__ = __webpack_require__(213);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_socket_io_client__);
 /**
  * what we want is a simple baisc abstraction layer to retrieve data .. nothing fancy just some structure for different services and probably topics
@@ -93751,12 +93766,23 @@ class Datasource
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__graph_hud_html__ = __webpack_require__(191);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__graph_hud_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__graph_hud_html__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__info_panel_InfoPanel__ = __webpack_require__(103);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__company_info_CompanyInfo__ = __webpack_require__(102);
 /**
  * the hud is the text overlay over the 3d scene. it contains all the other visual components
  */
 
 //TODO import css rules
 //TODO import other vusual components and templates
+
+
+
+
+
 
 
 
@@ -93767,12 +93793,17 @@ class GraphHUD extends HTMLElement {
 
     }
 
+    connectedCallback(){
+
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default()(this).append(__WEBPACK_IMPORTED_MODULE_1__graph_hud_html___default.a)
+
+
+    }
+
 
 
 
 }
-/* unused harmony export default */
-
 
 
 customElements.define("graph-hud", GraphHUD);
@@ -93783,7 +93814,1217 @@ customElements.define("graph-hud", GraphHUD);
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cluster_utils_DomEventsAlt__ = __webpack_require__(47);
+/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__company_info_html__ = __webpack_require__(190);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__company_info_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__company_info_html__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__searchable_option_list_SearchableOptionList__ = __webpack_require__(104);
+
+
+
+
+
+
+class CompanyInfo extends HTMLElement {
+
+    constructor(...args) {
+        super(...args);
+
+
+
+
+    }
+
+    connectedCallback(){
+
+        $(this).append(__WEBPACK_IMPORTED_MODULE_0__company_info_html___default.a).
+       addClass("rightCompanyInfo")
+
+    }
+
+
+}
+
+
+customElements.define("company-info", CompanyInfo);
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 103 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__info_panel_html__ = __webpack_require__(192);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__info_panel_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__info_panel_html__);
+
+
+
+class InfoPanel extends HTMLElement {
+
+    constructor(...args) {
+        super(...args);
+
+
+
+
+    }
+
+    connectedCallback(){
+
+        $(this).append(__WEBPACK_IMPORTED_MODULE_0__info_panel_html___default.a)
+
+
+    }
+
+
+}
+
+
+customElements.define("info-panel", InfoPanel);
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 104 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__sol__ = __webpack_require__(105);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sol_css__ = __webpack_require__(218);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sol_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__sol_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__searchOptions_json__ = __webpack_require__(227);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__searchOptions_json___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__searchOptions_json__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__searchable_option_list_html__ = __webpack_require__(193);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__searchable_option_list_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__searchable_option_list_html__);
+
+
+
+
+
+
+
+
+class SearchableOptionList extends HTMLElement {
+
+
+    connectedCallback() {
+
+        $(this).append(__WEBPACK_IMPORTED_MODULE_3__searchable_option_list_html___default.a)
+            .searchableOptionList({
+                maxHeight: '250px', showSelectAll: false,
+                data: __WEBPACK_IMPORTED_MODULE_2__searchOptions_json___default.a,
+                converter: function (sol, rawDataFromUrl) {
+                    var solData = rawDataFromUrl;
+
+                    // do whatever you have to do
+                    // to convert rawDataFromUrl to
+                    // valid SOL data format
+
+                    return solData;
+                }
+            });
+    }
+
+
+
+
+}
+
+
+customElements.define("searchable-option-list", SearchableOptionList,{extends:"select"});
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 105 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
+/*
+ * SOL - Searchable Option List jQuery plugin
+ * Version 2.0.2
+ * https://pbauerochse.github.io/searchable-option-list/
+ *
+ * Copyright 2015, Patrick Bauerochse
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ *
+ */
+
+
+(function ($, window, document) {
+    'use strict';
+
+    // constructor
+    var SearchableOptionList = function ($element, options) {
+        this.$originalElement = $element;
+        this.options = options;
+
+        // allow setting options as data attribute
+        // e.g. <select data-sol-options="{'allowNullSelection':true}">
+        this.metadata = this.$originalElement.data('sol-options');
+    };
+
+    // plugin prototype
+    SearchableOptionList.prototype = {
+
+        SOL_OPTION_FORMAT: {
+            type:     'option',        // fixed
+            value:    undefined,       // value that will be submitted
+            selected: false,           // boolean selected state
+            disabled: false,           // boolean disabled state
+            label:    undefined,       // label string
+            tooltip:  undefined,       // tooltip string
+            cssClass: ''               // custom css class for container
+        },
+        SOL_OPTIONGROUP_FORMAT: {
+            type:     'optiongroup',    // fixed
+            label:    undefined,        // label string
+            tooltip:  undefined,        // tooltip string
+            disabled: false,            // all children disabled boolean property
+            children: undefined         // array of SOL_OPTION_FORMAT objects
+        },
+
+        DATA_KEY: 'sol-element',
+        WINDOW_EVENTS_KEY: 'sol-window-events',
+
+        // default option values
+        defaults: {
+            data: undefined,
+            name: undefined,           // name attribute, can also be set as name="" attribute on original element or data-sol-name=""
+
+            texts: {
+                noItemsAvailable: '',
+                selectAll: 'Select all',
+                selectNone: 'Select none',
+                quickDelete: '&times;',
+                searchplaceholder: 'Search +2,000 news categories',
+                loadingData: 'loading data...',
+                itemsSelected: '{$a} items selected'
+            },
+
+            events: {
+                onInitialized: undefined,
+                onRendered: undefined,
+                onOpen: undefined,
+                onClose: undefined,
+                onChange: undefined,
+                onScroll: function () {
+
+                    var selectionContainerYPos = this.$input.offset().top - this.config.scrollTarget.scrollTop() + this.$input.outerHeight(false),
+                        selectionContainerHeight = this.$selectionContainer.outerHeight(false),
+                        selectionContainerBottom = selectionContainerYPos + selectionContainerHeight,
+                        displayContainerAboveInput = this.config.displayContainerAboveInput || document.documentElement.clientHeight - this.config.scrollTarget.scrollTop() < selectionContainerBottom,
+                        selectionContainerWidth = this.$innerContainer.outerWidth(false) - parseInt(this.$selectionContainer.css('border-left-width'), 10) - parseInt(this.$selectionContainer.css('border-right-width'), 10);
+
+                    if (displayContainerAboveInput) {
+                        // position the popup above the input
+                        selectionContainerYPos = this.$input.offset().top - selectionContainerHeight - this.config.scrollTarget.scrollTop() + parseInt(this.$selectionContainer.css('border-bottom-width'), 10);
+                        this.$container
+                            .removeClass('sol-selection-bottom')
+                            .addClass('sol-selection-top');
+                    } else {
+                        this.$container
+                            .removeClass('sol-selection-top')
+                            .addClass('sol-selection-bottom');
+                    }
+
+                    if (this.$innerContainer.css('display') !== 'block') {
+                        // container has a certain width
+                        // make selection container a bit wider
+                        selectionContainerWidth = selectionContainerWidth * 1.2;
+                    } else {
+
+                        var borderRadiusSelector = displayContainerAboveInput ? 'border-bottom-right-radius' : 'border-top-right-radius';
+
+                        // no border radius on top
+                        this.$selectionContainer
+                            .css(borderRadiusSelector, 'initial');
+
+                        if (this.$actionButtons) {
+                            this.$actionButtons
+                                .css(borderRadiusSelector, 'initial');
+                        }
+                    }
+
+                    this.$selectionContainer
+                        .css('top', Math.floor(selectionContainerYPos))
+                        .css('left', Math.floor(this.$container.offset().left))
+                        .css('width', selectionContainerWidth);
+
+                    // remember the position
+                    this.config.displayContainerAboveInput = displayContainerAboveInput;
+                }
+            },
+
+            selectAllMaxItemsThreshold: 30,
+            showSelectAll: function () {
+                return this.config.multiple && this.config.selectAllMaxItemsThreshold && this.items && this.items.length <= this.config.selectAllMaxItemsThreshold;
+            },
+
+            useBracketParameters: false,
+            multiple: undefined,
+            resultsContainer: undefined, // jquery element where the results should be appended
+            closeOnClick: true, // close when user clicked 'select all' or 'deselect all'
+            showSelectionBelowList: false,
+            allowNullSelection: false,
+            scrollTarget: undefined,
+            maxHeight: undefined,
+            converter: undefined,
+            asyncBatchSize: 300,
+            maxShow: 0
+        },
+
+        // initialize the plugin
+        init: function () {
+            this.config = $.extend(true, {}, this.defaults, this.options, this.metadata);
+
+            var originalName = this._getNameAttribute(),
+                sol = this;
+
+            if (!originalName) {
+                this._showErrorLabel('name attribute is required');
+                return;
+            }
+
+            // old IE does not support trim
+            if (typeof String.prototype.trim !== 'function') {
+                String.prototype.trim = function () {
+                    return this.replace(/^\s+|\s+$/g, '');
+                }
+            }
+
+            this.config.multiple = this.config.multiple || this.$originalElement.attr('multiple');
+
+            if (!this.config.scrollTarget) {
+                this.config.scrollTarget = $(window);
+            }
+
+            this._registerWindowEventsIfNeccessary();
+            this._initializeUiElements();
+            this._initializeInputEvents();
+
+            setTimeout(function () {
+                sol._initializeData();
+
+                // take original form element out of form submission
+                // by removing the name attribute
+                sol.$originalElement
+                    .data(sol.DATA_KEY, sol)
+                    .removeAttr('name')
+                    .data('sol-name', originalName);
+            }, 0);
+
+            this.$originalElement.hide();
+            this.$container
+                .css('visibility', 'initial')
+                .show();
+
+            return this;
+        },
+
+        _getNameAttribute: function () {
+            return this.config.name || this.$originalElement.data('sol-name') || this.$originalElement.attr('name');
+        },
+
+        // shows an error label
+        _showErrorLabel: function (message) {
+            var $errorMessage = $('<div style="color: red; font-weight: bold;" />').html(message);
+            if (!this.$container) {
+                $errorMessage.insertAfter(this.$originalElement);
+            } else {
+                this.$container.append($errorMessage);
+            }
+        },
+
+        // register click handler to determine when to trigger the close event
+        _registerWindowEventsIfNeccessary: function () {
+            if (!window[this.WINDOW_EVENTS_KEY]) {
+                $(document).click(function (event) {
+                    // if clicked inside a sol element close all others
+                    // else close all sol containers
+                    var $clickedElement = $(event.target),
+                        $closestSelectionContainer = $clickedElement.closest('.sol-selection-container'),
+                        $closestInnerContainer = $clickedElement.closest('.sol-inner-container'),
+                        $clickedWithinThisSolContainer;
+
+                    if ($closestInnerContainer.length) {
+                        $clickedWithinThisSolContainer = $closestInnerContainer.first().parent('.sol-container');
+                    } else if ($closestSelectionContainer.length) {
+                        $clickedWithinThisSolContainer = $closestSelectionContainer.first().parent('.sol-container');
+                    }
+
+                    $('.sol-active')
+                        .not($clickedWithinThisSolContainer)
+                        .each(function (index, item) {
+                            $(item)
+                                .data(SearchableOptionList.prototype.DATA_KEY)
+                                .close();
+                        });
+                });
+
+                // remember we already registered the global events
+                window[this.WINDOW_EVENTS_KEY] = true;
+            }
+        },
+
+        // add sol ui elements
+        _initializeUiElements: function () {
+            var self = this;
+
+            this.internalScrollWrapper = function () {
+                if ($.isFunction(self.config.events.onScroll)) {
+                    self.config.events.onScroll.call(self);
+                }
+            };
+
+            this.$input = $('<input type="text"/>')
+                .attr('placeholder', this.config.texts.searchplaceholder);
+
+            this.$noResultsItem = $('<div class="sol-no-results"/>').html(this.config.texts.noItemsAvailable).hide();
+            this.$loadingData = $('<div class="sol-loading-data"/>').html(this.config.texts.loadingData);
+            this.$xItemsSelected = $('<div class="sol-results-count"/>');
+
+            this.$caret = $('<div class="sol-caret-container"><i class=\"fa fa-search\" aria-hidden=\"true\" style=\"color:black;\"></i></div>').click(function (e) {
+                self.toggle();
+                e.preventDefault();
+                return false;
+            });
+
+            var $inputContainer = $('<div class="sol-input-container"/>').append(this.$input);
+            this.$innerContainer = $('<div class="sol-inner-container"/>').append($inputContainer).append(this.$caret);
+            this.$selection = $('<div class="sol-selection"/>');
+            this.$selectionContainer = $('<div class="sol-selection-container"/>')
+                .append(this.$noResultsItem)
+                .append(this.$loadingData)
+                .append(this.$selection);
+
+            this.$container = $('<div class="sol-container"/>')
+                .hide()
+                .data(this.DATA_KEY, this)
+                .append(this.$selectionContainer)
+                .append(this.$innerContainer)
+                .insertBefore(this.$originalElement);
+
+            // add selected items display container
+            this.$showSelectionContainer = $('<div class="sol-current-selection"/>');
+
+            var $el = this.config.resultsContainer || this.$innerContainer
+            if (this.config.resultsContainer) {
+                this.$showSelectionContainer.appendTo($el)
+            } else {
+                if (this.config.showSelectionBelowList) {
+                    this.$showSelectionContainer.insertAfter($el);
+                } else {
+                    this.$showSelectionContainer.insertBefore($el);
+                }
+            }
+
+
+            // dimensions
+            if (this.config.maxHeight) {
+                this.$selection.css('max-height', this.config.maxHeight);
+            }
+
+            // detect inline css classes and styles
+            var cssClassesAsString = this.$originalElement.attr('class'),
+                cssStylesAsString = this.$originalElement.attr('style'),
+                cssClassList = [],
+                stylesList = [];
+
+            if (cssClassesAsString && cssClassesAsString.length > 0) {
+                cssClassList = cssClassesAsString.split(/\s+/);
+
+                // apply css classes to $container
+                for (var i = 0; i < cssClassList.length; i++) {
+                    this.$container.addClass(cssClassList[i]);
+                }
+            }
+
+            if (cssStylesAsString && cssStylesAsString.length > 0) {
+                stylesList = cssStylesAsString.split(/\;/);
+
+                // apply css inline styles to $container
+                for (var i = 0; i < stylesList.length; i++) {
+                    var splitted = stylesList[i].split(/\s*\:\s*/g);
+
+                    if (splitted.length === 2) {
+
+                        if (splitted[0].toLowerCase().indexOf('height') >= 0) {
+                            // height property, apply to innerContainer instead of outer
+                            this.$innerContainer.css(splitted[0].trim(), splitted[1].trim());
+                        } else {
+                            this.$container.css(splitted[0].trim(), splitted[1].trim());
+                        }
+                    }
+                }
+            }
+
+            if (this.$originalElement.css('display') !== 'block') {
+                this.$container.css('width', this._getActualCssPropertyValue(this.$originalElement, 'width'));
+            }
+
+            if ($.isFunction(this.config.events.onRendered)) {
+                this.config.events.onRendered.call(this, this);
+            }
+        },
+
+        _getActualCssPropertyValue: function ($element, property) {
+
+            var domElement = $element.get(0),
+                originalDisplayProperty = $element.css('display');
+
+            // set invisible to get original width setting instead of translated to px
+            // see https://bugzilla.mozilla.org/show_bug.cgi?id=707691#c7
+            $element.css('display', 'none');
+
+            if (domElement.currentStyle) {
+                return domElement.currentStyle[property];
+            } else if (window.getComputedStyle) {
+                return document.defaultView.getComputedStyle(domElement, null).getPropertyValue(property);
+            }
+
+            $element.css('display', originalDisplayProperty);
+
+            return $element.css(property);
+        },
+
+        _initializeInputEvents: function () {
+            // form event
+            var self = this,
+                $form = this.$input.parents('form').first();
+
+            if ($form && $form.length === 1 && !$form.data(this.WINDOW_EVENTS_KEY)) {
+                var resetFunction = function () {
+                    var $changedItems = [];
+
+                    $form.find('.sol-option input').each(function (index, item) {
+                        var $item = $(item),
+                            initialState = $item.data('sol-item').selected;
+
+                        if ($item.prop('checked') !== initialState) {
+                            $item
+                                .prop('checked', initialState)
+                                .trigger('sol-change', true);
+                            $changedItems.push($item);
+                        }
+                    });
+
+                    if ($changedItems.length > 0 && $.isFunction(self.config.events.onChange)) {
+                        self.config.events.onChange.call(self, self, $changedItems);
+                    }
+                };
+
+                $form.on('reset', function (event) {
+                    // unfortunately the reset event gets fired _before_
+                    // the inputs are actually reset. The only possibility
+                    // to overcome this is to set an interval to execute
+                    // own scripts some time after the actual reset event
+
+                    // before fields are actually reset by the browser
+                    // needed to reset newly checked fields
+                    resetFunction.call(self);
+
+                    // timeout for selection after form reset
+                    // needed to reset previously checked fields
+                    setTimeout(function () {
+                        resetFunction.call(self);
+                    }, 100);
+                });
+
+                $form.data(this.WINDOW_EVENTS_KEY, true);
+            }
+
+            // text input events
+            this.$input
+                .focus(function () {
+                    self.open();
+                })
+                .on('propertychange input', function (e) {
+                    var valueChanged = true;
+                    if (e.type=='propertychange') {
+                        valueChanged = e.originalEvent.propertyName.toLowerCase()=='value';
+                    }
+                    if (valueChanged) {
+                        self._applySearchTermFilter();
+                    }
+                });
+
+            // keyboard navigation
+            this.$container
+                .on('keydown', function (e) {
+                    var keyCode = e.keyCode;
+
+                    // event handling for keyboard navigation
+                    // only when there are results to be shown
+                    if (!self.$noResultsItem.is(':visible')) {
+
+                        var $currentHighlightedOption,
+                            $nextHighlightedOption,
+                            directionValue,
+                            preventDefault = false,
+                            $allVisibleOptions = self.$selection.find('.sol-option:visible');
+
+                        if (keyCode === 40 || keyCode === 38) {
+                            // arrow up or down to select an item
+                            self._setKeyBoardNavigationMode(true);
+
+                            $currentHighlightedOption = self.$selection.find('.sol-option.keyboard-selection');
+                            directionValue = (keyCode === 38) ? -1 : 1;   // negative for up, positive for down
+
+                            var indexOfNextHighlightedOption = $allVisibleOptions.index($currentHighlightedOption) + directionValue;
+                            if (indexOfNextHighlightedOption < 0) {
+                                indexOfNextHighlightedOption = $allVisibleOptions.length - 1;
+                            } else if (indexOfNextHighlightedOption >= $allVisibleOptions.length) {
+                                indexOfNextHighlightedOption = 0;
+                            }
+
+                            $currentHighlightedOption.removeClass('keyboard-selection');
+                            $nextHighlightedOption = $($allVisibleOptions[indexOfNextHighlightedOption])
+                                .addClass('keyboard-selection');
+
+                            self.$selection.scrollTop(self.$selection.scrollTop() + $nextHighlightedOption.position().top);
+
+                            preventDefault = true;
+                        } else if (self.keyboardNavigationMode === true && keyCode === 32) {
+                            // toggle current selected item with space bar
+                            $currentHighlightedOption = self.$selection.find('.sol-option.keyboard-selection input');
+                            $currentHighlightedOption
+                                .prop('checked', !$currentHighlightedOption.prop('checked'))
+                                .trigger('change');
+
+                            preventDefault = true;
+                        }
+
+                        if (preventDefault) {
+                            // dont trigger any events in the input
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                })
+                .on('keyup', function (e) {
+                    var keyCode = e.keyCode;
+
+                    if (keyCode === 27) {
+                        // escape key
+                        if (self.keyboardNavigationMode === true) {
+                            self._setKeyBoardNavigationMode(false);
+                        } else if (self.$input.val() === '') {
+                            // trigger closing of container
+                            self.$caret.trigger('click');
+                            self.$input.trigger('blur');
+                        } else {
+                            // reset input and result filter
+                            self.$input.val('').trigger('input');
+                        }
+                    } else if (keyCode === 16 || keyCode === 17 || keyCode === 18 || keyCode === 20) {
+                        // special events like shift and control
+                        return;
+                    }
+                });
+        },
+
+        _setKeyBoardNavigationMode: function (keyboardNavigationOn) {
+
+            if (keyboardNavigationOn) {
+                // on
+                this.keyboardNavigationMode = true;
+                this.$selection.addClass('sol-keyboard-navigation');
+            } else {
+                // off
+                this.keyboardNavigationMode = false;
+                this.$selection.find('.sol-option.keyboard-selection')
+                this.$selection.removeClass('sol-keyboard-navigation');
+                this.$selectionContainer.find('.sol-option.keyboard-selection').removeClass('keyboard-selection');
+                this.$selection.scrollTop(0);
+            }
+        },
+
+        _applySearchTermFilter: function () {
+            if (!this.items || this.items.length === 0) {
+                return;
+            }
+
+            var searchTerm = this.$input.val(),
+                lowerCased = (searchTerm || '').toLowerCase();
+
+            // show previously filtered elements again
+            this.$selectionContainer.find('.sol-filtered-search').removeClass('sol-filtered-search');
+            this._setNoResultsItemVisible(false);
+
+            if (lowerCased.trim().length > 0) {
+                this._findTerms(this.items, lowerCased);
+            }
+
+            // call onScroll to position the popup again
+            // important if showing popup above list
+            if ($.isFunction(this.config.events.onScroll)) {
+                this.config.events.onScroll.call(this);
+            }
+        },
+
+        _findTerms: function (dataArray, searchTerm) {
+            if (!dataArray || !$.isArray(dataArray) || dataArray.length === 0) {
+                return;
+            }
+
+            var self = this;
+
+            // reset keyboard navigation mode when applying new filter
+            this._setKeyBoardNavigationMode(false);
+
+            $.each(dataArray, function (index, item) {
+                if (item.type === 'option') {
+                    var $element = item.displayElement,
+                        elementSearchableTerms = (item.label + ' ' + item.tooltip).trim().toLowerCase();
+
+                    if (elementSearchableTerms.indexOf(searchTerm) === -1) {
+                        $element.addClass('sol-filtered-search');
+                    }
+                } else {
+                    self._findTerms(item.children, searchTerm);
+                    var amountOfUnfilteredChildren = item.displayElement.find('.sol-option:not(.sol-filtered-search)');
+
+                    if (amountOfUnfilteredChildren.length === 0) {
+                        item.displayElement.addClass('sol-filtered-search');
+                    }
+                }
+            });
+
+            this._setNoResultsItemVisible(this.$selectionContainer.find('.sol-option:not(.sol-filtered-search)').length === 0);
+        },
+
+        _initializeData: function () {
+            if (!this.config.data) {
+                this.items = this._detectDataFromOriginalElement();
+            } else if ($.isFunction(this.config.data)) {
+                this.items = this._fetchDataFromFunction(this.config.data);
+            } else if ($.isArray(this.config.data)) {
+                this.items = this._fetchDataFromArray(this.config.data);
+            } else if (typeof this.config.data === (typeof 'a string')) {
+                this._loadItemsFromUrl(this.config.data);
+            } else {
+                this._showErrorLabel('Unknown data type');
+            }
+
+            if (this.items) {
+                // done right away -> invoke postprocessing
+                this._processDataItems(this.items);
+            }
+        },
+
+        _detectDataFromOriginalElement: function () {
+            if (this.$originalElement.prop('tagName').toLowerCase() === 'select') {
+                var self = this,
+                    solData = [];
+
+                $.each(this.$originalElement.children(), function (index, item) {
+                    var $item = $(item),
+                        itemTagName = $item.prop('tagName').toLowerCase(),
+                        solDataItem;
+
+                    if (itemTagName === 'option') {
+                        solDataItem = self._processSelectOption($item);
+                        if (solDataItem) {
+                            solData.push(solDataItem);
+                        }
+                    } else if (itemTagName === 'optgroup') {
+                        solDataItem = self._processSelectOptgroup($item);
+                        if (solDataItem) {
+                            solData.push(solDataItem);
+                        }
+                    } else {
+                        self._showErrorLabel('Invalid element found in select: ' + itemTagName + '. Only option and optgroup are allowed');
+                    }
+                });
+                return this._invokeConverterIfNeccessary(solData);
+            } else if (this.$originalElement.data('sol-data')) {
+                var solDataAttributeValue = this.$originalElement.data('sol-data');
+                return this._invokeConverterIfNeccessary(solDataAttributeValue);
+            } else {
+                this._showErrorLabel('Could not determine data from original element. Must be a select or data must be provided as data-sol-data="" attribute');
+            }
+        },
+
+        _processSelectOption: function ($option) {
+            return $.extend({}, this.SOL_OPTION_FORMAT, {
+                value: $option.val(),
+                selected: $option.prop('selected'),
+                disabled: $option.prop('disabled'),
+                cssClass: $option.attr('class'),
+                label: $option.html(),
+                tooltip: $option.attr('title'),
+                element: $option
+            });
+        },
+
+        _processSelectOptgroup: function ($optgroup) {
+            var self = this,
+                solOptiongroup = $.extend({}, this.SOL_OPTIONGROUP_FORMAT, {
+                    label: $optgroup.attr('label'),
+                    tooltip: $optgroup.attr('title'),
+                    disabled: $optgroup.prop('disabled'),
+                    children: []
+                }),
+                optgroupChildren = $optgroup.children('option');
+
+            $.each(optgroupChildren, function (index, item) {
+                var $child = $(item),
+                    solOption = self._processSelectOption($child);
+
+                // explicitly disable children when optgroup is disabled
+                if (solOptiongroup.disabled) {
+                    solOption.disabled = true;
+                }
+				
+                solOptiongroup.children.push(solOption);
+            });
+
+            return solOptiongroup;
+        },
+
+        _fetchDataFromFunction: function (dataFunction) {
+            return this._invokeConverterIfNeccessary(dataFunction(this));
+        },
+
+        _fetchDataFromArray: function (dataArray) {
+            return this._invokeConverterIfNeccessary(dataArray);
+        },
+
+        _loadItemsFromUrl: function (url) {
+            var self = this;
+            $.ajax(url, {
+                success: function (actualData) {
+                    self.items = self._invokeConverterIfNeccessary(actualData);
+                    if (self.items) {
+                        self._processDataItems(self.items);
+                    }
+                },
+                error: function (xhr, status, message) {
+                    self._showErrorLabel('Error loading from url ' + url + ': ' + message);
+                },
+                dataType: 'json'
+            });
+        },
+
+        _invokeConverterIfNeccessary: function (dataItems) {
+            if ($.isFunction(this.config.converter)) {
+                return this.config.converter.call(this, this, dataItems);
+            }
+            return dataItems;
+        },
+
+        _processDataItems: function (solItems) {
+            if (!solItems) {
+                this._showErrorLabel('Data items not present. Maybe the converter did not return any values');
+                return;
+            }
+
+            if (solItems.length === 0) {
+                this._setNoResultsItemVisible(true);
+                this.$loadingData.remove();
+                return;
+            }
+
+            var self = this,
+                nextIndex = 0,
+                dataProcessedFunction = function () {
+                    // hide "loading data"
+                    this.$loadingData.remove();
+                    this._initializeSelectAll();
+
+                    if ($.isFunction(this.config.events.onInitialized)) {
+                        this.config.events.onInitialized.call(this, this, solItems);
+                    }
+                },
+                loopFunction = function () {
+
+                    var currentBatch = 0,
+                        item;
+
+                    while (currentBatch++ < self.config.asyncBatchSize && nextIndex < solItems.length) {
+                        item = solItems[nextIndex++];
+                        if (item.type === self.SOL_OPTION_FORMAT.type) {
+                            self._renderOption(item);
+                        } else if (item.type === self.SOL_OPTIONGROUP_FORMAT.type) {
+                            self._renderOptiongroup(item);
+                        } else {
+                            self._showErrorLabel('Invalid item type found ' + item.type);
+                            return;
+                        }
+                    }
+
+                    if (nextIndex >= solItems.length) {
+                        dataProcessedFunction.call(self);
+                    } else {
+                        setTimeout(loopFunction, 0);
+                    }
+                };
+
+            // start async rendering of html elements
+            loopFunction.call(this);
+        },
+
+        _renderOption: function (solOption, $optionalTargetContainer) {
+            var self = this,
+                $actualTargetContainer = $optionalTargetContainer || this.$selection,
+                $inputElement,
+                $labelText = $('<div class="sol-label-text"/>')
+                    .html(solOption.label.trim().length === 0 ? '&nbsp;' : solOption.label)
+                    .addClass(solOption.cssClass),
+                $label,
+                $displayElement,
+                inputName = this._getNameAttribute();
+
+            if (this.config.multiple) {
+                // use checkboxes
+                $inputElement = $('<input type="checkbox" class="sol-checkbox"/>');
+
+                if (this.config.useBracketParameters) {
+                    inputName += '[]';
+                }
+            } else {
+                // use radio buttons
+                $inputElement = $('<input type="radio" class="sol-radio"/>')
+                    .on('change', function () {
+                        // when selected notify all others of being deselected
+                        self.$selectionContainer.find('input[type="radio"][name="' + inputName + '"]').not($(this)).trigger('sol-deselect');
+                    })
+                    .on('sol-deselect', function () {
+                        // remove display selection item
+                        // TODO also better show it inline instead of above or below to save space
+                        self._removeSelectionDisplayItem($(this));
+                    });
+            }
+
+            $inputElement
+                .on('change', function (event, skipCallback) {
+                    $(this).trigger('sol-change', skipCallback);
+                })
+                .on('sol-change', function (event, skipCallback) {
+                    self._selectionChange($(this), skipCallback);
+                })
+                .data('sol-item', solOption)
+                .prop('checked', solOption.selected)
+                .prop('disabled', solOption.disabled)
+                .attr('name', inputName)
+                .val(solOption.value);
+
+            $label = $('<label class="sol-label"/>')
+                .attr('title', solOption.tooltip)
+                .append($inputElement)
+                .append($labelText);
+
+            $displayElement = $('<div class="sol-option"/>').append($label);
+            solOption.displayElement = $displayElement;
+
+            $actualTargetContainer.append($displayElement);
+
+            if (solOption.selected) {
+                this._addSelectionDisplayItem($inputElement);
+            }
+        },
+
+        _renderOptiongroup: function (solOptiongroup) {
+            var self = this,
+                $groupCaption = $('<div class="sol-optiongroup-label"/>')
+                    .attr('title', solOptiongroup.tooltip)
+                    .html(solOptiongroup.label),
+                $groupItem = $('<div class="sol-optiongroup"/>').append($groupCaption);
+
+            if (solOptiongroup.disabled) {
+                $groupItem.addClass('disabled');
+            }
+
+            if ($.isArray(solOptiongroup.children)) {
+                $.each(solOptiongroup.children, function (index, item) {
+                    self._renderOption(item, $groupItem);
+                });
+            }
+
+            solOptiongroup.displayElement = $groupItem;
+            this.$selection.append($groupItem);
+        },
+
+        _initializeSelectAll: function () {
+            // multiple values selectable
+            if (this.config.showSelectAll === true || ($.isFunction(this.config.showSelectAll) && this.config.showSelectAll.call(this))) {
+                // buttons for (de-)select all
+                var self = this,
+                    $deselectAllButton = $('<a href="#" class="sol-deselect-all"/>').html(this.config.texts.selectNone).click(function (e) {
+                        self.deselectAll();
+                        e.preventDefault();
+                        return false;
+                    }),
+                    $selectAllButton = $('<a href="#" class="sol-select-all"/>').html(this.config.texts.selectAll).click(function (e) {
+                        self.selectAll();
+                        e.preventDefault();
+                        return false;
+                    });
+
+                this.$actionButtons = $('<div class="sol-action-buttons"/>').append($selectAllButton).append($deselectAllButton).append('<div class="sol-clearfix"/>');
+                this.$selectionContainer.prepend(this.$actionButtons);
+            }
+        },
+
+        _selectionChange: function ($changeItem, skipCallback) {
+
+            // apply state to original select if neccessary
+            // helps to keep old legacy code running which depends
+            // on retrieving the value via jQuery option selectors
+            // e.g. $('#myPreviousSelectWhichNowIsSol').val()
+            if (this.$originalElement && this.$originalElement.prop('tagName').toLowerCase() === 'select') {
+                var self = this;
+                this.$originalElement.find('option').each(function (index, item) {
+                    var $currentOriginalOption = $(item);
+                    if ($currentOriginalOption.val() === $changeItem.val()) {
+                        $currentOriginalOption.prop('selected', $changeItem.prop('checked'));
+                        self.$originalElement.trigger('change');
+                        return;
+                    }
+                });
+            }
+
+            if ($changeItem.prop('checked')) {
+				document.getElementById('DJSearch').value += "|"+$changeItem[0]['value'];
+				ajax_searchTo();
+                this._addSelectionDisplayItem($changeItem);
+            } else {
+				
+				var replace = "|"+$changeItem[0]['value'];
+				var str = document.getElementById('DJSearch').value;
+				document.getElementById('DJSearch').value=str.replace(replace, '');
+				ajax_searchTo();
+                this._removeSelectionDisplayItem($changeItem);
+            }
+
+            if (this.config.multiple) {
+                // update position of selection container
+                // to allow selecting more entries
+                this.config.scrollTarget.trigger('scroll');
+            } else {
+                // only one option selectable
+                // close selection container
+                this.close();
+            }
+
+            var selected = this.$showSelectionContainer.children('.sol-selected-display-item');
+            if (this.config.maxShow != 0 && selected.length > this.config.maxShow) {
+                selected.hide();
+                var xitemstext = this.config.texts.itemsSelected.replace('{$a}', selected.length);
+                this.$xItemsSelected.html('<div class="sol-selected-display-item-text">' + xitemstext + '<div>');
+                this.$showSelectionContainer.append(this.$xItemsSelected);
+                this.$xItemsSelected.show();
+            } else {
+                selected.show();
+                this.$xItemsSelected.hide();
+            }
+
+            if (!skipCallback && $.isFunction(this.config.events.onChange)) {
+                this.config.events.onChange.call(this, this, $changeItem);
+            }
+        },
+
+        _addSelectionDisplayItem: function ($changedItem) {
+            var solOptionItem = $changedItem.data('sol-item'),
+                $existingDisplayItem = solOptionItem.displaySelectionItem,
+                $displayItemText;
+
+            if (!$existingDisplayItem) {
+                $displayItemText = $('<span class="sol-selected-display-item-text" />').html(solOptionItem.label);
+                $existingDisplayItem = $('<div class="sol-selected-display-item"/>')
+                    .append($displayItemText)
+                    .attr('title', solOptionItem.tooltip)
+                    .appendTo(this.$showSelectionContainer);
+
+                // show remove button on display items if not disabled and null selection allowed
+                if ((this.config.multiple || this.config.allowNullSelection) && !$changedItem.prop('disabled')) {
+                    $('<span class="sol-quick-delete"/>')
+                        .html(this.config.texts.quickDelete)
+                        .click(function () {
+                            $changedItem
+                                .prop('checked', false)
+                                .trigger('change');
+                        })
+                        .prependTo($existingDisplayItem);
+                }
+
+                solOptionItem.displaySelectionItem = $existingDisplayItem;
+            }
+        },
+
+        _removeSelectionDisplayItem: function ($changedItem) {
+            var solOptionItem = $changedItem.data('sol-item'),
+                $myDisplayItem = solOptionItem.displaySelectionItem;
+
+            if ($myDisplayItem) {
+                $myDisplayItem.remove();
+                solOptionItem.displaySelectionItem = undefined;
+            }
+        },
+
+        _setNoResultsItemVisible: function (visible) {
+            if (visible) {
+                this.$noResultsItem.show();
+                this.$selection.hide();
+
+                if (this.$actionButtons) {
+                    this.$actionButtons.hide();
+                }
+            } else {
+                this.$noResultsItem.hide();
+                this.$selection.show();
+
+                if (this.$actionButtons) {
+                    this.$actionButtons.show();
+                }
+            }
+        },
+
+        isOpen: function () {
+            return this.$container.hasClass('sol-active');
+        },
+
+        isClosed: function () {
+            return !this.isOpen();
+        },
+
+        toggle: function () {
+            if (this.isOpen()) {
+                this.close();
+            } else {
+                this.open();
+            }
+        },
+
+        open: function () {
+            if (this.isClosed()) {
+                this.$container.addClass('sol-active');
+                this.config.scrollTarget.bind('scroll', this.internalScrollWrapper).trigger('scroll');
+                $(window).on('resize', this.internalScrollWrapper);
+
+                if ($.isFunction(this.config.events.onOpen)) {
+                    this.config.events.onOpen.call(this, this);
+                }
+            }
+        },
+
+        close: function () {
+            if (this.isOpen()) {
+                this._setKeyBoardNavigationMode(false);
+
+
+                this.$container.removeClass('sol-active');
+                this.config.scrollTarget.unbind('scroll', this.internalScrollWrapper);
+                $(window).off('resize');
+
+                // reset search on close
+                this.$input.val('');
+                this._applySearchTermFilter();
+
+                // clear to recalculate position again the next time sol is opened
+                this.config.displayContainerAboveInput = undefined;
+
+                if ($.isFunction(this.config.events.onClose)) {
+                    this.config.events.onClose.call(this, this);
+                }
+            }
+        },
+
+        selectAll: function () {
+            if (this.config.multiple) {
+                var $changedInputs = this.$selectionContainer
+                    .find('input[type="checkbox"]:not([disabled], :checked)')
+                    .prop('checked', true)
+                    .trigger('change', true);
+
+                this.config.closeOnClick && this.close();
+
+                if ($.isFunction(this.config.events.onChange)) {
+                    this.config.events.onChange.call(this, this, $changedInputs);
+                }
+            }
+        },
+        invert: function() {
+            if (this.config.multiple) {
+                var $closedInputs = this.$selectionContainer
+                    .find('input[type="checkbox"]:not([disabled], :checked)')
+                var $openedInputs = this.$selectionContainer
+                    .find('input[type="checkbox"]').filter('[disabled], :checked')
+
+                $openedInputs.prop('checked', false)
+                             .trigger('change', true);
+                $closedInputs.prop('checked', true)
+                             .trigger('change', true)
+
+                this.options.closeOnClick && this.close();
+
+                if ($.isFunction(this.config.events.onChange)) {
+                    this.config.events.onChange.call(this, this, $openedInputs.add($closedInputs));
+                }
+            }
+        },
+        deselectAll: function () {
+            if (this.config.multiple) {
+                var $changedInputs = this.$selectionContainer
+                    .find('input[type="checkbox"]:not([disabled]):checked')
+                    .prop('checked', false)
+                    .trigger('change', true);
+
+                this.config.closeOnClick && this.close();
+
+                if ($.isFunction(this.config.events.onChange)) {
+                    this.config.events.onChange.call(this, this, $changedInputs);
+                }
+            }
+        },
+
+        getSelection: function () {
+            return this.$selection.find('input:checked');
+        }
+    };
+
+    // jquery plugin boiler plate code
+    SearchableOptionList.defaults = SearchableOptionList.prototype.defaults;
+    window.SearchableOptionList = SearchableOptionList;
+
+    $.fn.searchableOptionList = function (options) {
+        var result = [];
+        this.each(function () {
+            var $this = $(this),
+                $alreadyInitializedSol = $this.data(SearchableOptionList.prototype.DATA_KEY);
+
+            if ($alreadyInitializedSol) {
+                result.push($alreadyInitializedSol);
+            } else {
+                var newSol = new SearchableOptionList($this, options);
+                result.push(newSol);
+
+                setTimeout(function() {
+                    newSol.init();
+                }, 0);
+            }
+        });
+
+        if (result.length === 1) {
+            return result[0];
+        }
+
+        return result;
+    };
+
+}(__WEBPACK_IMPORTED_MODULE_0_jquery___default.a, window, document));
+
+
+/***/ }),
+/* 106 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(THREE, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cluster_utils_DomEventsAlt__ = __webpack_require__(48);
 /**
  * Created by Frank on 13.06.2017.
  *
@@ -94364,7 +95605,7 @@ customElements.define("view-3d", View3D);
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(0)))
 
 /***/ }),
-/* 103 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -95279,10 +96520,10 @@ TWEEN.Interpolation = {
 
 })(this);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
 
 /***/ }),
-/* 104 */
+/* 108 */
 /***/ (function(module, exports) {
 
 module.exports = after
@@ -95316,7 +96557,7 @@ function noop() {}
 
 
 /***/ }),
-/* 105 */
+/* 109 */
 /***/ (function(module, exports) {
 
 /**
@@ -95351,7 +96592,7 @@ module.exports = function(arraybuffer, start, end) {
 
 
 /***/ }),
-/* 106 */
+/* 110 */
 /***/ (function(module, exports) {
 
 
@@ -95442,7 +96683,7 @@ Backoff.prototype.setJitter = function(jitter){
 
 
 /***/ }),
-/* 107 */
+/* 111 */
 /***/ (function(module, exports) {
 
 /*
@@ -95515,7 +96756,7 @@ Backoff.prototype.setJitter = function(jitter){
 
 
 /***/ }),
-/* 108 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
@@ -95618,24 +96859,24 @@ module.exports = (function() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 109 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(12)(undefined);
+exports = module.exports = __webpack_require__(10)(undefined);
 // imports
 
 
 // module
-exports.push([module.i, ".graph-nav-info {\r\n    position: absolute;\r\n    bottom: 5px;\r\n    width: 100%;\r\n    text-align: center;\r\n    color: slategrey;\r\n    opacity: 0.7;\r\n    font-size: 10px;\r\n}\r\n\r\n.graph-tooltip {\r\n    position: absolute;\r\n    color: lavender;\r\n    font-size: 18px;\r\n\tpointer-events: none;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\t.industry-info-row * {\r\n    vertical-align: middle;\r\n\tpadding:0.2em\r\n\t}\r\n\r\n\r\n\t.searchbar-container\r\n\t{\r\n\t\tz-index:999;\r\n\r\n\t}\r\n\r\n\r\n\t.graph-node-info\r\n\t{\r\n\t\t    overflow-y: visible;\r\n\t\tposition:absolute;\r\n\t\ttop:10px;\r\n\t\tleft:400px;\r\n\t\tz-index:999;\r\n\t\t\r\n\t\tcolor:white;\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  \r\n\t\t  max-height:760px;\r\n\t\t  max-width:810px;\r\n\t\t  \r\n\t\t   text-align: left;\r\n\t\t       overflow: hidden;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.graph-node-info-header{\r\n\t\tbackground-color: rgba(47, 45, 45, 0.81) !important;\t\r\n\t\tdisplay:flex;\r\n\t\ttext-align:right;\r\n\t}\r\n\r\n\t  \r\n\t\r\n\t.graph-node-info-search{\r\n\t\t\r\n\t\t\tbackground:#1f4e79;\r\n\t\t padding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.graph-node-info-search a{\r\n\t\t\r\n\t\tcolor:white;\r\n\t\ttext-decoration:none;\r\n\t}\r\n\t\r\n\t.graph-node-info-price{\r\n\t\t\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t}\r\n\t.graph-node-info-close{\r\n\t\t\t\r\n\t\t\tbackground-color: transparent !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-node-info-news-header{\r\n\t\tpadding:0.5em;\r\n\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\r\n\t}\r\n\t.graph-node-info-news-body{\r\n\t\tpadding:0.5em;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-tooltip\r\n\t{\r\n\t\t\r\n\t}\r\n\t.graph-tooltip > .content\r\n\t{\r\n\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\tpadding:0.5em;\t\r\n\t}\r\n\t\r\n\t.ui-autocomplete\r\n\t{\r\n\tbackground-color: rgba(255, 255, 255, 0.2) !important;\r\n    color: white !important;\r\n\tborder:0px !important;\r\n\t\r\n\t max-height:30em; overflow-y: scroll; \r\n\t max-width:20em;\r\n\t}\t\r\n\t\r\n\t\r\n\t\r\n\t.ui-accordion{\r\n\t\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  padding: 0px 2px 0px 2px\r\n\t\t  \r\n\t}\r\n\t\r\n\t.ui-accordion > *{\r\n\t\tmargin:0px;\r\n\t\t\r\n\t}\r\n\t\r\n\t.ui-accordion-header{\r\n\t\t    margin: 2px 0px 2px 0px !important;\r\n\t\t\tfont-weight:bold;\r\n\t\t\tcolor:white;\r\n\t\t\t text-align: left;\r\n\t}\r\n\t\r\n\t.ui-accordion-header:focus{\r\n\t\t outline: 0;\r\n\t\t background: rgba(0, 0, 0, 0.25);\r\n\t\t \r\n\t}\r\n\t\r\n\t.ui-accordion-content\r\n\t{\r\n\t\toverflow:visible;\r\n\t\t text-align: left;\r\n\t\t padding:.5em .5em .5em .7em !important;\r\n\t\t color:white !important;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.ui-widget-content\r\n\t{\r\n\t\t background: rgba(24, 23, 23, 0.21);\r\n\t\tborder:0px;\r\n\t}\r\n\t\r\n\t.ui-state-default\r\n\t{\r\n\t\t    background: rgba(32, 32, 32, 0.25);\r\n\t\t\tborder:0px;\r\n\t}\r\n\t\r\n\t\r\n\t.zoom-slider\r\n\t{\r\n\t\tposition:absolute;\r\n\t\ttop:1em;\r\n\t\tleft:60%;\r\n\t\tbackground:transparent;\r\n\t\t min-width: 300px;\r\n\t\tdisplay:inline-block;\r\n\t\twidth:200px !important;\r\n\tz-index:999;\r\n\t\t\r\n\t}\r\n\t.ui-slider\r\n\t{\r\n\t\t\r\n\t\tdisplay:none;\r\n\t\t\r\n\t\t\r\n\t  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n\t  background: -webkit-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: -o-linear-gradient(left,orange,grey);\r\n\t  \r\n\t  background: -moz-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: linear-gradient(to right,orange,grey); \r\n\t  \r\n\t      height: 0.2em;\r\n    border: 0 !important;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t.ui-slider .ui-slider-handle {\r\n    width:2em;\r\n    height:1.6em;\r\n\tborder: 0 !important;\r\n    text-decoration:none;\r\n    text-align:center;\r\n\t    top: -1em;\r\n\t\r\n\tbackground: url(" + __webpack_require__(212) + ");\r\n    background-size: 2em;\r\n\t\r\n\t}\r\n\t.ui-slider-handle:focus{\r\n\t\toutline:0;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-container{\r\n\t\r\n\tleft:240px;\r\n\tdisplay:flex;\r\n    position: absolute;\r\n\ttop:15px;\r\n\t\r\n\tborder: 0;\r\n\t\r\n\t}\r\n\t\r\n\t\r\n\t.searchbar-container input{\r\n\t\t\r\n\t\tborder-radius: 5px;\r\n\t\tborder: 0;\r\n\t\t min-width: 400px;\r\n\t\toutline: none;\r\n\t\tpadding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-search\r\n\t{\r\n   /* position: absolute;\r\n\tdisplay: inline-block;\r\n    content: \"\";\r\n    width: 26px;\r\n    height: 26px;\r\n    background: url('data:image/svg+xml;utf8,<svg width=\"1792\" height=\"1792\" viewBox=\"0 0 1792 1792\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1216 832q0-185-131.5-316.5t-316.5-131.5-316.5 131.5-131.5 316.5 131.5 316.5 316.5 131.5 316.5-131.5 131.5-316.5zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124-143 0-273.5-55.5t-225-150-150-225-55.5-273.5 55.5-273.5 150-225 225-150 273.5-55.5 273.5 55.5 225 150 150 225 55.5 273.5q0 220-124 399l343 343q37 37 37 90z\" fill=\"#fff\"/></svg>');\t\r\n\tbackground-size: 100%;*/\r\n\t}\r\n\r\n\t.searchbar-search-row\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-bottom:1px solid darkslateblue\r\n\t\t\r\n\t}\r\n\t\r\n\t.searchbar-search-row b\r\n\t{\r\n\t\tcolor:darkslateblue;\r\n\t\t text-shadow: 0 0 0.1em white, 0 0 0.1em white, 0 0 0.1em white;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n  .ui-progressbar {\r\n    position: absolute;\r\n\ttop:10px;\r\n\tleft:10px;\r\n\twidth:30%;\r\n\theight:20px;\r\n  }\r\n  .progress-label {\r\n    position: absolute;\r\n    left: 10%;\r\n    top: 4px;\r\n    font-weight: bold;\r\n    text-shadow: 1px 1px 0 #fff;\r\n  }\r\n\r\n\r\n  .noselect {\r\n  -webkit-touch-callout: none; /* iOS Safari */\r\n    -webkit-user-select: none; /* Safari */\r\n     -khtml-user-select: none; /* Konqueror HTML */\r\n       -moz-user-select: none; /* Firefox */\r\n        -ms-user-select: none; /* Internet Explorer/Edge */\r\n            user-select: none; /* Non-prefixed version, currently\r\n                                  supported by Chrome and Opera */\r\n}\r\n  \r\n  \r\n\t.graph-country-caption\r\n\t{\r\n\tcolor:ffffff;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t\t\r\n\t\tfont-size: 0.8em;\r\n\t\tfont-weight: 900;\r\n\t\topacity: 0.5;\r\n\t}\r\n\t\r\n\t.graph-country-caption:hover\r\n\t{\r\n\t\t\r\n\t    opacity: 0.6 !important;\r\n\t\tcolor:darkslateblue;\r\n\t\t\r\n\t\t\r\n    text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;\r\n\t\t\r\n\t}\r\n  \r\n  \r\n \r\n\t.node-caption\r\n\t{\r\n\t\tcolor:white;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t}\r\n\t\r\n\t.node-caption-highlighted\r\n\t{\r\n\t\tcolor: white !important;\r\n\t\t//font-weight: bold;\r\n\t\ttext-shadow: 0 0 0.3em white, 0 0 0.3em white, 0 0 0.3em white;\r\n\t}\r\n\t\r\n\r\n\t.cloudNodeColorSelect\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:40px;\r\n\t\tleft:48%;\r\n\t\tz-index:999;\r\n\t\twidth:130px;\r\n\t\t\r\n\t\t\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor: white;\r\n\t\tborder: transparent;\r\n\t\t\r\n\t}\r\n\t.cloudNodeColorSelect:focus{\r\n\t\toutline:0\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.bottomCompanyGradient\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:20px;\r\n\t\tleft:0px;\r\n\t\tright:0px;\r\n\t\tz-index:999;\r\n\t\tcolor:white;\r\n\t\tdisplay:flex;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\t.companyGradient {\r\n  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n  background: -webkit-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: -o-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n  \r\n  background: -moz-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: linear-gradient(to left,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729); \r\n}\r\n\t\r\n\t.rightCompanyInfo\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tright:0.5em;\r\n\t\ttop:50px;\r\n\t\tz-index:999;\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor:white;\r\n\t\tborder:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t.rightCompanyInfo .event\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-top:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t#companyIndustry img {\r\n    height: 1.5em;\r\n\t}", ""]);
+exports.push([module.i, ".graph-nav-info {\r\n    position: absolute;\r\n    bottom: 5px;\r\n    width: 100%;\r\n    text-align: center;\r\n    color: slategrey;\r\n    opacity: 0.7;\r\n    font-size: 10px;\r\n}\r\n\r\n.graph-tooltip {\r\n    position: absolute;\r\n    color: lavender;\r\n    font-size: 18px;\r\n\tpointer-events: none;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\t.industry-info-row * {\r\n    vertical-align: middle;\r\n\tpadding:0.2em\r\n\t}\r\n\r\n\r\n\t.searchbar-container\r\n\t{\r\n\t\tz-index:999;\r\n\r\n\t}\r\n\r\n\r\n\t.graph-node-info\r\n\t{\r\n\t\t    overflow-y: visible;\r\n\t\tposition:absolute;\r\n\t\ttop:10px;\r\n\t\tleft:400px;\r\n\t\tz-index:999;\r\n\t\t\r\n\t\tcolor:white;\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  \r\n\t\t  max-height:760px;\r\n\t\t  max-width:810px;\r\n\t\t  \r\n\t\t   text-align: left;\r\n\t\t       overflow: hidden;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.graph-node-info-header{\r\n\t\tbackground-color: rgba(47, 45, 45, 0.81) !important;\t\r\n\t\tdisplay:flex;\r\n\t\ttext-align:right;\r\n\t}\r\n\r\n\t  \r\n\t\r\n\t.graph-node-info-search{\r\n\t\t\r\n\t\t\tbackground:#1f4e79;\r\n\t\t padding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.graph-node-info-search a{\r\n\t\t\r\n\t\tcolor:white;\r\n\t\ttext-decoration:none;\r\n\t}\r\n\t\r\n\t.graph-node-info-price{\r\n\t\t\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t}\r\n\t.graph-node-info-close{\r\n\t\t\t\r\n\t\t\tbackground-color: transparent !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-node-info-news-header{\r\n\t\tpadding:0.5em;\r\n\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\r\n\t}\r\n\t.graph-node-info-news-body{\r\n\t\tpadding:0.5em;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-tooltip\r\n\t{\r\n\t\t\r\n\t}\r\n\t.graph-tooltip > .content\r\n\t{\r\n\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\tpadding:0.5em;\t\r\n\t}\r\n\t\r\n\t.ui-autocomplete\r\n\t{\r\n\tbackground-color: rgba(255, 255, 255, 0.2) !important;\r\n    color: white !important;\r\n\tborder:0px !important;\r\n\t\r\n\t max-height:30em; overflow-y: scroll; \r\n\t max-width:20em;\r\n\t}\t\r\n\t\r\n\t\r\n\t\r\n\t.ui-accordion{\r\n\t\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  padding: 0px 2px 0px 2px\r\n\t\t  \r\n\t}\r\n\t\r\n\t.ui-accordion > *{\r\n\t\tmargin:0px;\r\n\t\t\r\n\t}\r\n\t\r\n\t.ui-accordion-header{\r\n\t\t    margin: 2px 0px 2px 0px !important;\r\n\t\t\tfont-weight:bold;\r\n\t\t\tcolor:white;\r\n\t\t\t text-align: left;\r\n\t}\r\n\t\r\n\t.ui-accordion-header:focus{\r\n\t\t outline: 0;\r\n\t\t background: rgba(0, 0, 0, 0.25);\r\n\t\t \r\n\t}\r\n\t\r\n\t.ui-accordion-content\r\n\t{\r\n\t\toverflow:visible;\r\n\t\t text-align: left;\r\n\t\t padding:.5em .5em .5em .7em !important;\r\n\t\t color:white !important;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.ui-widget-content\r\n\t{\r\n\t\t background: rgba(24, 23, 23, 0.21);\r\n\t\tborder:0px;\r\n\t}\r\n\t\r\n\t.ui-state-default\r\n\t{\r\n\t\t    background: rgba(32, 32, 32, 0.25);\r\n\t\t\tborder:0px;\r\n\t}\r\n\t\r\n\t\r\n\t.zoom-slider\r\n\t{\r\n\t\tposition:absolute;\r\n\t\ttop:1em;\r\n\t\tleft:60%;\r\n\t\tbackground:transparent;\r\n\t\t min-width: 300px;\r\n\t\tdisplay:inline-block;\r\n\t\twidth:200px !important;\r\n\tz-index:999;\r\n\t\t\r\n\t}\r\n\t.ui-slider\r\n\t{\r\n\t\t\r\n\t\tdisplay:none;\r\n\t\t\r\n\t\t\r\n\t  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n\t  background: -webkit-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: -o-linear-gradient(left,orange,grey);\r\n\t  \r\n\t  background: -moz-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: linear-gradient(to right,orange,grey); \r\n\t  \r\n\t      height: 0.2em;\r\n    border: 0 !important;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t.ui-slider .ui-slider-handle {\r\n    width:2em;\r\n    height:1.6em;\r\n\tborder: 0 !important;\r\n    text-decoration:none;\r\n    text-align:center;\r\n\t    top: -1em;\r\n\t\r\n\tbackground: url(" + __webpack_require__(222) + ");\r\n    background-size: 2em;\r\n\t\r\n\t}\r\n\t.ui-slider-handle:focus{\r\n\t\toutline:0;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-container{\r\n\t\r\n\tleft:240px;\r\n\tdisplay:flex;\r\n    position: absolute;\r\n\ttop:15px;\r\n\t\r\n\tborder: 0;\r\n\t\r\n\t}\r\n\t\r\n\t\r\n\t.searchbar-container input{\r\n\t\t\r\n\t\tborder-radius: 5px;\r\n\t\tborder: 0;\r\n\t\t min-width: 400px;\r\n\t\toutline: none;\r\n\t\tpadding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-search\r\n\t{\r\n   /* position: absolute;\r\n\tdisplay: inline-block;\r\n    content: \"\";\r\n    width: 26px;\r\n    height: 26px;\r\n    background: url('data:image/svg+xml;utf8,<svg width=\"1792\" height=\"1792\" viewBox=\"0 0 1792 1792\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1216 832q0-185-131.5-316.5t-316.5-131.5-316.5 131.5-131.5 316.5 131.5 316.5 316.5 131.5 316.5-131.5 131.5-316.5zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124-143 0-273.5-55.5t-225-150-150-225-55.5-273.5 55.5-273.5 150-225 225-150 273.5-55.5 273.5 55.5 225 150 150 225 55.5 273.5q0 220-124 399l343 343q37 37 37 90z\" fill=\"#fff\"/></svg>');\t\r\n\tbackground-size: 100%;*/\r\n\t}\r\n\r\n\t.searchbar-search-row\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-bottom:1px solid darkslateblue\r\n\t\t\r\n\t}\r\n\t\r\n\t.searchbar-search-row b\r\n\t{\r\n\t\tcolor:darkslateblue;\r\n\t\t text-shadow: 0 0 0.1em white, 0 0 0.1em white, 0 0 0.1em white;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n  .ui-progressbar {\r\n    position: absolute;\r\n\ttop:10px;\r\n\tleft:10px;\r\n\twidth:30%;\r\n\theight:20px;\r\n  }\r\n  .progress-label {\r\n    position: absolute;\r\n    left: 10%;\r\n    top: 4px;\r\n    font-weight: bold;\r\n    text-shadow: 1px 1px 0 #fff;\r\n  }\r\n\r\n\r\n  .noselect {\r\n  -webkit-touch-callout: none; /* iOS Safari */\r\n    -webkit-user-select: none; /* Safari */\r\n     -khtml-user-select: none; /* Konqueror HTML */\r\n       -moz-user-select: none; /* Firefox */\r\n        -ms-user-select: none; /* Internet Explorer/Edge */\r\n            user-select: none; /* Non-prefixed version, currently\r\n                                  supported by Chrome and Opera */\r\n}\r\n  \r\n  \r\n\t.graph-country-caption\r\n\t{\r\n\tcolor:ffffff;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t\t\r\n\t\tfont-size: 0.8em;\r\n\t\tfont-weight: 900;\r\n\t\topacity: 0.5;\r\n\t}\r\n\t\r\n\t.graph-country-caption:hover\r\n\t{\r\n\t\t\r\n\t    opacity: 0.6 !important;\r\n\t\tcolor:darkslateblue;\r\n\t\t\r\n\t\t\r\n    text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;\r\n\t\t\r\n\t}\r\n  \r\n  \r\n \r\n\t.node-caption\r\n\t{\r\n\t\tcolor:white;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t}\r\n\t\r\n\t.node-caption-highlighted\r\n\t{\r\n\t\tcolor: white !important;\r\n\t\t//font-weight: bold;\r\n\t\ttext-shadow: 0 0 0.3em white, 0 0 0.3em white, 0 0 0.3em white;\r\n\t}\r\n\t\r\n\r\n\t.cloudNodeColorSelect\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:40px;\r\n\t\tleft:48%;\r\n\t\tz-index:999;\r\n\t\twidth:130px;\r\n\t\t\r\n\t\t\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor: white;\r\n\t\tborder: transparent;\r\n\t\t\r\n\t}\r\n\t.cloudNodeColorSelect:focus{\r\n\t\toutline:0\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.bottomCompanyGradient\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:20px;\r\n\t\tleft:0px;\r\n\t\tright:0px;\r\n\t\tz-index:999;\r\n\t\tcolor:white;\r\n\t\tdisplay:flex;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\t.companyGradient {\r\n  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n  background: -webkit-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: -o-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n  \r\n  background: -moz-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: linear-gradient(to left,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729); \r\n}\r\n\t\r\n\t.rightCompanyInfo\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tright:0.5em;\r\n\t\ttop:50px;\r\n\t\tz-index:999;\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor:white;\r\n\t\tborder:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t.rightCompanyInfo .event\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-top:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t#companyIndustry img {\r\n    height: 1.5em;\r\n\t}", ""]);
 
 // exports
 
 
 /***/ }),
-/* 110 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(12)(undefined);
+exports = module.exports = __webpack_require__(10)(undefined);
 // imports
 
 
@@ -95646,10 +96887,10 @@ exports.push([module.i, "body {\n    text-align: center;\n    font-family: Sans-
 
 
 /***/ }),
-/* 111 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(12)(undefined);
+exports = module.exports = __webpack_require__(10)(undefined);
 // imports
 exports.push([module.i, "@import url(https://fonts.googleapis.com/css?family=Exo+2);", ""]);
 
@@ -95660,24 +96901,38 @@ exports.push([module.i, "sample-cluster-application * {\r\n    font-family: 'rob
 
 
 /***/ }),
-/* 112 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(12)(undefined);
+exports = module.exports = __webpack_require__(10)(undefined);
 // imports
 
 
 // module
-exports.push([module.i, "mode-select {\r\n    position: absolute;\r\n    top: 10px;\r\n    right: 100;\r\n    cursor: pointer;\r\n}\r\n\r\n\r\nmode-select * {\r\n\r\n    padding: 0.2em;\r\n    color: white;\r\n    border-radius: 1px;\r\n    border: 1px solid white;\r\n}\r\n\r\n\r\n.inverted {\r\n    filter: invert(100%);\r\n}", ""]);
+exports.push([module.i, "mode-select {\r\n    position: absolute;\r\n    top: 10px;\r\n    right: 100px;\r\n    cursor: pointer;\r\n}\r\n\r\n\r\nmode-select * {\r\n\r\n    padding: 0.2em 1.8em;\r\n    color: white;\r\n    margin: 0.2em;\r\n    border-radius: 1px;\r\n    border: 1px solid rgba(128, 128, 128, 0.51);\r\n\r\n}\r\n\r\n\r\n.inverted {\r\n    filter: invert(100%);\r\n}", ""]);
 
 // exports
 
 
 /***/ }),
-/* 113 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(12)(undefined);
+exports = module.exports = __webpack_require__(10)(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "@-moz-keyframes blinker {\n    0% {opacity: 1.0;}\n    50% {opacity: 0.2;}\n    100% {opacity: 1.0;}\n}\n@-webkit-keyframes blinker {\n    0% {opacity: 1.0;}\n    50% {opacity: 0.2;}\n    100% {opacity: 1.0;}\n}\n\n@keyframes blinker {\n    0% {opacity: 1.0;}\n    50% {opacity: 0.2;}\n    100% {opacity: 1.0;}\n}\n\n.sol-container * { margin: 0; padding: 0;}\n.sol-inner-container {\n    position: relative;\n    height: 30px;\n    line-height: 30px;\n   background:transparent;\n    /*border: 1px solid #ccc;\n    border-radius: 4px;\n\n    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n\n    -webkit-transition: border linear .2s, box-shadow linear .2s;\n    -moz-transition: border linear .2s, box-shadow linear .2s;\n    -o-transition: border linear .2s, box-shadow linear .2s;\n    transition: border linear .2s, box-shadow linear .2s;*/\n}\n\n.sol-container.sol-active .sol-inner-container {\n    z-index: 9999;\n    background:transparent;\n\n    border-color: rgba(82, 168, 236, 0.8);\n\n    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(82, 168, 236, .6);\n    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(82, 168, 236, .6);\n    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(82, 168, 236, .6);\n}\n\n.sol-input-container {\n    position: absolute;\n    left: 0;\n    top: 0;\n    bottom: 0;\n    right: 25px;\n\tborder-top: 1px solid rgba(65,113,156, 0.8);\n\tborder-left: 1px solid rgba(65,113,156, 0.8);\n\tborder-bottom: 1px solid rgba(65,113,156, 0.8);\n\tcolor:transparentfff;\n}\n\n.sol-caret-container {\n    position: absolute;\n    display: inline-block;\n    width: 25px;\n    right: 0;\n    top: 0;\n    bottom: 0;\n\tborder-top: 1px solid rgba(65,113,156, 0.8);\n\tborder-right: 1px solid rgba(65,113,156, 0.8);\n\tborder-bottom: 1px solid rgba(65,113,156, 0.8);\n\tcolor:transparentfff;\n\tbackground-color: black;\t\n}\n\n.sol-caret-container .sol-caret {\n    position: relative;\n    display: inline-block;\n    left: 10px;\n    width: 0;\n    height: 0;\n    vertical-align: middle;\n    border-top: 4px solid #000;\n    border-right: 4px solid transparent;\n    border-left: 4px solid transparent;\n\tbackground-color: black;\t\n}\n\n.sol-input-container input[type=\"text\"] {\n    border: 0;\n    background-color: black;\t\n    box-shadow: none;\n\tcolor:transparent;\n    padding: 0 7px;\n    outline: none;\n    width: 100%;\n    height: 100%;\n}\n\n.sol-input-container input[type=\"text\"]:-ms-input-placeholder {\n    color:transparent;\n\n}\n\n.sol-input-container input[type=\"text\"]::-ms-clear {\n    display: none;\n}\n\n.sol-selection-container {\n    display: none;\n}\n\n.sol-container.sol-active .sol-selection-container {\n    display: block;\n    position: fixed;\n    left: inherit;\n    top: inherit;\n    z-index: 10000;\n    border: 1px solid #ccc;\n     background:rgba(0, 0, 0, 0.8);\n    border-radius: 4px;\n}\n\n.sol-active.sol-selection-top .sol-selection-container {\n    -webkit-border-bottom-left-radius: 0;\n    -moz-border-bottom-left-radius: 0;\n    border-bottom-left-radius: 0;\n\n    -webkit-box-shadow: 0 0 12px rgba(0, 0, 0, .175);\n    -moz-box-shadow: 0 0 12px rgba(0, 0, 0, .175);\n    box-shadow: 0 0 12px rgba(0, 0, 0, .175);\n}\n\n.sol-active.sol-selection-top .sol-inner-container {\n    -webkit-border-top-left-radius: 0;\n    -moz-border-top-left-radius: 0;\n    border-top-left-radius: 0;\n\n    -webkit-border-top-right-radius: 0;\n    -moz-border-top-right-radius: 0;\n    border-top-right-radius: 0;\n}\n\n.sol-active.sol-selection-bottom .sol-selection-container {\n    -webkit-border-top-left-radius: 0;\n    -moz-border-top-left-radius: 0;\n    border-top-left-radius: 0;\n}\n\n.sol-active.sol-selection-bottom .sol-inner-container {\n    -webkit-border-bottom-left-radius: 0;\n    -moz-border-bottom-left-radius: 0;\n    border-bottom-left-radius: 0;\n\n    -webkit-border-bottom-right-radius: 0;\n    -moz-border-bottom-right-radius: 0;\n    border-bottom-right-radius: 0;\n}\n\n.sol-action-buttons {\n    color: #555;\n    border-bottom: 1px solid #ccc;\n    background: #eee;\n    padding: 7px 10px;\n\n    -webkit-border-top-right-radius: 4px;\n    -moz-border-top-right-radius: 4px;\n    border-top-right-radius: 4px;\n}\n\n.sol-action-buttons a {\n    line-height: 1em;\n    text-decoration: none;\n    color: #0088cc;\n    border-bottom: 1px solid transparent;\n}\n\n.sol-action-buttons a:hover {\n    border-bottom: 1px solid #0088CC;\n}\n\n.sol-action-buttons .sol-select-all {\n    float: left;\n}\n\n.sol-action-buttons .sol-deselect-all {\n    float: right;\n}\n\n.sol-action-buttons .sol-clearfix {\n    clear: both;\n}\n\n.sol-selection {\n    overflow: auto;\n    position: relative;\n    min-height: 0px;\n}\n\n.sol-selection:empty {\n    display: none;\n}\n\n.sol-option {\n    display: block;\n\tcolor: #000000;\n\t font-family: 'robotoCondensed';\n}\n\n.sol-label {\n    padding: 5px 10px;\n    display: block;\n    position: relative;\n\tcolor: #ffffff;\n\t font-family: 'robotoCondensed';\n}\n\n.sol-label-text {\n    padding-left: 20px;\n    line-height: 1.2em;\n\t font-family: 'robotoCondensed';\n}\n\n.sol-selection:not(.sol-keyboard-navigation) .sol-option:hover, .sol-option.keyboard-selection {\n    background:transparentfff;\n    color: #e6e9ed;\n}\n\n.sol-optiongroup {\n    background:transparentfff;\n    padding-bottom: 1px;\n}\n\n.sol-optiongroup-label {\n    color:transparentfff;\n    background: #1f4e79;\n    margin-bottom: 5px;\n    padding: 3px 5px;\n    border-top: 1px solid #ccc;\n    border-bottom: 1px solid #ccc;\n}\n\n.sol-optiongroup.disabled {\n    color: #000000;\n}\n\n.sol-selection div:first-child.sol-optiongroup > .sol-optiongroup-label {\n    border-top: none;\n}\n\n.sol-checkbox, .sol-radio {\n    position: absolute;\n    width: 13px;\n    height: 13px;\n    padding: 0;\n    margin: 0;\n    top: 4px;\n}\n\n.sol-selected-display-item,\n.sol-results-count {\n    display: inline-table;\n    border: 1px solid #5381ab;\n    background: #5b9bd5;\n    font-size: 0.9em;\n    margin-right: 5px;\n    margin-bottom: 5px;\n    border-collapse: separate;\n\n    -webkit-border-radius: 4px;\n    -moz-border-radius: 4px;\n    border-radius: 4px;\n}\n\n.sol-selected-display-item-text {\n    padding: 3px 5px;\n    display: table-cell;\n    vertical-align: top;\n\t font-size: 14px;\n\t font-family: 'robotoCondensed';\n}\n\n.sol-quick-delete {\n    color:transparentfff;\n    display: table-cell;\n    font-weight: bold;\n    text-align: center;\n    padding: 3px 5px;\n    vertical-align: top;\n}\n\n.sol-quick-delete:hover {\n    color: #f1f1f1;\n    cursor: pointer;\n}\n\n.sol-quick-delete + .sol-selected-display-item-text {\n    padding-left: 0;\n}\n\n.sol-filtered-search {\n    display: none;\n}\n\n.sol-no-results, .sol-loading-data {\n    padding: 5px 0 5px 0;\n    color: #999;\n    font-style: italic;\n    text-align: center;\n}\n\n.sol-loading-data {\n    -webkit-animation-name: blinker;\n    -webkit-animation-duration: 1s;\n    -webkit-animation-timing-function: linear;\n    -webkit-animation-iteration-count: infinite;\n\n    -moz-animation-name: blinker;\n    -moz-animation-duration: 1s;\n    -moz-animation-timing-function: linear;\n    -moz-animation-iteration-count: infinite;\n\n    animation-name: blinker;\n    animation-duration: 1s;\n    animation-timing-function: linear;\n    animation-iteration-count: infinite;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 118 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(10)(undefined);
 // imports
 
 
@@ -95688,7 +96943,7 @@ exports.push([module.i, "/*!\n * jQuery UI CSS Framework 1.12.1\n * http://jquer
 
 
 /***/ }),
-/* 114 */
+/* 119 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95764,22 +97019,22 @@ function addAll(data) {
 
 
 /***/ }),
-/* 115 */
+/* 120 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = binarytree;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(114);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(116);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(117);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(118);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(119);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(120);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(121);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(122);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(123);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(124);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(125);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(119);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(121);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(122);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(123);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(124);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(125);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(126);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(127);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(128);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(129);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(130);
 
 
 
@@ -95850,7 +97105,7 @@ treeProto.visitAfter = __WEBPACK_IMPORTED_MODULE_9__visitAfter__["a" /* default 
 treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 /***/ }),
-/* 116 */
+/* 121 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95900,7 +97155,7 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 
 /***/ }),
-/* 117 */
+/* 122 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95914,7 +97169,7 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 
 /***/ }),
-/* 118 */
+/* 123 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95926,11 +97181,11 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 
 /***/ }),
-/* 119 */
+/* 124 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(23);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, radius) {
@@ -95992,7 +97247,7 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 
 /***/ }),
-/* 120 */
+/* 125 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96056,7 +97311,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 121 */
+/* 126 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96066,7 +97321,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 122 */
+/* 127 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96080,11 +97335,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 123 */
+/* 128 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(23);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -96102,11 +97357,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 124 */
+/* 129 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(23);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -96129,7 +97384,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 125 */
+/* 130 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96144,7 +97399,7 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 126 */
+/* 131 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96156,7 +97411,7 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 127 */
+/* 132 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96168,11 +97423,11 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 128 */
+/* 133 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(24);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function() {
@@ -96249,11 +97504,11 @@ function setMap(map, key, value) {
 
 
 /***/ }),
-/* 129 */
+/* 134 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(24);
 
 
 function Set() {}
@@ -96296,7 +97551,7 @@ function set(object, f) {
 
 
 /***/ }),
-/* 130 */
+/* 135 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96308,17 +97563,17 @@ function set(object, f) {
 
 
 /***/ }),
-/* 131 */
+/* 136 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_dispatch__ = __webpack_require__(132);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_dispatch__ = __webpack_require__(137);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_dispatch__["a"]; });
 
 
 
 /***/ }),
-/* 132 */
+/* 137 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96409,26 +97664,26 @@ function set(type, name, callback) {
 
 
 /***/ }),
-/* 133 */
+/* 138 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_center__ = __webpack_require__(134);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_center__ = __webpack_require__(139);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceCenter", function() { return __WEBPACK_IMPORTED_MODULE_0__src_center__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_collide__ = __webpack_require__(135);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_collide__ = __webpack_require__(140);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceCollide", function() { return __WEBPACK_IMPORTED_MODULE_1__src_collide__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_link__ = __webpack_require__(136);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_link__ = __webpack_require__(141);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceLink", function() { return __WEBPACK_IMPORTED_MODULE_2__src_link__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_manyBody__ = __webpack_require__(137);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_manyBody__ = __webpack_require__(142);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceManyBody", function() { return __WEBPACK_IMPORTED_MODULE_3__src_manyBody__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_simulation__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_simulation__ = __webpack_require__(54);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceSimulation", function() { return __WEBPACK_IMPORTED_MODULE_4__src_simulation__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_x__ = __webpack_require__(138);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_x__ = __webpack_require__(143);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceX", function() { return __WEBPACK_IMPORTED_MODULE_5__src_x__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_y__ = __webpack_require__(139);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_y__ = __webpack_require__(144);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceY", function() { return __WEBPACK_IMPORTED_MODULE_6__src_y__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_z__ = __webpack_require__(140);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_z__ = __webpack_require__(145);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceZ", function() { return __WEBPACK_IMPORTED_MODULE_7__src_z__["a"]; });
 
 
@@ -96440,7 +97695,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 134 */
+/* 139 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -96492,15 +97747,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 135 */
+/* 140 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_binarytree__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_quadtree__ = __webpack_require__(55);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_octree__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_binarytree__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_quadtree__ = __webpack_require__(56);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_octree__ = __webpack_require__(55);
 
 
 
@@ -96634,13 +97889,13 @@ function z(d) {
 
 
 /***/ }),
-/* 136 */
+/* 141 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_collection__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_collection__ = __webpack_require__(53);
 
 
 
@@ -96767,16 +98022,16 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 137 */
+/* 142 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_binarytree__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_quadtree__ = __webpack_require__(55);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_octree__ = __webpack_require__(54);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__simulation__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_binarytree__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_quadtree__ = __webpack_require__(56);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_octree__ = __webpack_require__(55);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__simulation__ = __webpack_require__(54);
 
 
 
@@ -96914,11 +98169,11 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 138 */
+/* 143 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x) {
@@ -96963,11 +98218,11 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 139 */
+/* 144 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(y) {
@@ -97012,11 +98267,11 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 140 */
+/* 145 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(z) {
@@ -97061,7 +98316,7 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 141 */
+/* 146 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97171,7 +98426,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 142 */
+/* 147 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97261,7 +98516,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 143 */
+/* 148 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97275,7 +98530,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 144 */
+/* 149 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97287,11 +98542,11 @@ function addAll(data) {
 
 
 /***/ }),
-/* 145 */
+/* 150 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(26);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, y, z, radius) {
@@ -97377,24 +98632,24 @@ function addAll(data) {
 
 
 /***/ }),
-/* 146 */
+/* 151 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = octree;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(141);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(142);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(143);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(144);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(145);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(147);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(148);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(149);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(150);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(151);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(152);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__y__ = __webpack_require__(153);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__z__ = __webpack_require__(154);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(146);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(147);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(148);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(149);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(150);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(152);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(153);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(154);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(155);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(156);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(157);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__y__ = __webpack_require__(158);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__z__ = __webpack_require__(159);
 
 
 
@@ -97476,7 +98731,7 @@ treeProto.z = __WEBPACK_IMPORTED_MODULE_12__z__["b" /* default */];
 
 
 /***/ }),
-/* 147 */
+/* 152 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97552,7 +98807,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 148 */
+/* 153 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97562,7 +98817,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 149 */
+/* 154 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97576,11 +98831,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 150 */
+/* 155 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(26);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -97604,11 +98859,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 151 */
+/* 156 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(26);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -97637,7 +98892,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 152 */
+/* 157 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97652,7 +98907,7 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 153 */
+/* 158 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97667,7 +98922,7 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 154 */
+/* 159 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97682,7 +98937,7 @@ function defaultZ(d) {
 
 
 /***/ }),
-/* 155 */
+/* 160 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97775,7 +99030,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 156 */
+/* 161 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97840,7 +99095,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 157 */
+/* 162 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97854,7 +99109,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 158 */
+/* 163 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97866,11 +99121,11 @@ function addAll(data) {
 
 
 /***/ }),
-/* 159 */
+/* 164 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(27);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, y, radius) {
@@ -97944,23 +99199,23 @@ function addAll(data) {
 
 
 /***/ }),
-/* 160 */
+/* 165 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = quadtree;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(155);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(156);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(157);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(158);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(159);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(161);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(162);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(163);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(164);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(165);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(166);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__y__ = __webpack_require__(167);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(160);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(161);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(162);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(163);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(164);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(166);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(167);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(168);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(169);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(170);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(171);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__y__ = __webpack_require__(172);
 
 
 
@@ -98037,7 +99292,7 @@ treeProto.y = __WEBPACK_IMPORTED_MODULE_11__y__["b" /* default */];
 
 
 /***/ }),
-/* 161 */
+/* 166 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98107,7 +99362,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 162 */
+/* 167 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98117,7 +99372,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 163 */
+/* 168 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98131,11 +99386,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 164 */
+/* 169 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(27);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -98155,11 +99410,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 165 */
+/* 170 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(27);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -98184,7 +99439,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 166 */
+/* 171 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98199,7 +99454,7 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 167 */
+/* 172 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98214,17 +99469,17 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 168 */
+/* 173 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer__ = __webpack_require__(28);
 /* unused harmony reexport now */
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_timer__["a"]; });
 /* unused harmony reexport timerFlush */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_timeout__ = __webpack_require__(170);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_timeout__ = __webpack_require__(175);
 /* unused harmony reexport timeout */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interval__ = __webpack_require__(169);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interval__ = __webpack_require__(174);
 /* unused harmony reexport interval */
 
 
@@ -98234,11 +99489,11 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 169 */
+/* 174 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(28);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function(callback, delay, time) {
@@ -98255,11 +99510,11 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 170 */
+/* 175 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(28);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function(callback, delay, time) {
@@ -98274,7 +99529,7 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 171 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -98290,7 +99545,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(198);
+exports.humanize = __webpack_require__(207);
 
 /**
  * The currently active debug mode names, and names to skip.
@@ -98482,19 +99737,19 @@ function coerce(val) {
 
 
 /***/ }),
-/* 172 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-module.exports = __webpack_require__(173);
+module.exports = __webpack_require__(178);
 
 
 /***/ }),
-/* 173 */
+/* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-module.exports = __webpack_require__(174);
+module.exports = __webpack_require__(179);
 
 /**
  * Exports parser
@@ -98502,24 +99757,24 @@ module.exports = __webpack_require__(174);
  * @api public
  *
  */
-module.exports.parser = __webpack_require__(11);
+module.exports.parser = __webpack_require__(12);
 
 
 /***/ }),
-/* 174 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies.
  */
 
-var transports = __webpack_require__(56);
+var transports = __webpack_require__(57);
 var Emitter = __webpack_require__(9);
 var debug = __webpack_require__(5)('engine.io-client:socket');
-var index = __webpack_require__(59);
-var parser = __webpack_require__(11);
-var parseuri = __webpack_require__(62);
-var parsejson = __webpack_require__(200);
+var index = __webpack_require__(60);
+var parser = __webpack_require__(12);
+var parseuri = __webpack_require__(63);
+var parsejson = __webpack_require__(209);
 var parseqs = __webpack_require__(18);
 
 /**
@@ -98653,9 +99908,9 @@ Socket.protocol = parser.protocol; // this is an int
  */
 
 Socket.Socket = Socket;
-Socket.Transport = __webpack_require__(27);
-Socket.transports = __webpack_require__(56);
-Socket.parser = __webpack_require__(11);
+Socket.Transport = __webpack_require__(29);
+Socket.transports = __webpack_require__(57);
+Socket.parser = __webpack_require__(12);
 
 /**
  * Creates transport of the given type.
@@ -99257,7 +100512,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 175 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -99265,7 +100520,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
  * Module requirements.
  */
 
-var Polling = __webpack_require__(57);
+var Polling = __webpack_require__(58);
 var inherit = __webpack_require__(17);
 
 /**
@@ -99495,15 +100750,15 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 176 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module requirements.
  */
 
-var XMLHttpRequest = __webpack_require__(28);
-var Polling = __webpack_require__(57);
+var XMLHttpRequest = __webpack_require__(30);
+var Polling = __webpack_require__(58);
 var Emitter = __webpack_require__(9);
 var inherit = __webpack_require__(17);
 var debug = __webpack_require__(5)('engine.io-client:polling-xhr');
@@ -99915,24 +101170,24 @@ function unloadHandler () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 177 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(27);
-var parser = __webpack_require__(11);
+var Transport = __webpack_require__(29);
+var parser = __webpack_require__(12);
 var parseqs = __webpack_require__(18);
 var inherit = __webpack_require__(17);
-var yeast = __webpack_require__(68);
+var yeast = __webpack_require__(69);
 var debug = __webpack_require__(5)('engine.io-client:websocket');
 var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 var NodeWebSocket;
 if (typeof window === 'undefined') {
   try {
-    NodeWebSocket = __webpack_require__(214);
+    NodeWebSocket = __webpack_require__(229);
   } catch (e) { }
 }
 
@@ -100208,7 +101463,7 @@ WS.prototype.check = function () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 178 */
+/* 183 */
 /***/ (function(module, exports) {
 
 
@@ -100233,7 +101488,7 @@ module.exports = Object.keys || function keys (obj){
 
 
 /***/ }),
-/* 179 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/utf8js v2.1.2 by @mathias */
@@ -100491,10 +101746,10 @@ module.exports = Object.keys || function keys (obj){
 
 }(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(67)(module), __webpack_require__(4)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(68)(module), __webpack_require__(4)))
 
 /***/ }),
-/* 180 */
+/* 185 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -100505,7 +101760,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 181 */
+/* 186 */
 /***/ (function(module, exports) {
 
 
@@ -100528,10 +101783,10 @@ try {
 
 
 /***/ }),
-/* 182 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Point = __webpack_require__(29);
+var Point = __webpack_require__(31);
 
 var _faceCount = 0;
 
@@ -100609,12 +101864,12 @@ module.exports = Face;
 
 
 /***/ }),
-/* 183 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Tile = __webpack_require__(184),
-    Face = __webpack_require__(182),
-    Point = __webpack_require__(29);
+var Tile = __webpack_require__(189),
+    Face = __webpack_require__(187),
+    Point = __webpack_require__(31);
 
 var Hexasphere = function(radius, numDivisions, hexSize){
 
@@ -100779,10 +102034,10 @@ module.exports = Hexasphere;
 
 
 /***/ }),
-/* 184 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Point = __webpack_require__(29);
+var Point = __webpack_require__(31);
 
 function vector(p1, p2){
     return {
@@ -100920,7 +102175,31 @@ module.exports = Tile;
 
 
 /***/ }),
-/* 185 */
+/* 190 */
+/***/ (function(module, exports) {
+
+module.exports = "\r\n    <div style=\"float:left;width:50%;\">\r\n        <div style=\"margin-top:-18px;\"><img src=\"./include/images/dow_jones.png\" style=\"width:150px;\"></div>\r\n    </div>\r\n    <div style=\"float:right;width:50%;text-align:center;\">\r\n        <span style=\"font-size:12px;font-family:'robotoCondensed' !important;\">CURRENT VIEW</span>\r\n        <br>\r\n        <div style=\"width:80%;background:rgba(24,23,23,0.21);padding:0.5em;margin-left:10px;\">\r\n            <span class=\"graph-info-companys-visible\" style=\"color:#ffc000;font-family:'roboto-bold' !important;\">1750</span>\r\n            <br>\r\n            <span style=\"font-size:12px;color:#ffffff;\">Companies</span>\r\n        </div>\r\n    </div>\r\n    <div class=\"control-search\" style=\"margin-top:100px;text-align:left;font-size:11px;\">\r\n        <searchable-option-list id=\"my-select\" name=\"character\" multiple=\"multiple\"></searchable-option-list>\r\n    </div>\r\n    <div style=\"width:100%;text-align;center;\">\r\n        <table style=\"width:90%;padding:10px;\" align=\"center\">\r\n            <tr>\r\n                <td style=\"width:60%;\"><img src=\"include/images/Significant.png\" style=\"height:30px;cursor:pointer;\" /></td>\r\n                <td style=\"width:40%;\"><img src=\"include/images/TopStories.png\" style=\"height:30px;cursor:pointer;\" /></td>\r\n            </tr>\r\n            <tr>\r\n                <td><img src=\"include/images/Marketmacro.png\" style=\"height:30px;cursor:pointer;\" /></td>\r\n                <td><img src=\"include/images/Earning.png\" style=\"height:30px;cursor:pointer;margin-left:-4px;\" /></td>\r\n            </tr>\r\n            <tr>\r\n                <td><img src=\"include/images/Management.png\" style=\"height:30px;cursor:pointer;margin-left:5px;\" /></td>\r\n                <td></td>\r\n            </tr>\r\n        </table>\r\n    </div>\r\n    <input type=\"hidden\" id=\"DJSearch\" value=\"\" style=\"background:#000000;\"   />\r\n    <div class=\"control-news\">\r\n        <div class=\"list-news\" id=\"ls_djnews\" >\r\n            <div class=\"main\" >\r\n                <div style=\"height: 380px; padding:0;\">\r\n                    <div id=\"djnews\"></div>\r\n                </div>\r\n            </div>\r\n        </div>\r\n        <div class=\"load-more\">\r\n            <div class=\"btn-loadmore\" style=\"padding-top:3px;font-size:14px;font-family:'benchnine' !important;\">< Previous <span class=\"page-control-active\" id=\"s_1\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '1');\">1</span> <span class=\"page-control\"  id=\"s_2\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '2');\">2</span> <span class=\"page-control\" id=\"s_3\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '3');\">3</span> <span class=\"page-control\" id=\"s_4\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '4');\">4</span> <span class=\"page-control\" id=\"s_5\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '5');\">5</span> <span class=\"page-control\" id=\"s_6\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '6');\">6</span>  ... <span class=\"page-control\" id=\"s_20\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '20');\">20</span> Next >></div>\r\n        </div>\r\n        <div class=\"desc-news\">\r\n            <div class=\"col positive\" style=\"font-size:14px;font-family:'benchnine' !important;\">Positive</div>\r\n            <div class=\"col negative\" style=\"font-size:14px;font-family:'benchnine' !important;\">Negative</div>\r\n            <div class=\"col strong\" style=\"font-size:14px;font-family:'benchnine' !important;\">Strong</div>\r\n            <div class=\"last active\" style=\"font-size:14px;font-family:'benchnine' !important;\">Active</div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n\r\n\r\n    <input type=\"hidden\" id=\"DJTab\" value=\"lsn_industry\" style=\"background:#000000;\" />\r\n    <input type=\"hidden\" id=\"DJLast\" value=\"0\" style=\"background:#000000;\"  />\r\n    <input type=\"hidden\" id=\"DJSelect\" value=\"\" style=\"background:#000000;\"  />\r\n    <input type=\"hidden\" id=\"DJSymbol\" value=\"\" style=\"background:#000000;\"  />\r\n    <input type=\"hidden\" id=\"DJBubble\" value=\"\" style=\"background:#000000;\"  />\r\n    <input type=\"hidden\" id=\"DJSearch\" value=\"\" style=\"background:#000000;\"   />\r\n    <script>\r\n        djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '1');\r\n    </script>\r\n\r\n";
+
+/***/ }),
+/* 191 */
+/***/ (function(module, exports) {
+
+module.exports = "\r\n<style>\r\n\r\n    #logo {\r\n        position: absolute;\r\n        top: 0px;\r\n        left: 30;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 10px;\r\n    }\r\n    #starview {\r\n        position: absolute;\r\n        top: 0px;\r\n        right: 0;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 5px 10px 10px 10px;\r\n    }\r\n    #sig_menu {\r\n        font-family:'roboto';\r\n        position: absolute;\r\n        top: 13px;\r\n        left: 650;\r\n        color: #0490cd;\r\n        z-index: 1;padding: 10px;\r\n        font-size:15px;\r\n        background: rgba(0, 0, 0, 0.51);\r\n        cursor:pointer;\r\n    }\r\n\r\n\r\n</style>\r\n\r\n\r\n<div id=\"sig_menu\" onclick=\"js_menu_sig();\">\r\n    <input type=\"hidden\" id=\"hid_sig_menu\" value=\"0\" />\r\n    SIGNIFICANT COMPANIES\r\n    <div id=\"sig_menu_sub\" style=\"display:none;text-align:left;color:#bfbfbf;\" >Customers<br />Suppliers<br />Influencers<br />Active Players<br />Chokepoints</div>\r\n</div>\r\n<div id=\"logo\"><img src=\"img/logo.png\" style=\"height:50px;\"></div>\r\n<div id=\"starview\"><img src=\"include/images/Starview.png\" style=\"height:35px;\"></div>\r\n\r\n<!-- the info panel containing rudimentary help for the user -->\r\n<info-panel></info-panel>\r\n\r\n\r\n\r\n<!-- TODO refactor parts -->\r\n\r\n<div style=\"position: absolute;top:50;right:320;\">\r\n    <div style=\"padding-bottom:5px;\"><img src=\"img/zoomin.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n    <div><img src=\"img/zoomout.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n</div>\r\n\r\n<div class=\"bottomCompanyGradient\">\r\n    <span style=\"width:10%;text-align:right;padding-right:20px;font-size:14px;font-family:'benchnine' !important;\">Negative</span>\r\n    <span style=\"width:80%\" class=\"companyGradient\"></span>\r\n    <span  style=\"width:10%;text-align:left;padding-left:20px;font-size:14px;font-family:'benchnine' !important;\">Positive</span>\r\n\r\n</div>\r\n\r\n\r\n\r\n<company-info style=\"max-width:300px; width:300px\"></company-info>\r\n";
+
+/***/ }),
+/* 192 */
+/***/ (function(module, exports) {
+
+module.exports = "\r\n<style>\r\n\r\n    info-panel {\r\n        display: none;\r\n        width: 40%;\r\n        z-index: 9999;\r\n        position: absolute;\r\n        top: 30%;\r\n        left: 30%;\r\n    }\r\n\r\n</style>\r\n\r\n<pre>\r\n    keymap\r\n    ------------------------------------\r\n    h ... toggle this help menu\r\n\r\n    s ... recluster hovered cluster/leaf\r\n    t ... toogle select current cluster\r\n    z/click ... zoom to cluster\r\n    u TODO toggle cluster text nodes ?\r\n    e ... toggle edges\r\n    ------------------------------------\r\n</pre>\r\n";
+
+/***/ }),
+/* 193 */
+/***/ (function(module, exports) {
+
+module.exports = "\r\n<option value=\"allSinficant\">Significant</option>";
+
+/***/ }),
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -100978,7 +102257,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 
 /***/ }),
-/* 186 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -101026,7 +102305,7 @@ return $.extend( $.expr[ ":" ], {
 
 
 /***/ }),
-/* 187 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -101081,7 +102360,7 @@ return $.fn.extend( {
 
 
 /***/ }),
-/* 188 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
@@ -101105,7 +102384,7 @@ return $.ui.ie = !!/msie [\w.]+/.exec( navigator.userAgent.toLowerCase() );
 
 
 /***/ }),
-/* 189 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
@@ -101135,7 +102414,7 @@ return $.ui.safeBlur = function( element ) {
 
 
 /***/ }),
-/* 190 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -101189,7 +102468,7 @@ return $.fn.scrollParent = function( includeHidden ) {
 
 
 /***/ }),
-/* 191 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -101247,7 +102526,7 @@ return $.fn.extend( {
 
 
 /***/ }),
-/* 192 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -101274,10 +102553,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(194),
-			__webpack_require__(31),
-			__webpack_require__(61),
-			__webpack_require__(32),
+			__webpack_require__(203),
+			__webpack_require__(33),
+			__webpack_require__(62),
+			__webpack_require__(34),
 			__webpack_require__(3),
 			__webpack_require__(7)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
@@ -101938,7 +103217,7 @@ return $.ui.autocomplete;
 
 
 /***/ }),
-/* 193 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -101963,12 +103242,12 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(33),
-			__webpack_require__(186),
-			__webpack_require__(60),
-			__webpack_require__(32),
-			__webpack_require__(189),
-			__webpack_require__(190),
+			__webpack_require__(35),
+			__webpack_require__(195),
+			__webpack_require__(61),
+			__webpack_require__(34),
+			__webpack_require__(198),
+			__webpack_require__(199),
 			__webpack_require__(3),
 			__webpack_require__(7)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
@@ -103197,7 +104476,7 @@ return $.ui.draggable;
 
 
 /***/ }),
-/* 194 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -103224,10 +104503,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(31),
-			__webpack_require__(61),
-			__webpack_require__(32),
-			__webpack_require__(191),
+			__webpack_require__(33),
+			__webpack_require__(62),
+			__webpack_require__(34),
+			__webpack_require__(200),
 			__webpack_require__(3),
 			__webpack_require__(7)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
@@ -103879,7 +105158,7 @@ return $.widget( "ui.menu", {
 
 
 /***/ }),
-/* 195 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -104066,7 +105345,7 @@ return $.widget( "ui.progressbar", {
 
 
 /***/ }),
-/* 196 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -104093,9 +105372,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(33),
-			__webpack_require__(187),
-			__webpack_require__(60),
+			__webpack_require__(35),
+			__webpack_require__(196),
+			__webpack_require__(61),
 			__webpack_require__(3),
 			__webpack_require__(7)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
@@ -105276,7 +106555,7 @@ return $.ui.resizable;
 
 
 /***/ }),
-/* 197 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -105303,8 +106582,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
+			__webpack_require__(35),
 			__webpack_require__(33),
-			__webpack_require__(31),
 			__webpack_require__(3),
 			__webpack_require__(7)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
@@ -106037,7 +107316,7 @@ return $.widget( "ui.slider", $.ui.mouse, {
 
 
 /***/ }),
-/* 198 */
+/* 207 */
 /***/ (function(module, exports) {
 
 /**
@@ -106195,7 +107474,7 @@ function plural(ms, n, name) {
 
 
 /***/ }),
-/* 199 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -107778,7 +109057,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 200 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
@@ -107816,7 +109095,7 @@ module.exports = function parsejson(data) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 201 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(setImmediate, process) {var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -107948,10 +109227,10 @@ module.exports = function parsejson(data) {
 }));
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(210).setImmediate, __webpack_require__(13)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(220).setImmediate, __webpack_require__(14)))
 
 /***/ }),
-/* 202 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*! qwest 4.4.6 (https://github.com/pyrsmk/qwest) */
@@ -107959,8 +109238,8 @@ module.exports = function parsejson(data) {
 module.exports = function() {
 
 	var global = typeof window != 'undefined' ? window : self,
-		pinkyswear = __webpack_require__(201),
-		jparam = __webpack_require__(185),
+		pinkyswear = __webpack_require__(210),
+		jparam = __webpack_require__(194),
 		defaultOptions = {},
 		// Default response type for XDR in auto mode
 		defaultXdrResponseType = 'json',
@@ -108458,7 +109737,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 203 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -108648,10 +109927,10 @@ module.exports = function() {
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4), __webpack_require__(13)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4), __webpack_require__(14)))
 
 /***/ }),
-/* 204 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -108659,9 +109938,9 @@ module.exports = function() {
  * Module dependencies.
  */
 
-var url = __webpack_require__(205);
-var parser = __webpack_require__(34);
-var Manager = __webpack_require__(63);
+var url = __webpack_require__(214);
+var parser = __webpack_require__(36);
+var Manager = __webpack_require__(64);
 var debug = __webpack_require__(5)('socket.io-client');
 
 /**
@@ -108746,12 +110025,12 @@ exports.connect = lookup;
  * @api public
  */
 
-exports.Manager = __webpack_require__(63);
-exports.Socket = __webpack_require__(65);
+exports.Manager = __webpack_require__(64);
+exports.Socket = __webpack_require__(66);
 
 
 /***/ }),
-/* 205 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -108759,7 +110038,7 @@ exports.Socket = __webpack_require__(65);
  * Module dependencies.
  */
 
-var parseuri = __webpack_require__(62);
+var parseuri = __webpack_require__(63);
 var debug = __webpack_require__(5)('socket.io-client:url');
 
 /**
@@ -108833,7 +110112,7 @@ function url (uri, loc) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 206 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -108842,8 +110121,8 @@ function url (uri, loc) {
  * Module requirements
  */
 
-var isArray = __webpack_require__(207);
-var isBuf = __webpack_require__(66);
+var isArray = __webpack_require__(216);
+var isBuf = __webpack_require__(67);
 var toString = Object.prototype.toString;
 var withNativeBlob = typeof global.Blob === 'function' || toString.call(global.Blob) === '[object BlobConstructor]';
 var withNativeFile = typeof global.File === 'function' || toString.call(global.File) === '[object FileConstructor]';
@@ -108981,7 +110260,7 @@ exports.removeBlobs = function(data, callback) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 207 */
+/* 216 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -108992,13 +110271,13 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 208 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(112);
+var content = __webpack_require__(116);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -109006,7 +110285,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(14)(content, options);
+var update = __webpack_require__(13)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -109023,7 +110302,38 @@ if(false) {
 }
 
 /***/ }),
-/* 209 */
+/* 218 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(117);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(13)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../node_modules/css-loader/index.js!./sol.css", function() {
+			var newContent = require("!!../../../node_modules/css-loader/index.js!./sol.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 219 */
 /***/ (function(module, exports) {
 
 
@@ -109118,7 +110428,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 210 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = Function.prototype.apply;
@@ -109171,13 +110481,13 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(203);
+__webpack_require__(212);
 exports.setImmediate = setImmediate;
 exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
-/* 211 */
+/* 221 */
 /***/ (function(module, exports) {
 
 module.exports = toArray
@@ -109196,19 +110506,49 @@ function toArray(list, index) {
 
 
 /***/ }),
-/* 212 */
+/* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "12336f52147a1e2431ff9eed33bdd646.png";
 
 /***/ }),
-/* 213 */
+/* 223 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "0c9a5af6e30d58ba54d4cb310a44a02b.png";
+
+/***/ }),
+/* 224 */
+/***/ (function(module, exports) {
+
+module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAGPElEQVR42u2baWzkcxjHd1x1X+u+JdYVIo5IliXiZi0iRNxBQuLY4IXEEeUV8QovECIIFWl0vVhe7NlYRVBxlZCys5tpozvVdjpnZ6adv++Hp5vOse1c///8Z8YvedJjjv/v+T7P77l/ixb9v7xZnZ2dO/X29u4yMDCwWzAY3H14eHjPkZGRvcLh8N785O/BwcEO3tPd3b2zPhJodp4D/f39u46Oju4Tj8cPnZqaOiGTyZydzWYvEq2Ynp6+SXSb6HbRLaIb9P8r9J7z0un0aclk8pjJyckDQ6HQHgZIczCNBMfGxvZNpVLHwgxMzszMdIreEa0X/SwKif4WTYqiuVwuItom+lN/fy1aJXpZn10pUK4RIKfHYrFD0Bw0ybfSjkajB4nps7TxO2FA9LloVIxNOxWu3H8rpc//YYA8oe+9Gk3i2PhGK5C4pHOwGF+qDT6qja5Gmk6dl4Hxi+g1jo+AOBHb0UhbEUASUs8ztKGHtbE1orjj8hIQWdFWPet1HY9rE4nEkQjBc6nrwYezAW3kfVHY8XgJhCk99yfRM9K+MzG2nmgDhkhSP1lSf0yb+MZp4DI7MSEQPkAYskGLXTWS+GpcmR74Ipbc8cnCPoj6JJS7ORKugGDMLxXjb+G2HJ8t7SmDkcQQK4Y4qq4gzGH+bc6e49OFuyWWEAiP1A0EzryYP8ck71vm54JA7IBnIniqyTAS3GDwOPN+VPsFjsMPAuHW8fHx/apOXmRQjjBrP+Q02bLAaYO8wyUkWRUDgF/FtTTa1dUIAi7yTUWNSyqyBwQ6RHgEOTjaJgaANYRRnJiY2L9sAEhq9KGHGhHhuRQxbpI2LysrZKZgYS5vrdMii4xU9DyCXRAAMjvL6lxPbEo938UEql9acMG8WsCL5vNXeyEZrwAwELaJr2fntQX4TEn/LjfyeR8AgFtcT7ltR8FRIJVKHUclx6uz6SUAZguClOhKxgVEfToj51PGalUApAVj4u8l0uaSgQ8VWi9dXwMAwCVu0DE4pejB8Xj8MKq31RQwmwgA1m/S9CvziqqEiRQZKV176Z+9BsDsQEia/kCeHQAN3J/QWdcGAPwbFNG7KDSAF9O0aAMAoqJ3Cfi2P5T2k2V+Q60OgHhMEuglk8mjtz+UBoPOxc24iTYAIC0ANtJhKnSBd9CrawMAyAv6qHQVAkA/L1pPZrxYsuYVAyA+v8iLBWhxEQRRQWkDAKgXbsLt55W9BcCNtSRBTQQA0eBa5T3Hz/2SDnmBq/Ti5lYHgDqHqIeCb14dwBKhb9vACFIofZXpk7xQmCkMvfhxGwAwIgCetNmColrAK15WgRuRDM3WBIh+CyvBiykfUzlpYQBom33PcS/qE8yGw/TVWrgihAH8iAm0ogeTEdIM8dIONACAvzj/xD0lXQrzfHrD0151gT0uis6Q7UrLL9vhhJkdg+V686+tBoClwV0l1b+gMrSECSxi5lYBAOkT5MnI34uQ542sLC8gNd7aQgAkJNRPJNyTFhyY4HzwRn3gDXLnZgfApM/YzH3kPGXF11YguV4gDLgZGLkNgAU+zCN3WQGk7HGZAENG9NJqSZF9AEDamqIrKp4SIVRk8FkgfOhldFjPqA/Dp/0/HolEDqgq1TSDeB0VFAoJTcQ8Pj+MHcOe1TIuF7BpkXuIDfjiJmB+9tz3SIPPrXmQGvSwBzYtttnPIBjzMSo+RHzMONal6oJrpI7O5IiBkPGp2iP5NTBftsurAoSVesiPfjKMluZy5ntcYX4uCCRM1kbfaHd9co1UeavyBjF4nPm6qf18hpE5GyF9qc0PD7sdMS6g8t/h6rD2RVUel6uxHdTWzTj2cQvMiwTKQtuk3TDroohDgbMht8k4EqYNy7SZF0waYTfqCSbxmAU3nwr4+wlvq5oDdgMI2s0C4kJt7jnsg2iLNjtu4WiuyvNNNJewEbcBrsaQ0tLXM0Pnr9ulAEHYSYndDCV3B3tFv2Mr7LJkzK64ZKxRmbXf08ZsxBjewsi73Rl8SuBeTjHD8nnfX6sNoJpUmgXGqXSdxMSDdkzeQ4VFn4m+FLNfmQ3hVmkP9wJhGACp3nIDleZtM12fLakZAMJYCkcFSVJ5okMLYcHp1dGuwqCRjmPR/XpNtqXWP/U+O0dS+SElAAAAAElFTkSuQmCC"
+
+/***/ }),
+/* 225 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "bd6506a08374857822ebdf3cde4dfd8b.png";
+
+/***/ }),
+/* 226 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "15dc79379495a49c9d56f2e26085a935.png";
+
+/***/ }),
+/* 227 */
+/***/ (function(module, exports) {
+
+module.exports = "data:application/json;base64,W3sNCiAgICAidHlwZSI6ICJvcHRpb25ncm91cCIsDQogICAgImxhYmVsIjogIlRoZSBHcmlmZmlucyIsDQogICAgImNoaWxkcmVuIjogWw0KICAgICAgeyAidHlwZSI6ICJvcHRpb24iLCAidmFsdWUiOiAiUGV0ZXIiLCAgImxhYmVsIjogIlBldGVyIEdyaWZmaW4ifSwNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkxvaXMiLCAgICJsYWJlbCI6ICJMb2lzIEdyaWZmaW4ifSwNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkNocmlzIiwgICJsYWJlbCI6ICJDaHJpcyBHcmlmZmluIn0sDQogICAgICB7ICJ0eXBlIjogIm9wdGlvbiIsICJ2YWx1ZSI6ICJNZWciLCAgICAibGFiZWwiOiAiTWVnIEdyaWZmaW4ifSwNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIlN0ZXdpZSIsICJsYWJlbCI6ICJTdGV3aWUgR3JpZmZpbiJ9DQogICAgXQ0KICB9LA0KICB7DQogICAgInR5cGUiOiAib3B0aW9uZ3JvdXAiLA0KICAgICJsYWJlbCI6ICJQZXRlcidzIEZyaWVuZHMiLA0KICAgICJjaGlsZHJlbiI6IFsNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkNsZXZlbGFuZCIsICJsYWJlbCI6ICJDbGV2ZWxhbmQgQnJvd24ifSwNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkpvZSIsICAgICAgICJsYWJlbCI6ICJKb2UgU3dhbnNvbiJ9LA0KICAgICAgeyAidHlwZSI6ICJvcHRpb24iLCAidmFsdWUiOiAiUXVhZ21pcmUiLCAgImxhYmVsIjogIkdsZW5uIFF1YWdtaXJlIn0NCiAgICBdDQogIH0sDQogIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkV2aWwgTW9ua2V5IiwgImxhYmVsIjogIkV2aWwgTW9ua2V5In0sDQogIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkhlcmJlcnQiLCAgICAgImxhYmVsIjogIkpvaG4gSGVyYmVydCJ9DQpd"
+
+/***/ }),
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "3b30479746a603ca6eeb0fa522427a01.png";
 
 /***/ }),
-/* 214 */
+/* 229 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
