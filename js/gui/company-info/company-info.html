@@ -1,0 +1,65 @@
+
+    <div style="float:left;width:50%;">
+        <div style="margin-top:-18px;"><img src="./include/images/dow_jones.png" style="width:150px;"></div>
+    </div>
+    <div style="float:right;width:50%;text-align:center;">
+        <span style="font-size:12px;font-family:'robotoCondensed' !important;">CURRENT VIEW</span>
+        <br>
+        <div style="width:80%;background:rgba(24,23,23,0.21);padding:0.5em;margin-left:10px;">
+            <span class="graph-info-companys-visible" style="color:#ffc000;font-family:'roboto-bold' !important;">1750</span>
+            <br>
+            <span style="font-size:12px;color:#ffffff;">Companies</span>
+        </div>
+    </div>
+    <div class="control-search" style="margin-top:100px;text-align:left;font-size:11px;">
+        <searchable-option-list id="my-select" name="character" multiple="multiple"></searchable-option-list>
+    </div>
+    <div style="width:100%;text-align;center;">
+        <table style="width:90%;padding:10px;" align="center">
+            <tr>
+                <td style="width:60%;"><img src="include/images/Significant.png" style="height:30px;cursor:pointer;" /></td>
+                <td style="width:40%;"><img src="include/images/TopStories.png" style="height:30px;cursor:pointer;" /></td>
+            </tr>
+            <tr>
+                <td><img src="include/images/Marketmacro.png" style="height:30px;cursor:pointer;" /></td>
+                <td><img src="include/images/Earning.png" style="height:30px;cursor:pointer;margin-left:-4px;" /></td>
+            </tr>
+            <tr>
+                <td><img src="include/images/Management.png" style="height:30px;cursor:pointer;margin-left:5px;" /></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <input type="hidden" id="DJSearch" value="" style="background:#000000;"   />
+    <div class="control-news">
+        <div class="list-news" id="ls_djnews" >
+            <div class="main" >
+                <div style="height: 380px; padding:0;">
+                    <div id="djnews"></div>
+                </div>
+            </div>
+        </div>
+        <div class="load-more">
+            <div class="btn-loadmore" style="padding-top:3px;font-size:14px;font-family:'benchnine' !important;">< Previous <span class="page-control-active" id="s_1" onclick="djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '1');">1</span> <span class="page-control"  id="s_2" onclick="djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '2');">2</span> <span class="page-control" id="s_3" onclick="djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '3');">3</span> <span class="page-control" id="s_4" onclick="djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '4');">4</span> <span class="page-control" id="s_5" onclick="djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '5');">5</span> <span class="page-control" id="s_6" onclick="djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '6');">6</span>  ... <span class="page-control" id="s_20" onclick="djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '20');">20</span> Next >></div>
+        </div>
+        <div class="desc-news">
+            <div class="col positive" style="font-size:14px;font-family:'benchnine' !important;">Positive</div>
+            <div class="col negative" style="font-size:14px;font-family:'benchnine' !important;">Negative</div>
+            <div class="col strong" style="font-size:14px;font-family:'benchnine' !important;">Strong</div>
+            <div class="last active" style="font-size:14px;font-family:'benchnine' !important;">Active</div>
+        </div>
+    </div>
+</div>
+
+
+
+    <input type="hidden" id="DJTab" value="lsn_industry" style="background:#000000;" />
+    <input type="hidden" id="DJLast" value="0" style="background:#000000;"  />
+    <input type="hidden" id="DJSelect" value="" style="background:#000000;"  />
+    <input type="hidden" id="DJSymbol" value="" style="background:#000000;"  />
+    <input type="hidden" id="DJBubble" value="" style="background:#000000;"  />
+    <input type="hidden" id="DJSearch" value="" style="background:#000000;"   />
+    <script>
+        djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '1');
+    </script>
+
