@@ -1,0 +1,7 @@
+<?php
+	header( "Cache-Control: no-cache, must-revalidate" );
+	header( "Pragma: no-cache" );
+	header( "content-type: application/x-javascript; charset=UTF-8" );
+	echo"
+<div class=\"list_news_list\"><div class=\"topic\" >How Nvidia Invaded Intel&#39;s Turf -- Heard on the Street </div><div class=\"ticker\">INTC, NVDA</div><div class=\"datetime\">5/16</div><div style=\"clear:both;\"></div><div class=\"topic\" >Tech Today: Buffett Buys AAPL, Salesforce On Tap, AMD&#39;s Prospects -- Barron&#39;s Blog </div><div class=\"ticker\">INTC, AAPL, ..</div><div class=\"datetime\">5/16</div><div style=\"clear:both;\"></div><div class=\"topic\" >Trump, Nixon, and the Economy -- Barrons.com </div><div class=\"ticker\">INTC, AAPL</div><div class=\"datetime\">5/13</div><div style=\"clear:both;\"></div><div class=\"topic\" >Samsung, Intel <span class=\"a1b3\">Back</span> U.S. Regulator&#39;s <span class=\"a1b1\">Suit</span> <span class=\"a1b2\">Against</span> Qualcomm </div><div class=\"ticker\">INTC</div><div class=\"datetime\">5/13</div><div style=\"clear:both;\"></div><div class=\"topic\" >Intel&#39;s <span class=\"a1b2\">Dim</span> View of PCs Looking <span class=\"a1b3\">More</span> Likely, Says Cowen -- Barron&#39;s Blog </div><div class=\"ticker\">INTC</div><div class=\"datetime\">5/13</div><div style=\"clear:both;\"></div></div>"
+?>

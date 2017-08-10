@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 
 
-
 //declare var clusters: any;
 
 
 
 //import '../../../js/cluster/SampleClusterApplication.js';
-
+import '../../../build/bundle.js';
 
 
 @Component({
@@ -18,8 +17,6 @@ import { Component, OnInit } from '@angular/core';
 export class HelloComponent implements OnInit {
 
   constructor() {
-
-  //   var main = new clusters.SampleClusterApplication({});
 
 
   }
