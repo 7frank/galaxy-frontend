@@ -181,7 +181,7 @@ class ConvexVolume extends BoxVolume {
 
         function mTransfer(x) {
             //transfer function y= 0.5*sin(1.5*pi+x*pi*2)+0.5
-            return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2) + +0.5 + minOpacity
+            return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2)  +0.5 + minOpacity
 
 
         }
@@ -199,10 +199,10 @@ class ConvexVolume extends BoxVolume {
             this.mesh.geometry = this.createResolutionGeometry("Least",2);
        else
         if (l > 0.2 && l < 0.6)
-            this.mesh.geometry = this.createResolutionGeometry("Low",5);
+            this.mesh.geometry = this.createResolutionGeometry("Low",4);
         else
         if (l >= 0.6)
-            this.mesh.geometry =  this.createResolutionGeometry("Average",10);
+            this.mesh.geometry =  this.createResolutionGeometry("Average",6);
 
 
 
@@ -213,12 +213,12 @@ class ConvexVolume extends BoxVolume {
 
 
     setActive() {
-        this.maxOpacity = 0.6;
+        this.maxOpacity = 0.4;
     }
 
 
     setInactive() {
-        this.maxOpacity = 0.3;
+        this.maxOpacity = 0.2;
     }
 
 

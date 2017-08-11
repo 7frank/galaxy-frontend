@@ -186,11 +186,15 @@ createSkyDome()
 //-- count visible nodes
    //TODO check if this interferes with the nodeMixin and the default implementation
       var visibleNodes=[];
-        _.each(preparedData.nodes,function(node){
+    /*    _.each(preparedData.nodes,function(node){
             node.get3DRoot().onBeforeRender=function(){
                 visibleNodes.push(node);
             }
-        });
+        });*/
+
+
+
+
 //--
 
         parentEl3D.add(res);
@@ -203,15 +207,22 @@ createSkyDome()
 
 
 
+        var visibleLeafs=[];
+        _.each( res.getLeafs() ,function(leaf){
+            leaf.onBeforeRender=function(){
+                visibleLeafs.push(leaf);
+            }
+        });
+
+
+
+
+
 
         var that=this;
         var _____skipFrames=0;
 
         $(that).on("before-render",function(){
-
-
-
-           // res.update()
 
 
             if (that.isMaximised()) {
@@ -224,7 +235,9 @@ createSkyDome()
 
                 if (prev_vis)
                 {
-                GUI.updateFromVisibleNodes(visibleNodes);
+              let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
+                    GUI.updateFromVisibleNodes(vl);
+                   // GUI.updateFromVisibleNodes(visibleNodes);
                  //   that.mVisibleNodes=[].concat(visibleNodes)
                 //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
                   //  that.mRootCluster.updateRootTextNodes(visibleNodes);
@@ -232,6 +245,7 @@ createSkyDome()
                 }
             }
             visibleNodes=[] //reset count
+            visibleLeafs=[]
 
         });
 

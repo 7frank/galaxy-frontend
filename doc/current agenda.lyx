@@ -998,6 +998,10 @@ edges/hull will not update until at least one leaf? is expanded
 \end_layout
 
 \end_deeper
+\begin_layout Enumerate
+count companies for collapsed clusters..
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
 for country can we say show all for US companies
@@ -1087,7 +1091,7 @@ btw you can noticed the version I sent there is a pop up when you clicked
 \begin_layout Standard
 \begin_inset Graphics
 	filename assets/893916279039516672.png
-	lyxscale 60
+	lyxscale 80
 	scale 20
 
 \end_inset
@@ -1323,6 +1327,10 @@ and be accessable as a reference for a view
 \end_layout
 
 \end_deeper
+\begin_layout Standard
+..................
+\end_layout
+
 \begin_layout Subsection
 small Sprint 31.07.
  - 4.8.

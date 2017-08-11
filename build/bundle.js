@@ -73524,7 +73524,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             //TODO the cluster edges should partially be dependant on the size of the hull..
 
             let opa = vis
-            if (opa > 0.2) opa = 0.2;
+            if (opa > 0.05) opa = 0.05;
 
             this.mChildClustersEdgesMesh.material.opacity = opa//*this.mEdgeFadeInVal ;
             this.mChildClustersEdgesMesh.material.visible = vis > 0.02 && vis < 0.9;
@@ -74009,7 +74009,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             }
 
             else {
-                console.warn("src - hull should exist before calling this function...")
+       //         console.warn("src - hull should exist before calling this function...")
               //  continue;
                 src = edge.source.position.clone();
             }
@@ -81905,11 +81905,15 @@ createSkyDome()
 //-- count visible nodes
    //TODO check if this interferes with the nodeMixin and the default implementation
       var visibleNodes=[];
-        _.each(preparedData.nodes,function(node){
+    /*    _.each(preparedData.nodes,function(node){
             node.get3DRoot().onBeforeRender=function(){
                 visibleNodes.push(node);
             }
-        });
+        });*/
+
+
+
+
 //--
 
         parentEl3D.add(res);
@@ -81922,15 +81926,22 @@ createSkyDome()
 
 
 
+        var visibleLeafs=[];
+        _.each( res.getLeafs() ,function(leaf){
+            leaf.onBeforeRender=function(){
+                visibleLeafs.push(leaf);
+            }
+        });
+
+
+
+
+
 
         var that=this;
         var _____skipFrames=0;
 
         $(that).on("before-render",function(){
-
-
-
-           // res.update()
 
 
             if (that.isMaximised()) {
@@ -81943,7 +81954,9 @@ createSkyDome()
 
                 if (prev_vis)
                 {
-                __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(visibleNodes);
+              let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
+                    __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(vl);
+                   // GUI.updateFromVisibleNodes(visibleNodes);
                  //   that.mVisibleNodes=[].concat(visibleNodes)
                 //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
                   //  that.mRootCluster.updateRootTextNodes(visibleNodes);
@@ -81951,6 +81964,7 @@ createSkyDome()
                 }
             }
             visibleNodes=[] //reset count
+            visibleLeafs=[]
 
         });
 
@@ -86714,7 +86728,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
         function mTransfer(x) {
             //transfer function y= 0.5*sin(1.5*pi+x*pi*2)+0.5
-            return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2) + +0.5 + minOpacity
+            return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2)  +0.5 + minOpacity
 
 
         }
@@ -86732,10 +86746,10 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
             this.mesh.geometry = this.createResolutionGeometry("Least",2);
        else
         if (l > 0.2 && l < 0.6)
-            this.mesh.geometry = this.createResolutionGeometry("Low",5);
+            this.mesh.geometry = this.createResolutionGeometry("Low",4);
         else
         if (l >= 0.6)
-            this.mesh.geometry =  this.createResolutionGeometry("Average",10);
+            this.mesh.geometry =  this.createResolutionGeometry("Average",6);
 
 
 
@@ -86746,12 +86760,12 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
 
 
     setActive() {
-        this.maxOpacity = 0.6;
+        this.maxOpacity = 0.4;
     }
 
 
     setInactive() {
-        this.maxOpacity = 0.3;
+        this.maxOpacity = 0.2;
     }
 
 
@@ -87576,8 +87590,8 @@ class ModeSelect extends HTMLElement {
 
     connectedCallback() {
 
-        let _2d = $("<span>").html("2d").on("click", () => this.setMode("2d"));
-        let _3d = $("<span>").html("3d").on("click", () => this.setMode("3d"));
+        let _2d = $("<span>").html("2D").on("click", () => this.setMode("2d"));
+        let _3d = $("<span>").html("3D").on("click", () => this.setMode("3d"));
 
         $(this).append(_3d, _2d)
 
@@ -91095,9 +91109,9 @@ class SampleClusterApplication extends HTMLElement {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_10__distributions_BaseDistribution__["a" /* default */](45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](80000, 2); // countries get placed equally on a plane of size 15k X 15k
         let industryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](15000, 3);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](500, 3);//same goes for the nodes within each industry
+        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](1500, 3);//same goes for the nodes within each industry
 
         //the final configuration for rendering
         //it contains an additional options attribute per array entry
@@ -91128,8 +91142,8 @@ class SampleClusterApplication extends HTMLElement {
                     }
                 },
                 options: {
-                    minClusterSize: 15,
-                    hull: __WEBPACK_IMPORTED_MODULE_25__hull_ConvexVolume__["a" /* default */]
+                    minClusterSize: 15//,
+                    //hull: ConvexVolume
 
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }

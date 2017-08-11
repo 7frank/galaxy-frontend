@@ -430,9 +430,9 @@ export class SampleClusterApplication extends HTMLElement {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new BaseDistribution(45000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let countryDistribution = new ForceGraphDistribution(80000, 2); // countries get placed equally on a plane of size 15k X 15k
         let industryDistribution = new ForceGraphDistribution(15000, 3);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new ForceGraphDistribution(500, 3);//same goes for the nodes within each industry
+        let nodesWithinIndustryDistribution = new ForceGraphDistribution(1500, 3);//same goes for the nodes within each industry
 
         //the final configuration for rendering
         //it contains an additional options attribute per array entry
@@ -463,8 +463,8 @@ export class SampleClusterApplication extends HTMLElement {
                     }
                 },
                 options: {
-                    minClusterSize: 15,
-                    hull: ConvexVolume
+                    minClusterSize: 15//,
+                    //hull: ConvexVolume
 
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
