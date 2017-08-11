@@ -28,6 +28,11 @@ function MaterialFadeMixin(material){
 
                 this._opacity=newOpacity;
 
+
+               if (this instanceof THREE.ShaderMaterial)
+                   if (this.uniforms.opacity)
+                   this.uniforms.opacity.value=newOpacity
+
             }
 
         });
@@ -35,10 +40,19 @@ function MaterialFadeMixin(material){
 
 
       material.fadeTo= function( fade, mDuration,onComplete) {
+
+        if (fade==material.fade) mDuration=0; //TODO
+
          return material.animate({fade:fade},mDuration,onComplete)
         }
 
-        return material
+
+
+
+
+
+
+    return material
 
     }
 

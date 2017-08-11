@@ -346,7 +346,7 @@ export class SampleClusterApplication extends HTMLElement {
 
 
             //NOTE: target rendering
-            var speccs = this.getForceSpeccs();
+            var speccs = this.getForceSpeccs(); //get2DPlaneForceSpeccs
             let view2 = createView("new force-graph", speccs, true)
                 .loadDataSet(this.getDSByID(0));
             views.push(view2)
@@ -540,6 +540,8 @@ export class SampleClusterApplication extends HTMLElement {
                 events: {
                     click: function () {
                         this.toggleCollapse()
+
+                        console.log("toggled country?",this.name)
                     }
                 },
                 options: {
@@ -555,12 +557,17 @@ export class SampleClusterApplication extends HTMLElement {
                 events: {
                     click: function () {
                         this.toggleCollapse()
+                        console.log("toggled leaf",this.name)
                     }
                 },
                 options: {
                     hull: ConvexVolume,
                     expanded: function () {
-                        return false//this.name == "other"
+                    //   let par=this.getParentCluster()
+                     //   if (!par) return false
+                    //FIXME cluster is not attached when parentcluster gets called
+                        return /*par.getParentCluster().name == "United States" &&*/ this.name == "Healthcare"// false //true// return false//
+
                     }
                 }
             }

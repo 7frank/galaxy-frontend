@@ -67,7 +67,7 @@ export default function AnimationMixin(origObject) {
     origObject.animate = function (options = {}, mDuration = 400, onComplete) {
         var mTimeout;
         var that = this;
-
+        var stopped=false
 
         var flattened_to = flatten(options);
 
@@ -75,8 +75,8 @@ export default function AnimationMixin(origObject) {
         var flattened_from = {}
         keys.forEach(k => flattened_from[k] = getValue(that, k))
 
-        let tween = new TWEEN.Tween(flattened_from)
-            .to(flattened_to, mDuration)
+        var  tween = new TWEEN.Tween(flattened_from);
+        tween.to(flattened_to, mDuration)
             .onUpdate(function () {
 
                 //Move the values from the flattened and tweening object
@@ -88,14 +88,18 @@ export default function AnimationMixin(origObject) {
             .onComplete(function () {
 
                 cancelAnimationFrame(mTimeout);
+
+                stopped=true
                 if (typeof onComplete == "function")
-                    onComplete()
+                    onComplete.bind(origObject)()
             })
             .start();
 
         mTimeout = requestAnimationFrame(animate);
 
         function animate(time) {
+            if (stopped) return
+
             tween.update(time);
             mTimeout = requestAnimationFrame(animate);
 

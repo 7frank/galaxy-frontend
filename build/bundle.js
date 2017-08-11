@@ -73302,6 +73302,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         })
 
 
+
+
+
     }
 
 
@@ -73318,32 +73321,39 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
                this.mCollapsedClusterHull.position.copy(boundingSphere.center);
             }
 
+var that=this
+          setTimeout(function(){
 
-            this.trigger("hull-updated")
+              that.trigger("hull-updated")
+
+          },1000)
 
             return this.mCollapsedClusterHull
         }
 
-
-        let material = new THREE.MeshPhongMaterial({
-            color: 0xfaebd7, //antique-white
+//FIXME MeshPhongMaterial does not get light
+        let material = new THREE.MeshBasicMaterial({
+            color:0xFFFFFF, // 0xfaebd7, //antique-white
             wireframe: false,
-            transparent: true,
-            opacity: 0.8,
+            transparent: false,
+            opacity: 1.0,
             visible: true,
             polygonOffset: true,
-            polygonOffsetFactor: -4
+            polygonOffsetFactor: -4,
+            depthTest: false,
+            blending:THREE.NoBlending
         });
 
 
         let materialOtherBlue = new THREE.MeshBasicMaterial({
-            color: 0x6a5acd, //slate-blue
+            color:0x6a5acd, //slate-blue
             wireframe: false,
-            transparent: true,
-            opacity: 0.8,
+            transparent: false,
+           // opacity: 0.8,
             visible: true,
             polygonOffset: true,
-            polygonOffsetFactor: -4
+            polygonOffsetFactor: -4,
+            depthTest: false
         });
 
 
@@ -73408,6 +73418,27 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         this.mCollapsedGroup.add(this.mCollapsedClusterHull);
         //------
 
+var origScale;
+        this.on("mouseover",function(){
+
+            if (this.mExpanded==false)
+                if (this.mCollapsedClusterHull) {
+                    origScale=this.mCollapsedClusterHull.scale.clone()
+                    this.mCollapsedClusterHull.scale.multiplyScalar (1.05)
+
+                }
+
+        })
+        this.on("mouseout",function(){
+
+            if (this.mExpanded==false)
+                if (this.mCollapsedClusterHull)
+                    this.mCollapsedClusterHull.scale.copy(origScale)
+
+
+        })
+
+
 
 
         this.trigger("hull-updated") //the collapsed sphere hull functions the same as the actual hull in terms of this event
@@ -73451,10 +73482,12 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         //TODO have a container for children so deferred elements are hidden too
         // _.each(this.children,el => el.visible=false )
 
-
+var that=this
         //this.mExpandedGroup.visible = false;
-        this.animate({mCollapsedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
-        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
+        this.animate({mCollapsedGroup: {scale: {x: 0.3, y: 0.3, z: 0.3}}}, 200)
+        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200,function(){
+            this.mExpandedGroup.visible=false
+        })
 
 
        this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
@@ -73471,37 +73504,39 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
     expand() {
-        let start=Date.now()
-console.log("start----------------------------------")
+
         var that = this;
 
-
+        if (this.mCollapsedClusterHull)
         this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
 
-
-        console.log("--",Date.now()-start)
 
 
         if (!this.mClusterClusteringApplied) {
 
-            console.log("pre cluster",Date.now()-start)
+
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
 
-            console.log("post cluster",Date.now()-start)
+
             // primarily notify text overlay here
             $(this.getRoot().getView()).trigger("graph-changed");
-            console.log("post trigger",Date.now()-start)
+
         }
 
 
         //TODO handle if not created.. via callback/event
         //also currently if not already created the placeholder sphere gets removed again (restructure)
 
-        console.log("a1",Date.now()-start)
+
         this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
+
+
+
+        this.mExpandedGroup.visible=true
+
         this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
 
-        console.log("a2",Date.now()-start)
+
     }
 
 
@@ -73794,13 +73829,13 @@ console.log("start----------------------------------")
 
         //bind event options to cluster
         _.each(this.getEvents(), function (handler, eventName) {
-            that.on(eventName, _.debounce(function (e) {
+            that.on(eventName, function (e) {
 
                 e.stopPropagation();
 
                 handler.bind(this)()
 
-            }, 50));
+            });
 
         })
 
@@ -73852,6 +73887,8 @@ console.log("start----------------------------------")
 
             //clean up previous clusters if they exist
             BaseCluster3D.cleanUpClusters(prevClusters, this);
+
+            this.mClusterClusteringApplied = true;
 
             return false;
         }
@@ -74044,6 +74081,21 @@ console.log("start----------------------------------")
             }
 
 
+
+            //fix edge length for collapsed
+  /*       if (edge.source.mCollapsedClusterHull) {
+
+
+             let v1=dst.clone().sub(src);
+
+                let radius = edge.source.geometry.boundingBox.getBoundingSphere().radius;
+             v1.multiply(radius/ v1.length())
+
+             src.sub(v1)
+
+         }
+*/
+
             let src0 = edge.source.position || edge.source._el.position;
             let dst0 = edge.target.position || edge.target._el.position;
             src.add(src0);
@@ -74055,6 +74107,84 @@ console.log("start----------------------------------")
         }
 
 
+    }
+
+    createShaderLineMaterial(){
+
+
+        let fragmentShader=`
+        
+        	uniform vec3 color;
+			uniform float opacity;
+
+			//varying vec3 vColor;
+
+			void main() {
+
+            //if (gl_FragCoord.z > 0.001) discard;
+            if (gl_FragColor.w > 0.5) discard;
+
+
+				gl_FragColor = vec4(// vColor *
+                 color,opacity*gl_FragCoord.z );
+
+			}
+        
+        `
+
+
+     let    attributes = {
+
+            displacement: {	type: 'v3', value: [] },
+            customColor: {	type: 'c', value: [] }
+
+        };
+
+      let  uniforms = {
+
+            amplitude: { type: "f", value: 5.0 },
+            opacity:   { type: "f", value: 0.3 },
+            color:     { type: "c", value: new THREE.Color( 0xff0000 ) }
+
+        };
+
+        var lineMaterial = new THREE.ShaderMaterial( {
+
+            uniforms: 		uniforms,
+           // attributes:     attributes,
+          //  vertexShader:   vertexShader,
+            fragmentShader: fragmentShader,
+            blending: 		THREE.AdditiveBlending,
+            depthTest:		false,
+            transparent:	true
+
+        });
+
+        lineMaterial.linewidth = 1;
+
+
+
+        lineMaterial._color=lineMaterial.color;
+        Reflect.defineProperty(lineMaterial, "color", {
+            enumerable: false,
+            configurable: false,
+            get: function () {
+                return this._color
+            },
+            set: function (c) {
+
+                this._color=c;
+                this.uniforms.color.value=c
+
+            }
+        });
+
+
+
+
+
+
+        return lineMaterial
     }
 
 
@@ -74091,14 +74221,27 @@ console.log("start----------------------------------")
         };
 
         options = _.extend(defaults, options);
-
-        lineMaterial = new THREE.MeshBasicMaterial({
+        //MeshBasicMaterial
+       lineMaterial = new THREE.LineBasicMaterial({
             color: options.color,
             transparent: options.transparent,
             opacity: options.opacity,
             depthTest: true,
-            depthWrite: false
+            depthWrite: false//,
+            //depthFunc:THREE.NeverDepth
         });
+
+
+/*
+FIXME lines should not interfere with it's cluster (currently are overdrawing)
+lineMaterial=this.createShaderLineMaterial();
+        lineMaterial.color= new THREE.Color( options.color);
+        lineMaterial.opacity= options.opacity;
+
+        if (!window["lineMaterial"]) window["lineMaterial"]=[]
+        window["lineMaterial"].push(lineMaterial)
+
+*/
 
 
         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__utils_MaterialFadeMixin__["a" /* default */])(lineMaterial);
@@ -74397,6 +74540,14 @@ console.log("start----------------------------------")
      *
      * @param entry
      */
+
+  getParentCluster()
+    {
+        let expContainer=this.parent;
+        if (expContainer) return expContainer.parent
+
+
+    }
 
 
     createParticlePointCloud(entry) {
@@ -77642,6 +77793,9 @@ class ZoomUtil {
         var vec3Start = camera.position
 
 
+        var isComplete1=false
+        var isComplete2=false
+
       //  var vec3End = new THREE.Vector3();
       //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
         var vec3End=position
@@ -77662,17 +77816,23 @@ class ZoomUtil {
             .onComplete(function () {
                 onComplete.bind(this)();
                 cancelAnimationFrame(mTimeout)
+                isComplete1=true
             })
             .start();
 
         //lookat target
         var tween2 = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(cameraTargetPosition)
-            .to(vec3End, 400)
+            .to(vec3End, 400) .onComplete(function () {
+                isComplete2=true
+            })
             .start();
 
         requestAnimationFrame(animate);
 
         function animate(time) {
+
+            if (isComplete1 && isComplete2) return ;
+
             mTimeout = requestAnimationFrame(animate);
             tween.update(time);
             tween2.update(time);
@@ -83740,7 +83900,7 @@ function AnimationMixin(origObject) {
     origObject.animate = function (options = {}, mDuration = 400, onComplete) {
         var mTimeout;
         var that = this;
-
+        var stopped=false
 
         var flattened_to = flatten(options);
 
@@ -83748,8 +83908,8 @@ function AnimationMixin(origObject) {
         var flattened_from = {}
         keys.forEach(k => flattened_from[k] = getValue(that, k))
 
-        let tween = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(flattened_from)
-            .to(flattened_to, mDuration)
+        var  tween = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(flattened_from);
+        tween.to(flattened_to, mDuration)
             .onUpdate(function () {
 
                 //Move the values from the flattened and tweening object
@@ -83761,14 +83921,18 @@ function AnimationMixin(origObject) {
             .onComplete(function () {
 
                 cancelAnimationFrame(mTimeout);
+
+                stopped=true
                 if (typeof onComplete == "function")
-                    onComplete()
+                    onComplete.bind(origObject)()
             })
             .start();
 
         mTimeout = requestAnimationFrame(animate);
 
         function animate(time) {
+            if (stopped) return
+
             tween.update(time);
             mTimeout = requestAnimationFrame(animate);
 
@@ -83820,6 +83984,11 @@ function MaterialFadeMixin(material){
 
                 this._opacity=newOpacity;
 
+
+               if (this instanceof THREE.ShaderMaterial)
+                   if (this.uniforms.opacity)
+                   this.uniforms.opacity.value=newOpacity
+
             }
 
         });
@@ -83827,10 +83996,19 @@ function MaterialFadeMixin(material){
 
 
       material.fadeTo= function( fade, mDuration,onComplete) {
+
+        if (fade==material.fade) mDuration=0; //TODO
+
          return material.animate({fade:fade},mDuration,onComplete)
         }
 
-        return material
+
+
+
+
+
+
+    return material
 
     }
 
@@ -86662,11 +86840,16 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
         //reduce the vertice count before adding margin
         let geo0
         try{
+
+            //FIXME this currently fixes a bug when every point lies on the same plane
+            //instead a 2d shape should be used if the mode is 2d
+            if (vertices[0].z==0) vertices[0].z=1
+
             geo0 =this.mGeometryZero= new THREE.ConvexGeometry(vertices);
         }
         catch(e){
             geo0=this.mGeometryZero=this.createBoxGeometryFromBoundingBox(boundingBox);
-            console.warn(e)
+            console.warn(e,vertices)
 
         }
 
@@ -89354,6 +89537,9 @@ THREE.TrackballControls = function ( object, domElement ) {
     var _this = this;
     var STATE = { NONE: - 1, ROTATE: 0, ZOOM: 1, PAN: 2, TOUCH_ROTATE: 3, TOUCH_ZOOM_PAN: 4 };
 
+
+
+
     this.object = object;
     this.domElement = ( domElement !== undefined ) ? domElement : document;
 
@@ -91061,7 +91247,7 @@ class SampleClusterApplication extends HTMLElement {
 
 
             //NOTE: target rendering
-            var speccs = this.getForceSpeccs();
+            var speccs = this.getForceSpeccs(); //get2DPlaneForceSpeccs
             let view2 = createView("new force-graph", speccs, true)
                 .loadDataSet(this.getDSByID(0));
             views.push(view2)
@@ -91255,6 +91441,8 @@ class SampleClusterApplication extends HTMLElement {
                 events: {
                     click: function () {
                         this.toggleCollapse()
+
+                        console.log("toggled country?",this.name)
                     }
                 },
                 options: {
@@ -91270,12 +91458,17 @@ class SampleClusterApplication extends HTMLElement {
                 events: {
                     click: function () {
                         this.toggleCollapse()
+                        console.log("toggled leaf",this.name)
                     }
                 },
                 options: {
                     hull: __WEBPACK_IMPORTED_MODULE_25__hull_ConvexVolume__["a" /* default */],
                     expanded: function () {
-                        return false//this.name == "other"
+                    //   let par=this.getParentCluster()
+                     //   if (!par) return false
+                    //FIXME cluster is not attached when parentcluster gets called
+                        return /*par.getParentCluster().name == "United States" &&*/ this.name == "Healthcare"// false //true// return false//
+
                     }
                 }
             }

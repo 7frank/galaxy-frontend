@@ -1335,6 +1335,35 @@ and be accessable as a reference for a view
 ..................
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+important
+\end_layout
+
+\begin_layout Itemize
+fix edges to be always behind collapsed nodes
+\end_layout
+
+\begin_layout Itemize
+fix edges to match clusters if collapsed
+\end_layout
+
+\begin_layout Itemize
+collapse not working if too far away
+\end_layout
+
+\begin_layout Itemize
+also little unresponsive over time?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 small Sprint 31.07.
  - 4.8.

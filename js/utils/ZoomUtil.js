@@ -68,6 +68,9 @@ class ZoomUtil {
         var vec3Start = camera.position
 
 
+        var isComplete1=false
+        var isComplete2=false
+
       //  var vec3End = new THREE.Vector3();
       //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
         var vec3End=position
@@ -88,17 +91,23 @@ class ZoomUtil {
             .onComplete(function () {
                 onComplete.bind(this)();
                 cancelAnimationFrame(mTimeout)
+                isComplete1=true
             })
             .start();
 
         //lookat target
         var tween2 = new TWEEN.Tween(cameraTargetPosition)
-            .to(vec3End, 400)
+            .to(vec3End, 400) .onComplete(function () {
+                isComplete2=true
+            })
             .start();
 
         requestAnimationFrame(animate);
 
         function animate(time) {
+
+            if (isComplete1 && isComplete2) return ;
+
             mTimeout = requestAnimationFrame(animate);
             tween.update(time);
             tween2.update(time);

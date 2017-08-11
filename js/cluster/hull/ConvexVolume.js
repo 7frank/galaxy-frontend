@@ -79,11 +79,16 @@ class ConvexVolume extends BoxVolume {
         //reduce the vertice count before adding margin
         let geo0
         try{
+
+            //FIXME this currently fixes a bug when every point lies on the same plane
+            //instead a 2d shape should be used if the mode is 2d
+            if (vertices[0].z==0) vertices[0].z=1
+
             geo0 =this.mGeometryZero= new THREE.ConvexGeometry(vertices);
         }
         catch(e){
             geo0=this.mGeometryZero=this.createBoxGeometryFromBoundingBox(boundingBox);
-            console.warn(e)
+            console.warn(e,vertices)
 
         }
 

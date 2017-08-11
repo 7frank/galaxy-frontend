@@ -108,6 +108,9 @@ export default class BaseCluster3D extends BaseNode {
         })
 
 
+
+
+
     }
 
 
@@ -124,32 +127,39 @@ export default class BaseCluster3D extends BaseNode {
                this.mCollapsedClusterHull.position.copy(boundingSphere.center);
             }
 
+var that=this
+          setTimeout(function(){
 
-            this.trigger("hull-updated")
+              that.trigger("hull-updated")
+
+          },1000)
 
             return this.mCollapsedClusterHull
         }
 
-
-        let material = new THREE.MeshPhongMaterial({
-            color: 0xfaebd7, //antique-white
+//FIXME MeshPhongMaterial does not get light
+        let material = new THREE.MeshBasicMaterial({
+            color:0xFFFFFF, // 0xfaebd7, //antique-white
             wireframe: false,
-            transparent: true,
-            opacity: 0.8,
+            transparent: false,
+            opacity: 1.0,
             visible: true,
             polygonOffset: true,
-            polygonOffsetFactor: -4
+            polygonOffsetFactor: -4,
+            depthTest: false,
+            blending:THREE.NoBlending
         });
 
 
         let materialOtherBlue = new THREE.MeshBasicMaterial({
-            color: 0x6a5acd, //slate-blue
+            color:0x6a5acd, //slate-blue
             wireframe: false,
-            transparent: true,
-            opacity: 0.8,
+            transparent: false,
+           // opacity: 0.8,
             visible: true,
             polygonOffset: true,
-            polygonOffsetFactor: -4
+            polygonOffsetFactor: -4,
+            depthTest: false
         });
 
 
@@ -214,6 +224,27 @@ export default class BaseCluster3D extends BaseNode {
         this.mCollapsedGroup.add(this.mCollapsedClusterHull);
         //------
 
+var origScale;
+        this.on("mouseover",function(){
+
+            if (this.mExpanded==false)
+                if (this.mCollapsedClusterHull) {
+                    origScale=this.mCollapsedClusterHull.scale.clone()
+                    this.mCollapsedClusterHull.scale.multiplyScalar (1.05)
+
+                }
+
+        })
+        this.on("mouseout",function(){
+
+            if (this.mExpanded==false)
+                if (this.mCollapsedClusterHull)
+                    this.mCollapsedClusterHull.scale.copy(origScale)
+
+
+        })
+
+
 
 
         this.trigger("hull-updated") //the collapsed sphere hull functions the same as the actual hull in terms of this event
@@ -257,10 +288,12 @@ export default class BaseCluster3D extends BaseNode {
         //TODO have a container for children so deferred elements are hidden too
         // _.each(this.children,el => el.visible=false )
 
-
+var that=this
         //this.mExpandedGroup.visible = false;
-        this.animate({mCollapsedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
-        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
+        this.animate({mCollapsedGroup: {scale: {x: 0.3, y: 0.3, z: 0.3}}}, 200)
+        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200,function(){
+            this.mExpandedGroup.visible=false
+        })
 
 
        this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
@@ -277,37 +310,39 @@ export default class BaseCluster3D extends BaseNode {
 
 
     expand() {
-        let start=Date.now()
-console.log("start----------------------------------")
+
         var that = this;
 
-
+        if (this.mCollapsedClusterHull)
         this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
 
-
-        console.log("--",Date.now()-start)
 
 
         if (!this.mClusterClusteringApplied) {
 
-            console.log("pre cluster",Date.now()-start)
+
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
 
-            console.log("post cluster",Date.now()-start)
+
             // primarily notify text overlay here
             $(this.getRoot().getView()).trigger("graph-changed");
-            console.log("post trigger",Date.now()-start)
+
         }
 
 
         //TODO handle if not created.. via callback/event
         //also currently if not already created the placeholder sphere gets removed again (restructure)
 
-        console.log("a1",Date.now()-start)
+
         this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
+
+
+
+        this.mExpandedGroup.visible=true
+
         this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
 
-        console.log("a2",Date.now()-start)
+
     }
 
 
@@ -600,13 +635,13 @@ console.log("start----------------------------------")
 
         //bind event options to cluster
         _.each(this.getEvents(), function (handler, eventName) {
-            that.on(eventName, _.debounce(function (e) {
+            that.on(eventName, function (e) {
 
                 e.stopPropagation();
 
                 handler.bind(this)()
 
-            }, 50));
+            });
 
         })
 
@@ -658,6 +693,8 @@ console.log("start----------------------------------")
 
             //clean up previous clusters if they exist
             BaseCluster3D.cleanUpClusters(prevClusters, this);
+
+            this.mClusterClusteringApplied = true;
 
             return false;
         }
@@ -850,6 +887,21 @@ console.log("start----------------------------------")
             }
 
 
+
+            //fix edge length for collapsed
+  /*       if (edge.source.mCollapsedClusterHull) {
+
+
+             let v1=dst.clone().sub(src);
+
+                let radius = edge.source.geometry.boundingBox.getBoundingSphere().radius;
+             v1.multiply(radius/ v1.length())
+
+             src.sub(v1)
+
+         }
+*/
+
             let src0 = edge.source.position || edge.source._el.position;
             let dst0 = edge.target.position || edge.target._el.position;
             src.add(src0);
@@ -861,6 +913,84 @@ console.log("start----------------------------------")
         }
 
 
+    }
+
+    createShaderLineMaterial(){
+
+
+        let fragmentShader=`
+        
+        	uniform vec3 color;
+			uniform float opacity;
+
+			//varying vec3 vColor;
+
+			void main() {
+
+            //if (gl_FragCoord.z > 0.001) discard;
+            if (gl_FragColor.w > 0.5) discard;
+
+
+				gl_FragColor = vec4(// vColor *
+                 color,opacity*gl_FragCoord.z );
+
+			}
+        
+        `
+
+
+     let    attributes = {
+
+            displacement: {	type: 'v3', value: [] },
+            customColor: {	type: 'c', value: [] }
+
+        };
+
+      let  uniforms = {
+
+            amplitude: { type: "f", value: 5.0 },
+            opacity:   { type: "f", value: 0.3 },
+            color:     { type: "c", value: new THREE.Color( 0xff0000 ) }
+
+        };
+
+        var lineMaterial = new THREE.ShaderMaterial( {
+
+            uniforms: 		uniforms,
+           // attributes:     attributes,
+          //  vertexShader:   vertexShader,
+            fragmentShader: fragmentShader,
+            blending: 		THREE.AdditiveBlending,
+            depthTest:		false,
+            transparent:	true
+
+        });
+
+        lineMaterial.linewidth = 1;
+
+
+
+        lineMaterial._color=lineMaterial.color;
+        Reflect.defineProperty(lineMaterial, "color", {
+            enumerable: false,
+            configurable: false,
+            get: function () {
+                return this._color
+            },
+            set: function (c) {
+
+                this._color=c;
+                this.uniforms.color.value=c
+
+            }
+        });
+
+
+
+
+
+
+        return lineMaterial
     }
 
 
@@ -897,14 +1027,27 @@ console.log("start----------------------------------")
         };
 
         options = _.extend(defaults, options);
-
-        lineMaterial = new THREE.MeshBasicMaterial({
+        //MeshBasicMaterial
+       lineMaterial = new THREE.LineBasicMaterial({
             color: options.color,
             transparent: options.transparent,
             opacity: options.opacity,
             depthTest: true,
-            depthWrite: false
+            depthWrite: false//,
+            //depthFunc:THREE.NeverDepth
         });
+
+
+/*
+FIXME lines should not interfere with it's cluster (currently are overdrawing)
+lineMaterial=this.createShaderLineMaterial();
+        lineMaterial.color= new THREE.Color( options.color);
+        lineMaterial.opacity= options.opacity;
+
+        if (!window["lineMaterial"]) window["lineMaterial"]=[]
+        window["lineMaterial"].push(lineMaterial)
+
+*/
 
 
         MaterialFadeMixin(lineMaterial);
@@ -1203,6 +1346,14 @@ console.log("start----------------------------------")
      *
      * @param entry
      */
+
+  getParentCluster()
+    {
+        let expContainer=this.parent;
+        if (expContainer) return expContainer.parent
+
+
+    }
 
 
     createParticlePointCloud(entry) {
