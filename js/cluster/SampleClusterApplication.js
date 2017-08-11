@@ -627,6 +627,9 @@ export class SampleClusterApplication extends HTMLElement {
 
 
         rootCluster.applyClustering(speccs);
+        view.addCompanyCountListenersToCluster(rootCluster);
+
+
 
         //TODO
         $(view).trigger("graph-changed");
@@ -663,6 +666,8 @@ export class SampleClusterApplication extends HTMLElement {
 
 
         rootCluster.applyClustering(speccs);
+        view.addCompanyCountListenersToCluster(rootCluster);
+
 
         //TODO text is shown to early on update
         $(view).trigger("graph-changed");

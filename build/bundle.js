@@ -73454,10 +73454,10 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         //this.mExpandedGroup.visible = false;
         this.animate({mCollapsedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
-        this.animate({mExpandedGroup: {scale: {x: 0, y: 0, z: 0}}}, 200)
+        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
 
 
-        this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
+       this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
 
 
         //TODO togging the group will have strange effect
@@ -73471,28 +73471,37 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
 
     expand() {
-
+        let start=Date.now()
+console.log("start----------------------------------")
         var that = this;
 
 
         this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
 
+
+        console.log("--",Date.now()-start)
+
+
         if (!this.mClusterClusteringApplied) {
+
+            console.log("pre cluster",Date.now()-start)
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
 
+            console.log("post cluster",Date.now()-start)
             // primarily notify text overlay here
             $(this.getRoot().getView()).trigger("graph-changed");
-
+            console.log("post trigger",Date.now()-start)
         }
 
 
         //TODO handle if not created.. via callback/event
         //also currently if not already created the placeholder sphere gets removed again (restructure)
 
-        this.animate({mCollapsedGroup: {scale: {x: 0, y: 0, z: 0}}}, 200)
+        console.log("a1",Date.now()-start)
+        this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
         this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
 
-
+        console.log("a2",Date.now()-start)
     }
 
 
@@ -74029,7 +74038,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             }
 
             else {
-                console.warn("dst - hull should exist before calling this function...")
+            //    console.warn("dst - hull should exist before calling this function...")
               //  continue;
                 dst = edge.target.position.clone();
             }
@@ -81887,6 +81896,60 @@ createSkyDome()
 
 
 
+
+addCompanyCountListenersToCluster(rootCluster){
+
+
+
+    var visibleLeafs=[];
+    _.each( rootCluster.getLeafs() ,function(leaf){
+        leaf.onBeforeRender=function(){
+            visibleLeafs.push(leaf);
+        }
+    });
+
+
+
+
+
+
+    var that=this;
+    var _____skipFrames=0;
+
+    $(that).on("before-render",function(){
+
+
+        if (that.isMaximised()) {
+
+            _____skipFrames++;
+            //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
+          //  let prev_vis=preparedData.nodes[0]._bubble.material.visible;
+          //  let _vis= (_____skipFrames % 20) ? false : true;
+          //  preparedData.nodes[0]._bubble.material.visible = _vis;
+
+         //   if (prev_vis)
+         //   {
+                let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
+                __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(vl);
+                // GUI.updateFromVisibleNodes(visibleNodes);
+                //   that.mVisibleNodes=[].concat(visibleNodes)
+                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
+                //  that.mRootCluster.updateRootTextNodes(visibleNodes);
+
+           // }
+        }
+
+        visibleLeafs=[]
+
+    });
+
+
+
+}
+
+
+
+
     initClusterForView(rawGraphData,parentEl3D) {
 
 
@@ -81926,48 +81989,6 @@ createSkyDome()
 
 
 
-        var visibleLeafs=[];
-        _.each( res.getLeafs() ,function(leaf){
-            leaf.onBeforeRender=function(){
-                visibleLeafs.push(leaf);
-            }
-        });
-
-
-
-
-
-
-        var that=this;
-        var _____skipFrames=0;
-
-        $(that).on("before-render",function(){
-
-
-            if (that.isMaximised()) {
-
-                   _____skipFrames++;
-                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-             let prev_vis=preparedData.nodes[0]._bubble.material.visible;
-                let _vis= (_____skipFrames % 20) ? false : true;
-                preparedData.nodes[0]._bubble.material.visible = _vis;
-
-                if (prev_vis)
-                {
-              let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
-                    __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(vl);
-                   // GUI.updateFromVisibleNodes(visibleNodes);
-                 //   that.mVisibleNodes=[].concat(visibleNodes)
-                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
-                  //  that.mRootCluster.updateRootTextNodes(visibleNodes);
-
-                }
-            }
-            visibleNodes=[] //reset count
-            visibleLeafs=[]
-
-        });
-
 
         this.start();
 
@@ -81985,8 +82006,12 @@ createSkyDome()
         //this.createSkyDome();
 
 
-        if (!this.mRootCluster)
-        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
+        if (!this.mRootCluster) {
+            this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
+            this.addCompanyCountListenersToCluster(this.mRootCluster);
+
+        }
+
 
         $(this).trigger("loaded")
 
@@ -82003,7 +82028,18 @@ createSkyDome()
             console.log("data loaded");
             that.setData(mGraphData);
 
-            $(".cloudNodeColorSelect").val("group").trigger("change")
+
+            //TODO element does not jet exist.. create webcomponent for that
+            function triggerColorChange() {
+                let selectEl = $(".cloudNodeColorSelect")
+
+                if (selectEl.length==0) setTimeout(triggerColorChange,100)
+                else
+                selectEl.val("group").trigger("change")
+            }
+
+            triggerColorChange();
+
 
         });
 
@@ -91306,6 +91342,9 @@ class SampleClusterApplication extends HTMLElement {
 
 
         rootCluster.applyClustering(speccs);
+        view.addCompanyCountListenersToCluster(rootCluster);
+
+
 
         //TODO
         $(view).trigger("graph-changed");
@@ -91342,6 +91381,8 @@ class SampleClusterApplication extends HTMLElement {
 
 
         rootCluster.applyClustering(speccs);
+        view.addCompanyCountListenersToCluster(rootCluster);
+
 
         //TODO text is shown to early on update
         $(view).trigger("graph-changed");

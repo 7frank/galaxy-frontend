@@ -168,6 +168,60 @@ createSkyDome()
 
 
 
+
+addCompanyCountListenersToCluster(rootCluster){
+
+
+
+    var visibleLeafs=[];
+    _.each( rootCluster.getLeafs() ,function(leaf){
+        leaf.onBeforeRender=function(){
+            visibleLeafs.push(leaf);
+        }
+    });
+
+
+
+
+
+
+    var that=this;
+    var _____skipFrames=0;
+
+    $(that).on("before-render",function(){
+
+
+        if (that.isMaximised()) {
+
+            _____skipFrames++;
+            //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
+          //  let prev_vis=preparedData.nodes[0]._bubble.material.visible;
+          //  let _vis= (_____skipFrames % 20) ? false : true;
+          //  preparedData.nodes[0]._bubble.material.visible = _vis;
+
+         //   if (prev_vis)
+         //   {
+                let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
+                GUI.updateFromVisibleNodes(vl);
+                // GUI.updateFromVisibleNodes(visibleNodes);
+                //   that.mVisibleNodes=[].concat(visibleNodes)
+                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
+                //  that.mRootCluster.updateRootTextNodes(visibleNodes);
+
+           // }
+        }
+
+        visibleLeafs=[]
+
+    });
+
+
+
+}
+
+
+
+
     initClusterForView(rawGraphData,parentEl3D) {
 
 
@@ -207,48 +261,6 @@ createSkyDome()
 
 
 
-        var visibleLeafs=[];
-        _.each( res.getLeafs() ,function(leaf){
-            leaf.onBeforeRender=function(){
-                visibleLeafs.push(leaf);
-            }
-        });
-
-
-
-
-
-
-        var that=this;
-        var _____skipFrames=0;
-
-        $(that).on("before-render",function(){
-
-
-            if (that.isMaximised()) {
-
-                   _____skipFrames++;
-                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-             let prev_vis=preparedData.nodes[0]._bubble.material.visible;
-                let _vis= (_____skipFrames % 20) ? false : true;
-                preparedData.nodes[0]._bubble.material.visible = _vis;
-
-                if (prev_vis)
-                {
-              let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
-                    GUI.updateFromVisibleNodes(vl);
-                   // GUI.updateFromVisibleNodes(visibleNodes);
-                 //   that.mVisibleNodes=[].concat(visibleNodes)
-                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
-                  //  that.mRootCluster.updateRootTextNodes(visibleNodes);
-
-                }
-            }
-            visibleNodes=[] //reset count
-            visibleLeafs=[]
-
-        });
-
 
         this.start();
 
@@ -266,8 +278,12 @@ createSkyDome()
         //this.createSkyDome();
 
 
-        if (!this.mRootCluster)
-        this.mRootCluster= this.initClusterForView(mGraphData,this.mScene);
+        if (!this.mRootCluster) {
+            this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
+            this.addCompanyCountListenersToCluster(this.mRootCluster);
+
+        }
+
 
         $(this).trigger("loaded")
 
@@ -284,7 +300,18 @@ createSkyDome()
             console.log("data loaded");
             that.setData(mGraphData);
 
-            $(".cloudNodeColorSelect").val("group").trigger("change")
+
+            //TODO element does not jet exist.. create webcomponent for that
+            function triggerColorChange() {
+                let selectEl = $(".cloudNodeColorSelect")
+
+                if (selectEl.length==0) setTimeout(triggerColorChange,100)
+                else
+                selectEl.val("group").trigger("change")
+            }
+
+            triggerColorChange();
+
 
         });
 
