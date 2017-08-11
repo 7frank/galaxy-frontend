@@ -6,12 +6,18 @@
 
 import $ from 'jquery';
 import 'jquery-ui/themes/base/core.css';
+import 'jquery-ui/themes/base/autocomplete.css';
+import 'jquery-ui/themes/base/menu.css';
+
+
 //import 'jquery-ui/themes/base/theme.css';
-//import 'jquery-ui/themes/base/selectable.css';
+
+
 import 'jquery-ui/ui/core';
 import 'jquery-ui/ui/widgets/autocomplete';
 
-import {highlightNodeElements,unhighlightNodeElements} from "../cluster/refactor/f1"
+
+import {highlightNodeElements,unhighlightNodeElements,doOnClickNode} from "../cluster/refactor/f1"
 
 
 $(function () {
@@ -32,7 +38,7 @@ $(function () {
     var container = $("<div>")
         .addClass("searchbar-container")
         .append("<span><span class='searchbar-search'><span>")
-        .prependTo("body")
+        .appendTo("sample-cluster-application graph-hud")
 
     var searchbar = $("<input placeholder='Search company name, ticker, people, sector, country'>")
 
@@ -151,8 +157,8 @@ $(function () {
 
             //moveToNode(ui.item)
             doOnClickNode(ui.item, false, function () {
-                globalEnv.updateTextWhenCameraIsMoving2()
-
+            //    globalEnv.updateTextWhenCameraIsMoving2()
+                console.warn("TODO updateTextWhenCameraIsMoving2 ")
             }, false, false, false, true)
 
             //we set the selection to false but want the node to appear like it was selected

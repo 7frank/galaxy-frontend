@@ -106,7 +106,10 @@ export class SampleClusterApplication extends HTMLElement {
         this.addNewsListeners()
 
 
-        $(this).append("<mode-select></mode-select>")
+        $(this).append("<graph-hud></graph-hud>")
+
+
+
 
 
     }
@@ -597,6 +600,8 @@ export class SampleClusterApplication extends HTMLElement {
     setGraph2D() {
 
 
+
+
         /**
          * FIXME if a cluster has subclusters and no clustering is given use the existsing
          * likewise with distributions
@@ -609,6 +614,9 @@ export class SampleClusterApplication extends HTMLElement {
         let speccs = this.get2DPlaneForceSpeccs();
 
         let view = this.getCurrentView();
+
+
+        view.mScene.background = new THREE.Color( 0x555555 );
 
 
         let rootCluster = view.mRootCluster;
@@ -644,6 +652,9 @@ export class SampleClusterApplication extends HTMLElement {
 
         let speccs = this.getForceSpeccs();
         let view = this.getCurrentView();
+
+        view.mScene.background = new THREE.Color( 0x000000 );
+
         let rootCluster = view.mRootCluster;
 
         rootCluster.cleanUpLeafs();

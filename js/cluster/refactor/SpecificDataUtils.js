@@ -29,7 +29,7 @@ function getNextGradient() {
 
 }
 
-
+export
 function computeCompanyNodeColor(val = 0, attr = "sent") {
 
 
@@ -137,9 +137,16 @@ $(function () {
         */
 
 
-    }).appendTo("body")
+    }).appendTo( getBody())
 
 })
+
+
+function getBody()
+{
+   return $("sample-cluster-application graph-hud")
+
+}
 
 
 export var GUI = {
@@ -157,7 +164,7 @@ export var GUI = {
             return section
         }
 
-        var acc = $('<div class="ui-accordion ui-widget ui-helper-reset">')
+        var acc = $('<div class=" ui-accordion ui-widget ui-helper-reset my-accordion">')
         for (let item of items) {
             item = _.extend({caption: "missing 'caption'", content: "missing 'content'"}, item)
             var sec = createSection(item.caption, item.content, item.id)
@@ -186,7 +193,7 @@ export var GUI = {
                 "margin-top": "0.5em",
             })
 
-        slider.appendTo("body")
+        slider.appendTo( getBody())
 
 
     },
@@ -201,7 +208,7 @@ export var GUI = {
             id: "companyCountry",
             content: "United States, 80%<br>Japan, 10%<br>Germany, 4%"
         }])
-        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo("body")
+        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo( getBody())
         GUI.$el = a
 
 
@@ -215,7 +222,7 @@ export var GUI = {
         GUI.$info = $("<div>")
 
 
-        GUI.$info.hide().appendTo("body")
+        GUI.$info.hide().appendTo( getBody())
 
         GUI.$info.addClass("graph-node-info").draggable().resizable()
 

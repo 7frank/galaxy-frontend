@@ -18,8 +18,8 @@
 
  */
 
-import doZoomToMesh from "./f2-zoom"
 import {addArrow,removeArrow} from "./f5-arrows"
+import ZoomUtil from "../../utils/ZoomUtil";
 
 
 
@@ -221,9 +221,29 @@ function extendElement(elements, attrName, options, env) {
 
 }
 
+//TODO
+function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
+
+
+    let view = $(".view-3d[hasFocus]")[0];
+
+    if (!view) view = $(".view-3d.view-3d-maximised").get(0);
+
+    if (!view) console.warn("no view focused to be able to zoom");
+
+
+    let camera = view.mCamera;
+    let controls = view.mControls;
+
+    ZoomUtil.moveToMesh(mesh,camera,controls,minMaxDistance,onEnd)
+
+
+}
+
 
 //helper to being able to handle click events
 //isSelected == false will prevent the actual node selection and only will trigger the zoom+highlight parts
+export
 function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelected = true, doHighlighNeighbours = true, doHighlighEdges = true, doZoomIn = true) {
 
     if (previousNodeClicked.indexOf(currNodeClicked) < 0)

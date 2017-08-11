@@ -10,8 +10,8 @@ class ModeSelect extends HTMLElement {
 
     connectedCallback() {
 
-        let _2d = $("<span>").html("2d").on("click", () => this.setMode("2d"));
-        let _3d = $("<span>").html("3d").on("click", () => this.setMode("3d"));
+        let _2d = $("<span>").html("2D").on("click", () => this.setMode("2d"));
+        let _3d = $("<span>").html("3D").on("click", () => this.setMode("3d"));
 
         $(this).append(_3d, _2d)
 
@@ -26,7 +26,8 @@ class ModeSelect extends HTMLElement {
 
             var prevMode;
             */
-
+        //...
+        let main=$("sample-cluster-application").get(0)
 
         //   if (prevMode == mode) return;//  prevMode = mode;
         //  if (!cameraModi) cameraModi = new CameraObserverMode(env);
@@ -49,7 +50,10 @@ class ModeSelect extends HTMLElement {
             main.setGraph2D();
             //  cameraModi.setMode("2d")
             //Graph.numDimensions(2);
-            $("body").addClass("inverted");
+
+           // $("body").addClass("inverted");
+
+
             //  env.controls.target.set(new THREE.Vector3(0,0,0));
             //main.getCurrentView().mRootCluster.zoomToCluster()
             //  doZoomToPos(new THREE.Vector3(0, 0, 3000));

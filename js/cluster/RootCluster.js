@@ -9,7 +9,7 @@ import Cluster3DExtended from "./Cluster3DExtended"
 import ClusterTextOverlay from "./text/ClusterTextOverlay"
 
 
-import {computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
+import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
 
 
 /**

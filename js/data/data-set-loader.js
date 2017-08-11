@@ -12,6 +12,7 @@ import "../gui/searchbar"
 
 import qwest from "qwest"
 import Papa from "papaparse"
+import {gpuInfo} from "../deprecated/gpu-info";
 
 
 

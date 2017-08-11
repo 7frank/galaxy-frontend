@@ -71591,7 +71591,7 @@ module.exports = g;
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(176);
+exports = module.exports = __webpack_require__(178);
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -71775,10 +71775,451 @@ function localstorage() {
 
 /***/ }),
 /* 6 */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+var stylesInDom = {};
+
+var	memoize = function (fn) {
+	var memo;
+
+	return function () {
+		if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+		return memo;
+	};
+};
+
+var isOldIE = memoize(function () {
+	// Test for IE <= 9 as proposed by Browserhacks
+	// @see http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
+	// Tests for existence of standard globals is to allow style-loader
+	// to operate correctly into non-standard environments
+	// @see https://github.com/webpack-contrib/style-loader/issues/177
+	return window && document && document.all && !window.atob;
+});
+
+var getElement = (function (fn) {
+	var memo = {};
+
+	return function(selector) {
+		if (typeof memo[selector] === "undefined") {
+			memo[selector] = fn.call(this, selector);
+		}
+
+		return memo[selector]
+	};
+})(function (target) {
+	return document.querySelector(target)
+});
+
+var singleton = null;
+var	singletonCounter = 0;
+var	stylesInsertedAtTop = [];
+
+var	fixUrls = __webpack_require__(223);
+
+module.exports = function(list, options) {
+	if (typeof DEBUG !== "undefined" && DEBUG) {
+		if (typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+	}
+
+	options = options || {};
+
+	options.attrs = typeof options.attrs === "object" ? options.attrs : {};
+
+	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+	// tags it will allow on a page
+	if (!options.singleton) options.singleton = isOldIE();
+
+	// By default, add <style> tags to the <head> element
+	if (!options.insertInto) options.insertInto = "head";
+
+	// By default, add <style> tags to the bottom of the target
+	if (!options.insertAt) options.insertAt = "bottom";
+
+	var styles = listToStyles(list, options);
+
+	addStylesToDom(styles, options);
+
+	return function update (newList) {
+		var mayRemove = [];
+
+		for (var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+
+			domStyle.refs--;
+			mayRemove.push(domStyle);
+		}
+
+		if(newList) {
+			var newStyles = listToStyles(newList, options);
+			addStylesToDom(newStyles, options);
+		}
+
+		for (var i = 0; i < mayRemove.length; i++) {
+			var domStyle = mayRemove[i];
+
+			if(domStyle.refs === 0) {
+				for (var j = 0; j < domStyle.parts.length; j++) domStyle.parts[j]();
+
+				delete stylesInDom[domStyle.id];
+			}
+		}
+	};
+};
+
+function addStylesToDom (styles, options) {
+	for (var i = 0; i < styles.length; i++) {
+		var item = styles[i];
+		var domStyle = stylesInDom[item.id];
+
+		if(domStyle) {
+			domStyle.refs++;
+
+			for(var j = 0; j < domStyle.parts.length; j++) {
+				domStyle.parts[j](item.parts[j]);
+			}
+
+			for(; j < item.parts.length; j++) {
+				domStyle.parts.push(addStyle(item.parts[j], options));
+			}
+		} else {
+			var parts = [];
+
+			for(var j = 0; j < item.parts.length; j++) {
+				parts.push(addStyle(item.parts[j], options));
+			}
+
+			stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+		}
+	}
+}
+
+function listToStyles (list, options) {
+	var styles = [];
+	var newStyles = {};
+
+	for (var i = 0; i < list.length; i++) {
+		var item = list[i];
+		var id = options.base ? item[0] + options.base : item[0];
+		var css = item[1];
+		var media = item[2];
+		var sourceMap = item[3];
+		var part = {css: css, media: media, sourceMap: sourceMap};
+
+		if(!newStyles[id]) styles.push(newStyles[id] = {id: id, parts: [part]});
+		else newStyles[id].parts.push(part);
+	}
+
+	return styles;
+}
+
+function insertStyleElement (options, style) {
+	var target = getElement(options.insertInto)
+
+	if (!target) {
+		throw new Error("Couldn't find a style target. This probably means that the value for the 'insertInto' parameter is invalid.");
+	}
+
+	var lastStyleElementInsertedAtTop = stylesInsertedAtTop[stylesInsertedAtTop.length - 1];
+
+	if (options.insertAt === "top") {
+		if (!lastStyleElementInsertedAtTop) {
+			target.insertBefore(style, target.firstChild);
+		} else if (lastStyleElementInsertedAtTop.nextSibling) {
+			target.insertBefore(style, lastStyleElementInsertedAtTop.nextSibling);
+		} else {
+			target.appendChild(style);
+		}
+		stylesInsertedAtTop.push(style);
+	} else if (options.insertAt === "bottom") {
+		target.appendChild(style);
+	} else {
+		throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+	}
+}
+
+function removeStyleElement (style) {
+	if (style.parentNode === null) return false;
+	style.parentNode.removeChild(style);
+
+	var idx = stylesInsertedAtTop.indexOf(style);
+	if(idx >= 0) {
+		stylesInsertedAtTop.splice(idx, 1);
+	}
+}
+
+function createStyleElement (options) {
+	var style = document.createElement("style");
+
+	options.attrs.type = "text/css";
+
+	addAttrs(style, options.attrs);
+	insertStyleElement(options, style);
+
+	return style;
+}
+
+function createLinkElement (options) {
+	var link = document.createElement("link");
+
+	options.attrs.type = "text/css";
+	options.attrs.rel = "stylesheet";
+
+	addAttrs(link, options.attrs);
+	insertStyleElement(options, link);
+
+	return link;
+}
+
+function addAttrs (el, attrs) {
+	Object.keys(attrs).forEach(function (key) {
+		el.setAttribute(key, attrs[key]);
+	});
+}
+
+function addStyle (obj, options) {
+	var style, update, remove, result;
+
+	// If a transform function was defined, run it on the css
+	if (options.transform && obj.css) {
+	    result = options.transform(obj.css);
+
+	    if (result) {
+	    	// If transform returns a value, use that instead of the original css.
+	    	// This allows running runtime transformations on the css.
+	    	obj.css = result;
+	    } else {
+	    	// If the transform function returns a falsy value, don't add this css.
+	    	// This allows conditional loading of css
+	    	return function() {
+	    		// noop
+	    	};
+	    }
+	}
+
+	if (options.singleton) {
+		var styleIndex = singletonCounter++;
+
+		style = singleton || (singleton = createStyleElement(options));
+
+		update = applyToSingletonTag.bind(null, style, styleIndex, false);
+		remove = applyToSingletonTag.bind(null, style, styleIndex, true);
+
+	} else if (
+		obj.sourceMap &&
+		typeof URL === "function" &&
+		typeof URL.createObjectURL === "function" &&
+		typeof URL.revokeObjectURL === "function" &&
+		typeof Blob === "function" &&
+		typeof btoa === "function"
+	) {
+		style = createLinkElement(options);
+		update = updateLink.bind(null, style, options);
+		remove = function () {
+			removeStyleElement(style);
+
+			if(style.href) URL.revokeObjectURL(style.href);
+		};
+	} else {
+		style = createStyleElement(options);
+		update = applyToTag.bind(null, style);
+		remove = function () {
+			removeStyleElement(style);
+		};
+	}
+
+	update(obj);
+
+	return function updateStyle (newObj) {
+		if (newObj) {
+			if (
+				newObj.css === obj.css &&
+				newObj.media === obj.media &&
+				newObj.sourceMap === obj.sourceMap
+			) {
+				return;
+			}
+
+			update(obj = newObj);
+		} else {
+			remove();
+		}
+	};
+}
+
+var replaceText = (function () {
+	var textStore = [];
+
+	return function (index, replacement) {
+		textStore[index] = replacement;
+
+		return textStore.filter(Boolean).join('\n');
+	};
+})();
+
+function applyToSingletonTag (style, index, remove, obj) {
+	var css = remove ? "" : obj.css;
+
+	if (style.styleSheet) {
+		style.styleSheet.cssText = replaceText(index, css);
+	} else {
+		var cssNode = document.createTextNode(css);
+		var childNodes = style.childNodes;
+
+		if (childNodes[index]) style.removeChild(childNodes[index]);
+
+		if (childNodes.length) {
+			style.insertBefore(cssNode, childNodes[index]);
+		} else {
+			style.appendChild(cssNode);
+		}
+	}
+}
+
+function applyToTag (style, obj) {
+	var css = obj.css;
+	var media = obj.media;
+
+	if(media) {
+		style.setAttribute("media", media)
+	}
+
+	if(style.styleSheet) {
+		style.styleSheet.cssText = css;
+	} else {
+		while(style.firstChild) {
+			style.removeChild(style.firstChild);
+		}
+
+		style.appendChild(document.createTextNode(css));
+	}
+}
+
+function updateLink (link, options, obj) {
+	var css = obj.css;
+	var sourceMap = obj.sourceMap;
+
+	/*
+		If convertToAbsoluteUrls isn't defined, but sourcemaps are enabled
+		and there is no publicPath defined then lets turn convertToAbsoluteUrls
+		on by default.  Otherwise default to the convertToAbsoluteUrls option
+		directly
+	*/
+	var autoFixUrls = options.convertToAbsoluteUrls === undefined && sourceMap;
+
+	if (options.convertToAbsoluteUrls || autoFixUrls) {
+		css = fixUrls(css);
+	}
+
+	if (sourceMap) {
+		// http://stackoverflow.com/a/26603875
+		css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+	}
+
+	var blob = new Blob([css], { type: "text/css" });
+
+	var oldSrc = link.href;
+
+	link.href = URL.createObjectURL(blob);
+
+	if(oldSrc) URL.revokeObjectURL(oldSrc);
+}
+
+
+/***/ }),
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(8);
+/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_Tween__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__lib_Tween__);
 /**
@@ -72000,7 +72441,7 @@ class BaseDistribution {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -72742,13 +73183,13 @@ return $.widget;
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(38);
+/* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(88);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_MaterialFadeMixin__ = __webpack_require__(50);
 /**
@@ -74198,7 +74639,7 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0)))
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -74367,89 +74808,7 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ }),
-/* 10 */
-/***/ (function(module, exports) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-// css base code, injected by the css-loader
-module.exports = function(useSourceMap) {
-	var list = [];
-
-	// return the list of modules as css string
-	list.toString = function toString() {
-		return this.map(function (item) {
-			var content = cssWithMappingToString(item, useSourceMap);
-			if(item[2]) {
-				return "@media " + item[2] + "{" + content + "}";
-			} else {
-				return content;
-			}
-		}).join("");
-	};
-
-	// import a list of modules into the list
-	list.i = function(modules, mediaQuery) {
-		if(typeof modules === "string")
-			modules = [[null, modules, ""]];
-		var alreadyImportedModules = {};
-		for(var i = 0; i < this.length; i++) {
-			var id = this[i][0];
-			if(typeof id === "number")
-				alreadyImportedModules[id] = true;
-		}
-		for(i = 0; i < modules.length; i++) {
-			var item = modules[i];
-			// skip already imported module
-			// this implementation is not 100% perfect for weird media query combinations
-			//  when a module is imported multiple times with different media queries.
-			//  I hope this will never occur (Hey this way we have smaller bundles)
-			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-				if(mediaQuery && !item[2]) {
-					item[2] = mediaQuery;
-				} else if(mediaQuery) {
-					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-				}
-				list.push(item);
-			}
-		}
-	};
-	return list;
-};
-
-function cssWithMappingToString(item, useSourceMap) {
-	var content = item[1] || '';
-	var cssMapping = item[3];
-	if (!cssMapping) {
-		return content;
-	}
-
-	if (useSourceMap && typeof btoa === 'function') {
-		var sourceMapping = toComment(cssMapping);
-		var sourceURLs = cssMapping.sources.map(function (source) {
-			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
-		});
-
-		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
-	}
-
-	return [content].join('\n');
-}
-
-// Adapted from convert-source-map (MIT)
-function toComment(sourceMap) {
-	// eslint-disable-next-line no-undef
-	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
-	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
-
-	return '/*# ' + data + ' */';
-}
-
-
-/***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -74461,18 +74820,18 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies.
  */
 
-var keys = __webpack_require__(183);
+var keys = __webpack_require__(185);
 var hasBinary = __webpack_require__(59);
 var sliceBuffer = __webpack_require__(109);
 var after = __webpack_require__(108);
-var utf8 = __webpack_require__(184);
+var utf8 = __webpack_require__(186);
 
 var base64encoder;
 if (global && global.ArrayBuffer) {
@@ -75072,365 +75431,6 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-
-var stylesInDom = {};
-
-var	memoize = function (fn) {
-	var memo;
-
-	return function () {
-		if (typeof memo === "undefined") memo = fn.apply(this, arguments);
-		return memo;
-	};
-};
-
-var isOldIE = memoize(function () {
-	// Test for IE <= 9 as proposed by Browserhacks
-	// @see http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
-	// Tests for existence of standard globals is to allow style-loader
-	// to operate correctly into non-standard environments
-	// @see https://github.com/webpack-contrib/style-loader/issues/177
-	return window && document && document.all && !window.atob;
-});
-
-var getElement = (function (fn) {
-	var memo = {};
-
-	return function(selector) {
-		if (typeof memo[selector] === "undefined") {
-			memo[selector] = fn.call(this, selector);
-		}
-
-		return memo[selector]
-	};
-})(function (target) {
-	return document.querySelector(target)
-});
-
-var singleton = null;
-var	singletonCounter = 0;
-var	stylesInsertedAtTop = [];
-
-var	fixUrls = __webpack_require__(219);
-
-module.exports = function(list, options) {
-	if (typeof DEBUG !== "undefined" && DEBUG) {
-		if (typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
-	}
-
-	options = options || {};
-
-	options.attrs = typeof options.attrs === "object" ? options.attrs : {};
-
-	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-	// tags it will allow on a page
-	if (!options.singleton) options.singleton = isOldIE();
-
-	// By default, add <style> tags to the <head> element
-	if (!options.insertInto) options.insertInto = "head";
-
-	// By default, add <style> tags to the bottom of the target
-	if (!options.insertAt) options.insertAt = "bottom";
-
-	var styles = listToStyles(list, options);
-
-	addStylesToDom(styles, options);
-
-	return function update (newList) {
-		var mayRemove = [];
-
-		for (var i = 0; i < styles.length; i++) {
-			var item = styles[i];
-			var domStyle = stylesInDom[item.id];
-
-			domStyle.refs--;
-			mayRemove.push(domStyle);
-		}
-
-		if(newList) {
-			var newStyles = listToStyles(newList, options);
-			addStylesToDom(newStyles, options);
-		}
-
-		for (var i = 0; i < mayRemove.length; i++) {
-			var domStyle = mayRemove[i];
-
-			if(domStyle.refs === 0) {
-				for (var j = 0; j < domStyle.parts.length; j++) domStyle.parts[j]();
-
-				delete stylesInDom[domStyle.id];
-			}
-		}
-	};
-};
-
-function addStylesToDom (styles, options) {
-	for (var i = 0; i < styles.length; i++) {
-		var item = styles[i];
-		var domStyle = stylesInDom[item.id];
-
-		if(domStyle) {
-			domStyle.refs++;
-
-			for(var j = 0; j < domStyle.parts.length; j++) {
-				domStyle.parts[j](item.parts[j]);
-			}
-
-			for(; j < item.parts.length; j++) {
-				domStyle.parts.push(addStyle(item.parts[j], options));
-			}
-		} else {
-			var parts = [];
-
-			for(var j = 0; j < item.parts.length; j++) {
-				parts.push(addStyle(item.parts[j], options));
-			}
-
-			stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
-		}
-	}
-}
-
-function listToStyles (list, options) {
-	var styles = [];
-	var newStyles = {};
-
-	for (var i = 0; i < list.length; i++) {
-		var item = list[i];
-		var id = options.base ? item[0] + options.base : item[0];
-		var css = item[1];
-		var media = item[2];
-		var sourceMap = item[3];
-		var part = {css: css, media: media, sourceMap: sourceMap};
-
-		if(!newStyles[id]) styles.push(newStyles[id] = {id: id, parts: [part]});
-		else newStyles[id].parts.push(part);
-	}
-
-	return styles;
-}
-
-function insertStyleElement (options, style) {
-	var target = getElement(options.insertInto)
-
-	if (!target) {
-		throw new Error("Couldn't find a style target. This probably means that the value for the 'insertInto' parameter is invalid.");
-	}
-
-	var lastStyleElementInsertedAtTop = stylesInsertedAtTop[stylesInsertedAtTop.length - 1];
-
-	if (options.insertAt === "top") {
-		if (!lastStyleElementInsertedAtTop) {
-			target.insertBefore(style, target.firstChild);
-		} else if (lastStyleElementInsertedAtTop.nextSibling) {
-			target.insertBefore(style, lastStyleElementInsertedAtTop.nextSibling);
-		} else {
-			target.appendChild(style);
-		}
-		stylesInsertedAtTop.push(style);
-	} else if (options.insertAt === "bottom") {
-		target.appendChild(style);
-	} else {
-		throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
-	}
-}
-
-function removeStyleElement (style) {
-	if (style.parentNode === null) return false;
-	style.parentNode.removeChild(style);
-
-	var idx = stylesInsertedAtTop.indexOf(style);
-	if(idx >= 0) {
-		stylesInsertedAtTop.splice(idx, 1);
-	}
-}
-
-function createStyleElement (options) {
-	var style = document.createElement("style");
-
-	options.attrs.type = "text/css";
-
-	addAttrs(style, options.attrs);
-	insertStyleElement(options, style);
-
-	return style;
-}
-
-function createLinkElement (options) {
-	var link = document.createElement("link");
-
-	options.attrs.type = "text/css";
-	options.attrs.rel = "stylesheet";
-
-	addAttrs(link, options.attrs);
-	insertStyleElement(options, link);
-
-	return link;
-}
-
-function addAttrs (el, attrs) {
-	Object.keys(attrs).forEach(function (key) {
-		el.setAttribute(key, attrs[key]);
-	});
-}
-
-function addStyle (obj, options) {
-	var style, update, remove, result;
-
-	// If a transform function was defined, run it on the css
-	if (options.transform && obj.css) {
-	    result = options.transform(obj.css);
-
-	    if (result) {
-	    	// If transform returns a value, use that instead of the original css.
-	    	// This allows running runtime transformations on the css.
-	    	obj.css = result;
-	    } else {
-	    	// If the transform function returns a falsy value, don't add this css.
-	    	// This allows conditional loading of css
-	    	return function() {
-	    		// noop
-	    	};
-	    }
-	}
-
-	if (options.singleton) {
-		var styleIndex = singletonCounter++;
-
-		style = singleton || (singleton = createStyleElement(options));
-
-		update = applyToSingletonTag.bind(null, style, styleIndex, false);
-		remove = applyToSingletonTag.bind(null, style, styleIndex, true);
-
-	} else if (
-		obj.sourceMap &&
-		typeof URL === "function" &&
-		typeof URL.createObjectURL === "function" &&
-		typeof URL.revokeObjectURL === "function" &&
-		typeof Blob === "function" &&
-		typeof btoa === "function"
-	) {
-		style = createLinkElement(options);
-		update = updateLink.bind(null, style, options);
-		remove = function () {
-			removeStyleElement(style);
-
-			if(style.href) URL.revokeObjectURL(style.href);
-		};
-	} else {
-		style = createStyleElement(options);
-		update = applyToTag.bind(null, style);
-		remove = function () {
-			removeStyleElement(style);
-		};
-	}
-
-	update(obj);
-
-	return function updateStyle (newObj) {
-		if (newObj) {
-			if (
-				newObj.css === obj.css &&
-				newObj.media === obj.media &&
-				newObj.sourceMap === obj.sourceMap
-			) {
-				return;
-			}
-
-			update(obj = newObj);
-		} else {
-			remove();
-		}
-	};
-}
-
-var replaceText = (function () {
-	var textStore = [];
-
-	return function (index, replacement) {
-		textStore[index] = replacement;
-
-		return textStore.filter(Boolean).join('\n');
-	};
-})();
-
-function applyToSingletonTag (style, index, remove, obj) {
-	var css = remove ? "" : obj.css;
-
-	if (style.styleSheet) {
-		style.styleSheet.cssText = replaceText(index, css);
-	} else {
-		var cssNode = document.createTextNode(css);
-		var childNodes = style.childNodes;
-
-		if (childNodes[index]) style.removeChild(childNodes[index]);
-
-		if (childNodes.length) {
-			style.insertBefore(cssNode, childNodes[index]);
-		} else {
-			style.appendChild(cssNode);
-		}
-	}
-}
-
-function applyToTag (style, obj) {
-	var css = obj.css;
-	var media = obj.media;
-
-	if(media) {
-		style.setAttribute("media", media)
-	}
-
-	if(style.styleSheet) {
-		style.styleSheet.cssText = css;
-	} else {
-		while(style.firstChild) {
-			style.removeChild(style.firstChild);
-		}
-
-		style.appendChild(document.createTextNode(css));
-	}
-}
-
-function updateLink (link, options, obj) {
-	var css = obj.css;
-	var sourceMap = obj.sourceMap;
-
-	/*
-		If convertToAbsoluteUrls isn't defined, but sourcemaps are enabled
-		and there is no publicPath defined then lets turn convertToAbsoluteUrls
-		on by default.  Otherwise default to the convertToAbsoluteUrls option
-		directly
-	*/
-	var autoFixUrls = options.convertToAbsoluteUrls === undefined && sourceMap;
-
-	if (options.convertToAbsoluteUrls || autoFixUrls) {
-		css = fixUrls(css);
-	}
-
-	if (sourceMap) {
-		// http://stackoverflow.com/a/26603875
-		css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
-	}
-
-	var blob = new Blob([css], { type: "text/css" });
-
-	var oldSrc = link.href;
-
-	link.href = URL.createObjectURL(blob);
-
-	if(oldSrc) URL.revokeObjectURL(oldSrc);
-}
-
 
 /***/ }),
 /* 14 */
@@ -76746,10 +76746,10 @@ exports.decode = function(qs){
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(44);
+/* WEBPACK VAR INJECTION */(function(_, THREE, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(21);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -77113,19 +77113,20 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_) {/* harmony export (immutable) */ __webpack_exports__["b"] = computeGroupNodeColorHelper;
+/* WEBPACK VAR INJECTION */(function(_) {/* harmony export (immutable) */ __webpack_exports__["c"] = computeCompanyNodeColor;
+/* harmony export (immutable) */ __webpack_exports__["b"] = computeGroupNodeColorHelper;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return GUI; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__ = __webpack_require__(206);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__ = __webpack_require__(208);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__ = __webpack_require__(202);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__ = __webpack_require__(204);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__ = __webpack_require__(205);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__ = __webpack_require__(207);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__);
 
 
@@ -77157,7 +77158,6 @@ function getNextGradient() {
     return currentGradientColors = availGradients[next]
 
 }
-
 
 function computeCompanyNodeColor(val = 0, attr = "sent") {
 
@@ -77266,9 +77266,16 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
         */
 
 
-    }).appendTo("body")
+    }).appendTo( getBody())
 
 })
+
+
+function getBody()
+{
+   return __WEBPACK_IMPORTED_MODULE_0_jquery___default()("sample-cluster-application graph-hud")
+
+}
 
 
 var GUI = {
@@ -77286,7 +77293,7 @@ var GUI = {
             return section
         }
 
-        var acc = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<div class="ui-accordion ui-widget ui-helper-reset">')
+        var acc = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<div class=" ui-accordion ui-widget ui-helper-reset my-accordion">')
         for (let item of items) {
             item = _.extend({caption: "missing 'caption'", content: "missing 'content'"}, item)
             var sec = createSection(item.caption, item.content, item.id)
@@ -77315,7 +77322,7 @@ var GUI = {
                 "margin-top": "0.5em",
             })
 
-        slider.appendTo("body")
+        slider.appendTo( getBody())
 
 
     },
@@ -77330,7 +77337,7 @@ var GUI = {
             id: "companyCountry",
             content: "United States, 80%<br>Japan, 10%<br>Germany, 4%"
         }])
-        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo("body")
+        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo( getBody())
         GUI.$el = a
 
 
@@ -77344,7 +77351,7 @@ var GUI = {
         GUI.$info = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>")
 
 
-        GUI.$info.hide().appendTo("body")
+        GUI.$info.hide().appendTo( getBody())
 
         GUI.$info.addClass("graph-node-info").draggable().resizable()
 
@@ -77552,6 +77559,126 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
 /***/ }),
 /* 21 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__lib_Tween__);
+/**
+ * Created by Frank on 08.06.2017.
+ */
+//import TWEEN from "@tweenjs/tween.js"
+
+
+
+//TODO refactor existing samples
+class ZoomUtil {
+
+
+    static moveToCluster(cluster, options) {
+
+        let defaults = {
+            complete: function () {
+            },
+            distance: 400
+        }
+        options = _.extend(defaults, options)
+
+        let view = cluster.getView()
+
+        if (!view) {
+            console.warn("cluster must be bound to instanceof View3D")
+            return
+        }
+
+
+        let mesh = cluster;
+        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, options.distance, options.complete);
+
+
+    }
+
+
+
+    static
+    moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
+    }) {
+
+         var position = new THREE.Vector3();
+        position.setFromMatrixPosition(mesh.matrixWorld);
+
+       ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
+
+
+    }
+
+
+    /**
+     *
+     *
+     * @param position must be in world coordiantes
+     * @param camera
+     * @param controls
+     * @param cameraDistanceToMesh
+     * @param onComplete
+     */
+    static
+    moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
+    }) {
+
+
+        var mTimeout;
+
+        var cameraTargetPosition = controls.target
+        var vec3Start = camera.position
+
+
+      //  var vec3End = new THREE.Vector3();
+      //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
+        var vec3End=position
+
+        //we want to have a fixed distance to a node when selecting
+        var distVec = vec3End.clone().sub(vec3Start)
+        var len = distVec.length()
+        distVec.normalize()
+        distVec.multiplyScalar(cameraDistanceToMesh) //apply fixed distance to the target
+
+        var alteredVecEnd = vec3End.clone().sub(distVec)
+
+
+        //change distance to target
+        var tween = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(vec3Start)
+            .to(alteredVecEnd, 400)
+            //.onUpdate(function () {})
+            .onComplete(function () {
+                onComplete.bind(this)();
+                cancelAnimationFrame(mTimeout)
+            })
+            .start();
+
+        //lookat target
+        var tween2 = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(cameraTargetPosition)
+            .to(vec3End, 400)
+            .start();
+
+        requestAnimationFrame(animate);
+
+        function animate(time) {
+            mTimeout = requestAnimationFrame(animate);
+            tween.update(time);
+            tween2.update(time);
+        }
+
+
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
+
+/***/ }),
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
@@ -78602,11 +78729,11 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(8);
+/* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(10);
 /**
  * Created by Frank on 02.06.2017.
  */
@@ -78846,7 +78973,7 @@ class EdgeUtil {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -78858,7 +78985,7 @@ class EdgeUtil {
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -78941,7 +79068,7 @@ function map(object, f) {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -78951,7 +79078,7 @@ function map(object, f) {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -78967,7 +79094,7 @@ function map(object, f) {
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -78981,7 +79108,7 @@ function map(object, f) {
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -79102,15 +79229,15 @@ function sleep(time) {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var parser = __webpack_require__(12);
-var Emitter = __webpack_require__(9);
+var parser = __webpack_require__(13);
+var Emitter = __webpack_require__(11);
 
 /**
  * Module exports.
@@ -79265,12 +79392,12 @@ Transport.prototype.onClose = function () {
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {// browser shim for xmlhttprequest module
 
-var hasCORS = __webpack_require__(186);
+var hasCORS = __webpack_require__(188);
 
 module.exports = function (opts) {
   var xdomain = opts.xdomain;
@@ -79309,7 +79436,7 @@ module.exports = function (opts) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports) {
 
 var Point = function(x,y,z){
@@ -79437,7 +79564,7 @@ module.exports = Point;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// This file is deprecated in 1.12.0 to be removed in 1.13
@@ -79468,7 +79595,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// This file i
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -79522,7 +79649,7 @@ return $.ui.keyCode = {
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
@@ -79571,7 +79698,7 @@ return $.ui.safeActiveElement = function( document ) {
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -79594,9 +79721,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(197),
+			__webpack_require__(199),
 			__webpack_require__(3),
-			__webpack_require__(7)
+			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -79806,7 +79933,7 @@ return $.widget( "ui.mouse", {
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -79815,9 +79942,9 @@ return $.widget( "ui.mouse", {
  */
 
 var debug = __webpack_require__(5)('socket.io-parser');
-var Emitter = __webpack_require__(9);
+var Emitter = __webpack_require__(11);
 var hasBin = __webpack_require__(59);
-var binary = __webpack_require__(215);
+var binary = __webpack_require__(217);
 var isBuf = __webpack_require__(67);
 
 /**
@@ -80212,13 +80339,13 @@ function error() {
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(118);
+var content = __webpack_require__(119);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -80226,7 +80353,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(13)(content, options);
+var update = __webpack_require__(7)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -80243,7 +80370,7 @@ if(false) {
 }
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -80550,7 +80677,7 @@ class ClusterLeafElement extends THREE.Mesh {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -80841,12 +80968,12 @@ class GraphData
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(98);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(97);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_SpecificDataUtils__ = __webpack_require__(20);
 /**
  * Created by Frank on 06.06.2017.
@@ -80959,7 +81086,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
             if (val=="group")
                 nodes.forEach(function(v){ v.color=helper.getColor(v.group)});
             else
-                nodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
+                nodes.forEach(function(v){ v.color=__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__refactor_SpecificDataUtils__["c" /* computeCompanyNodeColor */])(parseInt(v.sent),val)   } )
 
             _.each(that.getLeafs(),function(leaf){
 
@@ -81049,13 +81176,13 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(0)))
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(d3_force, _, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__ = __webpack_require__(8);
+/* WEBPACK VAR INJECTION */(function(d3_force, _, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__ = __webpack_require__(10);
 /**
  * Created by Frank on 02.06.2017.
  */
@@ -81246,10 +81373,10 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
 
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(138), __webpack_require__(2), __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(140), __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -81318,19 +81445,23 @@ class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* defaul
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_, Mousetrap) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete__ = __webpack_require__(201);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_autocomplete__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__cluster_refactor_f1__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_themes_base_autocomplete_css__ = __webpack_require__(221);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_themes_base_autocomplete_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_themes_base_autocomplete_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_themes_base_menu_css__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_themes_base_menu_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_themes_base_menu_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_core__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_core__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_autocomplete__ = __webpack_require__(203);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_autocomplete__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__ = __webpack_require__(47);
 /**
  * the searchbar for the graph
  *
@@ -81339,8 +81470,14 @@ class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* defaul
 
 
 
+
+
+
+
 //import 'jquery-ui/themes/base/theme.css';
-//import 'jquery-ui/themes/base/selectable.css';
+
+
+
 
 
 
@@ -81365,7 +81502,7 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
     var container = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>")
         .addClass("searchbar-container")
         .append("<span><span class='searchbar-search'><span>")
-        .prependTo("body")
+        .appendTo("sample-cluster-application graph-hud")
 
     var searchbar = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<input placeholder='Search company name, ticker, people, sector, country'>")
 
@@ -81379,7 +81516,7 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
         if (filterResult)
             filterResult.forEach(function (v) {
-                __WEBPACK_IMPORTED_MODULE_4__cluster_refactor_f1__["b" /* unhighlightNodeElements */].apply(v)
+                __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["b" /* unhighlightNodeElements */].apply(v)
             })
 
         filterResult = getNodes().filter(function (v) {
@@ -81421,7 +81558,7 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
     //
     function moveToNode(node) {
-        doOnClickNode(node, false, function () {
+        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["c" /* doOnClickNode */])(node, false, function () {
 
             setTimeout(function () {
 
@@ -81442,12 +81579,12 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
 
         lastResults.forEach(function (v) {
-            __WEBPACK_IMPORTED_MODULE_4__cluster_refactor_f1__["b" /* unhighlightNodeElements */].apply(v)
+            __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["b" /* unhighlightNodeElements */].apply(v)
         })
 
 
         mResult.forEach(function (v) {
-            __WEBPACK_IMPORTED_MODULE_4__cluster_refactor_f1__["c" /* highlightNodeElements */].apply(v, [true, false])
+            __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["d" /* highlightNodeElements */].apply(v, [true, false])
         })
 
         lastResults = mResult
@@ -81483,9 +81620,9 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
             searchbar.val(ui.item.name)
 
             //moveToNode(ui.item)
-            doOnClickNode(ui.item, false, function () {
-                globalEnv.updateTextWhenCameraIsMoving2()
-
+            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["c" /* doOnClickNode */])(ui.item, false, function () {
+            //    globalEnv.updateTextWhenCameraIsMoving2()
+                console.warn("TODO updateTextWhenCameraIsMoving2 ")
             }, false, false, false, true)
 
             //we set the selection to false but want the node to appear like it was selected
@@ -81565,139 +81702,19 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
 })
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(21)))
-
-/***/ }),
-/* 44 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__lib_Tween__);
-/**
- * Created by Frank on 08.06.2017.
- */
-//import TWEEN from "@tweenjs/tween.js"
-
-
-
-//TODO refactor existing samples
-class ZoomUtil {
-
-
-    static moveToCluster(cluster, options) {
-
-        let defaults = {
-            complete: function () {
-            },
-            distance: 400
-        }
-        options = _.extend(defaults, options)
-
-        let view = cluster.getView()
-
-        if (!view) {
-            console.warn("cluster must be bound to instanceof View3D")
-            return
-        }
-
-
-        let mesh = cluster;
-        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, options.distance, options.complete);
-
-
-    }
-
-
-
-    static
-    moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
-    }) {
-
-         var position = new THREE.Vector3();
-        position.setFromMatrixPosition(mesh.matrixWorld);
-
-       ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
-
-
-    }
-
-
-    /**
-     *
-     *
-     * @param position must be in world coordiantes
-     * @param camera
-     * @param controls
-     * @param cameraDistanceToMesh
-     * @param onComplete
-     */
-    static
-    moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
-    }) {
-
-
-        var mTimeout;
-
-        var cameraTargetPosition = controls.target
-        var vec3Start = camera.position
-
-
-      //  var vec3End = new THREE.Vector3();
-      //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
-        var vec3End=position
-
-        //we want to have a fixed distance to a node when selecting
-        var distVec = vec3End.clone().sub(vec3Start)
-        var len = distVec.length()
-        distVec.normalize()
-        distVec.multiplyScalar(cameraDistanceToMesh) //apply fixed distance to the target
-
-        var alteredVecEnd = vec3End.clone().sub(distVec)
-
-
-        //change distance to target
-        var tween = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(vec3Start)
-            .to(alteredVecEnd, 400)
-            //.onUpdate(function () {})
-            .onComplete(function () {
-                onComplete.bind(this)();
-                cancelAnimationFrame(mTimeout)
-            })
-            .start();
-
-        //lookat target
-        var tween2 = new __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default.a.Tween(cameraTargetPosition)
-            .to(vec3End, 400)
-            .start();
-
-        requestAnimationFrame(animate);
-
-        function animate(time) {
-            mTimeout = requestAnimationFrame(animate);
-            tween.update(time);
-            tween2.update(time);
-        }
-
-
-    }
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ZoomUtil;
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(22)))
 
 /***/ }),
 /* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(106);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png__ = __webpack_require__(228);
+/* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(106);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png__ = __webpack_require__(232);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__coordinates_png__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js__ = __webpack_require__(188);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js__ = __webpack_require__(190);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_hexasphere_js__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__gui_GraphHUD__ = __webpack_require__(101);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__ = __webpack_require__(20);
@@ -81744,9 +81761,6 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
     connectedCallback(){
         super.connectedCallback();
-
-
-        $(this).append("<graph-hud>")
 
     }
 
@@ -82022,7 +82036,7 @@ createSkyDome()
 
 customElements.define("graph-view-3d", GraphView3D);
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(1), __webpack_require__(2)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0)))
 
 /***/ }),
 /* 46 */
@@ -82033,13 +82047,13 @@ customElements.define("graph-view-3d", GraphView3D);
 /* harmony export (immutable) */ __webpack_exports__["b"] = basicSpriteSize;
 /* harmony export (immutable) */ __webpack_exports__["a"] = basicElementExtend;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_TextureAnimator__ = __webpack_require__(93);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_dot9_png__ = __webpack_require__(224);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_dot9_png__ = __webpack_require__(228);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_dot9_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__img_dot9_png__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_dot7_png__ = __webpack_require__(223);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_dot7_png__ = __webpack_require__(227);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_dot7_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__img_dot7_png__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_ring2_png__ = __webpack_require__(225);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_ring2_png__ = __webpack_require__(229);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_ring2_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__img_ring2_png__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__img_ring3_png__ = __webpack_require__(226);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__img_ring3_png__ = __webpack_require__(230);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__img_ring3_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__img_ring3_png__);
 /**
  * Created by Frank on 16.07.2017.
@@ -82586,11 +82600,12 @@ function basicElementExtend(env, obj, _mesh) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* harmony export (immutable) */ __webpack_exports__["c"] = highlightNodeElements;
+/* WEBPACK VAR INJECTION */(function($) {/* harmony export (immutable) */ __webpack_exports__["d"] = highlightNodeElements;
 /* harmony export (immutable) */ __webpack_exports__["b"] = unhighlightNodeElements;
+/* harmony export (immutable) */ __webpack_exports__["c"] = doOnClickNode;
 /* harmony export (immutable) */ __webpack_exports__["a"] = extendGraphElements;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f2_zoom__ = __webpack_require__(96);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__f5_arrows__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f5_arrows__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(21);
 /**
  * Created by Frank on 16.07.2017.
  */
@@ -82664,7 +82679,7 @@ function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) 
             var color = edge.source == this ? 0x99ff99 : 0xffb2b2;
 
 
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["a" /* addArrow */])(edge, color)
+            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["a" /* addArrow */])(edge, color)
         }
 }
 
@@ -82685,7 +82700,7 @@ function unhighlightNodeElements() {
         edge.hideHighlight()
 
     for (let edge of this.edges)
-        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["b" /* removeArrow */])(edge)
+        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["b" /* removeArrow */])(edge)
 
 }
 
@@ -82697,7 +82712,7 @@ function highlightEdgeElements() {
 
 
     var color = 0x666666;
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["a" /* addArrow */])(this, color)
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["a" /* addArrow */])(this, color)
 
 
 }
@@ -82708,7 +82723,7 @@ function unhighlightEdgeElements() {
     this.source.hideHighlight();
     this.target.hideHighlight();
 
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__f5_arrows__["b" /* removeArrow */])(this)
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["b" /* removeArrow */])(this)
 
 }
 
@@ -82812,6 +82827,25 @@ function extendElement(elements, attrName, options, env) {
 
 }
 
+//TODO
+function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
+
+
+    let view = $(".view-3d[hasFocus]")[0];
+
+    if (!view) view = $(".view-3d.view-3d-maximised").get(0);
+
+    if (!view) console.warn("no view focused to be able to zoom");
+
+
+    let camera = view.mCamera;
+    let controls = view.mControls;
+
+    __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__["a" /* default */].moveToMesh(mesh,camera,controls,minMaxDistance,onEnd)
+
+
+}
+
 
 //helper to being able to handle click events
 //isSelected == false will prevent the actual node selection and only will trigger the zoom+highlight parts
@@ -82825,7 +82859,7 @@ function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelecte
 
 
         if (doZoomIn)
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f2_zoom__["a" /* default */])(currNodeClicked._bubble, onAnimationEnd);
+            doZoomToMesh(currNodeClicked._bubble, onAnimationEnd);
 
 
         if (isSelected) {
@@ -83789,7 +83823,7 @@ module.exports = function(obj, fn){
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_binarytree__ = __webpack_require__(120);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_binarytree__ = __webpack_require__(122);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_binarytree__["a"]; });
 
 
@@ -83799,17 +83833,17 @@ module.exports = function(obj, fn){
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_nest__ = __webpack_require__(133);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_nest__ = __webpack_require__(135);
 /* unused harmony reexport nest */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_set__ = __webpack_require__(134);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_set__ = __webpack_require__(136);
 /* unused harmony reexport set */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map__ = __webpack_require__(25);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_2__src_map__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_keys__ = __webpack_require__(132);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_keys__ = __webpack_require__(134);
 /* unused harmony reexport keys */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_values__ = __webpack_require__(135);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_values__ = __webpack_require__(137);
 /* unused harmony reexport values */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_entries__ = __webpack_require__(131);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_entries__ = __webpack_require__(133);
 /* unused harmony reexport entries */
 
 
@@ -83827,9 +83861,9 @@ module.exports = function(obj, fn){
 /* harmony export (immutable) */ __webpack_exports__["b"] = x;
 /* harmony export (immutable) */ __webpack_exports__["c"] = y;
 /* harmony export (immutable) */ __webpack_exports__["d"] = z;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_d3_dispatch__ = __webpack_require__(136);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_d3_dispatch__ = __webpack_require__(138);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_collection__ = __webpack_require__(53);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_timer__ = __webpack_require__(173);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_timer__ = __webpack_require__(175);
 
 
 
@@ -84014,7 +84048,7 @@ var initialRadius = 10,
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_octree__ = __webpack_require__(151);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_octree__ = __webpack_require__(153);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_octree__["a"]; });
 
 
@@ -84024,7 +84058,7 @@ var initialRadius = 10,
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_quadtree__ = __webpack_require__(165);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_quadtree__ = __webpack_require__(167);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_quadtree__["a"]; });
 
 
@@ -84037,10 +84071,10 @@ var initialRadius = 10,
  * Module dependencies
  */
 
-var XMLHttpRequest = __webpack_require__(30);
-var XHR = __webpack_require__(181);
-var JSONP = __webpack_require__(180);
-var websocket = __webpack_require__(182);
+var XMLHttpRequest = __webpack_require__(31);
+var XHR = __webpack_require__(183);
+var JSONP = __webpack_require__(182);
+var websocket = __webpack_require__(184);
 
 /**
  * Export transports.
@@ -84097,9 +84131,9 @@ function polling (opts) {
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(29);
+var Transport = __webpack_require__(30);
 var parseqs = __webpack_require__(18);
-var parser = __webpack_require__(12);
+var parser = __webpack_require__(13);
 var inherit = __webpack_require__(17);
 var yeast = __webpack_require__(69);
 var debug = __webpack_require__(5)('engine.io-client:polling');
@@ -84115,7 +84149,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function () {
-  var XMLHttpRequest = __webpack_require__(30);
+  var XMLHttpRequest = __webpack_require__(31);
   var xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -84350,7 +84384,7 @@ Polling.prototype.uri = function () {
  * Module requirements.
  */
 
-var isArray = __webpack_require__(185);
+var isArray = __webpack_require__(187);
 
 var toString = Object.prototype.toString;
 var withNativeBlob = typeof global.Blob === 'function' || toString.call(global.Blob) === '[object BlobConstructor]';
@@ -85038,10 +85072,10 @@ module.exports = function parseuri(str) {
  * Module dependencies.
  */
 
-var eio = __webpack_require__(177);
+var eio = __webpack_require__(179);
 var Socket = __webpack_require__(66);
-var Emitter = __webpack_require__(9);
-var parser = __webpack_require__(36);
+var Emitter = __webpack_require__(11);
+var parser = __webpack_require__(37);
 var on = __webpack_require__(65);
 var bind = __webpack_require__(51);
 var debug = __webpack_require__(5)('socket.io-client:manager');
@@ -85647,9 +85681,9 @@ function on (obj, ev, fn) {
  * Module dependencies.
  */
 
-var parser = __webpack_require__(36);
-var Emitter = __webpack_require__(9);
-var toArray = __webpack_require__(221);
+var parser = __webpack_require__(37);
+var Emitter = __webpack_require__(11);
+var toArray = __webpack_require__(225);
 var on = __webpack_require__(65);
 var bind = __webpack_require__(51);
 var debug = __webpack_require__(5)('socket.io-client:socket');
@@ -86227,7 +86261,7 @@ class ClusterNodeArray extends Array //List<Node>
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__distributions_BaseDistribution__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__hull_BaseVolume__ = __webpack_require__(15);
 /**
  * a simple factory to generate options to build different clusters
@@ -86324,8 +86358,8 @@ class ClusterSpeccFacade {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__ = __webpack_require__(8);
+/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseCluster3D__ = __webpack_require__(10);
 /**
  * Created by Frank on 29.05.2017.
  */
@@ -86394,7 +86428,7 @@ class ClusterSpeccFacade {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(6);
+/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(8);
 /**
  * Created by Frank on 30.05.2017.
  */
@@ -86437,7 +86471,7 @@ class RandomDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(6);
+/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseDistribution__ = __webpack_require__(8);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -86496,7 +86530,7 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(42);
+/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_MaterialFadeMixin__ = __webpack_require__(50);
 /**
  * Created by Frank on 23.06.2017.
@@ -87048,7 +87082,7 @@ var AppDataService={
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Datasource__ = __webpack_require__(100);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Datasource__ = __webpack_require__(99);
 
 
 
@@ -87112,22 +87146,24 @@ class CompanyNewsDS extends __WEBPACK_IMPORTED_MODULE_0__Datasource__["a" /* def
 /* WEBPACK VAR INJECTION */(function(_) {/* harmony export (immutable) */ __webpack_exports__["a"] = getGraphDataSets;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar__ = __webpack_require__(204);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar__ = __webpack_require__(206);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__gui_searchbar__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_qwest__ = __webpack_require__(211);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__gui_searchbar__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_qwest__ = __webpack_require__(213);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_qwest___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_qwest__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_papaparse__ = __webpack_require__(208);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_papaparse__ = __webpack_require__(210);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_papaparse___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_papaparse__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__deprecated_gpu_info__ = __webpack_require__(100);
 
 
 
 //import 'jquery-ui/themes/base/theme.css';
 //import 'jquery-ui/themes/base/selectable.css';
+
 
 
 
@@ -87151,7 +87187,7 @@ function createDlg() {
 
 function openGraphConfirmDialog(fileName, nodeCount, acceptCallback) {
 
-    gpuInfo().lt(5000, function () {
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__deprecated_gpu_info__["a" /* gpuInfo */])().lt(5000, function () {
 
         console.warn("gpu might be too slow or onboard graphics are used")
 
@@ -87526,7 +87562,7 @@ function getGraphDataSets() {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ModeSelect_css__ = __webpack_require__(217);
+/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ModeSelect_css__ = __webpack_require__(219);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ModeSelect_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__ModeSelect_css__);
 
 
@@ -87556,7 +87592,8 @@ class ModeSelect extends HTMLElement {
 
             var prevMode;
             */
-
+        //...
+        let main=$("sample-cluster-application").get(0)
 
         //   if (prevMode == mode) return;//  prevMode = mode;
         //  if (!cameraModi) cameraModi = new CameraObserverMode(env);
@@ -87579,7 +87616,10 @@ class ModeSelect extends HTMLElement {
             main.setGraph2D();
             //  cameraModi.setMode("2d")
             //Graph.numDimensions(2);
-            $("body").addClass("inverted");
+
+           // $("body").addClass("inverted");
+
+
             //  env.controls.target.set(new THREE.Vector3(0,0,0));
             //main.getCurrentView().mRootCluster.zoomToCluster()
             //  doZoomToPos(new THREE.Vector3(0, 0, 3000));
@@ -89894,7 +89934,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(13)(content, options);
+var update = __webpack_require__(7)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -89925,7 +89965,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(13)(content, options);
+var update = __webpack_require__(7)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -89956,7 +89996,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(13)(content, options);
+var update = __webpack_require__(7)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -90361,7 +90401,7 @@ class BaseNode extends THREE.Mesh {
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BaseNode;
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0), __webpack_require__(21)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0), __webpack_require__(22)))
 
 /***/ }),
 /* 89 */
@@ -90369,7 +90409,7 @@ class BaseNode extends THREE.Mesh {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseEdge__ = __webpack_require__(87);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EdgeUtil__ = __webpack_require__(23);
 /**
  * Created by Frank on 08.06.2017.
  */
@@ -90591,7 +90631,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__css_style_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__css_style_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__ = __webpack_require__(84);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gui_searchbar__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gui_searchbar__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__refactor_SpecificDataUtils__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__refactor_AppDataService__ = __webpack_require__(76);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera__ = __webpack_require__(80);
@@ -90602,23 +90642,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__lib_ConvexGeometry___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__lib_ConvexGeometry__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__lib_QuickHull__ = __webpack_require__(82);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__lib_QuickHull___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__lib_QuickHull__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__distributions_BaseDistribution__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__distributions_BaseDistribution__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__distributions_DefaultDistribution__ = __webpack_require__(72);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__distributions_RandomDistribution__ = __webpack_require__(73);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__distributions_SphericalDistribution__ = __webpack_require__(74);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__ClusterNodeArray__ = __webpack_require__(70);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__ClusterLeafElement__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__BaseCluster3D__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__ClusterLeafElement__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__BaseCluster3D__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__Cluster3DExtended__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__RootCluster__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__GraphData__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__RootCluster__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__GraphData__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__view_GraphView3D__ = __webpack_require__(45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__gui_ModeSelect__ = __webpack_require__(79);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__hull_BoxVolume__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__hull_BoxVolume__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__hull_BaseVolume__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__hull_ConvexVolume__ = __webpack_require__(75);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__utils_ZoomUtil__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__utils_ZoomUtil__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__ClusterSpeccFacade__ = __webpack_require__(71);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__data_CompanyNewsDS__ = __webpack_require__(77);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__data_data_set_loader__ = __webpack_require__(78);
@@ -90731,7 +90771,10 @@ class SampleClusterApplication extends HTMLElement {
         this.addNewsListeners()
 
 
-        $(this).append("<mode-select></mode-select>")
+        $(this).append("<graph-hud></graph-hud>")
+
+
+
 
 
     }
@@ -91222,6 +91265,8 @@ class SampleClusterApplication extends HTMLElement {
     setGraph2D() {
 
 
+
+
         /**
          * FIXME if a cluster has subclusters and no clustering is given use the existsing
          * likewise with distributions
@@ -91234,6 +91279,9 @@ class SampleClusterApplication extends HTMLElement {
         let speccs = this.get2DPlaneForceSpeccs();
 
         let view = this.getCurrentView();
+
+
+        view.mScene.background = new THREE.Color( 0x555555 );
 
 
         let rootCluster = view.mRootCluster;
@@ -91269,6 +91317,9 @@ class SampleClusterApplication extends HTMLElement {
 
         let speccs = this.getForceSpeccs();
         let view = this.getCurrentView();
+
+        view.mScene.background = new THREE.Color( 0x000000 );
+
         let rootCluster = view.mRootCluster;
 
         rootCluster.cleanUpLeafs();
@@ -91301,7 +91352,7 @@ customElements.define("sample-cluster-application", SampleClusterApplication);
 
 
 	
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(21), __webpack_require__(2), __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(22), __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
 /* 91 */
@@ -92845,82 +92896,6 @@ var lastSelectedNode;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($, THREE) {/* harmony export (immutable) */ __webpack_exports__["a"] = doZoomToMesh;
-/**
- * Created by Frank on 16.07.2017.
- */
-
-
-//Feature 2 zoom and search
-//@deprecated use ZoomUtil instead
-//currently still in use in f1.js
-function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
-
-
-    let view = $(".view-3d[hasFocus]")[0];
-
-    if (!view) view = $(".view-3d.view-3d-maximised").get(0);
-
-    if (!view) console.warn("no view focused to be able to zoom");
-
-
-    let camera = view.mCamera;
-    let controls = view.mControls;
-
-
-    var vec3Start = camera.position;
-
-
-    var vec3End = new THREE.Vector3();
-    vec3End.setFromMatrixPosition(mesh.matrixWorld);
-
-    //	var vec3End = mesh.position //e.target.position
-
-
-    //we want to have a fixed distance to a node when selecting
-    var distVec = vec3End.clone().sub(vec3Start);
-    var len = distVec.length();
-    distVec.normalize();
-    distVec.multiplyScalar(minMaxDistance); //apply fixed distance to the target
-
-    var alteredVecEnd = vec3End.clone().sub(distVec);
-
-
-    if (typeof onEnd != "function") onEnd = function () {
-    };
-    //change distance to target
-    var tween = new TWEEN.Tween(vec3Start)
-        .to(alteredVecEnd, 400)
-        .onUpdate(function () {
-
-        }).onComplete(onEnd)
-        .start();
-
-    //lookat target
-    var tween2 = new TWEEN.Tween(controls.target)
-        .to(vec3End, 400)
-        .onUpdate(function () {
-
-        })
-        .start();
-
-    requestAnimationFrame(animate);
-
-    function animate(time) {
-        requestAnimationFrame(animate);
-        TWEEN.update(time);
-    }
-
-}
-
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(1)))
-
-/***/ }),
-/* 97 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* WEBPACK VAR INJECTION */(function(THREE, _) {/* harmony export (immutable) */ __webpack_exports__["a"] = addArrow;
 /* harmony export (immutable) */ __webpack_exports__["b"] = removeArrow;
 /**
@@ -93061,11 +93036,11 @@ function removeArrow(d3LinkObj) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 98 */
+/* 97 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(99);
+/* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(98);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__ = __webpack_require__(19);
 /**
@@ -93375,7 +93350,7 @@ customElements.define("cluster-text-overlay", ClusterTextOverlay);
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 99 */
+/* 98 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -93728,11 +93703,11 @@ function TextNodesFactory(env, options) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1), __webpack_require__(0)))
 
 /***/ }),
-/* 100 */
+/* 99 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_socket_io_client__ = __webpack_require__(213);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_socket_io_client__ = __webpack_require__(215);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_socket_io_client__);
 /**
  * what we want is a simple baisc abstraction layer to retrieve data .. nothing fancy just some structure for different services and probably topics
@@ -93762,13 +93737,102 @@ class Datasource
 
 
 /***/ }),
+/* 100 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(module, $) {/* harmony export (immutable) */ __webpack_exports__["a"] = gpuInfo;
+
+
+
+/*! fast-levenshtein 2016-12-27. Copyright Ramesh Nair MIT-License <ram@hiddentao.com> (http://www.hiddentao.com/) */
+!function(){"use strict";var a;try{a="undefined"!=typeof Intl&&"undefined"!=typeof Intl.Collator?Intl.Collator("generic",{sensitivity:"base"}):null}catch(b){console.log("Collator could not be initialized and wouldn't be used")}var c=[],d=[],e={get:function(b,e,f){var g=f&&a&&f.useCollator,h=b.length,i=e.length;if(0===h)return i;if(0===i)return h;var j,k,l,m,n;for(l=0;i>l;++l)c[l]=l,d[l]=e.charCodeAt(l);c[i]=i;var o;if(g)for(l=0;h>l;++l){for(k=l+1,m=0;i>m;++m)j=k,o=0===a.compare(b.charAt(l),String.fromCharCode(d[m])),k=c[m]+(o?0:1),n=j+1,k>n&&(k=n),n=c[m+1]+1,k>n&&(k=n),c[m]=j;c[m]=k}else for(l=0;h>l;++l){for(k=l+1,m=0;i>m;++m)j=k,o=b.charCodeAt(l)===d[m],k=c[m]+(o?0:1),n=j+1,k>n&&(k=n),n=c[m+1]+1,k>n&&(k=n),c[m]=j;c[m]=k}return k}};"undefined"!=typeof define&&null!==define&&__webpack_require__(233)?define(function(){return e}):"undefined"!=typeof module&&null!==module&&"undefined"!=typeof exports&&module.exports===exports?module.exports=e:"undefined"!=typeof self&&"function"==typeof self.postMessage&&"function"==typeof self.importScripts?self.Levenshtein=e:"undefined"!=typeof window&&null!==window&&(window.Levenshtein=e)}();
+
+
+// goal have the option to define some event listeners for specific use cases
+// onboard/slow 
+// have a list of gpu benchmarks at hand to look up graphics card
+
+// define lt and gt 
+// gpuInfo().lt(10000,function(){}).gt(...).unknown(...)
+
+
+
+
+function gpuInfo()
+{
+
+var $$=$({})
+var packed="128 DDR Radeon 9700 TX w/TV-Out|44;128MB DDR Radeon 9800 Pro|66;128MB RADEON X600 SE|49;256MB RADEON X600|69;7900 MOD - Radeon HD 6520G|610;A6 Micro-6500T Quad-Core APU with RadeonR4|224;ABIT Siluro T400|3;ALL-IN-WONDER 9000|4;ALL-IN-WONDER RADEON 8500DV|5;All-in-Wonder X1900|127;ALL-IN-WONDER X800 GT|84;Barco MXRT 5400|1334;Barco MXRT 5450|782;Chell 1.7b for Intel G33/G31|16;Chell 1.7b for Mobile Intel 945|6;Chell 1.8a for Mobile Intel 965|22;Chell 1.8b for Intel 945G|2;Chell 1.8b for Intel G33/G31|7;Chell 1.8b for Mobile Intel 945|2;Chell 1.8b for Mobile Intel 965|13;Chipset Intel G41 Express|57;Device|2502;EAH5450|134;EAH6450|275;Famille de jeu de puces Express Intel 946GZ|7;FireGL T2-128|30;FireGL V3100|52;FireGL V3200|84;FireGL V3300|70;FireGL V3350|66;FireGL V3400|103;FireGL V3600|194;FireGL V5100|92;FireGL V5200|113;FireGL V5600|343;FireGL V7200|108;FireGL V7350|122;FireGL V7600|615;FireGL V7700|631;FireGL V8650|550;FireGL X1|59;FireMV 2200 PCIe|36;FireMV 2250|45;FireMV 2260|117;FireMV 2400 PCIe|13;FirePro 2260|118;FirePro 2270|228;FirePro 2450|56;FirePro 2460|210;FirePro 3D V3700|187;FirePro 3D V3750|341;FirePro 3D V3800|476;FirePro 3D V4800|1084;FirePro 3D V5700|559;FirePro 3D V5800|1401;FirePro 3D V7750|541;FirePro 3D V7800|1809;FirePro 3D V8700|1208;FirePro 3D V8750|1271;FirePro 3D V8800|2407;FirePro 3D V9800|2811;FirePro M2000|608;FirePro M4000|1521;FirePro M4000 Mobility Pro|1680;FirePro M40003|1411;Firepro M4100|1058;FirePro M4150|1103;FirePro M4170|1113;FirePro M5100|2035;FirePro M5950|1314;FirePro M6000 Mobility Pro|1692;FirePro M6100|2894;FirePro M7740|653;FirePro S7000|4166;FirePro S7150|6276;FirePro V3900|865;FirePro V4900|1289;FirePro V5900|1516;FirePro V7000 Adapter|3161;FirePro V7900|2701;FirePro V9800 Adapter|2716;FirePro W2100|918;FirePro W4100|1623;FirePro W4100 Adapter|1798;FirePro W4170M|1327;Firepro W4190M|1222;FirePro W4300|3021;FirePro W5000|3040;FirePro W5100|2945;FirePro W5130M|1807;Firepro W5170M|2100;FirePro W600|1761;FirePro W7000|4137;FirePro W7000 Adapter|4242;FirePro W7100|5386;FirePro W7170M|4618;FirePro W8000|4264;FirePro W8000 Adapter|4646;FirePro W8100|5856;FirePro W8100 Graphic Adapter|8219;FirePro W9000|5178;FirePro W9100|6834;FireStream 9250|1164;FireStream 9270|1341;GeForce 205|126;GeForce 210|178;GeForce 256|5;GeForce 305M|190;GeForce 310|211;GeForce 310M|216;GeForce 315|260;GeForce 315M|214;GeForce 320M|277;GeForce 405|224;GeForce 410M|343;GeForce 505|191;GeForce 510|302;GeForce 605|315;GeForce 6100|21;GeForce 6100 nForce 400|25;GeForce 6100 nForce 405|22;GeForce 6100 nForce 420|25;GeForce 6100 nForce 430|23;GeForce 610M|398;GeForce 615|537;GeForce 6150|22;GeForce 6150 LE|21;GeForce 6150SE|23;GeForce 6150SE nForce 430|22;GeForce 6200|44;GeForce 6200 A-LE|32;GeForce 6200 LE|26;GeForce 6200 TurboCache|38;GeForce 6200SE TurboCache|29;GeForce 6500|37;GeForce 6600|63;GeForce 6600 GT|102;GeForce 6600 LE|49;GeForce 6610 XL|89;GeForce 6700 XL|102;GeForce 6800|111;GeForce 6800 GS|138;GeForce 6800 GS/XT|99;GeForce 6800 GT|143;GeForce 6800 LE|97;GeForce 6800 Ultra|138;GeForce 6800 XT|104;GeForce 7000M|13;GeForce 7000M / nForce 610M|13;GeForce 7025 / nForce 630a|25;GeForce 7050 / nForce 610i|27;GeForce 7050 / nForce 620i|32;GeForce 7050 / nForce 630i|26;GeForce 7050 PV / nForce 630a|21;GeForce 705M|455;GeForce 7100 / nForce 630i|30;GeForce 7100 GS|42;GeForce 710A|435;GeForce 710M|551;GeForce 7150 / nForce 630i|33;GeForce 7150M / nForce 630M|17;GeForce 7300 GS|65;GeForce 7300 GT|108;GeForce 7300 LE|54;GeForce 7300 SE|39;GeForce 7300 SE/7200 GS|41;GeForce 730A|768;GeForce 7350 LE|74;GeForce 7500 LE|69;GeForce 7600 GS|134;GeForce 7600 GT|181;GeForce 7650 GS|133;GeForce 7800 GS|177;GeForce 7800 GT|194;GeForce 7800 GTX|223;GeForce 7900 GS|217;GeForce 7900 GT|258;GeForce 7900 GT/GTO|245;GeForce 7900 GTX|301;GeForce 7950 GT|261;GeForce 7950 GX2|191;GeForce 800A|440;GeForce 800M|573;GeForce 8100 / nForce 720a|85;GeForce 810A|638;GeForce 810M|449;GeForce 8200|81;GeForce 8200M G|57;GeForce 820A|689;GeForce 820M|597;GeForce 825M|743;GeForce 8300|92;GeForce 8300 GS|67;GeForce 830A|972;GeForce 830M|815;GeForce 8400|101;GeForce 8400 GS|114;GeForce 8400 SE|68;GeForce 8400M G|58;GeForce 8400M GS|83;GeForce 8400M GT|97;GeForce 840A|873;GeForce 840M|875;GeForce 845M|1038;GeForce 8500 GT|139;GeForce 8600 GS|147;GeForce 8600 GT|248;GeForce 8600 GTS|291;GeForce 8600GS|147;GeForce 8600M GS|126;GeForce 8600M GT|172;GeForce 8700M GT|216;GeForce 8800 GS|551;GeForce 8800 GT|755;GeForce 8800 GTS|610;GeForce 8800 GTS 512|843;GeForce 8800 GTX|769;GeForce 8800 Ultra|791;GeForce 8800M GTS|482;GeForce 8800M GTX|548;GeForce 9100|83;GeForce 9100M G|74;GeForce 910M|467;GeForce 9200|82;GeForce 9200M GE|81;GeForce 9200M GS|87;GeForce 920A|931;GeForce 920M|707;GeForce 920MX|990;GeForce 9300|126;GeForce 9300 / nForce 730i|132;GeForce 9300 GE|102;GeForce 9300 GS|93;GeForce 9300GE|97;GeForce 9300M G|85;GeForce 9300M GS|97;GeForce 930A|1188;GeForce 930M|900;GeForce 930MX|1139;GeForce 9400|147;GeForce 9400 GT|192;GeForce 9400M|121;GeForce 9400M G|126;GeForce 940A|810;GeForce 940M|947;GeForce 940MX|1220;GeForce 945M|1500;GeForce 9500 GS|285;GeForce 9500 GT|281;GeForce 9500M|103;GeForce 9500M G|166;GeForce 9500M GS|187;GeForce 9600 GS|451;GeForce 9600 GSO|517;GeForce 9600 GSO 512|498;GeForce 9600 GT|740;GeForce 9600M GS|239;GeForce 9600M GT|268;GeForce 9600M GT / GeForce GT 220M|293;GeForce 9650M GS|285;GeForce 9650M GT|260;GeForce 9700M GT|331;GeForce 9700M GTS|485;GeForce 9800 GT|718;GeForce 9800 GTX|769;GeForce 9800 GTX+|919;GeForce 9800 GTX/9800 GTX+|892;GeForce 9800 GX2|805;GeForce 9800 S|635;GeForce 9800M GS|551;GeForce 9800M GT|469;GeForce 9800M GTS|648;GeForce 9800M GTX|530;GeForce FX 5200|7;GeForce FX 5200 Ultra|12;GeForce FX 5200LE|7;GeForce FX 5200SE|11;GeForce FX 5500|8;GeForce FX 5600|11;GeForce FX 5600 Ultra|17;GeForce FX 5600XT|9;GeForce FX 5700|41;GeForce FX 5700 Ultra|30;GeForce FX 5700LE|25;GeForce FX 5700VE|37;GeForce FX 5900|34;GeForce FX 5900 Ultra|41;GeForce FX 5900XT|42;GeForce FX 5950 Ultra|59;GeForce FX Go 5200|8;GeForce FX Go 5600|18;GeForce FX Go5300|12;GeForce FX Go5650|16;GeForce FX Go5700|47;GeForce G 103M|108;GeForce G 105M|115;GeForce G100|100;GeForce G102M|97;GeForce G105M|185;GeForce G200|133;GeForce G205M|103;GeForce G210|174;GeForce G210M|205;GeForce Go 6100|18;GeForce Go 6150|18;GeForce Go 6200|14;GeForce Go 6400|24;GeForce Go 6600|68;GeForce Go 6600 TE/6200 TE|44;GeForce Go 6800|104;GeForce Go 6800 Ultra|137;GeForce Go 7200|44;GeForce Go 7300|49;GeForce Go 7400|63;GeForce Go 7600|128;GeForce Go 7600 GT|163;GeForce Go 7700|147;GeForce Go 7800|116;GeForce Go 7800 GTX|208;GeForce Go 7900 GS|175;GeForce Go 7950 GTX|263;GeForce GPU|1131;GeForce GT 120|295;GeForce GT 120M|280;GeForce GT 130|462;GeForce GT 130M|304;GeForce GT 140|761;GeForce GT 220|356;GeForce GT 220M|270;GeForce GT 230|474;GeForce GT 230M|338;GeForce GT 240|651;GeForce GT 240M|356;GeForce GT 320|555;GeForce GT 320M|210;GeForce GT 325M|297;GeForce GT 330|555;GeForce GT 330M|367;GeForce GT 335M|500;GeForce GT 340|799;GeForce GT 415M|319;GeForce GT 420|461;GeForce GT 420M|548;GeForce GT 425M|624;GeForce GT 430|659;GeForce GT 435M|663;GeForce GT 440|839;GeForce GT 445M|1058;GeForce GT 520|367;GeForce GT 520M|382;GeForce GT 520MX|402;GeForce GT 525M|599;GeForce GT 530|741;GeForce GT 540M|651;GeForce GT 545|1287;GeForce GT 550M|721;GeForce GT 555M|901;GeForce GT 610|354;GeForce GT 620|432;GeForce GT 620M|558;GeForce GT 625|435;GeForce GT 625M|452;GeForce GT 630|790;GeForce GT 630M|678;GeForce GT 635|924;GeForce GT 635M|682;GeForce GT 640|1284;GeForce GT 640M|929;GeForce GT 640M LE|790;GeForce GT 645|2215;GeForce GT 645M|855;GeForce GT 650M|1205;GeForce GT 705|409;GeForce GT 710|657;GeForce GT 710M|531;GeForce GT 720|711;GeForce GT 720A|661;GeForce GT 720M|539;GeForce GT 730|927;GeForce GT 730A|717;GeForce GT 730M|803;GeForce GT 735M|642;GeForce GT 740|1579;GeForce GT 740M|770;GeForce GT 745A|1146;GeForce GT 745M|948;GeForce GT 750M|1291;GeForce GT 755M|1575;GeForce GT 820M|614;GeForce GT625M|530;GeForce GTS 160M|665;GeForce GTS 240|837;GeForce GTS 250|895;GeForce GTS 250M|561;GeForce GTS 350M|558;GeForce GTS 360M|757;GeForce GTS 450|1556;GeForce GTX 1050|4553;GeForce GTX 1050 Ti|5803;GeForce GTX 1060|8745;GeForce GTX 1060 3GB|8569;GeForce GTX 1060 6GB|8686;GeForce GTX 1070|10922;GeForce GTX 1080|11980;GeForce GTX 1080 Ti|13210;GeForce GTX 260|1127;GeForce GTX 260M|598;GeForce GTX 275|1234;GeForce GTX 280|1198;GeForce GTX 280M|667;GeForce GTX 285|1265;GeForce GTX 285M|750;GeForce GTX 295|1049;GeForce GTX 460|2647;GeForce GTX 460 SE|2250;GeForce GTX 460 v2|2528;GeForce GTX 460M|1385;GeForce GTX 465|2947;GeForce GTX 470|3602;GeForce GTX 470M|1949;GeForce GTX 480|4352;GeForce GTX 480M|2021;GeForce GTX 485M|2341;GeForce GTX 550 Ti|1926;GeForce GTX 555|2179;GeForce GTX 560|3128;GeForce GTX 560 SE|2233;GeForce GTX 560 Ti|3538;GeForce GTX 560M|1557;GeForce GTX 570|4410;GeForce GTX 570M|2025;GeForce GTX 580|5014;GeForce GTX 580M|2286;GeForce GTX 590|4167;GeForce GTX 645|1916;GeForce GTX 650|1831;GeForce GTX 650 Ti|2661;GeForce GTX 650 Ti BOOST|3531;GeForce GTX 660|4120;GeForce GTX 660 Ti|4690;GeForce GTX 660M|1409;GeForce GTX 670|5375;GeForce GTX 670M|1897;GeForce GTX 670MX|2053;GeForce GTX 675M|2125;GeForce GTX 675MX|2364;GeForce GTX 680|5696;GeForce GTX 680M|3377;GeForce GTX 680MX|4371;GeForce GTX 690|5311;GeForce GTX 745|2169;GeForce GTX 750|3272;GeForce GTX 750 Ti|3695;GeForce GTX 760|4952;GeForce GTX 760 Ti|5059;GeForce GTX 760A|1281;GeForce GTX 760M|1392;GeForce GTX 765M|1879;GeForce GTX 770|6107;GeForce GTX 770M|2649;GeForce GTX 775M|4210;GeForce GTX 780|7987;GeForce GTX 780 Ti|8902;GeForce GTX 780M|4062;GeForce GTX 850A|802;GeForce GTX 850M|1487;GeForce GTX 860M|1707;GeForce GTX 870M|2249;GeForce GTX 880M|3598;GeForce GTX 950|5212;GeForce GTX 950A|1367;GeForce GTX 950M|1798;GeForce GTX 960|5827;GeForce GTX 960A|2151;GeForce GTX 960M|2037;GeForce GTX 965M|2980;GeForce GTX 970|8573;GeForce GTX 970M|4019;GeForce GTX 980|9589;GeForce GTX 980 Ti|11347;GeForce GTX 980M|5684;GeForce GTX Titan|7878;GeForce GTX TITAN Black|8585;GeForce GTX TITAN X|10674;GeForce GTX TITAN Z|7766;GeForce PCX 5300|6;GeForce PCX 5750|34;GeForce2 GTS/GeForce2 Pro|3;GeForce2 Integrated GPU|4;GeForce2 MX|2;GeForce2 MX 100/200|3;GeForce2 MX/MX 400|3;GeForce2 Ti|4;GeForce3|4;GeForce3 Ti 200|4;GeForce3 Ti 500|2;GeForce4 420 Go|3;GeForce4 420 Go 32M|5;GeForce4 4200 Go|4;GeForce4 440 Go|3;GeForce4 440 Go 64M|5;GeForce4 448 Go|5;GeForce4 460 Go --MobileForce M4 Stock--|5;GeForce4 MX 4000|4;GeForce4 MX 420|4;GeForce4 MX 440|4;GeForce4 MX 440 with AGP8X|4;GeForce4 MX 440SE|4;GeForce4 MX 460|5;GeForce4 MX Integrated GPU|6;GeForce4 Ti 4200|5;GeForce4 Ti 4400|7;GeForce4 Ti 4600|5;GeForce4 Ti 4800 SE|6;GeForce9400M|105;GF117|554;GIGABYTE RADEON 9600 PRO|43;GRID K1|880;GRID K140Q|727;GRID K160Q|701;GRID K180Q|776;GRID K2|3772;GRID K220Q|912;GRID K240Q|2143;GRID K260Q|2940;GRID K280Q|2194;GRID K520|4370;GRID M60-2Q|7620;GRID M60-8Q|3469;GTX 965M|5139;Intel - Express Chipset G41|62;Intel - Express Chipset Q45/Q43|60;Intel 4th Generation Haswell HD|353;Intel 82845G Controller|2;Intel 82845G/GL Controller|2;Intel 82845G/GL/GE/PE/GV Controller|2;Intel 82865G Controller|4;Intel 82915G Express|5;Intel 82915G/GV/910GL Express|3;Intel 82945G Express|6;Intel 865 Embedded Controller|3;Intel 946GZ Express|6;Intel B43 Express Chipset|65;Intel G33/G31 Express|11;Intel G35 Express|30;Intel G41 Express Chipset|63;Intel G41 Express-Chipsatz|58;Intel G45/G43 Express Chipset|70;Intel G965 Express|17;Intel Haswell HD - GT1|121;Intel Haswell HD - GT2|160;Intel HD 3000|313;Intel HD 4000|453;Intel HD 4400|557;Intel HD 4600|708;Intel HD 5000|595;Intel HD 510|620;Intel HD 515|634;Intel HD 520|850;Intel HD 5200|777;Intel HD 530|1006;Intel HD 5300|400;Intel HD 5500|575;Intel HD 5600|665;Intel HD 6000|827;Intel HD 610|737;Intel HD 615|715;Intel HD 620|943;Intel HD 630|1262;Intel HD Family|422;Intel HD Modded|119;Intel HD P3000|352;Intel HD P4000|421;Intel HD P4600|604;Intel HD P4600/P4700|656;Intel HD P530|1080;Intel HD P630|1447;Intel Iris 5100|730;Intel Iris 540|1362;Intel Iris 550|1678;Intel Iris 6100|962;Intel Iris Plus 640|1440;Intel Iris Plus 650|1898;Intel Iris Pro 5200|1178;Intel Iris Pro 580|1911;Intel Iris Pro 6200|1487;Intel Iris Pro P580|2273;Intel Media Accelerator 3150|3;Intel Media Accelerator 500|3;Intel Media Accelerator 600|6;Intel Media Accelerator HD|115;Intel Q33 Express|11;Intel Q35 Express|11;Intel Q45/Q43 Express Chipset|67;Intel Q45/Q43 Express-Chipsatz|61;Intel Q965/Q963 Express|7;Intel Skylake HD DT GT2|576;Intel US15 Embedded Media and Controller|7;ION|100;ION LE|102;KB 2C|235;M860G with Mobility Radeon 4100|76;M880G with Mobility Radeon HD 4200|93;M880G with Mobility Radeon HD 4225|70;M880G with Mobility Radeon HD 4250|105;Matrox C680 PCIe x16|1951;Matrox G200e WDDM 1.2|59;Matrox G200eh|40;Matrox G200eh WDDM 1.2|52;Matrox G200eR|36;Matrox G200eR WDDM 1.2|67;Matrox G200eW|42;Matrox G200eW WDDM 1.2|50;Matrox M9125 PCIe x16|25;Matrox M9140 LP PCIe x16|19;Matrox Millennium P650 PCIe 128|5;Matrox Millennium P690 PCIe x16|10;Matrox Millennium P690 Plus LP PCIe x16|6;Matrox Parhelia APVe|5;Mobile Intel - famiglia Express Chipset 45|41;Mobile Intel - famiglia Express Chipset serie 4|46;Mobile Intel 4 Express-Chipsatzfamilie|44;Mobile Intel 45 Express|44;Mobile Intel 45 Express-Chipsatzfamilie|41;Mobile Intel 915GM/GMS/910GML Express|4;Mobile Intel 945 Express|4;Mobile Intel 945GM Express|5;Mobile Intel 945GM/GU Express|5;Mobile Intel 965 Express|20;Mobile Intel 965 Express-Chipsatzfamilie|24;Mobile Intel HD|407;Mobile Intel serie 4 Express|44;MOBILITY FIREGL T2|39;MOBILITY FIREGL T2/T2e|33;MOBILITY FireGL V3200|61;MOBILITY FireGL V5000|81;MOBILITY FireGL V5200|44;MOBILITY FireGL V5250|26;Mobility FireGL V5725|228;Mobility Radeon 4100|86;MOBILITY RADEON 7000 IGP|6;MOBILITY RADEON 7500|3;MOBILITY RADEON 9000|3;MOBILITY RADEON 9000 IGP|7;MOBILITY RADEON 9000/9100 IGP|5;MOBILITY RADEON 9100 IGP|2;MOBILITY RADEON 9200|3;MOBILITY RADEON 9600 PRO TURBO|25;MOBILITY RADEON 9600/9700|39;MOBILITY RADEON 9700|27;Mobility Radeon HD 2300|51;Mobility Radeon HD 2400|91;Mobility Radeon HD 2400 XT|107;Mobility Radeon HD 2600|172;Mobility Radeon HD 2600 XT|198;Mobility Radeon HD 3410|62;Mobility Radeon HD 3430|97;Mobility Radeon HD 3450|92;Mobility Radeon HD 3470|93;Mobility Radeon HD 3470 Hybrid X2|93;Mobility Radeon HD 3650|218;Mobility Radeon HD 3670|233;Mobility Radeon HD 3850|365;Mobility Radeon HD 3870|487;Mobility Radeon HD 3870 X2|568;Mobility Radeon HD 4200|92;Mobility Radeon HD 4225|66;Mobility Radeon HD 4250|99;Mobility Radeon HD 4270|95;Mobility Radeon HD 4330|152;Mobility Radeon HD 4350|148;Mobility Radeon HD 4550|192;Mobility Radeon HD 4570|200;Mobility Radeon HD 4650|398;Mobility Radeon HD 4670|466;Mobility Radeon HD 4830|514;Mobility Radeon HD 4850|864;Mobility Radeon HD 4870|719;Mobility Radeon HD 5000|773;Mobility Radeon HD 5000 Serisi|478;Mobility Radeon HD 5165|284;Mobility Radeon HD 530v|175;Mobility Radeon HD 540v|189;Mobility Radeon HD 5430|181;Mobility Radeon HD 5450|214;Mobility Radeon HD 545v|199;Mobility Radeon HD 5470|234;Mobility Radeon HD 550v|268;Mobility Radeon HD 5570|707;Mobility Radeon HD 560v|321;Mobility Radeon HD 5650|539;Mobility Radeon HD 565v|325;Mobility Radeon HD 5730|670;Mobility Radeon HD 5850|761;Mobility Radeon HD 5870|1219;Mobility Radeon HD serie 4200|96;Mobility Radeon X1300|39;Mobility Radeon X1350|40;Mobility Radeon X1400|43;Mobility Radeon X1450|33;Mobility Radeon X1600|91;Mobility Radeon X1700|102;MOBILITY RADEON X1800|129;Mobility Radeon X1900|134;Mobility Radeon X2300|47;Mobility Radeon X2300 HD|48;Mobility Radeon X2500|68;MOBILITY RADEON X300|34;MOBILITY RADEON X600|51;MOBILITY RADEON X600 SE|49;MOBILITY RADEON X700|66;MOBILITY RADEON XPRESS 200|27;Mobility Radeon. HD 5470|215;MOBILITY/RADEON 9000|4;nForce 750a SLI|86;nForce 760i SLI|140;nForce 780a SLI|92;nForce 980a/780a SLI|81;NVIDIA TITAN X|13016;NVIDIA TITAN Xp|14894;NVS 2100M|192;NVS 300|192;NVS 310|284;NVS 3100M|210;NVS 315|341;NVS 4200M|360;NVS 510|766;NVS 5100M|364;NVS 5200M|642;NVS 5400M|745;NVS 810|1153;OpenXT Display Driver|30;PHDGD Ivy 4|343;PHDGD Solo 1.2.0 x86|11;PHDGD Solo 2 x64|20;Quadro 1000M|744;Quadro 1100M|755;Quadro 2000|1309;Quadro 2000 D|1167;Quadro 2000D|1290;Quadro 2000M|1059;Quadro 280 NVS PCIe|5;Quadro 3000M|1427;Quadro 400|248;Quadro 4000|1984;Quadro 4000M|1794;Quadro 410|425;Quadro 5000|2774;Quadro 5000M|2039;Quadro 500M|672;Quadro 5010M|1748;Quadro 600|688;Quadro 6000|3483;Quadro CX|947;Quadro FX 1000|34;Quadro FX 1100|35;Quadro FX 1300|24;Quadro FX 1400|102;Quadro FX 1500|155;Quadro FX 1500M|170;Quadro FX 1600M|222;Quadro FX 1700|198;Quadro FX 1700M|309;Quadro FX 1800|589;Quadro FX 1800M|487;Quadro FX 2500M|212;Quadro FX 2700M|534;Quadro FX 2800M|672;Quadro FX 3000|66;Quadro FX 3400/4400|99;Quadro FX 3450|148;Quadro FX 3450/4000 SDI|134;Quadro FX 350|85;Quadro FX 3500|207;Quadro FX 3500M|306;Quadro FX 350M|61;Quadro FX 3600M|469;Quadro FX 360M|89;Quadro FX 370|87;Quadro FX 370 LP|108;Quadro FX 3700|634;Quadro FX 3700M|651;Quadro FX 370M|93;Quadro FX 380|158;Quadro FX 380 LP|198;Quadro FX 3800|844;Quadro FX 3800M|806;Quadro FX 380M|210;Quadro FX 4500|207;Quadro FX 4600|610;Quadro FX 4700 X2|665;Quadro FX 4800|991;Quadro FX 500/600 PCI|14;Quadro FX 500/FX 600|7;Quadro FX 540|83;Quadro FX 550|64;Quadro FX 5500|243;Quadro FX 560|118;Quadro FX 5600|682;Quadro FX 570|118;Quadro FX 570M|189;Quadro FX 580|281;Quadro FX 5800|1085;Quadro FX 770M|305;Quadro FX 880M|362;Quadro FX Go1400|101;Quadro GP100|11780;Quadro K1000M|784;Quadro K1100M|988;Quadro K1200|3054;Quadro K2000|1687;Quadro K2000D|1651;Quadro K2000M|1081;Quadro K2100M|1262;Quadro K2200|3510;Quadro K2200M|2067;Quadro K3000M|1709;Quadro K3100M|1893;Quadro K4000|2846;Quadro K4000M|2301;Quadro K4100M|2429;Quadro K420|832;Quadro K4200|4455;Quadro K5000|3991;Quadro K5000M|2631;Quadro K5100M|3011;Quadro K510M|624;Quadro K5200|6125;Quadro K600|825;Quadro K6000|7725;Quadro K610M|729;Quadro K620|2308;Quadro K620M|836;Quadro M1000M|2044;Quadro M1200|2758;Quadro M2000|4341;Quadro M2000M|2654;Quadro M2200|1815;Quadro M3000M|4137;Quadro M4000|6687;Quadro M4000M|3678;Quadro M5000|8510;Quadro M5000M|5271;Quadro M500M|1005;Quadro M5500|9322;Quadro M6000|9421;Quadro M6000 24GB|10301;Quadro M600M|1777;Quadro M620|2886;Quadro NVS 110M|47;Quadro NVS 120M|47;Quadro NVS 130M|59;Quadro NVS 135M|56;Quadro NVS 140M|92;Quadro NVS 150M|96;Quadro NVS 160M|95;Quadro NVS 210S|23;Quadro NVS 210S / GeForce 6150LE|19;Quadro NVS 280 SD|1;Quadro NVS 285|34;Quadro NVS 285 128MB|38;Quadro NVS 290|95;Quadro NVS 295|99;Quadro NVS 320M|209;Quadro NVS 420|102;Quadro NVS 440|38;Quadro NVS 450|92;Quadro NVS 55/280 PCI|6;Quadro P1000|4593;Quadro P2000|8936;Quadro P3000|7156;Quadro P4000|10760;Quadro P5000|10815;Quadro P600|3296;Quadro P6000|13473;Quadro2 Pro|1;Quadro4 380 XGL|6;Quadro4 980 XGL|5;Radeon 2100|58;Radeon 3000|101;Radeon 3100|75;Radeon 6600M|737;RADEON 7000 / RADEON VE Family|4;RADEON 7500|3;RADEON 7500 Family|4;RADEON 9000 Family|3;RADEON 9100 Family|5;RADEON 9100 IGP|6;RADEON 9200|3;RADEON 9200 LE Family|2;RADEON 9200 PRO Family|2;RADEON 9200 SE|2;RADEON 9250|2;RADEON 9500|36;RADEON 9500 PRO / 9700|45;RADEON 9550|35;Radeon 9550 / X1050|28;RADEON 9600 Family|26;RADEON 9600 PRO Family|26;RADEON 9600 TX Family|18;RADEON 9600 XT|35;RADEON 9600SE|27;RADEON 9700 PRO|53;RADEON 9800 PRO|54;RADEON 9800 SE|23;RADEON 9800 XT|55;RADEON E4690|405;Radeon E6760|954;Radeon E8860|1657;Radeon HD 2350|77;Radeon HD 2400|122;Radeon HD 2400 PCI|14;Radeon HD 2400 Pro|119;Radeon HD 2400 XT|123;Radeon HD 2600 PRO|216;Radeon HD 2600 Pro AGP|115;Radeon HD 2600 XT|289;Radeon HD 2900 GT|292;Radeon HD 2900 PRO|644;Radeon HD 2900 XT|661;Radeon HD 3200|83;Radeon HD 3300|129;Radeon HD 3450|122;Radeon HD 3470|148;Radeon HD 3650 AGP|147;Radeon HD 3670|250;Radeon HD 3850|533;Radeon HD 3850 AGP|470;Radeon HD 3850 X2|792;Radeon HD 3870|730;Radeon HD 3870 X2|869;Radeon HD 4200|115;Radeon HD 4250|126;Radeon HD 4270|110;Radeon HD 4290|144;Radeon HD 4300/4500 Serisi|155;Radeon HD 4330|163;Radeon HD 4350|173;Radeon HD 4550|245;Radeon HD 4650|344;Radeon HD 4650 AGP|263;Radeon HD 4670|546;Radeon HD 4770|1047;Radeon HD 4810|790;Radeon HD 4830|964;Radeon HD 4850|1028;Radeon HD 4850 X2|1129;Radeon HD 4870|1379;Radeon HD 4870 X2|1272;Radeon HD 4890|1535;Radeon HD 5450|231;Radeon HD 5470|268;Radeon HD 5550|539;Radeon HD 5570|712;Radeon HD 5600/5700|967;Radeon HD 5670|1069;Radeon HD 5750|1419;Radeon HD 5770|1694;Radeon HD 5830|2037;Radeon HD 5850|2259;Radeon HD 5870|2606;Radeon HD 5970|2592;Radeon HD 6230|211;Radeon HD 6250|117;Radeon HD 6290|136;Radeon HD 6290M|137;Radeon HD 6300M|251;Radeon HD 6310|169;Radeon HD 6320|203;Radeon HD 6320 Graphic|216;Radeon HD 6320M|198;RADEON HD 6350|208;Radeon HD 6370D|315;Radeon HD 6370M|271;Radeon HD 6380G|299;Radeon HD 6410D|387;Radeon HD 6430M|193;Radeon HD 6450|282;Radeon HD 6450A|260;Radeon HD 6470M|314;Radeon HD 6480G|404;Radeon HD 6490M|370;Radeon HD 6520G|486;Radeon HD 6530D|514;Radeon HD 6550A|707;Radeon HD 6550D|652;Radeon HD 6570|759;Radeon HD 6610M|561;Radeon HD 6620G|563;Radeon HD 6630M|684;Radeon HD 6650M|699;Radeon HD 6670|1052;Radeon HD 6670 + 6670 Dual|646;Radeon HD 6700M|993;Radeon HD 6750|1294;Radeon HD 6750M|949;Radeon HD 6770|1669;Radeon HD 6770M|992;Radeon HD 6790|2035;Radeon HD 6800M|980;Radeon HD 6850|2258;Radeon HD 6870|2590;Radeon HD 6900M|1923;Radeon HD 6950|3189;Radeon HD 6970|3491;Radeon HD 6990|2624;Radeon HD 7290|140;Radeon HD 7310|171;Radeon HD 7310G|180;Radeon HD 7310M|165;Radeon HD 7340|209;Radeon HD 7340G|194;Radeon HD 7340M|221;Radeon HD 7350|282;Radeon HD 7400G|330;Radeon HD 7420G|450;Radeon HD 7450|317;Radeon HD 7450A|288;Radeon HD 7450M|332;Radeon HD 7470|370;Radeon HD 7470M|413;Radeon HD 7480D|424;Radeon HD 7500G|409;Radeon HD 7500G + 7500M/7600M Dual|623;Radeon HD 7500G + 7550M Dual|497;Radeon HD 7500G + HD 7500M/7600M Dual|355;Radeon HD 7520G|454;Radeon HD 7520G + 7400M Dual|486;Radeon HD 7520G + 7600M Dual|591;Radeon HD 7520G + 7610M Dual|588;Radeon HD 7520G + 7650M Dual|453;Radeon HD 7520G + 7670M Dual|528;Radeon HD 7520G + 7700M Dual|1060;Radeon HD 7520G + 8600/8700M Dual|311;Radeon HD 7520G + HD 7400M Dual|544;Radeon HD 7520G + HD 7600M Dual|596;Radeon HD 7520G + HD 7670M Dual|547;Radeon HD 7520G + HD 8600/8700M Dual|463;Radeon HD 7520G + HD 8750M Dual|651;Radeon HD 7540D|513;Radeon HD 7540D + 6570 Dual|719;Radeon HD 7550M|443;Radeon HD 7550M/7650M|731;Radeon HD 7560D|660;Radeon HD 7560D + 6570 Dual|833;Radeon HD 7560D + 6670 Dual|1130;Radeon HD 7560D + 7560D Dual|982;Radeon HD 7560D + 7670 Dual|1426;Radeon HD 7560D + HD 7000 Dual|534;Radeon HD 7560D + HD 7700 Dual|1346;Radeon HD 7570|980;Radeon HD 7570M|616;Radeon HD 7570M/HD 7670M|699;Radeon HD 7580D|350;Radeon HD 7600G|482;Radeon HD 7600G + 7450M Dual|389;Radeon HD 7600G + 7500M/7600M Dual|405;Radeon HD 7600G + 7550M Dual|423;Radeon HD 7600G + 8500M/8700M Dual|469;Radeon HD 7600G + HD 7500M/7600M Dual|550;Radeon HD 7600G + HD 7550M Dual|509;Radeon HD 7600G + HD 8670M Dual|543;Radeon HD 7600G + HD Dual|412;Radeon HD 7600M + 7600M Dual|823;Radeon HD 7610M|633;Radeon HD 7620G|469;Radeon HD 7620G + 8600M Dual|503;Radeon HD 7620G + 8670M Dual|577;Radeon HD 7620G + HD 8600M Dual|442;Radeon HD 7620G + HD 8670M Dual|513;Radeon HD 7640G|607;Radeon HD 7640G + 6400M Dual|526;Radeon HD 7640G + 7400M Dual|637;Radeon HD 7640G + 7470M Dual|598;Radeon HD 7640G + 7500/7600 Dual|627;Radeon HD 7640G + 7600M Dual|705;Radeon HD 7640G + 7610M Dual|563;Radeon HD 7640G + 7670M Dual|644;Radeon HD 7640G + 7700M Dual|690;Radeon HD 7640G + 8500M Dual|585;Radeon HD 7640G + 8570M Dual|562;Radeon HD 7640G + 8600/8700M Dual|688;Radeon HD 7640G + 8670M Dual|558;Radeon HD 7640G + 8750M Dual|654;Radeon HD 7640G + HD 7400M Dual|630;Radeon HD 7640G + HD 7600M Dual|709;Radeon HD 7640G + HD 7670M Dual|639;Radeon HD 7640G + HD 7700M Dual|589;Radeon HD 7640G + HD 8500M Dual|607;Radeon HD 7640G + HD 8500M N HD 8500M Dual|665;Radeon HD 7640G + HD 8570M Dual|677;Radeon HD 7640G + HD 8600/8700M Dual|529;Radeon HD 7640G + HD 8750M Dual|1091;Radeon HD 7640G + R5 M200 Dual|508;Radeon HD 7640G N HD 7640G + HD 7600M N HD 7600M D|824;Radeon HD 7640G N HD 7640G + HD 7670M Dual|679;Radeon HD 7650A|797;Radeon HD 7650M|726;Radeon HD 7660D|788;Radeon HD 7660D + 6570 Dual|1100;Radeon HD 7660D + 6670 Dual|1238;Radeon HD 7660D + 7470 Dual|465;Radeon HD 7660D + 7670 Dual|1061;Radeon HD 7660D + HD 6670 Dual|1484;Radeon HD 7660D + HD 7700 Dual|1958;Radeon HD 7660G|809;Radeon HD 7660G + 7400M Dual|588;Radeon HD 7660G + 7470M Dual|579;Radeon HD 7660G + 7600M Dual|821;Radeon HD 7660G + 7610M Dual|744;Radeon HD 7660G + 7670M Dual|739;Radeon HD 7660G + 7700M Dual|757;Radeon HD 7660G + 7730M Dual|931;Radeon HD 7660G + 8600M Dual|445;Radeon HD 7660G + 8670M Dual|587;Radeon HD 7660G + HD 7500M/7600M Dual|999;Radeon HD 7660G + HD 7600M Dual|804;Radeon HD 7660G + HD 7670M Dual|719;Radeon HD 7660G + HD 7700M Dual|766;Radeon HD 7660G + HD 7730M Dual|881;Radeon HD 7660G + HD 8670M Dual|725;Radeon HD 7660G N HD 7660G + HD 7600M N HD 7600M D|722;Radeon HD 7660G N HD 7660G + HD 7670M Dual|704;Radeon HD 7660G N HD 7660G + HD 7700M N HD 7700M D|966;Radeon HD 7670|1095;Radeon HD 7670A|1051;Radeon HD 7670M|814;Radeon HD 7670M + 7670M Dual|738;Radeon HD 7690M|996;Radeon HD 7690M XT|1009;Radeon HD 7730|1388;Radeon HD 7730M|1014;Radeon HD 7750|1677;Radeon HD 7750M|1191;Radeon HD 7770|2188;Radeon HD 7790|3032;Radeon HD 7850|3806;Radeon HD 7850M|1372;Radeon HD 7870|4333;Radeon HD 7870 XT|4418;Radeon HD 7870M|1477;Radeon HD 7950 / R9 280|4764;Radeon HD 7970 / R9 280X|5247;Radeon HD 7970M|3768;Radeon HD 7990|5472;Radeon HD 8180|197;Radeon HD 8210|253;Radeon HD 8240|282;Radeon HD 8250|258;Radeon HD 8280|321;Radeon HD 8280E|329;Radeon HD 8280G|269;Radeon HD 8330|343;Radeon HD 8330E|327;Radeon HD 8350|264;Radeon HD 8350G|418;Radeon HD 8370D|433;Radeon HD 8400|365;Radeon HD 8400E|341;Radeon HD 8410G|428;Radeon HD 8450G|408;Radeon HD 8450G + 8600M Dual|545;Radeon HD 8450G + 8670M Dual|474;Radeon HD 8450G + 8750M Dual|637;Radeon HD 8450G + HD 8600M Dual|452;Radeon HD 8450G + HD 8750M Dual|437;Radeon HD 8470|348;Radeon HD 8470D|513;Radeon HD 8470D + 6450 Dual|717;Radeon HD 8490|383;Radeon HD 8500M|557;Radeon HD 8500M/8700M|863;Radeon HD 8510G|509;Radeon HD 8510G + 8500M Dual|596;Radeon HD 8550D|685;Radeon HD 8550G|716;Radeon HD 8550G + 8500M Dual|602;Radeon HD 8550G + 8570M Dual|535;Radeon HD 8550G + 8600/8700M Dual|802;Radeon HD 8550G + 8600M Dual|617;Radeon HD 8550G + 8670M Dual|573;Radeon HD 8550G + 8690M Dual|664;Radeon HD 8550G + 8750M Dual|797;Radeon HD 8550G + HD 7600M Dual|854;Radeon HD 8550G + HD 8570M Dual|529;Radeon HD 8550G + HD 8600/8700M Dual|813;Radeon HD 8550G + HD 8600M Dual|593;Radeon HD 8550G + HD 8670M Dual|365;Radeon HD 8550G + HD 8750M Dual|824;Radeon HD 8550G + R5 M200 Dual|628;Radeon HD 8550G + R5 M230 Dual|667;Radeon HD 8570|963;Radeon HD 8570 + 8670D Dual|620;Radeon HD 8570D|680;Radeon HD 8570D + 6570 Dual|1239;Radeon HD 8570D + HD 6570 Dual|868;Radeon HD 8570D + HD 6670 Dual|1260;Radeon HD 8570D + HD 7700 Dual|1834;Radeon HD 8570D + HD 8570 Dual|1032;Radeon HD 8570D + R7 200 Dual|999;Radeon HD 8570D + R7 240 Dual|963;Radeon HD 8570M|547;Radeon HD 8600/8700M|1023;Radeon HD 8610G|551;Radeon HD 8610G + 8500M Dual|610;Radeon HD 8610G + 8600M Dual|588;Radeon HD 8610G + 8670M Dual|599;Radeon HD 8610G + HD 8500M Dual|645;Radeon HD 8610G + HD 8600M Dual|575;Radeon HD 8610G + HD 8670M Dual|574;Radeon HD 8610G + R5 M200 Dual|675;Radeon HD 8650D|578;Radeon HD 8650G|951;Radeon HD 8650G + 7600M Dual|741;Radeon HD 8650G + 7670M Dual|778;Radeon HD 8650G + 8500M Dual|626;Radeon HD 8650G + 8570M Dual|652;Radeon HD 8650G + 8600/8700M Dual|835;Radeon HD 8650G + 8600M Dual|613;Radeon HD 8650G + 8670M Dual|638;Radeon HD 8650G + 8750M Dual|787;Radeon HD 8650G + HD 7600M Dual|854;Radeon HD 8650G + HD 7670M Dual|634;Radeon HD 8650G + HD 8570M Dual|728;Radeon HD 8650G + HD 8600/8700M Dual|768;Radeon HD 8650G + HD 8600M Dual|604;Radeon HD 8650G + HD 8670M Dual|608;Radeon HD 8650G + HD 8750M Dual|791;Radeon HD 8650G + R5 M200 Dual|756;Radeon HD 8650G + R5 M230 Dual|708;Radeon HD 8650G N HD 8650G + HD 8570M Dual|773;Radeon HD 8650G N HD 8650G + HD 8600M N HD 8600M D|679;Radeon HD 8670D|802;Radeon HD 8670D + 6670 Dual|1361;Radeon HD 8670D + 7700 Dual|1788;Radeon HD 8670D + HD 6670 Dual|1221;Radeon HD 8670D + HD 7000 Dual|655;Radeon HD 8670D + HD 7700 Dual|1892;Radeon HD 8670D + R5 235 Dual|836;Radeon HD 8670D + R7 200 Dual|949;Radeon HD 8670D + R7 240 Dual|1020;Radeon HD 8670M|513;Radeon HD 8690A|919;Radeon HD 8690M|930;Radeon HD 8730M|895;Radeon HD 8750M|1033;Radeon HD 8790M|1266;Radeon HD 8790M / R9 M290X|1236;Radeon HD 8850M|1062;Radeon HD 8850M / R9 M265X|1139;Radeon HD 8870M|1671;Radeon HD 8870M / R9 M270X / M370X|1799;Radeon HD 8950|3104;Radeon HD 8970M|3889;Radeon HD 8990|4750;RADEON HD6370D|331;RADEON HD6410D|422;RADEON HD6530D|531;Radeon HD7570|1028;Radeon HD8490|373;Radeon HD8970M|3193;Radeon IGP 320M|3;Radeon IGP 340M|2;RADEON IGP 345M|2;RADEON IGP 350M|6;Radeon Pro 460|3492;Radeon Pro Duo|9376;Radeon Pro WX 4100|3749;Radeon Pro WX 5100|6040;Radeon Pro WX 7100|7978;Radeon Pro WX4100|3949;Radeon R2|302;Radeon R2E|223;Radeon R3|373;Radeon R3E|271;Radeon R4|399;Radeon R5 220|230;Radeon R5 235|346;Radeon R5 235 + HD 7560D Dual|743;Radeon R5 235X|373;Radeon R5 240|654;Radeon R5 310|340;Radeon R5 330|661;Radeon R5 A10-9600P RADEON R5, 10 COMPUTE CORES 4C|551;Radeon R5 M230|515;Radeon R5 M240|508;Radeon R5 M255|742;Radeon R5 M315|620;Radeon R5 M320|598;Radeon R5 M330|580;Radeon R5 M335|554;Radeon R5 M430|630;Radeon R5 PRO A10-8730B R5, 10 COMPUTE CORES 4C+6G|931;Radeon R5 PRO A6-9500E R5, 6 COMPUTE CORES 2C+4G|966;Radeon R5E|333;Radeon R6|639;Radeon R6 + R7 M265DX Dual|570;Radeon R6 A10-8700P|658;Radeon R6 A8-8600P|468;Radeon R6 PRO A10-8700B R6, 10 Compute Cores 4C+6G|536;Radeon R6 PRO A8-8600B R6, 10 Compute Cores 4C+6G|534;Radeon R7 + HD 7700 Dual|1962;Radeon R7 + R5 330 Dual|1014;Radeon R7 + R7 200 Dual|1277;Radeon R7 + R7 240 Dual|1045;Radeon R7 + R7 350 Dual|1982;Radeon R7 240|963;Radeon R7 240 + HD 8570D Dual|917;Radeon R7 240 + HD 8670D Dual|930;Radeon R7 250|1407;Radeon R7 260|2880;Radeon R7 260X|3114;Radeon R7 340|1031;Radeon R7 360|3244;Radeon R7 370|4627;Radeon R7 450|2144;Radeon R7 A10 Extreme Edition|854;Radeon R7 A10 PRO-7800B|877;Radeon R7 A10 PRO-7850B|1015;Radeon R7 A10-7700K|909;Radeon R7 A10-7800|891;Radeon R7 A10-7850K|1017;Radeon R7 A10-7860K|1008;Radeon R7 A10-7870K|1152;Radeon R7 A10-7890K|1209;Radeon R7 A10-8750|1001;Radeon R7 A12-9700P RADEON|784;Radeon R7 A265|987;Radeon R7 A370|1281;Radeon R7 A8 PRO-7600B|711;Radeon R7 A8-7500 Radeon R7, 10 Compute Cores 4C+6|1003;Radeon R7 A8-7600|930;Radeon R7 A8-7650K|866;Radeon R7 A8-7670K|841;Radeon R7 A8-8650|905;Radeon R7 A8-9600 RADEON|1301;Radeon R7 FX-8800P|782;Radeon R7 FX-9800P RADEON|782;Radeon R7 FX-9830P RADEON|1522;Radeon R7 M260|659;Radeon R7 M260X|1104;Radeon R7 M265|810;Radeon R7 M270|734;Radeon R7 M340|734;Radeon R7 M350|1408;Radeon R7 M360|699;Radeon R7 M370|1395;Radeon R7 M440|900;Radeon R7 M445|942;Radeon R7 M460|837;Radeon R7 PRO A10-8750B|922;Radeon R7 PRO A10-8770|1319;Radeon R7 PRO A10-8770E|1191;Radeon R7 PRO A10-8850B|934;Radeon R7 PRO A10-9700|1370;Radeon R7 PRO A10-9700E|1289;Radeon R7 PRO A12-8800B|784;Radeon R7 PRO A12-8870|1442;Radeon R7 PRO A12-8870E|799;Radeon R7 PRO A12-9800|1346;Radeon R7 PRO A12-9800B|1053;Radeon R7 PRO A12-9800E|1077;Radeon R7 PRO A8-8650B|897;Radeon R7 PRO A8-9600|1062;Radeon R9 255|1757;Radeon R9 260|3018;Radeon R9 270 / R7 370|4259;Radeon R9 270X|4646;Radeon R9 280|5287;Radeon R9 280X|5796;Radeon R9 285 / 380|5546;Radeon R9 290 / 390|7030;Radeon R9 290X / 390X|7313;Radeon R9 295X2|7426;Radeon R9 350|2213;Radeon R9 360|3046;Radeon R9 370|4722;Radeon R9 380|5982;Radeon R9 380X|6017;Radeon R9 390|7892;Radeon R9 390X|8428;Radeon R9 Fury + Fury X|8352;Radeon R9 M265X|1291;Radeon R9 M270X|1486;Radeon R9 M275|1111;Radeon R9 M275X / M375|1508;Radeon R9 M290X|4050;Radeon R9 M295X|5101;Radeon R9 M360|1907;Radeon R9 M370X|1935;Radeon R9 M375|1274;Radeon R9 M375X|2188;Radeon R9 M380|3047;Radeon R9 M390X|4118;Radeon R9 M395|5155;Radeon R9 M395X|5745;Radeon R9 M470X|3507;Radeon RX 460|4297;Radeon RX 470|7335;Radeon RX 480|8046;Radeon RX 570|6686;Radeon RX 580|7500;Radeon TM R9 A360|2148;Radeon X1050|50;Radeon X1200|31;Radeon X1250|36;Radeon X1270|31;Radeon X1300|57;Radeon X1300 PRO|86;Radeon X1550|64;Radeon X1550 64-bit|46;Radeon X1600|44;Radeon X1600 Pro|98;Radeon X1600 Pro / X1300XT|69;Radeon X1600 XT|111;Radeon X1650 GTO|74;Radeon X1650 Pro|82;Radeon X1650 SE|71;Radeon X1700 Targa Edition|116;Radeon X1800 GTO|140;Radeon X1900 CrossFire Edition|137;Radeon X1900 GT|145;Radeon X1950 CrossFire Edition|151;Radeon X1950 GT|110;Radeon X1950 Pro|111;RADEON X300SE|38;RADEON X550|49;RADEON X550XT|54;Radeon X550XTX|70;RADEON X600 256MB HyperMemory|56;RADEON X600XT|91;RADEON X700|71;RADEON X700 PRO|76;RADEON X700 SE|71;RADEON X800 GT|84;RADEON X800 GTO|75;RADEON X800 PRO|64;RADEON X800 PRO/GTO|73;RADEON X800 XL|69;RADEON X800 XT|97;RADEON X800GT|79;RADEON X850 PRO|72;RADEON X850 XT|81;RADEON X850 XT Platinum Edition|79;Radeon Xpress 1100|32;Radeon Xpress 1150|29;Radeon Xpress 1200|35;Radeon Xpress 1250|43;Radeon Xpress 1270|26;RADEON XPRESS 200|29;RADEON XPRESS 200M|21;RadeonT R7 450|2115;Rage Fury Pro/Xpert 2000 Pro|3;RIVA TNT2 Model 64/Model 64 Pro|3;RIVA TNT2/TNT2 Pro|3;RV530 PRO|118;S3 Chrome 430 ULP|39;S3 ProSavageDDR|1;SAPPHIRE RADEON 9600 ATLANTIS|47;SAPPHIRE Radeon X1550|61;Sapphire RADEON X800 GT|112;Sherry 1.3 for GMA 3150|1;Sherry 1.3.2 beta for 945 chipsets|3;SiS 630/730|1;SiS 650_651_M650_M652_740|3;SiS 651|2;SiS 661FX|3;SiS 661FX/GX Mirage|4;SiS 661FX_760_741_M661FX_M760_M741|4;SiS 741|4;SiS 760|5;SiS M661MX|4;SiS M760GX|3;SiS Mirage|4;SiS Mirage 3|2;SUMO 9640|650;SUMO 964A|497;Tesla C2050|3472;Tesla C2050 / C2070|3756;Tesla C2070|3040;Tesla C2075|3191;TRINITY DEVASTATOR MOBILE|575;Vanta/Vanta LT|3;VIA Chrome9 HC IGP|4;VIA Chrome9 HC IGP Family|4;VIA Chrome9 HC IGP Family WDDM|3;VIA Chrome9 HC IGP Prerelease WDDM 1.1|2;VIA Chrome9 HC IGP WDDM|3;VIA Chrome9 HC IGP WDDM 1.1|3;VIA Chrome9 HD IGP|11;VIA/S3G Chrome 645/640 GPU|106;VIA/S3G DeltaChrome IGP|3;VIA/S3G KM400/KN400|4;VIA/S3G UniChrome IGP|4;VIA/S3G UniChrome Pro IGP|4;VIA/S3G UniChromeII|5;VirtualBox Adapter for Windows 8+|441;Wine Display Adapter|280"
+//unpack gpu benchmarks 
+var availBenchmarks=[];
+	packed.split(";").forEach(function(v) { var arr=v.split("|"); availBenchmarks.push({vendor:arr[0],score:arr[1]}) })
+
+
+	function sortEM(vendorName)
+	{
+		return availBenchmarks.sort(function(a,b){
+			
+			return Levenshtein.get(a,vendorName)<Levenshtein.get(b,vendorName)	
+		})	
+	}
+	
+	
+return {
+	lt:function(bmVal,callback){
+	 	$$.on("slow-device",callback)
+		
+		return this;	
+	},
+	run:function(){	
+		var canvas = document.createElement('canvas');
+		var gl;
+		var debugInfo;
+		var vendor;
+		var renderer;
+
+		try {
+		  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+		} 
+		catch (e) {
+		}
+
+		if (gl) {
+		  debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+		  vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+		  renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+		}
+
+		console.log(debugInfo, vendor, renderer);
+
+
+
+		//renderer contains graphics card vendor info
+
+		//var sorted=sortEM(renderer)
+		console.warn("gpu-info only rudimentary")
+		
+		if (renderer.indexOf("Intel"))
+		$$.trigger("slow-device")
+	
+	}
+
+}
+
+}
+
+
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(234)(module), __webpack_require__(0)))
+
+/***/ }),
 /* 101 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__graph_hud_html__ = __webpack_require__(191);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__graph_hud_html__ = __webpack_require__(193);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__graph_hud_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__graph_hud_html__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__info_panel_InfoPanel__ = __webpack_require__(103);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__company_info_CompanyInfo__ = __webpack_require__(102);
@@ -93814,7 +93878,7 @@ customElements.define("graph-hud", GraphHUD);
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__company_info_html__ = __webpack_require__(190);
+/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__company_info_html__ = __webpack_require__(192);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__company_info_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__company_info_html__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__searchable_option_list_SearchableOptionList__ = __webpack_require__(104);
 
@@ -93853,7 +93917,7 @@ customElements.define("company-info", CompanyInfo);
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__info_panel_html__ = __webpack_require__(192);
+/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__info_panel_html__ = __webpack_require__(194);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__info_panel_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__info_panel_html__);
 
 
@@ -93889,11 +93953,11 @@ customElements.define("info-panel", InfoPanel);
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__sol__ = __webpack_require__(105);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sol_css__ = __webpack_require__(218);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sol_css__ = __webpack_require__(220);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sol_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__sol_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__searchOptions_json__ = __webpack_require__(227);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__searchOptions_json__ = __webpack_require__(231);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__searchOptions_json___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__searchOptions_json__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__searchable_option_list_html__ = __webpack_require__(193);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__searchable_option_list_html__ = __webpack_require__(195);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__searchable_option_list_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__searchable_option_list_html__);
 
 
@@ -96862,12 +96926,12 @@ module.exports = (function() {
 /* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(10)(undefined);
+exports = module.exports = __webpack_require__(6)(undefined);
 // imports
 
 
 // module
-exports.push([module.i, ".graph-nav-info {\r\n    position: absolute;\r\n    bottom: 5px;\r\n    width: 100%;\r\n    text-align: center;\r\n    color: slategrey;\r\n    opacity: 0.7;\r\n    font-size: 10px;\r\n}\r\n\r\n.graph-tooltip {\r\n    position: absolute;\r\n    color: lavender;\r\n    font-size: 18px;\r\n\tpointer-events: none;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\t.industry-info-row * {\r\n    vertical-align: middle;\r\n\tpadding:0.2em\r\n\t}\r\n\r\n\r\n\t.searchbar-container\r\n\t{\r\n\t\tz-index:999;\r\n\r\n\t}\r\n\r\n\r\n\t.graph-node-info\r\n\t{\r\n\t\t    overflow-y: visible;\r\n\t\tposition:absolute;\r\n\t\ttop:10px;\r\n\t\tleft:400px;\r\n\t\tz-index:999;\r\n\t\t\r\n\t\tcolor:white;\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  \r\n\t\t  max-height:760px;\r\n\t\t  max-width:810px;\r\n\t\t  \r\n\t\t   text-align: left;\r\n\t\t       overflow: hidden;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.graph-node-info-header{\r\n\t\tbackground-color: rgba(47, 45, 45, 0.81) !important;\t\r\n\t\tdisplay:flex;\r\n\t\ttext-align:right;\r\n\t}\r\n\r\n\t  \r\n\t\r\n\t.graph-node-info-search{\r\n\t\t\r\n\t\t\tbackground:#1f4e79;\r\n\t\t padding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.graph-node-info-search a{\r\n\t\t\r\n\t\tcolor:white;\r\n\t\ttext-decoration:none;\r\n\t}\r\n\t\r\n\t.graph-node-info-price{\r\n\t\t\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t}\r\n\t.graph-node-info-close{\r\n\t\t\t\r\n\t\t\tbackground-color: transparent !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-node-info-news-header{\r\n\t\tpadding:0.5em;\r\n\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\r\n\t}\r\n\t.graph-node-info-news-body{\r\n\t\tpadding:0.5em;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-tooltip\r\n\t{\r\n\t\t\r\n\t}\r\n\t.graph-tooltip > .content\r\n\t{\r\n\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\tpadding:0.5em;\t\r\n\t}\r\n\t\r\n\t.ui-autocomplete\r\n\t{\r\n\tbackground-color: rgba(255, 255, 255, 0.2) !important;\r\n    color: white !important;\r\n\tborder:0px !important;\r\n\t\r\n\t max-height:30em; overflow-y: scroll; \r\n\t max-width:20em;\r\n\t}\t\r\n\t\r\n\t\r\n\t\r\n\t.ui-accordion{\r\n\t\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  padding: 0px 2px 0px 2px\r\n\t\t  \r\n\t}\r\n\t\r\n\t.ui-accordion > *{\r\n\t\tmargin:0px;\r\n\t\t\r\n\t}\r\n\t\r\n\t.ui-accordion-header{\r\n\t\t    margin: 2px 0px 2px 0px !important;\r\n\t\t\tfont-weight:bold;\r\n\t\t\tcolor:white;\r\n\t\t\t text-align: left;\r\n\t}\r\n\t\r\n\t.ui-accordion-header:focus{\r\n\t\t outline: 0;\r\n\t\t background: rgba(0, 0, 0, 0.25);\r\n\t\t \r\n\t}\r\n\t\r\n\t.ui-accordion-content\r\n\t{\r\n\t\toverflow:visible;\r\n\t\t text-align: left;\r\n\t\t padding:.5em .5em .5em .7em !important;\r\n\t\t color:white !important;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.ui-widget-content\r\n\t{\r\n\t\t background: rgba(24, 23, 23, 0.21);\r\n\t\tborder:0px;\r\n\t}\r\n\t\r\n\t.ui-state-default\r\n\t{\r\n\t\t    background: rgba(32, 32, 32, 0.25);\r\n\t\t\tborder:0px;\r\n\t}\r\n\t\r\n\t\r\n\t.zoom-slider\r\n\t{\r\n\t\tposition:absolute;\r\n\t\ttop:1em;\r\n\t\tleft:60%;\r\n\t\tbackground:transparent;\r\n\t\t min-width: 300px;\r\n\t\tdisplay:inline-block;\r\n\t\twidth:200px !important;\r\n\tz-index:999;\r\n\t\t\r\n\t}\r\n\t.ui-slider\r\n\t{\r\n\t\t\r\n\t\tdisplay:none;\r\n\t\t\r\n\t\t\r\n\t  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n\t  background: -webkit-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: -o-linear-gradient(left,orange,grey);\r\n\t  \r\n\t  background: -moz-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: linear-gradient(to right,orange,grey); \r\n\t  \r\n\t      height: 0.2em;\r\n    border: 0 !important;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t.ui-slider .ui-slider-handle {\r\n    width:2em;\r\n    height:1.6em;\r\n\tborder: 0 !important;\r\n    text-decoration:none;\r\n    text-align:center;\r\n\t    top: -1em;\r\n\t\r\n\tbackground: url(" + __webpack_require__(222) + ");\r\n    background-size: 2em;\r\n\t\r\n\t}\r\n\t.ui-slider-handle:focus{\r\n\t\toutline:0;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-container{\r\n\t\r\n\tleft:240px;\r\n\tdisplay:flex;\r\n    position: absolute;\r\n\ttop:15px;\r\n\t\r\n\tborder: 0;\r\n\t\r\n\t}\r\n\t\r\n\t\r\n\t.searchbar-container input{\r\n\t\t\r\n\t\tborder-radius: 5px;\r\n\t\tborder: 0;\r\n\t\t min-width: 400px;\r\n\t\toutline: none;\r\n\t\tpadding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-search\r\n\t{\r\n   /* position: absolute;\r\n\tdisplay: inline-block;\r\n    content: \"\";\r\n    width: 26px;\r\n    height: 26px;\r\n    background: url('data:image/svg+xml;utf8,<svg width=\"1792\" height=\"1792\" viewBox=\"0 0 1792 1792\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1216 832q0-185-131.5-316.5t-316.5-131.5-316.5 131.5-131.5 316.5 131.5 316.5 316.5 131.5 316.5-131.5 131.5-316.5zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124-143 0-273.5-55.5t-225-150-150-225-55.5-273.5 55.5-273.5 150-225 225-150 273.5-55.5 273.5 55.5 225 150 150 225 55.5 273.5q0 220-124 399l343 343q37 37 37 90z\" fill=\"#fff\"/></svg>');\t\r\n\tbackground-size: 100%;*/\r\n\t}\r\n\r\n\t.searchbar-search-row\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-bottom:1px solid darkslateblue\r\n\t\t\r\n\t}\r\n\t\r\n\t.searchbar-search-row b\r\n\t{\r\n\t\tcolor:darkslateblue;\r\n\t\t text-shadow: 0 0 0.1em white, 0 0 0.1em white, 0 0 0.1em white;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n  .ui-progressbar {\r\n    position: absolute;\r\n\ttop:10px;\r\n\tleft:10px;\r\n\twidth:30%;\r\n\theight:20px;\r\n  }\r\n  .progress-label {\r\n    position: absolute;\r\n    left: 10%;\r\n    top: 4px;\r\n    font-weight: bold;\r\n    text-shadow: 1px 1px 0 #fff;\r\n  }\r\n\r\n\r\n  .noselect {\r\n  -webkit-touch-callout: none; /* iOS Safari */\r\n    -webkit-user-select: none; /* Safari */\r\n     -khtml-user-select: none; /* Konqueror HTML */\r\n       -moz-user-select: none; /* Firefox */\r\n        -ms-user-select: none; /* Internet Explorer/Edge */\r\n            user-select: none; /* Non-prefixed version, currently\r\n                                  supported by Chrome and Opera */\r\n}\r\n  \r\n  \r\n\t.graph-country-caption\r\n\t{\r\n\tcolor:ffffff;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t\t\r\n\t\tfont-size: 0.8em;\r\n\t\tfont-weight: 900;\r\n\t\topacity: 0.5;\r\n\t}\r\n\t\r\n\t.graph-country-caption:hover\r\n\t{\r\n\t\t\r\n\t    opacity: 0.6 !important;\r\n\t\tcolor:darkslateblue;\r\n\t\t\r\n\t\t\r\n    text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;\r\n\t\t\r\n\t}\r\n  \r\n  \r\n \r\n\t.node-caption\r\n\t{\r\n\t\tcolor:white;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t}\r\n\t\r\n\t.node-caption-highlighted\r\n\t{\r\n\t\tcolor: white !important;\r\n\t\t//font-weight: bold;\r\n\t\ttext-shadow: 0 0 0.3em white, 0 0 0.3em white, 0 0 0.3em white;\r\n\t}\r\n\t\r\n\r\n\t.cloudNodeColorSelect\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:40px;\r\n\t\tleft:48%;\r\n\t\tz-index:999;\r\n\t\twidth:130px;\r\n\t\t\r\n\t\t\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor: white;\r\n\t\tborder: transparent;\r\n\t\t\r\n\t}\r\n\t.cloudNodeColorSelect:focus{\r\n\t\toutline:0\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.bottomCompanyGradient\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:20px;\r\n\t\tleft:0px;\r\n\t\tright:0px;\r\n\t\tz-index:999;\r\n\t\tcolor:white;\r\n\t\tdisplay:flex;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\t.companyGradient {\r\n  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n  background: -webkit-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: -o-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n  \r\n  background: -moz-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: linear-gradient(to left,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729); \r\n}\r\n\t\r\n\t.rightCompanyInfo\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tright:0.5em;\r\n\t\ttop:50px;\r\n\t\tz-index:999;\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor:white;\r\n\t\tborder:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t.rightCompanyInfo .event\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-top:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t#companyIndustry img {\r\n    height: 1.5em;\r\n\t}", ""]);
+exports.push([module.i, ".graph-nav-info {\r\n    position: absolute;\r\n    bottom: 5px;\r\n    width: 100%;\r\n    text-align: center;\r\n    color: slategrey;\r\n    opacity: 0.7;\r\n    font-size: 10px;\r\n}\r\n\r\n.graph-tooltip {\r\n    position: absolute;\r\n    color: lavender;\r\n    font-size: 18px;\r\n\tpointer-events: none;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\t.industry-info-row * {\r\n    vertical-align: middle;\r\n\tpadding:0.2em\r\n\t}\r\n\r\n\r\n\t.searchbar-container\r\n\t{\r\n\t\tz-index:999;\r\n\r\n\t}\r\n\r\n\r\n\t.graph-node-info\r\n\t{\r\n\t\t    overflow-y: visible;\r\n\t\tposition:absolute;\r\n\t\ttop:10px;\r\n\t\tleft:400px;\r\n\t\tz-index:999;\r\n\t\t\r\n\t\tcolor:white;\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  \r\n\t\t  max-height:760px;\r\n\t\t  max-width:810px;\r\n\t\t  \r\n\t\t   text-align: left;\r\n\t\t       overflow: hidden;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.graph-node-info-header{\r\n\t\tbackground-color: rgba(47, 45, 45, 0.81) !important;\t\r\n\t\tdisplay:flex;\r\n\t\ttext-align:right;\r\n\t}\r\n\r\n\t  \r\n\t\r\n\t.graph-node-info-search{\r\n\t\t\r\n\t\t\tbackground:#1f4e79;\r\n\t\t padding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.graph-node-info-search a{\r\n\t\t\r\n\t\tcolor:white;\r\n\t\ttext-decoration:none;\r\n\t}\r\n\t\r\n\t.graph-node-info-price{\r\n\t\t\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t}\r\n\t.graph-node-info-close{\r\n\t\t\t\r\n\t\t\tbackground-color: transparent !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-node-info-news-header{\r\n\t\tpadding:0.5em;\r\n\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\r\n\t}\r\n\t.graph-node-info-news-body{\r\n\t\tpadding:0.5em;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-tooltip\r\n\t{\r\n\t\t\r\n\t}\r\n\t.graph-tooltip > .content\r\n\t{\r\n\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\tpadding:0.5em;\t\r\n\t}\r\n\t\r\n\t.ui-autocomplete\r\n\t{\r\n\tbackground-color: rgba(255, 255, 255, 0.2) !important;\r\n    color: white !important;\r\n\tborder:0px !important;\r\n\t\r\n\t max-height:30em; overflow-y: scroll; \r\n\t max-width:20em;\r\n\t}\t\r\n\t\r\n\t/**\r\n\tTODO used in left-info-panel and should be used by web component and put itno shadow dom preferrably\r\n\t*/\r\n\t.my-accordion{\r\n\t\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25) !important;\r\n\t\t  padding: 0px 2px 0px 2px!important;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.my-accordion > *{\r\n\t\tmargin:0px !important;\r\n\t\t\r\n\t}\r\n\r\n.my-accordion > .ui-accordion-header{\r\n\t\t\tmargin: 2px 0 0 0;\r\n\t\t\tpadding: .5em .5em .5em .7em;\r\n\t\t\tfont-weight:bold !important;\r\n\t\t\tcolor:white !important;\r\n\t\t\t text-align: left !important;\r\n\t}\r\n\r\n.my-accordion > .ui-accordion-header:focus{\r\n\t\t outline: 0 !important;\r\n\t\t background: rgba(0, 0, 0, 0.25) !important;\r\n\t\t \r\n\t}\r\n\r\n.my-accordion >\t.ui-accordion-content\r\n\t{\r\n\t\toverflow:visible !important;\r\n\t\t text-align: left !important;\r\n\t\t padding:.5em .5em .5em .7em !important;\r\n\t\t color:white !important;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.ui-widget-content\r\n\t{\r\n\t\t background: rgba(24, 23, 23, 0.21);\r\n\t\tborder:0px;\r\n\t}\r\n\t\r\n\t.ui-state-default\r\n\t{\r\n\t\t    background: rgba(32, 32, 32, 0.25);\r\n\t\t\tborder:0px;\r\n\t}\r\n\t\r\n\t\r\n\t.zoom-slider\r\n\t{\r\n\t\tposition:absolute;\r\n\t\ttop:1em;\r\n\t\tleft:60%;\r\n\t\tbackground:transparent;\r\n\t\t min-width: 300px;\r\n\t\tdisplay:inline-block;\r\n\t\twidth:200px !important;\r\n\tz-index:999;\r\n\t\t\r\n\t}\r\n\t.ui-slider\r\n\t{\r\n\t\t\r\n\t\tdisplay:none;\r\n\t\t\r\n\t\t\r\n\t  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n\t  background: -webkit-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: -o-linear-gradient(left,orange,grey);\r\n\t  \r\n\t  background: -moz-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: linear-gradient(to right,orange,grey); \r\n\t  \r\n\t      height: 0.2em;\r\n    border: 0 !important;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t.ui-slider .ui-slider-handle {\r\n    width:2em;\r\n    height:1.6em;\r\n\tborder: 0 !important;\r\n    text-decoration:none;\r\n    text-align:center;\r\n\t    top: -1em;\r\n\t\r\n\tbackground: url(" + __webpack_require__(226) + ");\r\n    background-size: 2em;\r\n\t\r\n\t}\r\n\t.ui-slider-handle:focus{\r\n\t\toutline:0;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-container{\r\n\t\r\n\tleft:240px;\r\n\tdisplay:flex;\r\n    position: absolute;\r\n\ttop:15px;\r\n\t\r\n\tborder: 0;\r\n\t\r\n\t}\r\n\t\r\n\t\r\n\t.searchbar-container input{\r\n\t\t\r\n\t\tborder-radius: 5px;\r\n\t\tborder: 0;\r\n\t\t min-width: 400px;\r\n\t\toutline: none;\r\n\t\tpadding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-search\r\n\t{\r\n   /* position: absolute;\r\n\tdisplay: inline-block;\r\n    content: \"\";\r\n    width: 26px;\r\n    height: 26px;\r\n    background: url('data:image/svg+xml;utf8,<svg width=\"1792\" height=\"1792\" viewBox=\"0 0 1792 1792\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1216 832q0-185-131.5-316.5t-316.5-131.5-316.5 131.5-131.5 316.5 131.5 316.5 316.5 131.5 316.5-131.5 131.5-316.5zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124-143 0-273.5-55.5t-225-150-150-225-55.5-273.5 55.5-273.5 150-225 225-150 273.5-55.5 273.5 55.5 225 150 150 225 55.5 273.5q0 220-124 399l343 343q37 37 37 90z\" fill=\"#fff\"/></svg>');\t\r\n\tbackground-size: 100%;*/\r\n\t}\r\n\r\n\t.searchbar-search-row\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-bottom:1px solid darkslateblue\r\n\t\t\r\n\t}\r\n\t\r\n\t.searchbar-search-row b\r\n\t{\r\n\t\tcolor:darkslateblue;\r\n\t\t text-shadow: 0 0 0.1em white, 0 0 0.1em white, 0 0 0.1em white;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n  .ui-progressbar {\r\n    position: absolute;\r\n\ttop:10px;\r\n\tleft:10px;\r\n\twidth:30%;\r\n\theight:20px;\r\n  }\r\n  .progress-label {\r\n    position: absolute;\r\n    left: 10%;\r\n    top: 4px;\r\n    font-weight: bold;\r\n    text-shadow: 1px 1px 0 #fff;\r\n  }\r\n\r\n\r\n  .noselect {\r\n  -webkit-touch-callout: none; /* iOS Safari */\r\n    -webkit-user-select: none; /* Safari */\r\n     -khtml-user-select: none; /* Konqueror HTML */\r\n       -moz-user-select: none; /* Firefox */\r\n        -ms-user-select: none; /* Internet Explorer/Edge */\r\n            user-select: none; /* Non-prefixed version, currently\r\n                                  supported by Chrome and Opera */\r\n}\r\n  \r\n  \r\n\t.graph-country-caption\r\n\t{\r\n\tcolor:ffffff;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t\t\r\n\t\tfont-size: 0.8em;\r\n\t\tfont-weight: 900;\r\n\t\topacity: 0.5;\r\n\t}\r\n\t\r\n\t.graph-country-caption:hover\r\n\t{\r\n\t\t\r\n\t    opacity: 0.6 !important;\r\n\t\tcolor:darkslateblue;\r\n\t\t\r\n\t\t\r\n    text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;\r\n\t\t\r\n\t}\r\n  \r\n  \r\n \r\n\t.node-caption\r\n\t{\r\n\t\tcolor:white;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t}\r\n\t\r\n\t.node-caption-highlighted\r\n\t{\r\n\t\tcolor: white !important;\r\n\t\t//font-weight: bold;\r\n\t\ttext-shadow: 0 0 0.3em white, 0 0 0.3em white, 0 0 0.3em white;\r\n\t}\r\n\t\r\n\r\n\t.cloudNodeColorSelect\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:40px;\r\n\t\tleft:48%;\r\n\t\tz-index:999;\r\n\t\twidth:130px;\r\n\t\t\r\n\t\t\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor: white;\r\n\t\tborder: transparent;\r\n\t\t\r\n\t}\r\n\t.cloudNodeColorSelect:focus{\r\n\t\toutline:0\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.bottomCompanyGradient\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:20px;\r\n\t\tleft:0px;\r\n\t\tright:0px;\r\n\t\tz-index:999;\r\n\t\tcolor:white;\r\n\t\tdisplay:flex;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\t.companyGradient {\r\n  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n  background: -webkit-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: -o-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n  \r\n  background: -moz-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: linear-gradient(to left,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729); \r\n}\r\n\t\r\n\t.rightCompanyInfo\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tright:0.5em;\r\n\t\ttop:50px;\r\n\t\tz-index:999;\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor:white;\r\n\t\tborder:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t.rightCompanyInfo .event\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-top:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t#companyIndustry img {\r\n    height: 1.5em;\r\n\t}", ""]);
 
 // exports
 
@@ -96876,7 +96940,7 @@ exports.push([module.i, ".graph-nav-info {\r\n    position: absolute;\r\n    bot
 /* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(10)(undefined);
+exports = module.exports = __webpack_require__(6)(undefined);
 // imports
 
 
@@ -96890,7 +96954,7 @@ exports.push([module.i, "body {\n    text-align: center;\n    font-family: Sans-
 /* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(10)(undefined);
+exports = module.exports = __webpack_require__(6)(undefined);
 // imports
 exports.push([module.i, "@import url(https://fonts.googleapis.com/css?family=Exo+2);", ""]);
 
@@ -96904,7 +96968,7 @@ exports.push([module.i, "sample-cluster-application * {\r\n    font-family: 'rob
 /* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(10)(undefined);
+exports = module.exports = __webpack_require__(6)(undefined);
 // imports
 
 
@@ -96918,7 +96982,7 @@ exports.push([module.i, "mode-select {\r\n    position: absolute;\r\n    top: 10
 /* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(10)(undefined);
+exports = module.exports = __webpack_require__(6)(undefined);
 // imports
 
 
@@ -96932,7 +96996,21 @@ exports.push([module.i, "@-moz-keyframes blinker {\n    0% {opacity: 1.0;}\n    
 /* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(10)(undefined);
+exports = module.exports = __webpack_require__(6)(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "/*!\n * jQuery UI Autocomplete 1.12.1\n * http://jqueryui.com\n *\n * Copyright jQuery Foundation and other contributors\n * Released under the MIT license.\n * http://jquery.org/license\n *\n * http://api.jqueryui.com/autocomplete/#theming\n */\n.ui-autocomplete {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\tcursor: default;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 119 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(6)(undefined);
 // imports
 
 
@@ -96943,7 +97021,21 @@ exports.push([module.i, "/*!\n * jQuery UI CSS Framework 1.12.1\n * http://jquer
 
 
 /***/ }),
-/* 119 */
+/* 120 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(6)(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "/*!\n * jQuery UI Menu 1.12.1\n * http://jqueryui.com\n *\n * Copyright jQuery Foundation and other contributors\n * Released under the MIT license.\n * http://jquery.org/license\n *\n * http://api.jqueryui.com/menu/#theming\n */\n.ui-menu {\n\tlist-style: none;\n\tpadding: 0;\n\tmargin: 0;\n\tdisplay: block;\n\toutline: 0;\n}\n.ui-menu .ui-menu {\n\tposition: absolute;\n}\n.ui-menu .ui-menu-item {\n\tmargin: 0;\n\tcursor: pointer;\n\t/* support: IE10, see #8844 */\n\tlist-style-image: url(\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7\");\n}\n.ui-menu .ui-menu-item-wrapper {\n\tposition: relative;\n\tpadding: 3px 1em 3px .4em;\n}\n.ui-menu .ui-menu-divider {\n\tmargin: 5px 0;\n\theight: 0;\n\tfont-size: 0;\n\tline-height: 0;\n\tborder-width: 1px 0 0 0;\n}\n.ui-menu .ui-state-focus,\n.ui-menu .ui-state-active {\n\tmargin: -1px;\n}\n\n/* icon support */\n.ui-menu-icons {\n\tposition: relative;\n}\n.ui-menu-icons .ui-menu-item-wrapper {\n\tpadding-left: 2em;\n}\n\n/* left-aligned */\n.ui-menu .ui-icon {\n\tposition: absolute;\n\ttop: 0;\n\tbottom: 0;\n\tleft: .2em;\n\tmargin: auto 0;\n}\n\n/* right-aligned */\n.ui-menu .ui-menu-icon {\n\tleft: auto;\n\tright: 0;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 121 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97019,22 +97111,22 @@ function addAll(data) {
 
 
 /***/ }),
-/* 120 */
+/* 122 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = binarytree;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(119);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(121);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(122);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(123);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(124);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(125);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(126);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(127);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(128);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(129);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(130);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(121);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(123);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(124);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(125);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(126);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(127);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(128);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(129);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(130);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(131);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(132);
 
 
 
@@ -97105,7 +97197,7 @@ treeProto.visitAfter = __WEBPACK_IMPORTED_MODULE_9__visitAfter__["a" /* default 
 treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 /***/ }),
-/* 121 */
+/* 123 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97155,7 +97247,7 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 
 /***/ }),
-/* 122 */
+/* 124 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97169,7 +97261,7 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 
 /***/ }),
-/* 123 */
+/* 125 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97181,11 +97273,11 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 
 /***/ }),
-/* 124 */
+/* 126 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(24);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, radius) {
@@ -97247,7 +97339,7 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 
 
 /***/ }),
-/* 125 */
+/* 127 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97311,7 +97403,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 126 */
+/* 128 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97321,7 +97413,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 127 */
+/* 129 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97335,11 +97427,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 128 */
+/* 130 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(24);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -97357,11 +97449,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 129 */
+/* 131 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(24);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -97384,7 +97476,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 130 */
+/* 132 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97399,7 +97491,7 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 131 */
+/* 133 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97411,7 +97503,7 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 132 */
+/* 134 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97423,11 +97515,11 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 133 */
+/* 135 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(25);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function() {
@@ -97504,11 +97596,11 @@ function setMap(map, key, value) {
 
 
 /***/ }),
-/* 134 */
+/* 136 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(25);
 
 
 function Set() {}
@@ -97551,7 +97643,7 @@ function set(object, f) {
 
 
 /***/ }),
-/* 135 */
+/* 137 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97563,17 +97655,17 @@ function set(object, f) {
 
 
 /***/ }),
-/* 136 */
+/* 138 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_dispatch__ = __webpack_require__(137);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_dispatch__ = __webpack_require__(139);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_dispatch__["a"]; });
 
 
 
 /***/ }),
-/* 137 */
+/* 139 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97664,26 +97756,26 @@ function set(type, name, callback) {
 
 
 /***/ }),
-/* 138 */
+/* 140 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_center__ = __webpack_require__(139);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_center__ = __webpack_require__(141);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceCenter", function() { return __WEBPACK_IMPORTED_MODULE_0__src_center__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_collide__ = __webpack_require__(140);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_collide__ = __webpack_require__(142);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceCollide", function() { return __WEBPACK_IMPORTED_MODULE_1__src_collide__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_link__ = __webpack_require__(141);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_link__ = __webpack_require__(143);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceLink", function() { return __WEBPACK_IMPORTED_MODULE_2__src_link__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_manyBody__ = __webpack_require__(142);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_manyBody__ = __webpack_require__(144);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceManyBody", function() { return __WEBPACK_IMPORTED_MODULE_3__src_manyBody__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_simulation__ = __webpack_require__(54);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceSimulation", function() { return __WEBPACK_IMPORTED_MODULE_4__src_simulation__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_x__ = __webpack_require__(143);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_x__ = __webpack_require__(145);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceX", function() { return __WEBPACK_IMPORTED_MODULE_5__src_x__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_y__ = __webpack_require__(144);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_y__ = __webpack_require__(146);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceY", function() { return __WEBPACK_IMPORTED_MODULE_6__src_y__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_z__ = __webpack_require__(145);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__src_z__ = __webpack_require__(147);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "forceZ", function() { return __WEBPACK_IMPORTED_MODULE_7__src_z__["a"]; });
 
 
@@ -97695,7 +97787,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 139 */
+/* 141 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -97747,12 +97839,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /***/ }),
-/* 140 */
+/* 142 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(26);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_binarytree__ = __webpack_require__(52);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_quadtree__ = __webpack_require__(56);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_octree__ = __webpack_require__(55);
@@ -97889,12 +97981,12 @@ function z(d) {
 
 
 /***/ }),
-/* 141 */
+/* 143 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(26);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_collection__ = __webpack_require__(53);
 
 
@@ -98022,12 +98114,12 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 142 */
+/* 144 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(26);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_binarytree__ = __webpack_require__(52);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_quadtree__ = __webpack_require__(56);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_octree__ = __webpack_require__(55);
@@ -98169,11 +98261,11 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 143 */
+/* 145 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x) {
@@ -98218,11 +98310,11 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 144 */
+/* 146 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(y) {
@@ -98267,11 +98359,11 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 145 */
+/* 147 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(z) {
@@ -98316,7 +98408,7 @@ function find(nodeById, nodeId) {
 
 
 /***/ }),
-/* 146 */
+/* 148 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98426,7 +98518,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 147 */
+/* 149 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98516,7 +98608,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 148 */
+/* 150 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98530,7 +98622,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 149 */
+/* 151 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98542,11 +98634,11 @@ function addAll(data) {
 
 
 /***/ }),
-/* 150 */
+/* 152 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(27);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, y, z, radius) {
@@ -98632,24 +98724,24 @@ function addAll(data) {
 
 
 /***/ }),
-/* 151 */
+/* 153 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = octree;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(146);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(147);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(148);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(149);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(150);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(152);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(153);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(154);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(155);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(156);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(157);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__y__ = __webpack_require__(158);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__z__ = __webpack_require__(159);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(148);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(149);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(150);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(151);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(152);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(154);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(155);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(156);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(157);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(158);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(159);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__y__ = __webpack_require__(160);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__z__ = __webpack_require__(161);
 
 
 
@@ -98731,7 +98823,7 @@ treeProto.z = __WEBPACK_IMPORTED_MODULE_12__z__["b" /* default */];
 
 
 /***/ }),
-/* 152 */
+/* 154 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98807,7 +98899,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 153 */
+/* 155 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98817,7 +98909,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 154 */
+/* 156 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98831,11 +98923,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 155 */
+/* 157 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(27);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -98859,11 +98951,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 156 */
+/* 158 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(27);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -98892,7 +98984,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 157 */
+/* 159 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98907,7 +98999,7 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 158 */
+/* 160 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98922,7 +99014,7 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 159 */
+/* 161 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98937,7 +99029,7 @@ function defaultZ(d) {
 
 
 /***/ }),
-/* 160 */
+/* 162 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99030,7 +99122,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 161 */
+/* 163 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99095,7 +99187,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 162 */
+/* 164 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99109,7 +99201,7 @@ function addAll(data) {
 
 
 /***/ }),
-/* 163 */
+/* 165 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99121,11 +99213,11 @@ function addAll(data) {
 
 
 /***/ }),
-/* 164 */
+/* 166 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(28);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, y, radius) {
@@ -99199,23 +99291,23 @@ function addAll(data) {
 
 
 /***/ }),
-/* 165 */
+/* 167 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = quadtree;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(160);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(161);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(162);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(163);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(164);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(166);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(167);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(168);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(169);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(170);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(171);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__y__ = __webpack_require__(172);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__add__ = __webpack_require__(162);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cover__ = __webpack_require__(163);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__data__ = __webpack_require__(164);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__extent__ = __webpack_require__(165);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__find__ = __webpack_require__(166);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__remove__ = __webpack_require__(168);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__root__ = __webpack_require__(169);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__size__ = __webpack_require__(170);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__visit__ = __webpack_require__(171);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__visitAfter__ = __webpack_require__(172);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__x__ = __webpack_require__(173);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__y__ = __webpack_require__(174);
 
 
 
@@ -99292,7 +99384,7 @@ treeProto.y = __WEBPACK_IMPORTED_MODULE_11__y__["b" /* default */];
 
 
 /***/ }),
-/* 166 */
+/* 168 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99362,7 +99454,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 167 */
+/* 169 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99372,7 +99464,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 168 */
+/* 170 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99386,11 +99478,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 169 */
+/* 171 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(28);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -99410,11 +99502,11 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 170 */
+/* 172 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(28);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -99439,7 +99531,7 @@ function removeAll(data) {
 
 
 /***/ }),
-/* 171 */
+/* 173 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99454,7 +99546,7 @@ function defaultX(d) {
 
 
 /***/ }),
-/* 172 */
+/* 174 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99469,17 +99561,17 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 173 */
+/* 175 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer__ = __webpack_require__(29);
 /* unused harmony reexport now */
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_timer__["a"]; });
 /* unused harmony reexport timerFlush */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_timeout__ = __webpack_require__(175);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_timeout__ = __webpack_require__(177);
 /* unused harmony reexport timeout */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interval__ = __webpack_require__(174);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interval__ = __webpack_require__(176);
 /* unused harmony reexport interval */
 
 
@@ -99489,11 +99581,11 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 174 */
+/* 176 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(29);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function(callback, delay, time) {
@@ -99510,11 +99602,11 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 175 */
+/* 177 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(29);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function(callback, delay, time) {
@@ -99529,7 +99621,7 @@ function defaultY(d) {
 
 
 /***/ }),
-/* 176 */
+/* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -99545,7 +99637,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(207);
+exports.humanize = __webpack_require__(209);
 
 /**
  * The currently active debug mode names, and names to skip.
@@ -99737,19 +99829,19 @@ function coerce(val) {
 
 
 /***/ }),
-/* 177 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-module.exports = __webpack_require__(178);
+module.exports = __webpack_require__(180);
 
 
 /***/ }),
-/* 178 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-module.exports = __webpack_require__(179);
+module.exports = __webpack_require__(181);
 
 /**
  * Exports parser
@@ -99757,11 +99849,11 @@ module.exports = __webpack_require__(179);
  * @api public
  *
  */
-module.exports.parser = __webpack_require__(12);
+module.exports.parser = __webpack_require__(13);
 
 
 /***/ }),
-/* 179 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
@@ -99769,12 +99861,12 @@ module.exports.parser = __webpack_require__(12);
  */
 
 var transports = __webpack_require__(57);
-var Emitter = __webpack_require__(9);
+var Emitter = __webpack_require__(11);
 var debug = __webpack_require__(5)('engine.io-client:socket');
 var index = __webpack_require__(60);
-var parser = __webpack_require__(12);
+var parser = __webpack_require__(13);
 var parseuri = __webpack_require__(63);
-var parsejson = __webpack_require__(209);
+var parsejson = __webpack_require__(211);
 var parseqs = __webpack_require__(18);
 
 /**
@@ -99908,9 +100000,9 @@ Socket.protocol = parser.protocol; // this is an int
  */
 
 Socket.Socket = Socket;
-Socket.Transport = __webpack_require__(29);
+Socket.Transport = __webpack_require__(30);
 Socket.transports = __webpack_require__(57);
-Socket.parser = __webpack_require__(12);
+Socket.parser = __webpack_require__(13);
 
 /**
  * Creates transport of the given type.
@@ -100512,7 +100604,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 180 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -100750,16 +100842,16 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 181 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module requirements.
  */
 
-var XMLHttpRequest = __webpack_require__(30);
+var XMLHttpRequest = __webpack_require__(31);
 var Polling = __webpack_require__(58);
-var Emitter = __webpack_require__(9);
+var Emitter = __webpack_require__(11);
 var inherit = __webpack_require__(17);
 var debug = __webpack_require__(5)('engine.io-client:polling-xhr');
 
@@ -101170,15 +101262,15 @@ function unloadHandler () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 182 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(29);
-var parser = __webpack_require__(12);
+var Transport = __webpack_require__(30);
+var parser = __webpack_require__(13);
 var parseqs = __webpack_require__(18);
 var inherit = __webpack_require__(17);
 var yeast = __webpack_require__(69);
@@ -101187,7 +101279,7 @@ var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 var NodeWebSocket;
 if (typeof window === 'undefined') {
   try {
-    NodeWebSocket = __webpack_require__(229);
+    NodeWebSocket = __webpack_require__(235);
   } catch (e) { }
 }
 
@@ -101463,7 +101555,7 @@ WS.prototype.check = function () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 183 */
+/* 185 */
 /***/ (function(module, exports) {
 
 
@@ -101488,7 +101580,7 @@ module.exports = Object.keys || function keys (obj){
 
 
 /***/ }),
-/* 184 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/utf8js v2.1.2 by @mathias */
@@ -101749,7 +101841,7 @@ module.exports = Object.keys || function keys (obj){
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(68)(module), __webpack_require__(4)))
 
 /***/ }),
-/* 185 */
+/* 187 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -101760,7 +101852,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 186 */
+/* 188 */
 /***/ (function(module, exports) {
 
 
@@ -101783,10 +101875,10 @@ try {
 
 
 /***/ }),
-/* 187 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Point = __webpack_require__(31);
+var Point = __webpack_require__(32);
 
 var _faceCount = 0;
 
@@ -101864,12 +101956,12 @@ module.exports = Face;
 
 
 /***/ }),
-/* 188 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Tile = __webpack_require__(189),
-    Face = __webpack_require__(187),
-    Point = __webpack_require__(31);
+var Tile = __webpack_require__(191),
+    Face = __webpack_require__(189),
+    Point = __webpack_require__(32);
 
 var Hexasphere = function(radius, numDivisions, hexSize){
 
@@ -102034,10 +102126,10 @@ module.exports = Hexasphere;
 
 
 /***/ }),
-/* 189 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Point = __webpack_require__(31);
+var Point = __webpack_require__(32);
 
 function vector(p1, p2){
     return {
@@ -102175,31 +102267,31 @@ module.exports = Tile;
 
 
 /***/ }),
-/* 190 */
+/* 192 */
 /***/ (function(module, exports) {
 
 module.exports = "\r\n    <div style=\"float:left;width:50%;\">\r\n        <div style=\"margin-top:-18px;\"><img src=\"./include/images/dow_jones.png\" style=\"width:150px;\"></div>\r\n    </div>\r\n    <div style=\"float:right;width:50%;text-align:center;\">\r\n        <span style=\"font-size:12px;font-family:'robotoCondensed' !important;\">CURRENT VIEW</span>\r\n        <br>\r\n        <div style=\"width:80%;background:rgba(24,23,23,0.21);padding:0.5em;margin-left:10px;\">\r\n            <span class=\"graph-info-companys-visible\" style=\"color:#ffc000;font-family:'roboto-bold' !important;\">1750</span>\r\n            <br>\r\n            <span style=\"font-size:12px;color:#ffffff;\">Companies</span>\r\n        </div>\r\n    </div>\r\n    <div class=\"control-search\" style=\"margin-top:100px;text-align:left;font-size:11px;\">\r\n        <searchable-option-list id=\"my-select\" name=\"character\" multiple=\"multiple\"></searchable-option-list>\r\n    </div>\r\n    <div style=\"width:100%;text-align;center;\">\r\n        <table style=\"width:90%;padding:10px;\" align=\"center\">\r\n            <tr>\r\n                <td style=\"width:60%;\"><img src=\"include/images/Significant.png\" style=\"height:30px;cursor:pointer;\" /></td>\r\n                <td style=\"width:40%;\"><img src=\"include/images/TopStories.png\" style=\"height:30px;cursor:pointer;\" /></td>\r\n            </tr>\r\n            <tr>\r\n                <td><img src=\"include/images/Marketmacro.png\" style=\"height:30px;cursor:pointer;\" /></td>\r\n                <td><img src=\"include/images/Earning.png\" style=\"height:30px;cursor:pointer;margin-left:-4px;\" /></td>\r\n            </tr>\r\n            <tr>\r\n                <td><img src=\"include/images/Management.png\" style=\"height:30px;cursor:pointer;margin-left:5px;\" /></td>\r\n                <td></td>\r\n            </tr>\r\n        </table>\r\n    </div>\r\n    <input type=\"hidden\" id=\"DJSearch\" value=\"\" style=\"background:#000000;\"   />\r\n    <div class=\"control-news\">\r\n        <div class=\"list-news\" id=\"ls_djnews\" >\r\n            <div class=\"main\" >\r\n                <div style=\"height: 380px; padding:0;\">\r\n                    <div id=\"djnews\"></div>\r\n                </div>\r\n            </div>\r\n        </div>\r\n        <div class=\"load-more\">\r\n            <div class=\"btn-loadmore\" style=\"padding-top:3px;font-size:14px;font-family:'benchnine' !important;\">< Previous <span class=\"page-control-active\" id=\"s_1\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '1');\">1</span> <span class=\"page-control\"  id=\"s_2\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '2');\">2</span> <span class=\"page-control\" id=\"s_3\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '3');\">3</span> <span class=\"page-control\" id=\"s_4\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '4');\">4</span> <span class=\"page-control\" id=\"s_5\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '5');\">5</span> <span class=\"page-control\" id=\"s_6\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '6');\">6</span>  ... <span class=\"page-control\" id=\"s_20\" onclick=\"djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '20');\">20</span> Next >></div>\r\n        </div>\r\n        <div class=\"desc-news\">\r\n            <div class=\"col positive\" style=\"font-size:14px;font-family:'benchnine' !important;\">Positive</div>\r\n            <div class=\"col negative\" style=\"font-size:14px;font-family:'benchnine' !important;\">Negative</div>\r\n            <div class=\"col strong\" style=\"font-size:14px;font-family:'benchnine' !important;\">Strong</div>\r\n            <div class=\"last active\" style=\"font-size:14px;font-family:'benchnine' !important;\">Active</div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n\r\n\r\n    <input type=\"hidden\" id=\"DJTab\" value=\"lsn_industry\" style=\"background:#000000;\" />\r\n    <input type=\"hidden\" id=\"DJLast\" value=\"0\" style=\"background:#000000;\"  />\r\n    <input type=\"hidden\" id=\"DJSelect\" value=\"\" style=\"background:#000000;\"  />\r\n    <input type=\"hidden\" id=\"DJSymbol\" value=\"\" style=\"background:#000000;\"  />\r\n    <input type=\"hidden\" id=\"DJBubble\" value=\"\" style=\"background:#000000;\"  />\r\n    <input type=\"hidden\" id=\"DJSearch\" value=\"\" style=\"background:#000000;\"   />\r\n    <script>\r\n        djnew_DJLast('DJTab','DJLast', 'DJSelect', 'DJSymbol', '1');\r\n    </script>\r\n\r\n";
 
 /***/ }),
-/* 191 */
+/* 193 */
 /***/ (function(module, exports) {
 
-module.exports = "\r\n<style>\r\n\r\n    #logo {\r\n        position: absolute;\r\n        top: 0px;\r\n        left: 30;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 10px;\r\n    }\r\n    #starview {\r\n        position: absolute;\r\n        top: 0px;\r\n        right: 0;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 5px 10px 10px 10px;\r\n    }\r\n    #sig_menu {\r\n        font-family:'roboto';\r\n        position: absolute;\r\n        top: 13px;\r\n        left: 650;\r\n        color: #0490cd;\r\n        z-index: 1;padding: 10px;\r\n        font-size:15px;\r\n        background: rgba(0, 0, 0, 0.51);\r\n        cursor:pointer;\r\n    }\r\n\r\n\r\n</style>\r\n\r\n\r\n<div id=\"sig_menu\" onclick=\"js_menu_sig();\">\r\n    <input type=\"hidden\" id=\"hid_sig_menu\" value=\"0\" />\r\n    SIGNIFICANT COMPANIES\r\n    <div id=\"sig_menu_sub\" style=\"display:none;text-align:left;color:#bfbfbf;\" >Customers<br />Suppliers<br />Influencers<br />Active Players<br />Chokepoints</div>\r\n</div>\r\n<div id=\"logo\"><img src=\"img/logo.png\" style=\"height:50px;\"></div>\r\n<div id=\"starview\"><img src=\"include/images/Starview.png\" style=\"height:35px;\"></div>\r\n\r\n<!-- the info panel containing rudimentary help for the user -->\r\n<info-panel></info-panel>\r\n\r\n\r\n\r\n<!-- TODO refactor parts -->\r\n\r\n<div style=\"position: absolute;top:50;right:320;\">\r\n    <div style=\"padding-bottom:5px;\"><img src=\"img/zoomin.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n    <div><img src=\"img/zoomout.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n</div>\r\n\r\n<div class=\"bottomCompanyGradient\">\r\n    <span style=\"width:10%;text-align:right;padding-right:20px;font-size:14px;font-family:'benchnine' !important;\">Negative</span>\r\n    <span style=\"width:80%\" class=\"companyGradient\"></span>\r\n    <span  style=\"width:10%;text-align:left;padding-left:20px;font-size:14px;font-family:'benchnine' !important;\">Positive</span>\r\n\r\n</div>\r\n\r\n\r\n\r\n<company-info style=\"max-width:300px; width:300px\"></company-info>\r\n";
+module.exports = "\r\n<style>\r\n\r\n    #logo {\r\n        position: absolute;\r\n        top: 0px;\r\n        left: 30;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 10px;\r\n    }\r\n    #starview {\r\n        position: absolute;\r\n        top: 0px;\r\n        right: 0;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 5px 10px 10px 10px;\r\n    }\r\n    #sig_menu {\r\n        font-family:'roboto';\r\n        position: absolute;\r\n        top: 13px;\r\n        left: 650;\r\n        color: #0490cd;\r\n        z-index: 1;padding: 10px;\r\n        font-size:15px;\r\n        background: rgba(0, 0, 0, 0.51);\r\n        cursor:pointer;\r\n    }\r\n\r\n\r\n</style>\r\n\r\n\r\n<div id=\"sig_menu\" onclick=\"js_menu_sig();\">\r\n    <input type=\"hidden\" id=\"hid_sig_menu\" value=\"0\" />\r\n    SIGNIFICANT COMPANIES\r\n    <div id=\"sig_menu_sub\" style=\"display:none;text-align:left;color:#bfbfbf;\" >Customers<br />Suppliers<br />Influencers<br />Active Players<br />Chokepoints</div>\r\n</div>\r\n<div id=\"logo\"><img src=\"img/logo.png\" style=\"height:50px;\"></div>\r\n<div id=\"starview\"><img src=\"include/images/Starview.png\" style=\"height:35px;\"></div>\r\n\r\n<!-- the info panel containing rudimentary help for the user -->\r\n<info-panel></info-panel>\r\n\r\n\r\n\r\n<!-- TODO refactor parts -->\r\n\r\n<div style=\"position: absolute;top:50;right:320;\">\r\n    <div style=\"padding-bottom:5px;\"><img src=\"img/zoomin.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n    <div><img src=\"img/zoomout.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n</div>\r\n\r\n<div class=\"bottomCompanyGradient\">\r\n    <span style=\"width:10%;text-align:right;padding-right:20px;font-size:14px;font-family:'benchnine' !important;\">Negative</span>\r\n    <span style=\"width:80%\" class=\"companyGradient\"></span>\r\n    <span  style=\"width:10%;text-align:left;padding-left:20px;font-size:14px;font-family:'benchnine' !important;\">Positive</span>\r\n\r\n</div>\r\n\r\n\r\n\r\n<company-info style=\"max-width:300px; width:300px\"></company-info>\r\n\r\n\r\n<mode-select></mode-select>";
 
 /***/ }),
-/* 192 */
+/* 194 */
 /***/ (function(module, exports) {
 
 module.exports = "\r\n<style>\r\n\r\n    info-panel {\r\n        display: none;\r\n        width: 40%;\r\n        z-index: 9999;\r\n        position: absolute;\r\n        top: 30%;\r\n        left: 30%;\r\n    }\r\n\r\n</style>\r\n\r\n<pre>\r\n    keymap\r\n    ------------------------------------\r\n    h ... toggle this help menu\r\n\r\n    s ... recluster hovered cluster/leaf\r\n    t ... toogle select current cluster\r\n    z/click ... zoom to cluster\r\n    u TODO toggle cluster text nodes ?\r\n    e ... toggle edges\r\n    ------------------------------------\r\n</pre>\r\n";
 
 /***/ }),
-/* 193 */
+/* 195 */
 /***/ (function(module, exports) {
 
 module.exports = "\r\n<option value=\"allSinficant\">Significant</option>";
 
 /***/ }),
-/* 194 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -102257,7 +102349,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 
 /***/ }),
-/* 195 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -102305,7 +102397,7 @@ return $.extend( $.expr[ ":" ], {
 
 
 /***/ }),
-/* 196 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -102360,7 +102452,7 @@ return $.fn.extend( {
 
 
 /***/ }),
-/* 197 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
@@ -102384,7 +102476,7 @@ return $.ui.ie = !!/msie [\w.]+/.exec( navigator.userAgent.toLowerCase() );
 
 
 /***/ }),
-/* 198 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
@@ -102414,7 +102506,7 @@ return $.ui.safeBlur = function( element ) {
 
 
 /***/ }),
-/* 199 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -102468,7 +102560,7 @@ return $.fn.scrollParent = function( includeHidden ) {
 
 
 /***/ }),
-/* 200 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -102526,7 +102618,7 @@ return $.fn.extend( {
 
 
 /***/ }),
-/* 201 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -102553,12 +102645,12 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(203),
-			__webpack_require__(33),
-			__webpack_require__(62),
+			__webpack_require__(205),
 			__webpack_require__(34),
+			__webpack_require__(62),
+			__webpack_require__(35),
 			__webpack_require__(3),
-			__webpack_require__(7)
+			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -103217,7 +103309,7 @@ return $.ui.autocomplete;
 
 
 /***/ }),
-/* 202 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -103242,14 +103334,14 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(35),
-			__webpack_require__(195),
+			__webpack_require__(36),
+			__webpack_require__(197),
 			__webpack_require__(61),
-			__webpack_require__(34),
-			__webpack_require__(198),
-			__webpack_require__(199),
+			__webpack_require__(35),
+			__webpack_require__(200),
+			__webpack_require__(201),
 			__webpack_require__(3),
-			__webpack_require__(7)
+			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -104476,7 +104568,7 @@ return $.ui.draggable;
 
 
 /***/ }),
-/* 203 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -104503,12 +104595,12 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(33),
-			__webpack_require__(62),
 			__webpack_require__(34),
-			__webpack_require__(200),
+			__webpack_require__(62),
+			__webpack_require__(35),
+			__webpack_require__(202),
 			__webpack_require__(3),
-			__webpack_require__(7)
+			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -105158,7 +105250,7 @@ return $.widget( "ui.menu", {
 
 
 /***/ }),
-/* 204 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -105188,7 +105280,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
 			__webpack_require__(3),
-			__webpack_require__(7)
+			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -105345,7 +105437,7 @@ return $.widget( "ui.progressbar", {
 
 
 /***/ }),
-/* 205 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -105372,11 +105464,11 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(35),
-			__webpack_require__(196),
+			__webpack_require__(36),
+			__webpack_require__(198),
 			__webpack_require__(61),
 			__webpack_require__(3),
-			__webpack_require__(7)
+			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -106555,7 +106647,7 @@ return $.ui.resizable;
 
 
 /***/ }),
-/* 206 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -106582,10 +106674,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(35),
-			__webpack_require__(33),
+			__webpack_require__(36),
+			__webpack_require__(34),
 			__webpack_require__(3),
-			__webpack_require__(7)
+			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
@@ -107316,7 +107408,7 @@ return $.widget( "ui.slider", $.ui.mouse, {
 
 
 /***/ }),
-/* 207 */
+/* 209 */
 /***/ (function(module, exports) {
 
 /**
@@ -107474,7 +107566,7 @@ function plural(ms, n, name) {
 
 
 /***/ }),
-/* 208 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -109057,7 +109149,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 209 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
@@ -109095,7 +109187,7 @@ module.exports = function parsejson(data) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 210 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(setImmediate, process) {var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -109227,10 +109319,10 @@ module.exports = function parsejson(data) {
 }));
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(220).setImmediate, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(224).setImmediate, __webpack_require__(14)))
 
 /***/ }),
-/* 211 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*! qwest 4.4.6 (https://github.com/pyrsmk/qwest) */
@@ -109238,8 +109330,8 @@ module.exports = function parsejson(data) {
 module.exports = function() {
 
 	var global = typeof window != 'undefined' ? window : self,
-		pinkyswear = __webpack_require__(210),
-		jparam = __webpack_require__(194),
+		pinkyswear = __webpack_require__(212),
+		jparam = __webpack_require__(196),
 		defaultOptions = {},
 		// Default response type for XDR in auto mode
 		defaultXdrResponseType = 'json',
@@ -109737,7 +109829,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 212 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -109930,7 +110022,7 @@ module.exports = function() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4), __webpack_require__(14)))
 
 /***/ }),
-/* 213 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -109938,8 +110030,8 @@ module.exports = function() {
  * Module dependencies.
  */
 
-var url = __webpack_require__(214);
-var parser = __webpack_require__(36);
+var url = __webpack_require__(216);
+var parser = __webpack_require__(37);
 var Manager = __webpack_require__(64);
 var debug = __webpack_require__(5)('socket.io-client');
 
@@ -110030,7 +110122,7 @@ exports.Socket = __webpack_require__(66);
 
 
 /***/ }),
-/* 214 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -110112,7 +110204,7 @@ function url (uri, loc) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 215 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -110121,7 +110213,7 @@ function url (uri, loc) {
  * Module requirements
  */
 
-var isArray = __webpack_require__(216);
+var isArray = __webpack_require__(218);
 var isBuf = __webpack_require__(67);
 var toString = Object.prototype.toString;
 var withNativeBlob = typeof global.Blob === 'function' || toString.call(global.Blob) === '[object BlobConstructor]';
@@ -110260,7 +110352,7 @@ exports.removeBlobs = function(data, callback) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 216 */
+/* 218 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -110271,7 +110363,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 217 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
@@ -110285,7 +110377,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(13)(content, options);
+var update = __webpack_require__(7)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -110302,7 +110394,7 @@ if(false) {
 }
 
 /***/ }),
-/* 218 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
@@ -110316,7 +110408,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(13)(content, options);
+var update = __webpack_require__(7)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -110333,7 +110425,69 @@ if(false) {
 }
 
 /***/ }),
-/* 219 */
+/* 221 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(118);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(7)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../css-loader/index.js!./autocomplete.css", function() {
+			var newContent = require("!!../../../css-loader/index.js!./autocomplete.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 222 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(120);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(7)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../css-loader/index.js!./menu.css", function() {
+			var newContent = require("!!../../../css-loader/index.js!./menu.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 223 */
 /***/ (function(module, exports) {
 
 
@@ -110428,7 +110582,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 220 */
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = Function.prototype.apply;
@@ -110481,13 +110635,13 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(212);
+__webpack_require__(214);
 exports.setImmediate = setImmediate;
 exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
-/* 221 */
+/* 225 */
 /***/ (function(module, exports) {
 
 module.exports = toArray
@@ -110506,49 +110660,88 @@ function toArray(list, index) {
 
 
 /***/ }),
-/* 222 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "12336f52147a1e2431ff9eed33bdd646.png";
 
 /***/ }),
-/* 223 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "0c9a5af6e30d58ba54d4cb310a44a02b.png";
 
 /***/ }),
-/* 224 */
+/* 228 */
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAGPElEQVR42u2baWzkcxjHd1x1X+u+JdYVIo5IliXiZi0iRNxBQuLY4IXEEeUV8QovECIIFWl0vVhe7NlYRVBxlZCys5tpozvVdjpnZ6adv++Hp5vOse1c///8Z8YvedJjjv/v+T7P77l/ixb9v7xZnZ2dO/X29u4yMDCwWzAY3H14eHjPkZGRvcLh8N785O/BwcEO3tPd3b2zPhJodp4D/f39u46Oju4Tj8cPnZqaOiGTyZydzWYvEq2Ynp6+SXSb6HbRLaIb9P8r9J7z0un0aclk8pjJyckDQ6HQHgZIczCNBMfGxvZNpVLHwgxMzszMdIreEa0X/SwKif4WTYqiuVwuItom+lN/fy1aJXpZn10pUK4RIKfHYrFD0Bw0ybfSjkajB4nps7TxO2FA9LloVIxNOxWu3H8rpc//YYA8oe+9Gk3i2PhGK5C4pHOwGF+qDT6qja5Gmk6dl4Hxi+g1jo+AOBHb0UhbEUASUs8ztKGHtbE1orjj8hIQWdFWPet1HY9rE4nEkQjBc6nrwYezAW3kfVHY8XgJhCk99yfRM9K+MzG2nmgDhkhSP1lSf0yb+MZp4DI7MSEQPkAYskGLXTWS+GpcmR74Ipbc8cnCPoj6JJS7ORKugGDMLxXjb+G2HJ8t7SmDkcQQK4Y4qq4gzGH+bc6e49OFuyWWEAiP1A0EzryYP8ck71vm54JA7IBnIniqyTAS3GDwOPN+VPsFjsMPAuHW8fHx/apOXmRQjjBrP+Q02bLAaYO8wyUkWRUDgF/FtTTa1dUIAi7yTUWNSyqyBwQ6RHgEOTjaJgaANYRRnJiY2L9sAEhq9KGHGhHhuRQxbpI2LysrZKZgYS5vrdMii4xU9DyCXRAAMjvL6lxPbEo938UEql9acMG8WsCL5vNXeyEZrwAwELaJr2fntQX4TEn/LjfyeR8AgFtcT7ltR8FRIJVKHUclx6uz6SUAZguClOhKxgVEfToj51PGalUApAVj4u8l0uaSgQ8VWi9dXwMAwCVu0DE4pejB8Xj8MKq31RQwmwgA1m/S9CvziqqEiRQZKV176Z+9BsDsQEia/kCeHQAN3J/QWdcGAPwbFNG7KDSAF9O0aAMAoqJ3Cfi2P5T2k2V+Q60OgHhMEuglk8mjtz+UBoPOxc24iTYAIC0ANtJhKnSBd9CrawMAyAv6qHQVAkA/L1pPZrxYsuYVAyA+v8iLBWhxEQRRQWkDAKgXbsLt55W9BcCNtSRBTQQA0eBa5T3Hz/2SDnmBq/Ti5lYHgDqHqIeCb14dwBKhb9vACFIofZXpk7xQmCkMvfhxGwAwIgCetNmColrAK15WgRuRDM3WBIh+CyvBiykfUzlpYQBom33PcS/qE8yGw/TVWrgihAH8iAm0ogeTEdIM8dIONACAvzj/xD0lXQrzfHrD0151gT0uis6Q7UrLL9vhhJkdg+V686+tBoClwV0l1b+gMrSECSxi5lYBAOkT5MnI34uQ542sLC8gNd7aQgAkJNRPJNyTFhyY4HzwRn3gDXLnZgfApM/YzH3kPGXF11YguV4gDLgZGLkNgAU+zCN3WQGk7HGZAENG9NJqSZF9AEDamqIrKp4SIVRk8FkgfOhldFjPqA/Dp/0/HolEDqgq1TSDeB0VFAoJTcQ8Pj+MHcOe1TIuF7BpkXuIDfjiJmB+9tz3SIPPrXmQGvSwBzYtttnPIBjzMSo+RHzMONal6oJrpI7O5IiBkPGp2iP5NTBftsurAoSVesiPfjKMluZy5ntcYX4uCCRM1kbfaHd9co1UeavyBjF4nPm6qf18hpE5GyF9qc0PD7sdMS6g8t/h6rD2RVUel6uxHdTWzTj2cQvMiwTKQtuk3TDroohDgbMht8k4EqYNy7SZF0waYTfqCSbxmAU3nwr4+wlvq5oDdgMI2s0C4kJt7jnsg2iLNjtu4WiuyvNNNJewEbcBrsaQ0tLXM0Pnr9ulAEHYSYndDCV3B3tFv2Mr7LJkzK64ZKxRmbXf08ZsxBjewsi73Rl8SuBeTjHD8nnfX6sNoJpUmgXGqXSdxMSDdkzeQ4VFn4m+FLNfmQ3hVmkP9wJhGACp3nIDleZtM12fLakZAMJYCkcFSVJ5okMLYcHp1dGuwqCRjmPR/XpNtqXWP/U+O0dS+SElAAAAAElFTkSuQmCC"
 
 /***/ }),
-/* 225 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "bd6506a08374857822ebdf3cde4dfd8b.png";
 
 /***/ }),
-/* 226 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "15dc79379495a49c9d56f2e26085a935.png";
 
 /***/ }),
-/* 227 */
+/* 231 */
 /***/ (function(module, exports) {
 
 module.exports = "data:application/json;base64,W3sNCiAgICAidHlwZSI6ICJvcHRpb25ncm91cCIsDQogICAgImxhYmVsIjogIlRoZSBHcmlmZmlucyIsDQogICAgImNoaWxkcmVuIjogWw0KICAgICAgeyAidHlwZSI6ICJvcHRpb24iLCAidmFsdWUiOiAiUGV0ZXIiLCAgImxhYmVsIjogIlBldGVyIEdyaWZmaW4ifSwNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkxvaXMiLCAgICJsYWJlbCI6ICJMb2lzIEdyaWZmaW4ifSwNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkNocmlzIiwgICJsYWJlbCI6ICJDaHJpcyBHcmlmZmluIn0sDQogICAgICB7ICJ0eXBlIjogIm9wdGlvbiIsICJ2YWx1ZSI6ICJNZWciLCAgICAibGFiZWwiOiAiTWVnIEdyaWZmaW4ifSwNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIlN0ZXdpZSIsICJsYWJlbCI6ICJTdGV3aWUgR3JpZmZpbiJ9DQogICAgXQ0KICB9LA0KICB7DQogICAgInR5cGUiOiAib3B0aW9uZ3JvdXAiLA0KICAgICJsYWJlbCI6ICJQZXRlcidzIEZyaWVuZHMiLA0KICAgICJjaGlsZHJlbiI6IFsNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkNsZXZlbGFuZCIsICJsYWJlbCI6ICJDbGV2ZWxhbmQgQnJvd24ifSwNCiAgICAgIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkpvZSIsICAgICAgICJsYWJlbCI6ICJKb2UgU3dhbnNvbiJ9LA0KICAgICAgeyAidHlwZSI6ICJvcHRpb24iLCAidmFsdWUiOiAiUXVhZ21pcmUiLCAgImxhYmVsIjogIkdsZW5uIFF1YWdtaXJlIn0NCiAgICBdDQogIH0sDQogIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkV2aWwgTW9ua2V5IiwgImxhYmVsIjogIkV2aWwgTW9ua2V5In0sDQogIHsgInR5cGUiOiAib3B0aW9uIiwgInZhbHVlIjogIkhlcmJlcnQiLCAgICAgImxhYmVsIjogIkpvaG4gSGVyYmVydCJ9DQpd"
 
 /***/ }),
-/* 228 */
+/* 232 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "3b30479746a603ca6eeb0fa522427a01.png";
 
 /***/ }),
-/* 229 */
+/* 233 */
+/***/ (function(module, exports) {
+
+/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
+module.exports = __webpack_amd_options__;
+
+/* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 234 */
+/***/ (function(module, exports) {
+
+module.exports = function(originalModule) {
+	if(!originalModule.webpackPolyfill) {
+		var module = Object.create(originalModule);
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		Object.defineProperty(module, "exports", {
+			enumerable: true,
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 235 */
 /***/ (function(module, exports) {
 
 /* (ignored) */

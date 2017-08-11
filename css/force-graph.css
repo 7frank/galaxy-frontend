@@ -120,37 +120,39 @@
 	 max-width:20em;
 	}	
 	
-	
-	
-	.ui-accordion{
+	/**
+	TODO used in left-info-panel and should be used by web component and put itno shadow dom preferrably
+	*/
+	.my-accordion{
 		
-		  border :1px solid rgba(128, 128, 128, 0.25);
-		  padding: 0px 2px 0px 2px
+		  border :1px solid rgba(128, 128, 128, 0.25) !important;
+		  padding: 0px 2px 0px 2px!important;
 		  
 	}
 	
-	.ui-accordion > *{
-		margin:0px;
+	.my-accordion > *{
+		margin:0px !important;
 		
 	}
-	
-	.ui-accordion-header{
-		    margin: 2px 0px 2px 0px !important;
-			font-weight:bold;
-			color:white;
-			 text-align: left;
+
+.my-accordion > .ui-accordion-header{
+			margin: 2px 0 0 0;
+			padding: .5em .5em .5em .7em;
+			font-weight:bold !important;
+			color:white !important;
+			 text-align: left !important;
 	}
-	
-	.ui-accordion-header:focus{
-		 outline: 0;
-		 background: rgba(0, 0, 0, 0.25);
+
+.my-accordion > .ui-accordion-header:focus{
+		 outline: 0 !important;
+		 background: rgba(0, 0, 0, 0.25) !important;
 		 
 	}
-	
-	.ui-accordion-content
+
+.my-accordion >	.ui-accordion-content
 	{
-		overflow:visible;
-		 text-align: left;
+		overflow:visible !important;
+		 text-align: left !important;
 		 padding:.5em .5em .5em .7em !important;
 		 color:white !important;
 		

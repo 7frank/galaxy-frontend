@@ -43,9 +43,6 @@ class GraphView3D extends View3D
     connectedCallback(){
         super.connectedCallback();
 
-
-        $(this).append("<graph-hud>")
-
     }
 
     setSpeccs(speccs)
