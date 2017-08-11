@@ -3,7 +3,6 @@
  */
 
 
-
 import View3D from "./View3D"
 
 
@@ -20,209 +19,224 @@ import "../gui/GraphHUD"
 import {GUI} from "../cluster/refactor/SpecificDataUtils"
 
 
+export default class GraphView3D extends View3D {
 
-export default
-class GraphView3D extends View3D
-{
-
-    constructor(...args)
-    {
+    constructor(...args) {
         super(...args);
 
-        this.mRootCluster=null;
-
-
-
-
+        this.mRootCluster = null;
 
 
     }
 
 
-
-    connectedCallback(){
+    connectedCallback() {
         super.connectedCallback();
 
     }
 
-    setSpeccs(speccs)
-    {
-        this.mSpeccs=speccs;
+    setSpeccs(speccs) {
+        this.mSpeccs = speccs;
         return this
     }
 
-    getSpeccs()
-    {
+    getSpeccs() {
 
         return this.mSpeccs
     }
 
 
-
-createSkyDome()
-{
+    createSkyDome() {
 
 
-
-    var material = new THREE.MeshBasicMaterial();
-
-
-    let scene=this.mScene;
-
-    var ambientLight = new THREE.AmbientLight(0xFFFFFF,1.5);
-    scene.add(ambientLight);
-   /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(0, 10000, 0);
-    dirLight.intensity = 1;
-    scene.add(dirLight);
-*/
-   /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
-    pointLight.position.set( 0, 0, 20000 );
-    scene.add(pointLight);
-*/
-  /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
-    var material = new THREE.MeshBasicMaterial();
-
-   material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
-    material.side = THREE.BackSide;
-    material.opacity=0.05;
-    material.transparent=true;
-    var skydome = new THREE.Mesh(geometry, material);
-
-    this.mSkyDome=skydome
+        var material = new THREE.MeshBasicMaterial();
 
 
-*/
- //   scene.add(skydome);
+        let scene = this.mScene;
+
+        var ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.5);
+        scene.add(ambientLight);
+        /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+         dirLight.position.set(0, 10000, 0);
+         dirLight.intensity = 1;
+         scene.add(dirLight);
+     */
+        /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
+         pointLight.position.set( 0, 0, 20000 );
+         scene.add(pointLight);
+     */
+        /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
+          var material = new THREE.MeshBasicMaterial();
+
+         material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
+          material.side = THREE.BackSide;
+          material.opacity=0.05;
+          material.transparent=true;
+          var skydome = new THREE.Mesh(geometry, material);
+
+          this.mSkyDome=skydome
 
 
-    //--------------------------------
-    var meshMaterials = [];
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
-
-    var oceanMaterial = []
-    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
-    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
+      */
+        //   scene.add(skydome);
 
 
-    var radius = 300000;        // Radius used to calculate position of tiles
-    var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
-    var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
+        //--------------------------------
+        var meshMaterials = [];
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
+
+        var oceanMaterial = []
+        oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
+        oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
 
 
-    function isLand(){
+        var radius = 300000;        // Radius used to calculate position of tiles
+        var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
+        var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
 
-        return _.random(0,1)
+
+        function isLand() {
+
+            return _.random(0, 1)
+
+        }
+
+        var hexaGroup = new THREE.Group();
+
+        var hexasphere = new Hexasphere(radius, subDivisions, tileSize);
+        for (var i = 0; i < hexasphere.tiles.length; i++) {
+            var t = hexasphere.tiles[i];
+            var latLon = t.getLatLon(hexasphere.radius);
+
+            var geometry = new THREE.Geometry();
+
+            for (var j = 0; j < t.boundary.length; j++) {
+                var bp = t.boundary[j];
+                geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
+            }
+            geometry.faces.push(new THREE.Face3(0, 1, 2));
+            geometry.faces.push(new THREE.Face3(0, 2, 3));
+            geometry.faces.push(new THREE.Face3(0, 3, 4));
+            if (geometry.vertices.length > 5) {
+                geometry.faces.push(new THREE.Face3(0, 4, 5));
+            }
+
+            if (isLand(latLon.lat, latLon.lon)) {
+                material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
+            } else {
+                material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
+            }
+
+            material.opacity = 0.3;
+
+            material.side = THREE.BackSide;
+
+            var mesh = new THREE.Mesh(geometry, material.clone());
+            hexaGroup.add(mesh);
+            hexasphere.tiles[i].mesh = mesh;
+
+        }
+        scene.add(hexaGroup);
+        this.mSkyDome = hexaGroup
+
 
     }
 
-    var hexaGroup=new THREE.Group();
 
-    var hexasphere = new Hexasphere(radius, subDivisions, tileSize);
-    for(var i = 0; i< hexasphere.tiles.length; i++){
-        var t = hexasphere.tiles[i];
-        var latLon = t.getLatLon(hexasphere.radius);
+    addCompanyCountListenersToCluster(rootCluster) {
 
-        var geometry = new THREE.Geometry();
 
-        for(var j = 0; j< t.boundary.length; j++){
-            var bp = t.boundary[j];
-            geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
+        var visibleNodes = [];
+
+        function attachListeners(cluster) {
+
+
+            _.each(cluster.findClusters("*"), function (cluster) {
+                cluster.on('before-render', function () {
+
+
+                    if (cluster.mExpanded == false) {
+                        visibleNodes.push(cluster);
+                    }
+
+
+                    if (cluster.isLeaf()) {
+                        visibleNodes.push(cluster);
+                    }
+
+
+                })
+
+                cluster.on('initial-expand', function () {
+
+                    attachListeners(this)
+
+
+                })
+
+
+            });
         }
-        geometry.faces.push(new THREE.Face3(0,1,2));
-        geometry.faces.push(new THREE.Face3(0,2,3));
-        geometry.faces.push(new THREE.Face3(0,3,4));
-        if(geometry.vertices.length > 5){
-            geometry.faces.push(new THREE.Face3(0,4,5));
-        }
-
-        if(isLand(latLon.lat, latLon.lon)){
-            material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
-        } else {
-            material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
-        }
-
-        material.opacity = 0.3;
-
-        material.side = THREE.BackSide;
-
-        var mesh = new THREE.Mesh(geometry, material.clone());
-        hexaGroup.add(mesh);
-        hexasphere.tiles[i].mesh = mesh;
-
-    }
-    scene.add(hexaGroup);
-    this.mSkyDome=hexaGroup
 
 
-
-}
-
+        attachListeners(rootCluster)
 
 
-
-addCompanyCountListenersToCluster(rootCluster){
-
-
-
-    var visibleLeafs=[];
-    _.each( rootCluster.getLeafs() ,function(leaf){
-        leaf.onBeforeRender=function(){
-            visibleLeafs.push(leaf);
-        }
-    });
+        var visibleLeafs = [];
+        /* _.each( rootCluster.getLeafs() ,function(leaf){
+             leaf.onBeforeRender=function(){
+                 visibleLeafs.push(leaf);
+             }
+         });
+     */
 
 
+        var that = this;
+        var _____skipFrames = 0;
+
+        $(that).on("before-render", function () {
 
 
+            if (that.isMaximised()) {
 
+                _____skipFrames++;
+                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
+                //  let prev_vis=preparedData.nodes[0]._bubble.material.visible;
+                //  let _vis= (_____skipFrames % 20) ? false : true;
+                //  preparedData.nodes[0]._bubble.material.visible = _vis;
 
-    var that=this;
-    var _____skipFrames=0;
-
-    $(that).on("before-render",function(){
-
-
-        if (that.isMaximised()) {
-
-            _____skipFrames++;
-            //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-          //  let prev_vis=preparedData.nodes[0]._bubble.material.visible;
-          //  let _vis= (_____skipFrames % 20) ? false : true;
-          //  preparedData.nodes[0]._bubble.material.visible = _vis;
-
-         //   if (prev_vis)
-         //   {
-                let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
+                //   if (prev_vis)
+                //   {
+                visibleNodes
+                let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
+                //  let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
                 GUI.updateFromVisibleNodes(vl);
                 // GUI.updateFromVisibleNodes(visibleNodes);
                 //   that.mVisibleNodes=[].concat(visibleNodes)
                 //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
                 //  that.mRootCluster.updateRootTextNodes(visibleNodes);
 
-           // }
-        }
+                // }
+            }
 
-        visibleLeafs=[]
+            visibleLeafs = []
+            visibleNodes = []
 
-    });
-
-
-
-}
+        });
 
 
+    }
 
 
-    initClusterForView(rawGraphData,parentEl3D) {
+    initClusterForView(rawGraphData, parentEl3D) {
 
 
         if (!rawGraphData) return;
@@ -234,19 +248,17 @@ addCompanyCountListenersToCluster(rootCluster){
 
         let preparedData = graphData.createClusterNodesAndEdges(this);
 
-        var res = new RootCluster(preparedData.nodes,undefined,this);
+        var res = new RootCluster(preparedData.nodes, undefined, this);
 
 
 //-- count visible nodes
-   //TODO check if this interferes with the nodeMixin and the default implementation
-      var visibleNodes=[];
-    /*    _.each(preparedData.nodes,function(node){
-            node.get3DRoot().onBeforeRender=function(){
-                visibleNodes.push(node);
-            }
-        });*/
-
-
+        //TODO check if this interferes with the nodeMixin and the default implementation
+        var visibleNodes = [];
+        /*    _.each(preparedData.nodes,function(node){
+                node.get3DRoot().onBeforeRender=function(){
+                    visibleNodes.push(node);
+                }
+            });*/
 
 
 //--
@@ -260,8 +272,6 @@ addCompanyCountListenersToCluster(rootCluster){
         res.applyClustering(speccs);
 
 
-
-
         this.start();
 
         return res
@@ -270,8 +280,7 @@ addCompanyCountListenersToCluster(rootCluster){
     }
 
 
-    setData(mGraphData)
-    {
+    setData(mGraphData) {
         this.initStatic();
 
 
@@ -288,15 +297,13 @@ addCompanyCountListenersToCluster(rootCluster){
         $(this).trigger("loaded")
 
 
-
     }
 
-    loadDataSet(ds){
+    loadDataSet(ds) {
 
-      var that = this;
+        var that = this;
 
-        ds(null,function onSuccess(mGraphData)
-        {
+        ds(null, function onSuccess(mGraphData) {
             console.log("data loaded");
             that.setData(mGraphData);
 
@@ -305,9 +312,9 @@ addCompanyCountListenersToCluster(rootCluster){
             function triggerColorChange() {
                 let selectEl = $(".cloudNodeColorSelect")
 
-                if (selectEl.length==0) setTimeout(triggerColorChange,100)
+                if (selectEl.length == 0) setTimeout(triggerColorChange, 100)
                 else
-                selectEl.val("group").trigger("change")
+                    selectEl.val("group").trigger("change")
             }
 
             triggerColorChange();
@@ -315,38 +322,36 @@ addCompanyCountListenersToCluster(rootCluster){
 
         });
 
-    return this
+        return this
     }
 
 
     maximise() {
 
-        var  root = this.mRootCluster;
+        var root = this.mRootCluster;
 
         super.maximise();
 
-            if (root && root.mParentView && root.mTextOverlay) {
+        if (root && root.mParentView && root.mTextOverlay) {
 
-                root.mTextOverlay.height(root.mParentView.clientHeight);
-                root.mTextOverlay.width(root.mParentView.clientWidth);
-                console.log("maximised")
-            }
-
-
+            root.mTextOverlay.height(root.mParentView.clientHeight);
+            root.mTextOverlay.width(root.mParentView.clientWidth);
+            console.log("maximised")
+        }
 
 
     }
 
-    undoMaximise(){
-            super.undoMaximise();
+    undoMaximise() {
+        super.undoMaximise();
 
 
-            let root=this.mRootCluster;
-            if (root&& root.mParentView && root.mTextOverlay) {
+        let root = this.mRootCluster;
+        if (root && root.mParentView && root.mTextOverlay) {
 
-                root.mTextOverlay.height(root.mParentView.clientHeight);
-                root.mTextOverlay.width(root.mParentView.clientWidth)
-            }
+            root.mTextOverlay.height(root.mParentView.clientHeight);
+            root.mTextOverlay.width(root.mParentView.clientWidth)
+        }
 
 
     }

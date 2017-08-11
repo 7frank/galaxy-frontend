@@ -51,6 +51,10 @@ export default class BaseCluster3D extends BaseNode {
 
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
 
+        this.registerCustomEvent("initial-expand"); //triggered when a collapsed cluster gets expanded
+
+
+
         this.registerCustomEvent("cluster-ready"); //if the cluster animation is finished
 
         this.mClusters = {};
@@ -326,6 +330,9 @@ var that=this
 
             // primarily notify text overlay here
             $(this.getRoot().getView()).trigger("graph-changed");
+
+            this.trigger("initial-expand");
+
 
         }
 
