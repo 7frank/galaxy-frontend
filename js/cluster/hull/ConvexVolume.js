@@ -182,7 +182,7 @@ class ConvexVolume extends BoxVolume {
         if (l < 0) l = 0;
         if (l > 1) l = 1;
 
-        var minOpacity = 0.03;
+        var minOpacity = 0.00;
 
         function mTransfer(x) {
             //transfer function y= 0.5*sin(1.5*pi+x*pi*2)+0.5

@@ -114,19 +114,11 @@ class GraphData
     var d3Links =this.getAlteredRawLinks();
 
 
-//TODO
-  /*  function countVisibleNodes(node) {
-
-        env._nodeCounter.push(node)
-
-    }*/
 
     // Add WebGL objects
     d3Nodes.forEach(node => {
 
-        node = nodeMixin(env, node, {
-         //   onDrawNode: countVisibleNodes
-        })
+        node = nodeMixin(env, node)
         node._bubble.name = env.nameAccessor(node) || '';
 
 

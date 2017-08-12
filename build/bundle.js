@@ -72220,7 +72220,7 @@ function updateLink (link, options, obj) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_Tween__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_Tween__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__lib_Tween__);
 /**
  * Created by Frank on 29.05.2017.
@@ -73245,6 +73245,10 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
 
+        this.registerCustomEvent("initial-expand"); //triggered when a collapsed cluster gets expanded
+
+
+
         this.registerCustomEvent("cluster-ready"); //if the cluster animation is finished
 
         this.mClusters = {};
@@ -73520,6 +73524,9 @@ var that=this
 
             // primarily notify text overlay here
             $(this.getRoot().getView()).trigger("graph-changed");
+
+            this.trigger("initial-expand");
+
 
         }
 
@@ -75928,6 +75935,455 @@ class BaseVolume extends THREE.Object3D {
 
 /***/ }),
 /* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(_) {/* harmony export (immutable) */ __webpack_exports__["c"] = computeCompanyNodeColor;
+/* harmony export (immutable) */ __webpack_exports__["b"] = computeGroupNodeColorHelper;
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return GUI; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__ = __webpack_require__(208);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__ = __webpack_require__(204);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__ = __webpack_require__(207);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__);
+
+
+//import 'jquery-ui/themes/base/theme.css';
+//import 'jquery-ui/themes/base/selectable.css';
+
+
+
+
+
+function formatNumber(num) {
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+}
+
+var curr = 0
+var currentGradientColors = [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729]
+
+function getNextGradient() {
+
+
+    var availGradients = [
+
+        [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729],
+        [0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0xff0000, 0x00ff00, 0x0000ff, 0xffffff],
+        [0xffffff, 0x0000ff, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111]
+    ]
+
+    var next = ++curr % availGradients.length
+    return currentGradientColors = availGradients[next]
+
+}
+
+function computeCompanyNodeColor(val = 0, attr = "sent") {
+
+
+    var sentRanges = [[92, Number.MAX_SAFE_INTEGER], [85, 92], [78, 85], [71, 78], [64, 71], [57, 64], [50, 57], [43, 50], [36, 43], [29, 36], [22, 29], [15, 22], [Number.MIN_SAFE_INTEGER, 22]]
+    var priceRangesInPct = [[18, Number.MAX_SAFE_INTEGER], [18, 15], [12, 15], [9, 12], [6, 9], [3, 6], [0, 3], [-3, 0], [-6, -3], [-9, -6], [-12, -9], [-18, -15], [Number.MIN_SAFE_INTEGER, -18]]
+
+    var arr
+
+    if (attr == "sent") arr = sentRanges
+    if (attr == "priceRanges") arr = priceRangesInPct;
+
+    var i;
+    for (i = 0; i < arr.length; i++) {
+        var range = arr[i];
+
+        if (range[0] < val && val < range[1])
+            return currentGradientColors[i]
+
+        if (range[1] < val && val < range[0])
+            return currentGradientColors[i]
+    }
+
+    return 0xffffff
+}
+
+function computeGroupNodeColorHelper(distinctGroupIDS) {
+    var colors = []
+
+    for (let i in distinctGroupIDS) {
+        colors.push(_.random(0, 255) * _.random(0, 255) * _.random(0, 255))
+
+    }
+
+
+    return {
+        getColor: function (groupID) {
+
+            var i = distinctGroupIDS.indexOf(groupID)
+            return colors[i] || 0xFFFFFF
+        }
+
+    }
+
+}
+
+
+function changeGradientBar(colorArray) {
+    var gradientString = colorArray.map((c) => "#" + c.toString(16).padStart(6, "0")).join(",")
+
+    var tpl = `.companyGradient {
+		  background: lightgrey;
+		  
+		  background: -webkit-linear-gradient(left,${gradientString});
+		 
+		  background: -o-linear-gradient(left,${gradientString});
+		  
+		  background: -moz-linear-gradient(left,${gradientString});
+		 
+		  background: linear-gradient(to right,${gradientString}); 
+		}
+`
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<style>").text(tpl).appendTo("head")
+
+
+}
+
+
+__WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
+
+    var selectTemplate = `
+	<select class="cloudNodeColorSelect">
+	<option value="sent">sent</option>
+	<option value="priceRanges">priceRanges</option>
+	<option value="group">group</option>
+	</select> 
+	`
+    var $sel = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(selectTemplate)
+
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(".companyGradient").on("click", function () {
+
+        var array = getNextGradient()
+        changeGradientBar(array)
+        $sel.trigger("change")
+    })
+
+
+    $sel.on("change", function (e, ui) {
+        var val = $sel.val()
+
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).trigger("node-color-change", val)
+
+        /*
+                var helper=computeGroupNodeColorHelper(globalEnv.nodeClouds.groupIdList)
+
+
+                if (val=="group")
+                    globalNodes.forEach(function(v){ v.color=helper.getColor(v.group)});
+                else
+                    globalNodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
+
+                globalEnv.nodeClouds.update()
+
+                globalEnv.particles.updateColors()
+
+        */
+
+
+    }).appendTo( getBody())
+
+})
+
+
+function getBody()
+{
+   return __WEBPACK_IMPORTED_MODULE_0_jquery___default()("sample-cluster-application graph-hud")
+
+}
+
+
+var GUI = {
+    createAccordion(items) {
+        function createSection(caption, content, id) {
+            var sectionTpl = `<h3 class="accordion-header ui-accordion-header ui-helper-reset ui-state-default ui-accordion-icons ui-corner-all" > ${caption}</h3>
+		<div id="${id}" class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom">
+			
+		</div>`
+            var section = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(sectionTpl)
+
+
+            section.find(".ui-accordion-content").addBack('.ui-accordion-content').append(content)
+
+            return section
+        }
+
+        var acc = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<div class=" ui-accordion ui-widget ui-helper-reset my-accordion">')
+        for (let item of items) {
+            item = _.extend({caption: "missing 'caption'", content: "missing 'content'"}, item)
+            var sec = createSection(item.caption, item.content, item.id)
+            acc.append(sec)
+        }
+
+        //acc.accordion({ header: "h3", active: false, collapsible: true })
+        return acc
+    },
+    createSlider: function () {
+
+
+        var slider = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").slider({
+            min: 10, max: 1000,
+            slide: function (event, ui) {
+
+
+                doZoomByVal(ui.value)
+
+            }
+
+        }).addClass("zoom-slider")
+            .css({
+                width: 200,
+                "margin-left": "2em",
+                "margin-top": "0.5em",
+            })
+
+        slider.appendTo( getBody())
+
+
+    },
+    createSample() {
+
+        let a = GUI.createAccordion([{
+            caption: "<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Sectors </span><img src=\"include/images/Triangle.png\" style=\"width:10px;\">",
+            id: "companyIndustry",
+            content: "Technology, 33%<br>Consumer Discretionary, 20%<br>Consumer Staples, 20%"
+        }, {
+            caption: "<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Countries</span> <img src=\"include/images/Triangle.png\" style=\"width:10px;\">",
+            id: "companyCountry",
+            content: "United States, 80%<br>Japan, 10%<br>Germany, 4%"
+        }])
+        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo( getBody())
+        GUI.$el = a
+
+
+        GUI.createSlider()
+        GUI.info = GUI.createNodeInfoPanel()
+
+
+    },
+    createNodeInfoPanel() {
+
+        GUI.$info = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>")
+
+
+        GUI.$info.hide().appendTo( getBody())
+
+        GUI.$info.addClass("graph-node-info").draggable().resizable()
+
+        var $header = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-header")
+
+
+        var $search = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span>").addClass("graph-node-info-search").html("Yahoo Search")
+        var $price = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span>").addClass("graph-node-info-price").html("USD 36.5 (-0.5%)")
+        var $close = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span style=\"margin-left:420px;cursor:pointer;\">").addClass("graph-node-info-close").html("<i class=\"fa fa-times\" aria-hidden=\"true\" style=\"font-family:'FontAwesome' !important;\"></i> CLOSE")
+
+        var stockPrice = "<span style=\"margin-left:20px;margin-top:7px;\">USD <span style=\"color:#f7685e;font-family:'roboto-bold'  !important;\">36.5</span> (-0.5%)</span>";
+        // var headBar = "<span style=\"margin-left:400px;margin-top:7px;\" ></span>";
+
+
+        $close.on("click", function () {
+            GUI.$info.fadeOut(50)
+
+        })
+
+        $header.append($search, stockPrice, $close)
+
+        var $body = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-body")
+
+        $body.html("COMPANY<br> wikiinfo")
+
+        var $news = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news")
+
+        //$news.html("RSS or Twitter or News")
+
+        var $newsHeader = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news-header").html("News")
+        var $newsBody = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news-body")
+        $news.append($newsHeader, $newsBody)
+
+        GUI.$info.append($header, $body, $news)
+
+
+        return {
+            setNode: function (node) {
+                var news = ["U.S., China agree to first trade steps under 100-day plan",
+                    "Wall Street falls, department stores take a drubbing",
+                    "Behind Kushner Companies, a Chinese agency skirts visa-for-investment rules",
+                    "In blow to Trump, GE backs NAFTA and plans growth in Mexico"]
+
+                lorem = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+
+
+                //header
+
+
+                $search.html(__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<a style=\"text-decoration:none;\">").html("<div style=\"float:left;\">Go to Company Page </div><div  style=\"float:right;padding-left:5px;padding-top:1px;\"> >></div>").attr({
+                    target: "_blank",
+                    href: "#",
+                    title: "Open new Tab for " + node.name
+                }))
+
+
+                //price
+
+                var companyLookupName = node.name
+                if (node.ticker)
+                    companyLookupName = node.ticker.split(":")[1]
+
+                AppDataService.getCompanyInfo(companyLookupName).then(function (data) {
+
+                    /*if (!data.LastTradePriceOnly)
+                    {
+                        console.error("'"+node.name+"' not found",data)
+                        $price.html("-/-")
+                        return
+                    }*/
+
+                    var str = `${data.Currency} ${data.LastTradePriceOnly} (${data.ChangeinPercent})`
+                    $price.html(str)
+
+                })
+
+
+                //body
+                $body.html("")
+                AppDataService.getWiki(node.name).then(function (data) {
+
+                    if (data.content == "Redirect to:") {
+                        $body.html("<h2>" + node.name + "</h2><br>").append("TODO handle redirects for wikipedia")
+                        /*
+                        AppDataService.getWiki(data.page).then(function(data){
+                            $body.html("<h2>"+node.name+"</h2><br>").append(data.content)
+
+                        })*/
+                    }
+                    else
+                        $body.html("<h2>" + node.name + "</h2><br>").append(data.content)
+
+                }).catch(function (e) {
+
+
+                    if (e.code == "missingtitle")
+                        $body.html("Wiki info not found for: " + node.name)
+                    else
+                        $body.html(e.code)
+
+                })
+
+
+                $newsBody.html("")
+
+
+                function getNews() {
+                    var n = news[_.random(0, 3)]
+                    var el = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<p>").append(n)
+                    $newsBody.append(el)
+                }
+
+                getNews()
+
+                getNews()
+                getNews()
+
+            }
+        }
+
+    },
+    updateNodeInfo(node, bShow = true) {
+
+
+        GUI.$info.toggle(bShow)
+        if (bShow)
+            GUI.info.setNode(node)
+
+
+    },
+
+    updateFromVisibleNodes(nodes) {
+
+        if (!GUI.$el) return
+
+
+        GUI.$el.parent().find(".graph-info-companys-visible").html(formatNumber(nodes.length.toLocaleString('en-US')))
+
+
+        var industries = {}
+        var countries = {}
+        nodes.forEach(function (n) {
+
+            if (!n.industry) return
+
+            if (!n.group) return
+
+            if (!industries[n.industry]) industries[n.industry] = 0
+            industries[n.industry]++
+
+            if (!countries[n.group]) countries[n.group] = 0
+            countries[n.group]++
+
+        })
+
+
+        var sortedIndustries = _.sortBy(_.toPairs(industries), 1).reverse()
+        var sortedCountries = _.sortBy(_.toPairs(countries), 1).reverse()
+
+        var totalCountries = _.sum(sortedCountries.map((v) => v[1]))
+        var totalIndustries = _.sum(sortedIndustries.map((v) => v[1]))
+
+        var $industry = GUI.$el.find("#companyIndustry")
+        var $country = GUI.$el.find("#companyCountry")
+
+
+        function pct(val, total) {
+            return ", " + _.round(100 * val / total, 1) + "%"
+
+        }
+
+        $industry.html("")
+        for (var industry of sortedIndustries.slice(0, 3)) {
+            var resHTML = "<table style=\"width:100%;padding:0px;margin:0px;\"><tr><td style=\"padding:0px;margin:0px;text-align:center;width:25px;\" ><img src=\"img/industryIcons/" + industry[0] + ".png\" style=\"width:22px;height:22px;\"></td><td style=\"width:80%;padding:0px;margin:0px;text-align:left; font-family: 'roboto';color:rgb(208, 206, 206);font-size:14px;\">" + industry[0].trim() + "" + pct(industry[1], totalIndustries) + "</td></tr></table>";
+            var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("industry-info-row").append(resHTML)
+            $industry.append($row)
+        }
+
+
+        $country.html("")
+        for (var country of sortedCountries.slice(0, 3)) {
+            var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").append("<span style=\" font-family: 'roboto';color:rgb(208, 206, 206);font-size:14px;\">" + country[0] + "" + pct(country[1], totalCountries) + "</span>")
+            $country.append($row)
+
+        }
+        //TODO percentage
+
+
+    }
+
+
+}
+
+
+__WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
+
+    GUI.createSample()
+
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(".rightCompanyInfo").draggable()
+
+
+})
+	
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -76847,7 +77303,7 @@ TWEEN.Interpolation = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 
@@ -76859,7 +77315,7 @@ module.exports = function(a, b){
 };
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 /**
@@ -76902,7 +77358,7 @@ exports.decode = function(qs){
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -77269,460 +77725,11 @@ class Cluster3DExtended extends __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__["a"
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1), __webpack_require__(0)))
 
 /***/ }),
-/* 20 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(_) {/* harmony export (immutable) */ __webpack_exports__["c"] = computeCompanyNodeColor;
-/* harmony export (immutable) */ __webpack_exports__["b"] = computeGroupNodeColorHelper;
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return GUI; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(33);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__ = __webpack_require__(208);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__ = __webpack_require__(204);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_widgets_draggable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__ = __webpack_require__(207);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_resizable__);
-
-
-//import 'jquery-ui/themes/base/theme.css';
-//import 'jquery-ui/themes/base/selectable.css';
-
-
-
-
-
-function formatNumber(num) {
-    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
-}
-
-var curr = 0
-var currentGradientColors = [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729]
-
-function getNextGradient() {
-
-
-    var availGradients = [
-
-        [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729],
-        [0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0xff0000, 0x00ff00, 0x0000ff, 0xffffff],
-        [0xffffff, 0x0000ff, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111]
-    ]
-
-    var next = ++curr % availGradients.length
-    return currentGradientColors = availGradients[next]
-
-}
-
-function computeCompanyNodeColor(val = 0, attr = "sent") {
-
-
-    var sentRanges = [[92, Number.MAX_SAFE_INTEGER], [85, 92], [78, 85], [71, 78], [64, 71], [57, 64], [50, 57], [43, 50], [36, 43], [29, 36], [22, 29], [15, 22], [Number.MIN_SAFE_INTEGER, 22]]
-    var priceRangesInPct = [[18, Number.MAX_SAFE_INTEGER], [18, 15], [12, 15], [9, 12], [6, 9], [3, 6], [0, 3], [-3, 0], [-6, -3], [-9, -6], [-12, -9], [-18, -15], [Number.MIN_SAFE_INTEGER, -18]]
-
-    var arr
-
-    if (attr == "sent") arr = sentRanges
-    if (attr == "priceRanges") arr = priceRangesInPct;
-
-    var i;
-    for (i = 0; i < arr.length; i++) {
-        var range = arr[i];
-
-        if (range[0] < val && val < range[1])
-            return currentGradientColors[i]
-
-        if (range[1] < val && val < range[0])
-            return currentGradientColors[i]
-    }
-
-    return 0xffffff
-}
-
-function computeGroupNodeColorHelper(distinctGroupIDS) {
-    var colors = []
-
-    for (let i in distinctGroupIDS) {
-        colors.push(_.random(0, 255) * _.random(0, 255) * _.random(0, 255))
-
-    }
-
-
-    return {
-        getColor: function (groupID) {
-
-            var i = distinctGroupIDS.indexOf(groupID)
-            return colors[i] || 0xFFFFFF
-        }
-
-    }
-
-}
-
-
-function changeGradientBar(colorArray) {
-    var gradientString = colorArray.map((c) => "#" + c.toString(16).padStart(6, "0")).join(",")
-
-    var tpl = `.companyGradient {
-		  background: lightgrey;
-		  
-		  background: -webkit-linear-gradient(left,${gradientString});
-		 
-		  background: -o-linear-gradient(left,${gradientString});
-		  
-		  background: -moz-linear-gradient(left,${gradientString});
-		 
-		  background: linear-gradient(to right,${gradientString}); 
-		}
-`
-    __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<style>").text(tpl).appendTo("head")
-
-
-}
-
-
-__WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
-
-    var selectTemplate = `
-	<select class="cloudNodeColorSelect">
-	<option value="sent">sent</option>
-	<option value="priceRanges">priceRanges</option>
-	<option value="group">group</option>
-	</select> 
-	`
-    var $sel = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(selectTemplate)
-
-    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(".companyGradient").on("click", function () {
-
-        var array = getNextGradient()
-        changeGradientBar(array)
-        $sel.trigger("change")
-    })
-
-
-    $sel.on("change", function (e, ui) {
-        var val = $sel.val()
-
-        __WEBPACK_IMPORTED_MODULE_0_jquery___default()(window).trigger("node-color-change", val)
-
-        /*
-                var helper=computeGroupNodeColorHelper(globalEnv.nodeClouds.groupIdList)
-
-
-                if (val=="group")
-                    globalNodes.forEach(function(v){ v.color=helper.getColor(v.group)});
-                else
-                    globalNodes.forEach(function(v){ v.color=computeCompanyNodeColor(parseInt(v.sent),val)   } )
-
-                globalEnv.nodeClouds.update()
-
-                globalEnv.particles.updateColors()
-
-        */
-
-
-    }).appendTo( getBody())
-
-})
-
-
-function getBody()
-{
-   return __WEBPACK_IMPORTED_MODULE_0_jquery___default()("sample-cluster-application graph-hud")
-
-}
-
-
-var GUI = {
-    createAccordion(items) {
-        function createSection(caption, content, id) {
-            var sectionTpl = `<h3 class="accordion-header ui-accordion-header ui-helper-reset ui-state-default ui-accordion-icons ui-corner-all" > ${caption}</h3>
-		<div id="${id}" class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom">
-			
-		</div>`
-            var section = __WEBPACK_IMPORTED_MODULE_0_jquery___default()(sectionTpl)
-
-
-            section.find(".ui-accordion-content").addBack('.ui-accordion-content').append(content)
-
-            return section
-        }
-
-        var acc = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<div class=" ui-accordion ui-widget ui-helper-reset my-accordion">')
-        for (let item of items) {
-            item = _.extend({caption: "missing 'caption'", content: "missing 'content'"}, item)
-            var sec = createSection(item.caption, item.content, item.id)
-            acc.append(sec)
-        }
-
-        //acc.accordion({ header: "h3", active: false, collapsible: true })
-        return acc
-    },
-    createSlider: function () {
-
-
-        var slider = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").slider({
-            min: 10, max: 1000,
-            slide: function (event, ui) {
-
-
-                doZoomByVal(ui.value)
-
-            }
-
-        }).addClass("zoom-slider")
-            .css({
-                width: 200,
-                "margin-left": "2em",
-                "margin-top": "0.5em",
-            })
-
-        slider.appendTo( getBody())
-
-
-    },
-    createSample() {
-
-        let a = GUI.createAccordion([{
-            caption: "<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Sectors </span><img src=\"include/images/Triangle.png\" style=\"width:10px;\">",
-            id: "companyIndustry",
-            content: "Technology, 33%<br>Consumer Discretionary, 20%<br>Consumer Staples, 20%"
-        }, {
-            caption: "<span style=\"color:reg(255,255,255);font-family: 'roboto';font-size:16px;\">Top Countries</span> <img src=\"include/images/Triangle.png\" style=\"width:10px;\">",
-            id: "companyCountry",
-            content: "United States, 80%<br>Japan, 10%<br>Germany, 4%"
-        }])
-        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo( getBody())
-        GUI.$el = a
-
-
-        GUI.createSlider()
-        GUI.info = GUI.createNodeInfoPanel()
-
-
-    },
-    createNodeInfoPanel() {
-
-        GUI.$info = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>")
-
-
-        GUI.$info.hide().appendTo( getBody())
-
-        GUI.$info.addClass("graph-node-info").draggable().resizable()
-
-        var $header = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-header")
-
-
-        var $search = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span>").addClass("graph-node-info-search").html("Yahoo Search")
-        var $price = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span>").addClass("graph-node-info-price").html("USD 36.5 (-0.5%)")
-        var $close = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<span style=\"margin-left:420px;cursor:pointer;\">").addClass("graph-node-info-close").html("<i class=\"fa fa-times\" aria-hidden=\"true\" style=\"font-family:'FontAwesome' !important;\"></i> CLOSE")
-
-        var stockPrice = "<span style=\"margin-left:20px;margin-top:7px;\">USD <span style=\"color:#f7685e;font-family:'roboto-bold'  !important;\">36.5</span> (-0.5%)</span>";
-        // var headBar = "<span style=\"margin-left:400px;margin-top:7px;\" ></span>";
-
-
-        $close.on("click", function () {
-            GUI.$info.fadeOut(50)
-
-        })
-
-        $header.append($search, stockPrice, $close)
-
-        var $body = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-body")
-
-        $body.html("COMPANY<br> wikiinfo")
-
-        var $news = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news")
-
-        //$news.html("RSS or Twitter or News")
-
-        var $newsHeader = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news-header").html("News")
-        var $newsBody = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("graph-node-info-news-body")
-        $news.append($newsHeader, $newsBody)
-
-        GUI.$info.append($header, $body, $news)
-
-
-        return {
-            setNode: function (node) {
-                var news = ["U.S., China agree to first trade steps under 100-day plan",
-                    "Wall Street falls, department stores take a drubbing",
-                    "Behind Kushner Companies, a Chinese agency skirts visa-for-investment rules",
-                    "In blow to Trump, GE backs NAFTA and plans growth in Mexico"]
-
-                lorem = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
-
-
-                //header
-
-
-                $search.html(__WEBPACK_IMPORTED_MODULE_0_jquery___default()("<a style=\"text-decoration:none;\">").html("<div style=\"float:left;\">Go to Company Page </div><div  style=\"float:right;padding-left:5px;padding-top:1px;\"> >></div>").attr({
-                    target: "_blank",
-                    href: "#",
-                    title: "Open new Tab for " + node.name
-                }))
-
-
-                //price
-
-                var companyLookupName = node.name
-                if (node.ticker)
-                    companyLookupName = node.ticker.split(":")[1]
-
-                AppDataService.getCompanyInfo(companyLookupName).then(function (data) {
-
-                    /*if (!data.LastTradePriceOnly)
-                    {
-                        console.error("'"+node.name+"' not found",data)
-                        $price.html("-/-")
-                        return
-                    }*/
-
-                    var str = `${data.Currency} ${data.LastTradePriceOnly} (${data.ChangeinPercent})`
-                    $price.html(str)
-
-                })
-
-
-                //body
-                $body.html("")
-                AppDataService.getWiki(node.name).then(function (data) {
-
-                    if (data.content == "Redirect to:") {
-                        $body.html("<h2>" + node.name + "</h2><br>").append("TODO handle redirects for wikipedia")
-                        /*
-                        AppDataService.getWiki(data.page).then(function(data){
-                            $body.html("<h2>"+node.name+"</h2><br>").append(data.content)
-
-                        })*/
-                    }
-                    else
-                        $body.html("<h2>" + node.name + "</h2><br>").append(data.content)
-
-                }).catch(function (e) {
-
-
-                    if (e.code == "missingtitle")
-                        $body.html("Wiki info not found for: " + node.name)
-                    else
-                        $body.html(e.code)
-
-                })
-
-
-                $newsBody.html("")
-
-
-                function getNews() {
-                    var n = news[_.random(0, 3)]
-                    var el = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<p>").append(n)
-                    $newsBody.append(el)
-                }
-
-                getNews()
-
-                getNews()
-                getNews()
-
-            }
-        }
-
-    },
-    updateNodeInfo(node, bShow = true) {
-
-
-        GUI.$info.toggle(bShow)
-        if (bShow)
-            GUI.info.setNode(node)
-
-
-    },
-
-    updateFromVisibleNodes(nodes) {
-
-        if (!GUI.$el) return
-
-
-        GUI.$el.parent().find(".graph-info-companys-visible").html(formatNumber(nodes.length.toLocaleString('en-US')))
-
-
-        var industries = {}
-        var countries = {}
-        nodes.forEach(function (n) {
-
-            if (!n.industry) return
-
-            if (!n.group) return
-
-            if (!industries[n.industry]) industries[n.industry] = 0
-            industries[n.industry]++
-
-            if (!countries[n.group]) countries[n.group] = 0
-            countries[n.group]++
-
-        })
-
-
-        var sortedIndustries = _.sortBy(_.toPairs(industries), 1).reverse()
-        var sortedCountries = _.sortBy(_.toPairs(countries), 1).reverse()
-
-        var totalCountries = _.sum(sortedCountries.map((v) => v[1]))
-        var totalIndustries = _.sum(sortedIndustries.map((v) => v[1]))
-
-        var $industry = GUI.$el.find("#companyIndustry")
-        var $country = GUI.$el.find("#companyCountry")
-
-
-        function pct(val, total) {
-            return ", " + _.round(100 * val / total, 1) + "%"
-
-        }
-
-        $industry.html("")
-        for (var industry of sortedIndustries.slice(0, 3)) {
-            var resHTML = "<table style=\"width:100%;padding:0px;margin:0px;\"><tr><td style=\"padding:0px;margin:0px;text-align:center;width:25px;\" ><img src=\"img/industryIcons/" + industry[0] + ".png\" style=\"width:22px;height:22px;\"></td><td style=\"width:80%;padding:0px;margin:0px;text-align:left; font-family: 'roboto';color:rgb(208, 206, 206);font-size:14px;\">" + industry[0].trim() + "" + pct(industry[1], totalIndustries) + "</td></tr></table>";
-            var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").addClass("industry-info-row").append(resHTML)
-            $industry.append($row)
-        }
-
-
-        $country.html("")
-        for (var country of sortedCountries.slice(0, 3)) {
-            var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<div>").append("<span style=\" font-family: 'roboto';color:rgb(208, 206, 206);font-size:14px;\">" + country[0] + "" + pct(country[1], totalCountries) + "</span>")
-            $country.append($row)
-
-        }
-        //TODO percentage
-
-
-    }
-
-
-}
-
-
-__WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
-
-    GUI.createSample()
-
-    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(".rightCompanyInfo").draggable()
-
-
-})
-	
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
-
-/***/ }),
 /* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween__ = __webpack_require__(16);
+/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__lib_Tween__);
 /**
  * Created by Frank on 08.06.2017.
@@ -80546,7 +80553,7 @@ if(false) {
 /* WEBPACK VAR INJECTION */(function(THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__EdgesContainer__ = __webpack_require__(89);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__particles_NodesParticleSystem__ = __webpack_require__(91);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__particles_ParticleNodeGroup__ = __webpack_require__(92);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_Tween__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_Tween__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__lib_Tween__);
 /**
  * Created by Frank on 30.05.2017.
@@ -80968,19 +80975,11 @@ class GraphData
     var d3Links =this.getAlteredRawLinks();
 
 
-//TODO
-  /*  function countVisibleNodes(node) {
-
-        env._nodeCounter.push(node)
-
-    }*/
 
     // Add WebGL objects
     d3Nodes.forEach(node => {
 
-        node = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__["a" /* default */])(env, node, {
-         //   onDrawNode: countVisibleNodes
-        })
+        node = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__["a" /* default */])(env, node)
         node._bubble.name = env.nameAccessor(node) || '';
 
 
@@ -81141,9 +81140,9 @@ class GraphData
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(19);
+/* WEBPACK VAR INJECTION */(function(_, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(97);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_SpecificDataUtils__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_SpecificDataUtils__ = __webpack_require__(16);
 /**
  * Created by Frank on 06.06.2017.
  */
@@ -81886,7 +81885,7 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js__ = __webpack_require__(190);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_hexasphere_js__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__gui_GraphHUD__ = __webpack_require__(101);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__ = __webpack_require__(16);
 /**
  * Created by Frank on 13.06.2017.
  */
@@ -81908,209 +81907,207 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
 
 
+class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default */] {
 
-
-class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default */]
-{
-
-    constructor(...args)
-    {
+    constructor(...args) {
         super(...args);
 
-        this.mRootCluster=null;
-
-
-
-
+        this.mRootCluster = null;
 
 
     }
 
 
-
-    connectedCallback(){
+    connectedCallback() {
         super.connectedCallback();
 
     }
 
-    setSpeccs(speccs)
-    {
-        this.mSpeccs=speccs;
+    setSpeccs(speccs) {
+        this.mSpeccs = speccs;
         return this
     }
 
-    getSpeccs()
-    {
+    getSpeccs() {
 
         return this.mSpeccs
     }
 
 
-
-createSkyDome()
-{
+    createSkyDome() {
 
 
-
-    var material = new THREE.MeshBasicMaterial();
-
-
-    let scene=this.mScene;
-
-    var ambientLight = new THREE.AmbientLight(0xFFFFFF,1.5);
-    scene.add(ambientLight);
-   /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(0, 10000, 0);
-    dirLight.intensity = 1;
-    scene.add(dirLight);
-*/
-   /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
-    pointLight.position.set( 0, 0, 20000 );
-    scene.add(pointLight);
-*/
-  /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
-    var material = new THREE.MeshBasicMaterial();
-
-   material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
-    material.side = THREE.BackSide;
-    material.opacity=0.05;
-    material.transparent=true;
-    var skydome = new THREE.Mesh(geometry, material);
-
-    this.mSkyDome=skydome
+        var material = new THREE.MeshBasicMaterial();
 
 
-*/
- //   scene.add(skydome);
+        let scene = this.mScene;
+
+        var ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.5);
+        scene.add(ambientLight);
+        /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+         dirLight.position.set(0, 10000, 0);
+         dirLight.intensity = 1;
+         scene.add(dirLight);
+     */
+        /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
+         pointLight.position.set( 0, 0, 20000 );
+         scene.add(pointLight);
+     */
+        /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
+          var material = new THREE.MeshBasicMaterial();
+
+         material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
+          material.side = THREE.BackSide;
+          material.opacity=0.05;
+          material.transparent=true;
+          var skydome = new THREE.Mesh(geometry, material);
+
+          this.mSkyDome=skydome
 
 
-    //--------------------------------
-    var meshMaterials = [];
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
-    meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
-
-    var oceanMaterial = []
-    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
-    oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
+      */
+        //   scene.add(skydome);
 
 
-    var radius = 300000;        // Radius used to calculate position of tiles
-    var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
-    var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
+        //--------------------------------
+        var meshMaterials = [];
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
+        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
+
+        var oceanMaterial = []
+        oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
+        oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
 
 
-    function isLand(){
+        var radius = 300000;        // Radius used to calculate position of tiles
+        var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
+        var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
 
-        return _.random(0,1)
+
+        function isLand() {
+
+            return _.random(0, 1)
+
+        }
+
+        var hexaGroup = new THREE.Group();
+
+        var hexasphere = new __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default.a(radius, subDivisions, tileSize);
+        for (var i = 0; i < hexasphere.tiles.length; i++) {
+            var t = hexasphere.tiles[i];
+            var latLon = t.getLatLon(hexasphere.radius);
+
+            var geometry = new THREE.Geometry();
+
+            for (var j = 0; j < t.boundary.length; j++) {
+                var bp = t.boundary[j];
+                geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
+            }
+            geometry.faces.push(new THREE.Face3(0, 1, 2));
+            geometry.faces.push(new THREE.Face3(0, 2, 3));
+            geometry.faces.push(new THREE.Face3(0, 3, 4));
+            if (geometry.vertices.length > 5) {
+                geometry.faces.push(new THREE.Face3(0, 4, 5));
+            }
+
+            if (isLand(latLon.lat, latLon.lon)) {
+                material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
+            } else {
+                material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
+            }
+
+            material.opacity = 0.3;
+
+            material.side = THREE.BackSide;
+
+            var mesh = new THREE.Mesh(geometry, material.clone());
+            hexaGroup.add(mesh);
+            hexasphere.tiles[i].mesh = mesh;
+
+        }
+        scene.add(hexaGroup);
+        this.mSkyDome = hexaGroup
+
 
     }
 
-    var hexaGroup=new THREE.Group();
 
-    var hexasphere = new __WEBPACK_IMPORTED_MODULE_4_hexasphere_js___default.a(radius, subDivisions, tileSize);
-    for(var i = 0; i< hexasphere.tiles.length; i++){
-        var t = hexasphere.tiles[i];
-        var latLon = t.getLatLon(hexasphere.radius);
+    addCompanyCountListenersToCluster(rootCluster) {
 
-        var geometry = new THREE.Geometry();
 
-        for(var j = 0; j< t.boundary.length; j++){
-            var bp = t.boundary[j];
-            geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
+        var visibleNodes = [];
+
+        function attachListeners(cluster) {
+
+
+            _.each(cluster.findClusters("*"), function (cluster) {
+                cluster.on('before-render', function () {
+
+
+                    if (cluster.mExpanded == false) {
+                        visibleNodes.push(cluster);
+                    }
+
+
+                    if (cluster.isLeaf()) {
+                        visibleNodes.push(cluster);
+                    }
+
+
+                })
+
+                cluster.on('initial-expand', function () {
+
+                    attachListeners(this)
+
+
+                })
+
+
+            });
         }
-        geometry.faces.push(new THREE.Face3(0,1,2));
-        geometry.faces.push(new THREE.Face3(0,2,3));
-        geometry.faces.push(new THREE.Face3(0,3,4));
-        if(geometry.vertices.length > 5){
-            geometry.faces.push(new THREE.Face3(0,4,5));
-        }
-
-        if(isLand(latLon.lat, latLon.lon)){
-            material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
-        } else {
-            material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
-        }
-
-        material.opacity = 0.3;
-
-        material.side = THREE.BackSide;
-
-        var mesh = new THREE.Mesh(geometry, material.clone());
-        hexaGroup.add(mesh);
-        hexasphere.tiles[i].mesh = mesh;
-
-    }
-    scene.add(hexaGroup);
-    this.mSkyDome=hexaGroup
 
 
-
-}
+        attachListeners(rootCluster)
 
 
 
 
-addCompanyCountListenersToCluster(rootCluster){
+        var that = this;
+        var _____skipFrames = 0;
+
+        $(that).on("before-render", function () {
 
 
+            if (that.isMaximised()) {
 
-    var visibleLeafs=[];
-    _.each( rootCluster.getLeafs() ,function(leaf){
-        leaf.onBeforeRender=function(){
-            visibleLeafs.push(leaf);
-        }
-    });
+                _____skipFrames++;
+                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
 
 
+                let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
 
-
-
-
-    var that=this;
-    var _____skipFrames=0;
-
-    $(that).on("before-render",function(){
-
-
-        if (that.isMaximised()) {
-
-            _____skipFrames++;
-            //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-          //  let prev_vis=preparedData.nodes[0]._bubble.material.visible;
-          //  let _vis= (_____skipFrames % 20) ? false : true;
-          //  preparedData.nodes[0]._bubble.material.visible = _vis;
-
-         //   if (prev_vis)
-         //   {
-                let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
                 __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(vl);
-                // GUI.updateFromVisibleNodes(visibleNodes);
-                //   that.mVisibleNodes=[].concat(visibleNodes)
-                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
-                //  that.mRootCluster.updateRootTextNodes(visibleNodes);
 
-           // }
-        }
-
-        visibleLeafs=[]
-
-    });
+            }
 
 
+            visibleNodes = []
 
-}
+        });
 
 
+    }
 
 
-    initClusterForView(rawGraphData,parentEl3D) {
+    initClusterForView(rawGraphData, parentEl3D) {
 
 
         if (!rawGraphData) return;
@@ -82122,19 +82119,23 @@ addCompanyCountListenersToCluster(rootCluster){
 
         let preparedData = graphData.createClusterNodesAndEdges(this);
 
-        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes,undefined,this);
+
+        //TODO the nodes had to be visible for the on before render part counting companies which is no longer used
+      //  _.each(preparedData.nodes,(n) => n._bubble.material.visible = false)
+
+
+
+        var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes, undefined, this);
 
 
 //-- count visible nodes
-   //TODO check if this interferes with the nodeMixin and the default implementation
-      var visibleNodes=[];
-    /*    _.each(preparedData.nodes,function(node){
-            node.get3DRoot().onBeforeRender=function(){
-                visibleNodes.push(node);
-            }
-        });*/
-
-
+        //TODO check if this interferes with the nodeMixin and the default implementation
+        var visibleNodes = [];
+        /*    _.each(preparedData.nodes,function(node){
+                node.get3DRoot().onBeforeRender=function(){
+                    visibleNodes.push(node);
+                }
+            });*/
 
 
 //--
@@ -82148,8 +82149,6 @@ addCompanyCountListenersToCluster(rootCluster){
         res.applyClustering(speccs);
 
 
-
-
         this.start();
 
         return res
@@ -82158,8 +82157,7 @@ addCompanyCountListenersToCluster(rootCluster){
     }
 
 
-    setData(mGraphData)
-    {
+    setData(mGraphData) {
         this.initStatic();
 
 
@@ -82176,15 +82174,13 @@ addCompanyCountListenersToCluster(rootCluster){
         $(this).trigger("loaded")
 
 
-
     }
 
-    loadDataSet(ds){
+    loadDataSet(ds) {
 
-      var that = this;
+        var that = this;
 
-        ds(null,function onSuccess(mGraphData)
-        {
+        ds(null, function onSuccess(mGraphData) {
             console.log("data loaded");
             that.setData(mGraphData);
 
@@ -82193,9 +82189,9 @@ addCompanyCountListenersToCluster(rootCluster){
             function triggerColorChange() {
                 let selectEl = $(".cloudNodeColorSelect")
 
-                if (selectEl.length==0) setTimeout(triggerColorChange,100)
+                if (selectEl.length == 0) setTimeout(triggerColorChange, 100)
                 else
-                selectEl.val("group").trigger("change")
+                    selectEl.val("group").trigger("change")
             }
 
             triggerColorChange();
@@ -82203,38 +82199,36 @@ addCompanyCountListenersToCluster(rootCluster){
 
         });
 
-    return this
+        return this
     }
 
 
     maximise() {
 
-        var  root = this.mRootCluster;
+        var root = this.mRootCluster;
 
         super.maximise();
 
-            if (root && root.mParentView && root.mTextOverlay) {
+        if (root && root.mParentView && root.mTextOverlay) {
 
-                root.mTextOverlay.height(root.mParentView.clientHeight);
-                root.mTextOverlay.width(root.mParentView.clientWidth);
-                console.log("maximised")
-            }
-
-
+            root.mTextOverlay.height(root.mParentView.clientHeight);
+            root.mTextOverlay.width(root.mParentView.clientWidth);
+            console.log("maximised")
+        }
 
 
     }
 
-    undoMaximise(){
-            super.undoMaximise();
+    undoMaximise() {
+        super.undoMaximise();
 
 
-            let root=this.mRootCluster;
-            if (root&& root.mParentView && root.mTextOverlay) {
+        let root = this.mRootCluster;
+        if (root && root.mParentView && root.mTextOverlay) {
 
-                root.mTextOverlay.height(root.mParentView.clientHeight);
-                root.mTextOverlay.width(root.mParentView.clientWidth)
-            }
+            root.mTextOverlay.height(root.mParentView.clientHeight);
+            root.mTextOverlay.width(root.mParentView.clientWidth)
+        }
 
 
     }
@@ -82816,6 +82810,7 @@ function basicElementExtend(env, obj, _mesh) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = extendGraphElements;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f5_arrows__ = __webpack_require__(96);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__SpecificDataUtils__ = __webpack_require__(16);
 /**
  * Created by Frank on 16.07.2017.
  */
@@ -82835,6 +82830,7 @@ function basicElementExtend(env, obj, _mesh) {
  TODO search filter for hidden nodes.. expand before zoom
 
  */
+
 
 
 
@@ -83162,7 +83158,7 @@ function extendGraphElements(d3Nodes, d3Links, env) {
             //setCollapsedSateOfChildNodesAndEdgesOfNode(e.target.node)
             var currNodeDblClicked = e.target.node;
 
-            GUI.updateNodeInfo(currNodeDblClicked, currNodeDblClicked != previousNodeDblClicked);
+            __WEBPACK_IMPORTED_MODULE_2__SpecificDataUtils__["a" /* GUI */].updateNodeInfo(currNodeDblClicked, currNodeDblClicked != previousNodeDblClicked);
 
             if (previousNodeDblClicked == currNodeDblClicked)
                 previousNodeDblClicked = null;
@@ -83829,7 +83825,7 @@ DomEventsAlt.prototype._onMouseMove = _.throttle(function (domEvent)
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = AnimationMixin;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Tween___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__lib_Tween__);
 /**
  * extends any given object
@@ -84360,9 +84356,9 @@ function polling (opts) {
  */
 
 var Transport = __webpack_require__(30);
-var parseqs = __webpack_require__(18);
+var parseqs = __webpack_require__(19);
 var parser = __webpack_require__(13);
-var inherit = __webpack_require__(17);
+var inherit = __webpack_require__(18);
 var yeast = __webpack_require__(69);
 var debug = __webpack_require__(5)('engine.io-client:polling');
 
@@ -85915,7 +85911,7 @@ var toArray = __webpack_require__(225);
 var on = __webpack_require__(65);
 var bind = __webpack_require__(51);
 var debug = __webpack_require__(5)('socket.io-client:socket');
-var parseqs = __webpack_require__(18);
+var parseqs = __webpack_require__(19);
 
 /**
  * Module exports.
@@ -86943,7 +86939,7 @@ class ConvexVolume extends __WEBPACK_IMPORTED_MODULE_0__BoxVolume__["a" /* defau
         if (l < 0) l = 0;
         if (l > 1) l = 1;
 
-        var minOpacity = 0.03;
+        var minOpacity = 0.00;
 
         function mTransfer(x) {
             //transfer function y= 0.5*sin(1.5*pi+x*pi*2)+0.5
@@ -90868,7 +90864,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__ = __webpack_require__(84);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gui_searchbar__ = __webpack_require__(44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__refactor_SpecificDataUtils__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__refactor_SpecificDataUtils__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__refactor_AppDataService__ = __webpack_require__(76);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera__ = __webpack_require__(80);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera__);
@@ -90886,7 +90882,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__ClusterNodeArray__ = __webpack_require__(70);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__ClusterLeafElement__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__BaseCluster3D__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__Cluster3DExtended__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__Cluster3DExtended__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__RootCluster__ = __webpack_require__(41);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__GraphData__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__view_GraphView3D__ = __webpack_require__(45);
@@ -92922,74 +92918,33 @@ function linkMixin(env, link, options) {
 
 
 
-//better node structure
-//TODO not currently used
-
-//TODO
 var sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
-var emptyGeometry = new THREE.Geometry();
+
 var singleNodeMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffff00, wireframe: true, visible: true, opacity: 0, transparent: true,
+    color: 0xffff00, wireframe: true, visible: false, opacity: 1, transparent: true,
     alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
 
 });
 
-var lastSelectedNode;
+
+function nodeMixin(env, node) {
 
 
- function nodeMixin(env, node, options) {
-
-
-    if (node._mixin_) return;
+    if (node._mixin_) {
+        console.warn("try to not initialise nodes again for small performance increase")
+        return;
+    }
     node._mixin = true;
 
 
-    options = _.extend({
-        onDrawNode: function () {
-        }
-    }, options);
-    // have a container as root element  instead of the mesh itself
+    //TODO have a container as root element  instead of the mesh itself
 
-    //material is invisible but it seems that raycaster works as intended
-    //FIXME but the onBeforeRender and onAfterRender code won't get executed
-    //NOTE the material is currently visible and the opacity ==0 but this still impacts performace
-    // so currently the material is set invisible only every x frames in the animation loop
-
-    /*
-     var material = new THREE.MeshBasicMaterial({
-     color: 0xffff00, wireframe: true, visible: true, opacity: env.useDebugSphere ? 1 : 0, transparent: true,
-     alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
-
-     });
-     */
-
-    /*
-     var material = new THREE.MeshBasicMaterial( {color: 0xffff00,wireframe:true,visible:true,opacity:1,transparent:true ,
-     alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
-
-     } );
-     */
-
-
-    if (!emptyGeometry.boundingSphere)
-        emptyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
 
     //the single material is only for the node counting. so it should be irrelevant for rendering itself
-    node._bubble = new THREE.Mesh(sphereGeometry, singleNodeMaterial); //material );
+    node._bubble = new THREE.Mesh(sphereGeometry, singleNodeMaterial);
 
 
     var mMesh = node._bubble;
-
-
-    //the problem is that the onBeforeRender does not execute when the mesh or the material is invisible
-
-    mMesh.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
-
-    };
-
-    mMesh.onAfterRender = function (renderer, scene, camera, geometry, material, group) {
-        options.onDrawNode.apply(this, [node])
-    };
 
 
     var size = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__["b" /* basicSpriteSize */])(env, node) / 5;
@@ -92998,63 +92953,21 @@ var lastSelectedNode;
     mMesh.scale.setScalar(size);
 
 
-
-
     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__["a" /* basicElementExtend */])(env, node, mMesh);
 
     var self = _.extend(node, {
         highlight: function () {
-
             highlightNodeElements.apply(this)
-
         },
         unhighlight: function () {
-
             unhighlightNodeElements.apply(this)
-
         },
 
         zoom: function () {
-
-
             doOnClickNode(this)
-        }/*,
-
-         expandGroup: function () {
-
-
-         //setCollapsedSateOfChildNodesAndEdgesOfNode(this, true)
-         //if (typeof self.link_count!="number") return
-
-         var grp = this.group;
-         if (typeof grp == "undefined") return; //silent fail
-         if (env.expand[grp] == true) return; //already expanded
-
-         env.expand[grp] = true;
-         env.digest()
-
-
-         },
-         collapseGroup: function () {
-
-         //setCollapsedSateOfChildNodesAndEdgesOfNode(this, false)
-
-         var grp = this.group;
-         if (typeof grp == "undefined") return; //silent fail
-         if (env.expand[grp] == false) return; //already expanded
-
-         env.expand[grp] = false;
-         env.digest()
-
-
-         }*/
+        }
 
     });
-
-
-    //self.on("click mouseover mousemove ...")
-
-    //if (env.useTooltip){
 
 
     self.on("mousemove", function (e, f, g) {
@@ -93091,46 +93004,6 @@ var lastSelectedNode;
 
 
     });
-
-    /*
-     self.on("mouseout", function (e) {
-     e.stopPropagation();
-
-     //	   $(env.toolTipElem).html("")
-     })*/
-
-
-//	}
-
-    //add extra highlight for last clicked node
-
-
-    /*self.on("click",function(e){
-
-     if (lastSelectedNode)
-     lastSelectedNode.removeClass("basic-selection")
-
-     lastSelectedNode=e.target.node
-
-     e.target.node.addClass("basic-selection")
-     })*/
-
-
-    //add group node expand behaviour
-    /* @deprecated will be reimplemented on a per-cluster-basis
-     if (self.isGroupNode)
-     self.on("dblclick", function (e) {
-     e.target.node.expandGroup()
-     });
-     else //add none group node collapse behaviour
-     self.on("dblclick", function (e) {
-
-
-     if (env.useGroupFeature)
-     e.target.node.collapseGroup()
-
-     });
-     */
 
 
     return self
@@ -93290,7 +93163,7 @@ function removeArrow(d3LinkObj) {
 "use strict";
 /* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(98);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(45);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__ = __webpack_require__(20);
 /**
  * Created by Frank on 12.07.2017.
  */
@@ -95416,7 +95289,7 @@ class View3D extends HTMLElement {
     setControls() {
         // Add camera interaction
         this.mControls = new THREE.TrackballControls(this.mCamera, this.mRenderer.domElement);
-        // this.mControls.rotateSpeed = 0.3
+         this.mControls.rotateSpeed = 3
         this.mControls.maxDistance = Math.min(this.mCamera.far,200000);
 
 
@@ -100115,7 +99988,7 @@ var index = __webpack_require__(60);
 var parser = __webpack_require__(13);
 var parseuri = __webpack_require__(63);
 var parsejson = __webpack_require__(211);
-var parseqs = __webpack_require__(18);
+var parseqs = __webpack_require__(19);
 
 /**
  * Module exports.
@@ -100861,7 +100734,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
  */
 
 var Polling = __webpack_require__(58);
-var inherit = __webpack_require__(17);
+var inherit = __webpack_require__(18);
 
 /**
  * Module exports.
@@ -101100,7 +100973,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 var XMLHttpRequest = __webpack_require__(31);
 var Polling = __webpack_require__(58);
 var Emitter = __webpack_require__(11);
-var inherit = __webpack_require__(17);
+var inherit = __webpack_require__(18);
 var debug = __webpack_require__(5)('engine.io-client:polling-xhr');
 
 /**
@@ -101519,8 +101392,8 @@ function unloadHandler () {
 
 var Transport = __webpack_require__(30);
 var parser = __webpack_require__(13);
-var parseqs = __webpack_require__(18);
-var inherit = __webpack_require__(17);
+var parseqs = __webpack_require__(19);
+var inherit = __webpack_require__(18);
 var yeast = __webpack_require__(69);
 var debug = __webpack_require__(5)('engine.io-client:websocket');
 var BrowserWebSocket = global.WebSocket || global.MozWebSocket;

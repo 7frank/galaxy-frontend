@@ -190,13 +190,6 @@ export default class GraphView3D extends View3D {
         attachListeners(rootCluster)
 
 
-        var visibleLeafs = [];
-        /* _.each( rootCluster.getLeafs() ,function(leaf){
-             leaf.onBeforeRender=function(){
-                 visibleLeafs.push(leaf);
-             }
-         });
-     */
 
 
         var that = this;
@@ -209,25 +202,15 @@ export default class GraphView3D extends View3D {
 
                 _____skipFrames++;
                 //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-                //  let prev_vis=preparedData.nodes[0]._bubble.material.visible;
-                //  let _vis= (_____skipFrames % 20) ? false : true;
-                //  preparedData.nodes[0]._bubble.material.visible = _vis;
 
-                //   if (prev_vis)
-                //   {
-                visibleNodes
+
                 let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
-                //  let vl=  _.flatten(visibleLeafs.map( leaf => leaf.mNodes ) )
-                GUI.updateFromVisibleNodes(vl);
-                // GUI.updateFromVisibleNodes(visibleNodes);
-                //   that.mVisibleNodes=[].concat(visibleNodes)
-                //$(that).trigger("visible-nodes-changed") //TODO inverse control via listening
-                //  that.mRootCluster.updateRootTextNodes(visibleNodes);
 
-                // }
+                GUI.updateFromVisibleNodes(vl);
+
             }
 
-            visibleLeafs = []
+
             visibleNodes = []
 
         });
@@ -247,6 +230,12 @@ export default class GraphView3D extends View3D {
 
 
         let preparedData = graphData.createClusterNodesAndEdges(this);
+
+
+        //TODO the nodes had to be visible for the on before render part counting companies which is no longer used
+      //  _.each(preparedData.nodes,(n) => n._bubble.material.visible = false)
+
+
 
         var res = new RootCluster(preparedData.nodes, undefined, this);
 

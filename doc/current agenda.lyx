@@ -879,6 +879,95 @@ count clusters in background that would count towards visible countries
  but are invisible for performance reasons
 \end_layout
 
+\begin_layout Paragraph
+meeting 12.8.
+ TODO order prio and merge
+\end_layout
+
+\begin_layout Itemize
+hull nur minimal generieren
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+initial positions of cluster from file irgendwann
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+hull 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+nah dran wneiger prominent
+\end_layout
+
+\begin_layout Itemize
+weiter weg gegen null
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+edges weg und nur auf hover
+\end_layout
+
+\begin_layout Itemize
+rotate pan speed
+\end_layout
+
+\begin_layout Itemize
+breadcrumb clostest cluster
+\end_layout
+
+\begin_layout Itemize
+sector short text 
+\begin_inset Quotes eld
+\end_inset
+
+Health...
+\begin_inset Quotes erd
+\end_inset
+
+ version
+\end_layout
+
+\begin_layout Itemize
+pop up
+\end_layout
+
+\begin_layout Itemize
+zoom in out controls
+\end_layout
+
+\begin_layout Itemize
+color scheme white color options
+\end_layout
+
+\begin_layout Itemize
+2d look improve
+\end_layout
+
+\begin_layout Itemize
+news on right based on pos in cluster
+\end_layout
+
+\begin_layout Itemize
+touch options debugging ipad!!!!! important
+\end_layout
+
+\begin_layout Itemize
+circular cluster for 2d?
+\end_layout
+
+\begin_layout Paragraph
+bugs (backlog)
+\end_layout
+
+\begin_layout Itemize
+text overlay does not resize to same size as view sometimes
+\end_layout
+
 \begin_layout Section
 Features/Versions/History/sprints
 \end_layout

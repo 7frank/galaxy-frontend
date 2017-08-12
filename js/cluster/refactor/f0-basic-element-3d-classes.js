@@ -460,7 +460,6 @@ function basicElementExtend(env, obj, _mesh) {
 
 
             mDomEvents._notify(eventName, _mesh, node, intersect);
-            //mDomEvents.triggerEvent(_mesh, eventName, args)
 
 
         }, get3DRoot: function () {
