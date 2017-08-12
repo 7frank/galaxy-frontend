@@ -84,11 +84,11 @@ class RootCluster extends Cluster3DExtended {
 
         function updateParticles(leaf)
         {
-//FIXME performance
-          //  return;
-        if (leaf && leaf.parent && leaf.parent.mParticles) {
 
-            leaf.parent.mParticles.updateColors();
+
+        if (leaf && leaf.mParticles) {
+
+            leaf.mParticles.updateColors();
 
 
         }

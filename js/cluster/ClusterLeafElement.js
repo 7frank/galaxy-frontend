@@ -43,7 +43,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
     setLOD(levelOfDetail) {
         if (this.mNodeParticles && this.parent.useLOD)
-            this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
+            this.mNodeParticles.pointCloud.visible =  levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
         let edgeFadeLOD = 0.3;
@@ -178,8 +178,10 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         }, function () {
 
-
-            that._initDotParticles();
+//FIXME init dot particles if (root)cluster is done animating?
+            //FIXME update color of particles only for clusters that need an update
+            //by adding a timeout the color is yellow again because the event triggered is too early
+        setTimeout(() => that._initDotParticles(),500)
 
             onComplete()
 
@@ -238,7 +240,8 @@ export default class ClusterLeafElement extends THREE.Mesh {
             var demoOptions = {
                 increment: 1,
                 duration: 1000,
-                easing: TWEEN.Easing.Exponential.Out
+                easing: TWEEN.Easing.Exponential.Out,
+                position:{x:(_.random(0,2)-1)*_.random(50000,150000),y:(_.random(0,2)-1)*_.random(50000,150000),z:0}
             };
 
             if (!nodes) //FIXME this only works that way because to realData is not generated properly

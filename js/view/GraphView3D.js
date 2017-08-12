@@ -155,6 +155,8 @@ export default class GraphView3D extends View3D {
 
 
         var visibleNodes = [];
+        var _____skipFrames = 0;
+
 
         function attachListeners(cluster) {
 
@@ -162,8 +164,9 @@ export default class GraphView3D extends View3D {
             _.each(cluster.findClusters("*"), function (cluster) {
                 cluster.on('before-render', function () {
 
+                    if (_____skipFrames % 20!=0) return;
 
-                    if (cluster.mExpanded == false) {
+                        if (cluster.mExpanded == false) {
                         visibleNodes.push(cluster);
                     }
 
@@ -191,9 +194,13 @@ export default class GraphView3D extends View3D {
 
 
         var that = this;
-        var _____skipFrames = 0;
 
-        $(that).on("before-render", function () {
+
+        $(that).off("before-render", onBeforeRender);
+        $(that).on("before-render", onBeforeRender);
+
+
+        function onBeforeRender() {
 
 
             if (that.isMaximised()) {
@@ -202,12 +209,13 @@ export default class GraphView3D extends View3D {
                 if (_____skipFrames++ % 20==0) {
                     let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
                     GUI.updateFromVisibleNodes(vl);
+                    visibleNodes = []
                 }
             }
 
-            visibleNodes = []
 
-        });
+
+        }
 
 
     }

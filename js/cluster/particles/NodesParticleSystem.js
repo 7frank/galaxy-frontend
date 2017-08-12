@@ -86,7 +86,8 @@ export default
 					nodeKey:'itemCount',
 					increment:5,
 					duration:1000,
-					easing:TWEEN.Easing.Linear.None
+					easing:TWEEN.Easing.Linear.None,
+					position:{x:0,y:50000,z:50000}
 				},options)
 			
 			
@@ -138,9 +139,9 @@ export default
 							destination[ v * 3 + 1 ] = 2;
 							destination[ v * 3 + 2 ] = 5000;
 
-							positions[ v * 3 + 0 ] = 1;
-							positions[ v * 3 + 1 ] = 2;
-							positions[ v * 3 + 2 ] = 5000;
+							positions[ v * 3 + 0 ] = options.position.x;
+							positions[ v * 3 + 1 ] = options.position.y;
+							positions[ v * 3 + 2 ] = options.position.z;
 							
 				v++			
 				}           

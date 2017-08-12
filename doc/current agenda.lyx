@@ -961,6 +961,10 @@ circular cluster for 2d?
 \end_layout
 
 \begin_layout Paragraph
+\begin_inset Note Note
+status open
+
+\begin_layout Paragraph
 bugs (backlog)
 \end_layout
 
@@ -968,6 +972,29 @@ bugs (backlog)
 text overlay does not resize to same size as view sometimes
 \end_layout
 
+\begin_layout Itemize
+company names calc with skip after view change flickers
+\end_layout
+
+\begin_layout Itemize
+force graph is not rendered before everything is finished
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+render initial/actual force graph 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
 \begin_layout Paragraph
 perf consderations
 \begin_inset Note Note
@@ -997,6 +1024,36 @@ thats a third of cpu usage we might prevent by not rendering at all
 
 \end_layout
 
+\begin_deeper
+\begin_layout Itemize
+text nodes,events updates that don't matter at this stage have a huge impact
+ in this
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+applyClustering is another part that takes 1500 ms 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+delayed init of edges 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+getClusterInfo
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
 \begin_layout Itemize
 delayed intialisation?
 \end_layout
@@ -1067,7 +1124,17 @@ use line group instead
 
 \end_deeper
 \begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
 what parts can be created later which ones are relevant to initialise everything
+?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -1077,6 +1144,8 @@ try to remove _line mesh
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 check if line group is used for other lines created for clusters
 \end_layout
 
@@ -1093,6 +1162,11 @@ possible to delay parts via timeout?
 \begin_layout Itemize
 possible to bind dom events to leaf and handle it from there instead of
  per node?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section

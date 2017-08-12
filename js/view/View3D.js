@@ -23,6 +23,8 @@ class View3D extends HTMLElement {
         this.mTime = -1;
         this.mActualFPS = 0;
         this.showFPSCounter = false;
+        this.mouseSpeed=2;
+
 
         //   this.initStatic()
 
@@ -78,7 +80,7 @@ class View3D extends HTMLElement {
     setControls() {
         // Add camera interaction
         this.mControls = new THREE.TrackballControls(this.mCamera, this.mRenderer.domElement);
-        // this.mControls.rotateSpeed = 0.3
+
         this.mControls.maxDistance = Math.min(this.mCamera.far,200000);
 
 
@@ -177,9 +179,10 @@ class View3D extends HTMLElement {
 
         }
 
-        if (this.mRenderer &&  this.mControls)
-            this.mControls.panSpeed = this.mControls.rotateSpeed = 1600 / this.clientWidth * 0.3
-
+        if (this.mRenderer &&  this.mControls) {
+            this.mControls.panSpeed =1600 / this.clientWidth * this.mouseSpeed *0.3
+                this.mControls.rotateSpeed = 1600 / this.clientWidth * this.mouseSpeed
+        }
 
     }
 
@@ -351,7 +354,7 @@ class View3D extends HTMLElement {
         function animate(time) {
             that.mTime = time;
 
-
+            that.mControls.update();
             initialFrames--;
             if (that.mFPS == 0) {
 
@@ -390,7 +393,7 @@ class View3D extends HTMLElement {
 
             that.mLastFrameTime = time;
 
-            that.mControls.update();
+           // that.mControls.update();
 
 
             $(that).trigger("before-render", time);

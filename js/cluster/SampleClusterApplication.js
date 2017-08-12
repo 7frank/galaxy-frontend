@@ -634,7 +634,7 @@ export class SampleClusterApplication extends HTMLElement {
 
 
         rootCluster.applyClustering(speccs);
-        view.addCompanyCountListenersToCluster(rootCluster);
+       view.addCompanyCountListenersToCluster(rootCluster);
 
 
 

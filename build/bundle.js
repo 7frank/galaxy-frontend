@@ -80600,7 +80600,7 @@ class ClusterLeafElement extends THREE.Mesh {
 
     setLOD(levelOfDetail) {
         if (this.mNodeParticles && this.parent.useLOD)
-            this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.3;
+            this.mNodeParticles.pointCloud.visible =  levelOfDetail > 0.3;
         //TODO nodes,edges, ... as well
 
         let edgeFadeLOD = 0.3;
@@ -80735,8 +80735,10 @@ class ClusterLeafElement extends THREE.Mesh {
 
         }, function () {
 
-
-            that._initDotParticles();
+//FIXME init dot particles if (root)cluster is done animating?
+            //FIXME update color of particles only for clusters that need an update
+            //by adding a timeout the color is yellow again because the event triggered is too early
+        setTimeout(() => that._initDotParticles(),500)
 
             onComplete()
 
@@ -80795,7 +80797,8 @@ class ClusterLeafElement extends THREE.Mesh {
             var demoOptions = {
                 increment: 1,
                 duration: 1000,
-                easing: __WEBPACK_IMPORTED_MODULE_3__lib_Tween___default.a.Easing.Exponential.Out
+                easing: __WEBPACK_IMPORTED_MODULE_3__lib_Tween___default.a.Easing.Exponential.Out,
+                position:{x:(_.random(0,2)-1)*_.random(50000,150000),y:(_.random(0,2)-1)*_.random(50000,150000),z:0}
             };
 
             if (!nodes) //FIXME this only works that way because to realData is not generated properly
@@ -80857,8 +80860,8 @@ class ClusterLeafElement extends THREE.Mesh {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__refactor_f0_linkmixin__ = __webpack_require__(94);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__ = __webpack_require__(95);
+/* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__deprecated_f0_linkmixin__ = __webpack_require__(99);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__ = __webpack_require__(94);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_f1__ = __webpack_require__(47);
 /**
  * Created by Frank on 11.06.2017.
@@ -81042,7 +81045,7 @@ class GraphData
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__text_ClusterTextOverlay__ = __webpack_require__(96);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_SpecificDataUtils__ = __webpack_require__(16);
 /**
  * Created by Frank on 06.06.2017.
@@ -81129,11 +81132,11 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 
         function updateParticles(leaf)
         {
-//FIXME performance
-          //  return;
-        if (leaf && leaf.parent && leaf.parent.mParticles) {
 
-            leaf.parent.mParticles.updateColors();
+
+        if (leaf && leaf.mParticles) {
+
+            leaf.mParticles.updateColors();
 
 
         }
@@ -81278,7 +81281,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
         this.initialEngineTicks = 1;
 
     // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime=3000;//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeTime=2000;//ms ... 5 seconds upper bound for loading phase
         this.maxConvergeFrames=90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
@@ -81944,6 +81947,8 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
 
         var visibleNodes = [];
+        var _____skipFrames = 0;
+
 
         function attachListeners(cluster) {
 
@@ -81951,8 +81956,9 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
             _.each(cluster.findClusters("*"), function (cluster) {
                 cluster.on('before-render', function () {
 
+                    if (_____skipFrames % 20!=0) return;
 
-                    if (cluster.mExpanded == false) {
+                        if (cluster.mExpanded == false) {
                         visibleNodes.push(cluster);
                     }
 
@@ -81980,9 +81986,13 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
 
         var that = this;
-        var _____skipFrames = 0;
 
-        $(that).on("before-render", function () {
+
+        $(that).off("before-render", onBeforeRender);
+        $(that).on("before-render", onBeforeRender);
+
+
+        function onBeforeRender() {
 
 
             if (that.isMaximised()) {
@@ -81991,12 +82001,13 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
                 if (_____skipFrames++ % 20==0) {
                     let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
                     __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(vl);
+                    visibleNodes = []
                 }
             }
 
-            visibleNodes = []
 
-        });
+
+        }
 
 
     }
@@ -82686,7 +82697,7 @@ function basicElementExtend(env, obj, _mesh) {
 /* harmony export (immutable) */ __webpack_exports__["b"] = unhighlightNodeElements;
 /* harmony export (immutable) */ __webpack_exports__["c"] = doOnClickNode;
 /* harmony export (immutable) */ __webpack_exports__["a"] = extendGraphElements;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f5_arrows__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f5_arrows__ = __webpack_require__(95);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__SpecificDataUtils__ = __webpack_require__(16);
 /**
@@ -87127,7 +87138,7 @@ var AppDataService={
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Datasource__ = __webpack_require__(99);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Datasource__ = __webpack_require__(98);
 
 
 
@@ -91347,7 +91358,7 @@ class SampleClusterApplication extends HTMLElement {
 
 
         rootCluster.applyClustering(speccs);
-        view.addCompanyCountListenersToCluster(rootCluster);
+       view.addCompanyCountListenersToCluster(rootCluster);
 
 
 
@@ -91509,7 +91520,8 @@ function NodesParticleSystem(nodes,options)
 					nodeKey:'itemCount',
 					increment:5,
 					duration:1000,
-					easing:__WEBPACK_IMPORTED_MODULE_0__tweenjs_tween_js___default.a.Easing.Linear.None
+					easing:__WEBPACK_IMPORTED_MODULE_0__tweenjs_tween_js___default.a.Easing.Linear.None,
+					position:{x:0,y:50000,z:50000}
 				},options)
 			
 			
@@ -91561,9 +91573,9 @@ function NodesParticleSystem(nodes,options)
 							destination[ v * 3 + 1 ] = 2;
 							destination[ v * 3 + 2 ] = 5000;
 
-							positions[ v * 3 + 0 ] = 1;
-							positions[ v * 3 + 1 ] = 2;
-							positions[ v * 3 + 2 ] = 5000;
+							positions[ v * 3 + 0 ] = options.position.x;
+							positions[ v * 3 + 1 ] = options.position.y;
+							positions[ v * 3 + 2 ] = options.position.z;
 							
 				v++			
 				}           
@@ -92522,92 +92534,6 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__ = __webpack_require__(46);
-/**
- * Created by Frank on 16.07.2017.
- */
-
-
-
-function linkMixin(env, link, options) {
-
-    if (link._mixin_) return;
-    link._mixin = true;
-
-
-    /*
-  let defaults = {
-        opacity: 0.01,
-        transparent: true,
-        lineIsVisible: true, // if disabled the line won't be shown on the scene
-        color: 0xffffff
-    };
-
-    options = _.extend(defaults, options);
-*/
-
-    //TODO check if cluster edges used line group
-    /*
-    var lineMaterial = new THREE.MeshBasicMaterial({
-        color: options.color,
-        transparent: options.transparent,
-        opacity: options.opacity
-    });
-
-    function createBasicLineMesh() {
-
-
-
-        if (env.lineOpacity) //deprecated?
-            lineMaterial.opacity = env.lineOpacity;
-
-
-        var line = new THREE.Line(new THREE.Geometry(), lineMaterial);
-        line.geometry.vertices = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)];
-
-        return line;
-
-    }
-
-
-    //--------------------------------
-
-    function createLineGroupElem() {
-
-
-        var start = new THREE.Vector3(0, 0, 0);
-        var stop = new THREE.Vector3(0, 0, 0);
-
-
-        //naive approach to reduce the edge count for larger graph
-
-        if (options.lineIsVisible) {
-            env.mergedLineMesh.geometry.vertices.push(start);
-            env.mergedLineMesh.geometry.vertices.push(stop);
-        }
-
-
-        return {
-            start, stop, update: function () {
-                env.mergedLineMesh.geometry.verticesNeedUpdate = true;
-            }
-        };
-
-    }
-    */
-
-
-  //  basicElementExtend(env, link, link._line)
-
-
-}
-
-/***/ }),
-/* 95 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony export (immutable) */ __webpack_exports__["a"] = nodeMixin;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__ = __webpack_require__(46);
 /**
@@ -92721,7 +92647,7 @@ function nodeMixin(env, node) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0)))
 
 /***/ }),
-/* 96 */
+/* 95 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -92865,11 +92791,11 @@ function removeArrow(d3LinkObj) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 97 */
+/* 96 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(98);
+/* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(97);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__ = __webpack_require__(20);
 /**
@@ -93179,7 +93105,7 @@ customElements.define("cluster-text-overlay", ClusterTextOverlay);
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 98 */
+/* 97 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -93532,7 +93458,7 @@ function TextNodesFactory(env, options) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1), __webpack_require__(0)))
 
 /***/ }),
-/* 99 */
+/* 98 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -93564,6 +93490,92 @@ class Datasource
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Datasource;
 
+
+/***/ }),
+/* 99 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export default */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cluster_refactor_f0_basic_element_3d_classes__ = __webpack_require__(46);
+/**
+ * Created by Frank on 16.07.2017.
+ */
+
+
+
+function linkMixin(env, link, options) {
+
+    if (link._mixin_) return;
+    link._mixin = true;
+
+
+    /*
+  let defaults = {
+        opacity: 0.01,
+        transparent: true,
+        lineIsVisible: true, // if disabled the line won't be shown on the scene
+        color: 0xffffff
+    };
+
+    options = _.extend(defaults, options);
+*/
+
+    //TODO check if cluster edges used line group
+    /*
+    var lineMaterial = new THREE.MeshBasicMaterial({
+        color: options.color,
+        transparent: options.transparent,
+        opacity: options.opacity
+    });
+
+    function createBasicLineMesh() {
+
+
+
+        if (env.lineOpacity) //deprecated?
+            lineMaterial.opacity = env.lineOpacity;
+
+
+        var line = new THREE.Line(new THREE.Geometry(), lineMaterial);
+        line.geometry.vertices = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)];
+
+        return line;
+
+    }
+
+
+    //--------------------------------
+
+    function createLineGroupElem() {
+
+
+        var start = new THREE.Vector3(0, 0, 0);
+        var stop = new THREE.Vector3(0, 0, 0);
+
+
+        //naive approach to reduce the edge count for larger graph
+
+        if (options.lineIsVisible) {
+            env.mergedLineMesh.geometry.vertices.push(start);
+            env.mergedLineMesh.geometry.vertices.push(stop);
+        }
+
+
+        return {
+            start, stop, update: function () {
+                env.mergedLineMesh.geometry.verticesNeedUpdate = true;
+            }
+        };
+
+    }
+    */
+
+
+  //  basicElementExtend(env, link, link._line)
+
+
+}
 
 /***/ }),
 /* 100 */
@@ -94942,6 +94954,8 @@ class View3D extends HTMLElement {
         this.mTime = -1;
         this.mActualFPS = 0;
         this.showFPSCounter = false;
+        this.mouseSpeed=2;
+
 
         //   this.initStatic()
 
@@ -94997,7 +95011,7 @@ class View3D extends HTMLElement {
     setControls() {
         // Add camera interaction
         this.mControls = new THREE.TrackballControls(this.mCamera, this.mRenderer.domElement);
-         this.mControls.rotateSpeed = 3
+
         this.mControls.maxDistance = Math.min(this.mCamera.far,200000);
 
 
@@ -95096,9 +95110,10 @@ class View3D extends HTMLElement {
 
         }
 
-        if (this.mRenderer &&  this.mControls)
-            this.mControls.panSpeed = this.mControls.rotateSpeed = 1600 / this.clientWidth * 0.3
-
+        if (this.mRenderer &&  this.mControls) {
+            this.mControls.panSpeed =1600 / this.clientWidth * this.mouseSpeed *0.3
+                this.mControls.rotateSpeed = 1600 / this.clientWidth * this.mouseSpeed
+        }
 
     }
 
@@ -95270,7 +95285,7 @@ class View3D extends HTMLElement {
         function animate(time) {
             that.mTime = time;
 
-
+            that.mControls.update();
             initialFrames--;
             if (that.mFPS == 0) {
 
@@ -95309,7 +95324,7 @@ class View3D extends HTMLElement {
 
             that.mLastFrameTime = time;
 
-            that.mControls.update();
+           // that.mControls.update();
 
 
             $(that).trigger("before-render", time);

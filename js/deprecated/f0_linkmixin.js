@@ -2,7 +2,7 @@
  * Created by Frank on 16.07.2017.
  */
 
-import {basicElementExtend} from "./f0-basic-element-3d-classes"
+import {basicElementExtend} from "../cluster/refactor/f0-basic-element-3d-classes"
 
 export default
 function linkMixin(env, link, options) {
