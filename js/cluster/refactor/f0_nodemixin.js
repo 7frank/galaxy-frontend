@@ -24,6 +24,11 @@ export default function nodeMixin(env, node) {
     node._mixin = true;
 
 
+
+
+
+
+
     //TODO have a container as root element  instead of the mesh itself
 
 
@@ -91,6 +96,10 @@ export default function nodeMixin(env, node) {
 
 
     });
+
+
+    node._bubble.name = env.nameAccessor(node) || '';
+    node.size=env.sizeAccessor(node) || undefined;
 
 
     return self

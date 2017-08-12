@@ -187,9 +187,7 @@ export default class GraphView3D extends View3D {
         }
 
 
-        attachListeners(rootCluster)
-
-
+        attachListeners(rootCluster);
 
 
         var that = this;
@@ -200,16 +198,12 @@ export default class GraphView3D extends View3D {
 
             if (that.isMaximised()) {
 
-                _____skipFrames++;
-                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-
-
-                let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
-
-                GUI.updateFromVisibleNodes(vl);
-
+                //update company info only every 20 frames to increse overall performance
+                if (_____skipFrames++ % 20==0) {
+                    let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
+                    GUI.updateFromVisibleNodes(vl);
+                }
             }
-
 
             visibleNodes = []
 
@@ -232,25 +226,9 @@ export default class GraphView3D extends View3D {
         let preparedData = graphData.createClusterNodesAndEdges(this);
 
 
-        //TODO the nodes had to be visible for the on before render part counting companies which is no longer used
-      //  _.each(preparedData.nodes,(n) => n._bubble.material.visible = false)
-
-
 
         var res = new RootCluster(preparedData.nodes, undefined, this);
 
-
-//-- count visible nodes
-        //TODO check if this interferes with the nodeMixin and the default implementation
-        var visibleNodes = [];
-        /*    _.each(preparedData.nodes,function(node){
-                node.get3DRoot().onBeforeRender=function(){
-                    visibleNodes.push(node);
-                }
-            });*/
-
-
-//--
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);

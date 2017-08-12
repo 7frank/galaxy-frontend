@@ -80857,7 +80857,7 @@ class ClusterLeafElement extends THREE.Mesh {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__refactor_f0_linkmixin__ = __webpack_require__(94);
+/* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__refactor_f0_linkmixin__ = __webpack_require__(94);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__ = __webpack_require__(95);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_f1__ = __webpack_require__(47);
 /**
@@ -80872,36 +80872,28 @@ class ClusterLeafElement extends THREE.Mesh {
 class GraphData
 {
 
-    //constructor(nodes,edges){
     constructor(graphData){
+
             this.mGraphData=graphData
-      /*  this.mNodeData=[];
-        this.mEdgeData=[];
-
-        this.addNodes(nodes);
-        this.addEdges(nodes);*/
-
     }
 
     getClonedRawNodes()
     {
-        var mNodes={}
+        var mNodes={};
 
             _.each(this.mGraphData.nodes,function(node,id){
                 mNodes[id]=_.extend({x:0,y:0,z:0},node)
-
-
-            })
+            });
 
 
 
-        this.mDataNodeCopy=mNodes
+        this.mDataNodeCopy=mNodes;
 
 
         // Build graph with data
         var d3Nodes  = [];
         for (let nodeId in mNodes) { // Turn nodes into array
-            const node =mNodes[nodeId] // _.extend({},mNodes);
+            const node =mNodes[nodeId]; // _.extend({},mNodes);
             node._id = nodeId;
             d3Nodes.push(node);
         }
@@ -80910,11 +80902,9 @@ class GraphData
     }
 
     getAlteredRawLinks(){
-        var mDataNodeCopy= this.mDataNodeCopy
-   // var skipLines=100
-//FIXME filtering visible nodes here will break edge based calculations and arrows
+        var mDataNodeCopy= this.mDataNodeCopy;
 
-        var links=this.mGraphData.links   //.filter((v,id)=> !(id%skipLines)   )
+        var links=this.mGraphData.links;
 
         //FIXME this sets src and dst to the graph data nodes but it should instead link to the cloned nodes so no interference occures
        var  d3Links  = links.map(link => {
@@ -80922,7 +80912,7 @@ class GraphData
                 source: mDataNodeCopy[link[0]],
                 target: mDataNodeCopy[link[1]]
             };
-        })
+        });
 
     return d3Links
 
@@ -80930,24 +80920,9 @@ class GraphData
 
     }
 
-
-  /*  addRawNodeData(nodes){
-      if (_.isArray(nodes)) this.mNodeData=this.mNodeData.concat(nodes)
-
-        return this;
-
-    }
-
-    addRawEdgeData(edges)
-    {
-        if (_.isArray(edges)) this.mEdgeData=this.mEdgeData.concat(edges)
-
-        return this;
-    }*/
-
     createClusterNodesAndEdges( view3d)
     {
-        //env=globalEnv
+
         //see ForceGraph
         //TODO minimal env options to create a node
         var env={
@@ -80960,7 +80935,7 @@ class GraphData
             nodeRelSize:4,
            // useDebugSphere:true,
             domEvents:view3d.mDomEvents
-        }
+        };
 
 
 
@@ -80979,89 +80954,14 @@ class GraphData
     // Add WebGL objects
     d3Nodes.forEach(node => {
 
-        node = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__["a" /* default */])(env, node)
-        node._bubble.name = env.nameAccessor(node) || '';
+        node = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__["a" /* default */])(env, node);
+     //   node._bubble.name = env.nameAccessor(node) || '';
+     //   node.size=env.sizeAccessor(node) || undefined;
 
-
-        node.size=env.sizeAccessor(node) || undefined;
-
-
-        //TODO not highlighted group nodes should be rendered with separate point cloud
-        if (node.isGroupNode) {
-
-            //node.addClass("basic-sprite-collapsed")
-            node.addClass("basic-ring")
-
-            //node.on("mouseover",()=> node.addClass("basic-animated"))
-            //node.on("mouseout",()=> node.removeClass("basic-animated"))
-            node.on("mouseover", () => node.addClass("basic-ring-2"))
-            node.on("mouseout", () => node.removeClass("basic-ring-2"))
-
-        } else {
-
-            //TODO specific renderings for node should be handled via class property at node data itself
-            //NOTE: the default node/group nodes/links will be put inside a point  cloud for each so we woud need a point cloud for each 3d-class that generates a points object
-
-            //node.addClass("basic-sphere")
-
-            // nothing to begin with
-            //node.addClass("basic-sprite")
-
-        }
 
     });
 
     //-----------------------------------------------
-
-    //init mesh for groupline
-  /*  if (env.useLineGroup)
-        initLineGroup(env,{
-            opacity:0.01,
-            color:0x49616C,
-            transparent: true,
-        })
-
-    var linecount = 0;
-    var skipLines = env.numSkipEdgesRendered + 1;
-    if (skipLines < 1)
-        skipLines = 1
-    function shouldLineByVisible(link, id) {
-
-        return !(linecount++ % skipLines)
-    }
-*/
-
-        //TODO have more thatn one line mesh per rootcluster .. isntead have line meshes per sub-cluster
-       var mLineGroup= this.initLineGroupHelper()
-
-        //used to wrap per cluster functionality
-        function linkMixinExt(link,options)
-        {
-            var env={mergedLineMesh:mLineGroup}
-
-            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__refactor_f0_linkmixin__["a" /* default */])(env,link,options)
-
-        }
-
-
-
-
-        //d3Links.forEach(link => {
-    _.each(d3Links, (link, id) => {
-
-         //TODO have a function within the custer itself that is called
-        //determine by distance or something like that
-        var bVisible = true;// shouldLineByVisible()
-
-        linkMixinExt( link, {
-            lineIsVisible: bVisible,
-            color: 0xff0000,
-            opacity: 1
-        })
-
-
-    });
-
 
 
 
@@ -81070,7 +80970,7 @@ class GraphData
 
 
     //nodes are prepared by previous step ? TODO which one was that? for further altering
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__refactor_f1__["a" /* extendGraphElements */])(d3Nodes, d3Links, env)
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__refactor_f1__["a" /* extendGraphElements */])(d3Nodes, d3Links, env);
 
 
         return {nodes:d3Nodes,edges:d3Links}
@@ -81086,6 +80986,7 @@ class GraphData
      *
      *
      */
+  /*
    initLineGroupHelper( options) {
 
 
@@ -81126,14 +81027,14 @@ class GraphData
 
 }
 
-
+*/
 
 
 
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GraphData;
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
 
 /***/ }),
 /* 41 */
@@ -82075,9 +81976,7 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
         }
 
 
-        attachListeners(rootCluster)
-
-
+        attachListeners(rootCluster);
 
 
         var that = this;
@@ -82088,16 +81987,12 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
             if (that.isMaximised()) {
 
-                _____skipFrames++;
-                //     _.each(preparedData.nodes,(n) => n._bubble.material.visible = (_____skipFrames % 20) ? false : true)
-
-
-                let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
-
-                __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(vl);
-
+                //update company info only every 20 frames to increse overall performance
+                if (_____skipFrames++ % 20==0) {
+                    let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
+                    __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(vl);
+                }
             }
-
 
             visibleNodes = []
 
@@ -82120,25 +82015,9 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
         let preparedData = graphData.createClusterNodesAndEdges(this);
 
 
-        //TODO the nodes had to be visible for the on before render part counting companies which is no longer used
-      //  _.each(preparedData.nodes,(n) => n._bubble.material.visible = false)
-
-
 
         var res = new __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__["a" /* default */](preparedData.nodes, undefined, this);
 
-
-//-- count visible nodes
-        //TODO check if this interferes with the nodeMixin and the default implementation
-        var visibleNodes = [];
-        /*    _.each(preparedData.nodes,function(node){
-                node.get3DRoot().onBeforeRender=function(){
-                    visibleNodes.push(node);
-                }
-            });*/
-
-
-//--
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
@@ -82248,8 +82127,8 @@ customElements.define("graph-view-3d", GraphView3D);
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(THREE, $, _) {/* unused harmony export register3DClass */
-/* harmony export (immutable) */ __webpack_exports__["b"] = basicSpriteSize;
-/* harmony export (immutable) */ __webpack_exports__["a"] = basicElementExtend;
+/* harmony export (immutable) */ __webpack_exports__["a"] = basicSpriteSize;
+/* harmony export (immutable) */ __webpack_exports__["b"] = basicElementExtend;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_TextureAnimator__ = __webpack_require__(93);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_dot9_png__ = __webpack_require__(228);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_dot9_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__img_dot9_png__);
@@ -82718,7 +82597,6 @@ function basicElementExtend(env, obj, _mesh) {
 
 
             mDomEvents._notify(eventName, _mesh, node, intersect);
-            //mDomEvents.triggerEvent(_mesh, eventName, args)
 
 
         }, get3DRoot: function () {
@@ -82861,8 +82739,6 @@ function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) 
 
      }*/
 
-    //console.log("highlighting nodes:" + (this.children.length + this.parents.length))
-
     this.showHighlight();
 
 
@@ -82874,12 +82750,6 @@ function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) 
             parentNode.showHighlight()
     }
 
-    //console.log("highlighting edges:" + (this.edges.length))
-
-
-    for (let edge of this.edges)
-        edge.showHighlight()
-
     if (bShowEdgeArrows)
         for (let edge of this.edges) {
             var color = edge.source == this ? 0x99ff99 : 0xffb2b2;
@@ -82890,7 +82760,6 @@ function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) 
 }
 
 function unhighlightNodeElements() {
-    //console.log("unhighlighting nodes:" + (this.children.length + this.parents.length))
 
     this.hideHighlight();
 
@@ -82902,36 +82771,14 @@ function unhighlightNodeElements() {
 
     //console.log("unhighlighting edges:" + (this.edges.length))
 
-    for (let edge of this.edges)
-        edge.hideHighlight()
+  //  for (let edge of this.edges)
+   //     edge.hideHighlight()
 
     for (let edge of this.edges)
         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["b" /* removeArrow */])(edge)
 
 }
 
-function highlightEdgeElements() {
-
-    this.showHighlight();
-    this.source.showHighlight();
-    this.target.showHighlight();
-
-
-    var color = 0x666666;
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["a" /* addArrow */])(this, color)
-
-
-}
-
-function unhighlightEdgeElements() {
-
-    this.hideHighlight();
-    this.source.hideHighlight();
-    this.target.hideHighlight();
-
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["b" /* removeArrow */])(this)
-
-}
 
 function extendElement(elements, attrName, options, env) {
 
@@ -82956,15 +82803,6 @@ function extendElement(elements, attrName, options, env) {
     for (let el of elements) {
 
 
-        if (el._line && env.useLineGroup) {
-            el.showHighlight = function () {
-            };
-            el.hideHighlight = function () {
-            };
-
-            continue
-
-        }
         var mesh = el[attrName];
 
 
@@ -82991,11 +82829,6 @@ function extendElement(elements, attrName, options, env) {
 
             }
 
-            if (this._line) {
-                var mesh = this[attrName];
-                mesh.material.visible = false
-
-            }
 
             if (this.text) {
                 this.text.addClass("node-caption-highlighted")
@@ -83016,11 +82849,6 @@ function extendElement(elements, attrName, options, env) {
 
             }
 
-            if (this._line) {
-                var mesh = this[attrName];
-                mesh.material.visible = true
-
-            }
 
             if (this.text) {
                 this.text.removeClass("node-caption-highlighted")
@@ -83069,7 +82897,6 @@ function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelecte
 
 
         if (isSelected) {
-            //GUI.updateNodeInfo(currNodeClicked)
 
             currNodeClicked.addClass("basic-selection");
 
@@ -83111,8 +82938,10 @@ function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelecte
 
  if clicked and not current selection trigger mouse leave on last
 
+
+        mixin additional functionality
  */
-//inject additional functionality
+
 function extendGraphElements(d3Nodes, d3Links, env) {
 
     addGraphHierarchy(d3Nodes, d3Links);
@@ -83122,29 +82951,21 @@ function extendGraphElements(d3Nodes, d3Links, env) {
         mousemove: function (e) {
 
             if (previousNodeClicked.indexOf(this) >= 0)return;
-            //if (previousNodeClicked==this) return
 
-            highlightNodeElements.apply(this, [true, true])
+             highlightNodeElements.apply(this, [true, true])
 
-            //	GUI.updateNodeInfo(this,false)
 
         },
         mouseleave: function () {
 
-            //if (previousNodeClicked==this) return
             if (previousNodeClicked.indexOf(this) >= 0)return;
-
-
-            //if (previousNodeClicked!=this)
             unhighlightNodeElements.apply(this)
-
 
         },
         click: function (e) {
             var currNodeClicked = e.target.node;
             e.stopPropagation();
 
-            //if (previousNodeClicked &&previousNodeClicked!=currNodeClicked) 	unhighlightNodeElements.apply(previousNodeClicked)
             if (previousNodeClicked.length > 0 && previousNodeClicked.indexOf(currNodeClicked) < 0)
                 for (let p of previousNodeClicked)
                     unhighlightNodeElements.apply(p)
@@ -83170,25 +82991,17 @@ function extendGraphElements(d3Nodes, d3Links, env) {
     }, env);
 
 
-    //FIXME extending attrName sometimes false
-
-    extendElement(d3Links, "_line", {
-        click: function (e) {
-
-        },
-        mousemove: highlightEdgeElements,
-        mouseleave: unhighlightEdgeElements
-
-    }, env)
-
 }
 
 /**
  * build a helper structure for parent child relation
- * TODO how to handle/exclude recursive structures
+ *
+ * this is primarily used for highlighting the src and dst nodes
+ *
  */
 
 function addGraphHierarchy(d3Nodes, d3Links) {
+
     /*
      node:
      group:1
@@ -83197,11 +83010,9 @@ function addGraphHierarchy(d3Nodes, d3Links) {
      _bubble: instanceof THREE.Mesh //SphereGeometry
      _id:"2"
 
-
      link:
      source:"1"
      target:"3"
-     _line:	 instanceof THREE.Mesh //LineGeometry
      */
 
     //prepare nodes
@@ -83209,7 +83020,7 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
         if (!node.edges)
             node.edges = [];
-        if (!node.children)
+       if (!node.children)
             node.children = [];
         if (!node.parents)
             node.parents = [];
@@ -83220,13 +83031,15 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
     for (let item of d3Links) {
 
-        item._line.edge = item;
+       // item._line.edge = item;
 
         //add edge list to nodes
-        if (item.source.edges.indexOf(item) < 0)
+       if (item.source.edges.indexOf(item) < 0)
             item.source.edges.push(item);
         if (item.target.edges.indexOf(item) < 0)
             item.target.edges.push(item);
+
+
 
         //add target of current link to children list of source
         if (item.source.children.indexOf(item.target) < 0)
@@ -83235,6 +83048,9 @@ function addGraphHierarchy(d3Nodes, d3Links) {
         //add source of current link to parent list of target
         if (item.target.parents.indexOf(item.source) < 0)
             item.target.parents.push(item.source);
+
+
+
     }
 
 }
@@ -92706,7 +92522,7 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(_, THREE) {/* harmony export (immutable) */ __webpack_exports__["a"] = linkMixin;
+/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__ = __webpack_require__(46);
 /**
  * Created by Frank on 16.07.2017.
@@ -92719,6 +92535,8 @@ function linkMixin(env, link, options) {
     if (link._mixin_) return;
     link._mixin = true;
 
+
+    /*
   let defaults = {
         opacity: 0.01,
         transparent: true,
@@ -92727,15 +92545,20 @@ function linkMixin(env, link, options) {
     };
 
     options = _.extend(defaults, options);
+*/
+
+    //TODO check if cluster edges used line group
+    /*
+    var lineMaterial = new THREE.MeshBasicMaterial({
+        color: options.color,
+        transparent: options.transparent,
+        opacity: options.opacity
+    });
 
     function createBasicLineMesh() {
 
 
-        var lineMaterial = new THREE.MeshBasicMaterial({
-            color: options.color,
-            transparent: options.transparent,
-            opacity: options.opacity
-        });
+
         if (env.lineOpacity) //deprecated?
             lineMaterial.opacity = env.lineOpacity;
 
@@ -92772,137 +92595,13 @@ function linkMixin(env, link, options) {
         };
 
     }
-
-    //----------------------------
-
-    /*
-     function createExtLineHelper() {
+    */
 
 
-     var line = new MeshLine();
-     var material = new MeshLineMaterial({transparent: options.transparent, opacity: options.opacity});
-
-     var mStart = new THREE.Vector3;
-     var mEnd = new THREE.Vector3;
-
-     return {
-     setStart: function (vec3) {
-     mStart = vec3
-     }, setEnd: function (vec3) {
-     mEnd = vec3
-     },
-     getLine: function (srcWidth = 1, dstWidth = 1) {
-
-
-     var geo = new THREE.Geometry();
-     geo.vertices = [mStart, mEnd];
-     line.setGeometry(geo, function (p) {
-
-     var ratio = (srcWidth * p) + (dstWidth * (1 - p));
-     return ratio / 10
-     });
-     var lineMesh = new THREE.Mesh(line.geometry, material);
-
-     return lineMesh
-     }
-     };
-
-     }
-
-     */
-
-
-    /*   if (env.useLineWidthFeature == true && (link.source.isGroupNode || link.target.isGroupNode)) {
-
-     var helper = createExtLineHelper();
-
-     helper.setStart(new THREE.Vector3);
-     helper.setEnd(new THREE.Vector3);
-
-
-     link._line =//new THREE.Object3D
-     helper.getLine();
-
-     _.extend(link, {
-
-     setStartEnd: function (mVecStart, mVecEnd) {
-     this.mStart = new THREE.Vector3(mVecStart.x, mVecStart.y || 0, mVecStart.z || 0);
-     this.mEnd = new THREE.Vector3(mVecEnd.x, mVecEnd.y || 0, mVecEnd.z || 0);
-
-
-     helper.setStart(this.mStart);
-     helper.setEnd(this.mEnd);
-
-
-     //FIXME handle line like a container to maintain event handlers and such
-     env.scene.remove(link._line);
-     link._line;
-     link._line = helper.getLine(this.source.link_count || 1, this.target.link_count || 1);
-     env.scene.add(link._line);
-
-     }
-     })
-
-
-     }
-     else {
-
-
-     if (env.useLineGroup) {
-
-     var lg = createLineGroupElem();
-
-
-     link._line = {};
-     _.extend(link, {
-
-     setStartEnd: function (mVecStart, mVecEnd) {
-
-     lg.start.copy(mVecStart);
-     lg.stop.copy(mVecEnd);
-
-     this.mStart = lg.start;
-     this.mEnd = lg.stop;
-
-     lg.update()
-
-     }
-     })
-
-
-     }
-     else { */
-
-
-    link._line = createBasicLineMesh();
-    /*
-     _.extend(link, {
-
-     setStartEnd: function (mVecStart, mVecEnd) {
-
-     this.mStart = new THREE.Vector3(mVecStart.x, mVecStart.y || 0, mVecStart.z || 0);
-     this.mEnd = new THREE.Vector3(mVecEnd.x, mVecEnd.y || 0, mVecEnd.z || 0);
-
-     this._line.geometry.vertices[0] = this.mStart;
-     this._line.geometry.vertices[1] = this.mEnd;
-
-     this._line.geometry.verticesNeedUpdate = true;
-     //this._line.geometry.computeBoundingSphere();
-
-
-     }
-     })*/
-    // }
-
-
-    // }
-
-
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__["a" /* basicElementExtend */])(env, link, link._line)
+  //  basicElementExtend(env, link, link._line)
 
 
 }
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
 /* 95 */
@@ -92937,6 +92636,11 @@ function nodeMixin(env, node) {
     node._mixin = true;
 
 
+
+
+
+
+
     //TODO have a container as root element  instead of the mesh itself
 
 
@@ -92947,13 +92651,13 @@ function nodeMixin(env, node) {
     var mMesh = node._bubble;
 
 
-    var size = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__["b" /* basicSpriteSize */])(env, node) / 5;
+    var size = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__["a" /* basicSpriteSize */])(env, node) / 5;
     //var size=node.size?node.size*0.66:1
 
     mMesh.scale.setScalar(size);
 
 
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__["a" /* basicElementExtend */])(env, node, mMesh);
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__["b" /* basicElementExtend */])(env, node, mMesh);
 
     var self = _.extend(node, {
         highlight: function () {
@@ -93004,6 +92708,10 @@ function nodeMixin(env, node) {
 
 
     });
+
+
+    node._bubble.name = env.nameAccessor(node) || '';
+    node.size=env.sizeAccessor(node) || undefined;
 
 
     return self

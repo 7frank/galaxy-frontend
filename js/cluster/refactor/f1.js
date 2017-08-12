@@ -49,8 +49,6 @@ function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) 
 
      }*/
 
-    //console.log("highlighting nodes:" + (this.children.length + this.parents.length))
-
     this.showHighlight();
 
 
@@ -61,12 +59,6 @@ function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) 
         for (let parentNode of this.parents)
             parentNode.showHighlight()
     }
-
-    //console.log("highlighting edges:" + (this.edges.length))
-
-
-    for (let edge of this.edges)
-        edge.showHighlight()
 
     if (bShowEdgeArrows)
         for (let edge of this.edges) {
@@ -79,7 +71,6 @@ function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) 
 
 export
 function unhighlightNodeElements() {
-    //console.log("unhighlighting nodes:" + (this.children.length + this.parents.length))
 
     this.hideHighlight();
 
@@ -91,36 +82,14 @@ function unhighlightNodeElements() {
 
     //console.log("unhighlighting edges:" + (this.edges.length))
 
-    for (let edge of this.edges)
-        edge.hideHighlight()
+  //  for (let edge of this.edges)
+   //     edge.hideHighlight()
 
     for (let edge of this.edges)
         removeArrow(edge)
 
 }
 
-function highlightEdgeElements() {
-
-    this.showHighlight();
-    this.source.showHighlight();
-    this.target.showHighlight();
-
-
-    var color = 0x666666;
-    addArrow(this, color)
-
-
-}
-
-function unhighlightEdgeElements() {
-
-    this.hideHighlight();
-    this.source.hideHighlight();
-    this.target.hideHighlight();
-
-    removeArrow(this)
-
-}
 
 function extendElement(elements, attrName, options, env) {
 
@@ -145,15 +114,6 @@ function extendElement(elements, attrName, options, env) {
     for (let el of elements) {
 
 
-        if (el._line && env.useLineGroup) {
-            el.showHighlight = function () {
-            };
-            el.hideHighlight = function () {
-            };
-
-            continue
-
-        }
         var mesh = el[attrName];
 
 
@@ -180,11 +140,6 @@ function extendElement(elements, attrName, options, env) {
 
             }
 
-            if (this._line) {
-                var mesh = this[attrName];
-                mesh.material.visible = false
-
-            }
 
             if (this.text) {
                 this.text.addClass("node-caption-highlighted")
@@ -205,11 +160,6 @@ function extendElement(elements, attrName, options, env) {
 
             }
 
-            if (this._line) {
-                var mesh = this[attrName];
-                mesh.material.visible = true
-
-            }
 
             if (this.text) {
                 this.text.removeClass("node-caption-highlighted")
@@ -259,7 +209,6 @@ function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelecte
 
 
         if (isSelected) {
-            //GUI.updateNodeInfo(currNodeClicked)
 
             currNodeClicked.addClass("basic-selection");
 
@@ -301,8 +250,10 @@ function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelecte
 
  if clicked and not current selection trigger mouse leave on last
 
+
+        mixin additional functionality
  */
-//inject additional functionality
+
 export
 function extendGraphElements(d3Nodes, d3Links, env) {
 
@@ -313,29 +264,21 @@ function extendGraphElements(d3Nodes, d3Links, env) {
         mousemove: function (e) {
 
             if (previousNodeClicked.indexOf(this) >= 0)return;
-            //if (previousNodeClicked==this) return
 
-            highlightNodeElements.apply(this, [true, true])
+             highlightNodeElements.apply(this, [true, true])
 
-            //	GUI.updateNodeInfo(this,false)
 
         },
         mouseleave: function () {
 
-            //if (previousNodeClicked==this) return
             if (previousNodeClicked.indexOf(this) >= 0)return;
-
-
-            //if (previousNodeClicked!=this)
             unhighlightNodeElements.apply(this)
-
 
         },
         click: function (e) {
             var currNodeClicked = e.target.node;
             e.stopPropagation();
 
-            //if (previousNodeClicked &&previousNodeClicked!=currNodeClicked) 	unhighlightNodeElements.apply(previousNodeClicked)
             if (previousNodeClicked.length > 0 && previousNodeClicked.indexOf(currNodeClicked) < 0)
                 for (let p of previousNodeClicked)
                     unhighlightNodeElements.apply(p)
@@ -361,25 +304,17 @@ function extendGraphElements(d3Nodes, d3Links, env) {
     }, env);
 
 
-    //FIXME extending attrName sometimes false
-
-    extendElement(d3Links, "_line", {
-        click: function (e) {
-
-        },
-        mousemove: highlightEdgeElements,
-        mouseleave: unhighlightEdgeElements
-
-    }, env)
-
 }
 
 /**
  * build a helper structure for parent child relation
- * TODO how to handle/exclude recursive structures
+ *
+ * this is primarily used for highlighting the src and dst nodes
+ *
  */
 
 function addGraphHierarchy(d3Nodes, d3Links) {
+
     /*
      node:
      group:1
@@ -388,11 +323,9 @@ function addGraphHierarchy(d3Nodes, d3Links) {
      _bubble: instanceof THREE.Mesh //SphereGeometry
      _id:"2"
 
-
      link:
      source:"1"
      target:"3"
-     _line:	 instanceof THREE.Mesh //LineGeometry
      */
 
     //prepare nodes
@@ -400,7 +333,7 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
         if (!node.edges)
             node.edges = [];
-        if (!node.children)
+       if (!node.children)
             node.children = [];
         if (!node.parents)
             node.parents = [];
@@ -411,13 +344,15 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
     for (let item of d3Links) {
 
-        item._line.edge = item;
+       // item._line.edge = item;
 
         //add edge list to nodes
-        if (item.source.edges.indexOf(item) < 0)
+       if (item.source.edges.indexOf(item) < 0)
             item.source.edges.push(item);
         if (item.target.edges.indexOf(item) < 0)
             item.target.edges.push(item);
+
+
 
         //add target of current link to children list of source
         if (item.source.children.indexOf(item.target) < 0)
@@ -426,6 +361,9 @@ function addGraphHierarchy(d3Nodes, d3Links) {
         //add source of current link to parent list of target
         if (item.target.parents.indexOf(item.source) < 0)
             item.target.parents.push(item.source);
+
+
+
     }
 
 }

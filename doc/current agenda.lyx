@@ -968,6 +968,133 @@ bugs (backlog)
 text overlay does not resize to same size as view sometimes
 \end_layout
 
+\begin_layout Paragraph
+perf consderations
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+within the first 8000 ms of loading 2500 ms the animation frame is fired
+ and rendering stuff occured but nothing is visible
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+thats a third of cpu usage we might prevent by not rendering at all
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+delayed intialisation?
+\end_layout
+
+\begin_layout Itemize
+nodemixin takes 500ms
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+use point cloud instead
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+by not using the mesh at all but instead relying on the pointcloud for domevents
+ we'd get 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+approx 250ms
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+linkmixin takes also 700ms
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+removed link mixin alltogether
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+500ms create line mesh
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+use line group instead
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+what parts can be created later which ones are relevant to initialise everything
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+try to remove _line mesh 
+\end_layout
+
+\begin_layout Itemize
+check if line group is used for other lines created for clusters
+\end_layout
+
+\begin_layout Itemize
+applyClustering takes 1500ms
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+possible to delay parts via timeout?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+possible to bind dom events to leaf and handle it from there instead of
+ per node?
+\end_layout
+
 \begin_layout Section
 Features/Versions/History/sprints
 \end_layout
