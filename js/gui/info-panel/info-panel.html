@@ -1,14 +1,22 @@
-
 <style>
 
     info-panel {
         display: none;
         width: 40%;
-        z-index: 9999;
+
         position: absolute;
         top: 30%;
         left: 30%;
     }
+
+
+    info-panel > div {
+        background: mediumslateblue;
+        padding:1em;
+    }
+
+
+
 
 </style>
 
@@ -24,3 +32,34 @@
     e ... toggle edges
     ------------------------------------
 </pre>
+
+<div>
+
+    leafs
+    <select id="leafs">
+        <option>true</option>
+        <option>false</option>
+    </select><br><hr>
+
+    text
+    <select id="clusterTextVisible">
+        <option>true</option>
+        <option>false</option>
+    </select><br>
+    nodes
+    <select id="nodes">
+        <option>true</option>
+        <option>false</option>
+    </select><br>
+    edges
+    <select id="edges">
+        <option>true</option>
+        <option>false</option>
+    </select><br>
+
+    particles
+    <select id="particles">
+        <option>true</option>
+        <option>false</option>
+    </select><br>
+</div>
