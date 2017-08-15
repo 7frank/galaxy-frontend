@@ -37,7 +37,7 @@ export default class BaseCluster3D extends BaseNode {
         //initially have a value to ignore the lod while loading to make the animations visible for certain elements
         this.useLOD = false;
 
-
+        this.bClusterEdgesVisible=true;
         //add collapse/expand stuff
       //  this.mExpanded = true;
         this.mClusterClusteringApplied = false;
@@ -78,7 +78,7 @@ export default class BaseCluster3D extends BaseNode {
             });*/
 
 
-        //update lod //TODO the function shoul forwared onBeforeRender args in a way
+        //update lod //TODO the function should forward onBeforeRender args in a way
         this.on("before-render", function () {
 
             //   if (!this.mHull) return;
@@ -98,6 +98,11 @@ export default class BaseCluster3D extends BaseNode {
 
             let distance = dst.sub(src).length();
 
+            //no need for updates if nothing changed
+            if (this.mLastCamDistance==distance) return
+            this.mLastCamDistance=distance
+
+
             //TODO how to handle max distance with the lod approach of meshes
             let maxDistance = this.getRadius(this.mNodes.length) * 25;
             let minDistance = 0;//this.getRadius() ;
@@ -116,6 +121,45 @@ export default class BaseCluster3D extends BaseNode {
 
 
     }
+
+
+    setLeafsVisible(bVisible){
+
+    this.getLeafs().forEach( l => l.visible=bVisible)
+
+    }
+
+    setParticlesVisible(bVisible){
+
+        this.getLeafs().forEach( l => l.setParticlesVisible(bVisible) )
+
+    }
+
+    setNodesVisible(bVisible){
+
+        this.getLeafs().forEach( l => l.setNodesVisible(bVisible) )
+
+    }
+
+//FIXME does not work
+    setEdgesVisible(bVisible){
+
+        //TODO interference with lod
+        this.findClusters("*").forEach( function (c){
+            c.bClusterEdgesVisible=bVisible;
+            if (c.mChildClustersEdgesMesh) {
+                c.mChildClustersEdgesMesh.material.visible = bVisible;
+
+                c.mChildClustersEdgesMesh.material.needsUpdate = true;
+
+            }
+
+        })
+
+        this.getLeafs().forEach( l => l.setEdgesVisible(bVisible) )
+
+    }
+
 
 
     //TODO update position and radius
@@ -328,7 +372,7 @@ var that=this
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
 
 
-            // primarily notify text overlay here
+            // primarily notify text Foverlay here
             $(this.getRoot().getView()).trigger("graph-changed");
 
             this.trigger("initial-expand");
@@ -381,10 +425,11 @@ var that=this
             //TODO the cluster edges should partially be dependant on the size of the hull..
 
             let opa = vis
-            if (opa > 0.05) opa = 0.05;
+            if (opa > 0.02) opa = 0.02;
 
             this.mChildClustersEdgesMesh.material.opacity = opa//*this.mEdgeFadeInVal ;
-            this.mChildClustersEdgesMesh.material.visible = vis > 0.02 && vis < 0.9;
+
+            this.mChildClustersEdgesMesh.material.visible =this.bClusterEdgesVisible? vis > 0.02 && vis < 0.9:false;
 
         }
 
@@ -597,8 +642,7 @@ var that=this
             hull: BaseVolume,
             //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
             expanded: true,  //determines if a cluster is initially expanded or not
-            click: function () {
-            }
+            text:function noop(){ }
 
         }, this.mEntry.options);
 

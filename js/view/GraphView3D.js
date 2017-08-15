@@ -35,6 +35,30 @@ export default class GraphView3D extends View3D {
 
     }
 
+
+    static get observedAttributes() {return ['text-visible']; }
+
+    // Respond to attribute changes.
+    attributeChangedCallback(attr, oldValue, newValue) {
+        console.warn("attr changed",arguments)
+        if (attr == 'text-visible') {
+
+
+            let visible;
+            if (newValue=="true") visible=true;
+            else
+            if (newValue=="false") visible=false;
+             else
+               visible=Boolean(newValue)
+
+            if (this.mRootCluster && this.mRootCluster.mTextOverlay)
+            this.mRootCluster.mTextOverlay.get(0).enabled=visible;
+
+        }
+    }
+
+
+
     setSpeccs(speccs) {
         this.mSpeccs = speccs;
         return this
@@ -300,36 +324,20 @@ export default class GraphView3D extends View3D {
         return this
     }
 
-
-    maximise() {
+    resizeCanvas(){
+        super.resizeCanvas()
 
         var root = this.mRootCluster;
 
-        super.maximise();
-
         if (root && root.mParentView && root.mTextOverlay) {
 
-            root.mTextOverlay.height(root.mParentView.clientHeight);
-            root.mTextOverlay.width(root.mParentView.clientWidth);
-            console.log("maximised")
-        }
+                root.mTextOverlay.height(root.mParentView.clientHeight);
+                root.mTextOverlay.width(root.mParentView.clientWidth);
 
+        }
 
     }
 
-    undoMaximise() {
-        super.undoMaximise();
-
-
-        let root = this.mRootCluster;
-        if (root && root.mParentView && root.mTextOverlay) {
-
-            root.mTextOverlay.height(root.mParentView.clientHeight);
-            root.mTextOverlay.width(root.mParentView.clientWidth)
-        }
-
-
-    }
 
 
 }

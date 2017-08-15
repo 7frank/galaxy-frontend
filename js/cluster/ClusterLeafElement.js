@@ -20,6 +20,8 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         this.mNodes = nodes;
 
+        this.bNodesVisible=true;
+        this.bEdgesVisible=true;
         this.mNodeParticles = this.createParticleNodeCloud();
         this.add(this.mNodeParticles.pointCloud);
 
@@ -35,6 +37,28 @@ export default class ClusterLeafElement extends THREE.Mesh {
     }
 
 
+    setParticlesVisible(bVisible){
+
+        this.mParticles.pointCloud.visible=bVisible
+
+    }
+
+    setNodesVisible(bVisible){
+        this.bNodesVisible=bVisible;
+        this.mNodeParticles.pointCloud.visible=bVisible
+
+    }
+
+    setEdgesVisible(bVisible){
+
+
+
+        this.bEdgesVisible=bVisible;
+        this.mEdgesContainer.visible=bVisible;
+    }
+
+
+
     getView() {
         //TODO
         return this.parent.parent.getView()
@@ -43,7 +67,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
     setLOD(levelOfDetail) {
         if (this.mNodeParticles && this.parent.useLOD)
-            this.mNodeParticles.pointCloud.visible =  levelOfDetail > 0.3;
+            this.mNodeParticles.pointCloud.visible =this.bNodesVisible?levelOfDetail > 0.3:false;
         //TODO nodes,edges, ... as well
 
         let edgeFadeLOD = 0.3;
@@ -51,9 +75,9 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         if (this.mEdgesContainer) {
 
-            this.mEdgesContainer.visible = levelOfDetail>0.75// levelOfDetail >= edgeFadeLOD;
+            this.mEdgesContainer.visible = this.bEdgesVisible? levelOfDetail>0.75:false;// levelOfDetail >= edgeFadeLOD;
 
-            this.mEdgesContainer.mEdges.material.opacity =levelOfDetail/4// (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
+            this.mEdgesContainer.mEdges.material.opacity =0.04//levelOfDetail/4// (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
         }
 
      /*   if (this.mEdgesContainer2) {
@@ -123,7 +147,8 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
     appendNodes(nodes) {
-
+        console.warn("FIXME events from nodesmeshes => pointcloud")
+       // return
 
         if (!this.mNodeMeshes) {
             this.mNodeMeshes = new THREE.Object3D;
@@ -131,7 +156,8 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         }
 
-
+//adding invisible node meshes for domEvents
+// TODO use the point cloud itself for events to prevent potential unnecessary bindings?
         var that = this.mNodeMeshes;//this;
         _.each(nodes, function (node) {
             if (node && node._bubble)
@@ -181,7 +207,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 //FIXME init dot particles if (root)cluster is done animating?
             //FIXME update color of particles only for clusters that need an update
             //by adding a timeout the color is yellow again because the event triggered is too early
-        setTimeout(() => that._initDotParticles(),500)
+        setTimeout(() => that._initDotParticles(),500);
 
             onComplete()
 
@@ -261,7 +287,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
             //TODO this timeout currently fixes wrong positioning bug..
             setTimeout(function () {
                 particles.start();
-            }, 10)
+            }, 10);
 
             //TODO call start if distribution function is finished
             /*this.parent.on("distribution-complete", function () {
