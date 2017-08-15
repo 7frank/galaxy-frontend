@@ -29,8 +29,6 @@ import "./refactor/SpecificDataUtils"
 import "./refactor/AppDataService"
 
 
-
-
 //used by View3D
 import CombinedCamera from "../lib/CombinedCamera"
 import TrackballControls from "../lib/TrackballControls"
@@ -73,6 +71,7 @@ import ClusterSpeccFacade from "./ClusterSpeccFacade"
 import CompanyNewsDS from "../data/CompanyNewsDS"
 
 import {getGraphDataSets} from "../data/data-set-loader"
+import {IndustrialSectorAbbreviation, IndustrialSectorIcon} from "./utils/IndustrialSectorIcon";
 
 
 //-----------------------------------------
@@ -109,15 +108,12 @@ export class SampleClusterApplication extends HTMLElement {
         $(this).append("<graph-hud></graph-hud>")
 
 
-
-
-
     }
 
 
     addNewsListeners() {
 
-     console.error("fixme addNewsListeners needs socket server and handler if server is not found")
+        console.error("fixme addNewsListeners needs socket server and handler if server is not found")
 
         return
         var myDS = new CompanyNewsDS('http://localhost:3000')
@@ -241,7 +237,7 @@ export class SampleClusterApplication extends HTMLElement {
 
 
             if (that.isDebug()) {
-                mGraphView.maxFPS = 10;
+                mGraphView.maxFPS = 55;
 
             }
 
@@ -276,7 +272,7 @@ export class SampleClusterApplication extends HTMLElement {
             var infoVisible = true;
             events.bind("h", function () {
                 infoVisible = !infoVisible;
-                $(".info-panel").toggle(infoVisible)
+                $(that).find("info-panel").toggle(infoVisible)
 
 
             });
@@ -463,7 +459,7 @@ export class SampleClusterApplication extends HTMLElement {
                     }
                 },
                 options: {
-                    minClusterSize: 15//,
+                    minClusterSize: 15
                     //hull: ConvexVolume
 
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
@@ -471,7 +467,12 @@ export class SampleClusterApplication extends HTMLElement {
             , {
                 distribution: nodesWithinIndustryDistribution,
                 options: {
-                    hull: ConvexVolume
+                    //   hull: ConvexVolume
+
+                    text: function () {
+                        //return IndustrialSectorIcon(this.name)
+                        return  IndustrialSectorAbbreviation(this.name)
+                    }
                 },
                 events: {
                     click: function () {
@@ -541,7 +542,7 @@ export class SampleClusterApplication extends HTMLElement {
                     click: function () {
                         this.toggleCollapse()
 
-                        console.log("toggled country?",this.name)
+                        console.log("toggled country?", this.name)
                     }
                 },
                 options: {
@@ -557,15 +558,15 @@ export class SampleClusterApplication extends HTMLElement {
                 events: {
                     click: function () {
                         this.toggleCollapse()
-                        console.log("toggled leaf",this.name)
+                        console.log("toggled leaf", this.name)
                     }
                 },
                 options: {
                     hull: ConvexVolume,
                     expanded: function () {
-                    //   let par=this.getParentCluster()
-                     //   if (!par) return false
-                    //FIXME cluster is not attached when parentcluster gets called
+                        //   let par=this.getParentCluster()
+                        //   if (!par) return false
+                        //FIXME cluster is not attached when parentcluster gets called
                         return /*par.getParentCluster().name == "United States" &&*/ this.name == "Healthcare"// false //true// return false//
 
                     }
@@ -607,8 +608,6 @@ export class SampleClusterApplication extends HTMLElement {
     setGraph2D() {
 
 
-
-
         /**
          * FIXME if a cluster has subclusters and no clustering is given use the existsing
          * likewise with distributions
@@ -623,7 +622,7 @@ export class SampleClusterApplication extends HTMLElement {
         let view = this.getCurrentView();
 
 
-        view.mScene.background = new THREE.Color( 0x555555 );
+        view.mScene.background = new THREE.Color(0x555555);
 
 
         let rootCluster = view.mRootCluster;
@@ -634,8 +633,7 @@ export class SampleClusterApplication extends HTMLElement {
 
 
         rootCluster.applyClustering(speccs);
-       view.addCompanyCountListenersToCluster(rootCluster);
-
+        view.addCompanyCountListenersToCluster(rootCluster);
 
 
         //TODO
@@ -663,7 +661,7 @@ export class SampleClusterApplication extends HTMLElement {
         let speccs = this.getForceSpeccs();
         let view = this.getCurrentView();
 
-        view.mScene.background = new THREE.Color( 0x000000 );
+        view.mScene.background = new THREE.Color(0x000000);
 
         let rootCluster = view.mRootCluster;
 

@@ -62,11 +62,11 @@ class Cluster3DExtended extends BaseCluster3D {
 
 
         //have a "cluster-ready" event
-        this.on("cluster-ready",function(){
+      /*  this.on("cluster-ready",function(){
 
             this.addNodeCaptions();
 
-        });
+        });*/
 
 
 
@@ -243,11 +243,11 @@ class Cluster3DExtended extends BaseCluster3D {
     /**
      * add some text to the sub-clusters providing informations
      *
-     *
+     * deprecated, text is handled via overlay
      *
      */
 
-
+/*
     addNodeCaptions() {
 
         if (this._hasNodeCaptions_) return;
@@ -282,11 +282,8 @@ class Cluster3DExtended extends BaseCluster3D {
 
         };
 
-
-
-
-
     }
+    */
 
     isSelected() {
         return this.selected

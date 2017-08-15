@@ -882,6 +882,16 @@ count clusters in background that would count towards visible countries
 \begin_layout Paragraph
 meeting 12.8.
  TODO order prio and merge
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+next
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -920,6 +930,12 @@ rotate pan speed
 breadcrumb clostest cluster
 \end_layout
 
+\begin_deeper
+\begin_layout Itemize
+breadcrumb on click..
+\end_layout
+
+\end_deeper
 \begin_layout Itemize
 sector short text 
 \begin_inset Quotes eld
@@ -960,15 +976,47 @@ touch options debugging ipad!!!!! important
 circular cluster for 2d?
 \end_layout
 
-\begin_layout Paragraph
-\begin_inset Note Note
-status open
+\begin_layout Section
+Features/Versions/History/sprints
+\end_layout
+
+\begin_layout Standard
+if possible we should define about sprints of equal length.
+ about 2 weeks should be the right time for
+\end_layout
+
+\begin_layout Subsection
+not-a-sprint sprint 12.
+ 08 - 17.08.
+\end_layout
+
+\begin_layout Standard
+the main goal is to check all possible means to improve performance
+\end_layout
+
+\begin_layout Subsubsection
+Summary
+\end_layout
+
+\begin_layout Itemize
+bugs
+\end_layout
+
+\begin_layout Itemize
+performance considerations
+\end_layout
+
+\begin_layout Subsubsection
+Detailed
+\end_layout
 
 \begin_layout Paragraph
 bugs (backlog)
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 text overlay does not resize to same size as view sometimes
 \end_layout
 
@@ -977,11 +1025,15 @@ company names calc with skip after view change flickers
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 force graph is not rendered before everything is finished
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 \begin_inset Note Note
 status open
 
@@ -995,6 +1047,14 @@ render initial/actual force graph
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+prevent text from being selectable 
+\end_layout
+
+\begin_layout Itemize
+text nodes do appear a little (late) when cluster was clicked
+\end_layout
+
 \begin_layout Paragraph
 perf consderations
 \begin_inset Note Note
@@ -1010,6 +1070,8 @@ TODO
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 within the first 8000 ms of loading 2500 ms the animation frame is fired
  and rendering stuff occured but nothing is visible
 \begin_inset Note Note
@@ -1026,61 +1088,34 @@ thats a third of cpu usage we might prevent by not rendering at all
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 text nodes,events updates that don't matter at this stage have a huge impact
  in this
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 applyClustering is another part that takes 1500 ms 
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 delayed init of edges 
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
 getClusterInfo
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-delayed intialisation?
-\end_layout
-
-\begin_layout Itemize
-nodemixin takes 500ms
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-use point cloud instead
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-by not using the mesh at all but instead relying on the pointcloud for domevents
- we'd get 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-approx 250ms
 \end_layout
 
 \end_inset
@@ -1160,8 +1195,49 @@ possible to delay parts via timeout?
 
 \end_deeper
 \begin_layout Itemize
-possible to bind dom events to leaf and handle it from there instead of
- per node?
+TEST: collapse country nodes without collapse hull and expand with delay
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+collapsehull option
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Ring(Volume)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+timeout from biggest to smallest countries +=200ms
+\end_layout
+
+\begin_layout Itemize
+united sttes first then next biggest and so on
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+text nodes ...
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+on the one hand we got the controls that are now updated every frame again
+ for faster input
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+
+\strikeout on
+false assumtion: updating in sync with actual set frames does not decrease
+ responsiveness
 \end_layout
 
 \end_inset
@@ -1169,15 +1245,295 @@ possible to bind dom events to leaf and handle it from there instead of
 
 \end_layout
 
-\begin_layout Section
-Features/Versions/History/sprints
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+on the other hand the text nodes are again slowing performance considerably
+ by that
 \end_layout
 
-\begin_layout Standard
-if possible we should define about sprints of equal length.
- about 2 weeks should be the right time for
+\begin_layout Itemize
+
+\strikeout on
+30% when the full graph is shown is way too much
 \end_layout
 
+\begin_layout Itemize
+
+\strikeout on
+even 20-25% when only some clusters are shown is too much
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+check if possibly too many redundant listeners are bound
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+try to reduce frame drops when rotating
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+fixed a bug throttling simpleUpdate leading to too many calls
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+compare&hide again
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+10% updatePos 
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+10% animation jquery
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+replace by tween and sync withactual fps
+\strikeout default
+
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+currently animations are disabled (where almost not noticable)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+also probably have one class that handles fps like in view and replace requestAn
+imationFrame with something like FPS.onNextFrame / that uses View::onBeforeRender
+ !!have a stop/once mechanism
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+replace existing invisible node meshes
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+change domevents workflow
+\end_layout
+
+\begin_layout Enumerate
+nodemixin takes 500ms
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+generating meshes will no longer be necessary
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+by not using the mesh at all but instead relying on the pointcloud for domevents
+ we'd get 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+approx 250ms
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+webglrenderer takes ages due to all the invisible meshes!! approx 20%
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+updateMatrixWorld
+\end_layout
+
+\begin_layout Itemize
+projectObject
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+something is wrong with the cluster edges
+\end_layout
+
+\begin_layout Itemize
+also if nothing is visible no edges + no leafs but only empty clustersa
+ lot is calculated
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+invisible leafs still take a lot of computation
+\end_layout
+
+\begin_layout Itemize
+clusters even if empty 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+doAnimate seems to get called more than once per frame?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO refactor View3D:animate start stop
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+partially fixing View3D::animate resolves some of the issues
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+still if leafs are set invisible with previous everything else within leaf
+ set to invisible the frames jump by 20+ which indicates that something
+ within the lef might still be computated to often or s
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+try to reduce text nodes selected by compare&hide
+\end_layout
+
+\begin_layout Itemize
+force_simulation 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+shader?
+\end_layout
+
+\begin_layout Itemize
+webworker?
+\end_layout
+
+\begin_layout Itemize
+gpu.js
+\end_layout
+
+\begin_layout Itemize
+multithread.js
+\end_layout
+
+\begin_layout Itemize
+explore alternatives to accieve similar effects for parts of the cluster
+\end_layout
+
+\begin_layout Itemize
+implement a round robin like queue for all force animations to smoothen
+ out the overall animations
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+evaluate delayed intialisation of edges,hull
+\end_layout
+
+\begin_layout Itemize
+baseCluster before-render
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+no need to change anything if camera hasn't changed and element position
+ also
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+renderBufferDirect takes about 30% now 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+check which elements nodes?edges? are responsible and if it' might be a
+ needsUpdate that is triggered too often
+\end_layout
+
+\end_deeper
 \begin_layout Subsection
 (sprint) 6.8.
  - 14.
