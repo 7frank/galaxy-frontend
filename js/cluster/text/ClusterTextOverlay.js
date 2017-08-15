@@ -33,6 +33,8 @@ class ClusterTextOverlay extends HTMLElement {
         this.possibleClusters = [];
         this.possibleLeafClusters = [];
 
+        this.enabled=true;
+
     }
 
     /**
@@ -86,10 +88,16 @@ class ClusterTextOverlay extends HTMLElement {
 
         $view.on("after-render", () => {
 
+            $(that).toggle(that.enabled);
+            if (!that.enabled) return;
+
             this.tn.update();
             this.mTextNodes.update();
 
+            //console.log("clusters for text considered",that.possibleClusters .length+  that.possibleLeafClusters.length)
+
         });
+
 
 
         rootcluster.findClusters().forEach(function (cluster) {
@@ -229,7 +237,7 @@ class ClusterTextOverlay extends HTMLElement {
 
         //the handler for the cluster text
         this.mTextNodes = TextNodesFactory(env, {
-            maxVisibleCount: 50,
+            maxVisibleCount: 30,
             maxDistance: function (node) {
                 return getNodeParentCluster(node).getRadius(getNodeParentCluster(node).mNodes.length) / 3 * 10
             },//30000
@@ -268,6 +276,12 @@ class ClusterTextOverlay extends HTMLElement {
                 if (node instanceof Cluster3DExtended) {
                     newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
 
+                   var newText= node.getClusterOptions().text.bind(node)()
+                    if (newText)
+                    el.html("").append(newText)
+
+
+
 
                 }
                 else
@@ -280,6 +294,8 @@ class ClusterTextOverlay extends HTMLElement {
                 el.on("click", function () {
                     node.zoomToCluster();
                 })
+
+
 
             }
         })

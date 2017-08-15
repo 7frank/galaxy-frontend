@@ -215,10 +215,13 @@ function TextNodesFactory(env, options) {
 			var centered = coords.x - node.text.width() / 2;
 			var adjustedTop = coords.y - 500 / distance * 10
 
-				node.text.css({
+			/*	node.text.css({
 					top: adjustedTop,
 					left: centered
-				})
+				})*/
+
+            node.text.get(0).style.transform ='translate(' + _.round(centered-dw, 2)  + 'px, ' +_.round(adjustedTop, 2)  + 'px)';
+
 
 		}
 
@@ -270,8 +273,9 @@ function TextNodesFactory(env, options) {
 			for (var nodeInfo of nodeInfosCurrentBatch) {
 				if (nodeInfo.node.text && !nodeInfo.node.text._marked_for_deletion_)
 
-                    if (!nodeInfo.node.text.is( ":animated"))
-                    nodeInfo.node.text.stop().fadeIn(100);
+                    //if (!nodeInfo.node.text.is( ":animated"))
+                    //nodeInfo.node.text.stop().fadeIn(100);
+                    nodeInfo.node.text.show()
 
 				updatePos(nodeInfo.node, nodeInfo.distance);
 			}
@@ -333,8 +337,8 @@ function TextNodesFactory(env, options) {
 
 	return {
 		update: _.throttle(simpleUpdate, 20, {
-			leading: true,
-			trailing: false
+			//leading: true,
+			//trailing: false
 		}),
 		remove: function () {
 
