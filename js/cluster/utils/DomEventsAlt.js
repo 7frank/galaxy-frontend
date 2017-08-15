@@ -261,8 +261,8 @@ DomEventsAlt.prototype._onMove	= function(eventName, mouseX, mouseY, origDomEven
 {
 //console.log('eventName', eventName, 'boundObjs', this._boundObjs[eventName])
     // get objects bound to this event
-    var boundObjs	= this._boundObjs[eventName];
-    if( boundObjs === undefined || boundObjs.length === 0 )	return;
+   // var boundObjs	= this._boundObjs[eventName];
+   // if( boundObjs === undefined || boundObjs.length === 0 )	return;
     // compute the intersection
     var vector = new THREE.Vector2();
 
@@ -499,13 +499,14 @@ DomEventsAlt.prototype._onMouseEvent	= function(eventName, domEvent)
     this._onEvent(eventName, mouseCoords.x, mouseCoords.y, domEvent);
 }
 
+/*
 DomEventsAlt.prototype._onMouseMove	= function(domEvent)
 {
     var mouseCoords = this._getRelativeMouseXY(domEvent);
     this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
-    this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
-    this._onMove('mouseout' , mouseCoords.x, mouseCoords.y, domEvent);
-}
+   // this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
+   // this._onMove('mouseout' , mouseCoords.x, mouseCoords.y, domEvent);
+}*/
 
 DomEventsAlt.prototype._onClick		= function(event)
 {
@@ -542,8 +543,8 @@ DomEventsAlt.prototype._onTouchMove	= function(domEvent)
     var mouseX	= +(domEvent.touches[ 0 ].pageX / window.innerWidth ) * 2 - 1;
     var mouseY	= -(domEvent.touches[ 0 ].pageY / window.innerHeight) * 2 + 1;
     this._onMove('mousemove', mouseX, mouseY, domEvent);
-    this._onMove('mouseover', mouseX, mouseY, domEvent);
-    this._onMove('mouseout' , mouseX, mouseY, domEvent);
+  //  this._onMove('mouseover', mouseX, mouseY, domEvent);
+  //  this._onMove('mouseout' , mouseX, mouseY, domEvent);
 }
 
 DomEventsAlt.prototype._onTouchEvent	= function(eventName, domEvent)
@@ -561,10 +562,9 @@ DomEventsAlt.prototype._onTouchEvent	= function(eventName, domEvent)
 //throttle move events to about 50 fps
 //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
 DomEventsAlt.prototype._onMouseMove = _.throttle(function (domEvent)
-    //THREEx.DomEvents.prototype._onMouseMove	=_.throttle(function(domEvent)
 {
     var mouseCoords = this._getRelativeMouseXY(domEvent);
     this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
-    this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
-    this._onMove('mouseout', mouseCoords.x, mouseCoords.y, domEvent);
+   // this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
+   // this._onMove('mouseout', mouseCoords.x, mouseCoords.y, domEvent);
 }, 40);  //25 (f)ps
