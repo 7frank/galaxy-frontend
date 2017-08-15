@@ -8,7 +8,7 @@ import EdgeUtil from "../EdgeUtil"
 
 import BaseCluster3D from "../BaseCluster3D"
 
-
+import RoundRobin from "../utils/RoundRobin"
 /*
  * TODO the forceGraphDistribution should work like a normal force graph
  * but optimally is could use a initial distribution from another dist function with no animation enabled
@@ -22,13 +22,20 @@ class ForceGraphDistribution extends BaseDistribution {
         super(scale, dimensions);
 
 
-        this.initialEngineTicks = 1;
+        this.initialEngineTicks = 0;
 
     // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime=2000;//ms ... 5 seconds upper bound for loading phase
-        this.maxConvergeFrames=90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
+        this.maxConvergeTime=7000//2000;//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeFrames=400//90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
+
+    queue(){
+        if (!this.constructor._queue) this.constructor._queue=new RoundRobin()
+    return this.constructor._queue
+
+    }
+
 
     /**
      * a reduced simulation (for testing)
@@ -42,7 +49,11 @@ class ForceGraphDistribution extends BaseDistribution {
 
 
 
+
+
         var that=this;
+
+
 
         // Add force-directed layout
         let layout = d3_force.forceSimulation();
@@ -92,11 +103,30 @@ class ForceGraphDistribution extends BaseDistribution {
             layout.tick();
         } // Initial ticks before starting to render
 
-
         let cntTicks = 0;
         const startTickTime = new Date();
 
-        layout.on("tick", function () {
+
+        this.queue().add(function onQueue(){
+
+           if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
+                layout.alpha(0); //trigger end
+                layout.stop(); // Stop ticking graph
+            }
+
+            layout.tick();
+            onTick(layout, nodes, edges)
+            if ( layout.alpha()==0) {
+                that.queue().remove(onQueue)
+                if (onComplete) onComplete()
+            }
+        })
+
+
+
+
+        layout// .on('start', start)
+            .on("tick", function () {
 
            if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
                 layout.alpha(0); //trigger end
@@ -109,7 +139,9 @@ class ForceGraphDistribution extends BaseDistribution {
 
             if (onComplete) onComplete()
 
-        }).restart();
+        })
+            //.restart();
+
 
     }
 
