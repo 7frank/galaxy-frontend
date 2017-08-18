@@ -316,8 +316,6 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
     appendNodes(nodes) {
-        console.warn("FIXME events from nodesmeshes => pointcloud")
-       // return
 
         if (!this.mNodeMeshes) {
             this.mNodeMeshes = new THREE.Object3D;
@@ -331,6 +329,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
        var that = this.mNodeMeshes;//this;
         _.each(nodes, function (node) {
 
+            //TODO change the way parent gets set
             node._parent=that  //set a parent element to the placeholder mesh
            // if (node && node._bubble)
            //     that.add(node._bubble)
@@ -379,7 +378,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 //FIXME init dot particles if (root)cluster is done animating?
             //FIXME update color of particles only for clusters that need an update
             //by adding a timeout the color is yellow again because the event triggered is too early
-        setTimeout(() => that._initDotParticles(),500);
+        setTimeout(() => that._initDotParticles(),50);
 
             onComplete()
 
@@ -467,7 +466,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
             //TODO this timeout currently fixes wrong positioning bug..
             setTimeout(function () {
                 particles.start();
-            }, 10);
+            }, 500);
 
             //TODO call start if distribution function is finished
             /*this.parent.on("distribution-complete", function () {

@@ -81308,8 +81308,6 @@ class ClusterLeafElement extends THREE.Mesh {
 
 
     appendNodes(nodes) {
-        console.warn("FIXME events from nodesmeshes => pointcloud")
-       // return
 
         if (!this.mNodeMeshes) {
             this.mNodeMeshes = new THREE.Object3D;
@@ -81323,6 +81321,7 @@ class ClusterLeafElement extends THREE.Mesh {
        var that = this.mNodeMeshes;//this;
         _.each(nodes, function (node) {
 
+            //TODO change the way parent gets set
             node._parent=that  //set a parent element to the placeholder mesh
            // if (node && node._bubble)
            //     that.add(node._bubble)
@@ -81371,7 +81370,7 @@ class ClusterLeafElement extends THREE.Mesh {
 //FIXME init dot particles if (root)cluster is done animating?
             //FIXME update color of particles only for clusters that need an update
             //by adding a timeout the color is yellow again because the event triggered is too early
-        setTimeout(() => that._initDotParticles(),500);
+        setTimeout(() => that._initDotParticles(),50);
 
             onComplete()
 
@@ -81459,7 +81458,7 @@ class ClusterLeafElement extends THREE.Mesh {
             //TODO this timeout currently fixes wrong positioning bug..
             setTimeout(function () {
                 particles.start();
-            }, 10);
+            }, 500);
 
             //TODO call start if distribution function is finished
             /*this.parent.on("distribution-complete", function () {
@@ -81976,6 +81975,13 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
             .force('linkStrength', (link) => 1)
            // .force("collide", d3_force.forceCollide(scale/10).iterations(1))
             .stop();
+
+
+        //enable collision only for clusters not for leafs to improve performance
+        if (nodes.length>0&& nodes[0]._el&& nodes[0]._el instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */])
+        layout.force("collide", d3_force.forceCollide(scale/10).iterations(1))
+
+
 
 
             /*
@@ -91501,8 +91507,8 @@ class SampleClusterApplication extends HTMLElement {
 
 
         let countryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](80000, 3); // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](15000, 3);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](1500, 3);//same goes for the nodes within each industry
+        let industryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](25000, 3);// industries within countries use the Force-Graph approach to position elements
+        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](8000, 3);//same goes for the nodes within each industry
 
         //the final configuration for rendering
         //it contains an additional options attribute per array entry
@@ -91585,9 +91591,9 @@ class SampleClusterApplication extends HTMLElement {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](180000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](150000, 2); // countries get placed equally on a plane of size 15k X 15k
         let industryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](30000, 2);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](1000, 2);//same goes for the nodes within each industry
+        let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](5000, 2);//same goes for the nodes within each industry
 
         //the final configuration for rendering
         //it contains an additional options attribute per array entry
@@ -91614,7 +91620,7 @@ class SampleClusterApplication extends HTMLElement {
                 distribution: industryDistribution,
                 events: {
                     click: function () {
-                        this.toggleCollapse()
+                       // this.toggleCollapse()
 
                         console.log("toggled country?", this.name)
                     }
@@ -91623,6 +91629,7 @@ class SampleClusterApplication extends HTMLElement {
                     minClusterSize: 15,
                     hull: __WEBPACK_IMPORTED_MODULE_25__hull_ConvexVolume__["a" /* default */],
                     expanded: function () {
+                        return true
                         return this.name == "United States"
                     }
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
@@ -91631,13 +91638,14 @@ class SampleClusterApplication extends HTMLElement {
                 distribution: nodesWithinIndustryDistribution,
                 events: {
                     click: function () {
-                        this.toggleCollapse()
+                      //  this.toggleCollapse()
                         console.log("toggled leaf", this.name)
                     }
                 },
                 options: {
                     hull: __WEBPACK_IMPORTED_MODULE_25__hull_ConvexVolume__["a" /* default */],
                     expanded: function () {
+                        return true
                         //   let par=this.getParentCluster()
                         //   if (!par) return false
                         //FIXME cluster is not attached when parentcluster gets called
@@ -91679,6 +91687,18 @@ class SampleClusterApplication extends HTMLElement {
 
     }
 
+
+    resetNodesPositions(nodes){
+
+        _.each(nodes,function (n) {
+         n.x=0;
+            n.y=0;
+            n.z=0;
+
+        })
+
+    }
+
     setGraph2D() {
 
 
@@ -91691,6 +91711,8 @@ class SampleClusterApplication extends HTMLElement {
          *
          */
 
+
+
         let speccs = this.get2DPlaneForceSpeccs();
 
         let view = this.getCurrentView();
@@ -91700,6 +91722,9 @@ class SampleClusterApplication extends HTMLElement {
 
 
         let rootCluster = view.mRootCluster;
+
+        this.resetNodesPositions(rootCluster.mNodes)
+
 
         rootCluster.cleanUpLeafs();
         //clean up previous clusters
@@ -95155,7 +95180,7 @@ class View3D extends HTMLElement {
         this.mControls.maxDistance = Math.min(this.mCamera.far,200000);
 
 
-        this.mControls.addEventListener("change", (...args) => $(this).trigger("change", ...args));
+    //    this.mControls.addEventListener("change", (...args) => $(this).trigger("change", ...args));
 
 
     }

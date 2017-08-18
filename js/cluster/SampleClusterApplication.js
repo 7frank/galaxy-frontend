@@ -426,9 +426,9 @@ export class SampleClusterApplication extends HTMLElement {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new ForceGraphDistribution(80000, 2); // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new ForceGraphDistribution(15000, 3);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new ForceGraphDistribution(1500, 3);//same goes for the nodes within each industry
+        let countryDistribution = new ForceGraphDistribution(80000, 3); // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new ForceGraphDistribution(25000, 3);// industries within countries use the Force-Graph approach to position elements
+        let nodesWithinIndustryDistribution = new ForceGraphDistribution(8000, 3);//same goes for the nodes within each industry
 
         //the final configuration for rendering
         //it contains an additional options attribute per array entry
@@ -511,9 +511,9 @@ export class SampleClusterApplication extends HTMLElement {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new ForceGraphDistribution(180000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let countryDistribution = new ForceGraphDistribution(150000, 2); // countries get placed equally on a plane of size 15k X 15k
         let industryDistribution = new ForceGraphDistribution(30000, 2);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new ForceGraphDistribution(1000, 2);//same goes for the nodes within each industry
+        let nodesWithinIndustryDistribution = new ForceGraphDistribution(5000, 2);//same goes for the nodes within each industry
 
         //the final configuration for rendering
         //it contains an additional options attribute per array entry
@@ -540,7 +540,7 @@ export class SampleClusterApplication extends HTMLElement {
                 distribution: industryDistribution,
                 events: {
                     click: function () {
-                        this.toggleCollapse()
+                       // this.toggleCollapse()
 
                         console.log("toggled country?", this.name)
                     }
@@ -549,6 +549,7 @@ export class SampleClusterApplication extends HTMLElement {
                     minClusterSize: 15,
                     hull: ConvexVolume,
                     expanded: function () {
+                        return true
                         return this.name == "United States"
                     }
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
@@ -557,13 +558,14 @@ export class SampleClusterApplication extends HTMLElement {
                 distribution: nodesWithinIndustryDistribution,
                 events: {
                     click: function () {
-                        this.toggleCollapse()
+                      //  this.toggleCollapse()
                         console.log("toggled leaf", this.name)
                     }
                 },
                 options: {
                     hull: ConvexVolume,
                     expanded: function () {
+                        return true
                         //   let par=this.getParentCluster()
                         //   if (!par) return false
                         //FIXME cluster is not attached when parentcluster gets called
@@ -605,6 +607,18 @@ export class SampleClusterApplication extends HTMLElement {
 
     }
 
+
+    resetNodesPositions(nodes){
+
+        _.each(nodes,function (n) {
+         n.x=0;
+            n.y=0;
+            n.z=0;
+
+        })
+
+    }
+
     setGraph2D() {
 
 
@@ -617,6 +631,8 @@ export class SampleClusterApplication extends HTMLElement {
          *
          */
 
+
+
         let speccs = this.get2DPlaneForceSpeccs();
 
         let view = this.getCurrentView();
@@ -626,6 +642,9 @@ export class SampleClusterApplication extends HTMLElement {
 
 
         let rootCluster = view.mRootCluster;
+
+        this.resetNodesPositions(rootCluster.mNodes)
+
 
         rootCluster.cleanUpLeafs();
         //clean up previous clusters

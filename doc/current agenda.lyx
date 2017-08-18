@@ -1476,6 +1476,10 @@ FIXME
 
 \end_layout
 
+\begin_layout Itemize
+have collision for clusters but not leafs
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
 something is wrong with the cluster edges
