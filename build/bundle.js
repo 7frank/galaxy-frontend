@@ -93013,7 +93013,7 @@ class ClusterTextOverlay extends HTMLElement {
             var res=_.map(that.possibleLeafClusters,function(leaf){
 
             return{item:leaf,distance:getDistance(leaf)}
-            })
+            });
             res= _.sortBy(res, [function(o) { return o.distance; }]);
 
             //TODO nodes aren't in order so we should sort them also
@@ -93034,7 +93034,27 @@ class ClusterTextOverlay extends HTMLElement {
             this.tn = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__["a" /* default */])(env, {
                 maxVisibleCount: 10,
                 onNodeText: (node) => node.name ? node.name : node.id,
-                getNodes:getNodesForLeaf
+                getNodes:function(){
+                    let nodes=getNodesForLeaf();
+
+                    _.each( nodes, function(n){
+
+                        let mesh= n.get3DRoot();
+                        if (mesh.parent)
+                        mesh.updateMatrixWorld();
+                        else
+                        {
+                            mesh.parent=n._parent;
+                            mesh.updateMatrixWorld();
+                            mesh.parent=null
+
+                        }
+
+
+                    });
+
+                    return nodes;
+                }
             });
 
 
@@ -93078,7 +93098,7 @@ class ClusterTextOverlay extends HTMLElement {
 
                 //fixing the offset/position as soon as the hull is created
                 if (node.mHull)
-                    mVec3.add(node.mHull.mBoundingBox.getCenter())
+                    mVec3.add(node.mHull.mBoundingBox.getCenter());
 
                 return mVec3; //node.position.clone()
             },
@@ -93089,7 +93109,7 @@ class ClusterTextOverlay extends HTMLElement {
                 if (node instanceof __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__["a" /* default */]) {
                     newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
 
-                   var newText= node.getClusterOptions().text.bind(node)()
+                   var newText= node.getClusterOptions().text.bind(node)();
                     if (newText)
                     el.html("").append(newText)
 
@@ -95180,7 +95200,7 @@ class View3D extends HTMLElement {
         this.mControls.maxDistance = Math.min(this.mCamera.far,200000);
 
 
-    //    this.mControls.addEventListener("change", (...args) => $(this).trigger("change", ...args));
+        this.mControls.addEventListener("change", (...args) => $(this).trigger("change", ...args));
 
 
     }
