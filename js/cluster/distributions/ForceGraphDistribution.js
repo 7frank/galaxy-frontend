@@ -69,14 +69,14 @@ class ForceGraphDistribution extends BaseDistribution {
                 return d._id
             })
                 .distance(function computeLinkDistance() {
-                    return scale / 50;
+                    return scale / 5;
 
                 })
                .links(edges)
             )
-            .force('charge', (node) => -scale / 50)
+            .force('charge', (node) => -scale / 5)
             .force('linkStrength', (link) => 1)
-            .force("collide", d3_force.forceCollide(scale/10).iterations(3))
+           // .force("collide", d3_force.forceCollide(scale/10).iterations(1))
             .stop();
 
 
