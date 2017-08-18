@@ -4,6 +4,9 @@
 
 import {basicSpriteSize, basicElementExtend} from "./f0-basic-element-3d-classes"
 
+import {highlightNodeElements,} from "./f1"
+
+
 
 var sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
 
@@ -16,11 +19,12 @@ var singleNodeMaterial = new THREE.MeshBasicMaterial({
 
 export default function nodeMixin(env, node) {
 
+ if (!node)
+     console.warn("fu")
+    if (node._mixin_)
+        return node
 
-    if (node._mixin_) {
-        console.warn("try to not initialise nodes again for small performance increase")
-        return;
-    }
+
     node._mixin = true;
 
 
@@ -34,7 +38,6 @@ export default function nodeMixin(env, node) {
 
     //the single material is only for the node counting. so it should be irrelevant for rendering itself
     node._bubble = new THREE.Mesh(sphereGeometry, singleNodeMaterial);
-
 
     var mMesh = node._bubble;
 

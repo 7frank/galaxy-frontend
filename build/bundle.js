@@ -73187,7 +73187,7 @@ return $.widget;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(39);
+/* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__BaseNode__ = __webpack_require__(89);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__EdgeUtil__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__ = __webpack_require__(15);
@@ -73309,6 +73309,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             this.setLOD(lod)
 
         })
+
+
 
 
 
@@ -74299,6 +74301,11 @@ lineMaterial=this.createShaderLineMaterial();
 
 
         this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
+
+
+        //TODO check if this might be holpful to put edges behind nodes
+       // this.mChildClustersEdgesMesh.layers.set(1)
+
         this.mChildClustersEdgesMesh.geometry.boundingBox = new THREE.Box3;
         this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
 
@@ -74604,7 +74611,10 @@ lineMaterial=this.createShaderLineMaterial();
     createParticlePointCloud(entry) {
         // console.log("reached leaf cluster", this)
         var that = this;
-        let leaf = new __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */](this.mNodes);
+
+       let domEvents= this.getDOMEvents()
+
+        let leaf = new __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */](this.mNodes,domEvents);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
         leaf.setDistributionHandler(entry.distribution, function () {
@@ -75987,9 +75997,9 @@ class BaseVolume extends THREE.Object3D {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return GUI; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__ = __webpack_require__(210);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_slider__);
@@ -77408,7 +77418,7 @@ exports.decode = function(qs){
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCluster3D__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__distributions_BaseDistribution__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__distributions_ForceGraphDistribution__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_ZoomUtil__ = __webpack_require__(21);
 /**
  * Created by Frank on 06.06.2017.
@@ -79194,6 +79204,390 @@ class EdgeUtil {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* WEBPACK VAR INJECTION */(function($) {/* harmony export (immutable) */ __webpack_exports__["b"] = highlightNodeElements;
+/* harmony export (immutable) */ __webpack_exports__["c"] = unhighlightNodeElements;
+/* harmony export (immutable) */ __webpack_exports__["d"] = doOnClickNode;
+/* harmony export (immutable) */ __webpack_exports__["a"] = extendGraphElements;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f5_arrows__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__SpecificDataUtils__ = __webpack_require__(16);
+/**
+ * Created by Frank on 16.07.2017.
+ */
+
+/**
+ NOTE: set initialEngineTicks to a appropriate value to speed up bigger graphs
+
+
+ FIXME put arrows nodemixin and linkmixin into separate classes, curent implementations work but are in no way useable for other developers
+
+
+ TODO scale arrow depending on  group link size
+ TODO expanding nodes will result in still showing group tooltips
+ probably remove group nodes from raycaster or something like that
+
+ TODO ?when using hull feature? sometimes nodes cannot be clicked .. probably due to hull back or front preventing events from triggering on nodes
+ TODO search filter for hidden nodes.. expand before zoom
+
+ */
+
+
+
+
+
+
+
+
+
+//current selected node
+var previousNodeClicked = [];
+var previousNodeDblClicked;
+
+//------------------------------------------------
+//Feature 1
+
+var previousNodes;
+
+
+
+function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) {
+
+
+    //TODO
+    /*if (previousNodes&& previousNodes!=this)
+     {
+     unhighlightNodeElements.apply(previousNodes)
+     previousNodes=this
+
+     }*/
+
+    this.showHighlight();
+
+
+    if (bShowOtherNodes) {
+        for (let childNode of this.children)
+            childNode.showHighlight()
+
+        for (let parentNode of this.parents)
+            parentNode.showHighlight()
+    }
+
+    if (bShowEdgeArrows)
+        for (let edge of this.edges) {
+            var color = edge.source == this ? 0x99ff99 : 0xffb2b2;
+
+
+            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["a" /* addArrow */])(edge, color)
+        }
+}
+
+function unhighlightNodeElements() {
+
+    this.hideHighlight();
+
+    for (let childNode of this.children)
+        childNode.hideHighlight()
+
+    for (let parentNode of this.parents)
+        parentNode.hideHighlight()
+
+    //console.log("unhighlighting edges:" + (this.edges.length))
+
+  //  for (let edge of this.edges)
+   //     edge.hideHighlight()
+
+    for (let edge of this.edges)
+        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["b" /* removeArrow */])(edge)
+
+}
+
+
+function extendElement(elements, attrName, options, env) {
+
+    var mDomEvents = env.domEvents;
+
+    function _TODO(typeName) {
+        return function () {
+            console.warn("implement handler for", typeName);
+            console.log(this, arguments)
+        }
+    }
+
+    var defaults = {
+        mousemove: _TODO("mousemove"),
+        mouseleave: _TODO("mouseleave"),
+        click: _TODO("click"),
+        dblclick: _TODO("dblclick")
+    };
+    options = $.extend(true, {}, defaults, options);
+
+
+    for (let el of elements) {
+
+
+        var mesh = el[attrName];
+
+
+        mDomEvents.addEventListener(mesh, 'click', options.click, false);
+        mDomEvents.addEventListener(mesh, 'dblclick', options.dblclick, false);
+
+        mDomEvents.addEventListener(mesh, 'mouseover', function (e) {
+            options.mousemove.apply(e.target.node || e.target.edge)
+        }, false);
+        mDomEvents.addEventListener(mesh, 'mouseout', function (e) {
+            options.mouseleave.apply(e.target.node || e.target.edge)
+        }, false);
+
+
+        el.showHighlight = function () {
+            el.show()
+
+            if (this.isHighlighted) return;
+            this.isHighlighted = true;
+
+            if (attrName == "_bubble" && this["_bubble"] == null) console.error("FIXME ");
+
+            if (this._bubble) {
+                this.addClass("node-highlighted")
+
+            }
+
+
+            if (this.text) {
+                this.text.addClass("node-caption-highlighted")
+            }
+
+
+        };
+
+
+        el.hideHighlight = function () {
+
+        el.hide()
+            if (!this.isHighlighted) return;
+            this.isHighlighted = false;
+
+            if (this._bubble) {
+                this.removeClass("node-highlighted")
+
+            }
+
+
+            if (this.text) {
+                this.text.removeClass("node-caption-highlighted")
+            }
+
+
+        }
+
+    }
+
+}
+
+//TODO
+function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
+
+
+    let view = $(".view-3d[hasFocus]")[0];
+
+    if (!view) view = $(".view-3d.view-3d-maximised").get(0);
+
+    if (!view) console.warn("no view focused to be able to zoom");
+
+
+    let camera = view.mCamera;
+    let controls = view.mControls;
+
+    __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__["a" /* default */].moveToMesh(mesh,camera,controls,minMaxDistance,onEnd)
+
+
+}
+
+
+//helper to being able to handle click events
+//isSelected == false will prevent the actual node selection and only will trigger the zoom+highlight parts
+function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelected = true, doHighlighNeighbours = true, doHighlighEdges = true, doZoomIn = true) {
+
+    if (previousNodeClicked.indexOf(currNodeClicked) < 0)
+    //if (previousNodeClicked!=currNodeClicked)
+    {
+        //node selected
+        highlightNodeElements.apply(currNodeClicked, [doHighlighNeighbours, doHighlighEdges]);
+
+        currNodeClicked.show()//make sure
+
+
+
+        if (doZoomIn)
+            doZoomToMesh(currNodeClicked._bubble, onAnimationEnd);
+
+
+        if (isSelected) {
+
+            currNodeClicked.addClass("basic-selection");
+
+
+            //if (previousNodeClicked)
+            if (!stack)
+                if (previousNodeClicked.length > 0)
+                    for (let p of previousNodeClicked) {
+                        p.removeClass("basic-selection");
+                        unhighlightNodeElements.apply(p)
+                    }
+
+            if (!stack)
+                previousNodeClicked = [currNodeClicked];
+            else
+                previousNodeClicked.push(currNodeClicked)
+
+        }
+
+
+    }
+    else {
+        //GUI.updateNodeInfo(currNodeClicked,false)
+        //node unselected
+        unhighlightNodeElements.apply(currNodeClicked);
+
+        //previousNodeClicked=[]
+        previousNodeClicked.splice(currNodeClicked);
+
+        currNodeClicked.removeClass("basic-selection")
+
+    }
+
+}
+
+/*
+
+ as long as node is current selection => mouse enter return mouse leave return
+
+ if clicked and not current selection trigger mouse leave on last
+
+
+        mixin additional functionality
+ */
+
+function extendGraphElements(d3Nodes, d3Links, env) {
+
+    addGraphHierarchy(d3Nodes, d3Links);
+
+
+    extendElement(d3Nodes, "_bubble", {
+        mousemove: function (e) {
+
+            if (previousNodeClicked.indexOf(this) >= 0)return;
+
+             highlightNodeElements.apply(this, [true, true])
+
+
+        },
+        mouseleave: function () {
+
+            if (previousNodeClicked.indexOf(this) >= 0)return;
+            unhighlightNodeElements.apply(this)
+
+        },
+        click: function (e) {
+            var currNodeClicked = e.target.node;
+            e.stopPropagation();
+
+            if (previousNodeClicked.length > 0 && previousNodeClicked.indexOf(currNodeClicked) < 0)
+                for (let p of previousNodeClicked)
+                    unhighlightNodeElements.apply(p)
+
+            doOnClickNode(currNodeClicked, e.origDomEvent.ctrlKey);
+
+            return false;
+        },
+        dblclick: function (e) {
+            e.stopPropagation();
+            //setCollapsedSateOfChildNodesAndEdgesOfNode(e.target.node)
+            var currNodeDblClicked = e.target.node;
+
+            __WEBPACK_IMPORTED_MODULE_2__SpecificDataUtils__["a" /* GUI */].updateNodeInfo(currNodeDblClicked, currNodeDblClicked != previousNodeDblClicked);
+
+            if (previousNodeDblClicked == currNodeDblClicked)
+                previousNodeDblClicked = null;
+            else
+                previousNodeDblClicked = currNodeDblClicked;
+            //unhighlightNodeElements.apply(e.target.node)
+            return false;
+        }
+    }, env);
+
+
+}
+
+/**
+ * build a helper structure for parent child relation
+ *
+ * this is primarily used for highlighting the src and dst nodes
+ *
+ */
+
+function addGraphHierarchy(d3Nodes, d3Links) {
+
+    /*
+     node:
+     group:1
+     id:"2"
+     shape:"sphere" | "cube"
+     _bubble: instanceof THREE.Mesh //SphereGeometry
+     _id:"2"
+
+     link:
+     source:"1"
+     target:"3"
+     */
+
+    //prepare nodes
+    for (let node of d3Nodes) {
+
+        if (!node.edges)
+            node.edges = [];
+       if (!node.children)
+            node.children = [];
+        if (!node.parents)
+            node.parents = [];
+
+        node._bubble.node = node
+
+    }
+
+    for (let item of d3Links) {
+
+       // item._line.edge = item;
+
+        //add edge list to nodes
+       if (item.source.edges.indexOf(item) < 0)
+            item.source.edges.push(item);
+        if (item.target.edges.indexOf(item) < 0)
+            item.target.edges.push(item);
+
+
+
+        //add target of current link to children list of source
+        if (item.source.children.indexOf(item.target) < 0)
+            item.source.children.push(item.target);
+
+        //add source of current link to parent list of target
+        if (item.target.parents.indexOf(item.source) < 0)
+            item.target.parents.push(item.source);
+
+
+
+    }
+
+}
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+
+/***/ }),
+/* 25 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony default export */ __webpack_exports__["a"] = (function(node, x0, x1) {
   this.node = node;
   this.x0 = x0;
@@ -79202,7 +79596,7 @@ class EdgeUtil {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -79285,7 +79679,7 @@ function map(object, f) {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -79295,7 +79689,7 @@ function map(object, f) {
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -79311,7 +79705,7 @@ function map(object, f) {
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -79325,7 +79719,7 @@ function map(object, f) {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -79446,7 +79840,7 @@ function sleep(time) {
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -79609,7 +80003,7 @@ Transport.prototype.onClose = function () {
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {// browser shim for xmlhttprequest module
@@ -79653,7 +80047,7 @@ module.exports = function (opts) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports) {
 
 var Point = function(x,y,z){
@@ -79781,7 +80175,7 @@ module.exports = Point;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// This file is deprecated in 1.12.0 to be removed in 1.13
@@ -79812,7 +80206,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// This file i
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -79866,7 +80260,7 @@ return $.ui.keyCode = {
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;( function( factory ) {
@@ -79915,7 +80309,7 @@ return $.ui.safeActiveElement = function( document ) {
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -80150,7 +80544,7 @@ return $.widget( "ui.mouse", {
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -80556,7 +80950,7 @@ function error() {
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
@@ -80587,7 +80981,7 @@ if(false) {
 }
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -80608,12 +81002,12 @@ if(false) {
 
 
 
-//import TWEEN from "@tweenjs/tween.js"
-
 
 class ClusterLeafElement extends THREE.Mesh {
-    constructor(nodes) {
+    constructor(nodes,domEvents) {
         super();
+
+        this.mDomEvents=domEvents
 
 
         this.mNodes = nodes;
@@ -80621,6 +81015,10 @@ class ClusterLeafElement extends THREE.Mesh {
         this.bNodesVisible=true;
         this.bEdgesVisible=true;
         this.mNodeParticles = this.createParticleNodeCloud();
+
+
+        this.addNodeCloudInteractions(this.mNodeParticles)
+
         this.add(this.mNodeParticles.pointCloud);
 
 
@@ -80630,6 +81028,164 @@ class ClusterLeafElement extends THREE.Mesh {
 
         // add the nodes to the leaf
         this.appendNodes(nodes);
+
+
+    }
+
+    addNodeCloudInteractions(pcWrapper)
+    {
+        var that=this
+        //TODO handle node size in here?
+        //TODO all DomEventsAlt.eventNames
+        //current ccs3dclasses are bound to node mesh itself..
+
+
+        //on node click => highlight node and such => add cssclass
+        //? how to forward existing behaviour from nodes to pointcloud?
+
+
+        pcWrapper.pointCloud.raycast= ( function () {
+
+            var inverseMatrix = new THREE.Matrix4();
+            var ray = new THREE.Ray();
+            var sphere = new THREE.Sphere();
+
+            return function raycast( raycaster, intersects ) {
+
+                var object = this;
+                var geometry = this.geometry;
+                var matrixWorld = this.matrixWorld;
+                var threshold = raycaster.params.Points.threshold;
+
+                // Checking boundingSphere distance to ray
+
+                if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
+
+                sphere.copy( geometry.boundingSphere );
+                sphere.applyMatrix4( matrixWorld );
+                sphere.radius += threshold;
+
+                if ( raycaster.ray.intersectsSphere( sphere ) === false ) return;
+
+                //
+
+                inverseMatrix.getInverse( matrixWorld );
+                ray.copy( raycaster.ray ).applyMatrix4( inverseMatrix );
+
+
+                 //param size is threshold in original implementation
+                var that=this;
+                function thresholdFromSize(size)
+                {
+                    var mLocalThreshold = size / ( ( that.scale.x + that.scale.y + that.scale.z ) / 3 );
+                    var mThresholdSq = mLocalThreshold * mLocalThreshold;
+                    return mThresholdSq
+                }
+
+
+                var position = new THREE.Vector3();
+
+                function testPoint( point, index,size=1 ) {
+
+                    var rayPointDistanceSq = ray.distanceSqToPoint( point );
+
+                    if ( rayPointDistanceSq < thresholdFromSize(size) ) {
+
+                        var intersectPoint = ray.closestPointToPoint( point );
+                        intersectPoint.applyMatrix4( matrixWorld );
+
+                        var distance = raycaster.ray.origin.distanceTo( intersectPoint );
+
+                        if ( distance < raycaster.near || distance > raycaster.far ) return;
+
+                        intersects.push( {
+
+                            distance: distance,
+                            distanceToRay: Math.sqrt( rayPointDistanceSq ),
+                            point: intersectPoint.clone(),
+                            index: index,
+                            face: null,
+                            object: object
+
+                        } );
+
+                    }
+
+                }
+
+                if ( geometry.isBufferGeometry ) {
+
+                    var index = geometry.index;
+                    var attributes = geometry.attributes;
+                    var positions = attributes.position.array;
+
+                    var sizes = attributes.size? attributes.size.array:[];
+
+
+                    if ( index !== null ) {
+
+                        var indices = index.array;
+
+                        for ( var i = 0, il = indices.length; i < il; i ++ ) {
+
+                            var a = indices[ i ];
+
+                            position.fromArray( positions, a * 3 );
+
+                            testPoint( position, a,sizes[a] );
+
+                        }
+
+                    } else {
+
+                        for ( var i = 0, l = positions.length / 3; i < l; i ++ ) {
+
+                            position.fromArray( positions, i * 3 );
+
+                            testPoint( position, i,sizes[i] );
+
+                        }
+
+                    }
+
+                } else {
+
+                    var vertices = geometry.vertices;
+
+                    for ( var i = 0, l = vertices.length; i < l; i ++ ) {
+
+                        testPoint( vertices[ i ], i,threshold ); //for non-buffer gemoetries we use the global threshold
+
+                    }
+
+                }
+
+            };
+
+        }() )
+
+
+
+
+
+
+        pcWrapper.on("click dblclick mouseover mousemove",function(e){
+
+           // let index=e.intersect.index
+          this.show()
+          //  this.trigger (e.type, e.intersect, node)
+
+
+        })
+
+        //TODO mouseout this missing
+        pcWrapper.on("mouseout",function(e){
+
+        //    that.mNodeMeshes.remove(this._bubble);
+        //    this.trigger (e.type, e.intersect, this)
+
+        })
+
 
 
     }
@@ -80662,6 +81218,13 @@ class ClusterLeafElement extends THREE.Mesh {
         return this.parent.parent.getView()
 
     }
+
+    getRoot() {
+        //TODO
+        return this.parent.parent.getRoot()
+
+    }
+
 
     setLOD(levelOfDetail) {
         if (this.mNodeParticles && this.parent.useLOD)
@@ -80756,10 +81319,13 @@ class ClusterLeafElement extends THREE.Mesh {
 
 //adding invisible node meshes for domEvents
 // TODO use the point cloud itself for events to prevent potential unnecessary bindings?
-        var that = this.mNodeMeshes;//this;
+
+       var that = this.mNodeMeshes;//this;
         _.each(nodes, function (node) {
-            if (node && node._bubble)
-                that.add(node._bubble)
+
+            node._parent=that  //set a parent element to the placeholder mesh
+           // if (node && node._bubble)
+           //     that.add(node._bubble)
 
 
         })
@@ -80797,11 +81363,11 @@ class ClusterLeafElement extends THREE.Mesh {
         }, function onStep() {
 
 
-            that.updateEdges();
+
 
 
         }, function () {
-
+            that.updateEdges();
 //FIXME init dot particles if (root)cluster is done animating?
             //FIXME update color of particles only for clusters that need an update
             //by adding a timeout the color is yellow again because the event triggered is too early
@@ -80831,6 +81397,12 @@ class ClusterLeafElement extends THREE.Mesh {
     }
 
 
+    getDOMEvents()
+    {
+        return this.mDomEvents
+
+    }
+
     /**
      * creates a structure that contains a point cloud for the nodes for mre effiecient rendering
      *
@@ -80839,11 +81411,13 @@ class ClusterLeafElement extends THREE.Mesh {
 
     createParticleNodeCloud() {
 
+        let domEvents=this.getDOMEvents()
+
         var elem = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__particles_ParticleNodeGroup__["a" /* default */])(this.mNodes, {
             nodeDefaultSize: 10,
             nodeDefaultScale: 10,
             nodeTexture: "img/dot7.png"
-        });
+        },domEvents);
 
 
         return elem
@@ -80923,13 +81497,13 @@ class ClusterLeafElement extends THREE.Mesh {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__deprecated_f0_linkmixin__ = __webpack_require__(101);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__refactor_f0_nodemixin__ = __webpack_require__(95);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_f1__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__refactor_f1__ = __webpack_require__(24);
 /**
  * Created by Frank on 11.06.2017.
  */
@@ -81107,7 +81681,7 @@ class GraphData
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -81315,7 +81889,7 @@ class RootCluster extends __WEBPACK_IMPORTED_MODULE_0__Cluster3DExtended__["a" /
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(0)))
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -81393,14 +81967,14 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
                 return d._id
             })
                 .distance(function computeLinkDistance() {
-                    return scale / 50;
+                    return scale / 5;
 
                 })
                .links(edges)
             )
-            .force('charge', (node) => -scale / 50)
+            .force('charge', (node) => -scale / 5)
             .force('linkStrength', (link) => 1)
-            .force("collide", d3_force.forceCollide(scale/10).iterations(3))
+           // .force("collide", d3_force.forceCollide(scale/10).iterations(1))
             .stop();
 
 
@@ -81459,41 +82033,12 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
             onTick(layout, nodes, edges)
 
-/*
-                if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime >  that.maxConvergeTime) {
-                    layout.alpha(0); //trigger end
-                    layout.stop(); // Stop ticking graph
-                }
-*/
-
         }).on('end', function () {
 
             if (onComplete) onComplete()
 
         })
             //.restart();
-
-   /*     start()
-
-        function start() {
-            var ticksPerRender = 1;
-            requestAnimationFrame(function render() {
-                for (var i = 0; i < ticksPerRender; i++) {
-                    layout.tick();
-                    onTick(layout, nodes, edges)
-                }
-
-
-
-
-
-                if (layout.alpha() > 0) {
-                    requestAnimationFrame(render);
-                }
-            })
-        }
-*/
-
 
 
     }
@@ -81577,7 +82122,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(142), __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -81646,23 +82191,23 @@ class BoxVolume extends  __WEBPACK_IMPORTED_MODULE_0__BaseVolume__["a" /* defaul
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(_, Mousetrap) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_themes_base_autocomplete_css__ = __webpack_require__(223);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_themes_base_autocomplete_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_themes_base_autocomplete_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_themes_base_menu_css__ = __webpack_require__(224);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_themes_base_menu_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_themes_base_menu_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_core__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_core__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_jquery_ui_ui_core__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_autocomplete__ = __webpack_require__(205);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_jquery_ui_ui_widgets_autocomplete__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__ = __webpack_require__(24);
 /**
  * the searchbar for the graph
  *
@@ -81717,7 +82262,7 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
         if (filterResult)
             filterResult.forEach(function (v) {
-                __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["b" /* unhighlightNodeElements */].apply(v)
+                __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["c" /* unhighlightNodeElements */].apply(v)
             })
 
         filterResult = getNodes().filter(function (v) {
@@ -81758,8 +82303,8 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
     }
 
     //
-    function moveToNode(node) {
-        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["c" /* doOnClickNode */])(node, false, function () {
+    /*  function moveToNode(node) {
+        doOnClickNode(node, false, function () {
 
             setTimeout(function () {
 
@@ -81770,7 +82315,7 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
         }, false)
 
-    }
+    }*/
 
     //-----------------
     //un/highlight all results
@@ -81780,12 +82325,12 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
 
         lastResults.forEach(function (v) {
-            __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["b" /* unhighlightNodeElements */].apply(v)
+            __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["c" /* unhighlightNodeElements */].apply(v)
         })
 
 
         mResult.forEach(function (v) {
-            __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["d" /* highlightNodeElements */].apply(v, [true, false])
+            __WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["b" /* highlightNodeElements */].apply(v, [true, false])
         })
 
         lastResults = mResult
@@ -81821,7 +82366,7 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
             searchbar.val(ui.item.name)
 
             //moveToNode(ui.item)
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["c" /* doOnClickNode */])(ui.item, false, function () {
+            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__cluster_refactor_f1__["d" /* doOnClickNode */])(ui.item, false, function () {
             //    globalEnv.updateTextWhenCameraIsMoving2()
                 console.warn("TODO updateTextWhenCameraIsMoving2 ")
             }, false, false, false, true)
@@ -81906,13 +82451,13 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(22)))
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__View3D__ = __webpack_require__(108);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cluster_RootCluster__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cluster_GraphData__ = __webpack_require__(41);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png__ = __webpack_require__(234);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__coordinates_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__coordinates_png__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_hexasphere_js__ = __webpack_require__(192);
@@ -82270,7 +82815,7 @@ customElements.define("graph-view-3d", GraphView3D);
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0)))
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -82741,7 +83286,22 @@ function basicElementExtend(env, obj, _mesh) {
             },
             off: function (eventName, eventhandler) {
                 mDomEvents.removeEventListener(_mesh, eventName, eventhandler, false)
-            }, trigger: function (eventName, intersect, node) {
+            },
+            show:function(){
+                //needs a parent element it is attached to
+                let el=this.get3DRoot()
+                this._parent.add(el)
+
+
+               // el.updateMatrix()
+                el.updateMatrixWorld()
+
+            },
+            hide:function(){
+                //needs a parent element it is attached to
+                this._parent.remove(this.get3DRoot())
+            },
+            trigger: function (eventName, intersect, node) {
 
 
             mDomEvents._notify(eventName, _mesh, node, intersect);
@@ -82755,9 +83315,9 @@ function basicElementExtend(env, obj, _mesh) {
             {
                 let el = this.get3DRoot();
 
-                if (!el || !el.parent) return null;
+                if (!el || !el._parent) return null;
 
-                return el.parent.parent
+                return el._parent.parent
             },
             addClass: function (className) {
 
@@ -82824,386 +83384,6 @@ function basicElementExtend(env, obj, _mesh) {
 }
 
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(0), __webpack_require__(2)))
-
-/***/ }),
-/* 47 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* harmony export (immutable) */ __webpack_exports__["d"] = highlightNodeElements;
-/* harmony export (immutable) */ __webpack_exports__["b"] = unhighlightNodeElements;
-/* harmony export (immutable) */ __webpack_exports__["c"] = doOnClickNode;
-/* harmony export (immutable) */ __webpack_exports__["a"] = extendGraphElements;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f5_arrows__ = __webpack_require__(96);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__SpecificDataUtils__ = __webpack_require__(16);
-/**
- * Created by Frank on 16.07.2017.
- */
-
-/**
- NOTE: set initialEngineTicks to a appropriate value to speed up bigger graphs
-
-
- FIXME put arrows nodemixin and linkmixin into separate classes, curent implementations work but are in no way useable for other developers
-
-
- TODO scale arrow depending on  group link size
- TODO expanding nodes will result in still showing group tooltips
- probably remove group nodes from raycaster or something like that
-
- TODO ?when using hull feature? sometimes nodes cannot be clicked .. probably due to hull back or front preventing events from triggering on nodes
- TODO search filter for hidden nodes.. expand before zoom
-
- */
-
-
-
-
-
-
-
-
-
-//current selected node
-var previousNodeClicked = [];
-var previousNodeDblClicked;
-
-//------------------------------------------------
-//Feature 1
-
-var previousNodes;
-
-
-
-function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) {
-
-
-    //TODO
-    /*if (previousNodes&& previousNodes!=this)
-     {
-     unhighlightNodeElements.apply(previousNodes)
-     previousNodes=this
-
-     }*/
-
-    this.showHighlight();
-
-
-    if (bShowOtherNodes) {
-        for (let childNode of this.children)
-            childNode.showHighlight()
-
-        for (let parentNode of this.parents)
-            parentNode.showHighlight()
-    }
-
-    if (bShowEdgeArrows)
-        for (let edge of this.edges) {
-            var color = edge.source == this ? 0x99ff99 : 0xffb2b2;
-
-
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["a" /* addArrow */])(edge, color)
-        }
-}
-
-function unhighlightNodeElements() {
-
-    this.hideHighlight();
-
-    for (let childNode of this.children)
-        childNode.hideHighlight()
-
-    for (let parentNode of this.parents)
-        parentNode.hideHighlight()
-
-    //console.log("unhighlighting edges:" + (this.edges.length))
-
-  //  for (let edge of this.edges)
-   //     edge.hideHighlight()
-
-    for (let edge of this.edges)
-        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__f5_arrows__["b" /* removeArrow */])(edge)
-
-}
-
-
-function extendElement(elements, attrName, options, env) {
-
-    var mDomEvents = env.domEvents;
-
-    function _TODO(typeName) {
-        return function () {
-            console.warn("implement handler for", typeName);
-            console.log(this, arguments)
-        }
-    }
-
-    var defaults = {
-        mousemove: _TODO("mousemove"),
-        mouseleave: _TODO("mouseleave"),
-        click: _TODO("click"),
-        dblclick: _TODO("dblclick")
-    };
-    options = $.extend(true, {}, defaults, options);
-
-
-    for (let el of elements) {
-
-
-        var mesh = el[attrName];
-
-
-        mDomEvents.addEventListener(mesh, 'click', options.click, false);
-        mDomEvents.addEventListener(mesh, 'dblclick', options.dblclick, false);
-
-        mDomEvents.addEventListener(mesh, 'mouseover', function (e) {
-            options.mousemove.apply(e.target.node || e.target.edge)
-        }, false);
-        mDomEvents.addEventListener(mesh, 'mouseout', function (e) {
-            options.mouseleave.apply(e.target.node || e.target.edge)
-        }, false);
-
-
-        el.showHighlight = function () {
-
-            if (this.isHighlighted) return;
-            this.isHighlighted = true;
-
-            if (attrName == "_bubble" && this["_bubble"] == null) console.error("FIXME ");
-
-            if (this._bubble) {
-                this.addClass("node-highlighted")
-
-            }
-
-
-            if (this.text) {
-                this.text.addClass("node-caption-highlighted")
-            }
-
-
-        };
-
-
-        el.hideHighlight = function () {
-
-
-            if (!this.isHighlighted) return;
-            this.isHighlighted = false;
-
-            if (this._bubble) {
-                this.removeClass("node-highlighted")
-
-            }
-
-
-            if (this.text) {
-                this.text.removeClass("node-caption-highlighted")
-            }
-
-
-        }
-
-    }
-
-}
-
-//TODO
-function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
-
-
-    let view = $(".view-3d[hasFocus]")[0];
-
-    if (!view) view = $(".view-3d.view-3d-maximised").get(0);
-
-    if (!view) console.warn("no view focused to be able to zoom");
-
-
-    let camera = view.mCamera;
-    let controls = view.mControls;
-
-    __WEBPACK_IMPORTED_MODULE_1__utils_ZoomUtil__["a" /* default */].moveToMesh(mesh,camera,controls,minMaxDistance,onEnd)
-
-
-}
-
-
-//helper to being able to handle click events
-//isSelected == false will prevent the actual node selection and only will trigger the zoom+highlight parts
-function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelected = true, doHighlighNeighbours = true, doHighlighEdges = true, doZoomIn = true) {
-
-    if (previousNodeClicked.indexOf(currNodeClicked) < 0)
-    //if (previousNodeClicked!=currNodeClicked)
-    {
-        //node selected
-        highlightNodeElements.apply(currNodeClicked, [doHighlighNeighbours, doHighlighEdges]);
-
-
-        if (doZoomIn)
-            doZoomToMesh(currNodeClicked._bubble, onAnimationEnd);
-
-
-        if (isSelected) {
-
-            currNodeClicked.addClass("basic-selection");
-
-
-            //if (previousNodeClicked)
-            if (!stack)
-                if (previousNodeClicked.length > 0)
-                    for (let p of previousNodeClicked) {
-                        p.removeClass("basic-selection");
-                        unhighlightNodeElements.apply(p)
-                    }
-
-            if (!stack)
-                previousNodeClicked = [currNodeClicked];
-            else
-                previousNodeClicked.push(currNodeClicked)
-
-        }
-
-
-    }
-    else {
-        //GUI.updateNodeInfo(currNodeClicked,false)
-        //node unselected
-        unhighlightNodeElements.apply(currNodeClicked);
-
-        //previousNodeClicked=[]
-        previousNodeClicked.splice(currNodeClicked);
-
-        currNodeClicked.removeClass("basic-selection")
-
-    }
-
-}
-
-/*
-
- as long as node is current selection => mouse enter return mouse leave return
-
- if clicked and not current selection trigger mouse leave on last
-
-
-        mixin additional functionality
- */
-
-function extendGraphElements(d3Nodes, d3Links, env) {
-
-    addGraphHierarchy(d3Nodes, d3Links);
-
-
-    extendElement(d3Nodes, "_bubble", {
-        mousemove: function (e) {
-
-            if (previousNodeClicked.indexOf(this) >= 0)return;
-
-             highlightNodeElements.apply(this, [true, true])
-
-
-        },
-        mouseleave: function () {
-
-            if (previousNodeClicked.indexOf(this) >= 0)return;
-            unhighlightNodeElements.apply(this)
-
-        },
-        click: function (e) {
-            var currNodeClicked = e.target.node;
-            e.stopPropagation();
-
-            if (previousNodeClicked.length > 0 && previousNodeClicked.indexOf(currNodeClicked) < 0)
-                for (let p of previousNodeClicked)
-                    unhighlightNodeElements.apply(p)
-
-            doOnClickNode(currNodeClicked, e.origDomEvent.ctrlKey);
-
-            return false;
-        },
-        dblclick: function (e) {
-            e.stopPropagation();
-            //setCollapsedSateOfChildNodesAndEdgesOfNode(e.target.node)
-            var currNodeDblClicked = e.target.node;
-
-            __WEBPACK_IMPORTED_MODULE_2__SpecificDataUtils__["a" /* GUI */].updateNodeInfo(currNodeDblClicked, currNodeDblClicked != previousNodeDblClicked);
-
-            if (previousNodeDblClicked == currNodeDblClicked)
-                previousNodeDblClicked = null;
-            else
-                previousNodeDblClicked = currNodeDblClicked;
-            //unhighlightNodeElements.apply(e.target.node)
-            return false;
-        }
-    }, env);
-
-
-}
-
-/**
- * build a helper structure for parent child relation
- *
- * this is primarily used for highlighting the src and dst nodes
- *
- */
-
-function addGraphHierarchy(d3Nodes, d3Links) {
-
-    /*
-     node:
-     group:1
-     id:"2"
-     shape:"sphere" | "cube"
-     _bubble: instanceof THREE.Mesh //SphereGeometry
-     _id:"2"
-
-     link:
-     source:"1"
-     target:"3"
-     */
-
-    //prepare nodes
-    for (let node of d3Nodes) {
-
-        if (!node.edges)
-            node.edges = [];
-       if (!node.children)
-            node.children = [];
-        if (!node.parents)
-            node.parents = [];
-
-        node._bubble.node = node
-
-    }
-
-    for (let item of d3Links) {
-
-       // item._line.edge = item;
-
-        //add edge list to nodes
-       if (item.source.edges.indexOf(item) < 0)
-            item.source.edges.push(item);
-        if (item.target.edges.indexOf(item) < 0)
-            item.target.edges.push(item);
-
-
-
-        //add target of current link to children list of source
-        if (item.source.children.indexOf(item.target) < 0)
-            item.source.children.push(item.target);
-
-        //add source of current link to parent list of target
-        if (item.target.parents.indexOf(item.source) < 0)
-            item.target.parents.push(item.source);
-
-
-
-    }
-
-}
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
 
 /***/ }),
 /* 48 */
@@ -83286,6 +83466,8 @@ function DomEventsAlt(camera, domElement,scene)
     this._camera	= camera || null;
     this._domElement= domElement || document;
     this._raycaster = new THREE.Raycaster();
+
+
     this._selected	= null;
     this._boundObjs	= {};
 
@@ -84025,7 +84207,7 @@ module.exports = function(obj, fn){
 /* unused harmony reexport nest */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_set__ = __webpack_require__(138);
 /* unused harmony reexport set */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_map__ = __webpack_require__(26);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_2__src_map__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_keys__ = __webpack_require__(136);
 /* unused harmony reexport keys */
@@ -84259,7 +84441,7 @@ var initialRadius = 10,
  * Module dependencies
  */
 
-var XMLHttpRequest = __webpack_require__(31);
+var XMLHttpRequest = __webpack_require__(32);
 var XHR = __webpack_require__(185);
 var JSONP = __webpack_require__(184);
 var websocket = __webpack_require__(186);
@@ -84319,7 +84501,7 @@ function polling (opts) {
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(30);
+var Transport = __webpack_require__(31);
 var parseqs = __webpack_require__(19);
 var parser = __webpack_require__(13);
 var inherit = __webpack_require__(18);
@@ -84337,7 +84519,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function () {
-  var XMLHttpRequest = __webpack_require__(31);
+  var XMLHttpRequest = __webpack_require__(32);
   var xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -85263,7 +85445,7 @@ module.exports = function parseuri(str) {
 var eio = __webpack_require__(181);
 var Socket = __webpack_require__(66);
 var Emitter = __webpack_require__(11);
-var parser = __webpack_require__(37);
+var parser = __webpack_require__(38);
 var on = __webpack_require__(65);
 var bind = __webpack_require__(51);
 var debug = __webpack_require__(5)('socket.io-client:manager');
@@ -85869,7 +86051,7 @@ function on (obj, ev, fn) {
  * Module dependencies.
  */
 
-var parser = __webpack_require__(37);
+var parser = __webpack_require__(38);
 var Emitter = __webpack_require__(11);
 var toArray = __webpack_require__(227);
 var on = __webpack_require__(65);
@@ -86718,7 +86900,7 @@ class SphericalDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributio
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(43);
+/* WEBPACK VAR INJECTION */(function(THREE) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BoxVolume__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_MaterialFadeMixin__ = __webpack_require__(50);
 /**
  * Created by Frank on 23.06.2017.
@@ -87369,13 +87551,13 @@ class CompanyNewsDS extends __WEBPACK_IMPORTED_MODULE_0__Datasource__["a" /* def
 /* WEBPACK VAR INJECTION */(function(_) {/* harmony export (immutable) */ __webpack_exports__["a"] = getGraphDataSets;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery_ui_themes_base_core_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_jquery_ui_ui_core__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar__ = __webpack_require__(208);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_jquery_ui_ui_widgets_progressbar__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__gui_searchbar__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__gui_searchbar__ = __webpack_require__(45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_qwest__ = __webpack_require__(215);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_qwest___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_qwest__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_papaparse__ = __webpack_require__(212);
@@ -90857,7 +91039,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__css_style_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__css_style_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__ = __webpack_require__(85);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__css_force_graph_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__css_force_graph_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gui_searchbar__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gui_searchbar__ = __webpack_require__(45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__refactor_SpecificDataUtils__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__refactor_AppDataService__ = __webpack_require__(76);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_CombinedCamera__ = __webpack_require__(81);
@@ -90871,17 +91053,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__distributions_BaseDistribution__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__distributions_DefaultDistribution__ = __webpack_require__(72);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__distributions_RandomDistribution__ = __webpack_require__(73);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__ = __webpack_require__(43);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__distributions_SphericalDistribution__ = __webpack_require__(74);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__ClusterNodeArray__ = __webpack_require__(70);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__ClusterLeafElement__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__ClusterLeafElement__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__BaseCluster3D__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__Cluster3DExtended__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__RootCluster__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__GraphData__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__view_GraphView3D__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__RootCluster__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__GraphData__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__view_GraphView3D__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__gui_ModeSelect__ = __webpack_require__(80);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__hull_BoxVolume__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__hull_BoxVolume__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__hull_BaseVolume__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__hull_ConvexVolume__ = __webpack_require__(75);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__utils_ZoomUtil__ = __webpack_require__(21);
@@ -91318,7 +91500,7 @@ class SampleClusterApplication extends HTMLElement {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](80000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let countryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](80000, 3); // countries get placed equally on a plane of size 15k X 15k
         let industryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](15000, 3);// industries within countries use the Force-Graph approach to position elements
         let nodesWithinIndustryDistribution = new __WEBPACK_IMPORTED_MODULE_13__distributions_ForceGraphDistribution__["a" /* default */](1500, 3);//same goes for the nodes within each industry
 
@@ -91847,7 +92029,7 @@ var tween;
 
 var  start_time;
 
-function createTween(duration=1000,easing) {
+function createTween(duration=1000,easing,onComplete=function(){}) {
 
     start_time=Date.now();
 
@@ -91869,6 +92051,7 @@ function createTween(duration=1000,easing) {
 
 		}).onComplete(() => {
     	isRunning=false;
+        onComplete()
     })
 
 
@@ -91917,7 +92100,10 @@ if (!mTime) {
                             isRunning=true;
 							updateDestinations();
 
-                            let tween=createTween(options.duration,options.easing);
+                            let tween=createTween(options.duration,options.easing,function(){
+                                particleSystem.geometry.computeBoundingSphere()
+
+							});
 
 							tween.start()
 
@@ -91965,178 +92151,24 @@ if (!mTime) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony export (immutable) */ __webpack_exports__["a"] = ParticleNodeGroup;
-
-//todo bounding sphere => sprite
-/*
-pc=globalEnv.nodeClouds.container["Germany"].particles.pointCloud
-bs=pc.geometry.boundingSphere;
-var geometry = new THREE.SphereGeometry(1, 50, 50, 0, Math.PI * 2, 0, Math.PI * 2);
-var material = new THREE.MeshNormalMaterial();
-var cube = new THREE.Mesh(geometry, material); globalEnv.scene.add(cube);
-cube.scale.setScalar(bs.radius);cube.position.copy(bs.center)
- */
-
-//onBeforeRender for ppointclouds => opacity: distance bbox,camera
-//onBeforeRender for pointcloudcentermeshes => opacity: distance bbox,camera
-
-//TODO how to hide particles inside of node rendered when further away
-
-
-
-
-
-
-//-------------------------------------
-//helper for text nodes and hull
-function getCenterOfMass(pointCloud) {
-		var positions = pointCloud.geometry.attributes.position
-			var sizes = pointCloud.geometry.attributes.size
-
-			var tx = 0,
-		ty = 0,
-		tz = 0
-			var totalmass = 0; // += n.mass
-		for (let i = 0; i < positions.count; i++) {
-
-			var mSize = sizes.array[i]
-				totalmass += mSize
-				tx += positions.array[i * 3 + 0] * mSize
-				ty += positions.array[i * 3 + 1] * mSize
-				tz += positions.array[i * 3 + 2] * mSize
-		}
-
-		return new THREE.Vector3(tx / totalmass, ty / totalmass, tz / totalmass)
-
-	}
-
-
-//-------------------------------------
-function createCloudCenterSphereForGroupsByID(groupIDsToSet) {
-
-	var allGroupIDs = globalEnv.nodeClouds.groupIdList
-		if (!groupIDsToSet)
-			groupIDsToSet = allGroupIDs
-
-				var container = []
-				for (var gID of groupIDsToSet) {
-
-					var c = globalEnv.nodeClouds.container[gID]
-						if (c && c.particles.pointCloud)
-							container.push(c.particles.pointCloud)
-
-				}
-
-				createCloudCenterSphereForPointClouds(container, function (mMesh) {
-
-					globalEnv.scene.add(cube);
-
-				})
-
-}
-
-function createCloudCenterSphereForPointClouds(pointclouds, nodeCreatedCallback) {
-
-	var env = globalEnv
-
-		//for group /cluster helper
-	function calcOpacity() {
-
-		var mMesh = this
-			//var bs=mMesh.geometry.boundingSphere
-
-			var point1 = new THREE.Vector3;
-		point1.setFromMatrixPosition(env.camera.matrixWorld)
-		var point2 = mMesh.position //bs.center
-
-
-			var distance = point1.distanceTo(point2);
-
-		var opacity
-
-		opacity = distance / (mMesh.scale.x * 10) //bs.radius
-
-			if (opacity > 0.5)
-				opacity = 0.5
-					if (opacity < 0.01)
-						opacity = 0
-
-							//console.log(opacity)
-
-							mMesh.material.opacity = opacity
-
-	}
-	//-------------------------------------
-	//create the helper structure that gets rendered instead of the node cloud if the threshold is to high
-	function createElem(pointCloud) {
-
-		var pc = pointCloud
-			var bs = pc.geometry.boundingSphere;
-		var geometry = new THREE.SphereGeometry(1, 20, 20, 0, Math.PI * 2, 0, Math.PI * 2);
-
-		var material = new THREE.MeshNormalMaterial({
-				transparent: true,
-				opacity: 0.1,
-				side: THREE.BackSide
-			});
-		var cube = new THREE.Mesh(geometry, material);
-		cube.scale.setScalar(bs.radius / 20);
-
-		//cube.position.copy(bs.center)
-
-		var mCenter = getCenterOfMass(pc)
-			cube.position.copy(mCenter)
-
-			//cube.onBeforeRender=calcOpacity
-
-			nodeCreatedCallback(cube)
-
-	}
-
-	
-
-	var delay = 0
-		for (var pc of pointclouds) {
-
-			_.delay(createElem, delay, pc);
-			delay += 10
-
-		}
-
-}
-
-function setVisibleGroups(groupIDsToSet, visState) {
-	var allGroupIDs = globalEnv.nodeClouds.groupIdList
-		if (!groupIDsToSet)
-			groupIDsToSet = allGroupIDs
-
-				for (gID of groupIDsToSet) {
-
-					var pc = globalEnv.nodeClouds.container[gID].particles.pointCloud
-						pc.visible = visState
-
-				}
-
-}
-
+/* WEBPACK VAR INJECTION */(function(_, THREE, $) {/* harmony export (immutable) */ __webpack_exports__["a"] = ParticleNodeGroup;
 /**
- **	use for group of nodes that share some similarities (nCountry <= company)
- *	this approach does not allow for adding removing nodes use multiple ParticleNodeGroups to mimic add/remove/show/hide
+ **    use for group of nodes that share some similarities (nCountry <= company)
+ *    this approach does not allow for adding removing nodes as of yet
  */
- function ParticleNodeGroup(nodes, options) {
+function ParticleNodeGroup(nodes, options,domEvents) {
 
-	options = _.extend({
-			hullMinDistanceVisible: 3 * 1000,
-			nodeMaxDistanceVisible: 3 * 1500, //cross fade options
-			nodeDefaultSize: 10,
-			nodeDefaultScale: 1,
-			nodeTexture: "img/dot7.png",
-			baseColor: 0xFFFFFF,
-			baseOpacity: 1.4
-		}, options)
+    options = _.extend({
 
-	function getParticleShaderMaterial2() {
-		var vertexShader = `
+        nodeDefaultSize: 10,
+        nodeDefaultScale: 1,
+        nodeTexture: "img/dot7.png",
+        baseColor: 0xFFFFFF
+    }, options)
+
+
+    function getParticleShaderMaterial2() {
+        var vertexShader = `
 									
 									attribute float size;
 									attribute vec3 customColor;
@@ -92155,7 +92187,7 @@ function setVisibleGroups(groupIDsToSet, visState) {
 									}
 							`;
 
-		var fragmentShader = `
+        var fragmentShader = `
 									uniform float opacity;
 									uniform vec3 color;
 									uniform sampler2D texture;
@@ -92170,389 +92202,167 @@ function setVisibleGroups(groupIDsToSet, visState) {
 									}
 							`;
 
-		var uniforms = {
+        var uniforms = {
 
-			color: {
-				type: "c",
-				value: new THREE.Color(options.baseColor)
-			},
-			opacity: {
-				type: "f",
-				value: 1.0
-			},
-			texture: {
-				type: "t",
-				value: new THREE.TextureLoader().load(options.nodeTexture)
-			}
+            color: {
+                type: "c",
+                value: new THREE.Color(options.baseColor)
+            },
+            opacity: {
+                type: "f",
+                value: 1.0
+            },
+            texture: {
+                type: "t",
+                value: new THREE.TextureLoader().load(options.nodeTexture)
+            }
 
-		};
+        };
 
-		var shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new THREE.ShaderMaterial({
 
-				uniforms: uniforms,
-				// attributes:     attributes,
-				vertexShader: vertexShader,
-				fragmentShader: fragmentShader,
+            uniforms: uniforms,
+            // attributes:     attributes,
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
 
-				//blending: THREE.AdditiveBlending,
-			 blending: THREE.NormalBlending,
+            //blending: THREE.AdditiveBlending,
+            blending: THREE.NormalBlending,
 
-				depthTest: true,
-				depthWrite: false,
-				transparent: true
-			});
+            depthTest: true,
+            depthWrite: false,
+            transparent: true
+        });
 
-		return shaderMaterial
-	}
+        return shaderMaterial
+    }
 
-	var shaderMaterial = getParticleShaderMaterial2()
+    var shaderMaterial = getParticleShaderMaterial2()
 
-		var nCount = nodes.length
+    var nCount = nodes.length
 
-		var positions = new Float32Array(nCount * 3);
+    var positions = new Float32Array(nCount * 3);
 
-	var values_color = new Float32Array(nCount * 3);
-	var values_size = new Float32Array(nCount);
-	var geometry = new THREE.BufferGeometry();
+    var values_color = new Float32Array(nCount * 3);
+    var values_size = new Float32Array(nCount);
+    var geometry = new THREE.BufferGeometry();
 
-	geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-	geometry.addAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
-	geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
+    geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.addAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
+    geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
 
-	var particleSystem = new THREE.Points(geometry, shaderMaterial);
+    var particleSystem = new THREE.Points(geometry, shaderMaterial);
 
-	//TODO we might be able to remove the meshes and enable the raycasting in here again
+    //TODO we might be able to remove the meshes and enable the raycasting in here again
 
-	//prevent raycasting nodes// this actually does not give the intended effect and we added invisible meshes instead
+    //prevent raycasting nodes// this actually does not give the intended effect and we added invisible meshes instead
     //particleSystem.raycast=function(){}
 
-	//added to be able to retrieve the original node from the point within the raycaster code
-	particleSystem.srcNodes = nodes
-		particleSystem.frustrumCulled = true;
+    //added to be able to retrieve the original node from the point within the raycaster code
+    particleSystem.srcNodes = nodes
+    particleSystem.frustrumCulled = true;
 
-	//for now just have a huge bounding volume //TODO recalc sphere every now and then
-	particleSystem.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
+    //for now just have a huge bounding volume //TODO recalc sphere every now and then
+    particleSystem.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
 
-	for (let i = 0; i < nCount; i++)
-		updateNode(i)
+    for (let i = 0; i < nCount; i++)
+        updateNode(i)
 
-		function updateNode(i) {
-			updateNodePosition(i)
-			updateNodeColor(i)
-			updateNodeSize(i)
+    function updateNode(i) {
+        updateNodePosition(i)
+        updateNodeColor(i)
+        updateNodeSize(i)
 
-		}
+    }
 
-	function updateNodePosition(i) {
-		//updates the current nodes properties
+    function updateNodePosition(i) {
+        //updates the current nodes properties
 
-		var positions = geometry.attributes.position.array;
+        var positions = geometry.attributes.position.array;
 
-		positions[i * 3] = nodes[i].x
-			positions[i * 3 + 1] = nodes[i].y
-			positions[i * 3 + 2] = nodes[i].z
+        positions[i * 3] = nodes[i].x
+        positions[i * 3 + 1] = nodes[i].y
+        positions[i * 3 + 2] = nodes[i].z
 
-			geometry.attributes.position.needsUpdate = true;
+        geometry.attributes.position.needsUpdate = true;
 
-	}
+    }
 
-	function updateNodeColor(i) {
-		var colors = geometry.attributes.customColor.array;
+    function updateNodeColor(i) {
+        var colors = geometry.attributes.customColor.array;
 
-		var color = (typeof nodes[i].color == "number") ? new THREE.Color(nodes[i].color) : new THREE.Color(0xffffff);
+        var color = (typeof nodes[i].color == "number") ? new THREE.Color(nodes[i].color) : new THREE.Color(0xffffff);
 
-		colors[i * 3 + 0] = color.r;
-		colors[i * 3 + 1] = color.g;
-		colors[i * 3 + 2] = color.b;
+        colors[i * 3 + 0] = color.r;
+        colors[i * 3 + 1] = color.g;
+        colors[i * 3 + 2] = color.b;
 
-		geometry.attributes.customColor.needsUpdate = true;
-	}
+        geometry.attributes.customColor.needsUpdate = true;
+    }
 
-	function updateNodeSize(i) {
-		var sizes = geometry.attributes.size.array;
-		if (typeof nodes[i].size == "number")
-			sizes[i] = nodes[i].size * options.nodeDefaultScale;
-		else
-			sizes[i] = options.nodeDefaultSize * options.nodeDefaultScale
+    function updateNodeSize(i) {
+        var sizes = geometry.attributes.size.array;
+        if (typeof nodes[i].size == "number")
+            sizes[i] = nodes[i].size * options.nodeDefaultScale;
+        else
+            sizes[i] = options.nodeDefaultSize * options.nodeDefaultScale
 
-				geometry.attributes.size.needsUpdate = true;
+        geometry.attributes.size.needsUpdate = true;
 
-	}
+    }
 
-	function checkHull(pointCloud, distance, opacity) {
 
-		//FIXME if generated check if the bbox mass center has changed recently
+    return {
+        nodes: nodes,
+        pointCloud: particleSystem,
+        update: function () {
 
+            //update node attrs
+            for (let i = 0; i < nCount; i++)
+                updateNode(i)
 
-		//TODO calc real opacity with cross fade
-		function update(hull) {
+        },
+        updateNode: updateNode,
+        updateNodePosition: updateNodePosition,
+        updateNodeColor: updateNodeColor,
+        updateNodeSize: updateNodeSize,
+        on:  function(eventName, eventhandler) {
 
-			//calcOpacity.apply(hull)
+        for (let eName of eventName.split(" ")) {
 
-			//return
-			var mat = hull.material
-				mat.opacity = (1 - opacity) / 5
+           domEvents.addEventListener(particleSystem, eName,function(e) {
 
-				var newHullVis = hull.material.opacity > 0 //(distance<maxDistance)
-				if (mat.visible && !newHullVis) {
-					console.log("pc hull hidden")
-				}
-				if (!mat.visible && newHullVis) {
-					console.log("pc hull shown")
-				}
-				hull.visible = newHullVis
+               let index=e.intersect.index;
 
-		}
+               let node=  nodes[index];
 
-		//generate a hull on the fly
+               eventhandler.bind(node)(arguments)
 
-		if (distance > options.hullMinDistanceVisible) //partially lazy init	for elements
-		{
-			if (!pointCloud.hasHull) {
-				pointCloud.hasHull = true //prevent  multi async calls
-					createCloudCenterSphereForPointClouds([pointCloud], function (mMesh) {
 
-						globalEnv.scene.add(mMesh);
+           }, false);
 
-						pointCloud.mHull = mMesh
+        }
 
-							update(pointCloud.mHull)
 
-					})
 
-			} else if (pointCloud.mHull)
-				update(pointCloud.mHull)
+    },
+        remove: function () {
 
-		} else
-			if (distance <= options.hullMinDistanceVisible) {
-				if (pointCloud.mHull)
-					update(pointCloud.mHull)
-			}
+            if (particleSystem.geometry)
+                particleSystem.geometry.dispose();
+            if (particleSystem.material)
+                particleSystem.material.dispose();
 
-	}
 
+            if (particleSystem.parent)
+                particleSystem.parent.remove(particleSystem)
 
-	function updateCloudOpacityBasedOnDistance() {
-		//FIXME refactor? and fix opa
+            particleSystem = null
 
-
-		var maxDistance = options.nodeMaxDistanceVisible //opacity==0 visible == false
-			var env = globalEnv //TODO
-
-
-			if (!particleSystem.geometry.boundingSphere)
-				return 1
-
-				var point1 = env.camera.position
-					var point2 = particleSystem.geometry.boundingSphere.center //TODO getCenterOfMass .. would be better but is generated to often
-
-
-					var distance = point1.distanceTo(point2);
-
-			//set opacity based on distance
-			mat = particleSystem.material;
-
-		var newVis = (distance < maxDistance)
-
-		//if (mat.visible && !newVis) {  console.log("pc hidden")	}
-		//if (!mat.visible && newVis){   console.log("pc shown")}
-
-		var newOpacity = 1.0 - (distance / maxDistance)
-
-			if (newOpacity < 0)
-				newOpacity = 0.0
-					if (newOpacity > 1)
-						newOpacity = 1.0
-
-							//mat.visible=newVis
-							//mat.uniforms.opacity.value=newOpacity
-
-
-							//TODO apply if other things are working .. wee need the dots for now to  be able to see proper placement
-							//besides that its working as intended
-
-
-							mat.uniforms.opacity.value = options.baseOpacity
-							mat.visible = true
-
-							//return  	newOpacity//
-							//checkHull(particleSystem,distance,newOpacity)
-
-							return newOpacity
-
-	}
-
-	return {
-		nodes: nodes,
-		pointCloud: particleSystem,
-		updateCrossFade: updateCloudOpacityBasedOnDistance,
-		update: function () {
-
-			//update node attrs
-			for (let i = 0; i < nCount; i++)
-				updateNode(i)
-
-		},
-		updateNode: updateNode,
-		updateNodePosition: updateNodePosition,
-		updateNodeColor: updateNodeColor,
-		updateNodeSize: updateNodeSize,
-		on: function () {
-			console.log("TODO implement click/hover etc")
-
-		},
-		remove: function () {
-
-			if (particleSystem.geometry)
-				particleSystem.geometry.dispose();
-			if (particleSystem.material)
-				particleSystem.material.dispose();
-
-
-
-			if (particleSystem.parent)
-				particleSystem.parent.remove(particleSystem)
-
-            particleSystem=null
-
-		}
-	}
+        }
+    }
 
 }
-
-/**
- *
- * primary function to create separate groups of particle systems by using the "group" attribute of a node
- *
- * this is the default implementation, it will be replaced by the NoeContainer which can have several sub clusters defined instead of only using the group attribute
- *
- */
-
-function createParticleSystemsByGroupAttr(allNodes, options) {
-
-	options = _.extend({
-			minGroupSize: 40
-		}, options)
-
-		var groupContainer = {}
-	var groupIDs = allNodes.map((v) => v.group);
-	groupIDs = _.uniq(groupIDs)
-
-		for (var id of groupIDs) {
-			var nodes = allNodes.filter((v) => v.group == id) //globalNodes
-
-				var elem = ParticleNodeGroup(nodes, {
-					nodeDefaultSize: 10,
-					nodeDefaultScale: 10,
-					nodeTexture: "img/dot7.png"
-				})
-
-				groupContainer["" + id] = {
-				nodes: nodes,
-				particles: elem,
-				id: id
-			}
-
-		}
-
-	function update() {
-
-		_.each(groupContainer, function (el) {
-			el.particles.update()
-		})
-
-	}
-
-	function updateCrossFade() {
-		console.warn("deprecated")
-		return;
-		_.each(groupContainer, function (el) {
-			el.particles.updateCrossFade()
-		})
-
-	}
-
-	function attachTo(object3d) {
-
-		for (id of groupIDs) {
-
-			object3d.add(groupContainer[id].particles.pointCloud)
-
-		}
-
-	}
-
-	function detach() {
-
-		for (id of groupIDs) {
-			var pc = groupContainer[id].particles.pointCloud
-				if (pc.parent)
-					pc.parent.remove(pc)
-
-		}
-
-	}
-
-	function updateBoundingSpheres() {
-
-		for (id of groupIDs) {
-			//var pc = groupContainer[id].particles.pointCloud.geometry.computeBoundingSphere()
-		var pc = groupContainer[id].particles.pointCloud;
-		
-		var centerPos=getCenterOfMass(pc)
-		
-		pc.geometry.computeBoundingSphere()
-		pc.geometry.boundingSphere.center.copy(centerPos)	
-		
-		
-		}
-
-	}
-
-	return {
-		container: groupContainer,
-		groupIdList: groupIDs,
-		update,
-		updateCrossFade,
-		attachTo,
-		detach,
-		updateBoundingSpheres
-	}
-
-}
-
-/*
-//test stuff a little bit
-function demo(){
-
-globalNodes.forEach( function(v) { v.size=_.random(1,20); v.color=_.random(50,255)*_.random(50,255)*_.random(50,255) })
-
-
-var groupParticleSystems=createParticleSystemsByGroupAttr(globalNodes)
-
-
-var group=new THREE.Group
-group.position.x+=100
-globalEnv.scene.add(group)
-groupParticleSystems.attachTo(group)
-
-
-
-setInterval( function(){
-
-
-var n=globalNodes[_.random(0,globalNodes.length-1)]
-
-n.color=_.random(50,255)*_.random(50,255)*_.random(50,255)
-
-groupParticleSystems.update()
-
-},100)
-
-
-
-}
- */
 
 
 /**
@@ -92560,6 +92370,8 @@ groupParticleSystems.update()
  * this is a custom implementation for the raytracer of the point cloud
  * NOTE: currently it is not used because the nodes are handled partially as empty meshes
  * so the default threex.domEvents library can be used instead of the current work around
+ *
+ * @deprecated
  *
  * @param pointclouds
  * @param camera
@@ -92569,77 +92381,82 @@ groupParticleSystems.update()
 
 function createParticleNodeGroupIntersectionHelper(pointclouds, camera) {
 
-	if (!pointclouds)
-		throw new Error("needs THREE.Points array")
-		if (!camera)
-			throw new Error("needs THREE.Camera object")
+    if (!pointclouds)
+        throw new Error("needs THREE.Points array")
+    if (!camera)
+        throw new Error("needs THREE.Camera object")
 
-			var mouse = new THREE.Vector2();
-	function onDocumentMouseMove(event) {
-		event.preventDefault();
-		mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-		mouse.y =  - (event.clientY / window.innerHeight) * 2 + 1;
-	}
-	document.addEventListener('mousemove', onDocumentMouseMove, false);
+    var mouse = new THREE.Vector2();
 
-	var lastClick = 0;
-	function onDocumentMouseClick() {
+    function onDocumentMouseMove(event) {
+        event.preventDefault();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
 
-		lastClick = Date.now()
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
 
-	}
-	document.addEventListener('click', onDocumentMouseClick, false);
+    var lastClick = 0;
 
-	var lastDblClick = 0;
-	function onDocumentMouseDblClick() {
+    function onDocumentMouseClick() {
 
-		lastDblClick = Date.now()
+        lastClick = Date.now()
 
-	}
-	document.addEventListener('click', onDocumentMouseDblClick, false);
+    }
 
-	//-----------------------------
-	var threshold = 20;
+    document.addEventListener('click', onDocumentMouseClick, false);
 
-	var raycaster = new THREE.Raycaster();
-	raycaster.params.Points.threshold = threshold;
+    var lastDblClick = 0;
 
-	var eventList = $({})
-		var lastIntersectedNode;
+    function onDocumentMouseDblClick() {
 
-	function raycast() {
-		raycaster.setFromCamera(mouse, camera);
-		var intersections = raycaster.intersectObjects(pointclouds);
-		var intersection = (intersections.length) > 0 ? intersections[0] : null;
-		if (intersection !== null) {
+        lastDblClick = Date.now()
 
-			var intersectedNode = intersection.object.srcNodes[intersection.index]
+    }
 
-				eventList.trigger("mouseover", [intersection, intersectedNode, intersections])
+    document.addEventListener('click', onDocumentMouseDblClick, false);
 
-				if (lastIntersectedNode && lastIntersectedNode != intersectedNode)
-					eventList.trigger("mouseout", [intersection, lastIntersectedNode, intersections])
+    //-----------------------------
+    var threshold = 20;
 
-					if (Date.now() - lastClick < 50)
-						eventList.trigger("click", [intersection, intersectedNode, intersections])
+    var raycaster = new THREE.Raycaster();
+    raycaster.params.Points.threshold = threshold;
 
-						if (Date.now() - lastDblClick < 50)
-							eventList.trigger("dblclick", [intersection, intersectedNode, intersections])
+    var eventList = $({})
+    var lastIntersectedNode;
 
-							lastIntersectedNode = intersectedNode
-		} else
-			if (lastIntersectedNode)
-				eventList.trigger("mouseout", [intersection, lastIntersectedNode, intersections])
+    function raycast() {
+        raycaster.setFromCamera(mouse, camera);
+        var intersections = raycaster.intersectObjects(pointclouds);
+        var intersection = (intersections.length) > 0 ? intersections[0] : null;
+        if (intersection !== null) {
 
-	}
+            var intersectedNode = intersection.object.srcNodes[intersection.index]
 
-	return {
-		raycast,
-		on: eventList.on.bind(eventList)
-	}
+            eventList.trigger("mouseover", [intersection, intersectedNode, intersections])
+
+            if (lastIntersectedNode && lastIntersectedNode != intersectedNode)
+                eventList.trigger("mouseout", [intersection, lastIntersectedNode, intersections])
+
+            if (Date.now() - lastClick < 50)
+                eventList.trigger("click", [intersection, intersectedNode, intersections])
+
+            if (Date.now() - lastDblClick < 50)
+                eventList.trigger("dblclick", [intersection, intersectedNode, intersections])
+
+            lastIntersectedNode = intersectedNode
+        } else if (lastIntersectedNode)
+            eventList.trigger("mouseout", [intersection, lastIntersectedNode, intersections])
+
+    }
+
+    return {
+        raycast,
+        on: eventList.on.bind(eventList)
+    }
 }
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(2), __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(1), __webpack_require__(0)))
 
 /***/ }),
 /* 94 */
@@ -92701,10 +92518,14 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(THREE, _, $) {/* harmony export (immutable) */ __webpack_exports__["a"] = nodeMixin;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__f0_basic_element_3d_classes__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__f1__ = __webpack_require__(24);
 /**
  * Created by Frank on 16.07.2017.
  */
+
+
+
 
 
 
@@ -92720,11 +92541,12 @@ var singleNodeMaterial = new THREE.MeshBasicMaterial({
 
 function nodeMixin(env, node) {
 
+ if (!node)
+     console.warn("fu")
+    if (node._mixin_)
+        return node
 
-    if (node._mixin_) {
-        console.warn("try to not initialise nodes again for small performance increase")
-        return;
-    }
+
     node._mixin = true;
 
 
@@ -92739,7 +92561,6 @@ function nodeMixin(env, node) {
     //the single material is only for the node counting. so it should be irrelevant for rendering itself
     node._bubble = new THREE.Mesh(sphereGeometry, singleNodeMaterial);
 
-
     var mMesh = node._bubble;
 
 
@@ -92753,7 +92574,7 @@ function nodeMixin(env, node) {
 
     var self = _.extend(node, {
         highlight: function () {
-            highlightNodeElements.apply(this)
+            __WEBPACK_IMPORTED_MODULE_1__f1__["b" /* highlightNodeElements */].apply(this)
         },
         unhighlight: function () {
             unhighlightNodeElements.apply(this)
@@ -92924,11 +92745,13 @@ function addArrow(d3LinkObj, color, options) {
     //lineMesh.parent.add(arrowHelper);
 
 
-    var scene = _findSceneForMesh(d3LinkObj.source._bubble);
+    var scene = _findSceneForMesh(d3LinkObj.source.get3DRoot());
+
+    if (!scene)   scene = _findSceneForMesh(d3LinkObj.target.get3DRoot());
 
     if (!scene) {
-        console.warn("no scene found");
-        debugger;
+        console.warn("no scene found arrows can't be created");
+      //  debugger;
     }
     else
         scene.add(arrowHelper);
@@ -92962,7 +92785,7 @@ function removeArrow(d3LinkObj) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($, THREE, _) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__ = __webpack_require__(98);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__view_GraphView3D__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__ = __webpack_require__(20);
 /**
  * Created by Frank on 12.07.2017.
@@ -93778,7 +93601,7 @@ class Datasource
 
 "use strict";
 /* unused harmony export default */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cluster_refactor_f0_basic_element_3d_classes__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cluster_refactor_f0_basic_element_3d_classes__ = __webpack_require__(47);
 /**
  * Created by Frank on 16.07.2017.
  */
@@ -95605,7 +95428,7 @@ class View3D extends HTMLElement {
 
         function doAnimate(time) {
             that.mTime = time;
-            console.log("doAnimate",time)
+           // console.log("doAnimate",time)
             //that.mControls.update();
             initialFrames--;
             if (that.mFPS == 0) {
@@ -95650,7 +95473,7 @@ class View3D extends HTMLElement {
 
             $(that).trigger("before-render", time);
 
-            console.log("render",time)
+         //   console.log("render",time)
             that.mRenderer.render(that.mScene, that.mCamera);
 
             $(that).trigger("after-render", time);
@@ -97442,7 +97265,7 @@ treeProto.x = __WEBPACK_IMPORTED_MODULE_10__x__["b" /* default */];
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(25);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, radius) {
@@ -97596,7 +97419,7 @@ function removeAll(data) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(25);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -97618,7 +97441,7 @@ function removeAll(data) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__half__ = __webpack_require__(25);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -97684,7 +97507,7 @@ function defaultX(d) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(26);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function() {
@@ -97765,7 +97588,7 @@ function setMap(map, key, value) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__map__ = __webpack_require__(26);
 
 
 function Set() {}
@@ -98009,7 +97832,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_binarytree__ = __webpack_require__(52);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_quadtree__ = __webpack_require__(56);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_octree__ = __webpack_require__(55);
@@ -98151,7 +97974,7 @@ function z(d) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_collection__ = __webpack_require__(53);
 
 
@@ -98284,7 +98107,7 @@ function find(nodeById, nodeId) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__jiggle__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_binarytree__ = __webpack_require__(52);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_quadtree__ = __webpack_require__(56);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_octree__ = __webpack_require__(55);
@@ -98803,7 +98626,7 @@ function addAll(data) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(28);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, y, z, radius) {
@@ -99092,7 +98915,7 @@ function removeAll(data) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(28);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -99120,7 +98943,7 @@ function removeAll(data) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__octant__ = __webpack_require__(28);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -99382,7 +99205,7 @@ function addAll(data) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(29);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(x, y, radius) {
@@ -99647,7 +99470,7 @@ function removeAll(data) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(29);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -99671,7 +99494,7 @@ function removeAll(data) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__quad__ = __webpack_require__(29);
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function(callback) {
@@ -99730,7 +99553,7 @@ function defaultY(d) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_timer__ = __webpack_require__(30);
 /* unused harmony reexport now */
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__src_timer__["a"]; });
 /* unused harmony reexport timerFlush */
@@ -99750,7 +99573,7 @@ function defaultY(d) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(30);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function(callback, delay, time) {
@@ -99771,7 +99594,7 @@ function defaultY(d) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__timer__ = __webpack_require__(30);
 
 
 /* unused harmony default export */ var _unused_webpack_default_export = (function(callback, delay, time) {
@@ -100165,7 +99988,7 @@ Socket.protocol = parser.protocol; // this is an int
  */
 
 Socket.Socket = Socket;
-Socket.Transport = __webpack_require__(30);
+Socket.Transport = __webpack_require__(31);
 Socket.transports = __webpack_require__(57);
 Socket.parser = __webpack_require__(13);
 
@@ -101014,7 +100837,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
  * Module requirements.
  */
 
-var XMLHttpRequest = __webpack_require__(31);
+var XMLHttpRequest = __webpack_require__(32);
 var Polling = __webpack_require__(58);
 var Emitter = __webpack_require__(11);
 var inherit = __webpack_require__(18);
@@ -101434,7 +101257,7 @@ function unloadHandler () {
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(30);
+var Transport = __webpack_require__(31);
 var parser = __webpack_require__(13);
 var parseqs = __webpack_require__(19);
 var inherit = __webpack_require__(18);
@@ -102043,7 +101866,7 @@ try {
 /* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Point = __webpack_require__(32);
+var Point = __webpack_require__(33);
 
 var _faceCount = 0;
 
@@ -102126,7 +101949,7 @@ module.exports = Face;
 
 var Tile = __webpack_require__(193),
     Face = __webpack_require__(191),
-    Point = __webpack_require__(32);
+    Point = __webpack_require__(33);
 
 var Hexasphere = function(radius, numDivisions, hexSize){
 
@@ -102294,7 +102117,7 @@ module.exports = Hexasphere;
 /* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Point = __webpack_require__(32);
+var Point = __webpack_require__(33);
 
 function vector(p1, p2){
     return {
@@ -102811,9 +102634,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
 			__webpack_require__(207),
-			__webpack_require__(34),
-			__webpack_require__(62),
 			__webpack_require__(35),
+			__webpack_require__(62),
+			__webpack_require__(36),
 			__webpack_require__(3),
 			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
@@ -103499,10 +103322,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(36),
+			__webpack_require__(37),
 			__webpack_require__(199),
 			__webpack_require__(61),
-			__webpack_require__(35),
+			__webpack_require__(36),
 			__webpack_require__(202),
 			__webpack_require__(203),
 			__webpack_require__(3),
@@ -104760,9 +104583,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(34),
-			__webpack_require__(62),
 			__webpack_require__(35),
+			__webpack_require__(62),
+			__webpack_require__(36),
 			__webpack_require__(204),
 			__webpack_require__(3),
 			__webpack_require__(9)
@@ -105629,7 +105452,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(36),
+			__webpack_require__(37),
 			__webpack_require__(200),
 			__webpack_require__(61),
 			__webpack_require__(3),
@@ -106839,8 +106662,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 		// AMD. Register as an anonymous module.
 		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 			__webpack_require__(0),
-			__webpack_require__(36),
-			__webpack_require__(34),
+			__webpack_require__(37),
+			__webpack_require__(35),
 			__webpack_require__(3),
 			__webpack_require__(9)
 		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
@@ -110196,7 +110019,7 @@ module.exports = function() {
  */
 
 var url = __webpack_require__(218);
-var parser = __webpack_require__(37);
+var parser = __webpack_require__(38);
 var Manager = __webpack_require__(64);
 var debug = __webpack_require__(5)('socket.io-client');
 

@@ -74,6 +74,8 @@ function DomEventsAlt(camera, domElement,scene)
     this._camera	= camera || null;
     this._domElement= domElement || document;
     this._raycaster = new THREE.Raycaster();
+
+
     this._selected	= null;
     this._boundObjs	= {};
 

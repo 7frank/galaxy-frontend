@@ -104,11 +104,13 @@ function addArrow(d3LinkObj, color, options) {
     //lineMesh.parent.add(arrowHelper);
 
 
-    var scene = _findSceneForMesh(d3LinkObj.source._bubble);
+    var scene = _findSceneForMesh(d3LinkObj.source.get3DRoot());
+
+    if (!scene)   scene = _findSceneForMesh(d3LinkObj.target.get3DRoot());
 
     if (!scene) {
-        console.warn("no scene found");
-        debugger;
+        console.warn("no scene found arrows can't be created");
+      //  debugger;
     }
     else
         scene.add(arrowHelper);

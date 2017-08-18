@@ -43,7 +43,7 @@ class View3D extends HTMLElement {
 
     initCamera() {
 
-        var initialCameraPosition= new THREE.Vector3(-5500,-4000, 60000);
+        var initialCameraPosition= new THREE.Vector3(-5500,-4000, 50000);
 
 
         // Setup camera
@@ -347,19 +347,23 @@ class View3D extends HTMLElement {
     // Kick-off renderer
     animate() {
 
-        var initialFrames = 1;
+        if (this._a) return
+        this._a=true;
+
+        console.log("animate")
+        var initialFrames = 0;
         var that = this;
         var accTime = 0, accFrames = 0;
 
-        function animate(time) {
+        function doAnimate(time) {
             that.mTime = time;
-
-            that.mControls.update();
+           // console.log("doAnimate",time)
+            //that.mControls.update();
             initialFrames--;
             if (that.mFPS == 0) {
 
                 if (initialFrames < 0) {
-                    that.mFrameId = requestAnimationFrame(animate);
+                    that.mFrameId = requestAnimationFrame(doAnimate);
                     return;
                 }
             }
@@ -368,7 +372,7 @@ class View3D extends HTMLElement {
                 let nextTime = that.mLastFrameTime + (1000 / that.mFPS);
                 if (nextTime > time) {
 
-                    that.mFrameId = requestAnimationFrame(animate);
+                    that.mFrameId = requestAnimationFrame(doAnimate);
                     return;
                 }
             }
@@ -393,20 +397,20 @@ class View3D extends HTMLElement {
 
             that.mLastFrameTime = time;
 
-           // that.mControls.update();
+            that.mControls.update();
 
 
             $(that).trigger("before-render", time);
-            // $(that).trigger("animate")
 
+         //   console.log("render",time)
             that.mRenderer.render(that.mScene, that.mCamera);
 
             $(that).trigger("after-render", time);
 
-            that.mFrameId = requestAnimationFrame(animate);
+            that.mFrameId = requestAnimationFrame(doAnimate);
         }
 
-        animate(-1)
+        doAnimate(-1)
 
     }
 
@@ -471,7 +475,7 @@ class View3D extends HTMLElement {
     }
 
     stop() {
-        window.cancelAnimationFrame(this.mFrameId)
+      //  window.cancelAnimationFrame(this.mFrameId)
     }
 
     resume() {

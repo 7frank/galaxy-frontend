@@ -93,7 +93,7 @@ $(function () {
     }
 
     //
-    function moveToNode(node) {
+    /*  function moveToNode(node) {
         doOnClickNode(node, false, function () {
 
             setTimeout(function () {
@@ -105,7 +105,7 @@ $(function () {
 
         }, false)
 
-    }
+    }*/
 
     //-----------------
     //un/highlight all results

@@ -456,7 +456,22 @@ function basicElementExtend(env, obj, _mesh) {
             },
             off: function (eventName, eventhandler) {
                 mDomEvents.removeEventListener(_mesh, eventName, eventhandler, false)
-            }, trigger: function (eventName, intersect, node) {
+            },
+            show:function(){
+                //needs a parent element it is attached to
+                let el=this.get3DRoot()
+                this._parent.add(el)
+
+
+               // el.updateMatrix()
+                el.updateMatrixWorld()
+
+            },
+            hide:function(){
+                //needs a parent element it is attached to
+                this._parent.remove(this.get3DRoot())
+            },
+            trigger: function (eventName, intersect, node) {
 
 
             mDomEvents._notify(eventName, _mesh, node, intersect);
@@ -470,9 +485,9 @@ function basicElementExtend(env, obj, _mesh) {
             {
                 let el = this.get3DRoot();
 
-                if (!el || !el.parent) return null;
+                if (!el || !el._parent) return null;
 
-                return el.parent.parent
+                return el._parent.parent
             },
             addClass: function (className) {
 

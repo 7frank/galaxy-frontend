@@ -957,7 +957,7 @@ zoom in out controls
 \end_layout
 
 \begin_layout Itemize
-color scheme white color options
+color scheme white color options?
 \end_layout
 
 \begin_layout Itemize
@@ -1400,6 +1400,82 @@ projectObject
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+extend three.points
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+replace raycast in three.points with one that has variable node size
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+instead of having meshes for each node have a nodes-highlight-helper that
+ creates a temporary mesh with highlighted nodes and edges
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+for blinking nodes probably have a similar approack
+\end_layout
+
+\begin_layout Itemize
+have a before render to update mesh positions with point cloud
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+[----]for now try the simple approach to just hide/show node mesh group
+ for leaf on hover and raycast nothing at all --- that will be shit when
+ blink is enabled
+\end_layout
+
+\begin_layout Itemize
+we want a global overlay container!! that manages visibility of nodes
+\end_layout
+
+\begin_layout Itemize
+Container(allnodes) show(partialNodes)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+textnodes per leaf will now be invaild due to missing meshes
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+also mouse over is bugged now
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
 something is wrong with the cluster edges
@@ -1431,11 +1507,15 @@ clusters even if empty
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 doAnimate seems to get called more than once per frame?
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 \begin_inset Note Note
 status open
 
@@ -1450,6 +1530,8 @@ TODO refactor View3D:animate start stop
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 partially fixing View3D::animate resolves some of the issues
 \end_layout
 

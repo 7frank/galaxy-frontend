@@ -120,6 +120,8 @@ export default class BaseCluster3D extends BaseNode {
 
 
 
+
+
     }
 
 
@@ -1105,6 +1107,11 @@ lineMaterial=this.createShaderLineMaterial();
 
 
         this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
+
+
+        //TODO check if this might be holpful to put edges behind nodes
+       // this.mChildClustersEdgesMesh.layers.set(1)
+
         this.mChildClustersEdgesMesh.geometry.boundingBox = new THREE.Box3;
         this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
 
@@ -1410,7 +1417,10 @@ lineMaterial=this.createShaderLineMaterial();
     createParticlePointCloud(entry) {
         // console.log("reached leaf cluster", this)
         var that = this;
-        let leaf = new ClusterLeafElement(this.mNodes);
+
+       let domEvents= this.getDOMEvents()
+
+        let leaf = new ClusterLeafElement(this.mNodes,domEvents);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
         leaf.setDistributionHandler(entry.distribution, function () {

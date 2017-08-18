@@ -129,6 +129,7 @@ function extendElement(elements, attrName, options, env) {
 
 
         el.showHighlight = function () {
+            el.show()
 
             if (this.isHighlighted) return;
             this.isHighlighted = true;
@@ -151,7 +152,7 @@ function extendElement(elements, attrName, options, env) {
 
         el.hideHighlight = function () {
 
-
+        el.hide()
             if (!this.isHighlighted) return;
             this.isHighlighted = false;
 
@@ -202,6 +203,9 @@ function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelecte
     {
         //node selected
         highlightNodeElements.apply(currNodeClicked, [doHighlighNeighbours, doHighlighEdges]);
+
+        currNodeClicked.show()//make sure
+
 
 
         if (doZoomIn)

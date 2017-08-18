@@ -247,7 +247,7 @@ var tween;
 
 var  start_time;
 
-function createTween(duration=1000,easing) {
+function createTween(duration=1000,easing,onComplete=function(){}) {
 
     start_time=Date.now();
 
@@ -269,6 +269,7 @@ function createTween(duration=1000,easing) {
 
 		}).onComplete(() => {
     	isRunning=false;
+        onComplete()
     })
 
 
@@ -317,7 +318,10 @@ if (!mTime) {
                             isRunning=true;
 							updateDestinations();
 
-                            let tween=createTween(options.duration,options.easing);
+                            let tween=createTween(options.duration,options.easing,function(){
+                                particleSystem.geometry.computeBoundingSphere()
+
+							});
 
 							tween.start()
 
