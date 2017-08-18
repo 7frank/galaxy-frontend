@@ -82,7 +82,7 @@ class ForceGraphDistribution extends BaseDistribution {
 
         //enable collision only for clusters not for leafs to improve performance
         if (nodes.length>0&& nodes[0]._el&& nodes[0]._el instanceof BaseCluster3D)
-        layout.force("collide", d3_force.forceCollide(scale/10).iterations(1))
+        layout.force("collide", d3_force.forceCollide(scale/5).iterations(2))
 
 
 

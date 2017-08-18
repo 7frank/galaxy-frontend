@@ -32,6 +32,7 @@ class ClusterTextOverlay extends HTMLElement {
 
         this.possibleClusters = [];
         this.possibleLeafClusters = [];
+        this.selectedLeafCluster= null;
 
         this.enabled=true;
 
@@ -193,6 +194,8 @@ class ClusterTextOverlay extends HTMLElement {
 
         function getNodesForLeaf() {
             //return only the closest cluster
+            that.selectedLeafCluster=null
+
             if (!that.possibleLeafClusters) return [];
 
             // get closest leaf only
@@ -210,6 +213,8 @@ class ClusterTextOverlay extends HTMLElement {
             if (!res[0] ||!res[0] .item) return [];
 
             let leaf1 =res[0].item;
+            that.selectedLeafCluster=leaf1;
+
             return leaf1.mNodes ? leaf1.mNodes : []
 
 
@@ -220,6 +225,12 @@ class ClusterTextOverlay extends HTMLElement {
         if (!this.tn)
             this.tn = TextNodesFactory(env, {
                 maxVisibleCount: 10,
+                maxDistance: function (node) {
+
+                  if (!that.selectedLeafCluster) return 0;
+
+                    return that.selectedLeafCluster.getRadius()
+                },
                 onNodeText: (node) => node.name ? node.name : node.id,
                 getNodes:function(){
                     let nodes=getNodesForLeaf();

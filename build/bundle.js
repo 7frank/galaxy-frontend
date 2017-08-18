@@ -81979,7 +81979,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
 
         //enable collision only for clusters not for leafs to improve performance
         if (nodes.length>0&& nodes[0]._el&& nodes[0]._el instanceof __WEBPACK_IMPORTED_MODULE_2__BaseCluster3D__["a" /* default */])
-        layout.force("collide", d3_force.forceCollide(scale/10).iterations(1))
+        layout.force("collide", d3_force.forceCollide(scale/5).iterations(2))
 
 
 
@@ -92845,6 +92845,7 @@ class ClusterTextOverlay extends HTMLElement {
 
         this.possibleClusters = [];
         this.possibleLeafClusters = [];
+        this.selectedLeafCluster= null;
 
         this.enabled=true;
 
@@ -93006,6 +93007,8 @@ class ClusterTextOverlay extends HTMLElement {
 
         function getNodesForLeaf() {
             //return only the closest cluster
+            that.selectedLeafCluster=null
+
             if (!that.possibleLeafClusters) return [];
 
             // get closest leaf only
@@ -93023,6 +93026,8 @@ class ClusterTextOverlay extends HTMLElement {
             if (!res[0] ||!res[0] .item) return [];
 
             let leaf1 =res[0].item;
+            that.selectedLeafCluster=leaf1;
+
             return leaf1.mNodes ? leaf1.mNodes : []
 
 
@@ -93033,6 +93038,12 @@ class ClusterTextOverlay extends HTMLElement {
         if (!this.tn)
             this.tn = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__["a" /* default */])(env, {
                 maxVisibleCount: 10,
+                maxDistance: function (node) {
+
+                  if (!that.selectedLeafCluster) return 0;
+
+                    return that.selectedLeafCluster.getRadius()
+                },
                 onNodeText: (node) => node.name ? node.name : node.id,
                 getNodes:function(){
                     let nodes=getNodesForLeaf();
