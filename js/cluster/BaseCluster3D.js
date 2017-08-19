@@ -840,7 +840,7 @@ var that=this
                 that.updateChildClusterEdgeMeshWithHull();
 
                 that.trigger("hull-updated");
-            }, 50, {trailing: true, leading: false}))  //if leading is true it won't build up the hulls in a progressive manner
+            }, 50/*, {trailing: true, leading: false}*/))  //if leading is true it won't build up the hulls in a progressive manner
         });
 
 

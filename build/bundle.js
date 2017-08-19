@@ -74034,7 +74034,7 @@ var that=this
                 that.updateChildClusterEdgeMeshWithHull();
 
                 that.trigger("hull-updated");
-            }, 50, {trailing: true, leading: false}))  //if leading is true it won't build up the hulls in a progressive manner
+            }, 50/*, {trailing: true, leading: false}*/))  //if leading is true it won't build up the hulls in a progressive manner
         });
 
 
@@ -81004,16 +81004,16 @@ if(false) {
 
 
 class ClusterLeafElement extends THREE.Mesh {
-    constructor(nodes,domEvents) {
+    constructor(nodes, domEvents) {
         super();
 
-        this.mDomEvents=domEvents
+        this.mDomEvents = domEvents
 
 
         this.mNodes = nodes;
 
-        this.bNodesVisible=true;
-        this.bEdgesVisible=true;
+        this.bNodesVisible = true;
+        this.bEdgesVisible = true;
         this.mNodeParticles = this.createParticleNodeCloud();
 
 
@@ -81032,9 +81032,8 @@ class ClusterLeafElement extends THREE.Mesh {
 
     }
 
-    addNodeCloudInteractions(pcWrapper)
-    {
-        var that=this
+    addNodeCloudInteractions(pcWrapper) {
+        var that = this
         //TODO handle node size in here?
         //TODO all DomEventsAlt.eventNames
         //current ccs3dclasses are bound to node mesh itself..
@@ -81044,13 +81043,13 @@ class ClusterLeafElement extends THREE.Mesh {
         //? how to forward existing behaviour from nodes to pointcloud?
 
 
-        pcWrapper.pointCloud.raycast= ( function () {
+        pcWrapper.pointCloud.raycast = ( function () {
 
             var inverseMatrix = new THREE.Matrix4();
             var ray = new THREE.Ray();
             var sphere = new THREE.Sphere();
 
-            return function raycast( raycaster, intersects ) {
+            return function raycast(raycaster, intersects) {
 
                 var object = this;
                 var geometry = this.geometry;
@@ -81059,24 +81058,24 @@ class ClusterLeafElement extends THREE.Mesh {
 
                 // Checking boundingSphere distance to ray
 
-                if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
+                if (geometry.boundingSphere === null) geometry.computeBoundingSphere();
 
-                sphere.copy( geometry.boundingSphere );
-                sphere.applyMatrix4( matrixWorld );
+                sphere.copy(geometry.boundingSphere);
+                sphere.applyMatrix4(matrixWorld);
                 sphere.radius += threshold;
 
-                if ( raycaster.ray.intersectsSphere( sphere ) === false ) return;
+                if (raycaster.ray.intersectsSphere(sphere) === false) return;
 
                 //
 
-                inverseMatrix.getInverse( matrixWorld );
-                ray.copy( raycaster.ray ).applyMatrix4( inverseMatrix );
+                inverseMatrix.getInverse(matrixWorld);
+                ray.copy(raycaster.ray).applyMatrix4(inverseMatrix);
 
 
-                 //param size is threshold in original implementation
-                var that=this;
-                function thresholdFromSize(size)
-                {
+                //param size is threshold in original implementation
+                var that = this;
+
+                function thresholdFromSize(size) {
                     var mLocalThreshold = size / ( ( that.scale.x + that.scale.y + that.scale.z ) / 3 );
                     var mThresholdSq = mLocalThreshold * mLocalThreshold;
                     return mThresholdSq
@@ -81085,64 +81084,64 @@ class ClusterLeafElement extends THREE.Mesh {
 
                 var position = new THREE.Vector3();
 
-                function testPoint( point, index,size=1 ) {
+                function testPoint(point, index, size = 1) {
 
-                    var rayPointDistanceSq = ray.distanceSqToPoint( point );
+                    var rayPointDistanceSq = ray.distanceSqToPoint(point);
 
-                    if ( rayPointDistanceSq < thresholdFromSize(size) ) {
+                    if (rayPointDistanceSq < thresholdFromSize(size)) {
 
-                        var intersectPoint = ray.closestPointToPoint( point );
-                        intersectPoint.applyMatrix4( matrixWorld );
+                        var intersectPoint = ray.closestPointToPoint(point);
+                        intersectPoint.applyMatrix4(matrixWorld);
 
-                        var distance = raycaster.ray.origin.distanceTo( intersectPoint );
+                        var distance = raycaster.ray.origin.distanceTo(intersectPoint);
 
-                        if ( distance < raycaster.near || distance > raycaster.far ) return;
+                        if (distance < raycaster.near || distance > raycaster.far) return;
 
-                        intersects.push( {
+                        intersects.push({
 
                             distance: distance,
-                            distanceToRay: Math.sqrt( rayPointDistanceSq ),
+                            distanceToRay: Math.sqrt(rayPointDistanceSq),
                             point: intersectPoint.clone(),
                             index: index,
                             face: null,
                             object: object
 
-                        } );
+                        });
 
                     }
 
                 }
 
-                if ( geometry.isBufferGeometry ) {
+                if (geometry.isBufferGeometry) {
 
                     var index = geometry.index;
                     var attributes = geometry.attributes;
                     var positions = attributes.position.array;
 
-                    var sizes = attributes.size? attributes.size.array:[];
+                    var sizes = attributes.size ? attributes.size.array : [];
 
 
-                    if ( index !== null ) {
+                    if (index !== null) {
 
                         var indices = index.array;
 
-                        for ( var i = 0, il = indices.length; i < il; i ++ ) {
+                        for (var i = 0, il = indices.length; i < il; i++) {
 
-                            var a = indices[ i ];
+                            var a = indices[i];
 
-                            position.fromArray( positions, a * 3 );
+                            position.fromArray(positions, a * 3);
 
-                            testPoint( position, a,sizes[a] );
+                            testPoint(position, a, sizes[a]);
 
                         }
 
                     } else {
 
-                        for ( var i = 0, l = positions.length / 3; i < l; i ++ ) {
+                        for (var i = 0, l = positions.length / 3; i < l; i++) {
 
-                            position.fromArray( positions, i * 3 );
+                            position.fromArray(positions, i * 3);
 
-                            testPoint( position, i,sizes[i] );
+                            testPoint(position, i, sizes[i]);
 
                         }
 
@@ -81152,9 +81151,9 @@ class ClusterLeafElement extends THREE.Mesh {
 
                     var vertices = geometry.vertices;
 
-                    for ( var i = 0, l = vertices.length; i < l; i ++ ) {
+                    for (var i = 0, l = vertices.length; i < l; i++) {
 
-                        testPoint( vertices[ i ], i,threshold ); //for non-buffer gemoetries we use the global threshold
+                        testPoint(vertices[i], i, threshold); //for non-buffer gemoetries we use the global threshold
 
                     }
 
@@ -81165,52 +81164,45 @@ class ClusterLeafElement extends THREE.Mesh {
         }() )
 
 
+        pcWrapper.on("click dblclick mouseover mousemove", function (e) {
 
-
-
-
-        pcWrapper.on("click dblclick mouseover mousemove",function(e){
-
-           // let index=e.intersect.index
-          this.show()
-          //  this.trigger (e.type, e.intersect, node)
+            // let index=e.intersect.index
+            this.show()
+            //  this.trigger (e.type, e.intersect, node)
 
 
         })
 
         //TODO mouseout this missing
-        pcWrapper.on("mouseout",function(e){
+        pcWrapper.on("mouseout", function (e) {
 
-        //    that.mNodeMeshes.remove(this._bubble);
-        //    this.trigger (e.type, e.intersect, this)
+            //    that.mNodeMeshes.remove(this._bubble);
+            //    this.trigger (e.type, e.intersect, this)
 
         })
 
 
-
     }
 
 
-    setParticlesVisible(bVisible){
+    setParticlesVisible(bVisible) {
 
-        this.mParticles.pointCloud.visible=bVisible
-
-    }
-
-    setNodesVisible(bVisible){
-        this.bNodesVisible=bVisible;
-        this.mNodeParticles.pointCloud.visible=bVisible
+        this.mParticles.pointCloud.visible = bVisible
 
     }
 
-    setEdgesVisible(bVisible){
+    setNodesVisible(bVisible) {
+        this.bNodesVisible = bVisible;
+        this.mNodeParticles.pointCloud.visible = bVisible
 
-
-
-        this.bEdgesVisible=bVisible;
-        this.mEdgesContainer.visible=bVisible;
     }
 
+    setEdgesVisible(bVisible) {
+
+
+        this.bEdgesVisible = bVisible;
+        this.mEdgesContainer.visible = bVisible;
+    }
 
 
     getView() {
@@ -81228,7 +81220,7 @@ class ClusterLeafElement extends THREE.Mesh {
 
     setLOD(levelOfDetail) {
         if (this.mNodeParticles && this.parent.useLOD)
-            this.mNodeParticles.pointCloud.visible =this.bNodesVisible?levelOfDetail > 0.3:false;
+            this.mNodeParticles.pointCloud.visible = this.bNodesVisible ? levelOfDetail > 0.3 : false;
         //TODO nodes,edges, ... as well
 
         let edgeFadeLOD = 0.3;
@@ -81236,25 +81228,32 @@ class ClusterLeafElement extends THREE.Mesh {
 
         if (this.mEdgesContainer) {
 
-            this.mEdgesContainer.visible = this.bEdgesVisible? levelOfDetail>0.75:false;// levelOfDetail >= edgeFadeLOD;
+            this.mEdgesContainer.visible = this.bEdgesVisible ? levelOfDetail > 0.75 : false;// levelOfDetail >= edgeFadeLOD;
 
-            this.mEdgesContainer.mEdges.material.opacity =0.04//levelOfDetail/4// (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
+            this.mEdgesContainer.mEdges.material.opacity = 0.04//levelOfDetail/4// (levelOfDetail - edgeFadeLOD) / edgeFadeLOD;
         }
 
-     /*   if (this.mEdgesContainer2) {
+        /*   if (this.mEdgesContainer2) {
 
-            this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
+               this.mEdgesContainer2.visible = levelOfDetail < edgeFadeLOD;
 
-            this.mEdgesContainer2.mEdges.material.opacity = 1 - levelOfDetail / edgeFadeLOD;
-        }*/
+               this.mEdgesContainer2.mEdges.material.opacity = 1 - levelOfDetail / edgeFadeLOD;
+           }*/
 
 
         if (this.mNodeMeshes)
             this.mNodeMeshes.visible = levelOfDetail > 0.2;
 
-        // if (this.parent && this.parent.mParticles)
-        // this.parent.mParticles.pointCloud.visible= levelOfDetail>0.1;
 
+        if (this.mParticles) {
+
+            let scale=Math.cbrt(levelOfDetail)
+            if (scale<0.1) scale=0.1 //make sure that at all times at least 10pct of particles per leaf are rendered
+            if (scale>0.8) scale=1
+            let max = Math.floor(scale * this.mParticles.particleCount)
+            this.mParticles.pointCloud.geometry.setDrawRange(0, max)
+
+        }
 
     }
 
@@ -81284,12 +81283,12 @@ class ClusterLeafElement extends THREE.Mesh {
         }
 
 
-     /*   if (this.mEdgesContainer2 && this.mEdgesContainer2.geometry) {
+        /*   if (this.mEdgesContainer2 && this.mEdgesContainer2.geometry) {
 
 
-            this.mEdgesContainer2.geometry.dispose();
-            this.mEdgesContainer2 = null;
-        }*/
+               this.mEdgesContainer2.geometry.dispose();
+               this.mEdgesContainer2 = null;
+           }*/
 
 
         if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
@@ -81318,13 +81317,13 @@ class ClusterLeafElement extends THREE.Mesh {
 //adding invisible node meshes for domEvents
 // TODO use the point cloud itself for events to prevent potential unnecessary bindings?
 
-       var that = this.mNodeMeshes;//this;
+        var that = this.mNodeMeshes;//this;
         _.each(nodes, function (node) {
 
             //TODO change the way parent gets set
-            node._parent=that  //set a parent element to the placeholder mesh
-           // if (node && node._bubble)
-           //     that.add(node._bubble)
+            node._parent = that  //set a parent element to the placeholder mesh
+            // if (node && node._bubble)
+            //     that.add(node._bubble)
 
 
         })
@@ -81362,15 +81361,12 @@ class ClusterLeafElement extends THREE.Mesh {
         }, function onStep() {
 
 
-
-
-
         }, function () {
             that.updateEdges();
 //FIXME init dot particles if (root)cluster is done animating?
             //FIXME update color of particles only for clusters that need an update
             //by adding a timeout the color is yellow again because the event triggered is too early
-        setTimeout(() => that._initDotParticles(),50);
+            setTimeout(() => that._initDotParticles(), 50);
 
             onComplete()
 
@@ -81385,8 +81381,8 @@ class ClusterLeafElement extends THREE.Mesh {
         if (this.mEdgesContainer)
             this.mEdgesContainer.updateEdges();
 
-      //  if (this.mEdgesContainer2)
-       //     this.mEdgesContainer2.updateEdges();
+        //  if (this.mEdgesContainer2)
+        //     this.mEdgesContainer2.updateEdges();
 
     }
 
@@ -81396,8 +81392,7 @@ class ClusterLeafElement extends THREE.Mesh {
     }
 
 
-    getDOMEvents()
-    {
+    getDOMEvents() {
         return this.mDomEvents
 
     }
@@ -81410,13 +81405,13 @@ class ClusterLeafElement extends THREE.Mesh {
 
     createParticleNodeCloud() {
 
-        let domEvents=this.getDOMEvents()
+        let domEvents = this.getDOMEvents()
 
         var elem = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__particles_ParticleNodeGroup__["a" /* default */])(this.mNodes, {
             nodeDefaultSize: 10,
             nodeDefaultScale: 10,
             nodeTexture: "img/dot7.png"
-        },domEvents);
+        }, domEvents);
 
 
         return elem
@@ -81438,7 +81433,11 @@ class ClusterLeafElement extends THREE.Mesh {
                 increment: 1,
                 duration: 1000,
                 easing: __WEBPACK_IMPORTED_MODULE_3__lib_Tween___default.a.Easing.Exponential.Out,
-                position:{x:(_.random(0,2)-1)*_.random(50000,150000),y:(_.random(0,2)-1)*_.random(50000,150000),z:0}
+                position: {
+                    x: (_.random(0, 2) - 1) * _.random(50000, 150000),
+                    y: (_.random(0, 2) - 1) * _.random(50000, 150000),
+                    z: 0
+                }
             };
 
             if (!nodes) //FIXME this only works that way because to realData is not generated properly
@@ -81922,7 +81921,7 @@ class ForceGraphDistribution extends __WEBPACK_IMPORTED_MODULE_0__BaseDistributi
         this.initialEngineTicks = 0;
 
     // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime=7000//2000;//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeTime=5000//2000;//ms ... 5 seconds upper bound for loading phase
         this.maxConvergeFrames=400//90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
@@ -92817,7 +92816,6 @@ function removeArrow(d3LinkObj) {
  */
 
 
-
 /**
  * the text overlay class can be used to put text elements on top of an other container element
  *
@@ -92845,9 +92843,9 @@ class ClusterTextOverlay extends HTMLElement {
 
         this.possibleClusters = [];
         this.possibleLeafClusters = [];
-        this.selectedLeafCluster= null;
+        this.selectedLeafCluster = null;
 
-        this.enabled=true;
+        this.enabled = true;
 
     }
 
@@ -92867,12 +92865,12 @@ class ClusterTextOverlay extends HTMLElement {
 
         $(view).on("loaded graph-changed", () => {
 
-            if (!this.parentElement) return ;
+            if (!this.parentElement) return;
 
-        this.bindToCluster(this.parentElement.mRootCluster);
+            this.bindToCluster(this.parentElement.mRootCluster);
             this.addGlobalNodeCaptions(this.parentElement)
 
-       })
+        })
 
     }
 
@@ -92911,7 +92909,6 @@ class ClusterTextOverlay extends HTMLElement {
             //console.log("clusters for text considered",that.possibleClusters .length+  that.possibleLeafClusters.length)
 
         });
-
 
 
         rootcluster.findClusters().forEach(function (cluster) {
@@ -92995,69 +92992,69 @@ class ClusterTextOverlay extends HTMLElement {
         };
 
 
-
-        function getDistance(cluster){
+        function getDistance(cluster) {
             let point1 = view.mCamera.position;
             let point2 = cluster.localToWorld(new THREE.Vector3);
             let distance = point1.distanceTo(point2);
 
-          return distance
+            return distance
 
         }
 
-        function getNodesForLeaf() {
+            function getNodesForLeaf() {
             //return only the closest cluster
-            that.selectedLeafCluster=null
+            that.selectedLeafCluster = null
 
             if (!that.possibleLeafClusters) return [];
 
             // get closest leaf only
 
-            var res=_.map(that.possibleLeafClusters,function(leaf){
+            var res = _.map(that.possibleLeafClusters, function (leaf) {
 
-            return{item:leaf,distance:getDistance(leaf)}
+                return {item: leaf, distance: getDistance(leaf)}
             });
-            res= _.sortBy(res, [function(o) { return o.distance; }]);
+            res = _.sortBy(res, [function (o) {
+                return o.distance;
+            }]);
 
             //TODO nodes aren't in order so we should sort them also
 
             //FIXME deplace overlay after changing 3d => 2d view or have an event to track changing leafs/clusters
             //check for empty array which can happen if graph data changes and clusters get deleted
-            if (!res[0] ||!res[0] .item) return [];
+            if (!res[0] || !res[0].item) return [];
 
-            let leaf1 =res[0].item;
-            that.selectedLeafCluster=leaf1;
 
+            //(1)see below if changing the distance
+            let leaf1 = res[0].item;
+            if (leaf1.getRadius() < res[0].distance)
+                return [] // discard clostest leaf if it is too far away
+
+            that.selectedLeafCluster = leaf1;
             return leaf1.mNodes ? leaf1.mNodes : []
-
-
         }
-
 
         //the handler for the leaf text
         if (!this.tn)
             this.tn = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__TextNodesFactory__["a" /* default */])(env, {
                 maxVisibleCount: 10,
                 maxDistance: function (node) {
-
-                  if (!that.selectedLeafCluster) return 0;
-
+                    //(1)see above if changing the distance
+                    if (!that.selectedLeafCluster) return 0;
                     return that.selectedLeafCluster.getRadius()
                 },
                 onNodeText: (node) => node.name ? node.name : node.id,
-                getNodes:function(){
-                    let nodes=getNodesForLeaf();
+                getNodes: function () {
+                    let nodes = getNodesForLeaf();
 
-                    _.each( nodes, function(n){
+                    _.each(nodes, function (n) {
 
-                        let mesh= n.get3DRoot();
+                        let mesh = n.get3DRoot();
                         if (mesh.parent)
-                        mesh.updateMatrixWorld();
-                        else
-                        {
-                            mesh.parent=n._parent;
                             mesh.updateMatrixWorld();
-                            mesh.parent=null
+                        else {
+                            mesh.parent = n._parent;
+                            mesh.updateMatrixWorld();
+                            mesh.parent = null
 
                         }
 
@@ -93072,8 +93069,7 @@ class ClusterTextOverlay extends HTMLElement {
         // TODO the bounding volume determines the visibility of the text nodes
         //TODO so currently with no volume generated properly the text nodes are invisible
 
-        function getNodeParentCluster(node)
-        {
+        function getNodeParentCluster(node) {
             return node.parent.parent
 
         }
@@ -93120,11 +93116,9 @@ class ClusterTextOverlay extends HTMLElement {
                 if (node instanceof __WEBPACK_IMPORTED_MODULE_2__Cluster3DExtended__["a" /* default */]) {
                     newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
 
-                   var newText= node.getClusterOptions().text.bind(node)();
+                    var newText = node.getClusterOptions().text.bind(node)();
                     if (newText)
-                    el.html("").append(newText)
-
-
+                        el.html("").append(newText)
 
 
                 }
@@ -93138,7 +93132,6 @@ class ClusterTextOverlay extends HTMLElement {
                 el.on("click", function () {
                     node.zoomToCluster();
                 })
-
 
 
             }
@@ -93477,9 +93470,12 @@ function TextNodesFactory(env, options) {
 			if (res.addNodeToSet)
 				nodesCurrentBatch.push(res);
 
-			if (res.distance > options.maxDistance * 1.5)
-				break; //shorten the search for large graphs
+          /*  let _maxDistance=typeof options.maxDistance=="function"?options.maxDistance(node):options.maxDistance
 
+
+            if (res.distance > _maxDistance * 1.5)
+				break; //shorten the search for large graphs
+*/
 
 		}
 

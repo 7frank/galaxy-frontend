@@ -879,6 +879,28 @@ count clusters in background that would count towards visible countries
  but are invisible for performance reasons
 \end_layout
 
+\begin_layout Itemize
+loads slow as a toaster on mobile...
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+have nodes collapsed for m
+\end_layout
+
+\begin_layout Itemize
+also maybe have a reduced data set to load initially
+\end_layout
+
+\end_deeper
+\begin_layout Paragraph
+bugs
+\end_layout
+
+\begin_layout Itemize
+Government%20Institution.png missing
+\end_layout
+
 \begin_layout Paragraph
 meeting 12.8.
  TODO order prio and merge
@@ -987,7 +1009,7 @@ if possible we should define about sprints of equal length.
 
 \begin_layout Subsection
 not-a-sprint sprint 12.
- 08 - 17.08.
+ 08 - 21.08.
 \end_layout
 
 \begin_layout Standard
@@ -1053,6 +1075,20 @@ prevent text from being selectable
 
 \begin_layout Itemize
 text nodes do appear a little (late) when cluster was clicked
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME switching 2d on load will kill webgl so pervent switching or stop
+ current before starting new view
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Paragraph

@@ -305,9 +305,12 @@ function TextNodesFactory(env, options) {
 			if (res.addNodeToSet)
 				nodesCurrentBatch.push(res);
 
-			if (res.distance > options.maxDistance * 1.5)
-				break; //shorten the search for large graphs
+          /*  let _maxDistance=typeof options.maxDistance=="function"?options.maxDistance(node):options.maxDistance
 
+
+            if (res.distance > _maxDistance * 1.5)
+				break; //shorten the search for large graphs
+*/
 
 		}
 

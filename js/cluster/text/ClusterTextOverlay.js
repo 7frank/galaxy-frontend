@@ -3,7 +3,6 @@
  */
 
 
-
 /**
  * the text overlay class can be used to put text elements on top of an other container element
  *
@@ -19,22 +18,21 @@
 
 
 import TextNodesFactory from "./TextNodesFactory"
-import GraphView3D from  "../../view/GraphView3D"
+import GraphView3D from "../../view/GraphView3D"
 
 import Cluster3DExtended from "../Cluster3DExtended"
 
 
-export default
-class ClusterTextOverlay extends HTMLElement {
+export default class ClusterTextOverlay extends HTMLElement {
 
     constructor() {
         super();
 
         this.possibleClusters = [];
         this.possibleLeafClusters = [];
-        this.selectedLeafCluster= null;
+        this.selectedLeafCluster = null;
 
-        this.enabled=true;
+        this.enabled = true;
 
     }
 
@@ -54,12 +52,12 @@ class ClusterTextOverlay extends HTMLElement {
 
         $(view).on("loaded graph-changed", () => {
 
-            if (!this.parentElement) return ;
+            if (!this.parentElement) return;
 
-        this.bindToCluster(this.parentElement.mRootCluster);
+            this.bindToCluster(this.parentElement.mRootCluster);
             this.addGlobalNodeCaptions(this.parentElement)
 
-       })
+        })
 
     }
 
@@ -98,7 +96,6 @@ class ClusterTextOverlay extends HTMLElement {
             //console.log("clusters for text considered",that.possibleClusters .length+  that.possibleLeafClusters.length)
 
         });
-
 
 
         rootcluster.findClusters().forEach(function (cluster) {
@@ -182,69 +179,69 @@ class ClusterTextOverlay extends HTMLElement {
         };
 
 
-
-        function getDistance(cluster){
+        function getDistance(cluster) {
             let point1 = view.mCamera.position;
             let point2 = cluster.localToWorld(new THREE.Vector3);
             let distance = point1.distanceTo(point2);
 
-          return distance
+            return distance
 
         }
 
-        function getNodesForLeaf() {
+            function getNodesForLeaf() {
             //return only the closest cluster
-            that.selectedLeafCluster=null
+            that.selectedLeafCluster = null
 
             if (!that.possibleLeafClusters) return [];
 
             // get closest leaf only
 
-            var res=_.map(that.possibleLeafClusters,function(leaf){
+            var res = _.map(that.possibleLeafClusters, function (leaf) {
 
-            return{item:leaf,distance:getDistance(leaf)}
+                return {item: leaf, distance: getDistance(leaf)}
             });
-            res= _.sortBy(res, [function(o) { return o.distance; }]);
+            res = _.sortBy(res, [function (o) {
+                return o.distance;
+            }]);
 
             //TODO nodes aren't in order so we should sort them also
 
             //FIXME deplace overlay after changing 3d => 2d view or have an event to track changing leafs/clusters
             //check for empty array which can happen if graph data changes and clusters get deleted
-            if (!res[0] ||!res[0] .item) return [];
+            if (!res[0] || !res[0].item) return [];
 
-            let leaf1 =res[0].item;
-            that.selectedLeafCluster=leaf1;
 
+            //(1)see below if changing the distance
+            let leaf1 = res[0].item;
+            if (leaf1.getRadius() < res[0].distance)
+                return [] // discard clostest leaf if it is too far away
+
+            that.selectedLeafCluster = leaf1;
             return leaf1.mNodes ? leaf1.mNodes : []
-
-
         }
-
 
         //the handler for the leaf text
         if (!this.tn)
             this.tn = TextNodesFactory(env, {
                 maxVisibleCount: 10,
                 maxDistance: function (node) {
-
-                  if (!that.selectedLeafCluster) return 0;
-
+                    //(1)see above if changing the distance
+                    if (!that.selectedLeafCluster) return 0;
                     return that.selectedLeafCluster.getRadius()
                 },
                 onNodeText: (node) => node.name ? node.name : node.id,
-                getNodes:function(){
-                    let nodes=getNodesForLeaf();
+                getNodes: function () {
+                    let nodes = getNodesForLeaf();
 
-                    _.each( nodes, function(n){
+                    _.each(nodes, function (n) {
 
-                        let mesh= n.get3DRoot();
+                        let mesh = n.get3DRoot();
                         if (mesh.parent)
-                        mesh.updateMatrixWorld();
-                        else
-                        {
-                            mesh.parent=n._parent;
                             mesh.updateMatrixWorld();
-                            mesh.parent=null
+                        else {
+                            mesh.parent = n._parent;
+                            mesh.updateMatrixWorld();
+                            mesh.parent = null
 
                         }
 
@@ -259,8 +256,7 @@ class ClusterTextOverlay extends HTMLElement {
         // TODO the bounding volume determines the visibility of the text nodes
         //TODO so currently with no volume generated properly the text nodes are invisible
 
-        function getNodeParentCluster(node)
-        {
+        function getNodeParentCluster(node) {
             return node.parent.parent
 
         }
@@ -307,11 +303,9 @@ class ClusterTextOverlay extends HTMLElement {
                 if (node instanceof Cluster3DExtended) {
                     newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
 
-                   var newText= node.getClusterOptions().text.bind(node)();
+                    var newText = node.getClusterOptions().text.bind(node)();
                     if (newText)
-                    el.html("").append(newText)
-
-
+                        el.html("").append(newText)
 
 
                 }
@@ -325,7 +319,6 @@ class ClusterTextOverlay extends HTMLElement {
                 el.on("click", function () {
                     node.zoomToCluster();
                 })
-
 
 
             }
