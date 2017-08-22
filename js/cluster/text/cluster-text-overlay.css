@@ -1,0 +1,48 @@
+
+cluster-text-overlay {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    pointer-events: none
+}
+
+cluster-text-overlay > .cluster-text-overlay-breadcrumb {
+    color:rgba(255,255,255,0.1);
+    font-size:3em;
+
+    position: absolute;
+    top:20%;
+    left: 0;
+    width:100%;
+
+}
+
+
+
+cluster-text-overlay  .cluster-text-overlay-breadcrumb-item {
+
+
+
+
+}
+
+
+
+cluster-text-overlay  .cluster-text-overlay-breadcrumb-item:hover {
+
+    opacity: 0.6 !important;
+    color:darkslateblue;
+
+
+    text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;
+
+
+}
+
+
+
+
+
+
+
