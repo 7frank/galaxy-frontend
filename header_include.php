@@ -1,4 +1,9 @@
-<link href="include/css/layout.css" rel="stylesheet" type="text/css" />
+
+
+<link href="include/css/font-roboto-condense.css" rel="stylesheet" type="text/css" async/>
+
+<link href="include/css/layout.css" rel="stylesheet" type="text/css" async/>
+<!--
 <link href="include/css/main.css" rel="stylesheet" type="text/css" >
 
 <link href="include/css/scrollert.min.css" rel="stylesheet" type="text/css" >
@@ -7,14 +12,19 @@
 <link href="include/css/font-benchnine.css" rel="stylesheet" type="text/css" />
 <link href="include/fonts/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 
+-->
+
 <script src="include/js/ajax_connect.js"></script>
 <script src="include/js/ajax_function.js"></script>
 <script src="include/js/ajax_people.js"></script>
 
+<!--
 <script src="include/js/scrollert.min.js"></script>
 <script src="include/highstock/code/highstock.js"></script>
 <script src="include/highstock/code/js/themes/dark-unica.js"></script>
 <script src="include/highstock/code/modules/exporting.js"></script>
+-->
+
 <style>
     #logo {
         position: absolute;

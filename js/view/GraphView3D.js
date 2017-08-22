@@ -9,9 +9,11 @@ import View3D from "./View3D"
 import RootCluster from "../cluster/RootCluster"
 import GraphData from "../cluster/GraphData"
 
-import skyDomeImage from "./coordinates.png"
+import "../cluster/utils/DefaultColorScheme"
 
-import Hexasphere from "hexasphere.js"
+//import skyDomeImage from "./coordinates.png"
+
+//import Hexasphere from "hexasphere.js"
 
 
 import "../gui/GraphHUD"
@@ -289,6 +291,9 @@ export default class GraphView3D extends View3D {
         if (!this.mRootCluster) {
             this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
             this.addCompanyCountListenersToCluster(this.mRootCluster);
+
+
+            $(this).append("<default-color-scheme>")
 
         }
 

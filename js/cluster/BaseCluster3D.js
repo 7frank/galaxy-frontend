@@ -642,6 +642,7 @@ var that=this
             minClusterSize: 10,
             defaultMergeGroupName: "other",
             hull: BaseVolume,
+            onHullCreated:function(){},
             //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
             expanded: true,  //determines if a cluster is initially expanded or not
             text:function noop(){ }
@@ -1262,7 +1263,7 @@ lineMaterial=this.createShaderLineMaterial();
             distribution.setNodes(this,
                 function onNodePositionChanged(vecPosition, i) {
                 },
-                function onStep() {
+                function onStep(p) {
 
                     updateLeafsEdges(that);
 
@@ -1355,6 +1356,8 @@ lineMaterial=this.createShaderLineMaterial();
             if (BaseVolume == mOptions.hull || BaseVolume.isPrototypeOf(mOptions.hull)) {
 
                 this.mHull = new mOptions.hull();
+                mOptions.onHullCreated(this.mHull)
+
                 this.mExpandedGroup.add(this.mHull);
             }
             else throw new Error("option hull must have superclass BaseVolume");
@@ -1648,6 +1651,10 @@ lineMaterial=this.createShaderLineMaterial();
         while (maxDepth--) {
             let r = _root.parent;
             if (r == null) return parents;
+
+            //the actual parent cluster has one group element where the sub-cluster resides
+            if (r instanceof THREE.Group && r.parent instanceof BaseCluster3D) r=r.parent;
+
             if (!(r instanceof BaseCluster3D)) return parents;
             _root = r;
 

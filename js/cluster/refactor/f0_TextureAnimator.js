@@ -4,7 +4,7 @@
 
 
 
-export
+export default
 function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) {
     // note: texture passed by reference, will be updated by the update function.
 

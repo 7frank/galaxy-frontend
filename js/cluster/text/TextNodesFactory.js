@@ -339,10 +339,11 @@ function TextNodesFactory(env, options) {
 	}
 
 	return {
-		update: _.throttle(simpleUpdate, 20, {
+		update:simpleUpdate// _.throttle(simpleUpdate, 20, {
 			//leading: true,
 			//trailing: false
-		}),
+		//}),
+		,
 		remove: function () {
 
 			compareAndHidePreviousBatch([])

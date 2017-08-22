@@ -6,7 +6,8 @@
 //TODO refactor RootCluster
 import Cluster3DExtended from "./Cluster3DExtended"
 
-import ClusterTextOverlay from "./text/ClusterTextOverlay"
+import "./text/ClusterTextOverlay"
+import DefaultColorScheme from "./utils/DefaultColorScheme"
 
 
 import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
@@ -44,6 +45,8 @@ class RootCluster extends Cluster3DExtended {
        this.addColorHandler()
 
 
+
+
     }
 
     addListeners() {
@@ -61,7 +64,18 @@ class RootCluster extends Cluster3DExtended {
     }
 
 
+addColorScheme(cs){
 
+    if (!cs instanceof DefaultColorScheme) { console.warn("set proper color scheme") }
+
+
+        this.mColorScheme=cs
+
+
+
+
+
+}
 
 
     addColorHandler()

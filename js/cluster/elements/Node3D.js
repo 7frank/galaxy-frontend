@@ -6,9 +6,9 @@
 
 
 //better node structure
-//TODO not currently used
+//TODO not currently used remove?
 
-//TODO
+//TODO ...
 
 
 export default

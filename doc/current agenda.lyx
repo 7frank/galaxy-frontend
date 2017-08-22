@@ -893,12 +893,325 @@ also maybe have a reduced data set to load initially
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+TEST: collapse country nodes without collapse hull and expand with delay
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+collapsehull option
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Ring(Volume)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+timeout from biggest to smallest countries +=200ms
+\end_layout
+
+\begin_layout Itemize
+united sttes first then next biggest and so on
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+evaluate alternative options to improve force_simulation 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+shader?
+\end_layout
+
+\begin_layout Itemize
+webworker?
+\end_layout
+
+\begin_layout Itemize
+gpu.js
+\end_layout
+
+\begin_layout Itemize
+multithread.js
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+explore alternatives to accieve similar effects for parts of the cluster
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+implement a round robin like queue for all force animations to smoothen
+ out the overall animations
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+text nodes do appear a little (late) when cluster was clicked
+\end_layout
+
+\begin_layout Itemize
+prevent text gui and such from being selectable 
+\end_layout
+
+\begin_layout Itemize
+use spherrnd_distribution
+\end_layout
+
 \begin_layout Paragraph
 bugs
 \end_layout
 
 \begin_layout Itemize
 Government%20Institution.png missing
+\end_layout
+
+\begin_layout Section
+Features/Versions/History/sprints
+\end_layout
+
+\begin_layout Standard
+if possible we should define about sprints of equal length.
+ about 2 weeks should be the right time for
+\end_layout
+
+\begin_layout Subsection
+20- 26.
+ 08
+\end_layout
+
+\begin_layout Standard
+get as much done as time allows
+\end_layout
+
+\begin_layout Paragraph
+Summary
+\end_layout
+
+\begin_layout Itemize
+m1
+\end_layout
+
+\begin_layout Itemize
+m2
+\end_layout
+
+\begin_layout Paragraph
+meeting 19.08.
+\end_layout
+
+\begin_layout Itemize
+when loading 
+\begin_inset Quotes eld
+\end_inset
+
+sent >iment<
+\begin_inset Quotes erd
+\end_inset
+
+ color
+\end_layout
+
+\begin_layout Itemize
+when loading focus united states
+\end_layout
+
+\begin_layout Itemize
+increase sizeof clusers to cover more space
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+....
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+potentially different distribution approach instead of force graph would
+ be good:
+\end_layout
+
+\begin_layout Itemize
+we initially need the size of the industrial sectors.
+ this could be a simple random distribution within a sphere radius or a
+ grid of some sort to prevent intersetctions between elements
+\end_layout
+
+\begin_layout Itemize
+besides that for the parent clusters to cover as much space as possible
+ a 3d bin packing distribution handler would be optimal
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+popup! link to charts.php
+\end_layout
+
+\begin_layout Itemize
+js files
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+highstock
+\end_layout
+
+\begin_layout Itemize
+fiontawse
+\end_layout
+
+\begin_layout Itemize
+unica
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+cluster names abbreviation
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+expand on hover
+\end_layout
+
+\begin_layout Itemize
+use myriad pro condensed
+\end_layout
+
+\begin_layout Itemize
+<script src="https://use.typekit.net/ulv2nrf.js"></script> 
+\end_layout
+
+\begin_layout Itemize
+<script>try{Typekit.load({ async: true });}catch(e){}</script>
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+(-broker app)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+news iq
+\end_layout
+
+\begin_layout Itemize
+dj_news#
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+all news plus hot news
+\end_layout
+
+\begin_layout Itemize
+use converter for timezone
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+dj_news_isin
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+isin ticker 
+\end_layout
+
+\begin_layout Itemize
+dj_news_isin.news_id => dj_news.id
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+dj_news_siga_about
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+all relevant news
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+dj_newsprimary_symbol
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+header company+significant
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+node connections
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+customers table
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+company _id == node
+\end_layout
+
+\begin_layout Itemize
+name == customers
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+symbol
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+related to companies table
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+intrino app
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+relevant for real time prices
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+real time news
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+/zpghkvqdgf/public_html/ dj_cross_app.php
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+set zoom target on hover if none is selected
+\end_layout
+
+\begin_layout Itemize
+zoom buttons mousedown kep for touch users
 \end_layout
 
 \begin_layout Paragraph
@@ -917,25 +1230,156 @@ next
 \end_layout
 
 \begin_layout Itemize
-hull nur minimal generieren
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+switching 2d on load will kill webgl so pervent switching or stop current
+ before starting new view
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+fixme
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+pop up
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+urgent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+color scheme white color options?
+\end_layout
+
+\begin_layout Itemize
+2d look improve
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+urgent
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-initial positions of cluster from file irgendwann
+like herhobelt 
+\end_layout
+
+\begin_layout Itemize
+and like other screenshot from iq-broker
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+grid-layout 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://www.youtube.com/watch?v=7kVeCqQCxlk
+\end_layout
+
+\begin_layout Itemize
+grid-template-area (responsive)
+\end_layout
+
+\begin_layout Itemize
+@support grid-area-auto for edge
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+graphql/apollo
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://www.youtube.com/watch?v=9wiepxb8qPc
+\end_layout
+
+\begin_layout Itemize
+https://www.youtube.com/watch?v=kXH2dbnHYA0
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+incl sample of react-apollo-app
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+webassembly in 6 months or so for 50% perf inc
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+company names calc with skip after view change flickers
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Itemize
 hull 
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+nur minimal generieren
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if no hull shoul dbe visible initially generate the smallest possible like
+ a lowpoly sphere or box or whatever to get the radius for dependent processes
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+initial positions of cluster from file irgendwann
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
 nah dran wneiger prominent
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 weiter weg gegen null
 \end_layout
 
@@ -945,6 +1389,8 @@ edges weg und nur auf hover
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 rotate pan speed
 \end_layout
 
@@ -957,8 +1403,25 @@ breadcrumb clostest cluster
 breadcrumb on click..
 \end_layout
 
+\begin_layout Itemize
+hide/show bc only if it is needed, like when we are close the radius of
+ a ceratin cluster 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+TODO find some meaningfull heuristic
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 sector short text 
 \begin_inset Quotes eld
 \end_inset
@@ -968,22 +1431,6 @@ Health...
 \end_inset
 
  version
-\end_layout
-
-\begin_layout Itemize
-pop up
-\end_layout
-
-\begin_layout Itemize
-zoom in out controls
-\end_layout
-
-\begin_layout Itemize
-color scheme white color options?
-\end_layout
-
-\begin_layout Itemize
-2d look improve
 \end_layout
 
 \begin_layout Itemize
@@ -998,18 +1445,13 @@ touch options debugging ipad!!!!! important
 circular cluster for 2d?
 \end_layout
 
-\begin_layout Section
-Features/Versions/History/sprints
-\end_layout
-
-\begin_layout Standard
-if possible we should define about sprints of equal length.
- about 2 weeks should be the right time for
+\begin_layout Itemize
+zoom in out controls
 \end_layout
 
 \begin_layout Subsection
 not-a-sprint sprint 12.
- 08 - 21.08.
+ 08 - 19.08.
 \end_layout
 
 \begin_layout Standard
@@ -1043,10 +1485,6 @@ text overlay does not resize to same size as view sometimes
 \end_layout
 
 \begin_layout Itemize
-company names calc with skip after view change flickers
-\end_layout
-
-\begin_layout Itemize
 
 \strikeout on
 force graph is not rendered before everything is finished
@@ -1069,28 +1507,6 @@ render initial/actual force graph
 \end_layout
 
 \end_deeper
-\begin_layout Itemize
-prevent text from being selectable 
-\end_layout
-
-\begin_layout Itemize
-text nodes do appear a little (late) when cluster was clicked
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME switching 2d on load will kill webgl so pervent switching or stop
- current before starting new view
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Paragraph
 perf consderations
 \begin_inset Note Note
@@ -1221,36 +1637,16 @@ check if line group is used for other lines created for clusters
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 applyClustering takes 1500ms
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 possible to delay parts via timeout?
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-TEST: collapse country nodes without collapse hull and expand with delay
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-collapsehull option
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Ring(Volume)
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-timeout from biggest to smallest countries +=200ms
-\end_layout
-
-\begin_layout Itemize
-united sttes first then next biggest and so on
 \end_layout
 
 \end_deeper
@@ -1379,19 +1775,21 @@ imationFrame with something like FPS.onNextFrame / that uses View::onBeforeRende
 \end_deeper
 \end_deeper
 \begin_layout Itemize
-\begin_inset Note Note
-status open
 
-\begin_layout Itemize
+\strikeout on
 replace existing invisible node meshes
 \end_layout
 
 \begin_deeper
 \begin_layout Enumerate
+
+\strikeout on
 change domevents workflow
 \end_layout
 
 \begin_layout Enumerate
+
+\strikeout on
 nodemixin takes 500ms
 \begin_inset Note Note
 status open
@@ -1407,6 +1805,8 @@ generating meshes will no longer be necessary
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 by not using the mesh at all but instead relying on the pointcloud for domevents
  we'd get 
 \begin_inset Note Note
@@ -1421,81 +1821,102 @@ approx 250ms
 
 \end_layout
 
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+currently ok could be generated delayed maybe though
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_deeper
 \begin_layout Enumerate
+
+\strikeout on
 webglrenderer takes ages due to all the invisible meshes!! approx 20%
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 updateMatrixWorld
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 projectObject
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+invisible mesh helpers where updated each frame
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 extend three.points
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 replace raycast in three.points with one that has variable node size
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 instead of having meshes for each node have a nodes-highlight-helper that
  creates a temporary mesh with highlighted nodes and edges
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+did not work as intended
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 for blinking nodes probably have a similar approack
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 have a before render to update mesh positions with point cloud
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
-\begin_inset Note Note
-status open
 
-\begin_layout Itemize
-[----]for now try the simple approach to just hide/show node mesh group
- for leaf on hover and raycast nothing at all --- that will be shit when
- blink is enabled
-\end_layout
-
-\begin_layout Itemize
-we want a global overlay container!! that manages visibility of nodes
-\end_layout
-
-\begin_layout Itemize
-Container(allnodes) show(partialNodes)
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
+\strikeout on
 textnodes per leaf will now be invaild due to missing meshes
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Itemize
@@ -1513,6 +1934,8 @@ FIXME
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 have collision for clusters but not leafs
 \end_layout
 
@@ -1522,27 +1945,36 @@ something is wrong with the cluster edges
 \end_layout
 
 \begin_layout Itemize
-also if nothing is visible no edges + no leafs but only empty clustersa
+
+\strikeout on
+also if nothing is visible no edges + no leafs but only empty cluster a
  lot is calculated
-\begin_inset Note Note
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+invisible leafs still take a lot of computation
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+clusters even if empty 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Comment
 status open
 
 \begin_layout Plain Layout
-FIXME
+should be ok now
 \end_layout
 
 \end_inset
 
 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-invisible leafs still take a lot of computation
-\end_layout
-
-\begin_layout Itemize
-clusters even if empty 
 \end_layout
 
 \end_deeper
@@ -1590,69 +2022,43 @@ still if leafs are set invisible with previous everything else within leaf
 
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
 \begin_layout Itemize
+
+\strikeout on
 try to reduce text nodes selected by compare&hide
 \end_layout
 
 \begin_layout Itemize
-force_simulation 
-\end_layout
 
-\begin_deeper
-\begin_layout Itemize
-shader?
-\end_layout
-
-\begin_layout Itemize
-webworker?
-\end_layout
-
-\begin_layout Itemize
-gpu.js
-\end_layout
-
-\begin_layout Itemize
-multithread.js
-\end_layout
-
-\begin_layout Itemize
-explore alternatives to accieve similar effects for parts of the cluster
-\end_layout
-
-\begin_layout Itemize
-implement a round robin like queue for all force animations to smoothen
- out the overall animations
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
+\strikeout on
 evaluate delayed intialisation of edges,hull
 \end_layout
 
 \begin_layout Itemize
-baseCluster before-render
-\end_layout
 
-\begin_deeper
-\begin_layout Itemize
-no need to change anything if camera hasn't changed and element position
- also
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
+\strikeout on
 renderBufferDirect takes about 30% now 
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 check which elements nodes?edges? are responsible and if it' might be a
  needsUpdate that is triggered too often
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+reduced by using setDrawRange for particles
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_deeper

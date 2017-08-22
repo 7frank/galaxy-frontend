@@ -22,8 +22,12 @@ import GraphView3D from "../../view/GraphView3D"
 
 import Cluster3DExtended from "../Cluster3DExtended"
 
+import "./cluster-text-overlay.css"
 
-export default class ClusterTextOverlay extends HTMLElement {
+
+
+export default
+class ClusterTextOverlay extends HTMLElement {
 
     constructor() {
         super();
@@ -60,6 +64,8 @@ export default class ClusterTextOverlay extends HTMLElement {
         })
 
     }
+
+
 
 
     /**
@@ -129,17 +135,45 @@ export default class ClusterTextOverlay extends HTMLElement {
     initCSS() {
 
 
-        $(this).addClass("graph-captions-container").css({
-            width: "100%",
-            height: "100%",
-            // top: 0,
-            // left: 0,
-            overflow: "hidden",
-            position: "absolute",
-            "pointer-events": "none"//, border: "1px solid red"
-        });
+
+
+
+
+        $(this).addClass("graph-captions-container")
 
     }
+
+    addBreadcrumbContainer()
+    {
+        if ( this.mBreadcrumb){
+            $(this).append(this.mBreadcrumb)
+            return
+        }
+        this.mBreadcrumb=$("<span class='cluster-text-overlay-breadcrumb'></span>")
+
+        $(this).append(this.mBreadcrumb)
+
+    }
+
+    setBreadcrumb(parentClusters)
+    {
+        parentClusters.shift()//discard root
+
+        var res=[]
+        _.each(parentClusters,function(cluster){
+
+            let item="<span class='cluster-text-overlay-breadcrumb-item'>"+cluster.name+"</span>"
+            res.push(item)
+
+
+        });
+
+        this.mBreadcrumb.empty().append(res.join(" - "))
+
+    }
+
+
+
 
 
     /**
@@ -168,6 +202,8 @@ export default class ClusterTextOverlay extends HTMLElement {
             .width(view.clientWidth)
             .empty();
 
+        this.addBreadcrumbContainer()
+
 
         var that = this;
         let env = {
@@ -188,6 +224,19 @@ export default class ClusterTextOverlay extends HTMLElement {
 
         }
 
+        function sortClusters(clusters){
+
+            var res = _.map(clusters, function (c) {
+
+                return {item: c, distance: getDistance(c)}
+            });
+            return  _.sortBy(res, [function (o) {
+                return o.distance;
+            }]);
+
+        }
+
+
             function getNodesForLeaf() {
             //return only the closest cluster
             that.selectedLeafCluster = null
@@ -196,13 +245,7 @@ export default class ClusterTextOverlay extends HTMLElement {
 
             // get closest leaf only
 
-            var res = _.map(that.possibleLeafClusters, function (leaf) {
-
-                return {item: leaf, distance: getDistance(leaf)}
-            });
-            res = _.sortBy(res, [function (o) {
-                return o.distance;
-            }]);
+            var res =sortClusters(that.possibleLeafClusters)
 
             //TODO nodes aren't in order so we should sort them also
 
@@ -262,6 +305,9 @@ export default class ClusterTextOverlay extends HTMLElement {
         }
 
 
+
+
+
         //the handler for the cluster text
         this.mTextNodes = TextNodesFactory(env, {
             maxVisibleCount: 30,
@@ -272,6 +318,12 @@ export default class ClusterTextOverlay extends HTMLElement {
                 return getNodeParentCluster(node).getRadius(getNodeParentCluster(node).mNodes.length) / 3 * 3
             }, //3000
             getNodes: function () {
+
+                if (that.possibleClusters.length > 0) {
+                    var res=sortClusters(that.possibleClusters)
+
+                that.setBreadcrumb([].concat(res[0].item.getParents(), res[0].item))
+            }
                 return that.possibleClusters
             },
             onNodeText: function (node) {

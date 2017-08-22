@@ -426,8 +426,8 @@ export class SampleClusterApplication extends HTMLElement {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new ForceGraphDistribution(80000, 3); // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new ForceGraphDistribution(25000, 3);// industries within countries use the Force-Graph approach to position elements
+        let countryDistribution = new ForceGraphDistribution(40000, 3); // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new ForceGraphDistribution(15000, 3);// industries within countries use the Force-Graph approach to position elements
         let nodesWithinIndustryDistribution = new ForceGraphDistribution(8000, 3);//same goes for the nodes within each industry
 
         //the final configuration for rendering
@@ -443,6 +443,9 @@ export class SampleClusterApplication extends HTMLElement {
 
         let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
 
+        //TODO these options are a little bit confusing atm.. the mCS option refers to the dist of the sub-clusters
+        // while the hull option is used by the cluster itself
+
         return [
 
             {
@@ -456,11 +459,21 @@ export class SampleClusterApplication extends HTMLElement {
                 events: {
                     click: function () {
                         // this.toggleCollapse()
+                    },
+                    mouseover:function(){
+                        this.mHull.visible=true
+                    },
+                    mouseout:function(){
+                        this.mHull.visible=false
                     }
                 },
                 options: {
                     minClusterSize: 15
-                    //hull: ConvexVolume
+                   // ,hull:BoxVolume
+                    ,hull: ConvexVolume,
+                    onHullCreated:function(volume){
+                        volume.visible=false
+                    }
 
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
@@ -471,7 +484,7 @@ export class SampleClusterApplication extends HTMLElement {
 
                     text: function () {
                         //return IndustrialSectorIcon(this.name)
-                        return  IndustrialSectorAbbreviation(this.name)
+                       return  IndustrialSectorAbbreviation(this.name)
                     }
                 },
                 events: {

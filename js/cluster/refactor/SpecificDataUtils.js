@@ -7,6 +7,11 @@ import 'jquery-ui/ui/widgets/slider';
 import 'jquery-ui/ui/widgets/draggable';
 import 'jquery-ui/ui/widgets/resizable';
 
+
+
+import "../../gui/company-details/CompanyDetails"
+
+
 function formatNumber(num) {
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 }
@@ -244,9 +249,20 @@ export var GUI = {
 
         $header.append($search, stockPrice, $close)
 
+
+
         var $body = $("<div>").addClass("graph-node-info-body")
 
+
+
+
+
+
+
         $body.html("COMPANY<br> wikiinfo")
+
+        $body.append("<company-details></company-details>")
+
 
         var $news = $("<div>").addClass("graph-node-info-news")
 

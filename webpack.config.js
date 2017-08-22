@@ -18,7 +18,11 @@ module.exports = {
             "$":"jquery",
             "jQuery":"jquery",
             "$$":"jquery-ui"
-        })
+        })/*,
+        new webpack.optimize.UglifyJsPlugin({
+           // include: /\.min\.js$/,
+            minimize: true
+        })*/
     ],
     module: {
         rules: [
