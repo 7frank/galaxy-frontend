@@ -1,7 +1,7 @@
 {
-  "name": "galaxy",
+  "name": "galaxy-webcomponent",
   "version": "1.0.0",
-  "description": "TODO add proper descritipn for this project",
+  "description": "contains a component to render node/edge data with threejs and d3_force",
   "main": "index.js",
   "scripts": {
     "build-graph": "node_modules/.bin/webpack  --display-error-details --config webpack.config.js",
@@ -57,15 +57,6 @@
     "webpack": "^2.6.1"
   },
   "dependencies": {
-    "@angular/animations": "^4.3.3",
-    "@angular/common": "^4.3.3",
-    "@angular/compiler": "^4.3.3",
-    "@angular/core": "^4.3.3",
-    "@angular/forms": "^4.3.3",
-    "@angular/http": "^4.3.3",
-    "@angular/platform-browser": "^4.3.3",
-    "@angular/platform-browser-dynamic": "^4.3.3",
-    "@angular/router": "^4.3.3",
     "@tweenjs/tween.js": "^17.1.0",
     "core-js": "^2.5.0",
     "d3-force-3d": "^1.0.7",

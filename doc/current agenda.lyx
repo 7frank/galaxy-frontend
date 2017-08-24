@@ -972,6 +972,14 @@ bugs
 Government%20Institution.png missing
 \end_layout
 
+\begin_layout Paragraph
+webassembly
+\end_layout
+
+\begin_layout Itemize
+check in about 6 months or so for 50% performance increase which is a must
+\end_layout
+
 \begin_layout Section
 Features/Versions/History/sprints
 \end_layout
@@ -1299,12 +1307,18 @@ grid-layout
 https://www.youtube.com/watch?v=7kVeCqQCxlk
 \end_layout
 
+\begin_deeper
 \begin_layout Itemize
-grid-template-area (responsive)
+https://mor10.com/
 \end_layout
 
 \begin_layout Itemize
-@support grid-area-auto for edge
+https://github.com/mor10
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+grid-template-area (responsive)
 \end_layout
 
 \end_deeper
@@ -1327,11 +1341,16 @@ incl sample of react-apollo-app
 \end_layout
 
 \end_deeper
-\end_deeper
 \begin_layout Itemize
-webassembly in 6 months or so for 50% perf inc
+transport agnostic defaoutl is http but websocket can be used to increase
+ performance
 \end_layout
 
+\begin_layout Itemize
+server bei github scaphol.io 
+\end_layout
+
+\end_deeper
 \end_inset
 
 
