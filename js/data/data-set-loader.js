@@ -1,4 +1,3 @@
-
 import $ from 'jquery';
 import 'jquery-ui/themes/base/core.css';
 //import 'jquery-ui/themes/base/theme.css';
@@ -14,7 +13,7 @@ import qwest from "qwest"
 import Papa from "papaparse"
 import {gpuInfo} from "../deprecated/gpu-info";
 
-
+import ApolloDS from "./ApolloDS"
 
 
 function createDlg() {
@@ -74,8 +73,7 @@ function openGraphConfirmDialog(fileName, nodeCount, acceptCallback) {
 
 }
 
-export
-function getGraphDataSets() {
+export function getGraphDataSets() {
 
     // Color brewer paired set
     const colors = ['#f90500', '#e9e916', '#55c64c', '#FF0000', '#00FF00', '#0000FF', '#FF00FF', '#C0C0C0', '#808080', '#800000', '#808000', '#008000', '#800080', '#008080', '#000080'];
@@ -193,6 +191,99 @@ function getGraphDataSets() {
     }
 
 
+    /*******************************************************************************************************/
+    /**
+     * adding some database functions to query the remote server
+     *
+     *
+     * @param countryName
+     * @returns {string}
+     */
+    function getCountryQuery(countryName) {
+        var str = ""
+        if (countryName)
+            str = `country:"${countryName}"`
+
+        return `        
+              query GraphCountryData  {
+                        nodes(${str}) {
+                          id
+                          name
+                          country
+                          industry
+                          ticker
+                          sentiment
+                          price
+                          itemCount
+                        }
+                          edges(${str}){
+                            source
+                            target
+                            strength
+                            
+                          }     
+            }
+        `
+    }
+
+
+    var db = new ApolloDS()
+
+    function queryDatabase(query, AlsoNotUsed) {
+        return function (notUsed, onSuccess) {
+
+
+            db.query(query, function (response) {
+
+                var _nodes = response.data.nodes.map(function (r) {
+
+                    var data = {
+                        id:""+ r.id,
+                        name: r.name,
+                        group: r.country,
+                        industry: r.industry,
+                        sent: r.sentiment,
+                        price: r.price,
+                        itemCount: r.itemCount,
+                        ticker: r.ticker
+                    }
+
+                    data.color = 0x0000ff
+                    return data
+                })
+
+                var _links = []
+
+                response.data.edges.forEach(function (edge) {
+                    let link = {
+                        source: "" + edge.source,
+                        target: "" + edge.target,
+                        strength: edge.strength
+                    }
+                    _links.push(link)
+                })
+
+
+                var data = {
+                    expanded: ["United States"],
+                    nodes: _nodes,
+                    links: _links,
+                    isRealData: true
+                }
+
+                //FIXME the work flow in here needs some proper refactoring to be more efficient..
+                defaultLoadHandler(_,data,onSuccess)
+
+
+
+
+
+            })
+
+        }
+    }
+
+
     function loadRealDataSampleOnly(fileName, fileName2, onLoadSuccess) {
 
 
@@ -226,7 +317,7 @@ function getGraphDataSets() {
 
             var nodesPromise = streamCSVFile(fileName, function (row) {
 
-                if (row.errors.length > 0)  return
+                if (row.errors.length > 0) return
 
                 //id,name,industry,country,sent,price,itemCount
                 //4488	alnc.	Consumer Staples	United States	64	12%	8
@@ -255,7 +346,7 @@ function getGraphDataSets() {
             var invalidLinks = 0
             var linksPromise = streamCSVFile(fileName2, function (row) {
 
-                if (row.errors.length > 0)  return
+                if (row.errors.length > 0) return
 
                 //SourceID,TargetID,Relationship Strenght
                 //4488	448338	12%
@@ -378,7 +469,15 @@ function getGraphDataSets() {
 
     }
 
+
+    var url = new URL(window.location.href);
+    var c = url.searchParams.get("countries");
+   let extraCountriesTODO
+    if (c) extraCountriesTODO=c.replace(new RegExp("_", "gi")," ")
+
     return [
+       queryDatabase(getCountryQuery(extraCountriesTODO)),
+        queryDatabase(getCountryQuery(extraCountriesTODO?extraCountriesTODO:"France,Taiwan")),
 
         loadRealDataSampleOnly("assets/realDataNodesv5_ticker.csv", "assets/realDataLinksv5.csv", function (graph) {
         }),

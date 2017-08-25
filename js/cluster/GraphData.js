@@ -53,7 +53,14 @@ class GraphData
             };
         });
 
-    return d3Links
+//TODO again invalid links are discared this time because of the database that send potentially invalid edges that lead to other potentially already existing notes if the whole structure is streamed in the near future
+          d3Links  = d3Links.filter(l => {
+            return  l.source && l.target ? l:undefined;
+        });
+
+
+
+        return d3Links
 
 
 
