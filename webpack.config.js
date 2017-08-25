@@ -5,7 +5,7 @@ module.exports = {
     devtool: 'source-map',
     output: {
         path: __dirname + "/build",
-        publicPath: "/test_app/build/",
+        publicPath: "/galaxy-webcomponent/build/",
         filename: "bundle.js",
         library: 'clusters'
     },

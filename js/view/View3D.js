@@ -478,7 +478,7 @@ class View3D extends HTMLElement {
 
         $(this.toolTipElem).css({
             "z-index": 1,
-            position: "relative",
+            position: "absolute",
             "user-select": "none"
         });
 

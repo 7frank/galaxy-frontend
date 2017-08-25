@@ -29,7 +29,7 @@
     #logo {
         position: absolute;
         top: 0px;
-        left: 30;
+        left: 30px;
         color: #ffffff;
         z-index: 1;padding: 10px;
     }
