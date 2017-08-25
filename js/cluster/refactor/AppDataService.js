@@ -190,7 +190,7 @@ var DataService=function(){
 AppDataService=new DataService("app").registerSrc("wiki",{required:"page",result:"misc.stats,misc.info",url:"http://fallout.wikia.com/"}) //templateurl?
 AppDataService.getWiki({page:""})
 */
-
+export
 var AppDataService={
 	getWiki:function(page){
 		

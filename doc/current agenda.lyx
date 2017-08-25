@@ -1223,6 +1223,42 @@ zoom buttons mousedown kep for touch users
 \end_layout
 
 \begin_layout Paragraph
+next
+\end_layout
+
+\begin_layout Itemize
+grid-layout 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://www.youtube.com/watch?v=7kVeCqQCxlk
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://mor10.com/
+\end_layout
+
+\begin_layout Itemize
+https://github.com/mor10
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+grid-template-area (responsive)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+news on right based on pos in cluster
+\end_layout
+
+\begin_layout Itemize
+touch options debugging ipad!!!!! important
+\end_layout
+
+\begin_layout Paragraph
 meeting 12.8.
  TODO order prio and merge
 \begin_inset Note Note
@@ -1299,54 +1335,42 @@ and like other screenshot from iq-broker
 
 \end_deeper
 \begin_layout Itemize
-grid-layout 
-\end_layout
 
-\begin_deeper
-\begin_layout Itemize
-https://www.youtube.com/watch?v=7kVeCqQCxlk
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-https://mor10.com/
-\end_layout
-
-\begin_layout Itemize
-https://github.com/mor10
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-grid-template-area (responsive)
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
+\strikeout on
 graphql/apollo
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 https://www.youtube.com/watch?v=9wiepxb8qPc
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 https://www.youtube.com/watch?v=kXH2dbnHYA0
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 incl sample of react-apollo-app
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
+
+\strikeout on
 transport agnostic defaoutl is http but websocket can be used to increase
  performance
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 server bei github scaphol.io 
 \end_layout
 
@@ -1357,17 +1381,9 @@ server bei github scaphol.io
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 company names calc with skip after view change flickers
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-TODO
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Itemize
@@ -1376,6 +1392,8 @@ hull
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 nur minimal generieren
 \end_layout
 
@@ -1450,14 +1468,6 @@ Health...
 \end_inset
 
  version
-\end_layout
-
-\begin_layout Itemize
-news on right based on pos in cluster
-\end_layout
-
-\begin_layout Itemize
-touch options debugging ipad!!!!! important
 \end_layout
 
 \begin_layout Itemize

@@ -714,6 +714,8 @@ var that=this
 
     applyClustering(mClusteringSpeccsArray, overrideExpand = false) {
 
+
+
         if (mClusteringSpeccsArray.length >= 0) {
             this.setEntries(mClusteringSpeccsArray);
         }
@@ -763,6 +765,7 @@ var that=this
         this.doClusteringForOnlyThis(entry);
 
 
+
         _.each(this.mClusters, function (mCluster, key) {
 
             var nextDepthSpeccsArray = [].concat(mClusteringSpeccsArray);
@@ -770,6 +773,7 @@ var that=this
 
             if (nextDepthSpeccsArray.length >= 1)
                 mCluster.applyClustering(nextDepthSpeccsArray);
+
 
         });
 

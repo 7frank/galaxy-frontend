@@ -10,6 +10,7 @@ import 'jquery-ui/ui/widgets/resizable';
 
 
 import "../../gui/company-details/CompanyDetails"
+import {AppDataService} from "./AppDataService";
 
 
 function formatNumber(num) {
@@ -259,7 +260,7 @@ export var GUI = {
 
 
 
-        $body.html("COMPANY<br> wikiinfo")
+        $body.html("")
 
         $body.append("<company-details></company-details>")
 
@@ -277,12 +278,18 @@ export var GUI = {
 
         return {
             setNode: function (node) {
+
+                ////////////////////////////////////////////////////////
+                console.warn("TODO implement node data from database")
+                return;
+
+
                 var news = ["U.S., China agree to first trade steps under 100-day plan",
                     "Wall Street falls, department stores take a drubbing",
                     "Behind Kushner Companies, a Chinese agency skirts visa-for-investment rules",
                     "In blow to Trump, GE backs NAFTA and plans growth in Mexico"]
 
-                lorem = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+               let lorem = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
 
 
                 //header
