@@ -83,6 +83,18 @@ class ZoomUtil {
 
         var alteredVecEnd = vec3End.clone().sub(distVec)
 
+        //-------------------------------------
+        //rotate the vector to be orientated on 0,0,1   //this will have not much impact on the 3d zoom but will prevent the 2d zoom from rotating
+        //TODO find an alternative solution
+
+        let distVec2d=new THREE.Vector3(0,0,1).multiplyScalar(distVec.length())
+        alteredVecEnd = vec3End.clone().sub(distVec2d)
+
+        // -------------------------------------
+
+
+
+
 
         //change distance to target
         var tween = new TWEEN.Tween(vec3Start)
