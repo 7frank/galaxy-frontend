@@ -1,5 +1,9 @@
 
 import bodyHTML from "./company-details-body.html"
+import TemplateString from "../../utils/TemplateString";
+
+
+
 
 class CompanyDetails extends HTMLElement {
 
@@ -13,8 +17,9 @@ class CompanyDetails extends HTMLElement {
 
     connectedCallback(){
 
+        let str=  new TemplateString(bodyHTML).format({name:"CompanyName"})
 
-        $(this).append(bodyHTML)
+        $(this).append(str)
 
 
 
