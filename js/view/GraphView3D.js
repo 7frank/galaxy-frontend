@@ -222,8 +222,10 @@ export default class GraphView3D extends View3D {
         var that = this;
 
 
-        $(that).off();
-        $(that).on("before-render", onBeforeRender);
+        //$(that).off();
+
+       if (!$(that).hasClass("before-render-inited"))
+        $(that).addClass("before-render-inited").on("before-render", onBeforeRender);
 
 
         function onBeforeRender() {

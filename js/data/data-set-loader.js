@@ -202,11 +202,11 @@ export function getGraphDataSets() {
     function getCountryQuery(countryName) {
         var str = ""
         if (countryName)
-            str = `country:"${countryName}"`
+            str = `(country:"${countryName}")`
 
         return `        
               query GraphCountryData  {
-                        nodes(${str}) {
+                        nodes ${str} {
                           id
                           name
                           country
@@ -216,7 +216,7 @@ export function getGraphDataSets() {
                           price
                           itemCount
                         }
-                          edges(${str}){
+                          edges ${str}{
                             source
                             target
                             strength

@@ -107,8 +107,8 @@ $(function () {
 
     var selectTemplate = `
 	<select class="cloudNodeColorSelect">
-	<option value="sent">sent</option>
-	<option value="priceRanges">priceRanges</option>
+	<option value="sent">sentiment</option>
+	<option value="priceRanges">price ranges</option>
 	<option value="group">group</option>
 	</select> 
 	`

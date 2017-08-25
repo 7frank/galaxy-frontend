@@ -374,7 +374,7 @@ var that=this
             this.applyClustering(this.getEntries(), true); //initialise sub-clusters if necessary
 
 
-            // primarily notify text Foverlay here
+            // primarily notify text overlay here
             $(this.getRoot().getView()).trigger("graph-changed");
 
             this.trigger("initial-expand");

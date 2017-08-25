@@ -357,6 +357,9 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
             let n = that.mNodes[i];
             if (n._bubble) n._bubble.position.set(n.x, n.y, n.z);
+
+            //check f particles are still valid and not being cleaned up for example
+            if (that.mNodeParticles)
             that.mNodeParticles.updateNodePosition(i);
 
         }, function onStep() {

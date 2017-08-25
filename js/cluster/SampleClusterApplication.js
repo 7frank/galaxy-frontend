@@ -134,15 +134,15 @@ export class SampleClusterApplication extends HTMLElement {
 
 
     setupViews() {
-      /*  const thumbCSS = {
-            "pointer-events": "all",
-            height: 300,
-            width: 400,
-            display: "flex",
-            "border": "1px solid rgba(128, 128, 128, 0.5)",
-            margin: "0.2em"
-        };
-*/
+        /*  const thumbCSS = {
+              "pointer-events": "all",
+              height: 300,
+              width: 400,
+              display: "flex",
+              "border": "1px solid rgba(128, 128, 128, 0.5)",
+              margin: "0.2em"
+          };
+  */
 
         function createContainer() {
 
@@ -212,7 +212,8 @@ export class SampleClusterApplication extends HTMLElement {
 
                     $(this)
                         .addClass(".view-thumbnail")
-                    return;}
+                    return;
+                }
 
 
                 $(this)
@@ -469,19 +470,19 @@ export class SampleClusterApplication extends HTMLElement {
                     click: function () {
                         // this.toggleCollapse()
                     },
-                    mouseover:function(){
-                        this.mHull.visible=true
+                    mouseover: function () {
+                        this.mHull.visible = true
                     },
-                    mouseout:function(){
-                        this.mHull.visible=false
+                    mouseout: function () {
+                        this.mHull.visible = false
                     }
                 },
                 options: {
                     minClusterSize: 15
-                   // ,hull:BoxVolume
-                    ,hull: ConvexVolume,
-                    onHullCreated:function(volume){
-                        volume.visible=false
+                    // ,hull:BoxVolume
+                    , hull: ConvexVolume,
+                    onHullCreated: function (volume) {
+                        volume.visible = false
                     }
 
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
@@ -493,7 +494,7 @@ export class SampleClusterApplication extends HTMLElement {
 
                     text: function () {
                         //return IndustrialSectorIcon(this.name)
-                       return  IndustrialSectorAbbreviation(this.name)
+                        return IndustrialSectorAbbreviation(this.name)
                     }
                 },
                 events: {
@@ -533,8 +534,8 @@ export class SampleClusterApplication extends HTMLElement {
         // the second defined the dimensions 1/2/3 that get used for the element placement
 
 
-        let countryDistribution = new ForceGraphDistribution(150000, 2); // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new ForceGraphDistribution(30000, 2);// industries within countries use the Force-Graph approach to position elements
+        let countryDistribution = new ForceGraphDistribution(60000, 2); // countries get placed equally on a plane of size 15k X 15k
+        let industryDistribution = new ForceGraphDistribution(10000, 2);// industries within countries use the Force-Graph approach to position elements
         let nodesWithinIndustryDistribution = new ForceGraphDistribution(5000, 2);//same goes for the nodes within each industry
 
         //the final configuration for rendering
@@ -562,7 +563,7 @@ export class SampleClusterApplication extends HTMLElement {
                 distribution: industryDistribution,
                 events: {
                     click: function () {
-                       // this.toggleCollapse()
+                        // this.toggleCollapse()
 
                         console.log("toggled country?", this.name)
                     }
@@ -580,7 +581,7 @@ export class SampleClusterApplication extends HTMLElement {
                 distribution: nodesWithinIndustryDistribution,
                 events: {
                     click: function () {
-                      //  this.toggleCollapse()
+                        //  this.toggleCollapse()
                         console.log("toggled leaf", this.name)
                     }
                 },
@@ -624,24 +625,50 @@ export class SampleClusterApplication extends HTMLElement {
     }
 
 
+    doZoomToRelevant(rootCluster) {
+
+        setTimeout(function () {
+
+            //TODO zoom to usa
+           /* if (rootCluster.mClusters["United States"])
+                rootCluster.mClusters["United States"].zoomToCluster()
+            else*/
+
+
+                this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
+                    //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
+                    this.getCurrentView().mRootCluster.zoomToCluster(150000)
+
+                });
+
+
+        }.bind(this), 3000)
+
+
+        //   this.getCurrentView().mRootCluster.zoomToCluster()
+
+
+    }
+
     getCurrentView() {
         return $(".view-3d.view-3d-maximised").get(0)
 
     }
 
 
-    resetNodesPositions(nodes){
+    resetNodesPositions(nodes) {
 
-        _.each(nodes,function (n) {
-         n.x=0;
-            n.y=0;
-            n.z=0;
+        _.each(nodes, function (n) {
+            n.x = 0;
+            n.y = 0;
+            n.z = 0;
 
         })
 
     }
 
-    setGraph2D() {
+    setGraph2D(onComplete = function () {
+    }) {
 
 
         /**
@@ -660,10 +687,19 @@ export class SampleClusterApplication extends HTMLElement {
         let view = this.getCurrentView();
 
 
-        view.mScene.background = new THREE.Color(0x555555);
-
-
         let rootCluster = view.mRootCluster;
+
+
+        if (!rootCluster || rootCluster.isLocked()) {
+            console.warn("can't setGraph2D wait until animation has finished");
+            return
+        }
+
+        rootCluster.setLock()
+
+
+        // view.mScene.background = new THREE.Color(0xFFFFFF);
+
 
         this.resetNodesPositions(rootCluster.mNodes)
 
@@ -680,16 +716,22 @@ export class SampleClusterApplication extends HTMLElement {
         //TODO
         $(view).trigger("graph-changed");
 
-
-        this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
-            //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
-            this.getCurrentView().mRootCluster.zoomToCluster(150000)
-
-        });
+        this.doZoomToRelevant(rootCluster)
 
         view.mControls.target.set(new THREE.Vector3(0, 0, 0));
         view.mControls.noRotate = true;
         view.mControls.reset();
+
+
+        //currently the hull update event is a good indicator
+        //TODO test and improve the way we determine when a cluster may be changed again
+        rootCluster.on("hull-updated", function () {
+
+            rootCluster.setLock(false)
+
+            onComplete()
+
+        })
 
 
         // view.mSkyDome.visible=false;
@@ -697,14 +739,24 @@ export class SampleClusterApplication extends HTMLElement {
     }
 
 
-    setGraph3D() {
+    setGraph3D(onComplete = function () {
+    }) {
 
         let speccs = this.getForceSpeccs();
         let view = this.getCurrentView();
+        let rootCluster = view.mRootCluster;
+
+
+        if (!rootCluster || rootCluster.isLocked()) {
+            console.warn("can't setGraph3D wait until animation has finished");
+            return
+        }
+
+        rootCluster.setLock(true)
+
 
         view.mScene.background = new THREE.Color(0x000000);
 
-        let rootCluster = view.mRootCluster;
 
         rootCluster.cleanUpLeafs();
         //clean up previous clusters
@@ -722,9 +774,17 @@ export class SampleClusterApplication extends HTMLElement {
         view.mControls.noRotate = false;
 
         //view.mSkyDome.visible=true;
+        this.doZoomToRelevant(rootCluster)
 
 
-        this.getCurrentView().mRootCluster.zoomToCluster()
+        rootCluster.on("hull-updated", function () {
+
+            rootCluster.setLock(false)
+            onComplete()
+
+        })
+
+
     }
 
 

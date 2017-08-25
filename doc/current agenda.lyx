@@ -990,6 +990,63 @@ if possible we should define about sprints of equal length.
 \end_layout
 
 \begin_layout Subsection
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+asdasd
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+next
+\end_layout
+
+\begin_layout Itemize
+grid-layout 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://www.youtube.com/watch?v=7kVeCqQCxlk
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://mor10.com/
+\end_layout
+
+\begin_layout Itemize
+https://github.com/mor10
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+grid-template-area (responsive)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+news on right based on pos in cluster
+\end_layout
+
+\begin_layout Itemize
+touch options debugging ipad!!!!! important
+\end_layout
+
+\begin_layout Itemize
+when loading focus united states
+\end_layout
+
+\begin_layout Itemize
+zoom in out controls
+\end_layout
+
+\begin_layout Subsection
 20- 26.
  08
 \end_layout
@@ -1024,10 +1081,6 @@ sent >iment<
 \end_inset
 
  color
-\end_layout
-
-\begin_layout Itemize
-when loading focus united states
 \end_layout
 
 \begin_layout Itemize
@@ -1220,42 +1273,6 @@ set zoom target on hover if none is selected
 
 \begin_layout Itemize
 zoom buttons mousedown kep for touch users
-\end_layout
-
-\begin_layout Paragraph
-next
-\end_layout
-
-\begin_layout Itemize
-grid-layout 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-https://www.youtube.com/watch?v=7kVeCqQCxlk
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-https://mor10.com/
-\end_layout
-
-\begin_layout Itemize
-https://github.com/mor10
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-grid-template-area (responsive)
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-news on right based on pos in cluster
-\end_layout
-
-\begin_layout Itemize
-touch options debugging ipad!!!!! important
 \end_layout
 
 \begin_layout Paragraph
@@ -1472,10 +1489,6 @@ Health...
 
 \begin_layout Itemize
 circular cluster for 2d?
-\end_layout
-
-\begin_layout Itemize
-zoom in out controls
 \end_layout
 
 \begin_layout Subsection

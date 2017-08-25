@@ -10,54 +10,57 @@ class ModeSelect extends HTMLElement {
 
     connectedCallback() {
 
-        let _2d = $("<span>").html("2D").on("click", () => this.setMode("2d"));
-        let _3d = $("<span>").html("3D").on("click", () => this.setMode("3d"));
+      this.btn2d= $("<span>").html("2D").on("click", () => this.setMode("2d"));
+       this.btn3d= $("<span>").addClass("selected").html("3D").on("click", () => this.setMode("3d"));
 
-        $(this).append(_3d, _2d)
+        $(this).append( this.btn3d,  this.btn2d)
 
 
     }
 
     setMode(mode) {
 
-        /*
-            var cameraModi;
-            var main = null;
+        var spinner=$(`<div class="spinner">
+  <div class="bounce1"></div>
+  <div class="bounce2"></div>
+  <div class="bounce3"></div>
+</div>`)
 
-            var prevMode;
-            */
-        //...
         let main=$("sample-cluster-application").get(0)
 
-        //   if (prevMode == mode) return;//  prevMode = mode;
-        //  if (!cameraModi) cameraModi = new CameraObserverMode(env);
+           if (this.prevMode == mode) return;//  prevMode = mode;
+
 
         if (mode == "3d") {
-            main.setGraph3D();
-            // cameraModi.setMode("3d")
 
 
-            //Graph.numDimensions(3);
+         //   this.btn3d.html('').append(spinner)
+            main.setGraph3D(function(){
+                this.prevMode=mode
+                this.btn3d.addClass("selected")
+                this.btn2d.removeClass("selected")
+             //   this.btn3d.html('3D')
+            }.bind(this));
+
+
+
+
             $("body").removeClass("inverted");
 
-            //   env.controls.target.set(new THREE.Vector3(0,0,0));
-            //      doZoomToPos(new THREE.Vector3(0, 0, 5000));
-            //   main.getCurrentView().mRootCluster.zoomToCluster()
-            //   env.controls.noRotate=false
             //TODO for orbit controls controls.mouseButtons = { PAN: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, ORBIT: THREE.MOUSE.RIGHT }; // swapping left and right buttons
         }
         else if (mode == "2d") {
-            main.setGraph2D();
-            //  cameraModi.setMode("2d")
-            //Graph.numDimensions(2);
 
-           // $("body").addClass("inverted");
+           // this.btn2d.html('').append(spinner)
+            main.setGraph2D(function(){
 
+                this.prevMode=mode
+                this.btn2d.addClass("selected")
+                this.btn3d.removeClass("selected")
+             //   this.btn3d.html('2D')
 
-            //  env.controls.target.set(new THREE.Vector3(0,0,0));
-            //main.getCurrentView().mRootCluster.zoomToCluster()
-            //  doZoomToPos(new THREE.Vector3(0, 0, 3000));
-            //   env.controls.noRotate=true
+            }.bind(this));
+
         }
     }
 

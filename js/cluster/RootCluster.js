@@ -191,6 +191,18 @@ addColorScheme(cs){
 
 
 
+   isLocked(){
+
+       return  this.mLock==true
+
+   }
+
+    setLock(bLocked=true){
+
+        return  this.mLock=bLocked
+
+    }
+
 
     applyClustering(mClusteringSpeccsArray,overrideExpand=false) {
 
@@ -199,6 +211,8 @@ addColorScheme(cs){
         super.applyClustering(mClusteringSpeccsArray,overrideExpand)
 
         this.resetTextOverlay()
+
+
 
 
 
