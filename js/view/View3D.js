@@ -8,7 +8,7 @@
 
 
 import DomEventsAlt from "../cluster/utils/DomEventsAlt"
-
+import  "./View3D.css"
 
 
 
@@ -19,7 +19,7 @@ class View3D extends HTMLElement {
         super(...args);
 
 
-        this.createCSSRule();
+       // this.createCSSRule();
         this.mTime = -1;
         this.mActualFPS = 0;
         this.showFPSCounter = false;
@@ -142,22 +142,6 @@ class View3D extends HTMLElement {
     }
 
 
-
-
-
-
-    //TODO remove little redundancy
-    createCSSRule() {
-
-        var style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = '.view-3d-maximised {  border: 0px solid rgba(128, 128, 128, 0.5) !important; margin: 0 !important; position: absolute !important;   top: 0  !important;   left: 0  !important;   height: 100% !important;    width: 100% !important; }';
-        document.getElementsByTagName('head')[0].appendChild(style);
-
-
-    }
-
-
     resizeCanvas() {
         if (this.mRenderer &&  this.mCamera) {
             this.mRenderer.setSize(this.clientWidth, this.clientHeight);
@@ -197,21 +181,8 @@ class View3D extends HTMLElement {
     setCaption(text) {
 
 
-        let captionCSS = {
-            "pointer-events": "none",
-            position: "relative",
-            padding: "1em",
-            "font-size": "2em",
-            top: "30%",
-            height: "3em",
-            width: "100%",
-            background: "rgba(255,255,255,0.3)",
-            left: "0px",
-            "z-index": 1
-        };
-
-        if (!this.mCaption)
-            this.mCaption = $("<span></span>").html(this.name).css(captionCSS);
+            if (!this.mCaption)
+            this.mCaption = $("<span></span>").html(this.name).addClass(".view-3d-caption");
 
         this.mCaption.html("").append(text);
         return this
@@ -235,23 +206,10 @@ class View3D extends HTMLElement {
 
         this.mLastFrameTime = -1;
 
-        let captionCSS = {
-            "pointer-events": "none",
-            position: "relative",
-            padding: "1em",
-            "font-size": "2em",
-            top: "30%",
-            height: "3em",
-            width: "100%",
-            background: "rgba(255,255,255,0.3)",
-            left: "0px",
-            "z-index": 1
-        };
 
-        if (!this.mCaption)
-            this.mCaption = $("<span></span>").html(this.name).css(captionCSS);
+        this.setCaption(this.name)
 
-        $(this).append(this.mCaption).addClass("view-3d");
+        $(this).addClass("view-3d");
 
 
         // Setup scene
@@ -269,7 +227,7 @@ class View3D extends HTMLElement {
         this.appendChild(this.mRenderer.domElement);
 
 
-        $(this.mRenderer.domElement).css({position: "absolute", width: "100%", height: "100%"});
+        $(this.mRenderer.domElement).css({position: "absolute",top:0,left:0, width: "100%", height: "100%"});
 
 
         //init basic keyboard io

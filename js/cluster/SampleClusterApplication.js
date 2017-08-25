@@ -134,7 +134,7 @@ export class SampleClusterApplication extends HTMLElement {
 
 
     setupViews() {
-        const thumbCSS = {
+      /*  const thumbCSS = {
             "pointer-events": "all",
             height: 300,
             width: 400,
@@ -142,7 +142,7 @@ export class SampleClusterApplication extends HTMLElement {
             "border": "1px solid rgba(128, 128, 128, 0.5)",
             margin: "0.2em"
         };
-
+*/
 
         function createContainer() {
 
@@ -208,7 +208,16 @@ export class SampleClusterApplication extends HTMLElement {
 
             function maximiseView() {
 
-                if (this.isMaximised()) return;
+                if (this.isMaximised()) {
+
+                    $(this)
+                        .addClass(".view-thumbnail")
+                    return;}
+
+
+                $(this)
+                    .removeClass(".view-thumbnail")
+
                 container.hide();
 
                 let maximisedContainer = $(that) //$("#3d-graph");
@@ -245,7 +254,7 @@ export class SampleClusterApplication extends HTMLElement {
 
 
             $(mGraphView)
-                .css(thumbCSS);
+                .addClass(".view-thumbnail")  // .css(thumbCSS);
 
             $(mGraphView).on("dblclick", maximiseView);
 
