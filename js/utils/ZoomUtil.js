@@ -4,6 +4,7 @@
 //import TWEEN from "@tweenjs/tween.js"
 
 import TWEEN from "../lib/Tween"
+import BaseCluster3D from "../cluster/BaseCluster3D";
 
 //TODO refactor existing samples
 export default
@@ -41,6 +42,17 @@ class ZoomUtil {
 
          var position = new THREE.Vector3();
         position.setFromMatrixPosition(mesh.matrixWorld);
+
+
+        //fixes cluster hull center if one is present
+        if (mesh instanceof BaseCluster3D)
+        {
+            console.log(mesh.mHull.mBoundingBox.getCenter())
+           let hullCenterPos= mesh.mHull.mBoundingBox.getCenter()
+            position= mesh.localToWorld(hullCenterPos)
+        }
+
+
 
        ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
 
