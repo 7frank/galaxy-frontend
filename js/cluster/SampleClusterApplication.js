@@ -556,7 +556,13 @@ export class SampleClusterApplication extends HTMLElement {
             {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: rootHull}
+                options: {
+                    minClusterSize: 40, hull: rootHull, colors: {
+                        edge: [0x000000, 1],
+
+                        hull: [0x6A5ACD, 0.4] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
+                    }
+                }
             },
             {
                 generator: industrySetGenerator,
@@ -630,16 +636,16 @@ export class SampleClusterApplication extends HTMLElement {
         setTimeout(function () {
 
             //TODO zoom to usa
-           /* if (rootCluster.mClusters["United States"])
-                rootCluster.mClusters["United States"].zoomToCluster()
-            else*/
+            /* if (rootCluster.mClusters["United States"])
+                 rootCluster.mClusters["United States"].zoomToCluster()
+             else*/
 
 
-                this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
-                    //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
-                    this.getCurrentView().mRootCluster.zoomToCluster(150000)
+            this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
+                //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
+                this.getCurrentView().mRootCluster.zoomToCluster(150000)
 
-                });
+            });
 
 
         }.bind(this), 3000)
@@ -698,7 +704,11 @@ export class SampleClusterApplication extends HTMLElement {
         rootCluster.setLock()
 
 
-        // view.mScene.background = new THREE.Color(0xFFFFFF);
+         view.mScene.background = new THREE.Color(0xFFFFFF);
+
+
+        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").addClass("darker")
+
 
 
         this.resetNodesPositions(rootCluster.mNodes)
@@ -756,6 +766,9 @@ export class SampleClusterApplication extends HTMLElement {
 
 
         view.mScene.background = new THREE.Color(0x000000);
+
+        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass("darker")
+
 
 
         rootCluster.cleanUpLeafs();

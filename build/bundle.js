@@ -73764,9 +73764,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         //initially have a value to ignore the lod while loading to make the animations visible for certain elements
         this.useLOD = false;
 
-        this.bClusterEdgesVisible=true;
+        this.bClusterEdgesVisible = true;
         //add collapse/expand stuff
-      //  this.mExpanded = true;
+        //  this.mExpanded = true;
         this.mClusterClusteringApplied = false;
         this.mCollapsedGroup = new THREE.Group();
         this.mExpandedGroup = new THREE.Group();
@@ -73779,7 +73779,6 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
 
         this.registerCustomEvent("initial-expand"); //triggered when a collapsed cluster gets expanded
-
 
 
         this.registerCustomEvent("cluster-ready"); //if the cluster animation is finished
@@ -73826,8 +73825,8 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             let distance = dst.sub(src).length();
 
             //no need for updates if nothing changed
-            if (this.mLastCamDistance==distance) return
-            this.mLastCamDistance=distance
+            if (this.mLastCamDistance == distance) return
+            this.mLastCamDistance = distance
 
 
             //TODO how to handle max distance with the lod approach of meshes
@@ -73844,38 +73843,33 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
         })
 
 
-
-
-
-
-
     }
 
 
-    setLeafsVisible(bVisible){
+    setLeafsVisible(bVisible) {
 
-    this.getLeafs().forEach( l => l.visible=bVisible)
-
-    }
-
-    setParticlesVisible(bVisible){
-
-        this.getLeafs().forEach( l => l.setParticlesVisible(bVisible) )
+        this.getLeafs().forEach(l => l.visible = bVisible)
 
     }
 
-    setNodesVisible(bVisible){
+    setParticlesVisible(bVisible) {
 
-        this.getLeafs().forEach( l => l.setNodesVisible(bVisible) )
+        this.getLeafs().forEach(l => l.setParticlesVisible(bVisible))
+
+    }
+
+    setNodesVisible(bVisible) {
+
+        this.getLeafs().forEach(l => l.setNodesVisible(bVisible))
 
     }
 
 //FIXME does not work
-    setEdgesVisible(bVisible){
+    setEdgesVisible(bVisible) {
 
         //TODO interference with lod
-        this.findClusters("*").forEach( function (c){
-            c.bClusterEdgesVisible=bVisible;
+        this.findClusters("*").forEach(function (c) {
+            c.bClusterEdgesVisible = bVisible;
             if (c.mChildClustersEdgesMesh) {
                 c.mChildClustersEdgesMesh.material.visible = bVisible;
 
@@ -73885,10 +73879,9 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
 
         })
 
-        this.getLeafs().forEach( l => l.setEdgesVisible(bVisible) )
+        this.getLeafs().forEach(l => l.setEdgesVisible(bVisible))
 
     }
-
 
 
     //TODO update position and radius
@@ -73901,22 +73894,22 @@ class BaseCluster3D extends __WEBPACK_IMPORTED_MODULE_1__BaseNode__["a" /* defau
             if (this.mHull) {
                 let boundingBox = this.mHull.mBoundingBox;
                 boundingSphere = boundingBox.getBoundingSphere();
-               this.mCollapsedClusterHull.position.copy(boundingSphere.center);
+                this.mCollapsedClusterHull.position.copy(boundingSphere.center);
             }
 
-var that=this
-          setTimeout(function(){
+            var that = this
+            setTimeout(function () {
 
-              that.trigger("hull-updated")
+                that.trigger("hull-updated")
 
-          },1000)
+            }, 1000)
 
             return this.mCollapsedClusterHull
         }
 
 //FIXME MeshPhongMaterial does not get light
         let material = new THREE.MeshBasicMaterial({
-            color:0xFFFFFF, // 0xfaebd7, //antique-white
+            color: 0xFFFFFF, // 0xfaebd7, //antique-white
             wireframe: false,
             transparent: false,
             opacity: 1.0,
@@ -73924,15 +73917,15 @@ var that=this
             polygonOffset: true,
             polygonOffsetFactor: -4,
             depthTest: false,
-            blending:THREE.NoBlending
+            blending: THREE.NoBlending
         });
 
 
         let materialOtherBlue = new THREE.MeshBasicMaterial({
-            color:0x6a5acd, //slate-blue
+            color: 0x6a5acd, //slate-blue
             wireframe: false,
             transparent: false,
-           // opacity: 0.8,
+            // opacity: 0.8,
             visible: true,
             polygonOffset: true,
             polygonOffsetFactor: -4,
@@ -74001,27 +73994,25 @@ var that=this
         this.mCollapsedGroup.add(this.mCollapsedClusterHull);
         //------
 
-var origScale;
-        this.on("mouseover",function(){
+        var origScale;
+        this.on("mouseover", function () {
 
-            if (this.mExpanded==false)
+            if (this.mExpanded == false)
                 if (this.mCollapsedClusterHull) {
-                    origScale=this.mCollapsedClusterHull.scale.clone()
-                    this.mCollapsedClusterHull.scale.multiplyScalar (1.05)
+                    origScale = this.mCollapsedClusterHull.scale.clone()
+                    this.mCollapsedClusterHull.scale.multiplyScalar(1.05)
 
                 }
 
         })
-        this.on("mouseout",function(){
+        this.on("mouseout", function () {
 
-            if (this.mExpanded==false)
+            if (this.mExpanded == false)
                 if (this.mCollapsedClusterHull)
                     this.mCollapsedClusterHull.scale.copy(origScale)
 
 
         })
-
-
 
 
         this.trigger("hull-updated") //the collapsed sphere hull functions the same as the actual hull in terms of this event
@@ -74065,15 +74056,15 @@ var origScale;
         //TODO have a container for children so deferred elements are hidden too
         // _.each(this.children,el => el.visible=false )
 
-var that=this
+        var that = this
         //this.mExpandedGroup.visible = false;
         this.animate({mCollapsedGroup: {scale: {x: 0.3, y: 0.3, z: 0.3}}}, 200)
-        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200,function(){
-            this.mExpandedGroup.visible=false
+        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200, function () {
+            this.mExpandedGroup.visible = false
         })
 
 
-       this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
+        this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
 
 
         //TODO togging the group will have strange effect
@@ -74091,8 +74082,7 @@ var that=this
         var that = this;
 
         if (this.mCollapsedClusterHull)
-        this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
-
+            this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
 
 
         if (!this.mClusterClusteringApplied) {
@@ -74117,8 +74107,7 @@ var that=this
         this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
 
 
-
-        this.mExpandedGroup.visible=true
+        this.mExpandedGroup.visible = true
 
         this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
 
@@ -74158,7 +74147,7 @@ var that=this
 
             this.mChildClustersEdgesMesh.material.opacity = opa//*this.mEdgeFadeInVal ;
 
-            this.mChildClustersEdgesMesh.material.visible =this.bClusterEdgesVisible? vis > 0.02 && vis < 0.9:false;
+            this.mChildClustersEdgesMesh.material.visible = this.bClusterEdgesVisible ? vis > 0.02 && vis < 0.9 : false;
 
         }
 
@@ -74365,16 +74354,41 @@ var that=this
 
     getClusterOptions() {
 
+
         let options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
             hull: __WEBPACK_IMPORTED_MODULE_3__hull_BaseVolume__["a" /* default */],
-            onHullCreated:function(){},
+            onHullCreated: function () {
+            },
             //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
             expanded: true,  //determines if a cluster is initially expanded or not
-            text:function noop(){ }
-
+            text: function noop() {
+            },
+            colors:{}
         }, this.mEntry.options);
+
+
+
+        //we want to have to color option defaults copied from the parent if it exists
+        //or set otherwise
+        let parent = this.getParentCluster()
+        if (!parent) //is root
+        {
+
+            options.colors=
+            _.extend({
+                    edge: [0x999999, 1],
+
+                    hull: [0xffffff, 0.03]//     color: 0xffffff,    opacity: 0.03,
+            }, options.colors);
+
+        }
+        else
+            options.colors=
+                _.extend( parent.getClusterOptions().colors, options.colors);
+
+
 
         return options
 
@@ -74442,7 +74456,6 @@ var that=this
     applyClustering(mClusteringSpeccsArray, overrideExpand = false) {
 
 
-
         if (mClusteringSpeccsArray.length >= 0) {
             this.setEntries(mClusteringSpeccsArray);
         }
@@ -74492,7 +74505,6 @@ var that=this
         this.doClusteringForOnlyThis(entry);
 
 
-
         _.each(this.mClusters, function (mCluster, key) {
 
             var nextDepthSpeccsArray = [].concat(mClusteringSpeccsArray);
@@ -74504,7 +74516,9 @@ var that=this
 
         });
 
-        this.updateCluster();
+
+        // elements are added elsewhere
+        //this.updateCluster();
 
 
         //clean up previous clusters
@@ -74554,6 +74568,8 @@ var that=this
 
         _.extend(this.mClusters, _clustersObj);
 
+        //TODO add clusters to parent so getParentCluster Works within options
+        this.addAllSubClustersToContainer()
 
         /**
          * add listeners to child elements if the hull was update
@@ -74564,11 +74580,11 @@ var that=this
             childCluster.on("hull-updated", _.throttle(function () {
 
 
-
                 that.adjustHullSize();
 
 
-                that.addChildClusterEdgeMesh();
+                let o=that.getClusterOptions()
+                that.addChildClusterEdgeMesh({color:o.colors.edge[0],opacity:o.colors.edge[1]});
                 that.updateChildClusterEdgeMeshWithHull();
 
                 that.trigger("hull-updated");
@@ -74646,8 +74662,8 @@ var that=this
             }
 
             else {
-       //         console.warn("src - hull should exist before calling this function...")
-              //  continue;
+                //         console.warn("src - hull should exist before calling this function...")
+                //  continue;
                 src = edge.source.position.clone();
             }
 
@@ -74660,32 +74676,31 @@ var that=this
             }
             else if (edge.target.mCollapsedClusterHull) {
 
-               dst = edge.target.geometry.boundingBox.getCenter();
+                dst = edge.target.geometry.boundingBox.getCenter();
 
 
             }
 
             else {
-            //    console.warn("dst - hull should exist before calling this function...")
-              //  continue;
+                //    console.warn("dst - hull should exist before calling this function...")
+                //  continue;
                 dst = edge.target.position.clone();
             }
 
 
-
             //fix edge length for collapsed
-  /*       if (edge.source.mCollapsedClusterHull) {
+            /*       if (edge.source.mCollapsedClusterHull) {
 
 
-             let v1=dst.clone().sub(src);
+                       let v1=dst.clone().sub(src);
 
-                let radius = edge.source.geometry.boundingBox.getBoundingSphere().radius;
-             v1.multiply(radius/ v1.length())
+                          let radius = edge.source.geometry.boundingBox.getBoundingSphere().radius;
+                       v1.multiply(radius/ v1.length())
 
-             src.sub(v1)
+                       src.sub(v1)
 
-         }
-*/
+                   }
+          */
 
             let src0 = edge.source.position || edge.source._el.position;
             let dst0 = edge.target.position || edge.target._el.position;
@@ -74700,10 +74715,10 @@ var that=this
 
     }
 
-    createShaderLineMaterial(){
+    createShaderLineMaterial() {
 
 
-        let fragmentShader=`
+        let fragmentShader = `
         
         	uniform vec3 color;
 			uniform float opacity;
@@ -74724,38 +74739,37 @@ var that=this
         `
 
 
-     let    attributes = {
+        let attributes = {
 
-            displacement: {	type: 'v3', value: [] },
-            customColor: {	type: 'c', value: [] }
-
-        };
-
-      let  uniforms = {
-
-            amplitude: { type: "f", value: 5.0 },
-            opacity:   { type: "f", value: 0.3 },
-            color:     { type: "c", value: new THREE.Color( 0xff0000 ) }
+            displacement: {type: 'v3', value: []},
+            customColor: {type: 'c', value: []}
 
         };
 
-        var lineMaterial = new THREE.ShaderMaterial( {
+        let uniforms = {
 
-            uniforms: 		uniforms,
-           // attributes:     attributes,
-          //  vertexShader:   vertexShader,
+            amplitude: {type: "f", value: 5.0},
+            opacity: {type: "f", value: 0.3},
+            color: {type: "c", value: new THREE.Color(0xff0000)}
+
+        };
+
+        var lineMaterial = new THREE.ShaderMaterial({
+
+            uniforms: uniforms,
+            // attributes:     attributes,
+            //  vertexShader:   vertexShader,
             fragmentShader: fragmentShader,
-            blending: 		THREE.AdditiveBlending,
-            depthTest:		false,
-            transparent:	true
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true
 
         });
 
         lineMaterial.linewidth = 1;
 
 
-
-        lineMaterial._color=lineMaterial.color;
+        lineMaterial._color = lineMaterial.color;
         Reflect.defineProperty(lineMaterial, "color", {
             enumerable: false,
             configurable: false,
@@ -74764,15 +74778,11 @@ var that=this
             },
             set: function (c) {
 
-                this._color=c;
-                this.uniforms.color.value=c
+                this._color = c;
+                this.uniforms.color.value = c
 
             }
         });
-
-
-
-
 
 
         return lineMaterial
@@ -74804,7 +74814,7 @@ var that=this
         var lineMaterial;
         var mergedLineMesh;
 
-      let  defaults = {
+        let defaults = {
             opacity: 1.0,
             transparent: true,
             //lineIsVisible:true, // if disabled the line won't be shown on the scene
@@ -74813,7 +74823,7 @@ var that=this
 
         options = _.extend(defaults, options);
         //MeshBasicMaterial
-       lineMaterial = new THREE.LineBasicMaterial({
+        lineMaterial = new THREE.LineBasicMaterial({
             color: options.color,
             transparent: options.transparent,
             opacity: options.opacity,
@@ -74823,16 +74833,16 @@ var that=this
         });
 
 
-/*
-FIXME lines should not interfere with it's cluster (currently are overdrawing)
-lineMaterial=this.createShaderLineMaterial();
-        lineMaterial.color= new THREE.Color( options.color);
-        lineMaterial.opacity= options.opacity;
+        /*
+        FIXME lines should not interfere with it's cluster (currently are overdrawing)
+        lineMaterial=this.createShaderLineMaterial();
+                lineMaterial.color= new THREE.Color( options.color);
+                lineMaterial.opacity= options.opacity;
 
-        if (!window["lineMaterial"]) window["lineMaterial"]=[]
-        window["lineMaterial"].push(lineMaterial)
+                if (!window["lineMaterial"]) window["lineMaterial"]=[]
+                window["lineMaterial"].push(lineMaterial)
 
-*/
+        */
 
 
         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__utils_MaterialFadeMixin__["a" /* default */])(lineMaterial);
@@ -74842,7 +74852,7 @@ lineMaterial=this.createShaderLineMaterial();
 
 
         //TODO check if this might be holpful to put edges behind nodes
-       // this.mChildClustersEdgesMesh.layers.set(1)
+        // this.mChildClustersEdgesMesh.layers.set(1)
 
         this.mChildClustersEdgesMesh.geometry.boundingBox = new THREE.Box3;
         this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
@@ -75021,6 +75031,18 @@ lineMaterial=this.createShaderLineMaterial();
 
     }
 
+
+    setHullColorFromOptions(hull) {
+        let o = this.getClusterOptions()
+
+        if (hull.canBeVisible()) {
+
+        hull.mesh.material.color = new THREE.Color(o.colors.hull[0])
+        hull.maxOpacity = o.colors.hull[1]
+        }
+
+    }
+
     /**
      *
      *  current implementation of the hull is a simple invisible boundingBox with
@@ -75038,9 +75060,8 @@ lineMaterial=this.createShaderLineMaterial();
         if (this.mExpanded == false) {
 
             this.getSphereHull();
-        return;
+            return;
         }
-
 
 
         let info = {box: new THREE.Box3, vertices: []};
@@ -75089,6 +75110,8 @@ lineMaterial=this.createShaderLineMaterial();
                 this.mHull = new mOptions.hull();
                 mOptions.onHullCreated(this.mHull)
 
+
+
                 this.mExpandedGroup.add(this.mHull);
             }
             else throw new Error("option hull must have superclass BaseVolume");
@@ -75113,6 +75136,10 @@ lineMaterial=this.createShaderLineMaterial();
             sphereGeometry.boundingBox = boundingBox;
             this.geometry = sphereGeometry;
         }
+
+
+        this.setHullColorFromOptions(this.mHull)
+
 
         //notify listeners that the hull size changed
         this.trigger("hull-updated")
@@ -75139,9 +75166,8 @@ lineMaterial=this.createShaderLineMaterial();
      * @param entry
      */
 
-  getParentCluster()
-    {
-        let expContainer=this.parent;
+    getParentCluster() {
+        let expContainer = this.parent;
         if (expContainer) return expContainer.parent
 
 
@@ -75152,16 +75178,15 @@ lineMaterial=this.createShaderLineMaterial();
         // console.log("reached leaf cluster", this)
         var that = this;
 
-       let domEvents= this.getDOMEvents()
+        let domEvents = this.getDOMEvents()
 
-        let leaf = new __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */](this.mNodes,domEvents);
+        let leaf = new __WEBPACK_IMPORTED_MODULE_0__ClusterLeafElement__["a" /* default */](this.mNodes, domEvents);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
         leaf.setDistributionHandler(entry.distribution, function () {
 
             //create/update the hull element after the animation has finished
             that.adjustHullSize();
-
 
 
             if (that.isLeaf())
@@ -75384,7 +75409,7 @@ lineMaterial=this.createShaderLineMaterial();
             if (r == null) return parents;
 
             //the actual parent cluster has one group element where the sub-cluster resides
-            if (r instanceof THREE.Group && r.parent instanceof BaseCluster3D) r=r.parent;
+            if (r instanceof THREE.Group && r.parent instanceof BaseCluster3D) r = r.parent;
 
             if (!(r instanceof BaseCluster3D)) return parents;
             _root = r;
@@ -85327,6 +85352,8 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
     }
 
+
+
     //-----------------
     var ac_instance = searchbar.autocomplete({
         minLength: 3,
@@ -85391,9 +85418,26 @@ __WEBPACK_IMPORTED_MODULE_0_jquery___default()(function () {
 
         rowOutput = _.replace(rowOutput, re, "<b>" + val + "</b>")
 
+
+        ul.addClass("searchbar-autocomplete-popup")
+
+
+
         var $row = __WEBPACK_IMPORTED_MODULE_0_jquery___default()("<li>").addClass('searchbar-search-row')
             .append(rowOutput)
+            .append(rowOutput)
             .appendTo(ul);
+
+//FIXME have a more rebust  autocomplete
+        if (searchbar.hasClass("darker")) {
+            let css = window.getComputedStyle(searchbar.get(0), null)
+
+            $row.css({
+                "background-color": css.getPropertyValue("background-color"),
+                "color": css.getPropertyValue("color")
+            })
+        }
+
 
         return $row
     };
@@ -85676,8 +85720,10 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
 
         //$(that).off();
 
-       if (!$(that).hasClass("before-render-inited"))
-        $(that).addClass("before-render-inited").on("before-render", onBeforeRender);
+      // if (!$(that).hasClass("before-render-inited"))
+        $(that).
+           // .addClass("before-render-inited").
+        on("before-render", onBeforeRender);
 
 
         function onBeforeRender() {
@@ -85688,6 +85734,8 @@ class GraphView3D extends __WEBPACK_IMPORTED_MODULE_0__View3D__["a" /* default *
                 //update company info only every 20 frames to increse overall performance
                 if (_____skipFrames++ % 20==0) {
                     let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
+
+                 if (vl.length!=0) //FIXME this should prevent the flickering but it does not solve the underlying problem that the handlers are bound incorrect
                     __WEBPACK_IMPORTED_MODULE_5__cluster_refactor_SpecificDataUtils__["a" /* GUI */].updateFromVisibleNodes(vl);
                     visibleNodes = []
                 }
@@ -96702,7 +96750,13 @@ class SampleClusterApplication extends HTMLElement {
             {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: rootHull}
+                options: {
+                    minClusterSize: 40, hull: rootHull, colors: {
+                        edge: [0x000000, 1],
+
+                        hull: [0x6A5ACD, 0.4] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
+                    }
+                }
             },
             {
                 generator: industrySetGenerator,
@@ -96776,16 +96830,16 @@ class SampleClusterApplication extends HTMLElement {
         setTimeout(function () {
 
             //TODO zoom to usa
-           /* if (rootCluster.mClusters["United States"])
-                rootCluster.mClusters["United States"].zoomToCluster()
-            else*/
+            /* if (rootCluster.mClusters["United States"])
+                 rootCluster.mClusters["United States"].zoomToCluster()
+             else*/
 
 
-                this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
-                    //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
-                    this.getCurrentView().mRootCluster.zoomToCluster(150000)
+            this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
+                //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
+                this.getCurrentView().mRootCluster.zoomToCluster(150000)
 
-                });
+            });
 
 
         }.bind(this), 3000)
@@ -96844,7 +96898,11 @@ class SampleClusterApplication extends HTMLElement {
         rootCluster.setLock()
 
 
-        // view.mScene.background = new THREE.Color(0xFFFFFF);
+         view.mScene.background = new THREE.Color(0xFFFFFF);
+
+
+        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").addClass("darker")
+
 
 
         this.resetNodesPositions(rootCluster.mNodes)
@@ -96902,6 +96960,9 @@ class SampleClusterApplication extends HTMLElement {
 
 
         view.mScene.background = new THREE.Color(0x000000);
+
+        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass("darker")
+
 
 
         rootCluster.cleanUpLeafs();
@@ -97329,7 +97390,7 @@ if (!mTime) {
  **    use for group of nodes that share some similarities (nCountry <= company)
  *    this approach does not allow for adding removing nodes as of yet
  */
-function ParticleNodeGroup(nodes, options,domEvents) {
+function ParticleNodeGroup(nodes, options, domEvents) {
 
     options = _.extend({
 
@@ -97499,26 +97560,28 @@ function ParticleNodeGroup(nodes, options,domEvents) {
         updateNodePosition: updateNodePosition,
         updateNodeColor: updateNodeColor,
         updateNodeSize: updateNodeSize,
-        on:  function(eventName, eventhandler) {
+        on: function (eventName, eventhandler) {
 
-        for (let eName of eventName.split(" ")) {
+            for (let eName of eventName.split(" ")) {
 
-           domEvents.addEventListener(particleSystem, eName,function(e) {
+                domEvents.addEventListener(particleSystem, eName, function (e) {
 
-               let index=e.intersect.index;
+                    if (!e.intersect) {
+                        //TODO find out if it is a bug within DomEventsAlt selection that is set =null
+                        console.warn("could not resolve intersection ")
+                        return
+                    }
 
-               let node=  nodes[index];
+                    let index = e.intersect.index;
+                    let node = nodes[index];
+                    eventhandler.bind(node)(arguments)
 
-               eventhandler.bind(node)(arguments)
+                }, false);
 
-
-           }, false);
-
-        }
-
+            }
 
 
-    },
+        },
         remove: function () {
 
             if (particleSystem.geometry)
@@ -104371,7 +104434,7 @@ exports = module.exports = __webpack_require__(5)(undefined);
 
 
 // module
-exports.push([module.i, ".graph-nav-info {\r\n    position: absolute;\r\n    bottom: 5px;\r\n    width: 100%;\r\n    text-align: center;\r\n    color: slategrey;\r\n    opacity: 0.7;\r\n    font-size: 10px;\r\n}\r\n\r\n.graph-tooltip {\r\n    position: absolute;\r\n    color: lavender;\r\n    font-size: 18px;\r\n\tpointer-events: none;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\t.industry-info-row * {\r\n    vertical-align: middle;\r\n\tpadding:0.2em\r\n\t}\r\n\r\n\r\n\t.searchbar-container\r\n\t{\r\n\t\tz-index:999;\r\n\r\n\t}\r\n\r\n\r\n\t.graph-node-info\r\n\t{\r\n\t\t    overflow-y: visible;\r\n\t\tposition:absolute;\r\n\t\ttop:10px;\r\n\t\tleft:400px;\r\n\t\tz-index:999;\r\n\t\t\r\n\t\tcolor:white;\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  \r\n\t\t  max-height:760px;\r\n\t\t  max-width:810px;\r\n\t\t  \r\n\t\t   text-align: left;\r\n\t\t       overflow: hidden;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.graph-node-info-header{\r\n\t\tbackground-color: rgba(47, 45, 45, 0.81) !important;\t\r\n\t\tdisplay:flex;\r\n\t\ttext-align:right;\r\n\t}\r\n\r\n\t  \r\n\t\r\n\t.graph-node-info-search{\r\n\t\t\r\n\t\t\tbackground:#1f4e79;\r\n\t\t padding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.graph-node-info-search a{\r\n\t\t\r\n\t\tcolor:white;\r\n\t\ttext-decoration:none;\r\n\t}\r\n\t\r\n\t.graph-node-info-price{\r\n\t\t\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t}\r\n\t.graph-node-info-close{\r\n\t\t\t\r\n\t\t\tbackground-color: transparent !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-node-info-news-header{\r\n\t\tpadding:0.5em;\r\n\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\r\n\t}\r\n\t.graph-node-info-news-body{\r\n\t\tpadding:0.5em;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-tooltip\r\n\t{\r\n\t\t\r\n\t}\r\n\t.graph-tooltip > .content\r\n\t{\r\n\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\tpadding:0.5em;\t\r\n\t}\r\n\t\r\n\t.ui-autocomplete\r\n\t{\r\n\tbackground-color: rgba(255, 255, 255, 0.2) !important;\r\n    color: white !important;\r\n\tborder:0px !important;\r\n\t\r\n\t max-height:30em; overflow-y: scroll; \r\n\t max-width:20em;\r\n\t}\t\r\n\t\r\n\t/**\r\n\tTODO used in left-info-panel and should be used by web component and put itno shadow dom preferrably\r\n\t*/\r\n\t.my-accordion{\r\n\t\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25) !important;\r\n\t\t  padding: 0px 2px 0px 2px!important;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.my-accordion > *{\r\n\t\tmargin:0px !important;\r\n\t\t\r\n\t}\r\n\r\n.my-accordion > .ui-accordion-header{\r\n\t\t\tmargin: 2px 0 0 0;\r\n\t\t\tpadding: .5em .5em .5em .7em;\r\n\t\t\tfont-weight:bold !important;\r\n\t\t\tcolor:white !important;\r\n\t\t\t text-align: left !important;\r\n\t}\r\n\r\n.my-accordion > .ui-accordion-header:focus{\r\n\t\t outline: 0 !important;\r\n\t\t background: rgba(0, 0, 0, 0.25) !important;\r\n\t\t \r\n\t}\r\n\r\n.my-accordion >\t.ui-accordion-content\r\n\t{\r\n\t\toverflow:visible !important;\r\n\t\t text-align: left !important;\r\n\t\t padding:.5em .5em .5em .7em !important;\r\n\t\t color:white !important;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.ui-widget-content\r\n\t{\r\n\t\t background: rgba(24, 23, 23, 0.21);\r\n\t\tborder:0px;\r\n\t}\r\n\t\r\n\t.ui-state-default\r\n\t{\r\n\t\t    background: rgba(32, 32, 32, 0.25);\r\n\t\t\tborder:0px;\r\n\t}\r\n\t\r\n\t\r\n\t.zoom-slider\r\n\t{\r\n\t\tposition:absolute;\r\n\t\ttop:1em;\r\n\t\tleft:60%;\r\n\t\tbackground:transparent;\r\n\t\t min-width: 300px;\r\n\t\tdisplay:inline-block;\r\n\t\twidth:200px !important;\r\n\tz-index:999;\r\n\t\t\r\n\t}\r\n\t.ui-slider\r\n\t{\r\n\t\t\r\n\t\tdisplay:none;\r\n\t\t\r\n\t\t\r\n\t  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n\t  background: -webkit-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: -o-linear-gradient(left,orange,grey);\r\n\t  \r\n\t  background: -moz-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: linear-gradient(to right,orange,grey); \r\n\t  \r\n\t      height: 0.2em;\r\n    border: 0 !important;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t.ui-slider .ui-slider-handle {\r\n    width:2em;\r\n    height:1.6em;\r\n\tborder: 0 !important;\r\n    text-decoration:none;\r\n    text-align:center;\r\n\t    top: -1em;\r\n\t\r\n\tbackground: url(" + __webpack_require__(317) + ");\r\n    background-size: 2em;\r\n\t\r\n\t}\r\n\t.ui-slider-handle:focus{\r\n\t\toutline:0;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-container{\r\n\t\r\n\tleft:240px;\r\n\tdisplay:flex;\r\n    position: absolute;\r\n\ttop:15px;\r\n\t\r\n\tborder: 0;\r\n\t\r\n\t}\r\n\t\r\n\t\r\n\t.searchbar-container input{\r\n\t\t\r\n\t\tborder-radius: 5px;\r\n\t\tborder: 0;\r\n\t\t min-width: 400px;\r\n\t\toutline: none;\r\n\t\tpadding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-search\r\n\t{\r\n   /* position: absolute;\r\n\tdisplay: inline-block;\r\n    content: \"\";\r\n    width: 26px;\r\n    height: 26px;\r\n    background: url('data:image/svg+xml;utf8,<svg width=\"1792\" height=\"1792\" viewBox=\"0 0 1792 1792\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1216 832q0-185-131.5-316.5t-316.5-131.5-316.5 131.5-131.5 316.5 131.5 316.5 316.5 131.5 316.5-131.5 131.5-316.5zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124-143 0-273.5-55.5t-225-150-150-225-55.5-273.5 55.5-273.5 150-225 225-150 273.5-55.5 273.5 55.5 225 150 150 225 55.5 273.5q0 220-124 399l343 343q37 37 37 90z\" fill=\"#fff\"/></svg>');\t\r\n\tbackground-size: 100%;*/\r\n\t}\r\n\r\n\t.searchbar-search-row\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-bottom:1px solid darkslateblue\r\n\t\t\r\n\t}\r\n\t\r\n\t.searchbar-search-row b\r\n\t{\r\n\t\tcolor:darkslateblue;\r\n\t\t text-shadow: 0 0 0.1em white, 0 0 0.1em white, 0 0 0.1em white;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n  .ui-progressbar {\r\n    position: absolute;\r\n\ttop:10px;\r\n\tleft:10px;\r\n\twidth:30%;\r\n\theight:20px;\r\n  }\r\n  .progress-label {\r\n    position: absolute;\r\n    left: 10%;\r\n    top: 4px;\r\n    font-weight: bold;\r\n    text-shadow: 1px 1px 0 #fff;\r\n  }\r\n\r\n\r\n  .noselect {\r\n  -webkit-touch-callout: none; /* iOS Safari */\r\n    -webkit-user-select: none; /* Safari */\r\n     -khtml-user-select: none; /* Konqueror HTML */\r\n       -moz-user-select: none; /* Firefox */\r\n        -ms-user-select: none; /* Internet Explorer/Edge */\r\n            user-select: none; /* Non-prefixed version, currently\r\n                                  supported by Chrome and Opera */\r\n}\r\n  \r\n  \r\n\t.graph-country-caption\r\n\t{\r\n\tcolor:ffffff;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t\t\r\n\t\tfont-size: 0.8em;\r\n\t\tfont-weight: 900;\r\n\t\topacity: 0.5;\r\n\t}\r\n\t\r\n\t.graph-country-caption:hover\r\n\t{\r\n\t\t\r\n\t    opacity: 0.6 !important;\r\n\t\tcolor:darkslateblue;\r\n\t\t\r\n\t\t\r\n    text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;\r\n\t\t\r\n\t}\r\n  \r\n  \r\n \r\n\t.node-caption\r\n\t{\r\n\t\tcolor:white;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t}\r\n\t\r\n\t.node-caption-highlighted\r\n\t{\r\n\t\tcolor: white !important;\r\n\t\t//font-weight: bold;\r\n\t\ttext-shadow: 0 0 0.3em white, 0 0 0.3em white, 0 0 0.3em white;\r\n\t}\r\n\t\r\n\r\n\t.cloudNodeColorSelect\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:40px;\r\n\t\tleft:48%;\r\n\t\tz-index:999;\r\n\t\twidth:130px;\r\n\t\t\r\n\t\t\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor: white;\r\n\t\tborder: transparent;\r\n\t\t\r\n\t}\r\n\t.cloudNodeColorSelect:focus{\r\n\t\toutline:0\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.bottomCompanyGradient\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:20px;\r\n\t\tleft:0px;\r\n\t\tright:0px;\r\n\t\tz-index:999;\r\n\t\tcolor:white;\r\n\t\tdisplay:flex;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\t.companyGradient {\r\n  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n  background: -webkit-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: -o-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n  \r\n  background: -moz-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: linear-gradient(to left,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729); \r\n}\r\n\t\r\n\t.rightCompanyInfo\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tright:0.5em;\r\n\t\ttop:50px;\r\n\t\tz-index:999;\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor:white;\r\n\t\tborder:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t.rightCompanyInfo .event\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-top:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t#companyIndustry img {\r\n    height: 1.5em;\r\n\t}", ""]);
+exports.push([module.i, ".graph-nav-info {\r\n    position: absolute;\r\n    bottom: 5px;\r\n    width: 100%;\r\n    text-align: center;\r\n    color: slategrey;\r\n    opacity: 0.7;\r\n    font-size: 10px;\r\n}\r\n\r\n.graph-tooltip {\r\n    position: absolute;\r\n    color: lavender;\r\n    font-size: 18px;\r\n\tpointer-events: none;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\t.industry-info-row * {\r\n    vertical-align: middle;\r\n\tpadding:0.2em\r\n\t}\r\n\r\n\r\n\t.searchbar-container\r\n\t{\r\n\t\tz-index:999;\r\n\r\n\t}\r\n\r\n\r\n\t.graph-node-info\r\n\t{\r\n\t\t    overflow-y: visible;\r\n\t\tposition:absolute;\r\n\t\ttop:10px;\r\n\t\tleft:400px;\r\n\t\tz-index:999;\r\n\t\t\r\n\t\tcolor:white;\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.6) ;\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25);\r\n\t\t  \r\n\t\t  max-height:760px;\r\n\t\t  max-width:810px;\r\n\t\t  \r\n\t\t   text-align: left;\r\n\t\t       overflow: hidden;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.graph-node-info-header{\r\n\t\tbackground-color: rgba(47, 45, 45, 0.81) !important;\t\r\n\t\tdisplay:flex;\r\n\t\ttext-align:right;\r\n\t}\r\n\r\n\t  \r\n\t\r\n\t.graph-node-info-search{\r\n\t\t\r\n\t\t\tbackground:#1f4e79;\r\n\t\t padding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.graph-node-info-search a{\r\n\t\t\r\n\t\tcolor:white;\r\n\t\ttext-decoration:none;\r\n\t}\r\n\t\r\n\t.graph-node-info-price{\r\n\t\t\r\n\t\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t}\r\n\t.graph-node-info-close{\r\n\t\t\t\r\n\t\t\tbackground-color: transparent !important;\t\r\n\t\t\tpadding: 0.5em;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-node-info-news-header{\r\n\t\tpadding:0.5em;\r\n\t\tbackground-color: rgba(0, 0, 0, 0.3) !important;\t\r\n\t\t\r\n\t}\r\n\t.graph-node-info-news-body{\r\n\t\tpadding:0.5em;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.graph-tooltip\r\n\t{\r\n\t\t\r\n\t}\r\n\t.graph-tooltip > .content\r\n\t{\r\n\t\tbackground-color: rgba(0, 0, 0, 0.6) !important;\t\r\n\t\tpadding:0.5em;\t\r\n\t}\r\n\t\r\n\t.ui-autocomplete\r\n\t{\r\n\tbackground-color: rgba(255, 255, 255, 0.2) !important;\r\n    color: white !important;\r\n\tborder:0px !important;\r\n\t\r\n\t max-height:30em; overflow-y: scroll; \r\n\t max-width:20em;\r\n\t}\t\r\n\t\r\n\t/**\r\n\tTODO used in left-info-panel and should be used by web component and put itno shadow dom preferrably\r\n\t*/\r\n\t.my-accordion{\r\n\t\t\r\n\t\t  border :1px solid rgba(128, 128, 128, 0.25) !important;\r\n\t\t  padding: 0px 2px 0px 2px!important;\r\n\t\t  \r\n\t}\r\n\t\r\n\t.my-accordion > *{\r\n\t\tmargin:0px !important;\r\n\t\t\r\n\t}\r\n\r\n.my-accordion > .ui-accordion-header{\r\n\t\t\tmargin: 2px 0 0 0;\r\n\t\t\tpadding: .5em .5em .5em .7em;\r\n\t\t\tfont-weight:bold !important;\r\n\t\t\tcolor:white !important;\r\n\t\t\t text-align: left !important;\r\n\t}\r\n\r\n.my-accordion > .ui-accordion-header:focus{\r\n\t\t outline: 0 !important;\r\n\t\t background: rgba(0, 0, 0, 0.25) !important;\r\n\t\t \r\n\t}\r\n\r\n.my-accordion >\t.ui-accordion-content\r\n\t{\r\n\t\toverflow:visible !important;\r\n\t\t text-align: left !important;\r\n\t\t padding:.5em .5em .5em .7em !important;\r\n\t\t color:white !important;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.ui-widget-content\r\n\t{\r\n\t\t background: rgba(24, 23, 23, 0.21);\r\n\t\tborder:0px;\r\n\t}\r\n\t\r\n\t.ui-state-default\r\n\t{\r\n\t\t    background: rgba(32, 32, 32, 0.25);\r\n\t\t\tborder:0px;\r\n\t}\r\n\t\r\n\t\r\n\t.zoom-slider\r\n\t{\r\n\t\tposition:absolute;\r\n\t\ttop:1em;\r\n\t\tleft:60%;\r\n\t\tbackground:transparent;\r\n\t\t min-width: 300px;\r\n\t\tdisplay:inline-block;\r\n\t\twidth:200px !important;\r\n\tz-index:999;\r\n\t\t\r\n\t}\r\n\t.ui-slider\r\n\t{\r\n\t\t\r\n\t\tdisplay:none;\r\n\t\t\r\n\t\t\r\n\t  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n\t  background: -webkit-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: -o-linear-gradient(left,orange,grey);\r\n\t  \r\n\t  background: -moz-linear-gradient(left,orange,grey);\r\n\t \r\n\t  background: linear-gradient(to right,orange,grey); \r\n\t  \r\n\t      height: 0.2em;\r\n    border: 0 !important;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t.ui-slider .ui-slider-handle {\r\n    width:2em;\r\n    height:1.6em;\r\n\tborder: 0 !important;\r\n    text-decoration:none;\r\n    text-align:center;\r\n\t    top: -1em;\r\n\t\r\n\tbackground: url(" + __webpack_require__(317) + ");\r\n    background-size: 2em;\r\n\t\r\n\t}\r\n\t.ui-slider-handle:focus{\r\n\t\toutline:0;\r\n\t\t\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-container{\r\n\t\r\n\tleft:240px;\r\n\tdisplay:flex;\r\n    position: absolute;\r\n\ttop:15px;\r\n\t\r\n\tborder: 0;\r\n\t\r\n\t}\r\n\t\r\n\t\r\n\t.searchbar-container input{\r\n\t\t\r\n\t\tborder-radius: 5px;\r\n\t\tborder: 0;\r\n\t\t min-width: 400px;\r\n\t\toutline: none;\r\n\t\tpadding: 0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t.searchbar-search\r\n\t{\r\n   /* position: absolute;\r\n\tdisplay: inline-block;\r\n    content: \"\";\r\n    width: 26px;\r\n    height: 26px;\r\n    background: url('data:image/svg+xml;utf8,<svg width=\"1792\" height=\"1792\" viewBox=\"0 0 1792 1792\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1216 832q0-185-131.5-316.5t-316.5-131.5-316.5 131.5-131.5 316.5 131.5 316.5 316.5 131.5 316.5-131.5 131.5-316.5zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124-143 0-273.5-55.5t-225-150-150-225-55.5-273.5 55.5-273.5 150-225 225-150 273.5-55.5 273.5 55.5 225 150 150 225 55.5 273.5q0 220-124 399l343 343q37 37 37 90z\" fill=\"#fff\"/></svg>');\t\r\n\tbackground-size: 100%;*/\r\n\t}\r\n\r\n\t.searchbar-search-row\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-bottom:1px solid darkslateblue;\r\n\r\n\t\t\r\n\t}\r\n\t\r\n\t.searchbar-search-row b\r\n\t{\r\n\t\tcolor:darkslateblue;\r\n\t\t text-shadow: 0 0 0.1em white, 0 0 0.1em white, 0 0 0.1em white;\r\n\r\n\t}\r\n\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n\t\r\n  .ui-progressbar {\r\n    position: absolute;\r\n\ttop:10px;\r\n\tleft:10px;\r\n\twidth:30%;\r\n\theight:20px;\r\n  }\r\n  .progress-label {\r\n    position: absolute;\r\n    left: 10%;\r\n    top: 4px;\r\n    font-weight: bold;\r\n    text-shadow: 1px 1px 0 #fff;\r\n  }\r\n\r\n\r\n  .noselect {\r\n  -webkit-touch-callout: none; /* iOS Safari */\r\n    -webkit-user-select: none; /* Safari */\r\n     -khtml-user-select: none; /* Konqueror HTML */\r\n       -moz-user-select: none; /* Firefox */\r\n        -ms-user-select: none; /* Internet Explorer/Edge */\r\n            user-select: none; /* Non-prefixed version, currently\r\n                                  supported by Chrome and Opera */\r\n}\r\n  \r\n  \r\n\t.graph-country-caption\r\n\t{\r\n\tcolor:ffffff;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t\t\r\n\t\tfont-size: 0.8em;\r\n\t\tfont-weight: 900;\r\n\t\topacity: 0.5;\r\n\t}\r\n\t\r\n\t.graph-country-caption:hover\r\n\t{\r\n\t\t\r\n\t    opacity: 0.6 !important;\r\n\t\tcolor:darkslateblue;\r\n\t\t\r\n\t\t\r\n    text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;\r\n\t\t\r\n\t}\r\n  \r\n  \r\n \r\n\t.node-caption\r\n\t{\r\n\t\tcolor:white;\r\n\t    padding: 2 5 2 5;\r\n\t\tbackground: rgba(0, 0, 0, 0.5);\r\n\t}\r\n\t\r\n\t.node-caption-highlighted\r\n\t{\r\n\t\tcolor: white !important;\r\n\t\t//font-weight: bold;\r\n\t\ttext-shadow: 0 0 0.3em white, 0 0 0.3em white, 0 0 0.3em white;\r\n\t}\r\n\t\r\n\r\n\t.cloudNodeColorSelect\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:40px;\r\n\t\tleft:48%;\r\n\t\tz-index:999;\r\n\t\twidth:130px;\r\n\t\t\r\n\t\t\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor: white;\r\n\t\tborder: transparent;\r\n\t\t\r\n\t}\r\n\t.cloudNodeColorSelect:focus{\r\n\t\toutline:0\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t.bottomCompanyGradient\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tbottom:20px;\r\n\t\tleft:0px;\r\n\t\tright:0px;\r\n\t\tz-index:999;\r\n\t\tcolor:white;\r\n\t\tdisplay:flex;\r\n\t\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\t\t.companyGradient {\r\n  background: lightgrey; /* For browsers that do not support gradients */\r\n  \r\n  background: -webkit-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: -o-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n  \r\n  background: -moz-linear-gradient(right,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729);\r\n \r\n  background: linear-gradient(to left,#218D20,#439229,#8CCB84,#14B0BF,#9DC9CA,#CAB81A,#BBC42D,#C8A6BF,#CF73B4,#816365,#7D5C53,#AE5E29,#B62729); \r\n}\r\n\t\r\n\t.rightCompanyInfo\r\n\t{\r\n\t\tposition:absolute;\r\n\t\tright:0.5em;\r\n\t\ttop:50px;\r\n\t\tz-index:999;\r\n\t\tbackground: rgba(0, 0, 0, 0.51);\r\n\t\tcolor:white;\r\n\t\tborder:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t.rightCompanyInfo .event\r\n\t{\r\n\t\ttext-align:left;\r\n\t\tborder-top:1px solid rgba(128, 128, 128, 0.51);\r\n\t\tpadding:0.5em;\r\n\t}\r\n\t\r\n\t\r\n\t#companyIndustry img {\r\n    height: 1.5em;\r\n\t}", ""]);
 
 // exports
 
@@ -104399,7 +104462,7 @@ exports = module.exports = __webpack_require__(5)(undefined);
 exports.push([module.i, "@import url(https://fonts.googleapis.com/css?family=Exo+2);", ""]);
 
 // module
-exports.push([module.i, "sample-cluster-application * {\r\n    font-family: 'robotoCondensed' !important;\r\n}\r\n\r\nsample-cluster-application * {\r\n    font-family: 'robotoCondensed' !important;\r\n}\r\n\r\nsample-cluster-application .view-thumbnail{\r\npointer-events: all;\r\nheight: 300px;\r\nwidth: 400px;\r\ndisplay: flex;\r\nborder: 1px solid rgba(128, 128, 128, 0.5);\r\nmargin: 0.2em;\r\n}\r\n\r\n\r\nsample-cluster-application graph-hud{\r\n\r\n    position: absolute;\r\n    left: 0;\r\n    top: 0;\r\n    width: 100%;\r\n    height: 100%;\r\n    pointer-events: none;\r\n\r\n}\r\n\r\nsample-cluster-application graph-hud *{\r\n\r\n    pointer-events: all;\r\n\r\n}\r\n\r\n\r\n\r\n::-webkit-scrollbar {\r\n    width: 5px;\r\n    height: 5px;\r\n}\r\n\r\n::-webkit-scrollbar-thumb {\r\n    background: red;\r\n\r\n}\r\n\r\n::-webkit-scrollbar-button {\r\n    background: transparent;\r\n    width: 0px;\r\n    height: 0px;\r\n}\r\n\r\n::-webkit-scrollbar-track {\r\n    background: #888;\r\n}\r\n\r\n", ""]);
+exports.push([module.i, "sample-cluster-application * {\r\n    font-family: 'robotoCondensed' !important;\r\n}\r\n\r\nsample-cluster-application * {\r\n    font-family: 'robotoCondensed' !important;\r\n}\r\n\r\nsample-cluster-application .view-thumbnail{\r\npointer-events: all;\r\nheight: 300px;\r\nwidth: 400px;\r\ndisplay: flex;\r\nborder: 1px solid rgba(128, 128, 128, 0.5);\r\nmargin: 0.2em;\r\n}\r\n\r\n\r\nsample-cluster-application graph-hud{\r\n\r\n    position: absolute;\r\n    left: 0;\r\n    top: 0;\r\n    width: 100%;\r\n    height: 100%;\r\n    pointer-events: none;\r\n\r\n}\r\n\r\nsample-cluster-application graph-hud *{\r\n\r\n    pointer-events: all;\r\n\r\n}\r\n\r\n\r\n.darker\r\n{\r\n\r\n    background:rgba(0, 0, 0, 0.9) !important;\r\n    color:white !important;\r\n}\r\n\r\n\r\n\r\n\r\n::-webkit-scrollbar {\r\n    width: 5px;\r\n    height: 5px;\r\n}\r\n\r\n::-webkit-scrollbar-thumb {\r\n    background: red;\r\n\r\n}\r\n\r\n::-webkit-scrollbar-button {\r\n    background: transparent;\r\n    width: 0px;\r\n    height: 0px;\r\n}\r\n\r\n::-webkit-scrollbar-track {\r\n    background: #888;\r\n}\r\n\r\n", ""]);
 
 // exports
 
@@ -112671,7 +112734,7 @@ module.exports = "\r\n    <div style=\"float:left;width:50%;\">\r\n        <div 
 /* 268 */
 /***/ (function(module, exports) {
 
-module.exports = "\r\n<style>\r\n\r\n    #logo {\r\n        position: absolute;\r\n        top: 0px;\r\n        left: 30;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 10px;\r\n    }\r\n    #starview {\r\n        position: absolute;\r\n        top: 0px;\r\n        right: 0;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 5px 10px 10px 10px;\r\n    }\r\n    #sig_menu {\r\n        font-family:'roboto';\r\n        position: absolute;\r\n        top: 13px;\r\n        left: 650;\r\n        color: #0490cd;\r\n        z-index: 1;padding: 10px;\r\n        font-size:15px;\r\n        background: rgba(0, 0, 0, 0.51);\r\n        cursor:pointer;\r\n    }\r\n\r\n\r\n</style>\r\n\r\n\r\n<div id=\"sig_menu\" onclick=\"js_menu_sig();\">\r\n    <input type=\"hidden\" id=\"hid_sig_menu\" value=\"0\" />\r\n    SIGNIFICANT COMPANIES\r\n    <div id=\"sig_menu_sub\" style=\"display:none;text-align:left;color:#bfbfbf;\" >Customers<br />Suppliers<br />Influencers<br />Active Players<br />Chokepoints</div>\r\n</div>\r\n<div id=\"logo\"><img src=\"img/logo.png\" style=\"height:50px;\"></div>\r\n<div id=\"starview\"><img src=\"include/images/Starview.png\" style=\"height:35px;\"></div>\r\n\r\n<!-- the info panel containing rudimentary help for the user -->\r\n<info-panel></info-panel>\r\n\r\n\r\n\r\n<!-- TODO refactor parts -->\r\n\r\n<div style=\"position: absolute;top:50;right:320;\">\r\n    <div style=\"padding-bottom:5px;\"><img src=\"img/zoomin.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n    <div><img src=\"img/zoomout.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n</div>\r\n\r\n<div class=\"bottomCompanyGradient\">\r\n    <span style=\"width:10%;text-align:right;padding-right:20px;font-size:14px;font-family:'benchnine' !important;\">Negative</span>\r\n    <span style=\"width:80%\" class=\"companyGradient\"></span>\r\n    <span  style=\"width:10%;text-align:left;padding-left:20px;font-size:14px;font-family:'benchnine' !important;\">Positive</span>\r\n\r\n</div>\r\n\r\n\r\n\r\n<company-info style=\"max-width:300px; width:300px\"></company-info>\r\n\r\n\r\n<mode-select></mode-select>";
+module.exports = "\r\n<style>\r\n\r\n    #logo {\r\n        position: absolute;\r\n        top: 0px;\r\n        left: 30;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 10px;\r\n    }\r\n    #starview {\r\n        position: absolute;\r\n        top: 0px;\r\n        right: 0;\r\n        color: #ffffff;\r\n        z-index: 1;padding: 5px 10px 10px 10px;\r\n    }\r\n    #sig_menu {\r\n        font-family:'roboto';\r\n        position: absolute;\r\n        top: 13px;\r\n        left: 650;\r\n        color: #0490cd;\r\n        z-index: 1;\r\n        padding:7px 10px;\r\n        font-size:15px;\r\n        background: rgba(0, 0, 0, 0.51);\r\n        cursor:pointer;\r\n    }\r\n\r\n\r\n</style>\r\n\r\n\r\n<div id=\"sig_menu\" onclick=\"js_menu_sig();\">\r\n    <input type=\"hidden\" id=\"hid_sig_menu\" value=\"0\" />\r\n    SIGNIFICANT COMPANIES\r\n    <div id=\"sig_menu_sub\" style=\"display:none;text-align:left;color:#bfbfbf;\" >Customers<br />Suppliers<br />Influencers<br />Active Players<br />Chokepoints</div>\r\n</div>\r\n<div id=\"logo\"><img src=\"img/logo.png\" style=\"height:50px;\"></div>\r\n<div id=\"starview\"><img src=\"include/images/Starview.png\" style=\"height:35px;\"></div>\r\n\r\n<!-- the info panel containing rudimentary help for the user -->\r\n<info-panel></info-panel>\r\n\r\n\r\n\r\n<!-- TODO refactor parts -->\r\n\r\n<div style=\"position: absolute;top:50;right:320;\">\r\n    <div style=\"padding-bottom:5px;\"><img src=\"img/zoomin.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n    <div><img src=\"img/zoomout.png\" style=\"width:40px;cursor:pointer;\" /></div>\r\n</div>\r\n\r\n<div class=\"bottomCompanyGradient\">\r\n    <span style=\"width:10%;text-align:right;padding-right:20px;font-size:14px;font-family:'benchnine' !important;\">Negative</span>\r\n    <span style=\"width:80%\" class=\"companyGradient\"></span>\r\n    <span  style=\"width:10%;text-align:left;padding-left:20px;font-size:14px;font-family:'benchnine' !important;\">Positive</span>\r\n\r\n</div>\r\n\r\n\r\n\r\n<company-info style=\"max-width:300px; width:300px\"></company-info>\r\n\r\n\r\n<mode-select></mode-select>";
 
 /***/ }),
 /* 269 */

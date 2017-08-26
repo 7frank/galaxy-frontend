@@ -2,7 +2,7 @@
  **    use for group of nodes that share some similarities (nCountry <= company)
  *    this approach does not allow for adding removing nodes as of yet
  */
-export default function ParticleNodeGroup(nodes, options,domEvents) {
+export default function ParticleNodeGroup(nodes, options, domEvents) {
 
     options = _.extend({
 
@@ -172,26 +172,28 @@ export default function ParticleNodeGroup(nodes, options,domEvents) {
         updateNodePosition: updateNodePosition,
         updateNodeColor: updateNodeColor,
         updateNodeSize: updateNodeSize,
-        on:  function(eventName, eventhandler) {
+        on: function (eventName, eventhandler) {
 
-        for (let eName of eventName.split(" ")) {
+            for (let eName of eventName.split(" ")) {
 
-           domEvents.addEventListener(particleSystem, eName,function(e) {
+                domEvents.addEventListener(particleSystem, eName, function (e) {
 
-               let index=e.intersect.index;
+                    if (!e.intersect) {
+                        //TODO find out if it is a bug within DomEventsAlt selection that is set =null
+                        console.warn("could not resolve intersection ")
+                        return
+                    }
 
-               let node=  nodes[index];
+                    let index = e.intersect.index;
+                    let node = nodes[index];
+                    eventhandler.bind(node)(arguments)
 
-               eventhandler.bind(node)(arguments)
+                }, false);
 
-
-           }, false);
-
-        }
-
+            }
 
 
-    },
+        },
         remove: function () {
 
             if (particleSystem.geometry)

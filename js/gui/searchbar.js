@@ -128,6 +128,8 @@ $(function () {
 
     }
 
+
+
     //-----------------
     var ac_instance = searchbar.autocomplete({
         minLength: 3,
@@ -192,9 +194,26 @@ $(function () {
 
         rowOutput = _.replace(rowOutput, re, "<b>" + val + "</b>")
 
+
+        ul.addClass("searchbar-autocomplete-popup")
+
+
+
         var $row = $("<li>").addClass('searchbar-search-row')
             .append(rowOutput)
+            .append(rowOutput)
             .appendTo(ul);
+
+//FIXME have a more robust  autocomplete
+        if (searchbar.hasClass("darker")) {
+            let css = window.getComputedStyle(searchbar.get(0), null)
+
+            $row.css({
+                "background-color": css.getPropertyValue("background-color"),
+                "color": css.getPropertyValue("color")
+            })
+        }
+
 
         return $row
     };

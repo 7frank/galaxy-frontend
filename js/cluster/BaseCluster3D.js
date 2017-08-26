@@ -37,9 +37,9 @@ export default class BaseCluster3D extends BaseNode {
         //initially have a value to ignore the lod while loading to make the animations visible for certain elements
         this.useLOD = false;
 
-        this.bClusterEdgesVisible=true;
+        this.bClusterEdgesVisible = true;
         //add collapse/expand stuff
-      //  this.mExpanded = true;
+        //  this.mExpanded = true;
         this.mClusterClusteringApplied = false;
         this.mCollapsedGroup = new THREE.Group();
         this.mExpandedGroup = new THREE.Group();
@@ -52,7 +52,6 @@ export default class BaseCluster3D extends BaseNode {
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
 
         this.registerCustomEvent("initial-expand"); //triggered when a collapsed cluster gets expanded
-
 
 
         this.registerCustomEvent("cluster-ready"); //if the cluster animation is finished
@@ -99,8 +98,8 @@ export default class BaseCluster3D extends BaseNode {
             let distance = dst.sub(src).length();
 
             //no need for updates if nothing changed
-            if (this.mLastCamDistance==distance) return
-            this.mLastCamDistance=distance
+            if (this.mLastCamDistance == distance) return
+            this.mLastCamDistance = distance
 
 
             //TODO how to handle max distance with the lod approach of meshes
@@ -117,38 +116,33 @@ export default class BaseCluster3D extends BaseNode {
         })
 
 
-
-
-
-
-
     }
 
 
-    setLeafsVisible(bVisible){
+    setLeafsVisible(bVisible) {
 
-    this.getLeafs().forEach( l => l.visible=bVisible)
-
-    }
-
-    setParticlesVisible(bVisible){
-
-        this.getLeafs().forEach( l => l.setParticlesVisible(bVisible) )
+        this.getLeafs().forEach(l => l.visible = bVisible)
 
     }
 
-    setNodesVisible(bVisible){
+    setParticlesVisible(bVisible) {
 
-        this.getLeafs().forEach( l => l.setNodesVisible(bVisible) )
+        this.getLeafs().forEach(l => l.setParticlesVisible(bVisible))
+
+    }
+
+    setNodesVisible(bVisible) {
+
+        this.getLeafs().forEach(l => l.setNodesVisible(bVisible))
 
     }
 
 //FIXME does not work
-    setEdgesVisible(bVisible){
+    setEdgesVisible(bVisible) {
 
         //TODO interference with lod
-        this.findClusters("*").forEach( function (c){
-            c.bClusterEdgesVisible=bVisible;
+        this.findClusters("*").forEach(function (c) {
+            c.bClusterEdgesVisible = bVisible;
             if (c.mChildClustersEdgesMesh) {
                 c.mChildClustersEdgesMesh.material.visible = bVisible;
 
@@ -158,10 +152,9 @@ export default class BaseCluster3D extends BaseNode {
 
         })
 
-        this.getLeafs().forEach( l => l.setEdgesVisible(bVisible) )
+        this.getLeafs().forEach(l => l.setEdgesVisible(bVisible))
 
     }
-
 
 
     //TODO update position and radius
@@ -174,22 +167,22 @@ export default class BaseCluster3D extends BaseNode {
             if (this.mHull) {
                 let boundingBox = this.mHull.mBoundingBox;
                 boundingSphere = boundingBox.getBoundingSphere();
-               this.mCollapsedClusterHull.position.copy(boundingSphere.center);
+                this.mCollapsedClusterHull.position.copy(boundingSphere.center);
             }
 
-var that=this
-          setTimeout(function(){
+            var that = this
+            setTimeout(function () {
 
-              that.trigger("hull-updated")
+                that.trigger("hull-updated")
 
-          },1000)
+            }, 1000)
 
             return this.mCollapsedClusterHull
         }
 
 //FIXME MeshPhongMaterial does not get light
         let material = new THREE.MeshBasicMaterial({
-            color:0xFFFFFF, // 0xfaebd7, //antique-white
+            color: 0xFFFFFF, // 0xfaebd7, //antique-white
             wireframe: false,
             transparent: false,
             opacity: 1.0,
@@ -197,15 +190,15 @@ var that=this
             polygonOffset: true,
             polygonOffsetFactor: -4,
             depthTest: false,
-            blending:THREE.NoBlending
+            blending: THREE.NoBlending
         });
 
 
         let materialOtherBlue = new THREE.MeshBasicMaterial({
-            color:0x6a5acd, //slate-blue
+            color: 0x6a5acd, //slate-blue
             wireframe: false,
             transparent: false,
-           // opacity: 0.8,
+            // opacity: 0.8,
             visible: true,
             polygonOffset: true,
             polygonOffsetFactor: -4,
@@ -274,27 +267,25 @@ var that=this
         this.mCollapsedGroup.add(this.mCollapsedClusterHull);
         //------
 
-var origScale;
-        this.on("mouseover",function(){
+        var origScale;
+        this.on("mouseover", function () {
 
-            if (this.mExpanded==false)
+            if (this.mExpanded == false)
                 if (this.mCollapsedClusterHull) {
-                    origScale=this.mCollapsedClusterHull.scale.clone()
-                    this.mCollapsedClusterHull.scale.multiplyScalar (1.05)
+                    origScale = this.mCollapsedClusterHull.scale.clone()
+                    this.mCollapsedClusterHull.scale.multiplyScalar(1.05)
 
                 }
 
         })
-        this.on("mouseout",function(){
+        this.on("mouseout", function () {
 
-            if (this.mExpanded==false)
+            if (this.mExpanded == false)
                 if (this.mCollapsedClusterHull)
                     this.mCollapsedClusterHull.scale.copy(origScale)
 
 
         })
-
-
 
 
         this.trigger("hull-updated") //the collapsed sphere hull functions the same as the actual hull in terms of this event
@@ -338,15 +329,15 @@ var origScale;
         //TODO have a container for children so deferred elements are hidden too
         // _.each(this.children,el => el.visible=false )
 
-var that=this
+        var that = this
         //this.mExpandedGroup.visible = false;
         this.animate({mCollapsedGroup: {scale: {x: 0.3, y: 0.3, z: 0.3}}}, 200)
-        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200,function(){
-            this.mExpandedGroup.visible=false
+        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200, function () {
+            this.mExpandedGroup.visible = false
         })
 
 
-       this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
+        this.getSphereHull(this.mHull ? this.mHull.mBoundingBox : null)
 
 
         //TODO togging the group will have strange effect
@@ -364,8 +355,7 @@ var that=this
         var that = this;
 
         if (this.mCollapsedClusterHull)
-        this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
-
+            this.mCollapsedClusterHull.animate({fade: 0.1}, 200)
 
 
         if (!this.mClusterClusteringApplied) {
@@ -390,8 +380,7 @@ var that=this
         this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
 
 
-
-        this.mExpandedGroup.visible=true
+        this.mExpandedGroup.visible = true
 
         this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
 
@@ -431,7 +420,7 @@ var that=this
 
             this.mChildClustersEdgesMesh.material.opacity = opa//*this.mEdgeFadeInVal ;
 
-            this.mChildClustersEdgesMesh.material.visible =this.bClusterEdgesVisible? vis > 0.02 && vis < 0.9:false;
+            this.mChildClustersEdgesMesh.material.visible = this.bClusterEdgesVisible ? vis > 0.02 && vis < 0.9 : false;
 
         }
 
@@ -638,16 +627,41 @@ var that=this
 
     getClusterOptions() {
 
+
         let options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
             hull: BaseVolume,
-            onHullCreated:function(){},
+            onHullCreated: function () {
+            },
             //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
             expanded: true,  //determines if a cluster is initially expanded or not
-            text:function noop(){ }
-
+            text: function noop() {
+            },
+            colors:{}
         }, this.mEntry.options);
+
+
+
+        //we want to have to color option defaults copied from the parent if it exists
+        //or set otherwise
+        let parent = this.getParentCluster()
+        if (!parent) //is root
+        {
+
+            options.colors=
+            _.extend({
+                    edge: [0x999999, 1],
+
+                    hull: [0xffffff, 0.03]//     color: 0xffffff,    opacity: 0.03,
+            }, options.colors);
+
+        }
+        else
+            options.colors=
+                _.extend( parent.getClusterOptions().colors, options.colors);
+
+
 
         return options
 
@@ -715,7 +729,6 @@ var that=this
     applyClustering(mClusteringSpeccsArray, overrideExpand = false) {
 
 
-
         if (mClusteringSpeccsArray.length >= 0) {
             this.setEntries(mClusteringSpeccsArray);
         }
@@ -765,7 +778,6 @@ var that=this
         this.doClusteringForOnlyThis(entry);
 
 
-
         _.each(this.mClusters, function (mCluster, key) {
 
             var nextDepthSpeccsArray = [].concat(mClusteringSpeccsArray);
@@ -777,7 +789,9 @@ var that=this
 
         });
 
-        this.updateCluster();
+
+        // elements are added elsewhere
+        //this.updateCluster();
 
 
         //clean up previous clusters
@@ -827,6 +841,8 @@ var that=this
 
         _.extend(this.mClusters, _clustersObj);
 
+        //TODO add clusters to parent so getParentCluster Works within options
+        this.addAllSubClustersToContainer()
 
         /**
          * add listeners to child elements if the hull was update
@@ -837,11 +853,11 @@ var that=this
             childCluster.on("hull-updated", _.throttle(function () {
 
 
-
                 that.adjustHullSize();
 
 
-                that.addChildClusterEdgeMesh();
+                let o=that.getClusterOptions()
+                that.addChildClusterEdgeMesh({color:o.colors.edge[0],opacity:o.colors.edge[1]});
                 that.updateChildClusterEdgeMeshWithHull();
 
                 that.trigger("hull-updated");
@@ -919,8 +935,8 @@ var that=this
             }
 
             else {
-       //         console.warn("src - hull should exist before calling this function...")
-              //  continue;
+                //         console.warn("src - hull should exist before calling this function...")
+                //  continue;
                 src = edge.source.position.clone();
             }
 
@@ -933,32 +949,31 @@ var that=this
             }
             else if (edge.target.mCollapsedClusterHull) {
 
-               dst = edge.target.geometry.boundingBox.getCenter();
+                dst = edge.target.geometry.boundingBox.getCenter();
 
 
             }
 
             else {
-            //    console.warn("dst - hull should exist before calling this function...")
-              //  continue;
+                //    console.warn("dst - hull should exist before calling this function...")
+                //  continue;
                 dst = edge.target.position.clone();
             }
 
 
-
             //fix edge length for collapsed
-  /*       if (edge.source.mCollapsedClusterHull) {
+            /*       if (edge.source.mCollapsedClusterHull) {
 
 
-             let v1=dst.clone().sub(src);
+                       let v1=dst.clone().sub(src);
 
-                let radius = edge.source.geometry.boundingBox.getBoundingSphere().radius;
-             v1.multiply(radius/ v1.length())
+                          let radius = edge.source.geometry.boundingBox.getBoundingSphere().radius;
+                       v1.multiply(radius/ v1.length())
 
-             src.sub(v1)
+                       src.sub(v1)
 
-         }
-*/
+                   }
+          */
 
             let src0 = edge.source.position || edge.source._el.position;
             let dst0 = edge.target.position || edge.target._el.position;
@@ -973,10 +988,10 @@ var that=this
 
     }
 
-    createShaderLineMaterial(){
+    createShaderLineMaterial() {
 
 
-        let fragmentShader=`
+        let fragmentShader = `
         
         	uniform vec3 color;
 			uniform float opacity;
@@ -997,38 +1012,37 @@ var that=this
         `
 
 
-     let    attributes = {
+        let attributes = {
 
-            displacement: {	type: 'v3', value: [] },
-            customColor: {	type: 'c', value: [] }
-
-        };
-
-      let  uniforms = {
-
-            amplitude: { type: "f", value: 5.0 },
-            opacity:   { type: "f", value: 0.3 },
-            color:     { type: "c", value: new THREE.Color( 0xff0000 ) }
+            displacement: {type: 'v3', value: []},
+            customColor: {type: 'c', value: []}
 
         };
 
-        var lineMaterial = new THREE.ShaderMaterial( {
+        let uniforms = {
 
-            uniforms: 		uniforms,
-           // attributes:     attributes,
-          //  vertexShader:   vertexShader,
+            amplitude: {type: "f", value: 5.0},
+            opacity: {type: "f", value: 0.3},
+            color: {type: "c", value: new THREE.Color(0xff0000)}
+
+        };
+
+        var lineMaterial = new THREE.ShaderMaterial({
+
+            uniforms: uniforms,
+            // attributes:     attributes,
+            //  vertexShader:   vertexShader,
             fragmentShader: fragmentShader,
-            blending: 		THREE.AdditiveBlending,
-            depthTest:		false,
-            transparent:	true
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true
 
         });
 
         lineMaterial.linewidth = 1;
 
 
-
-        lineMaterial._color=lineMaterial.color;
+        lineMaterial._color = lineMaterial.color;
         Reflect.defineProperty(lineMaterial, "color", {
             enumerable: false,
             configurable: false,
@@ -1037,15 +1051,11 @@ var that=this
             },
             set: function (c) {
 
-                this._color=c;
-                this.uniforms.color.value=c
+                this._color = c;
+                this.uniforms.color.value = c
 
             }
         });
-
-
-
-
 
 
         return lineMaterial
@@ -1077,7 +1087,7 @@ var that=this
         var lineMaterial;
         var mergedLineMesh;
 
-      let  defaults = {
+        let defaults = {
             opacity: 1.0,
             transparent: true,
             //lineIsVisible:true, // if disabled the line won't be shown on the scene
@@ -1086,7 +1096,7 @@ var that=this
 
         options = _.extend(defaults, options);
         //MeshBasicMaterial
-       lineMaterial = new THREE.LineBasicMaterial({
+        lineMaterial = new THREE.LineBasicMaterial({
             color: options.color,
             transparent: options.transparent,
             opacity: options.opacity,
@@ -1096,16 +1106,16 @@ var that=this
         });
 
 
-/*
-FIXME lines should not interfere with it's cluster (currently are overdrawing)
-lineMaterial=this.createShaderLineMaterial();
-        lineMaterial.color= new THREE.Color( options.color);
-        lineMaterial.opacity= options.opacity;
+        /*
+        FIXME lines should not interfere with it's cluster (currently are overdrawing)
+        lineMaterial=this.createShaderLineMaterial();
+                lineMaterial.color= new THREE.Color( options.color);
+                lineMaterial.opacity= options.opacity;
 
-        if (!window["lineMaterial"]) window["lineMaterial"]=[]
-        window["lineMaterial"].push(lineMaterial)
+                if (!window["lineMaterial"]) window["lineMaterial"]=[]
+                window["lineMaterial"].push(lineMaterial)
 
-*/
+        */
 
 
         MaterialFadeMixin(lineMaterial);
@@ -1115,7 +1125,7 @@ lineMaterial=this.createShaderLineMaterial();
 
 
         //TODO check if this might be holpful to put edges behind nodes
-       // this.mChildClustersEdgesMesh.layers.set(1)
+        // this.mChildClustersEdgesMesh.layers.set(1)
 
         this.mChildClustersEdgesMesh.geometry.boundingBox = new THREE.Box3;
         this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
@@ -1294,6 +1304,18 @@ lineMaterial=this.createShaderLineMaterial();
 
     }
 
+
+    setHullColorFromOptions(hull) {
+        let o = this.getClusterOptions()
+
+        if (hull.canBeVisible()) {
+
+        hull.mesh.material.color = new THREE.Color(o.colors.hull[0])
+        hull.maxOpacity = o.colors.hull[1]
+        }
+
+    }
+
     /**
      *
      *  current implementation of the hull is a simple invisible boundingBox with
@@ -1311,9 +1333,8 @@ lineMaterial=this.createShaderLineMaterial();
         if (this.mExpanded == false) {
 
             this.getSphereHull();
-        return;
+            return;
         }
-
 
 
         let info = {box: new THREE.Box3, vertices: []};
@@ -1362,6 +1383,8 @@ lineMaterial=this.createShaderLineMaterial();
                 this.mHull = new mOptions.hull();
                 mOptions.onHullCreated(this.mHull)
 
+
+
                 this.mExpandedGroup.add(this.mHull);
             }
             else throw new Error("option hull must have superclass BaseVolume");
@@ -1386,6 +1409,10 @@ lineMaterial=this.createShaderLineMaterial();
             sphereGeometry.boundingBox = boundingBox;
             this.geometry = sphereGeometry;
         }
+
+
+        this.setHullColorFromOptions(this.mHull)
+
 
         //notify listeners that the hull size changed
         this.trigger("hull-updated")
@@ -1412,9 +1439,8 @@ lineMaterial=this.createShaderLineMaterial();
      * @param entry
      */
 
-  getParentCluster()
-    {
-        let expContainer=this.parent;
+    getParentCluster() {
+        let expContainer = this.parent;
         if (expContainer) return expContainer.parent
 
 
@@ -1425,16 +1451,15 @@ lineMaterial=this.createShaderLineMaterial();
         // console.log("reached leaf cluster", this)
         var that = this;
 
-       let domEvents= this.getDOMEvents()
+        let domEvents = this.getDOMEvents()
 
-        let leaf = new ClusterLeafElement(this.mNodes,domEvents);
+        let leaf = new ClusterLeafElement(this.mNodes, domEvents);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
         leaf.setDistributionHandler(entry.distribution, function () {
 
             //create/update the hull element after the animation has finished
             that.adjustHullSize();
-
 
 
             if (that.isLeaf())
@@ -1657,7 +1682,7 @@ lineMaterial=this.createShaderLineMaterial();
             if (r == null) return parents;
 
             //the actual parent cluster has one group element where the sub-cluster resides
-            if (r instanceof THREE.Group && r.parent instanceof BaseCluster3D) r=r.parent;
+            if (r instanceof THREE.Group && r.parent instanceof BaseCluster3D) r = r.parent;
 
             if (!(r instanceof BaseCluster3D)) return parents;
             _root = r;
