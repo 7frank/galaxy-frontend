@@ -224,8 +224,10 @@ export default class GraphView3D extends View3D {
 
         //$(that).off();
 
-       if (!$(that).hasClass("before-render-inited"))
-        $(that).addClass("before-render-inited").on("before-render", onBeforeRender);
+      // if (!$(that).hasClass("before-render-inited"))
+        $(that).
+           // .addClass("before-render-inited").
+        on("before-render", onBeforeRender);
 
 
         function onBeforeRender() {
@@ -236,6 +238,8 @@ export default class GraphView3D extends View3D {
                 //update company info only every 20 frames to increse overall performance
                 if (_____skipFrames++ % 20==0) {
                     let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
+
+                 if (vl.length!=0) //FIXME this should prevent the flickering but it does not solve the underlying problem that the handlers are bound incorrect
                     GUI.updateFromVisibleNodes(vl);
                     visibleNodes = []
                 }
