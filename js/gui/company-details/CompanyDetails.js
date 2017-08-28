@@ -17,10 +17,20 @@ class CompanyDetails extends HTMLElement {
 
     connectedCallback(){
 
-        let str=  new TemplateString(bodyHTML).format({name:"CompanyName"})
 
-        $(this).append(str)
+            this.setStuff()
 
+    }
+
+
+    setStuff(o){
+
+            o=_.extend({name:"CompanyName",link:""},o)
+
+
+        let str=  new TemplateString(bodyHTML).format(o)
+
+        $(this).html(str)
 
 
     }

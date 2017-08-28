@@ -281,6 +281,10 @@ export var GUI = {
 
                 ////////////////////////////////////////////////////////
                 console.warn("TODO implement node data from database")
+
+              let link="<a target='_blank' href='https://www.iqbanker.com/charts/"+node.id+"/supply_chain'>iq maps</a>"
+                $("company-details").get(0).setStuff({name:node.name,link})
+
                 return;
 
 
