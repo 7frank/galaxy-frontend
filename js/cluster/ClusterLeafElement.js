@@ -105,16 +105,55 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
                         if (distance < raycaster.near || distance > raycaster.far) return;
 
-                        intersects.push({
+                        /*                        intersects.push({
 
+                                                    distance: distance,
+                                                    distanceToRay: Math.sqrt(rayPointDistanceSq),
+                                                    point: intersectPoint.clone(),
+                                                    index: index,
+                                                    face: null,
+                                                    object: object
+
+                                                });
+                        */
+
+                        let n = pcWrapper.nodes[index]
+                        if (!n || !n.get3DRoot) {
+                            console.warn("ClusterLeaf Node Element not initialised properly")
+                            return
+
+                        }
+
+
+
+                        //TODO unclear
+                       function getDepthForDomEventsAlt(el){
+
+                        var depth=0;
+
+                           while(el=el.parent)
+                           {
+                               depth++;
+                           }
+                          return depth
+                       }
+
+
+
+                        let node = n.get3DRoot()
+                        let newDepth=getDepthForDomEventsAlt(pcWrapper.pointCloud)+1
+
+                        intersects.push({
+                            depth:newDepth,
                             distance: distance,
                             distanceToRay: Math.sqrt(rayPointDistanceSq),
-                            point: intersectPoint.clone(),
-                            index: index,
+//                            point: intersectPoint.clone(),
+//                            index: index,
                             face: null,
-                            object: object
+                            object: node
 
                         });
+
 
                     }
 
@@ -171,12 +210,16 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         }() )
 
-
+/*
         pcWrapper.on("click dblclick mouseover mousemove", function (e) {
 
-            // let index=e.intersect.index
-            this.show()
-            //  this.trigger (e.type, e.intersect, node)
+          //  e[0].stopPropagation()
+            //  this.show()
+
+//FIXME forward events view::domeevents notify (event, this ...)
+
+
+            //this contains the node which has been clicked
 
 
         })
@@ -188,7 +231,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
             //    this.trigger (e.type, e.intersect, this)
 
         })
-
+*/
 
     }
 
@@ -255,9 +298,9 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         if (this.mParticles) {
 
-            let scale=Math.cbrt(levelOfDetail)
-            if (scale<0.1) scale=0.1 //make sure that at all times at least 10pct of particles per leaf are rendered
-            if (scale>0.8) scale=1
+            let scale = Math.cbrt(levelOfDetail)
+            if (scale < 0.1) scale = 0.1 //make sure that at all times at least 10pct of particles per leaf are rendered
+            if (scale > 0.8) scale = 1
             let max = Math.floor(scale * this.mParticles.particleCount)
             this.mParticles.pointCloud.geometry.setDrawRange(0, max)
 
@@ -291,7 +334,6 @@ export default class ClusterLeafElement extends THREE.Mesh {
         }
 
 
-      
         if (this.mNodeMeshes && this.mNodeMeshes.geometry) {
             this.mNodeMeshes.geometry.dispose();
             this.mNodeMeshes = null;
@@ -360,7 +402,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
             //check f particles are still valid and not being cleaned up for example
             if (that.mNodeParticles)
-            that.mNodeParticles.updateNodePosition(i);
+                that.mNodeParticles.updateNodePosition(i);
 
         }, function onStep() {
 

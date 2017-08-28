@@ -67,6 +67,16 @@
 /** @namespace */
 //var THREEx		= THREEx 		|| {};
 
+
+/**
+ * DomEventsAlt is a partial rewrite for nested graph-like structures
+ * it prioritises distanceToRay and depth of element within render graph to find best matiching elements for interaction
+ * also it speeds up comparisons for meshes by using the scene element to raycast for relevant meshes and bubbling up the render graph of  results,
+ * for objects with events context
+ */
+
+
+
 // # Constructor
 export default
 function DomEventsAlt(camera, domElement,scene)
@@ -370,6 +380,13 @@ DomEventsAlt.prototype.sortByDepth=function(intersects){
 
         var el=i.object
         var depth=0;
+
+        //TODO check alternatives
+        //our ClusterLeafElements do get a depth property attached bythe raycaster
+
+        if (i.depth)
+            return i.depth
+
         while( el=el.parent)
         {
             depth++;
@@ -382,7 +399,7 @@ DomEventsAlt.prototype.sortByDepth=function(intersects){
     // and DESC depth
     //so elements that are closer and deeper within the scene are more relevant
 
-    intersects= _.sortBy(intersects, [ (o) => -o.depth,o => o.distance]);
+    intersects= _.sortBy(intersects, [ (o) => -o.depth,o => o.distanceToRay]);  //,o => o.distance
 
 
     return intersects
@@ -429,22 +446,13 @@ DomEventsAlt.prototype._onEvent	= function(eventName, mouseX, mouseY, origDomEve
     var intersects = this._raycaster.intersectObjects( this.scene.children,true );
     // intersects=  intersects.filter( i => this._objectCtxIsInit(i.object) );
     intersects=  this.getRelevantIntersections(intersects)
-
     // if there are no intersections, return now
     if( intersects.length === 0 )	return;
 
     // init some variables
     var intersect	= intersects[0];
     var object3d	= intersect.object;
-    var objectCtx	= this._objectCtxGet(object3d);
-    var objectParent = object3d.parent;
 
-    while ( typeof(objectCtx) == 'undefined' && objectParent )
-    {
-        objectCtx = this._objectCtxGet(objectParent);
-        objectParent = objectParent.parent;
-    }
-    if( !objectCtx )	return;
 
     // notify handlers
     this._notify(eventName, object3d, origDomEvent, intersect);
