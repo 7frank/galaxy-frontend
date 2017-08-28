@@ -53,11 +53,16 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         pcWrapper.pointCloud.raycast = ( function () {
 
+
             var inverseMatrix = new THREE.Matrix4();
             var ray = new THREE.Ray();
             var sphere = new THREE.Sphere();
 
             return function raycast(raycaster, intersects) {
+
+                if (this.visible == false)
+                    return
+
 
                 var object = this;
                 var geometry = this.geometry;
@@ -125,26 +130,23 @@ export default class ClusterLeafElement extends THREE.Mesh {
                         }
 
 
-
                         //TODO unclear
-                       function getDepthForDomEventsAlt(el){
+                        function getDepthForDomEventsAlt(el) {
 
-                        var depth=0;
+                            var depth = 0;
 
-                           while(el=el.parent)
-                           {
-                               depth++;
-                           }
-                          return depth
-                       }
-
+                            while (el = el.parent) {
+                                depth++;
+                            }
+                            return depth
+                        }
 
 
                         let node = n.get3DRoot()
-                        let newDepth=getDepthForDomEventsAlt(pcWrapper.pointCloud)+1
+                        let newDepth = getDepthForDomEventsAlt(pcWrapper.pointCloud) + 1
 
                         intersects.push({
-                            depth:newDepth,
+                            depth: newDepth,
                             distance: distance,
                             distanceToRay: Math.sqrt(rayPointDistanceSq),
 //                            point: intersectPoint.clone(),
@@ -210,28 +212,28 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
         }() )
 
-/*
-        pcWrapper.on("click dblclick mouseover mousemove", function (e) {
+        /*
+                pcWrapper.on("click dblclick mouseover mousemove", function (e) {
 
-          //  e[0].stopPropagation()
-            //  this.show()
+                  //  e[0].stopPropagation()
+                    //  this.show()
 
-//FIXME forward events view::domeevents notify (event, this ...)
-
-
-            //this contains the node which has been clicked
+        //FIXME forward events view::domeevents notify (event, this ...)
 
 
-        })
+                    //this contains the node which has been clicked
 
-        //TODO mouseout this missing
-        pcWrapper.on("mouseout", function (e) {
 
-            //    that.mNodeMeshes.remove(this._bubble);
-            //    this.trigger (e.type, e.intersect, this)
+                })
 
-        })
-*/
+                //TODO mouseout this missing
+                pcWrapper.on("mouseout", function (e) {
+
+                    //    that.mNodeMeshes.remove(this._bubble);
+                    //    this.trigger (e.type, e.intersect, this)
+
+                })
+        */
 
     }
 
@@ -270,8 +272,11 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
     setLOD(levelOfDetail) {
-        if (this.mNodeParticles && this.parent.useLOD)
-            this.mNodeParticles.pointCloud.visible = this.bNodesVisible ? levelOfDetail > 0.3 : false;
+        if (this.mNodeParticles)
+            if (this.parent.useLOD)
+                this.mNodeParticles.pointCloud.visible = this.bNodesVisible ? levelOfDetail > 0.3 : false;
+            else
+                this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.75;
         //TODO nodes,edges, ... as well
 
         let edgeFadeLOD = 0.3;
