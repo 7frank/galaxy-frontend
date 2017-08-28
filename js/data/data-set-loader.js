@@ -476,8 +476,8 @@ export function getGraphDataSets() {
     if (c) extraCountriesTODO=c.replace(new RegExp("_", "gi")," ")
 
     return [
-       queryDatabase(getCountryQuery(extraCountriesTODO)),
-        queryDatabase(getCountryQuery(extraCountriesTODO?extraCountriesTODO:"France,Taiwan")),
+     //  queryDatabase(getCountryQuery(extraCountriesTODO)),
+      //  queryDatabase(getCountryQuery(extraCountriesTODO?extraCountriesTODO:"France,Taiwan")),
 
         loadRealDataSampleOnly("assets/realDataNodesv5_ticker.csv", "assets/realDataLinksv5.csv", function (graph) {
         }),
