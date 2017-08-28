@@ -37,7 +37,7 @@ export default class BaseCluster3D extends BaseNode {
         //initially have a value to ignore the lod while loading to make the animations visible for certain elements
         this.useLOD = false;
 
-        this.bClusterEdgesVisible = true;
+        this.bClusterEdgesVisible = false; //initially invisible
         //add collapse/expand stuff
         //  this.mExpanded = true;
         this.mClusterClusteringApplied = false;

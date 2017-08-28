@@ -472,9 +472,12 @@ export class SampleClusterApplication extends HTMLElement {
                     },
                     mouseover: function () {
                         this.mHull.visible = true
+                        this.bClusterEdgesVisible= true
+
                     },
                     mouseout: function () {
                         this.mHull.visible = false
+                        this.bClusterEdgesVisible= false
                     }
                 },
                 options: {
@@ -589,6 +592,15 @@ export class SampleClusterApplication extends HTMLElement {
                     click: function () {
                         //  this.toggleCollapse()
                         console.log("toggled leaf", this.name)
+                    },
+                    mouseover: function () {
+
+                        this.bClusterEdgesVisible= true
+
+                    },
+                    mouseout: function () {
+
+                        this.bClusterEdgesVisible= false
                     }
                 },
                 options: {
