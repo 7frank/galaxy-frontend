@@ -1046,6 +1046,44 @@ when loading focus united states
 zoom in out controls
 \end_layout
 
+\begin_layout Itemize
+have a better solution to the previously partialy solved 3d 2d switch problem
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+switching 2d on load will kill webgl so pervent switching or stop current
+ before starting new view
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+ClusterLeafElement node cloud 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+when selecting a industry cluster from further away prevent selecting the
+ nodes instead by having the nodecloud ignored/invisibe at that distance
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+fix ids for papaparse or live database to match the one iq_maps detail view
+ uses
+\end_layout
+
 \begin_layout Subsection
 20- 26.
  08
@@ -1295,6 +1333,8 @@ next
 status open
 
 \begin_layout Itemize
+
+\strikeout on
 switching 2d on load will kill webgl so pervent switching or stop current
  before starting new view
 \begin_inset Note Note
@@ -1323,7 +1363,15 @@ urgent
 
 \end_layout
 
+\begin_deeper
 \begin_layout Itemize
+have the link to maps working
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
 color scheme white color options?
 \end_layout
 
@@ -1351,6 +1399,81 @@ and like other screenshot from iq-broker
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Itemize
+node can't be selected which prevents that menu appears on dblclick
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+this is urgent!
+\end_layout
+
+\begin_layout Itemize
+could be within DomEventsAlt::onEvent
+\end_layout
+
+\begin_layout Itemize
+or on ClusterLeafElement => pcWrapper
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+this is working
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Itemize
+fixing the depth param within the raycaster should enable previous behaviour
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+update matrix for intersected node
+\end_layout
+
+\begin_layout Itemize
+rewrite ParticleNodeGroup
+\end_layout
+
+\begin_layout Itemize
+remove events ...
+ on
+\end_layout
+
+\begin_layout Itemize
+add raycaster that is currently sitting in leaf element
+\end_layout
+
+\end_deeper
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_inset
+
+
+\end_layout
+
 \begin_layout Itemize
 
 \strikeout on
@@ -1404,6 +1527,20 @@ company names calc with skip after view change flickers
 \end_layout
 
 \begin_layout Itemize
+edges weg und nur auf hover
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
 hull 
 \end_layout
 
@@ -1438,10 +1575,6 @@ weiter weg gegen null
 \end_layout
 
 \end_deeper
-\begin_layout Itemize
-edges weg und nur auf hover
-\end_layout
-
 \begin_layout Itemize
 
 \strikeout on

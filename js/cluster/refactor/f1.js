@@ -269,7 +269,7 @@ function extendGraphElements(d3Nodes, d3Links, env) {
 
             if (previousNodeClicked.indexOf(this) >= 0)return;
 
-             highlightNodeElements.apply(this, [true, true])
+             highlightNodeElements.apply(this, [true, false])
 
 
         },
