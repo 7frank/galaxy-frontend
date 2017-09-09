@@ -22,7 +22,7 @@ export default class RandomDistribution extends BaseDistribution
 
         let x=_.random(min,max);
         let y=this.dimensions>1?_.random(min,max):0;
-        let z=this.dimensions>1?_.random(min,max):0;
+        let z=this.dimensions>2?_.random(min,max):0;
 
 
         return {

@@ -157,6 +157,11 @@ class ClusterTextOverlay extends HTMLElement {
 
     setBreadcrumb(parentClusters)
     {
+
+        //compare arrays if an update is necessary
+      if ( _.last(parentClusters)==this.mBreadcrumb.item) return
+        this.mBreadcrumb.item=_.last(parentClusters)
+
         parentClusters.shift()//discard root
 
         var res=[]

@@ -120,11 +120,25 @@ class ConvexVolume extends BoxVolume {
         let mesh = new THREE.Mesh(this.geo0, mat);
 
         mesh.geometry.boundingBox = boundingBox;
+        mesh.geometry.boundingSphere=boundingBox.getBoundingSphere()
+
+        //this part is to prevent an exception in the raycaster where position is not present but element initialised
+        //TODO maybe change the element itself so it stays in a valid state
+        var rc= mesh.raycast
+        mesh.raycast=function(raycaster,intersects){
+
+            if (this.geometry&&this.geometry.attributes&& !this.geometry.attributes.position)
+                return
+
+            return rc.apply(this,arguments)
+
+        }
 
 
         if (this.mesh) this.remove(this.mesh);
         this.mesh = mesh;
         this.add(mesh);
+
         return this.mesh;
 
     }
@@ -200,8 +214,12 @@ class ConvexVolume extends BoxVolume {
          if (l >= 0.8 && l <= 0.95) this.mesh.geometry = this.geometryAveragePoly;
          if (l > 0.95) this.mesh.geometry = this.geometryHighPoly*/
 
+
+        //FIXME initial C-V is to heavy to compute
+        l=0.1
+
         if (l < 0.2)
-            this.mesh.geometry = this.createResolutionGeometry("Least",2);
+            this.mesh.geometry = this.createResolutionGeometry("Least",1);
        else
         if (l > 0.2 && l < 0.6)
             this.mesh.geometry = this.createResolutionGeometry("Low",4);

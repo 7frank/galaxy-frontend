@@ -339,6 +339,9 @@ DomEventsAlt.prototype._onMove	= function(eventName, mouseX, mouseY, origDomEven
 //retrieves the bound objects for the intersected elements using the recursive approach
 DomEventsAlt.prototype.getRelevantIntersections= function getRelevantIntersections(intersects){
 
+
+    if( intersects.length === 0 )	return intersects;
+
     var relevant=[];
     var that=this;
     intersects.forEach(function(i){
