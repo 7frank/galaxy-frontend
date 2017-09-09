@@ -64,7 +64,7 @@ export default function AnimationMixin(origObject) {
     }
 
 
-    origObject.animate = function (options = {}, mDuration = 400, onComplete) {
+    origObject.animate = function (options = {}, mDuration = 400, onComplete,onUpdate) {
         var mTimeout;
         var that = this;
         var stopped=false
@@ -84,6 +84,8 @@ export default function AnimationMixin(origObject) {
                 for (let key in this) {
                     returnValue(that, this, key);
                 }
+                if (typeof onUpdate=="function") onUpdate.bind(that)()
+
             })
             .onComplete(function () {
 
