@@ -8,22 +8,20 @@
 
 
 import DomEventsAlt from "../cluster/utils/DomEventsAlt"
-import  "./View3D.css"
+import "./View3D.css"
 
 
-
-export default
-class View3D extends HTMLElement {
+export default class View3D extends HTMLElement {
 
     constructor(...args) {
         super(...args);
 
 
-       // this.createCSSRule();
+        // this.createCSSRule();
         this.mTime = -1;
         this.mActualFPS = 0;
         this.showFPSCounter = false;
-        this.mouseSpeed=2;
+        this.mouseSpeed = 2;
 
 
         //   this.initStatic()
@@ -43,11 +41,11 @@ class View3D extends HTMLElement {
 
     initCamera() {
 
-        var initialCameraPosition= new THREE.Vector3(-5500,-4000, 50000);
+        var initialCameraPosition = new THREE.Vector3(-5500, -4000, 50000);
 
 
         // Setup camera
-         this.mCameraP = new THREE.PerspectiveCamera();
+        this.mCameraP = new THREE.PerspectiveCamera();
 
 
         this.mCameraO = new THREE.OrthographicCamera();
@@ -56,10 +54,9 @@ class View3D extends HTMLElement {
         this.mCameraO.position.copy(initialCameraPosition)
 
 
+        this.mCamera = new THREE.CombinedCamera();
 
-        this.mCamera =    new THREE.CombinedCamera();
-
-       // this.mCamera =   this.mCameraO// new THREE.CombinedCamera();
+        // this.mCamera =   this.mCameraO// new THREE.CombinedCamera();
 
 
         if (this.mCamera instanceof THREE.CombinedCamera) {
@@ -81,7 +78,7 @@ class View3D extends HTMLElement {
         // Add camera interaction
         this.mControls = new THREE.TrackballControls(this.mCamera, this.mRenderer.domElement);
 
-        this.mControls.maxDistance = Math.min(this.mCamera.far,200000);
+        this.mControls.maxDistance = Math.min(this.mCamera.far, 200000);
 
 
         this.mControls.addEventListener("change", (...args) => $(this).trigger("change", ...args));
@@ -103,39 +100,34 @@ class View3D extends HTMLElement {
     }
 
 
-
-     updateCamera()
-     {
-         this.mCamera.updateProjectionMatrix();
+    updateCamera() {
+        this.mCamera.updateProjectionMatrix();
 
 
-     //update controls
-     this.mControls.object=this.mCamera
+        //update controls
+        this.mControls.object = this.mCamera
 
-     //update domEvents camera with current camera
-     this.mDomEvents._camera=this.mCamera
+        //update domEvents camera with current camera
+        this.mDomEvents._camera = this.mCamera
 
 
-     }
+    }
 
-    set2D()
-    {
+    set2D() {
 
-     //   this.mCameraO.copy( this.mCamera);
+        //   this.mCameraO.copy( this.mCamera);
 
-        this.mCamera=this.mCameraO
-
+        this.mCamera = this.mCameraO
 
 
         this.updateCamera()
 
     }
 
-    set3D()
-    {
-      //  this.mCameraP.copy( this.mCamera);
+    set3D() {
+        //  this.mCameraP.copy( this.mCamera);
 
-        this.mCamera=this.mCameraP
+        this.mCamera = this.mCameraP
 
         this.updateCamera()
 
@@ -143,7 +135,7 @@ class View3D extends HTMLElement {
 
 
     resizeCanvas() {
-        if (this.mRenderer &&  this.mCamera) {
+        if (this.mRenderer && this.mCamera) {
             this.mRenderer.setSize(this.clientWidth, this.clientHeight);
             this.mCamera.aspect = this.clientWidth / this.clientHeight;
 
@@ -153,19 +145,19 @@ class View3D extends HTMLElement {
             this.mCamera.updateProjectionMatrix();
 
             //adjust orthographic camera
-        let camFactor=2
-            this.mCameraO.left = - this.clientWidth / camFactor;
-            this.mCameraO.right =  this.clientWidth / camFactor;
-            this.mCameraO.top =  this.clientHeight / camFactor;
-            this.mCameraO.bottom = - this.clientHeight / camFactor;
+            let camFactor = 2
+            this.mCameraO.left = -this.clientWidth / camFactor;
+            this.mCameraO.right = this.clientWidth / camFactor;
+            this.mCameraO.top = this.clientHeight / camFactor;
+            this.mCameraO.bottom = -this.clientHeight / camFactor;
             this.mCameraO.updateProjectionMatrix();
 
 
         }
 
-        if (this.mRenderer &&  this.mControls) {
-            this.mControls.panSpeed =1600 / this.clientWidth * this.mouseSpeed *0.3
-                this.mControls.rotateSpeed = 1600 / this.clientWidth * this.mouseSpeed
+        if (this.mRenderer && this.mControls) {
+            this.mControls.panSpeed = 1600 / this.clientWidth * this.mouseSpeed * 0.3
+            this.mControls.rotateSpeed = 1600 / this.clientWidth * this.mouseSpeed
         }
 
     }
@@ -181,7 +173,7 @@ class View3D extends HTMLElement {
     setCaption(text) {
 
 
-            if (!this.mCaption)
+        if (!this.mCaption)
             this.mCaption = $("<span></span>").html(this.name).addClass(".view-3d-caption");
 
         this.mCaption.html("").append(text);
@@ -216,6 +208,9 @@ class View3D extends HTMLElement {
 
         this.mScene = new THREE.Scene();
 
+        //added to be able to use threejs inspector
+        window.scene =  this.mScene ;
+        window.THREE =  THREE ;
         // Add nav info section
         //createTooltip()
 
@@ -227,7 +222,7 @@ class View3D extends HTMLElement {
         this.appendChild(this.mRenderer.domElement);
 
 
-        $(this.mRenderer.domElement).css({position: "absolute",top:0,left:0, width: "100%", height: "100%"});
+        $(this.mRenderer.domElement).css({position: "absolute", top: 0, left: 0, width: "100%", height: "100%"});
 
 
         //init basic keyboard io
@@ -306,7 +301,7 @@ class View3D extends HTMLElement {
     animate() {
 
         if (this._a) return
-        this._a=true;
+        this._a = true;
 
         console.log("animate")
         var initialFrames = 0;
@@ -315,7 +310,7 @@ class View3D extends HTMLElement {
 
         function doAnimate(time) {
             that.mTime = time;
-           // console.log("doAnimate",time)
+            // console.log("doAnimate",time)
             //that.mControls.update();
             initialFrames--;
             if (that.mFPS == 0) {
@@ -360,8 +355,16 @@ class View3D extends HTMLElement {
 
             $(that).trigger("before-render", time);
 
-         //   console.log("render",time)
+            //    that.mRenderer.autoClear=false
+            //    that.mCamera.layers.set(1) //render lines in background
+            //    that.mRenderer.clear();
+
             that.mRenderer.render(that.mScene, that.mCamera);
+
+            //  that.mCamera.layers.set(0) //render the other objects
+            //  that.mRenderer.clearDepth();
+            //   that.mRenderer.render(that.mScene, that.mCamera);
+
 
             $(that).trigger("after-render", time);
 
@@ -433,7 +436,7 @@ class View3D extends HTMLElement {
     }
 
     stop() {
-      //  window.cancelAnimationFrame(this.mFrameId)
+        //  window.cancelAnimationFrame(this.mFrameId)
     }
 
     resume() {
