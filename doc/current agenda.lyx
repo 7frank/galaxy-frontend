@@ -990,24 +990,55 @@ if possible we should define about sprints of equal length.
 \end_layout
 
 \begin_layout Subsection
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-asdasd
+next sprint if things for 2d are done
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Paragraph
-next
+\begin_layout Subsubsection
+summary
 \end_layout
 
 \begin_layout Itemize
-grid-layout 
+database
+\end_layout
+
+\begin_layout Itemize
+gui
+\end_layout
+
+\begin_layout Itemize
+graph
+\end_layout
+
+\begin_layout Itemize
+other
+\end_layout
+
+\begin_layout Subsubsection
+detail
+\end_layout
+
+\begin_layout Itemize
+database
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+live news on right gui panel based on (x,y,z) - position of viewer within
+ 3D geometry/cluster
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+gui
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+zoom - in/out controls
+\end_layout
+
+\begin_layout Itemize
+use css-grid layout for components to enable responsive design 
 \end_layout
 
 \begin_deeper
@@ -1031,23 +1062,48 @@ grid-template-area (responsive)
 
 \end_deeper
 \begin_layout Itemize
-news on right based on pos in cluster
+test/debug touch options for iPad
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+graph
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+when loading, focus united states culster 
 \end_layout
 
 \begin_layout Itemize
-touch options debugging ipad!!!!! important
+improve performance of leaf elements on expand/collapse
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+entry that was forgotten
 \end_layout
 
-\begin_layout Itemize
-when loading focus united states
+\end_inset
+
+
 \end_layout
 
+\begin_deeper
 \begin_layout Itemize
-zoom in out controls
+leaf elements take 3-4 seconds on expand which makes them look really slow
 \end_layout
 
+\end_deeper
+\end_deeper
 \begin_layout Itemize
-have a better solution to the previously partialy solved 3d 2d switch problem
+misc
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+have a better solution to the previously partially solved problem when switching
+ between 3D and 2D view
 \end_layout
 
 \begin_deeper
@@ -1058,6 +1114,851 @@ have a better solution to the previously partialy solved 3d 2d switch problem
 switching 2d on load will kill webgl so pervent switching or stop current
  before starting new view
 \begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+in the zipped demo hovering a node does not highlight the node
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+while debugging,everything seems normal
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+fix node IDs when loading csv data with papaparse to match the ones from
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+iq_maps
+\begin_inset Quotes erd
+\end_inset
+
+ - detail view 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+setting up live database alternativly to 
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Subsection
+03.09-09.08.
+\end_layout
+
+\begin_layout Standard
+Focus solely on the 2d graph until that is looking as intended
+\end_layout
+
+\begin_layout Subsubsection
+Summary
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+2d graph-view!!!
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Details
+\end_layout
+
+\begin_layout Itemize
+2d-graph
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+fix bug for edges not animating when every node is collapsed
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+adjusting hull size when stepping through distribution function does create
+ the hull properly but as side effect the layout for complete 2d view will
+ bug out ...
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+ok it's not adjusting the hull that f's up the distribution for large 2d
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+something wrong with forcegraphdistribution if collapse feature is used
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+check slow initial expand of leaf (bad usability)
+\end_layout
+
+\begin_layout Itemize
+make edges have a line width with THREE.Meshline
+\end_layout
+
+\begin_layout Itemize
+offset between clollapsed and expanded center
+\end_layout
+
+\begin_layout Itemize
+no hull if no child is expanded leaf
+\end_layout
+
+\begin_layout Itemize
+cluster edges initially visible for 2d but not for 3d 
+\end_layout
+
+\begin_layout Itemize
+refactor BaseCluster::updateChildClusterEdgeMeshWithHull as it is too problemnat
+ic the way it currently works
+\end_layout
+
+\begin_layout Itemize
+edges on collapsed clusters not visible correctly
+\end_layout
+
+\begin_layout Itemize
+faster initial and invisible convexHull plus 2d shape-
+\begin_inset Quotes eld
+\end_inset
+
+hull
+\begin_inset Quotes erd
+\end_inset
+
+ for 2d
+\end_layout
+
+\begin_layout Itemize
+test renderOrder and non transparent hull
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+make 2d hull transparent=false
+\end_layout
+
+\begin_layout Itemize
+lines transparent false
+\end_layout
+
+\begin_layout Itemize
+render order..
+ nodes=0 hull=1 edges=2
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+https://stackoverflow.com/questions/12666570/how-to-change-the-zorder-of-object-w
+ith-threejs/12666937#12666937
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mesh.renderOrder = 999; mesh.onBeforeRender = function( renderer ) { renderer.clear
+Depth(); };
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+http://jsfiddle.net/sg02e5sm/2/
+\end_layout
+
+\begin_layout Itemize
+create 2d shape for 2d instead of convexHull
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+layers don' work here because we do want to have edges within cluster be
+ on top and edges of parent cluster be behind hull
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+bugs/other unforseen changes
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+dbl clicking a collapsing cluster will render it useless
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+disable collapse twice
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+breadcrumb b/w
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+overlay gets recreated thus must get state from somewhere else like
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+cluster-text-overlay.darker > cluster-text-overlay-breadcrumb-item { color:red
+\end_layout
+
+\begin_layout Itemize
+} 
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+in debug, other sector does not show hull porperly..
+ check ordering of DOMEventsAlt
+\end_layout
+
+\begin_layout Itemize
+add event that resets clicked node
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+use it for collapse/expand/create cluster
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+//TODO smaller collapsed hulls should be in front of bigger ones
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+the position of the collapsed cluster hull is not where it should be ...
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+scaling by 3 makes it more okish
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+also the offsets for the animated positions have to be changed
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+when collapsing the edges arent recomputed 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+ok the edges are computed
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+flickering of hull when animating
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+navigate collapsed clusters via searchbar
+\end_layout
+
+\begin_layout Itemize
+faster leaf expand
+\end_layout
+
+\begin_layout Itemize
+cluster edges meshline with width feature
+\end_layout
+
+\begin_layout Itemize
+2d 
+\begin_inset Quotes eld
+\end_inset
+
+hull
+\begin_inset Quotes erd
+\end_inset
+
+ nontransparent for parent cluster edges to not draw into the element plus
+ some perf increase
+\end_layout
+
+\begin_layout Itemize
+edges not default visible in 3d but in 2d
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+20.
+ 08.
+ - 26.
+ 08
+\end_layout
+
+\begin_layout Standard
+The following sprint was more of a todo list based on the two meetings and
+ the discussed items.
+ The internal (programmers) goal was to get as much done as time allows.
+ (strokeout entries have been finished)
+\end_layout
+
+\begin_layout Paragraph
+Summary
+\end_layout
+
+\begin_layout Itemize
+meeting 19.
+ 08.
+ 
+\end_layout
+
+\begin_layout Itemize
+meeting 12.
+ 08.
+\end_layout
+
+\begin_layout Paragraph
+Meeting 19.08.
+ items discussed
+\end_layout
+
+\begin_layout Standard
+This section contains functional requirements discussed in the meeting and
+ technical annotations how to proceed.
+ 
+\end_layout
+
+\begin_layout Itemize
+when loading the graph, set colors to 
+\begin_inset Quotes eld
+\end_inset
+
+sentiment
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+out of time
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+timing bug which prevents setting the color consistently
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+increase sizeof/spread of clusters to cover more space
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+potentially use a different distribution approach (instead of force graph)
+ 
+\end_layout
+
+\begin_layout Itemize
+problem: we initially need the size of the industrial sectors.
+ this could be a simple random distribution within a sphere radius or a
+ grid of some sort to prevent intersetions between elements
+\end_layout
+
+\begin_layout Itemize
+besides that, for the parent clusters to cover as much space as possible,
+ a 3D bin packing distribution handler would be optimal
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+took a bit of time to research
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+popup! link to charts.php
+\end_layout
+
+\begin_layout Itemize
+javascript files/packages that may be discarded to improve loading performance
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+highstock 
+\end_layout
+
+\begin_layout Itemize
+fontawesome
+\end_layout
+
+\begin_layout Itemize
+unica
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+cluster names abbreviations
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+expand on hover
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+out of time
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+use myriad pro condensed
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+out of time
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+<script src="https://use.typekit.net/ulv2nrf.js"></script> 
+\end_layout
+
+\begin_layout Itemize
+<script>try{Typekit.load({ async: true });}catch(e){}</script>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+explanations of internal structure of the database
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+news iq
+\end_layout
+
+\begin_layout Itemize
+dj_news
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Itemize
+contains all news plus hot news
+\end_layout
+
+\begin_layout Itemize
+use converter for timezone
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+dj_news_isin
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Itemize
+isin ticker 
+\end_layout
+
+\begin_layout Itemize
+dj_news_isin.news_id => dj_news.id
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+dj_news_sig_about
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Plain Layout
+contains all relevant news
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+dj_news_primary_symbol
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Plain Layout
+header company+significant
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+node connections
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Itemize
+customers table
+\end_layout
+
+\begin_deeper
+\begin_layout Plain Layout
+.company _id == node
+\end_layout
+
+\begin_layout Plain Layout
+.name == customers
+\end_layout
+
+\end_deeper
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+related to companies table
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+intrinio app
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+relevant for real time prices
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+currently working real time news
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+/zpghkvqdgf/public_html/ dj_cross_app.php
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+set zoom target on hover if none is selected
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+out of time
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+zoom buttons behaviour: additional 
+\begin_inset Quotes eld
+\end_inset
+
+touch
+\begin_inset Quotes erd
+\end_inset
+
+ handler for touch screen users
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+out of time
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+meeting 12.8.
+ TODO order prio and merge
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+next
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+more important
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+switching 2d on load will kill webgl so pervent switching or stop current
+ before starting new view
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+fixme
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+re-enable pop-up dialog (conpany details) and have the link to iq_maps working
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+connect to database
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+color scheme white color options?
+\end_layout
+
+\begin_layout Itemize
+2d look improve
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+like herhobelt 
+\end_layout
+
+\begin_layout Itemize
+and like other screenshot from iq-broker
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\strikeout on
+BUG: node can't be selected which prevents that menu appears on dblclick
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+this was urgent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+could be within DomEventsAlt::onEvent
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+or on ClusterLeafElement => pcWrapper
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+
+\strikeout on
+not the cause, this is working
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+\begin_inset Note Comment
+status open
+
+\begin_layout Itemize
+
+\strikeout on
+fixing the depth param within the raycaster should enable previous behaviour
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+update matrix for intersected node
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+rewrite ParticleNodeGroup
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+remove events ...
+ on
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
+add raycaster that is currently sitting in leaf element
+\end_layout
+
+\end_deeper
 \end_inset
 
 
@@ -1080,404 +1981,9 @@ when selecting a industry cluster from further away prevent selecting the
 
 \end_deeper
 \begin_layout Itemize
-fix ids for papaparse or live database to match the one iq_maps detail view
- uses
-\end_layout
-
-\begin_layout Subsection
-20- 26.
- 08
-\end_layout
-
-\begin_layout Standard
-get as much done as time allows
-\end_layout
-
-\begin_layout Paragraph
-Summary
-\end_layout
-
-\begin_layout Itemize
-m1
-\end_layout
-
-\begin_layout Itemize
-m2
-\end_layout
-
-\begin_layout Paragraph
-meeting 19.08.
-\end_layout
-
-\begin_layout Itemize
-when loading 
-\begin_inset Quotes eld
-\end_inset
-
-sent >iment<
-\begin_inset Quotes erd
-\end_inset
-
- color
-\end_layout
-
-\begin_layout Itemize
-increase sizeof clusers to cover more space
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-....
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-potentially different distribution approach instead of force graph would
- be good:
-\end_layout
-
-\begin_layout Itemize
-we initially need the size of the industrial sectors.
- this could be a simple random distribution within a sphere radius or a
- grid of some sort to prevent intersetctions between elements
-\end_layout
-
-\begin_layout Itemize
-besides that for the parent clusters to cover as much space as possible
- a 3d bin packing distribution handler would be optimal
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-popup! link to charts.php
-\end_layout
-
-\begin_layout Itemize
-js files
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-highstock
-\end_layout
-
-\begin_layout Itemize
-fiontawse
-\end_layout
-
-\begin_layout Itemize
-unica
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-cluster names abbreviation
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-expand on hover
-\end_layout
-
-\begin_layout Itemize
-use myriad pro condensed
-\end_layout
-
-\begin_layout Itemize
-<script src="https://use.typekit.net/ulv2nrf.js"></script> 
-\end_layout
-
-\begin_layout Itemize
-<script>try{Typekit.load({ async: true });}catch(e){}</script>
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-(-broker app)
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-news iq
-\end_layout
-
-\begin_layout Itemize
-dj_news#
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-all news plus hot news
-\end_layout
-
-\begin_layout Itemize
-use converter for timezone
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-dj_news_isin
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-isin ticker 
-\end_layout
-
-\begin_layout Itemize
-dj_news_isin.news_id => dj_news.id
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-dj_news_siga_about
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-all relevant news
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-dj_newsprimary_symbol
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-header company+significant
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-node connections
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-customers table
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-company _id == node
-\end_layout
-
-\begin_layout Itemize
-name == customers
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-symbol
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Itemize
-related to companies table
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Itemize
-intrino app
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-relevant for real time prices
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-real time news
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-/zpghkvqdgf/public_html/ dj_cross_app.php
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-set zoom target on hover if none is selected
-\end_layout
-
-\begin_layout Itemize
-zoom buttons mousedown kep for touch users
-\end_layout
-
-\begin_layout Paragraph
-meeting 12.8.
- TODO order prio and merge
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-next
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Note Note
-status open
-
-\begin_layout Itemize
 
 \strikeout on
-switching 2d on load will kill webgl so pervent switching or stop current
- before starting new view
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-fixme
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-pop up
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-urgent
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-have the link to maps working
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-
-\strikeout on
-color scheme white color options?
-\end_layout
-
-\begin_layout Itemize
-2d look improve
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-urgent
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-like herhobelt 
-\end_layout
-
-\begin_layout Itemize
-and like other screenshot from iq-broker
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-\begin_inset Note Comment
-status open
-
-\begin_layout Itemize
-node can't be selected which prevents that menu appears on dblclick
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-FIXME
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-this is urgent!
-\end_layout
-
-\begin_layout Itemize
-could be within DomEventsAlt::onEvent
-\end_layout
-
-\begin_layout Itemize
-or on ClusterLeafElement => pcWrapper
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-this is working
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-\begin_inset Note Comment
-status open
-
-\begin_layout Itemize
-fixing the depth param within the raycaster should enable previous behaviour
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-update matrix for intersected node
-\end_layout
-
-\begin_layout Itemize
-rewrite ParticleNodeGroup
-\end_layout
-
-\begin_layout Itemize
-remove events ...
- on
-\end_layout
-
-\begin_layout Itemize
-add raycaster that is currently sitting in leaf element
-\end_layout
-
-\end_deeper
-\end_inset
-
-
-\end_layout
-
-\end_deeper
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-
-\strikeout on
-graphql/apollo
+graphql/apollo as REST replacement and connection to the SQL database
 \end_layout
 
 \begin_deeper
@@ -1504,7 +2010,7 @@ incl sample of react-apollo-app
 \begin_layout Itemize
 
 \strikeout on
-transport agnostic defaoutl is http but websocket can be used to increase
+transport agnostic default is http but websocket can be used to increase
  performance
 \end_layout
 
@@ -1515,24 +2021,23 @@ server bei github scaphol.io
 \end_layout
 
 \end_deeper
-\end_inset
-
-
-\end_layout
-
 \begin_layout Itemize
 
 \strikeout on
-company names calc with skip after view change flickers
+flickering of company names after view change to 2D
+\end_layout
+
+\begin_layout Paragraph
+less important
 \end_layout
 
 \begin_layout Itemize
-edges weg und nur auf hover
-\begin_inset Note Note
+show edges only on hover cluster for 3D
+\begin_inset Note Comment
 status open
 
 \begin_layout Plain Layout
-FIXME
+interference with 2D view
 \end_layout
 
 \end_inset
@@ -1541,20 +2046,20 @@ FIXME
 \end_layout
 
 \begin_layout Itemize
-hull 
+hull, reduce clutter
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 
 \strikeout on
-nur minimal generieren
+generate only minimal visible hull for 3d 
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-if no hull shoul dbe visible initially generate the smallest possible like
- a lowpoly sphere or box or whatever to get the radius for dependent processes
+Note: if hull is initially invisible a simple lowpoly sphere or boxis sufficient
+ for elements that need the hull radius to calculate sizes
 \end_layout
 
 \end_deeper
@@ -1578,11 +2083,20 @@ weiter weg gegen null
 \begin_layout Itemize
 
 \strikeout on
-rotate pan speed
+change controls, faster rotate/pan speed
 \end_layout
 
 \begin_layout Itemize
-breadcrumb clostest cluster
+breadcrumb text element (eg.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Taiwan - Industrials
+\begin_inset Quotes erd
+\end_inset
+
+) showing for for clostest sub-cluster
 \end_layout
 
 \begin_deeper
@@ -1609,19 +2123,11 @@ TODO find some meaningfull heuristic
 \begin_layout Itemize
 
 \strikeout on
-sector short text 
-\begin_inset Quotes eld
-\end_inset
-
-Health...
-\begin_inset Quotes erd
-\end_inset
-
- version
+text and glyph based abbreviations of industrial sectors in cluster
 \end_layout
 
 \begin_layout Itemize
-circular cluster for 2d?
+possible alternative circular cluste implementation for 2D
 \end_layout
 
 \begin_layout Subsection
