@@ -10,6 +10,10 @@ import BaseVolume from "./hull/BaseVolume"
 
 import MaterialFadeMixin from "../utils/MaterialFadeMixin"
 
+import Color from 'easy-color';
+
+import ClusterBaseEdges from "./edges/ClusterBaseEdges";
+
 /**
  * NOTE: possible future work flow/use case
  *  cluster=new BaseCluster3D(allNodes)
@@ -37,17 +41,28 @@ export default class BaseCluster3D extends BaseNode {
         //initially have a value to ignore the lod while loading to make the animations visible for certain elements
         this.useLOD = false;
 
-        this.bClusterEdgesVisible = false; //initially invisible
+        //FIXME
+        this.bClusterEdgesVisible = true;
+
+        // this.bClusterEdgesVisible = false; //initially invisible
         //add collapse/expand stuff
         //  this.mExpanded = true;
         this.mClusterClusteringApplied = false;
         this.mCollapsedGroup = new THREE.Group();
         this.mExpandedGroup = new THREE.Group();
 
+        this.mCollapsedGroup.name="CollapsedGroup"
+        this.mExpandedGroup.name="ExpandedGroup"
 
         this.add(this.mCollapsedGroup);
         this.add(this.mExpandedGroup);
 
+//some helpers for testing
+/*        var axisHelper = new THREE.AxisHelper( 2500 );
+        this.add( axisHelper );
+        this.mCollapsedGroup.add( axisHelper );
+        this.mExpandedGroup.add( axisHelper );
+*/
 
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
 
@@ -146,6 +161,7 @@ export default class BaseCluster3D extends BaseNode {
             if (c.mChildClustersEdgesMesh) {
                 c.mChildClustersEdgesMesh.material.visible = bVisible;
 
+
                 c.mChildClustersEdgesMesh.material.needsUpdate = true;
 
             }
@@ -167,7 +183,9 @@ export default class BaseCluster3D extends BaseNode {
             if (this.mHull) {
                 let boundingBox = this.mHull.mBoundingBox;
                 boundingSphere = boundingBox.getBoundingSphere();
-                this.mCollapsedClusterHull.position.copy(boundingSphere.center);
+
+
+              //  this.mCollapsedClusterHull.position.copy(boundingSphere.center);
             }
 
             var that = this
@@ -175,34 +193,45 @@ export default class BaseCluster3D extends BaseNode {
 
                 that.trigger("hull-updated")
 
-            }, 1000)
+            }, 50)
 
             return this.mCollapsedClusterHull
         }
 
+
+        var parser = new Color("#00AAFF");
+        var table = parser.CSSColorTable
+
+
+        let id= _.random(0,  Object.keys(table).length-1)
+        var color = new Color(Object.values(table)[id]);
+
+
 //FIXME MeshPhongMaterial does not get light
-        let material = new THREE.MeshBasicMaterial({
-            color: 0xFFFFFF, // 0xfaebd7, //antique-white
+        let materialInnerRing = new THREE.MeshBasicMaterial({
+            color: 0x00FFFF, // 0xfaebd7, //antique-white
             wireframe: false,
-            transparent: false,
+            transparent: true,
             opacity: 1.0,
             visible: true,
             polygonOffset: true,
             polygonOffsetFactor: -4,
-            depthTest: false,
+            depthTest: true, //enabled, it will half way hide BaseVolume lines //TODO this is because the ring is only a flat surface in 3d space ...
             blending: THREE.NoBlending
         });
 
 
+        materialInnerRing.color=new THREE.Color(color.rgb.r/255,color.rgb.g/255,color.rgb.b/255)
+
         let materialOtherBlue = new THREE.MeshBasicMaterial({
-            color: 0x6a5acd, //slate-blue
+            color:0x555555, //0x6a5acd, //slate-blue
             wireframe: false,
             transparent: false,
             // opacity: 0.8,
             visible: true,
             polygonOffset: true,
             polygonOffsetFactor: -4,
-            depthTest: false
+            depthTest: true
         });
 
 
@@ -220,33 +249,43 @@ export default class BaseCluster3D extends BaseNode {
         //  ringGeometryInner.boundingSphere = boundingSphere;
 
 
-        let inner = new THREE.Mesh(ringGeometryInner, material);
+        let inner = new THREE.Mesh(ringGeometryInner, materialInnerRing);
         let outer = new THREE.Mesh(ringGeometryOuter, materialOtherBlue);
 
-        MaterialFadeMixin(material)
+        MaterialFadeMixin(materialInnerRing)
         MaterialFadeMixin(materialOtherBlue)
 
 
-        let hull = new THREE.Group();
+        let _hull = new THREE.Group();
 
-        hull.add(outer);
-        hull.add(inner);
+         _hull.name="CollapsedHull"
 
-        hull.animate = function (fade, duration, onComplete) {
-            material.animate(...arguments)
+        _hull.add(outer);
+        _hull.add(inner);
+
+        _hull.animate = function (fade, duration, onComplete) {
+        //  materialInnerRing.animate(...arguments)
             materialOtherBlue.animate(...arguments)
         }
 
 
         inner.onBeforeRender = outer.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
             //billboard effect
+            this.position.set(0,0,0)
+
             this.setRotationFromQuaternion(camera.quaternion)
 
+
+            var vec3 =new THREE.Vector3(0,0,1)// camera.position.clone().sub(this.position).normalize()
+
+            // translate the object 10% of it's size into the foreground
+            //TODO smaller collapsed hulls should be in front of bigger ones
+            this.translateOnAxis (vec3, boundingSphere.radius/10 )
 
         };
 
 
-        hull.position.copy(boundingSphere.center);
+        _hull.position.copy(boundingSphere.center);
 
         //inner.geometry.boundingSphere=boundingSphere;
         //inner.geometry.boundingBox=boundingSphere.getBoundingBox();
@@ -263,7 +302,13 @@ export default class BaseCluster3D extends BaseNode {
 
 
         //------
-        this.mCollapsedClusterHull = hull;
+
+        _hull.renderOrder = -1
+
+        // hull.onBeforeRender = function( renderer ) { renderer.clearDepth(); };
+
+
+        this.mCollapsedClusterHull = _hull;
         this.mCollapsedGroup.add(this.mCollapsedClusterHull);
         //------
 
@@ -281,7 +326,7 @@ export default class BaseCluster3D extends BaseNode {
         this.on("mouseout", function () {
 
             if (this.mExpanded == false)
-                if (this.mCollapsedClusterHull)
+                if (this.mCollapsedClusterHull && origScale)
                     this.mCollapsedClusterHull.scale.copy(origScale)
 
 
@@ -291,7 +336,7 @@ export default class BaseCluster3D extends BaseNode {
         this.trigger("hull-updated") //the collapsed sphere hull functions the same as the actual hull in terms of this event
 
 
-        return hull
+        return _hull
 
     }
 
@@ -302,6 +347,9 @@ export default class BaseCluster3D extends BaseNode {
         this.mExpanded = !this.mExpanded;
 
         console.log(this.name, "expanded:", this.mExpanded)
+
+
+
 
 
         if (this.mExpanded)
@@ -329,11 +377,22 @@ export default class BaseCluster3D extends BaseNode {
         //TODO have a container for children so deferred elements are hidden too
         // _.each(this.children,el => el.visible=false )
 
+        var pos_offset = new THREE.Vector3
+        //change position of mCollapsedGroup based on center of mHull
+        if (this.mHull.mBoundingBox)
+            pos_offset = this.mHull.mBoundingBox.getCenter()//.multiplyScalar(-1);
+
+
         var that = this
-        //this.mExpandedGroup.visible = false;
-        this.animate({mCollapsedGroup: {scale: {x: 0.3, y: 0.3, z: 0.3}}}, 200)
-        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200, function () {
+
+        //scale collapsed nodes only to 70% of the size of the actual cluster
+        this.animate({mCollapsedGroup: {scale: {x: 0.7, y: 0.7, z: 0.7}, position: {x: 0, y: 0, z: 0}}}, 200)
+        this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}, position: pos_offset}}, 200, function () {
             this.mExpandedGroup.visible = false
+        },function onAnimate(){
+
+            this.trigger("hull-updated")
+
         })
 
 
@@ -345,6 +404,18 @@ export default class BaseCluster3D extends BaseNode {
         //      this.mCollapsedGroup.visible = true
 
         this.mCollapsedClusterHull.animate({fade: 1}, 200)
+
+
+        //change position of mCollapsedGroup based on center of mHull
+       if (!this.mHull.mBoundingBox) console.warn("hull should have a bounding box", this.mHull)
+        else {
+            var offset = this.mHull.mBoundingBox.getCenter()//.multiplyScalar(3);
+
+            //this.mCollapsedGroup.position.copy(offset)
+
+           this.mCollapsedClusterHull.position.copy(offset)
+
+        }
 
 
     }
@@ -376,13 +447,24 @@ export default class BaseCluster3D extends BaseNode {
         //TODO handle if not created.. via callback/event
         //also currently if not already created the placeholder sphere gets removed again (restructure)
 
+        var pos_offset = new THREE.Vector3
+        //change position of mCollapsedGroup based on center of mHull
+        if (this.mHull && this.mHull.mBoundingBox)
+            pos_offset = this.mHull.mBoundingBox.getCenter()//.multiplyScalar(-1);
 
-        this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}}}, 200)
+
+
+        this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001},position:pos_offset}}, 200)
 
 
         this.mExpandedGroup.visible = true
 
-        this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}}}, 200)
+        this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}, position: {x: 0, y: 0, z: 0}}}, 200, function () {},function onAnimate(){
+
+            this.trigger("hull-updated")
+
+        })
+
 
 
     }
@@ -508,6 +590,7 @@ export default class BaseCluster3D extends BaseNode {
             if (cluster.mHull) {
                 cluster.mHull.dispose();
                 delete (cluster.mHull);
+
                 cluster.mHull = null;
             }
 
@@ -634,13 +717,13 @@ export default class BaseCluster3D extends BaseNode {
             hull: BaseVolume,
             onHullCreated: function () {
             },
+            edges:ClusterBaseEdges,
             //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
             expanded: true,  //determines if a cluster is initially expanded or not
             text: function noop() {
             },
-            colors:{}
+            colors: {}
         }, this.mEntry.options);
-
 
 
         //we want to have to color option defaults copied from the parent if it exists
@@ -649,18 +732,20 @@ export default class BaseCluster3D extends BaseNode {
         if (!parent) //is root
         {
 
-            options.colors=
-            _.extend({
+            options.colors =
+                _.extend({
                     edge: [0x999999, 1],
 
                     hull: [0xffffff, 0.03]//     color: 0xffffff,    opacity: 0.03,
-            }, options.colors);
+                }, options.colors);
 
         }
         else
-            options.colors=
-                _.extend( parent.getClusterOptions().colors, options.colors);
+            options.colors =
+                _.extend(parent.getClusterOptions().colors, options.colors);
 
+
+        //TODO have more utility for global options
 
 
         return options
@@ -747,11 +832,15 @@ export default class BaseCluster3D extends BaseNode {
             this.mExpanded = isClusterExpanded
 
             if (isClusterExpanded == false) {
+           //     console.log("creating collapsed hull for", this.name)
                 this.getSphereHull(); //create the placeholder for the cluster instead
+           //     console.log("collapsed hull:", this.mCollapsedClusterHull)
                 return;
             }
 
         }
+
+
         //e. g. result should be .. {china:instanceof BaseCluster3D}
 
         if (mClusteringSpeccsArray.length == 1) {
@@ -785,7 +874,6 @@ export default class BaseCluster3D extends BaseNode {
 
             if (nextDepthSpeccsArray.length >= 1)
                 mCluster.applyClustering(nextDepthSpeccsArray);
-
 
         });
 
@@ -856,9 +944,9 @@ export default class BaseCluster3D extends BaseNode {
                 that.adjustHullSize();
 
 
-                let o=that.getClusterOptions()
-                that.addChildClusterEdgeMesh({color:o.colors.edge[0],opacity:o.colors.edge[1]});
-                that.updateChildClusterEdgeMeshWithHull();
+                let o = that.getClusterOptions()
+                that.addChildClusterEdges({color: o.colors.edge[0], opacity: o.colors.edge[1]});
+                that.updateChildClusterEdges();
 
                 that.trigger("hull-updated");
             }, 50/*, {trailing: true, leading: false}*/))  //if leading is true it won't build up the hulls in a progressive manner
@@ -866,10 +954,26 @@ export default class BaseCluster3D extends BaseNode {
 
 
         this.setDistributionHandler(entry.distribution, function () {
-            that.mClusterRule = entry;
 
+            that.mClusterRule = entry;
             that.trigger("cluster-ready")
-        })
+            that.adjustHullSize();
+
+        }, _.throttle(function () {
+
+
+
+
+            // that.trigger("hull-updated")
+            //FIXME on expand, the "hull-updated" event for child elements is not triggered
+            //check if hull is created but is not big  enough or not visible
+            that.adjustHullSize();
+            //use on step with throttle to create hull every 500ms and on complete once again
+            //dont use this for leaf elements bc the convex hull will take too lng
+            //remove events for hull that are no longer necessary this way?
+
+
+        }, 50))
 
     }
 
@@ -896,169 +1000,11 @@ export default class BaseCluster3D extends BaseNode {
      */
 
 
-    updateChildClusterEdgeMeshWithHull(options) {
+    updateChildClusterEdges(options) {
 
+        this.mChildClustersEdgesMesh.setClusters(this.mClusters)
+        this.mChildClustersEdgesMesh.update()
 
-
-        //TODO
-        if (!this.mChildClustersEdgesMesh) throw new Error("BaseCluster::addChildClusterEdgeMesh must be called first");
-
-        let edges = this.createEdgesForChildClusters();
-
-
-        var line_geom = new THREE.Geometry();
-
-
-        this.mChildClustersEdgesMesh.geometry.dispose();
-        this.mChildClustersEdgesMesh.geometry = line_geom;
-
-
-        for (let edge of edges) {
-            //TODO we should unify the edges to not always have 2 separate ways to access certain elements
-            //TODO also we should use the center of the hull feature instead
-            //FIXME for cluster: add edges only if mHull exists
-
-            let src, dst;
-
-
-            if (edge.source._el) {
-                src = edge.source._el.mHull.mBoundingBox.getCenter();
-
-            }
-            else if (edge.source.mHull) {
-                src = edge.source.mHull.mBoundingBox.getCenter();
-
-            }
-            else if (edge.source.mCollapsedClusterHull) {
-                src = edge.source.geometry.boundingBox.getCenter();
-
-            }
-
-            else {
-                //         console.warn("src - hull should exist before calling this function...")
-                //  continue;
-                src = edge.source.position.clone();
-            }
-
-
-            if (edge.target._el) {
-                dst = edge.target._el.mHull.mBoundingBox.getCenter();
-            }
-            else if (edge.target.mHull) {
-                dst = edge.target.mHull.mBoundingBox.getCenter();
-            }
-            else if (edge.target.mCollapsedClusterHull) {
-
-                dst = edge.target.geometry.boundingBox.getCenter();
-
-
-            }
-
-            else {
-                //    console.warn("dst - hull should exist before calling this function...")
-                //  continue;
-                dst = edge.target.position.clone();
-            }
-
-
-            //fix edge length for collapsed
-            /*       if (edge.source.mCollapsedClusterHull) {
-
-
-                       let v1=dst.clone().sub(src);
-
-                          let radius = edge.source.geometry.boundingBox.getBoundingSphere().radius;
-                       v1.multiply(radius/ v1.length())
-
-                       src.sub(v1)
-
-                   }
-          */
-
-            let src0 = edge.source.position || edge.source._el.position;
-            let dst0 = edge.target.position || edge.target._el.position;
-            src.add(src0);
-            dst.add(dst0);
-
-            line_geom.vertices.push(src);
-            line_geom.vertices.push(dst);
-
-        }
-
-
-    }
-
-    createShaderLineMaterial() {
-
-
-        let fragmentShader = `
-        
-        	uniform vec3 color;
-			uniform float opacity;
-
-			//varying vec3 vColor;
-
-			void main() {
-
-            //if (gl_FragCoord.z > 0.001) discard;
-            if (gl_FragColor.w > 0.5) discard;
-
-
-				gl_FragColor = vec4(// vColor *
-                 color,opacity*gl_FragCoord.z );
-
-			}
-        
-        `
-
-
-        let attributes = {
-
-            displacement: {type: 'v3', value: []},
-            customColor: {type: 'c', value: []}
-
-        };
-
-        let uniforms = {
-
-            amplitude: {type: "f", value: 5.0},
-            opacity: {type: "f", value: 0.3},
-            color: {type: "c", value: new THREE.Color(0xff0000)}
-
-        };
-
-        var lineMaterial = new THREE.ShaderMaterial({
-
-            uniforms: uniforms,
-            // attributes:     attributes,
-            //  vertexShader:   vertexShader,
-            fragmentShader: fragmentShader,
-            blending: THREE.AdditiveBlending,
-            depthTest: false,
-            transparent: true
-
-        });
-
-        lineMaterial.linewidth = 1;
-
-
-        lineMaterial._color = lineMaterial.color;
-        Reflect.defineProperty(lineMaterial, "color", {
-            enumerable: false,
-            configurable: false,
-            get: function () {
-                return this._color
-            },
-            set: function (c) {
-
-                this._color = c;
-                this.uniforms.color.value = c
-
-            }
-        });
-
-
-        return lineMaterial
     }
 
 
@@ -1068,9 +1014,7 @@ export default class BaseCluster3D extends BaseNode {
      * generated and updates edges between clusters
      *
      */
-    addChildClusterEdgeMesh(options) {
-
-
+    addChildClusterEdges(options) {
 
 
         //TODO
@@ -1080,77 +1024,19 @@ export default class BaseCluster3D extends BaseNode {
             return;
         }
 
-        let edges = this.createEdgesForChildClusters();
 
+        let edgeClass=this.getClusterOptions().edges
 
-        var line_geom = new THREE.Geometry();
-        var lineMaterial;
-        var mergedLineMesh;
-
-        let defaults = {
-            opacity: 1.0,
-            transparent: true,
-            //lineIsVisible:true, // if disabled the line won't be shown on the scene
-            color: 0x999999
-        };
-
-        options = _.extend(defaults, options);
-        //MeshBasicMaterial
-        lineMaterial = new THREE.LineBasicMaterial({
-            color: options.color,
-            transparent: options.transparent,
-            opacity: options.opacity,
-            depthTest: true,
-            depthWrite: false//,
-            //depthFunc:THREE.NeverDepth
-        });
-
-
-        /*
-        FIXME lines should not interfere with it's cluster (currently are overdrawing)
-        lineMaterial=this.createShaderLineMaterial();
-                lineMaterial.color= new THREE.Color( options.color);
-                lineMaterial.opacity= options.opacity;
-
-                if (!window["lineMaterial"]) window["lineMaterial"]=[]
-                window["lineMaterial"].push(lineMaterial)
-
-        */
-
-
-        MaterialFadeMixin(lineMaterial);
-
-
-        this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
-
-
-        //TODO check if this might be holpful to put edges behind nodes
-        // this.mChildClustersEdgesMesh.layers.set(1)
-
-        this.mChildClustersEdgesMesh.geometry.boundingBox = new THREE.Box3;
-        this.mChildClustersEdgesMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
-
-
-        this.mExpandedGroup.add(this.mChildClustersEdgesMesh);
-
-        for (let edge of edges) {
-            //TODO we should unify the edges to not always have 2 separate ways to access certain elements
-            //TODO also we should use the center of the hull feature instead
-            //FIXME for cluster: add edges only if mHull exists
-
-            let src, dst;
-
-            src = edge.source.position || edge.source._el.position;
-            dst = edge.target.position || edge.target._el.position;
-
-            line_geom.vertices.push(src);
-            line_geom.vertices.push(dst);
-
+        if (!(  ClusterBaseEdges==edgeClass|| ClusterBaseEdges.isPrototypeOf(edgeClass)))
+        {
+            edgeClass=  ClusterBaseEdges;
+            console.error("cluster option edges must be instanceof ClusterBaseEdges, using default")
         }
 
 
-        lineMaterial.fade = 0;
-        lineMaterial.fadeTo(1, 4000)
+
+            this.mChildClustersEdgesMesh = new edgeClass(null, options)
+            this.mExpandedGroup.add(this.mChildClustersEdgesMesh);
 
 
     }
@@ -1266,6 +1152,7 @@ export default class BaseCluster3D extends BaseNode {
      * @param distribution instanceof BaseDistribution
      */
     setDistributionHandler(distribution, onComplete = function () {
+    }, onStep = function () {
     }) {
         var that = this;
         var values = Object.values(this.mClusters);
@@ -1277,11 +1164,13 @@ export default class BaseCluster3D extends BaseNode {
             distribution.setNodes(this,
                 function onNodePositionChanged(vecPosition, i) {
                 },
-                function onStep(p) {
+                function _onStep(p) {
 
                     updateLeafsEdges(that);
 
-                    //that.addChildClusterEdgeMesh();
+
+                    onStep()
+                    //that.addChildClusterEdges();
 
                 }, function () {
 
@@ -1310,8 +1199,12 @@ export default class BaseCluster3D extends BaseNode {
 
         if (hull.canBeVisible()) {
 
-        hull.mesh.material.color = new THREE.Color(o.colors.hull[0])
-        hull.maxOpacity = o.colors.hull[1]
+            hull.mesh.material.color = new THREE.Color(o.colors.hull[0])
+
+            //TODO test this
+            //hull.mesh.material.transparent =o.colors.hull[0]!=1
+
+            hull.maxOpacity = o.colors.hull[1]
         }
 
     }
@@ -1337,7 +1230,7 @@ export default class BaseCluster3D extends BaseNode {
         }
 
 
-        let info = {box: new THREE.Box3, vertices: []};
+        let info = {box: new THREE.Box3(), vertices: []};
 
         //generate the boundingBox for the node particles if the clster is a leaf
         if (this.isLeaf()) {
@@ -1366,6 +1259,10 @@ export default class BaseCluster3D extends BaseNode {
             //  override default values with actual bbox infos
             info = this.getCompoundBoundingBoxInfo();
 
+
+            //it  can happen initially
+            if (info.box.min.x == Infinity) info.box = new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1))
+
         }
 
         let boundingBox = info.box;
@@ -1381,17 +1278,22 @@ export default class BaseCluster3D extends BaseNode {
             if (BaseVolume == mOptions.hull || BaseVolume.isPrototypeOf(mOptions.hull)) {
 
                 this.mHull = new mOptions.hull();
-                mOptions.onHullCreated(this.mHull)
 
+                this.mHull.name="HullElement"
 
+                this.mHull.renderOrder = -1
 
+               // mOptions.onHullCreated(this.mHull)
                 this.mExpandedGroup.add(this.mHull);
+
             }
             else throw new Error("option hull must have superclass BaseVolume");
 
         //--------------
         let vertices = info.vertices;
         this.mHull.createFromBoundingBox(vertices, boundingBox);
+
+        mOptions.onHullCreated(this.mHull)
 
         //--------------
         //copy the geometry for the doeEvents to work
@@ -1522,10 +1424,12 @@ export default class BaseCluster3D extends BaseNode {
     /**
      *
      *
-     * @params defaultRadius if the radius is not yet determined the fefault value is used instead
+     * @params defaultRadius if the radius is not yet determined the default value is used instead
      * @returns the radius of the cluster
      */
     getRadius(defaultRadius = 100) {
+
+        //TODO maybe use mCollapsedClusterHull  if collapsed?
 
         return this.geometry.boundingSphere ? this.geometry.boundingSphere.radius : defaultRadius;
 

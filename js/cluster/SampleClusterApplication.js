@@ -72,6 +72,8 @@ import CompanyNewsDS from "../data/CompanyNewsDS"
 
 import {getGraphDataSets} from "../data/data-set-loader"
 import {IndustrialSectorAbbreviation, IndustrialSectorIcon} from "./utils/IndustrialSectorIcon";
+import ClusterMeshEdges from "./edges/ClusterMeshEdges";
+import FlatVolume from "./hull/FlatVolume";
 
 
 //-----------------------------------------
@@ -472,12 +474,12 @@ export class SampleClusterApplication extends HTMLElement {
                     },
                     mouseover: function () {
                         this.mHull.visible = true
-                        this.bClusterEdgesVisible= true
+                       // this.bClusterEdgesVisible= true
 
                     },
                     mouseout: function () {
                         this.mHull.visible = false
-                        this.bClusterEdgesVisible= false
+                      //  this.bClusterEdgesVisible= false
                     }
                 },
                 options: {
@@ -552,7 +554,34 @@ export class SampleClusterApplication extends HTMLElement {
         //but is necessary for other components like picking and tet rendering
 
 
+        function injectHull(volume) {
+
+           // volume.mesh.material.color=new THREE.Color(0.9,0.9,1)
+          //  volume.mesh.material.transparent=false
+
+          //put the expanded group a bit more into the foreground to hide edges beneath
+
+
+    //FIXME this will reset on collapse
+
+          if (  volume.mesh) {
+
+               volume.mesh.onBeforeRender = function () {
+                  // volume.parent.position.z=20000
+               }
+           }
+        }
+
+
         let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
+
+
+        /*
+        * used below to set different colors for different hulls to fake traksparentcy  until a solution to the edges behind transpareten hulls is found
+        * TODO
+        *    0xbab8cc //10% saturated slateBlue
+        *    0x978FCC//30% saturated slateBlue
+        * */
 
         return [
 
@@ -560,10 +589,13 @@ export class SampleClusterApplication extends HTMLElement {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
                 options: {
-                    minClusterSize: 40, hull: rootHull, colors: {
+                    minClusterSize: 40,
+                    hull: rootHull,
+                    edges:ClusterMeshEdges,
+                    colors: {
                         edge: [0x000000, 1],
+                        hull: [0x6A5ACD, 1] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
 
-                        hull: [0x6A5ACD, 0.4] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
                     }
                 }
             },
@@ -572,17 +604,22 @@ export class SampleClusterApplication extends HTMLElement {
                 distribution: industryDistribution,
                 events: {
                     click: function () {
-                        // this.toggleCollapse()
+                         this.toggleCollapse()
 
                         console.log("toggled country?", this.name)
                     }
                 },
                 options: {
                     minClusterSize: 15,
-                    hull: ConvexVolume,
+                    hull: FlatVolume,//ConvexVolume,
+                    onHullCreated:injectHull,
+                    edges:ClusterMeshEdges,
                     expanded: function () {
-                        return true
+                       // return true
                         return this.name == "United States"
+                    },
+                    colors: {
+                        hull: [0xbab8cc, 1]
                     }
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
@@ -590,28 +627,32 @@ export class SampleClusterApplication extends HTMLElement {
                 distribution: nodesWithinIndustryDistribution,
                 events: {
                     click: function () {
-                        //  this.toggleCollapse()
+                          this.toggleCollapse()
                         console.log("toggled leaf", this.name)
                     },
                     mouseover: function () {
 
-                        this.bClusterEdgesVisible= true
+                      //  this.bClusterEdgesVisible= true
 
                     },
                     mouseout: function () {
 
-                        this.bClusterEdgesVisible= false
+                      //  this.bClusterEdgesVisible= false
                     }
                 },
                 options: {
-                    hull: ConvexVolume,
+                    hull: FlatVolume,
+                    onHullCreated:injectHull,
                     expanded: function () {
-                        return true
-                        //   let par=this.getParentCluster()
-                        //   if (!par) return false
-                        //FIXME cluster is not attached when parentcluster gets called
+
+                           let par=this.getParentCluster()
+                           if (!par) return false
+
                         return /*par.getParentCluster().name == "United States" &&*/ this.name == "Healthcare"// false //true// return false//
 
+                    },
+                    colors: {
+                        hull: [0x978FCC, 1]
                     }
                 }
             }
@@ -716,11 +757,12 @@ export class SampleClusterApplication extends HTMLElement {
         rootCluster.setLock()
 
 
-         view.mScene.background = new THREE.Color(0xFFFFFF);
+        view.mScene.background = new THREE.Color(0xFFFFFF);
 
 
         $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").addClass("darker")
 
+     //   $("cluster-text-overlay").addClass("darker")
 
 
         this.resetNodesPositions(rootCluster.mNodes)
@@ -741,7 +783,7 @@ export class SampleClusterApplication extends HTMLElement {
         this.doZoomToRelevant(rootCluster)
 
         view.mControls.target.set(new THREE.Vector3(0, 0, 0));
-        view.mControls.noRotate = true;
+       // view.mControls.noRotate = true;
         view.mControls.reset();
 
 
@@ -753,7 +795,15 @@ export class SampleClusterApplication extends HTMLElement {
 
             onComplete()
 
+
+//2d enable edges 3d diable down below
+         /*   rootCluster.findClusters("*").forEach(function(c){
+                c.bClusterEdgesVisible=true
+            })*/
+
         })
+
+
 
 
         // view.mSkyDome.visible=false;
@@ -771,7 +821,7 @@ export class SampleClusterApplication extends HTMLElement {
 
         if (!rootCluster || rootCluster.isLocked()) {
             console.warn("can't setGraph3D wait until animation has finished");
-            return
+          //  return
         }
 
         rootCluster.setLock(true)
@@ -780,7 +830,7 @@ export class SampleClusterApplication extends HTMLElement {
         view.mScene.background = new THREE.Color(0x000000);
 
         $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass("darker")
-
+      //  $("cluster-text-overlay").removeClass("darker")
 
 
         rootCluster.cleanUpLeafs();
@@ -807,7 +857,17 @@ export class SampleClusterApplication extends HTMLElement {
             rootCluster.setLock(false)
             onComplete()
 
+
+
+         /*   rootCluster.findClusters("*").forEach(function(c){
+                c.bClusterEdgesVisible=false
+            })*/
+
+
         })
+
+
+
 
 
     }
