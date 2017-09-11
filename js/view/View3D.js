@@ -31,6 +31,7 @@ export default class View3D extends HTMLElement {
             antialias: true
         });
 
+
         $(this).on("resize", () => this.resizeCanvas())
 
 
@@ -209,8 +210,8 @@ export default class View3D extends HTMLElement {
         this.mScene = new THREE.Scene();
 
         //added to be able to use threejs inspector
-        window.scene =  this.mScene ;
-        window.THREE =  THREE ;
+        window.scene = this.mScene;
+        window.THREE = THREE;
         // Add nav info section
         //createTooltip()
 
@@ -297,8 +298,36 @@ export default class View3D extends HTMLElement {
 
     }
 
+
+    setStencil(bTrue)
+    {
+
+        //TODO have a switch to be able to debug options
+        var gl = this.mRenderer.context;
+
+        // enable stencil test
+        if(bTrue)
+        gl.enable(gl.STENCIL_TEST);
+        else
+            gl.disable(gl.STENCIL_TEST);
+    }
+
+
+
+    render(){
+
+
+
+
+        this.mRenderer.render(that.mScene, that.mCamera);
+
+    }
+
     // Kick-off renderer
     animate() {
+
+
+
 
         if (this._a) return
         this._a = true;
@@ -353,17 +382,11 @@ export default class View3D extends HTMLElement {
             that.mControls.update();
 
 
+
             $(that).trigger("before-render", time);
 
-            //    that.mRenderer.autoClear=false
-            //    that.mCamera.layers.set(1) //render lines in background
-            //    that.mRenderer.clear();
 
-            that.mRenderer.render(that.mScene, that.mCamera);
-
-            //  that.mCamera.layers.set(0) //render the other objects
-            //  that.mRenderer.clearDepth();
-            //   that.mRenderer.render(that.mScene, that.mCamera);
+           that.render()
 
 
             $(that).trigger("after-render", time);

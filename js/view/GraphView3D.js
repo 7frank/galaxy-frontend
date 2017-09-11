@@ -29,6 +29,33 @@ export default class GraphView3D extends View3D {
         this.mRootCluster = null;
 
 
+
+
+
+        //debug code
+        //options to be used in onBeforeRender for hull and edges
+
+        var gl = this.mRenderer.context;
+
+        window.test={gl:gl,renderer:this.mRenderer}
+
+        if ( this.mRenderer.debug) throw new Error("already exists")
+
+
+        //gl=test.gl;st=test.renderer.debug.stencil;st.state(true);st.func=[[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xFF]];st.op=[[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]];
+
+        this.mRenderer.debug = {
+            stencil: {
+                func: [[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xff]],
+                op: [[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]],
+                state: (b) => this.setStencil(b)
+            }
+        }
+
+
+
+
+
     }
 
 
@@ -346,6 +373,31 @@ export default class GraphView3D extends View3D {
                 root.mTextOverlay.width(root.mParentView.clientWidth);
 
         }
+
+    }
+
+    /**
+     * override default renderer call
+     * this provides stencil based per cluster edge masking
+     * by rendering all objects but cluster edges first
+     */
+
+    render(){
+
+
+        var that=this
+        //that.setStencil(true);
+        that.mRenderer.autoClear=false
+        that.mRenderer.autoClearStencil=false
+        that.mRenderer.clear();
+        that.mCamera.layers.set(0) //render the other objects which should mask the stencil buffer for lines to be hidden as they should be
+
+
+        that.mRenderer.render(that.mScene, that.mCamera);
+
+        that.mCamera.layers.set(1) //render lines in background
+
+        that.mRenderer.render(that.mScene, that.mCamera);
 
     }
 
