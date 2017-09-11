@@ -554,34 +554,9 @@ export class SampleClusterApplication extends HTMLElement {
         //but is necessary for other components like picking and tet rendering
 
 
-        function injectHull(volume) {
-
-           // volume.mesh.material.color=new THREE.Color(0.9,0.9,1)
-          //  volume.mesh.material.transparent=false
-
-          //put the expanded group a bit more into the foreground to hide edges beneath
-
-
-    //FIXME this will reset on collapse
-
-          if (  volume.mesh) {
-
-               volume.mesh.onBeforeRender = function () {
-                  // volume.parent.position.z=20000
-               }
-           }
-        }
-
 
         let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
 
-
-        /*
-        * used below to set different colors for different hulls to fake traksparentcy  until a solution to the edges behind transpareten hulls is found
-        * TODO
-        *    0xbab8cc //10% saturated slateBlue
-        *    0x978FCC//30% saturated slateBlue
-        * */
 
         return [
 
@@ -591,10 +566,10 @@ export class SampleClusterApplication extends HTMLElement {
                 options: {
                     minClusterSize: 40,
                     hull: rootHull,
-                    edges:ClusterMeshEdges,
+                    //edges:ClusterMeshEdges,
                     colors: {
-                        edge: [0x000000, 1],
-                        hull: [0x6A5ACD, 1] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
+                        edge: [0x000000, 0.8],
+                        hull: [0x6A5ACD, 0.8] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
 
                     }
                 }
@@ -612,14 +587,10 @@ export class SampleClusterApplication extends HTMLElement {
                 options: {
                     minClusterSize: 15,
                     hull: FlatVolume,//ConvexVolume,
-                    onHullCreated:injectHull,
-                    edges:ClusterMeshEdges,
+                    //edges:ClusterMeshEdges,
                     expanded: function () {
                        // return true
                         return this.name == "United States"
-                    },
-                    colors: {
-                        hull: [0xbab8cc, 1]
                     }
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
@@ -642,7 +613,7 @@ export class SampleClusterApplication extends HTMLElement {
                 },
                 options: {
                     hull: FlatVolume,
-                    onHullCreated:injectHull,
+
                     expanded: function () {
 
                            let par=this.getParentCluster()
@@ -650,9 +621,6 @@ export class SampleClusterApplication extends HTMLElement {
 
                         return /*par.getParentCluster().name == "United States" &&*/ this.name == "Healthcare"// false //true// return false//
 
-                    },
-                    colors: {
-                        hull: [0x978FCC, 1]
                     }
                 }
             }

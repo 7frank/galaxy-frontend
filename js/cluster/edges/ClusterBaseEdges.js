@@ -23,6 +23,9 @@ export default class ClusterBaseEdges extends THREE.Line {
     constructor(siblingClustersObj, materialOptions) {
         super();
 
+        this.layers.set(1)
+
+
         if (siblingClustersObj)
             this.setClusters(siblingClustersObj);
 
@@ -51,10 +54,18 @@ export default class ClusterBaseEdges extends THREE.Line {
             transparent: options.transparent,
             opacity: options.opacity,
             depthTest: true,
-            depthWrite: false//,
+            depthWrite: false
             //depthFunc:THREE.NeverDepth
         });
 
+   /*     var lineMaterial = new THREE.LineBasicMaterial({
+            color: 0xffffff,//options.color,
+            transparent:false,// options.transparent,
+            opacity: 1,//options.opacity,
+            depthTest: true,
+            depthWrite: true//,
+            //depthFunc:THREE.NeverDepth
+        });*/
 
         //   FIXME lines should not interfere with it's cluster (currently are overdrawing)
         /*
@@ -181,7 +192,7 @@ export default class ClusterBaseEdges extends THREE.Line {
 
         //TODO check if this might be helpful to put edges behind nodes
 
-        this.renderOrder = -2;
+       // this.renderOrder = -2;
 
 
         this.geometry.boundingBox = new THREE.Box3;

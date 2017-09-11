@@ -130,7 +130,7 @@ export default class FlatVolume extends BoxVolume {
         let mat = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             opacity: 0.03,
-            transparent: false,//true, no transparency, we want to hide the edges behind the  hull
+            transparent: true,
             depthWrite: true
            // side: THREE.BackSide
             //  ,   wireframe:true
@@ -145,7 +145,7 @@ export default class FlatVolume extends BoxVolume {
          else*/
         mat.fade = 0;
 
-        mat.fadeTo(1, 2000);
+        mat.fadeTo(1, 400);
 
 
 
