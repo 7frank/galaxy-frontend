@@ -51,18 +51,18 @@ export default class BaseCluster3D extends BaseNode {
         this.mCollapsedGroup = new THREE.Group();
         this.mExpandedGroup = new THREE.Group();
 
-        this.mCollapsedGroup.name="CollapsedGroup"
-        this.mExpandedGroup.name="ExpandedGroup"
+        this.mCollapsedGroup.name = "CollapsedGroup"
+        this.mExpandedGroup.name = "ExpandedGroup"
 
         this.add(this.mCollapsedGroup);
         this.add(this.mExpandedGroup);
 
 //some helpers for testing
-/*        var axisHelper = new THREE.AxisHelper( 2500 );
-        this.add( axisHelper );
-        this.mCollapsedGroup.add( axisHelper );
-        this.mExpandedGroup.add( axisHelper );
-*/
+        /*        var axisHelper = new THREE.AxisHelper( 2500 );
+                this.add( axisHelper );
+                this.mCollapsedGroup.add( axisHelper );
+                this.mExpandedGroup.add( axisHelper );
+        */
 
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
 
@@ -185,7 +185,7 @@ export default class BaseCluster3D extends BaseNode {
                 boundingSphere = boundingBox.getBoundingSphere();
 
 
-              //  this.mCollapsedClusterHull.position.copy(boundingSphere.center);
+                //  this.mCollapsedClusterHull.position.copy(boundingSphere.center);
             }
 
             var that = this
@@ -203,7 +203,7 @@ export default class BaseCluster3D extends BaseNode {
         var table = parser.CSSColorTable
 
 
-        let id= _.random(0,  Object.keys(table).length-1)
+        let id = _.random(0, Object.keys(table).length - 1)
         var color = new Color(Object.values(table)[id]);
 
 
@@ -221,10 +221,10 @@ export default class BaseCluster3D extends BaseNode {
         });
 
 
-        materialInnerRing.color=new THREE.Color(color.rgb.r/255,color.rgb.g/255,color.rgb.b/255)
+        materialInnerRing.color = new THREE.Color(color.rgb.r / 255, color.rgb.g / 255, color.rgb.b / 255)
 
         let materialOtherBlue = new THREE.MeshBasicMaterial({
-            color:0x555555, //0x6a5acd, //slate-blue
+            color: 0x555555, //0x6a5acd, //slate-blue
             wireframe: false,
             transparent: false,
             // opacity: 0.8,
@@ -258,29 +258,29 @@ export default class BaseCluster3D extends BaseNode {
 
         let _hull = new THREE.Group();
 
-         _hull.name="CollapsedHull"
+        _hull.name = "CollapsedHull"
 
         _hull.add(outer);
         _hull.add(inner);
 
         _hull.animate = function (fade, duration, onComplete) {
-        //  materialInnerRing.animate(...arguments)
+            //  materialInnerRing.animate(...arguments)
             materialOtherBlue.animate(...arguments)
         }
 
 
         inner.onBeforeRender = outer.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
             //billboard effect
-            this.position.set(0,0,0)
+            this.position.set(0, 0, 0)
 
             this.setRotationFromQuaternion(camera.quaternion)
 
 
-            var vec3 =new THREE.Vector3(0,0,1)// camera.position.clone().sub(this.position).normalize()
+            var vec3 = new THREE.Vector3(0, 0, 1)// camera.position.clone().sub(this.position).normalize()
 
             // translate the object 10% of it's size into the foreground
             //TODO smaller collapsed hulls should be in front of bigger ones
-            this.translateOnAxis (vec3, boundingSphere.radius/10 )
+            this.translateOnAxis(vec3, boundingSphere.radius / 10)
 
         };
 
@@ -303,7 +303,7 @@ export default class BaseCluster3D extends BaseNode {
 
         //------
 
-        _hull.renderOrder = -1
+       // _hull.renderOrder = -1
 
         // hull.onBeforeRender = function( renderer ) { renderer.clearDepth(); };
 
@@ -349,9 +349,6 @@ export default class BaseCluster3D extends BaseNode {
         console.log(this.name, "expanded:", this.mExpanded)
 
 
-
-
-
         if (this.mExpanded)
             this.expand();
         else
@@ -389,7 +386,7 @@ export default class BaseCluster3D extends BaseNode {
         this.animate({mCollapsedGroup: {scale: {x: 0.7, y: 0.7, z: 0.7}, position: {x: 0, y: 0, z: 0}}}, 200)
         this.animate({mExpandedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}, position: pos_offset}}, 200, function () {
             this.mExpandedGroup.visible = false
-        },function onAnimate(){
+        }, function onAnimate() {
 
             this.trigger("hull-updated")
 
@@ -407,13 +404,13 @@ export default class BaseCluster3D extends BaseNode {
 
 
         //change position of mCollapsedGroup based on center of mHull
-       if (!this.mHull.mBoundingBox) console.warn("hull should have a bounding box", this.mHull)
+        if (!this.mHull.mBoundingBox) console.warn("hull should have a bounding box", this.mHull)
         else {
             var offset = this.mHull.mBoundingBox.getCenter()//.multiplyScalar(3);
 
             //this.mCollapsedGroup.position.copy(offset)
 
-           this.mCollapsedClusterHull.position.copy(offset)
+            this.mCollapsedClusterHull.position.copy(offset)
 
         }
 
@@ -453,18 +450,17 @@ export default class BaseCluster3D extends BaseNode {
             pos_offset = this.mHull.mBoundingBox.getCenter()//.multiplyScalar(-1);
 
 
-
-        this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001},position:pos_offset}}, 200)
+        this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}, position: pos_offset}}, 200)
 
 
         this.mExpandedGroup.visible = true
 
-        this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}, position: {x: 0, y: 0, z: 0}}}, 200, function () {},function onAnimate(){
+        this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}, position: {x: 0, y: 0, z: 0}}}, 200, function () {
+        }, function onAnimate() {
 
             this.trigger("hull-updated")
 
         })
-
 
 
     }
@@ -717,7 +713,7 @@ export default class BaseCluster3D extends BaseNode {
             hull: BaseVolume,
             onHullCreated: function () {
             },
-            edges:ClusterBaseEdges,
+            edges: ClusterBaseEdges,
             //isCollapsable:false, //TODO the behaviour to toggle collapse state should be handled by the specific handler of the visualisation not by the cluster itself
             expanded: true,  //determines if a cluster is initially expanded or not
             text: function noop() {
@@ -832,9 +828,9 @@ export default class BaseCluster3D extends BaseNode {
             this.mExpanded = isClusterExpanded
 
             if (isClusterExpanded == false) {
-           //     console.log("creating collapsed hull for", this.name)
+                //     console.log("creating collapsed hull for", this.name)
                 this.getSphereHull(); //create the placeholder for the cluster instead
-           //     console.log("collapsed hull:", this.mCollapsedClusterHull)
+                //     console.log("collapsed hull:", this.mCollapsedClusterHull)
                 return;
             }
 
@@ -1025,18 +1021,33 @@ export default class BaseCluster3D extends BaseNode {
         }
 
 
-        let edgeClass=this.getClusterOptions().edges
+        let edgeClass = this.getClusterOptions().edges
 
-        if (!(  ClusterBaseEdges==edgeClass|| ClusterBaseEdges.isPrototypeOf(edgeClass)))
-        {
-            edgeClass=  ClusterBaseEdges;
+        if (!(  ClusterBaseEdges == edgeClass || ClusterBaseEdges.isPrototypeOf(edgeClass))) {
+            edgeClass = ClusterBaseEdges;
             console.error("cluster option edges must be instanceof ClusterBaseEdges, using default")
         }
 
 
+        this.mChildClustersEdgesMesh = new edgeClass(null, options)
 
-            this.mChildClustersEdgesMesh = new edgeClass(null, options)
-            this.mExpandedGroup.add(this.mChildClustersEdgesMesh);
+
+
+        var that=this
+        function mCallback(depth){
+
+            console.log("edges for", that.name,"depth",depth)
+
+        }
+
+        //TODO this should enable stencil testing for the current two implementations of edges
+        if (this.mChildClustersEdgesMesh.children.length > 0)
+            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[0],mCallback)
+        else
+            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh,mCallback)
+
+
+        this.mExpandedGroup.add(this.mChildClustersEdgesMesh);
 
 
     }
@@ -1209,6 +1220,62 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
+
+    addHullStencilBeforeRender(mesh,callback) {
+        var that=this
+
+        mesh.onBeforeRender = function (renderer) {
+
+            var depth=that.getDepth()+1
+
+            let opt = renderer.debug.stencil
+            opt.state(true)
+            var gl = renderer.context;
+            // config the stencil buffer to collect data for testing
+            let func=opt.func[0]
+            gl.stencilFunc(func[0],depth,func[2]);
+            gl.stencilOp(... opt.op[0]);
+
+            if (opt.debug)
+            callback(depth)
+
+        }
+
+        mesh.onAfterRender = function (renderer) {
+
+            let opt = renderer.debug.stencil
+            opt.state(false)
+        }
+
+    }
+
+    addEdgeStencilBeforeRender(mesh,callback) {
+        var that=this
+
+        mesh.onBeforeRender = function (renderer) {
+
+            var depth=that.getDepth()+1
+            let opt = renderer.debug.stencil
+            opt.state(true)
+            var gl = renderer.context;
+            // config the stencil buffer to collect data for testing
+            let func=opt.func[1]
+            gl.stencilFunc(func[0],depth,func[2]);
+            gl.stencilOp(... opt.op[1]);
+
+            if (opt.debug)
+            callback(depth)
+        }
+
+        mesh.onAfterRender = function (renderer) {
+
+            let opt = renderer.debug.stencil
+            opt.state(false)
+        }
+
+    }
+
+
     /**
      *
      *  current implementation of the hull is a simple invisible boundingBox with
@@ -1279,11 +1346,11 @@ export default class BaseCluster3D extends BaseNode {
 
                 this.mHull = new mOptions.hull();
 
-                this.mHull.name="HullElement"
+                this.mHull.name = "HullElement"
 
-                this.mHull.renderOrder = -1
+               // this.mHull.renderOrder = -1
 
-               // mOptions.onHullCreated(this.mHull)
+                // mOptions.onHullCreated(this.mHull)
                 this.mExpandedGroup.add(this.mHull);
 
             }
@@ -1315,6 +1382,12 @@ export default class BaseCluster3D extends BaseNode {
 
         this.setHullColorFromOptions(this.mHull)
 
+var that=this
+        this.addHullStencilBeforeRender(this.mHull.mesh,function(depth){
+
+           console.log("hull for", that.name,"depth",depth)
+
+        })
 
         //notify listeners that the hull size changed
         this.trigger("hull-updated")
@@ -1597,6 +1670,11 @@ export default class BaseCluster3D extends BaseNode {
 
         return parents;
 
+    }
+
+    //TODO performance wise this is too redundant
+    getDepth() {
+        return this.getParents().length
     }
 
 
