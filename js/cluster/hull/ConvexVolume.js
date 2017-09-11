@@ -83,6 +83,8 @@ export default class ConvexVolume extends BoxVolume {
 
             //FIXME this currently fixes a bug when every point lies on the same plane
             //instead a 2d shape should be used if the mode is 2d
+            if (vertices[0].x == 0) vertices[0].x = 0.1;
+            if (vertices[0].y == 0) vertices[0].y = 0.1;
             if (vertices[0].z == 0) vertices[0].z = 0.1;
 
             geo0 = this.mGeometryZero = new THREE.ConvexGeometry(vertices);

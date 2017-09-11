@@ -495,7 +495,7 @@ export class SampleClusterApplication extends HTMLElement {
             , {
                 distribution: nodesWithinIndustryDistribution,
                 options: {
-                    //   hull: ConvexVolume
+                       hull: ConvexVolume,
 
                     text: function () {
                         //return IndustrialSectorIcon(this.name)

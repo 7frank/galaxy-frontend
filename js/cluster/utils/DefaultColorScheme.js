@@ -8,6 +8,7 @@
 import Color from 'easy-color';
 //OptionsManager
 // colors
+//TODO currently not in use
 export default
 class DefaultColorScheme extends HTMLElement {
 
