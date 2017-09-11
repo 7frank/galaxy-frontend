@@ -725,8 +725,8 @@ export class SampleClusterApplication extends HTMLElement {
         rootCluster.setLock()
 
 
-        view.mScene.background = new THREE.Color(0xFFFFFF);
-
+      //  view.mScene.background = new THREE.Color(0xFFFFFF);
+        view.mRenderer.setClearColor(0xffffff)
 
         $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").addClass("darker")
 
@@ -792,10 +792,12 @@ export class SampleClusterApplication extends HTMLElement {
           //  return
         }
 
-        rootCluster.setLock(true)
+        rootCluster.setLock(true);
 
 
-        view.mScene.background = new THREE.Color(0x000000);
+      // view.mScene.background.copy(new THREE.Color(0x000000));
+        view.mRenderer.setClearColor(0x000000)
+
 
         $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass("darker")
       //  $("cluster-text-overlay").removeClass("darker")
@@ -827,9 +829,9 @@ export class SampleClusterApplication extends HTMLElement {
 
 
 
-         /*   rootCluster.findClusters("*").forEach(function(c){
-                c.bClusterEdgesVisible=false
-            })*/
+        //    rootCluster.findClusters("*").forEach(function(c){
+         //       c.bClusterEdgesVisible=false
+         //   })
 
 
         })
