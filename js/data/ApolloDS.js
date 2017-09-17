@@ -11,7 +11,7 @@ class ApolloDS {
 
     }
 
-    connect(url="http://localhost:8080/graphql") {
+    connect(url="http://localhost:8088/graphql") {
 
         this.client = new ApolloClient({
             networkInterface: createBatchingNetworkInterface({
