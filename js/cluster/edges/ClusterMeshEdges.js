@@ -20,7 +20,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         super(...args)
 
         this.smoothenWidth = true;
-
+        this.minLinkStrength=700
     }
 
 
@@ -43,6 +43,8 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
             color: new THREE.Color(options.color),
             transparent: options.transparent,
             opacity: options.opacity,
+            depthTest: true,
+            depthWrite: false
         });
 
         MaterialFadeMixin(material);
@@ -74,13 +76,15 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         this.geometry.dispose();
         this.geometry = line_geom;
 
-
+        var that=this
         var invalidEdges = [];
 
         for (let edge of edges) {
             //TODO we should unify the edges to not always have 2 separate ways to access certain elements
             //TODO also we should use the center of the hull feature instead
             //FIXME for cluster: add edges only if mHull exists
+
+           if (edge.link_strength<that.minLinkStrength) continue;
 
             let src, dst;
 
@@ -125,7 +129,9 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
                 }
 
                 widthFN=function widthFunction(p) {
-                    return 1 * parabola(p, 1)
+
+                    return 1
+                    // return 1 * parabola(p, 1)
                 }
             }
 
@@ -135,10 +141,13 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
 
             //TODO
             var material = new MeshLineMaterial({
-                lineWidth: edge.link_strength || 1,
+                lineWidth: edge.link_strength/5 || 1, //TODO have a proper width
                 color: new THREE.Color(0x333333),
                 transparent: true,
-                opacity: 0.5
+                opacity: 0.5,
+
+                depthTest: false,
+                depthWrite: false
             });
             // var material = new MeshLineMaterial();
 
@@ -153,6 +162,8 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
 
 
             var mesh = new THREE.Mesh(meshLine.geometry, material); // this syntax could definitely be improved!
+            mesh.layers.set(1)
+
             this.add(mesh);
 
 

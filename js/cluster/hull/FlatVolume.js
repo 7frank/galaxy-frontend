@@ -238,7 +238,7 @@ export default class FlatVolume extends BoxVolume {
 
         let y = mTransfer(l);
 
-        super.setLOD(y * this.maxOpacity);
+        super.setLOD(y * this.maxOpacity*2);
 
 
         /*     if (l < 0.8) this.mesh.geometry = this.geometryLowPoly;

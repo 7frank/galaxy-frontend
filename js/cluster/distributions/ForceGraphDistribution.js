@@ -24,8 +24,8 @@ export default class ForceGraphDistribution extends BaseDistribution {
         this.initialEngineTicks = 0;
 
         // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime = 5000//2000;//ms ... 5 seconds upper bound for loading phase
-        this.maxConvergeFrames = 400//90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
+        this.maxConvergeTime = 9000//2000;//ms ... 5 seconds upper bound for loading phase
+        this.maxConvergeFrames = 700//90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
 

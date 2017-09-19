@@ -620,12 +620,12 @@ console.log(query)
     if (c) extraCountriesTODO = c.replace(new RegExp("_", "gi"), " ")
 
     return [
-        queryDatabase(getCountryQueryDB(extraCountriesTODO),alterDBResponse),
-        queryDatabase(getCountryQueryDB(extraCountriesTODO ? extraCountriesTODO : "France,Taiwan"),alterDBResponse),
+       // queryDatabase(getCountryQueryDB(extraCountriesTODO),alterDBResponse),
+     //   queryDatabase(getCountryQueryDB(extraCountriesTODO ? extraCountriesTODO : "France,Taiwan"),alterDBResponse),
 
 
-        queryDatabase(getCountryQuery(extraCountriesTODO)),
-        queryDatabase(getCountryQuery(extraCountriesTODO ? extraCountriesTODO : "France,Taiwan")),
+     //   queryDatabase(getCountryQuery(extraCountriesTODO)),
+      //  queryDatabase(getCountryQuery(extraCountriesTODO ? extraCountriesTODO : "France,Taiwan")),
 
 
 
