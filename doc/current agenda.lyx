@@ -72,6 +72,297 @@
 
 \begin_body
 
+\begin_layout Standard
+[9/11/2017 7:11:11 AM] Frank Reimann: the line-width feature has a bug i'm
+ currently trying to fix.
+ this screenshot is with the default line implementation [9/11/2017 7:12:28
+ AM] Nat Sap: hmm okay [9/11/2017 7:12:36 AM] Nat Sap: it still doesn't
+ look very good [9/11/2017 7:13:19 AM] Nat Sap: let's try expand everything
+ first then [9/11/2017 7:13:39 AM] Nat Sap: the collpasible and expandable
+ features you can add after [9/11/2017 7:13:54 AM] Nat Sap: right now, it
+ doesn't look like in the mock up [9/11/2017 7:14:12 AM] Nat Sap: let's
+ at least make it looks like what in the production today [9/11/2017 7:14:31
+ AM] Nat Sap: at least as nice if not better [9/11/2017 7:34:23 AM] Frank
+ Reimann: https://url.upwork.com/_01MR9Y3gjWv0KphZYuZmIwnUD0jati9Sus [9/11/2017
+ 7:35:00 AM] Frank Reimann: ok, this is how it would look with the edge
+ width feature [9/11/2017 7:35:16 AM] Nat Sap: Hmm [9/11/2017 7:35:26 AM]
+ Nat Sap: Look pretty bad, Frank [9/11/2017 7:35:28 AM] Frank Reimann: compared
+ to the mockup [9/11/2017 7:35:29 AM] Frank Reimann: http://bl.ocks.org/GerHobbelt
+/3071239 [9/11/2017 7:36:01 AM] Frank Reimann: we do have more clusters
+ simultaniously resulting in more lines that are rendered [9/11/2017 7:36:11
+ AM] Nat Sap: Let's make it look like the mock up then [9/11/2017 7:36:45
+ AM] Nat Sap: And let make look like the one that is in production [9/11/2017
+ 7:36:46 AM] Frank Reimann: https://url.upwork.com/_01MR9Y3gjWv0KeWmiMXxUkV-aSw1Rj
+MQVS [9/11/2017 7:36:49 AM] Frank Reimann: this one was it? [9/11/2017 7:36:55
+ AM] Nat Sap: It looks a lot cleaner [9/11/2017 7:37:15 AM] Nat Sap: Yes
+ [9/11/2017 7:38:13 AM] Frank Reimann: one reason would be,that it does
+ have much less clusters [9/11/2017 7:38:35 AM] Frank Reimann: and dependencies
+ between them [9/11/2017 7:39:05 AM] Nat Sap: Yes that is one reason [9/11/2017
+ 7:39:37 AM] Frank Reimann: i could fiddle with values if you want.
+ [9/11/2017 7:39:53 AM] Nat Sap: So as I mentioned before that you only
+ make edges really visible if the relationship is significant [9/11/2017
+ 7:40:02 AM] Nat Sap: Between the two companies [9/11/2017 7:40:05 AM] Nat
+ Sap: But anyway [9/11/2017 7:40:12 AM] Nat Sap: The visual now look pretty
+ bad [9/11/2017 7:40:19 AM] Nat Sap: Even without edges [9/11/2017 7:42:23
+ AM] Nat Sap: Even if you remove all the edges [9/11/2017 7:42:34 AM] Nat
+ Sap: The cosmetic is still not right [9/11/2017 7:42:51 AM] Nat Sap: The
+ current production on iqbanker.com [9/11/2017 7:43:25 AM] Nat Sap: I have
+ a rules that if a company has many significant suppliers and customers
+ [9/11/2017 7:43:33 AM] Nat Sap: Then it will be in the center [9/11/2017
+ 7:43:58 AM] Nat Sap: The current look obviously wouldn't work [9/11/2017
+ 7:44:10 AM] Nat Sap: It looks non intelligence to anyone [9/11/2017 7:45:19
+ AM] Nat Sap: We can't even get the basic right [9/11/2017 7:45:39 AM] Nat
+ Sap: Of just showing company in the supply chain with customers and suppliers
+ [9/11/2017 7:45:45 AM] Nat Sap: So I think at this point [9/11/2017 7:45:54
+ AM] Nat Sap: We forget about collapsing and expanding [9/11/2017 7:46:15
+ AM] Nat Sap: We can't even get it look as close as the one I currently
+ have [9/11/2017 7:46:20 AM] Nat Sap: In production [9/11/2017 7:47:27 AM]
+ Nat Sap: As I said the current production has a rule I created that make
+ it look nice [9/11/2017 7:47:43 AM] Nat Sap: And it doesn't even use any
+ force direct [9/11/2017 7:47:52 AM] Nat Sap: It just a pure connections
+ of real data [9/11/2017 7:48:09 AM] Nat Sap: It is just that it only connect
+ to suppliers [9/11/2017 7:48:14 AM] Nat Sap: And.
+ It customers [9/11/2017 7:48:27 AM] Nat Sap: And not customers [9/11/2017
+ 7:54:14 AM] Frank Reimann: ok but that's a matter of the calculated line
+ distances..
+ I focused solely on the technical aspects like masking and edges hull etc.
+ to resemble the mock up.
+ If that is what makes it still not look good for you primarily, then it
+ would be good if we had a short meeting - tomorrow maybe - where you show
+ me how the specific implementation calculated the distances based on which
+ rules.
+ because currently the line distance is same for every neighbor.
+ [9/11/2017 7:55:08 AM] Nat Sap: The most important thing for this project
+ is to make it look nice [9/11/2017 7:55:14 AM] Nat Sap: And easy to understand
+ [9/11/2017 7:55:26 AM] Nat Sap: Forget about hull [9/11/2017 7:55:43 AM]
+ Nat Sap: We can't even get the basic display to look nice [9/11/2017 7:55:58
+ AM] Nat Sap: Even if just solid node [9/11/2017 7:59:32 AM] Frank Reimann:
+ yes but that might have been a misunderstanding.
+ you said it didn't look nice and that i should make it look more like the
+ mock up which I did.
+ But as you mentioned it is more important for you to to have the rules
+ applied to that the distribution is more intuitive.
+ am I understanding it this time correctly? [9/11/2017 8:00:18 AM] Nat Sap:
+ How can we it to look exactly like in the production [9/11/2017 8:00:24
+ AM] Nat Sap: And just add customers [9/11/2017 8:00:43 AM] Nat Sap: If
+ a company has more than 5 suppliers or something [9/11/2017 8:00:52 AM]
+ Nat Sap: Then it would be in the center [9/11/2017 8:01:23 AM] Nat Sap:
+ Right now [9/11/2017 8:01:31 AM] Nat Sap: What you showed me [9/11/2017
+ 8:01:38 AM] Nat Sap: Doesn't work at all [9/11/2017 8:02:26 AM] Nat Sap:
+ The most important algorithm is how to make it look nkce [9/11/2017 8:02:31
+ AM] Nat Sap: And as I mentioned [9/11/2017 8:02:38 AM] Nat Sap: You only
+ display edges [9/11/2017 8:02:57 AM] Nat Sap: Or make it visible for significan
+t relationships only [9/11/2017 8:03:15 AM] Nat Sap: That why I asked you
+ to connect to database to live data [9/11/2017 8:03:33 AM] Nat Sap: If
+ the relationships is significant between companies or quantifiable [9/11/2017
+ 8:03:40 AM] Nat Sap: Then you will display edges [9/11/2017 8:03:49 AM]
+ Nat Sap: And as I mentioned about displaying the center [9/11/2017 8:03:59
+ AM] Nat Sap: But you need to help me [9/11/2017 8:04:19 AM] Nat Sap: Come
+ up with ways to make look nice and intuitive [9/11/2017 8:11:26 AM] Nat
+ Sap: You can rules that say if a company has more than a few quantifiable
+ revenue suppliers [9/11/2017 8:11:34 AM] Nat Sap: It will be display in
+ the center [9/11/2017 8:11:40 AM] Nat Sap: Or something like that [9/11/2017
+ 8:11:51 AM] Nat Sap: But better if you analyze the relationship [9/11/2017
+ 8:12:02 AM] Nat Sap: And come up with way to make it look best [9/11/2017
+ 8:12:10 AM] Nat Sap: We have customer and supplier [9/11/2017 8:12:17 AM]
+ Nat Sap: Relationship for a company [9/11/2017 8:12:21 AM] Frank Reimann:
+ ok to technically (excluding the distribution of the nodes based on rules)
+ the implementation is ok for now and i could continue to implement the
+ rules, yes? [9/11/2017 8:12:29 AM] Nat Sap: That is the core about this
+ project [9/11/2017 8:12:40 AM] Nat Sap: But so much about nodes and edges
+ [9/11/2017 8:12:54 AM] Nat Sap: I am not sure it is okay [9/11/2017 8:13:01
+ AM] Nat Sap: It doesn't look nice [9/11/2017 8:13:07 AM] Nat Sap: So it
+ is not really okay [9/11/2017 8:13:32 AM] Nat Sap: How can you make it
+ so that it looks as nice as what I have currently [9/11/2017 8:13:51 AM]
+ Nat Sap: Have you get the data for relationship from databas me yet [9/11/2017
+ 8:14:09 AM] Nat Sap: This is not generic network chart [9/11/2017 8:14:17
+ AM] Nat Sap: About nodes of edges [9/11/2017 8:14:32 AM] Nat Sap: It is
+ about customers and suppliers relationship display [9/11/2017 8:14:52 AM]
+ Nat Sap: So I confirm [9/11/2017 8:15:03 AM] Nat Sap: That you already
+ use real data right? [9/11/2017 8:15:13 AM] Nat Sap: And you know how to
+ get quantifiable relationship [9/11/2017 8:15:27 AM] Nat Sap: And what
+ is consider customer [9/11/2017 8:15:33 AM] Nat Sap: And what is consider
+ supplier [9/11/2017 8:15:40 AM] Nat Sap: This is most important [9/11/2017
+ 8:16:06 AM] Nat Sap: And then you Can analyze base on actual data [9/11/2017
+ 8:17:02 AM] Nat Sap: This project is about nodes and edges [9/11/2017 8:17:07
+ AM] Nat Sap: Is not [9/11/2017 8:17:07 AM] Frank Reimann: I haven't touched
+ the database, the last week because from what you said last week of "doesn't
+ look good" was about the nodes/edges itself not the data/distribution.
+ I'd connect the database tomorrow then to use real data [9/11/2017 8:17:10
+ AM] Nat Sap: I meant [9/11/2017 8:17:18 AM] Frank Reimann: until now i'm
+ using the static data [9/11/2017 8:17:31 AM] Nat Sap: What would it take
+ [9/11/2017 8:17:44 AM] Nat Sap: For you to make it look exactly the same
+ As what I have [9/11/2017 8:17:48 AM] Nat Sap: I production [9/11/2017
+ 8:17:53 AM] Nat Sap: In production [9/11/2017 8:18:52 AM] Nat Sap: Forgot
+ about expanding and collapsing [9/11/2017 8:19:02 AM] Nat Sap: We can't
+ even get the basic to look nice [9/11/2017 8:19:41 AM] Frank Reimann: (1)
+ first of all i'll need to connect to the database.
+ i already got the websocket server.
+ which i'd need to connect to the sql-database first (writing/copying sql
+ queries) to load real data [9/11/2017 8:20:26 AM] Nat Sap: Forget about
+ the news too [9/11/2017 8:20:31 AM] Nat Sap: Web socket [9/11/2017 8:20:39
+ AM] Nat Sap: We are not that advance yet [9/11/2017 8:21:02 AM] Nat Sap:
+ We can't even replicate the basic connection and display to make it look
+ like in the production [9/11/2017 8:21:21 AM] Nat Sap: So my question is
+ [9/11/2017 8:21:41 AM] Nat Sap: What would it take to make it look like
+ what in the production today [9/11/2017 8:21:56 AM] Frank Reimann: no the
+ websocket-server for the news is the same as for loading the node/relation/comp
+any data [9/11/2017 8:22:40 AM] Nat Sap: We don't need news [9/11/2017 8:22:42
+ AM] Frank Reimann: (2) second would be to add the rules, like "the more
+ customers a company has the more it gets put in the center" [9/11/2017
+ 8:22:51 AM] Nat Sap: We are too far from that stage [9/11/2017 8:23:39
+ AM] Nat Sap: We still figuring how to replicate what I have in production
+ [9/11/2017 8:23:47 AM] Frank Reimann: i understand, but i need to load
+ the real data from the sql-database? [9/11/2017 8:23:54 AM] Frank Reimann:
+ for the nodes [9/11/2017 8:23:55 AM] Nat Sap: Can you let me know [9/11/2017
+ 8:24:00 AM] Nat Sap: What would it take [9/11/2017 8:24:06 AM] Nat Sap:
+ To make it look the same [9/11/2017 8:24:10 AM] Nat Sap: As what I have
+ now [9/11/2017 8:24:19 AM] Nat Sap: Forget about everything else [9/11/2017
+ 8:24:42 AM] Nat Sap: And yes you would use real data [9/11/2017 8:24:55
+ AM] Nat Sap: The same way the current production one use real data [9/11/2017
+ 8:25:41 AM] Frank Reimann: ok so i'd need to query the database like in
+ (1) write sql query (2)send it to client (3) apply rules [9/11/2017 8:27:15
+ AM] Nat Sap: Yes [9/11/2017 8:27:22 AM] Nat Sap: Let try one last time
+ [9/11/2017 8:27:44 AM] Nat Sap: To see if we can get it to make it at least
+ the same as what I have [9/11/2017 8:29:44 AM] Frank Reimann: I'll check
+ the source code of the current implementation to get the data and rules
+ tomorrow [9/11/2017 8:29:57 AM] Frank Reimann: and see how it was implemented
+ 
+\end_layout
+
+\begin_layout Itemize
+[9/11/2017 8:30:02 AM] Nat Sap: Yes
+\end_layout
+
+\begin_layout Itemize
+[9/11/2017 8:30:17 AM] Nat Sap: It link to suppliers only 
+\end_layout
+
+\begin_layout Itemize
+[9/11/2017 8:30:32 AM] Nat Sap: But I want it to link to customers as well
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+see how it is currently implemented
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+what data is used
+\end_layout
+
+\begin_layout Itemize
+what rules are applied
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+>5 customers more center
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+If you can look at actual data And find most optimal ways to present this
+ in the network chart
+\end_layout
+
+\begin_layout Itemize
+The table contains relationship between a company and its customers With
+ % of revenue a company received from each customers
+\end_layout
+
+\begin_layout Itemize
+There are about 5000 of such companies with at least one quantifiable revenue
+ customer 
+\end_layout
+
+\begin_layout Itemize
+The supplier side is self explanatory And not in the database 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+because a company is basically a supplier to its customers
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+some explanation companies is the table that has company information
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+907132602916450304.png
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+companies is the table that has company information
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+907132808366043136.png
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+iqmaps currently
+\end_layout
+
+\begin_layout Itemize
+root
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+big companies/supplier
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+smaller companies that are primarily customers
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+see sorce code for force
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+rudimentary force layout using Gauss-Seidel.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+uavhpdqgfx
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+contains the iqbanker but no clue where exaclty the files to lie
+\end_layout
+
+\end_deeper
 \begin_layout Section*
 Basics
 \end_layout
@@ -159,7 +450,7 @@ current sprint
 
 \end_deeper
 \begin_layout Itemize
-probleme/lösungen versionen (dokumentation)
+probleme/l??sungen versionen (dokumentation)
 \end_layout
 
 \begin_deeper
@@ -1179,11 +1470,265 @@ status open
 Details
 \end_layout
 
+\begin_layout Paragraph
+most important
+\end_layout
+
 \begin_layout Itemize
-2d-graph
+search collapsed elements
 \end_layout
 
 \begin_deeper
+\begin_layout Itemize
+navigate collapsed clusters via searchbar
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+important
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+flickering hull / edges
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+lines are flickering into FlatVolume which they shouldn't maybe adding near
+ and far to material can solvethe precision??
+\end_layout
+
+\begin_layout Itemize
+flickering of hull when animating
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+taking previous value does not fix it but worsen the flickering
+\end_layout
+
+\begin_layout Itemize
+find out when exactly this occures and when not
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+hull hiding edges
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+//FIXME injectHull stuff will reset on collapse
+\end_layout
+
+\begin_layout Itemize
+find another way to hide edges 
+\end_layout
+
+\begin_layout Itemize
+use stencil?
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+evaluate
+\end_layout
+
+\end_inset
+
+ thisshould work by using same stencil value for edges and hull of same
+ depth
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+if hull is drawn the stencil value should be ==depth and if edges do have
+ same depth value they should be discarded
+\end_layout
+
+\begin_layout Itemize
+afterwardsfor the next depth the depth value should increase and the same
+ process would repeat
+\end_layout
+
+\begin_layout Itemize
+https://en.wikibooks.org/wiki/OpenGL_Programming/Stencil_buffer#Bitplanes
+\end_layout
+
+\begin_layout Itemize
+https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glStencilFunc.xml
+\end_layout
+
+\begin_layout Itemize
+https://sites.google.com/site/cgwith3js/home/masking-with-stencil
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+http://jsfiddle.net/georgeChen/3momsqr7/
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+potential solutions for stencil
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+wrong ordering does create wrong stencil values
+\end_layout
+
+\begin_layout Itemize
+maybe read out stencil buffer and draw it to see content
+\end_layout
+
+\begin_layout Itemize
+debug with other hull? box?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+2d does not render second pass and won't show anything...
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+after switching 2d to 3d again 3d also does not render correctly
+\end_layout
+
+\end_deeper
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+stencil currently working only for root 
+\end_layout
+
+\begin_layout Itemize
+not working for ClusterMeshEdges
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+faster initial and invisible convexHull for 2d leaf elements
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+important
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+check slow initial expand of leaf (bad usability)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+edges not default visible in 3d but in 2d
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+important
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+bClusterEdgesVisible
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+text? sometimes missing on expanded nodes
+\end_layout
+
+\begin_layout Paragraph
+less important
+\end_layout
+
+\begin_layout Itemize
+dbl clicking a collapsing cluster will render it useless
+\end_layout
+
+\begin_layout Itemize
+disable collapse twice
+\end_layout
+
+\begin_layout Itemize
+breadcrumb b/w
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+overlay gets recreated thus must get state from somewhere else like
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+cluster-text-overlay.darker > cluster-text-overlay-breadcrumb-item { color:red
+\end_layout
+
+\begin_layout Itemize
+} 
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+ClusterMeshLine material-group for lineWidth feature + only one material
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+also options can't be copied for some reason
+\end_layout
+
+\end_deeper
 \begin_layout Itemize
 fix bug for edges not animating when every node is collapsed
 \end_layout
@@ -1214,46 +1759,48 @@ something wrong with forcegraphdistribution if collapse feature is used
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+if no subcluster is expanded in US eg.
+ no edges are drawn
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
-check slow initial expand of leaf (bad usability)
+fix offset between collapsed and expanded center
 \end_layout
 
 \begin_layout Itemize
+in debug, other sector does not show hull porperly..
+ check ordering of DOMEventsAlt
+\end_layout
+
+\begin_layout Paragraph
+2d-graph
+\end_layout
+
+\begin_layout Itemize
+
+\strikeout on
 make edges have a line width with THREE.Meshline
 \end_layout
 
 \begin_layout Itemize
-offset between clollapsed and expanded center
-\end_layout
 
-\begin_layout Itemize
+\strikeout on
 no hull if no child is expanded leaf
 \end_layout
 
 \begin_layout Itemize
-cluster edges initially visible for 2d but not for 3d 
-\end_layout
 
-\begin_layout Itemize
+\strikeout on
 refactor BaseCluster::updateChildClusterEdgeMeshWithHull as it is too problemnat
 ic the way it currently works
 \end_layout
 
 \begin_layout Itemize
+
+\strikeout on
 edges on collapsed clusters not visible correctly
-\end_layout
-
-\begin_layout Itemize
-faster initial and invisible convexHull plus 2d shape-
-\begin_inset Quotes eld
-\end_inset
-
-hull
-\begin_inset Quotes erd
-\end_inset
-
- for 2d
 \end_layout
 
 \begin_layout Itemize
@@ -1262,6 +1809,8 @@ test renderOrder and non transparent hull
 
 \begin_deeper
 \begin_layout Itemize
+
+\strikeout on
 make 2d hull transparent=false
 \end_layout
 
@@ -1301,10 +1850,6 @@ http://jsfiddle.net/sg02e5sm/2/
 \end_layout
 
 \begin_layout Itemize
-create 2d shape for 2d instead of convexHull
-\end_layout
-
-\begin_layout Itemize
 \begin_inset Note Comment
 status open
 
@@ -1319,57 +1864,24 @@ layers don' work here because we do want to have edges within cluster be
 \end_layout
 
 \end_deeper
-\end_deeper
 \begin_layout Itemize
+
+\strikeout on
+create 2d shape for 2d instead of convexHull
+\end_layout
+
+\begin_layout Paragraph
 bugs/other unforseen changes
 \end_layout
 
-\begin_deeper
 \begin_layout Itemize
-dbl clicking a collapsing cluster will render it useless
+add event that resets clicked node to reset selected edges
 \end_layout
 
-\begin_deeper
-\begin_layout Itemize
-disable collapse twice
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-breadcrumb b/w
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-overlay gets recreated thus must get state from somewhere else like
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-cluster-text-overlay.darker > cluster-text-overlay-breadcrumb-item { color:red
-\end_layout
-
-\begin_layout Itemize
-} 
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Itemize
-in debug, other sector does not show hull porperly..
- check ordering of DOMEventsAlt
-\end_layout
-
-\begin_layout Itemize
-add event that resets clicked node
-\end_layout
-
-\begin_deeper
 \begin_layout Itemize
 use it for collapse/expand/create cluster
 \end_layout
 
-\end_deeper
 \begin_layout Itemize
 //TODO smaller collapsed hulls should be in front of bigger ones
 \end_layout
@@ -1409,22 +1921,19 @@ ok the edges are computed
 
 \end_deeper
 \begin_layout Itemize
-flickering of hull when animating
+zoom to collapsing cluster on dbl click sometimes occures and should be
+ prevented
 \end_layout
 
 \begin_layout Itemize
-\begin_inset Note Note
-status open
 
-\begin_layout Itemize
-navigate collapsed clusters via searchbar
+\strikeout on
+round line edges?
 \end_layout
 
 \begin_layout Itemize
-faster leaf expand
-\end_layout
 
-\begin_layout Itemize
+\strikeout on
 cluster edges meshline with width feature
 \end_layout
 
@@ -1441,8 +1950,32 @@ hull
  some perf increase
 \end_layout
 
+\begin_deeper
 \begin_layout Itemize
-edges not default visible in 3d but in 2d
+??? 2d too chaotic 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+remove/discard double created lines especially for mesh lines
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\strikeout on
+have separate implementations
+\end_layout
+
+\begin_layout Itemize
+lines are only drawn from src to dst but in the loop for creating edges
+ in BaseCluster the src and dst for other an US in the demo appear multiple
+ times
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIXME
 \end_layout
 
 \end_inset
@@ -1451,6 +1984,17 @@ edges not default visible in 3d but in 2d
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+
+\strikeout on
+render normal lines while graph is creating...
+ meshlines are to performance intensive
+\end_layout
+
+\begin_layout Itemize
+have same LOD approach for meshlines
+\end_layout
+
 \begin_layout Subsection
 20.
  08.
@@ -2903,7 +3447,7 @@ basically be based on market value size (For company with stock) and revenue
 \end_deeper
 \begin_layout Itemize
 \begin_inset Graphics
-	filename assets/eingefügt1.png
+	filename assets/eingef??gt1.png
 	lyxscale 40
 
 \end_inset
@@ -4353,7 +4897,7 @@ _.each(leafs, function (leaf) { leaf.updateEdges(); })
 \end_layout
 
 \begin_layout Plain Layout
-};updateLeafsEdges(main.getCurrentView().mRootCluster)
+};updateLeafsEdges(main.getView().mRootCluster)
 \end_layout
 
 \end_inset

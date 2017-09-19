@@ -11,6 +11,8 @@ import DomEventsAlt from "../cluster/utils/DomEventsAlt"
 import "./View3D.css"
 
 
+//import * as THREE from "three";
+
 export default class View3D extends HTMLElement {
 
     constructor(...args) {

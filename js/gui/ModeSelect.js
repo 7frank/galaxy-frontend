@@ -1,5 +1,7 @@
-
 import "./ModeSelect.css"
+import Extended2DGraphConfig from "../cluster/configs/Extendend2DGraphConfig";
+import Default3DGraphConfig from "../cluster/configs/Default3DGraphConfig";
+import Default2DGraphConfig from "../cluster/configs/Default2DGraphConfig";
 
 class ModeSelect extends HTMLElement {
 
@@ -8,63 +10,56 @@ class ModeSelect extends HTMLElement {
 
     }
 
+
+    addModeBtn(caption, mode,bSelected) {
+
+        var that = this
+
+        if (! (mode instanceof Default3DGraphConfig)) throw new Error("must be instanceof Default3DGraphConfig")
+
+
+        function selectBtn(btn) {
+            btn.parent().find(".selected").removeClass("selected")
+            btn.addClass("selected")
+
+        }
+
+        let modeBtn = $("<span>").html(caption).on("click", onModeClick);
+
+        if (bSelected) {
+
+            that.prevMode == caption
+            modeBtn.addClass("selected")
+        }
+
+        function onModeClick() {
+
+            let main = $("sample-cluster-application").get(0)
+
+            if (that.prevMode == caption) return;//  prevMode = mode;
+
+
+                mode.setView(main.getCurrentView()).setMode(function () {
+
+                that.prevMode = caption
+
+                selectBtn(modeBtn)
+
+            }.bind(this));
+
+        }
+
+        $(this).append(modeBtn)
+
+    }
+
     connectedCallback() {
 
-      this.btn2d= $("<span>").html("2D").on("click", () => this.setMode("2d"));
-       this.btn3d= $("<span>").addClass("selected").html("3D").on("click", () => this.setMode("3d"));
-
-        $(this).append( this.btn3d,  this.btn2d)
-
+        this.addModeBtn("3D",new Default3DGraphConfig(),true)
+        this.addModeBtn("2D",new Default2DGraphConfig())
+        this.addModeBtn("2D+",new Extended2DGraphConfig())
 
     }
-
-    setMode(mode) {
-
-        var spinner=$(`<div class="spinner">
-  <div class="bounce1"></div>
-  <div class="bounce2"></div>
-  <div class="bounce3"></div>
-</div>`)
-
-        let main=$("sample-cluster-application").get(0)
-
-           if (this.prevMode == mode) return;//  prevMode = mode;
-
-
-        if (mode == "3d") {
-
-
-         //   this.btn3d.html('').append(spinner)
-            main.setGraph3D(function(){
-                this.prevMode=mode
-                this.btn3d.addClass("selected")
-                this.btn2d.removeClass("selected")
-             //   this.btn3d.html('3D')
-            }.bind(this));
-
-
-
-
-            $("body").removeClass("inverted");
-
-            //TODO for orbit controls controls.mouseButtons = { PAN: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, ORBIT: THREE.MOUSE.RIGHT }; // swapping left and right buttons
-        }
-        else if (mode == "2d") {
-
-           // this.btn2d.html('').append(spinner)
-            main.setGraph2D(function(){
-
-                this.prevMode=mode
-                this.btn2d.addClass("selected")
-                this.btn3d.removeClass("selected")
-             //   this.btn3d.html('2D')
-
-            }.bind(this));
-
-        }
-    }
-
-
 }
 
 

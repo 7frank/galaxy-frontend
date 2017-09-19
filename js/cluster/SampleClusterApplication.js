@@ -28,8 +28,8 @@ import "../gui/searchbar"
 import "./refactor/SpecificDataUtils"
 import "./refactor/AppDataService"
 
-
 //used by View3D
+//TODO fix imports
 import CombinedCamera from "../lib/CombinedCamera"
 import TrackballControls from "../lib/TrackballControls"
 
@@ -40,40 +40,18 @@ import QuickHull from "../lib/QuickHull"
 // --------------------------------
 
 
-import BaseDistribution from "./distributions/BaseDistribution"
-import DefaultDistribution from "./distributions/DefaultDistribution"
-import RandomDistribution from "./distributions/RandomDistribution"
-import ForceGraphDistribution from "./distributions/ForceGraphDistribution"
-import SphericalDistribution from "./distributions/SphericalDistribution"
-
-import ClusterNodeArray from "./ClusterNodeArray"
-
-import ClusterLeafElement from "./ClusterLeafElement"
-
-import BaseCluster3D from "./BaseCluster3D"
-import Cluster3DExtended from "./Cluster3DExtended"
-import RootCluster from "./RootCluster"
-import GraphData from "./GraphData"
 
 
 import "../view/GraphView3D"
 import "../gui/ModeSelect"
 
 
-import BoxVolume from "./hull/BoxVolume"
-import BaseVolume from "./hull/BaseVolume"
-import ConvexVolume from "./hull/ConvexVolume"
-
-import ZoomUtil from "../utils/ZoomUtil"
-
-import ClusterSpeccFacade from "./ClusterSpeccFacade"
 
 import CompanyNewsDS from "../data/CompanyNewsDS"
 
 import {getGraphDataSets} from "../data/data-set-loader"
-import {IndustrialSectorAbbreviation, IndustrialSectorIcon} from "./utils/IndustrialSectorIcon";
-import ClusterMeshEdges from "./edges/ClusterMeshEdges";
-import FlatVolume from "./hull/FlatVolume";
+
+import Default3DGraphConfig from "./configs/Default3DGraphConfig";
 
 
 //-----------------------------------------
@@ -81,23 +59,17 @@ import FlatVolume from "./hull/FlatVolume";
 //-----------------------------------------
 
 
-export {Cluster3DExtended}
+
 
 /**
- * currently used for debugging purposes.. shoould receive a mayor overhaul, if used for production
+ * currently used for debugging purposes.. TODO should receive a mayor overhaul, if used for production
  */
 
 
 export class SampleClusterApplication extends HTMLElement {
 
-    constructor() {
-        super(...arguments)
-
-
-    }
 
     connectedCallback() {
-
 
         let datasets = getGraphDataSets()
 
@@ -122,7 +94,6 @@ export class SampleClusterApplication extends HTMLElement {
 
         myDS.onNewsReceived(function (news) {
 
-
         })
 
     }
@@ -136,15 +107,6 @@ export class SampleClusterApplication extends HTMLElement {
 
 
     setupViews() {
-        /*  const thumbCSS = {
-              "pointer-events": "all",
-              height: 300,
-              width: 400,
-              display: "flex",
-              "border": "1px solid rgba(128, 128, 128, 0.5)",
-              margin: "0.2em"
-          };
-  */
 
         function createContainer() {
 
@@ -213,13 +175,13 @@ export class SampleClusterApplication extends HTMLElement {
                 if (this.isMaximised()) {
 
                     $(this)
-                        .addClass(".view-thumbnail")
+                        .addClass("view-thumbnail")
                     return;
                 }
 
 
                 $(this)
-                    .removeClass(".view-thumbnail")
+                    .removeClass("view-thumbnail")
 
                 container.hide();
 
@@ -257,7 +219,7 @@ export class SampleClusterApplication extends HTMLElement {
 
 
             $(mGraphView)
-                .addClass(".view-thumbnail")  // .css(thumbCSS);
+                .addClass("view-thumbnail")
 
             $(mGraphView).on("dblclick", maximiseView);
 
@@ -320,9 +282,15 @@ export class SampleClusterApplication extends HTMLElement {
 
 
             //NOTE: target rendering
-            var speccs = this.getForceSpeccs();
+
+            var config = new Default3DGraphConfig()
+
+            var speccs = config.getSpeccs()// this.getForceSpeccs();
             let view2 = createView("new force-graph", speccs, true)
                 .loadDataSet(this.getDSByID(1));
+
+            config.setView(view2)
+
             views.push(view2);
 
 
@@ -372,20 +340,6 @@ export class SampleClusterApplication extends HTMLElement {
     }
 
 
-    getForceSpeccs2DChangesOnly() {
-
-        let speccs = this.getForceSpeccs();
-
-
-        speccs[0].distribution = new BaseDistribution(45000, 2); // countries get placed equally on a plane of size 15k X 15k
-        speccs[1].distribution = new BaseDistribution(10000, 2);// industries within countries use the Force-Graph approach to position elements
-        speccs[2].distribution = new BaseDistribution(500, 3);//same g
-
-        return speccs
-
-    }
-
-
     getSampleSpeccs() {
 
 
@@ -404,231 +358,6 @@ export class SampleClusterApplication extends HTMLElement {
 
     }
 
-    /**
-     * this is a sample configuration for  the cluster.
-     * it contains 2 subdivisions:  -first into countries
-     *                              -followed by industry
-     *
-     */
-    getForceSpeccs() {
-
-
-
-
-
-        //the function that is called to create the  country groups
-        function countrySetGenerator(groupFunction, node) {
-            // the group function takes 2 arguments
-            // the first is the value that will determine the key of the group
-            //in this case node.group contains country names
-            //the second argument is the node itself that is passed into the group created
-            groupFunction(node.group, node)
-        }
-
-        //same goes for the industy clusters that are sub-clusters of the country clusters in this example
-        function industrySetGenerator(groupFunction, node) {
-            groupFunction(node.industry, node)
-        }
-
-
-        //there are several distribution classes defined
-        //these handle how the current cluster positions it's sub-clusters when rendering
-        //basically a distribution function does have 2 parameters
-        // the first is the maximum size in x/y/z direction the elements within can be placed
-        // the second defined the dimensions 1/2/3 that get used for the element placement
-
-
-        let countryDistribution = new ForceGraphDistribution(40000, 3); // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new ForceGraphDistribution(15000, 3);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new ForceGraphDistribution(8000, 3);//same goes for the nodes within each industry
-
-        //the final configuration for rendering
-        //it contains an additional options attribute per array entry
-
-        // @param options.minClusterSize ... is the lower bound for the nodes within the cluster
-        // if the cluster has fewer elements all clusters previously generated are places within this "other" cluster
-        // @param options. defaultMergeGroupName the name of the "other" cluster can be changed by this value
-        // @param options.hull can be used to add a volume around the cluster
-        //by default if no value gets set, the BaseVolume class is used which is invisible by default
-        //but is necessary for other components like picking and tet rendering
-
-
-        let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
-
-        //TODO these options are a little bit confusing atm.. the mCS option refers to the dist of the sub-clusters
-        // while the hull option is used by the cluster itself
-
-        return [
-
-            {
-                generator: countrySetGenerator,
-                distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: rootHull}
-            },
-            {
-                generator: industrySetGenerator,
-                distribution: industryDistribution,
-                events: {
-                    click: function () {
-                        // this.toggleCollapse()
-                    },
-                    mouseover: function () {
-                        this.mHull.visible = true
-                       // this.bClusterEdgesVisible= true
-
-                    },
-                    mouseout: function () {
-                        this.mHull.visible = false
-                      //  this.bClusterEdgesVisible= false
-                    }
-                },
-                options: {
-                    minClusterSize: 15
-                    // ,hull:BoxVolume
-                    , hull: ConvexVolume,
-                    onHullCreated: function (volume) {
-                        volume.visible = false
-                    }
-
-                }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
-            }
-            , {
-                distribution: nodesWithinIndustryDistribution,
-                options: {
-                       hull: ConvexVolume,
-
-                    text: function () {
-                        //return IndustrialSectorIcon(this.name)
-                        return IndustrialSectorAbbreviation(this.name)
-                    }
-                },
-                events: {
-                    click: function () {
-                        console.log("idle")
-                    }
-                },
-            }
-
-        ]
-
-    }
-
-
-    get2DPlaneForceSpeccs() {
-
-
-        //the function that is called to create the  country groups
-        function countrySetGenerator(groupFunction, node) {
-            // the group function takes 2 arguments
-            // the first is the value that will determine the key of the group
-            //in this case node.group contains country names
-            //the second argument is the node itself that is passed into the group created
-            groupFunction(node.group, node)
-        }
-
-        //same goes for the industy clusters that are sub-clusters of the country clusters in this example
-        function industrySetGenerator(groupFunction, node) {
-            groupFunction(node.industry, node)
-        }
-
-
-        //there are several distribution classes defined
-        //these handle how the current cluster positions it's sub-clusters when rendering
-        //basically a distribution function does have 2 parameters
-        // the first is the maximum size in x/y/z direction the elements within can be placed
-        // the second defined the dimensions 1/2/3 that get used for the element placement
-
-
-        let countryDistribution = new ForceGraphDistribution(60000, 2); // countries get placed equally on a plane of size 15k X 15k
-        let industryDistribution = new ForceGraphDistribution(10000, 2);// industries within countries use the Force-Graph approach to position elements
-        let nodesWithinIndustryDistribution = new ForceGraphDistribution(5000, 2);//same goes for the nodes within each industry
-
-        //the final configuration for rendering
-        //it contains an additional options attribute per array entry
-
-        // @param options.minClusterSize ... is the lower bound for the nodes within the cluster
-        // if the cluster has fewer elements all clusters previously generated are places within this "other" cluster
-        // @param options. defaultMergeGroupName the name of the "other" cluster can be changed by this value
-        // @param options.hull can be used to add a volume around the cluster
-        //by default if no value gets set, the BaseVolume class is used which is invisible by default
-        //but is necessary for other components like picking and tet rendering
-
-
-
-        let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
-
-
-        return [
-
-            {
-                generator: countrySetGenerator,
-                distribution: countryDistribution,
-                options: {
-                    minClusterSize: 40,
-                    hull: rootHull,
-                    //edges:ClusterMeshEdges,
-                    colors: {
-                        edge: [0x000000, 0.8],
-                        hull: [0x6A5ACD, 0.8] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
-
-                    }
-                }
-            },
-            {
-                generator: industrySetGenerator,
-                distribution: industryDistribution,
-                events: {
-                    click: function () {
-                         this.toggleCollapse()
-
-                        console.log("toggled country?", this.name)
-                    }
-                },
-                options: {
-                    minClusterSize: 15,
-                    hull: FlatVolume,//ConvexVolume,
-                    //edges:ClusterMeshEdges,
-                    expanded: function () {
-                       // return true
-                        return this.name == "United States"
-                    }
-                }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
-            }
-            , {
-                distribution: nodesWithinIndustryDistribution,
-                events: {
-                    click: function () {
-                          this.toggleCollapse()
-                        console.log("toggled leaf", this.name)
-                    },
-                    mouseover: function () {
-
-                      //  this.bClusterEdgesVisible= true
-
-                    },
-                    mouseout: function () {
-
-                      //  this.bClusterEdgesVisible= false
-                    }
-                },
-                options: {
-                    hull: FlatVolume,
-
-                    expanded: function () {
-
-                           let par=this.getParentCluster()
-                           if (!par) return false
-
-                        return /*par.getParentCluster().name == "United States" &&*/ this.name == "Healthcare"// false //true// return false//
-
-                    }
-                }
-            }
-
-        ]
-
-    }
-
 
     setDataSets(datasets) {
         this.mDataSets = datasets;
@@ -640,211 +369,15 @@ export class SampleClusterApplication extends HTMLElement {
         return this.mDataSets[id]
     }
 
-//-------------------------------
-
-
-    zoomToPosition(position, onComplete) {
-
-
-        let view = this.getCurrentView();
-
-        ZoomUtil.moveToPosition(position, view.mCamera, view.mControls, 0, onComplete)
-    }
-
-
-    doZoomToRelevant(rootCluster) {
-
-        setTimeout(function () {
-
-            //TODO zoom to usa
-            /* if (rootCluster.mClusters["United States"])
-                 rootCluster.mClusters["United States"].zoomToCluster()
-             else*/
-
-
-            this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
-                //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
-                this.getCurrentView().mRootCluster.zoomToCluster(150000)
-
-            });
-
-
-        }.bind(this), 3000)
-
-
-        //   this.getCurrentView().mRootCluster.zoomToCluster()
-
-
-    }
 
     getCurrentView() {
+
         return $(".view-3d.view-3d-maximised").get(0)
 
     }
 
 
-    resetNodesPositions(nodes) {
-
-        _.each(nodes, function (n) {
-            n.x = 0;
-            n.y = 0;
-            n.z = 0;
-
-        })
-
-    }
-
-    setGraph2D(onComplete = function () {
-    }) {
-
-
-        /**
-         * FIXME if a cluster has subclusters and no clustering is given use the existsing
-         * likewise with distributions
-         * currently the cluster gets cleaned first before the new visualisation is generated
-         *
-         *
-         *
-         */
-
-
-
-        let speccs = this.get2DPlaneForceSpeccs();
-
-        let view = this.getCurrentView();
-
-
-        let rootCluster = view.mRootCluster;
-
-
-        if (!rootCluster || rootCluster.isLocked()) {
-            console.warn("can't setGraph2D wait until animation has finished");
-            return
-        }
-
-        rootCluster.setLock()
-
-
-      //  view.mScene.background = new THREE.Color(0xFFFFFF);
-        view.mRenderer.setClearColor(0xffffff)
-
-        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").addClass("darker")
-
-     //   $("cluster-text-overlay").addClass("darker")
-
-
-        this.resetNodesPositions(rootCluster.mNodes)
-
-
-        rootCluster.cleanUpLeafs();
-        //clean up previous clusters
-        BaseCluster3D.cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
-
-
-        rootCluster.applyClustering(speccs);
-        view.addCompanyCountListenersToCluster(rootCluster);
-
-
-        //TODO
-        $(view).trigger("graph-changed");
-
-        this.doZoomToRelevant(rootCluster)
-
-        view.mControls.target.set(new THREE.Vector3(0, 0, 0));
-       // view.mControls.noRotate = true;
-        view.mControls.reset();
-
-
-        //currently the hull update event is a good indicator
-        //TODO test and improve the way we determine when a cluster may be changed again
-        rootCluster.on("hull-updated", function () {
-
-            rootCluster.setLock(false)
-
-            onComplete()
-
-
-//2d enable edges 3d diable down below
-         /*   rootCluster.findClusters("*").forEach(function(c){
-                c.bClusterEdgesVisible=true
-            })*/
-
-        })
-
-
-
-
-        // view.mSkyDome.visible=false;
-
-    }
-
-
-    setGraph3D(onComplete = function () {
-    }) {
-
-        let speccs = this.getForceSpeccs();
-        let view = this.getCurrentView();
-        let rootCluster = view.mRootCluster;
-
-
-        if (!rootCluster || rootCluster.isLocked()) {
-            console.warn("can't setGraph3D wait until animation has finished");
-          //  return
-        }
-
-        rootCluster.setLock(true);
-
-
-      // view.mScene.background.copy(new THREE.Color(0x000000));
-        view.mRenderer.setClearColor(0x000000)
-
-
-        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass("darker")
-      //  $("cluster-text-overlay").removeClass("darker")
-
-
-        rootCluster.cleanUpLeafs();
-        //clean up previous clusters
-        BaseCluster3D.cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
-
-
-        rootCluster.applyClustering(speccs);
-        view.addCompanyCountListenersToCluster(rootCluster);
-
-
-        //TODO text is shown to early on update
-        $(view).trigger("graph-changed");
-
-
-        view.mControls.noRotate = false;
-
-        //view.mSkyDome.visible=true;
-        this.doZoomToRelevant(rootCluster)
-
-
-        rootCluster.on("hull-updated", function () {
-
-            rootCluster.setLock(false)
-            onComplete()
-
-
-
-        //    rootCluster.findClusters("*").forEach(function(c){
-         //       c.bClusterEdgesVisible=false
-         //   })
-
-
-        })
-
-
-
-
-
-    }
-
-
 }
-
 
 customElements.define("sample-cluster-application", SampleClusterApplication);
 

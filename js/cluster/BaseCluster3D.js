@@ -216,7 +216,7 @@ export default class BaseCluster3D extends BaseNode {
             visible: true,
             polygonOffset: true,
             polygonOffsetFactor: -4,
-            depthTest: true, //enabled, it will half way hide BaseVolume lines //TODO this is because the ring is only a flat surface in 3d space ...
+            depthTest: false, //enabled, it will half way hide BaseVolume lines //TODO this is because the ring is only a flat surface in 3d space ...
             blending: THREE.NoBlending
         });
 
@@ -226,12 +226,12 @@ export default class BaseCluster3D extends BaseNode {
         let materialOtherBlue = new THREE.MeshBasicMaterial({
             color: 0x555555, //0x6a5acd, //slate-blue
             wireframe: false,
-            transparent: false,
+            transparent: true,
             // opacity: 0.8,
             visible: true,
             polygonOffset: true,
             polygonOffsetFactor: -4,
-            depthTest: true
+            depthTest: false
         });
 
 
@@ -269,20 +269,27 @@ export default class BaseCluster3D extends BaseNode {
         }
 
 
-        inner.onBeforeRender = outer.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {
+
+
+
+    function beforeRender(renderer, scene, camera, geometry, material, group) {
             //billboard effect
-            this.position.set(0, 0, 0)
+          //  this.position.set(0, 0, 0)
 
             this.setRotationFromQuaternion(camera.quaternion)
 
 
-            var vec3 = new THREE.Vector3(0, 0, 1)// camera.position.clone().sub(this.position).normalize()
+         /*   var vec3 = new THREE.Vector3(0, 0, 1)// camera.position.clone().sub(this.position).normalize()
 
             // translate the object 10% of it's size into the foreground
             //TODO smaller collapsed hulls should be in front of bigger ones
             this.translateOnAxis(vec3, boundingSphere.radius / 10)
-
+        */
         };
+
+
+        this.addHullStencilBeforeRender(outer,beforeRender)
+        this.addHullStencilBeforeRender(inner,beforeRender)
 
 
         _hull.position.copy(boundingSphere.center);
@@ -1033,18 +1040,13 @@ export default class BaseCluster3D extends BaseNode {
 
 
 
-        var that=this
-        function mCallback(depth){
-
-            console.log("edges for", that.name,"depth",depth)
-
-        }
 
         //TODO this should enable stencil testing for the current two implementations of edges
-        if (this.mChildClustersEdgesMesh.children.length > 0)
-            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[0],mCallback)
-        else
-            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh,mCallback)
+      /*  if (this.mChildClustersEdgesMesh.children.length > 0)
+            for (let i=0;i<this.mChildClustersEdgesMesh.children.length;i++)
+            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[i])
+        else*/
+            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
 
 
         this.mExpandedGroup.add(this.mChildClustersEdgesMesh);
@@ -1236,8 +1238,8 @@ export default class BaseCluster3D extends BaseNode {
             gl.stencilFunc(func[0],depth,func[2]);
             gl.stencilOp(... opt.op[0]);
 
-            if (opt.debug)
-            callback(depth)
+            if (callback)
+            callback.bind(this)(...arguments)
 
         }
 
@@ -1263,14 +1265,14 @@ export default class BaseCluster3D extends BaseNode {
             gl.stencilFunc(func[0],depth,func[2]);
             gl.stencilOp(... opt.op[1]);
 
-            if (opt.debug)
-            callback(depth)
+            if (callback)
+                callback.bind(this)(...arguments)
         }
 
         mesh.onAfterRender = function (renderer) {
 
-            let opt = renderer.debug.stencil
-            opt.state(false)
+         //   let opt = renderer.debug.stencil
+         //   opt.state(false)
         }
 
     }
@@ -1383,11 +1385,7 @@ export default class BaseCluster3D extends BaseNode {
         this.setHullColorFromOptions(this.mHull)
 
 var that=this
-        this.addHullStencilBeforeRender(this.mHull.mesh,function(depth){
-
-           console.log("hull for", that.name,"depth",depth)
-
-        })
+        this.addHullStencilBeforeRender(this.mHull.mesh)
 
         //notify listeners that the hull size changed
         this.trigger("hull-updated")

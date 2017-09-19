@@ -396,7 +396,7 @@ export default class GraphView3D extends View3D {
         that.mRenderer.render(that.mScene, that.mCamera);
 
         that.mCamera.layers.set(1) //render lines in background
-
+        that.mRenderer.clearDepth();
         that.mRenderer.render(that.mScene, that.mCamera);
 
     }
