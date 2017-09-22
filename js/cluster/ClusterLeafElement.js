@@ -259,21 +259,32 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
     getView() {
-        //TODO
-        return this.parent.parent.getView()
+
+        return this.getParentCluster().getView()
 
     }
 
     getRoot() {
-        //TODO
-        return this.parent.parent.getRoot()
+
+        return this.getParentCluster().getRoot()
+
+    }
+
+    getParentCluster() {
+        let expContainer = this.parent;
+        if (expContainer) return expContainer.parent
+
 
     }
 
 
+
     setLOD(levelOfDetail) {
+       console.error("!!!FIXME!!! setLOD")
+        return  //FIXME interferes with collapse feature not showing anything while in transition
+
         if (this.mNodeParticles)
-            if (this.parent.useLOD)
+            if (this.getParentCluster().useLOD)
                 this.mNodeParticles.pointCloud.visible = this.bNodesVisible ? levelOfDetail > 0.3 : false;
             else
                 this.mNodeParticles.pointCloud.visible = levelOfDetail > 0.75;
@@ -396,8 +407,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
     //TODO refactor
-    setDistributionHandler(distribution, onComplete = function () {
-    }) {
+    setDistributionHandler(distribution, onComplete = ()=>0, onStep = ()=>0 ) {
 
         var that = this;
         distribution.setNodes(this.mNodes, function (vec, i) {
@@ -409,9 +419,9 @@ export default class ClusterLeafElement extends THREE.Mesh {
             if (that.mNodeParticles)
                 that.mNodeParticles.updateNodePosition(i);
 
-        }, function onStep() {
+        }, function _onStep() {
 
-
+            onStep()
         }, function () {
             that.updateEdges();
 //FIXME init dot particles if (root)cluster is done animating?
