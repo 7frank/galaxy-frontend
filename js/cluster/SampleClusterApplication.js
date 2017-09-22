@@ -321,10 +321,12 @@ export class SampleClusterApplication extends HTMLElement {
 
 
 
-            //NOTE: target rendering
-            var speccs = this.getForceSpeccs(); //get2DPlaneForceSpeccs
+            var config = new Default3DGraphConfig()
+
+            var speccs = config.getSpeccs()
             let view2 = createView("new force-graph", speccs, true)
                 .loadDataSet(this.getDSByID(0));
+            config.setView(view2)
             views.push(view2)
 
 

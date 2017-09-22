@@ -10,6 +10,7 @@ import BaseVolume from "../hull/BaseVolume";
 import BoxVolume from "../hull/BoxVolume";
 import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
 import ZoomUtil from "../../utils/ZoomUtil";
+import {removeSelections} from "../refactor/f1";
 //import * as THREE from "three";
 
 export default
@@ -202,6 +203,9 @@ class Default3DGraphConfig {
     setMode(onComplete = function () {
     }) {
 
+        removeSelections()
+
+
         let speccs = this.getSpeccs();
         let view = this.getView();
         let rootCluster = view.mRootCluster;
@@ -229,7 +233,8 @@ class Default3DGraphConfig {
         var that = this
         rootCluster.on("hull-updated", function () {
 
-            that.doZoomToRelevant(rootCluster)
+            //FIXME called too often
+          //  that.doZoomToRelevant(rootCluster)
 
             rootCluster.setLock(false)
             onComplete()

@@ -461,7 +461,6 @@ export default class BaseCluster3D extends BaseNode {
 
 
         this.mExpandedGroup.visible = true
-
         this.animate({mExpandedGroup: {scale: {x: 1, y: 1, z: 1}, position: {x: 0, y: 0, z: 0}}}, 200, function () {
         }, function onAnimate() {
 
@@ -483,7 +482,6 @@ export default class BaseCluster3D extends BaseNode {
      */
 
     setLOD(mLOD) {
-
 
         if (this.mHull)
             this.mHull.setLOD(mLOD);
@@ -960,6 +958,9 @@ export default class BaseCluster3D extends BaseNode {
 
             that.mClusterRule = entry;
             that.trigger("cluster-ready")
+
+
+
             that.adjustHullSize();
 
         }, _.throttle(function () {
@@ -1171,9 +1172,27 @@ export default class BaseCluster3D extends BaseNode {
         var values = Object.values(this.mClusters);
         //TODO translation,rotation,scale by using different per-node function
 
-        if (this.isLeaf())
-            this.mLeaf.setDistributionHandler(distribution, onComplete);
-        else
+
+
+        //FIXME redundant updating multiple edges and potentially leafs
+        var updateLeafsEdges = _.throttle( function (cluster) {
+
+            //TODO the timeout fixes the problem that the edges aren't on spot but this should be reviewed and fixed without it
+
+
+            let leafs = cluster.getLeafs();
+            _.each(leafs, function (leaf) {
+                leaf.updateEdges();
+            });
+
+        }, 100);
+
+//TODO it seems as if this part was no longer in use
+    /*    if (this.isLeaf())
+            this.mLeaf.setDistributionHandler(distribution, onComplete,function(){
+                updateLeafsEdges(that);
+                onStep()   });
+        else*/
             distribution.setNodes(this,
                 function onNodePositionChanged(vecPosition, i) {
                 },
@@ -1191,18 +1210,7 @@ export default class BaseCluster3D extends BaseNode {
                 });
 
 
-        //FIXME redundant updating multiple edges and potentially leafs
-        function updateLeafsEdges(cluster) {
 
-            //TODO the timeout fixes the problem that the edges aren't on spot but this should be reviewed and fixed without it
-            setTimeout(function () {
-
-                let leafs = cluster.getLeafs();
-                _.each(leafs, function (leaf) {
-                    leaf.updateEdges();
-                });
-            }, 50);
-        }
 
     }
 
@@ -1429,6 +1437,21 @@ var that=this
         let leaf = new ClusterLeafElement(this.mNodes, domEvents);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
+
+        var updateLeafsEdges = _.throttle( function (cluster) {
+
+            //TODO the timeout fixes the problem that the edges aren't on spot but this should be reviewed and fixed without it
+
+
+            let leafs = cluster.getLeafs();
+            _.each(leafs, function (leaf) {
+                leaf.updateEdges();
+                that.adjustHullSize();
+            });
+
+        }, 50);
+
+
         leaf.setDistributionHandler(entry.distribution, function () {
 
             //create/update the hull element after the animation has finished
@@ -1438,6 +1461,10 @@ var that=this
             if (that.isLeaf())
                 that.updateIfIsLeaf()
 
+
+        },function(){
+
+            updateLeafsEdges(that)
 
         })
 
