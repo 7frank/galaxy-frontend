@@ -47,6 +47,38 @@ export default class ConvexVolume extends BoxVolume {
     }
 
 
+
+    getMaterial()
+    {
+        if (this.mMaterial) return this.mMaterial;
+
+
+    let mat = this.mMaterial= new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            opacity: 0.03,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.BackSide
+            //  ,   wireframe:true
+        });
+
+        this.mMaterial.visible=  this.canBeVisible();
+
+
+        MaterialFadeMixin(mat);
+
+        //FIXME test if previous material exists and take its fade value to prevent flickering
+      /*  if (this.mesh && this.mesh.material && this.mesh.material.fade)
+            mat.fade = this.mesh.material.fade;
+        else*/
+            mat.fade = 0;
+
+        mat.fadeTo(1, 2000);
+
+        return this.mMaterial
+    }
+
+
     createFromBoundingBox(vertices, boundingBox) {
 
         //adding a timestamp for the different lods of the mesh
@@ -99,30 +131,11 @@ export default class ConvexVolume extends BoxVolume {
         this.mBoundingBox = boundingBox;
 
 
-        //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
-        let mat = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            opacity: 0.03,
-            transparent: true,
-            depthWrite: false,
-            side: THREE.BackSide
-            //  ,   wireframe:true
-        });
 
-
-        MaterialFadeMixin(mat);
-
-        //FIXME test if previous material exists and take its fade value to prevent flickering
-       /* if (this.mesh && this.mesh.material && this.mesh.material.fade)
-            mat.fade = this.mesh.material.fade;
-        else*/
-            mat.fade = 0;
-
-        mat.fadeTo(1, 2000);
 
 
         //   let mesh = new THREE.Mesh(geo, mat);
-        let mesh = new THREE.Mesh(this.geo0, mat);
+        let mesh = new THREE.Mesh(this.geo0, this.getMaterial());
 
         mesh.geometry.boundingBox = boundingBox;
         mesh.geometry.boundingSphere = boundingBox.getBoundingSphere();
@@ -192,7 +205,6 @@ export default class ConvexVolume extends BoxVolume {
     //TODO it is probably better to separate the LOD from the visiblility/opacity
     //
     setLOD(l) {
-
 
         if (l < 0) l = 0;
         if (l > 1) l = 1;
