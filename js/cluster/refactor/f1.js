@@ -36,6 +36,27 @@ var previousNodeDblClicked;
 var previousNodes;
 
 
+/**
+ * removes/cleans up all selections from previous selected elements
+ *
+ */
+export
+function removeSelections()
+{
+
+    function undoStuff(node){
+
+        unhighlightNodeElements.apply(node);
+
+    }
+
+
+    _.each(previousNodeClicked,undoStuff)
+    _.each(previousNodes,undoStuff)
+
+
+
+}
 
 export
 function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) {
