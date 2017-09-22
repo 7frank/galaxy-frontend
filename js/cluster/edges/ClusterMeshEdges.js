@@ -20,7 +20,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         super(...args)
 
         this.smoothenWidth = true;
-        this.minLinkStrength=700
+        this.minLinkStrength=0
     }
 
 
@@ -70,6 +70,8 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         let edges = this.createEdgesForClusters(this.mClusters);
 
 
+        if (edges.length==0) return
+
         var line_geom = new THREE.Geometry();
 
 
@@ -78,6 +80,13 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
 
         var that=this
         var invalidEdges = [];
+
+
+        //TODO sort and show only certain amount of edges based on relative size
+
+        var orderedEdges = _.orderBy(edges, ['link_strength'], ['desc']);
+        that.minLinkStrength=0.4*orderedEdges[0].link_strength;//set minLinkStrength to pass the test to 40% of biggest edge
+
 
         for (let edge of edges) {
             //TODO we should unify the edges to not always have 2 separate ways to access certain elements
