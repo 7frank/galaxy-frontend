@@ -126,12 +126,13 @@ export default class FlatVolume extends BoxVolume {
         this.mBoundingBox = boundingBox;
 
 
-        //FIXME ,polygonOffset:true,polygonOffsetFactor:-4
+
         let mat = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             opacity: 0.03,
             transparent: true,
-            depthWrite: true
+            depthWrite: true,
+            depthTest: false //disabling depth test instead of using polygonOffset to prevent flickering
            // side: THREE.BackSide
             //  ,   wireframe:true
         });
