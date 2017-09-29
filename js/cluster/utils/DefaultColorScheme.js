@@ -6,6 +6,8 @@
  *
  */
 import Color from 'easy-color';
+import * as $ from "jquery"
+
 //OptionsManager
 // colors
 //TODO currently not in use

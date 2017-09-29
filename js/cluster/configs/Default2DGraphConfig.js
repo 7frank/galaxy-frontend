@@ -6,6 +6,7 @@ import FlatVolume from "../hull/FlatVolume";
 
 
 import * as THREE from "three";
+import * as $ from "jquery"
 
 
 export default class Default2DGraphConfig extends Default3DGraphConfig {

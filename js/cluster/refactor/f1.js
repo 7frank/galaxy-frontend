@@ -24,7 +24,7 @@ import {GUI} from "./SpecificDataUtils";
 
 
 import * as _ from "lodash";
-
+import * as $ from "jquery"
 
 //current selected node
 var previousNodeClicked = [];

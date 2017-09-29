@@ -9,7 +9,7 @@ import DefaultColorScheme from "./utils/DefaultColorScheme"
 
 
 import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
-
+import * as $ from "jquery"
 
 /**
  *

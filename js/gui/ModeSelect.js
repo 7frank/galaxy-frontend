@@ -2,6 +2,8 @@ import "./ModeSelect.css"
 import Extended2DGraphConfig from "../cluster/configs/Extendend2DGraphConfig";
 import Default3DGraphConfig from "../cluster/configs/Default3DGraphConfig";
 import Default2DGraphConfig from "../cluster/configs/Default2DGraphConfig";
+import * as $ from "jquery"
+
 
 class ModeSelect extends HTMLElement {
 

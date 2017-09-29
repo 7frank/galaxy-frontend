@@ -19,6 +19,8 @@ import Default3DGraphConfig from "./configs/Default3DGraphConfig";
 import * as Mousetrap from "mousetrap";
 
 
+import * as $ from "jquery"
+
 /**
  *  TODO re-structure graph
  * -into graph + subgraphs or simply multiple graphs

@@ -17,6 +17,7 @@
 
 import * as THREE from "three";
 import * as _ from "lodash";
+import * as $ from "jquery"
 
 
 export default function TextNodesFactory(env, options) {

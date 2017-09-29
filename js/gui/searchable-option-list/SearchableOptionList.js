@@ -4,6 +4,7 @@ import searchListOoptions from "./searchOptions.json"
 
 
 import template from "./searchable-option-list.html"
+import * as $ from "jquery"
 
 class SearchableOptionList extends HTMLElement {
 

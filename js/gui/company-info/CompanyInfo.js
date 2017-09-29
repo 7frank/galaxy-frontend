@@ -3,6 +3,8 @@ import template from "./company-info.html"
 import "../searchable-option-list/SearchableOptionList"
 import ApolloDS from "../../data/ApolloDS";
 import _ from "lodash"
+import * as $ from "jquery"
+
 
 class CompanyInfo extends HTMLElement {
 

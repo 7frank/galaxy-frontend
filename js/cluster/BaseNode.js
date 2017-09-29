@@ -11,7 +11,7 @@ import * as THREE from "three";
 import * as _ from "lodash";
 
 import * as Mousetrap from "mousetrap";
-
+import * as $ from "jquery"
 
 /**
  * simple node implementation for interaction and basic visualisation

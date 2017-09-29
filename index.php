@@ -2,7 +2,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-
+    <script src="./build/node-modules-bundle.js"></script>
     <script src="./build/bundle.js"></script>
 
 

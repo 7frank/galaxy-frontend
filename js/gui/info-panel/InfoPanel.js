@@ -1,4 +1,5 @@
 import template from "./info-panel.html"
+import * as $ from "jquery"
 
 class InfoPanel extends HTMLElement {
 

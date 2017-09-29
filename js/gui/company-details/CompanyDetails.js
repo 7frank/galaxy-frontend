@@ -1,6 +1,6 @@
 import bodyHTML from "./company-details-body.html"
 import TemplateString from "../../utils/TemplateString";
-
+import * as $ from "jquery"
 
 class CompanyDetails extends HTMLElement {
 

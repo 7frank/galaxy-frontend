@@ -72,7 +72,9 @@ export function register3DClass(className, options) {
         unique: false
     };
 
-    options = $.extend(true, {}, defaults, options);
+    //options = $.extend(true, {}, defaults, options);
+
+    options = _.merge( {}, defaults, options);
 
     if (typeof _classes[className] != "undefined") throw new Error("className already registered:", className);
 

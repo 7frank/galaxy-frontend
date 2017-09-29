@@ -13,6 +13,8 @@ import "../cluster/utils/DefaultColorScheme"
 import "../gui/GraphHUD"
 
 import {GUI} from "../cluster/refactor/SpecificDataUtils"
+import * as $ from "jquery"
+
 
 //import skyDomeImage from "./coordinates.png"
 

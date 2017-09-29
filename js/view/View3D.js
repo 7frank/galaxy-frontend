@@ -14,6 +14,8 @@ import * as THREE from "three";
 import "../lib/CombinedCamera"
 import "../lib/TrackballControls"
 
+import * as $ from "jquery"
+
 export default class View3D extends HTMLElement {
 
     constructor(...args) {

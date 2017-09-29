@@ -36,6 +36,7 @@
     "codelyzer": "~3.0.1",
     "css-loader": "^0.28.4",
     "file-loader": "^0.11.2",
+    "hard-source-webpack-plugin": "^0.4.9",
     "html-loader": "^0.5.1",
     "html-webpack-plugin": "^2.29.0",
     "imports-loader": "^0.7.1",
@@ -54,7 +55,8 @@
     "tslint": "~5.3.2",
     "typescript": "~2.3.3",
     "url-loader": "^0.5.9",
-    "webpack": "^2.6.1"
+    "webpack": "^2.6.1",
+    "webpack-bundle-analyzer": "^2.9.0"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^17.1.0",

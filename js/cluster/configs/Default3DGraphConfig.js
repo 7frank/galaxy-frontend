@@ -9,6 +9,7 @@ import ZoomUtil from "../../utils/ZoomUtil";
 import {removeSelections} from "../refactor/f1";
 
 import * as THREE from "three";
+import * as $ from "jquery"
 
 
 export default class Default3DGraphConfig {
