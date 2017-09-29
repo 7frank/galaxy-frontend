@@ -4,11 +4,17 @@
 
 import BaseDistribution from "./BaseDistribution"
 
-import EdgeUtil from "../EdgeUtil"
+
 
 import BaseCluster3D from "../BaseCluster3D"
 
 import RoundRobin from "../utils/RoundRobin"
+
+import * as THREE from "three";
+import * as _ from "lodash";
+import * as d3_force from "d3-force-3d";
+
+
 /*
  * TODO the forceGraphDistribution should work like a normal force graph
  * but optimally is could use a initial distribution from another dist function with no animation enabled

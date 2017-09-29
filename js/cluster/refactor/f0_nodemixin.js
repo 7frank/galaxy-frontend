@@ -6,7 +6,8 @@ import {basicSpriteSize, basicElementExtend} from "./f0-basic-element-3d-classes
 
 import {highlightNodeElements,} from "./f1"
 
-
+import * as THREE from "three";
+import * as _ from "lodash";
 
 var sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
 

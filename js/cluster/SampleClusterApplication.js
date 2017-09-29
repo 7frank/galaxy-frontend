@@ -52,6 +52,7 @@ import CompanyNewsDS from "../data/CompanyNewsDS"
 import {getGraphDataSets} from "../data/data-set-loader"
 
 import Default3DGraphConfig from "./configs/Default3DGraphConfig";
+import * as Mousetrap from "mousetrap";
 
 
 //-----------------------------------------

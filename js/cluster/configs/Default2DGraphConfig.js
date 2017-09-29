@@ -8,7 +8,10 @@ import BoxVolume from "../hull/BoxVolume";
 import BaseVolume from "../hull/BaseVolume";
 import ClusterMeshEdges from "../edges/ClusterMeshEdges";
 import FlatVolume from "../hull/FlatVolume";
-//import * as THREE from "three";
+
+
+import * as THREE from "three";
+
 
 export default
 class Default2DGraphConfig extends Default3DGraphConfig {

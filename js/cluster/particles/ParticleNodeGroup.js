@@ -1,3 +1,7 @@
+
+import * as THREE from "three";
+import * as _ from "lodash";
+
 /**
  **    use for group of nodes that share some similarities (nCountry <= company)
  *    this approach does not allow for adding removing nodes as of yet

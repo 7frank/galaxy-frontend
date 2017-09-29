@@ -7,11 +7,13 @@ import BaseCluster3D from "../BaseCluster3D";
 import {IndustrialSectorAbbreviation} from "../utils/IndustrialSectorIcon";
 import ConvexVolume from "../hull/ConvexVolume";
 import BaseVolume from "../hull/BaseVolume";
-import BoxVolume from "../hull/BoxVolume";
+
 import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
 import ZoomUtil from "../../utils/ZoomUtil";
 import {removeSelections} from "../refactor/f1";
-//import * as THREE from "three";
+
+import * as THREE from "three";
+
 
 export default
 class Default3DGraphConfig {

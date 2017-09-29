@@ -75,6 +75,8 @@
  * for objects with events context
  */
 
+import * as THREE from "three";
+import * as _ from "lodash";
 
 
 // # Constructor

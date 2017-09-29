@@ -4,6 +4,7 @@
 
 import BaseDistribution from "./BaseDistribution"
 
+import * as THREE from "three";
 
 
 

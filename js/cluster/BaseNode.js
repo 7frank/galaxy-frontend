@@ -7,6 +7,12 @@ import AnimationMixin from "../utils/AnimationMixin"
 
 import DomEventsAlt from "./utils/DomEventsAlt"
 
+import * as THREE from "three";
+import * as _ from "lodash";
+
+import * as Mousetrap from "mousetrap";
+
+
 /**
  * simple node implementation for interaction and basic visualisation
  *

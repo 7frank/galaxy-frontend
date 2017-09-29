@@ -12,6 +12,8 @@ import 'jquery-ui/ui/widgets/resizable';
 import "../../gui/company-details/CompanyDetails"
 import {AppDataService} from "./AppDataService";
 
+import * as _ from "lodash";
+
 
 function formatNumber(num) {
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")

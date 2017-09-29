@@ -11,7 +11,8 @@
 
 import BoxVolume from "./BoxVolume"
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin"
-
+import * as THREE from "three";
+import * as _ from "lodash";
 
 import convexHull2d from "monotone-convex-hull-2d"
 

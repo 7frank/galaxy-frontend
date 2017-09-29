@@ -10,6 +10,10 @@ import  dot7Image from "../../../img/dot7.png"
 import  ring2Image from "../../../img/ring2.png"
 import  ring3Image from "../../../img/ring3.png"
 
+
+import * as THREE from "three";
+import * as _ from "lodash";
+
 //------------------------------------------------
 //helper structures for "class"-like work flow with nodes
 var _classes = {};

@@ -12,6 +12,9 @@ import BaseCluster3D from "../BaseCluster3D"
 //import TWEEN from "@tweenjs/tween.js"
 import TWEEN from "../../lib/Tween"
 
+import * as THREE from "three";
+import * as _ from "lodash";
+
 
 export default  class BaseDistribution {
     constructor(scale = 50, dimensions = 1) {
@@ -124,6 +127,10 @@ export default  class BaseDistribution {
             //animating from current position to new one
             var mc = c;
             let origPos = (n.position) ? n.position : n
+
+            //reset y,z dimension of dist to to animate node onto the plane it should be
+            //   if (that.dimensions<3) dist.position.z=0;
+            //   if (that.dimensions<2) dist.position.y=0;
 
 
             let tween = new TWEEN.Tween(origPos)

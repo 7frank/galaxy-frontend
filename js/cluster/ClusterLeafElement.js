@@ -9,6 +9,8 @@ import ParticleNodeGroup from "./particles/ParticleNodeGroup"
 
 
 import TWEEN from "../lib/Tween"
+import * as THREE from "three";
+import * as _ from "lodash";
 
 
 export default class ClusterLeafElement extends THREE.Mesh {

@@ -24,7 +24,8 @@ import Cluster3DExtended from "../Cluster3DExtended"
 
 import "./cluster-text-overlay.css"
 
-
+import * as THREE from "three";
+import * as _ from "lodash";
 
 export default
 class ClusterTextOverlay extends HTMLElement {

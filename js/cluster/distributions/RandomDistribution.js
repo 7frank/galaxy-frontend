@@ -5,6 +5,11 @@
 
 import BaseDistribution from "./BaseDistribution"
 
+
+import * as THREE from "three";
+import * as _ from "lodash";
+
+
 /**
  * a simple random distribution function
  *

@@ -16,7 +16,8 @@
  */
 
 
-
+import * as THREE from "three";
+import * as _ from "lodash";
 
 
 export default

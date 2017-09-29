@@ -5,6 +5,9 @@
  *
  */
 
+import * as THREE from "three";
+
+
 ( function() {
 
 	var Visible = 0;

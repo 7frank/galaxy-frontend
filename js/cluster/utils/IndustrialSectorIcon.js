@@ -1,5 +1,5 @@
-//import ""
 
+import * as _ from "lodash";
 
 export function IndustrialSectorIcon(sectorName) {
     return `<img src="./img/industryIcons/${sectorName}.png" title="${sectorName}" />`

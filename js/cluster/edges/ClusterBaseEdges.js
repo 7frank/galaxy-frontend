@@ -2,6 +2,10 @@ import EdgeUtil from "../EdgeUtil";
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin";
 import BaseCluster3D from "../BaseCluster3D";
 
+import * as THREE from "three";
+import * as _ from "lodash";
+
+
 /**
  * the default implementation for the cluster-to-neighboring-clusters edges
  *

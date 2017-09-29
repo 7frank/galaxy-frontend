@@ -5,6 +5,9 @@
  * @author Luca Antiga 	/ http://lantiga.github.io
  */
 
+import * as THREE from "three";
+import * as _ from "lodash";
+
 THREE.TrackballControls = function ( object, domElement ) {
 
     var _this = this;

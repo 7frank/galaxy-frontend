@@ -1,6 +1,9 @@
 //{groupKeyName:"group_data",groupValueName:"group_data",nodeKey:'size'}
 
 import TWEEN from "@tweenjs/tween.js"
+import * as THREE from "three";
+import * as _ from "lodash";
+
 
 export default
 	function NodesParticleSystem(nodes,options)

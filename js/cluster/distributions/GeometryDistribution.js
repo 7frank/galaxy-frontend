@@ -5,10 +5,6 @@
 
 import BaseDistribution from "./BaseDistribution"
 
-import EdgeUtil from "../EdgeUtil"
-
-import BaseCluster3D from "../BaseCluster3D"
-
 /*
 * the geometry distribution takes an arbitrary geometry and uses its
 

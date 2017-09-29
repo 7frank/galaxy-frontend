@@ -12,6 +12,7 @@
 import BaseDistribution from "./BaseDistribution"
 
 import BaseCluster3D from "../BaseCluster3D"
+import * as THREE from "three";
 
 
 

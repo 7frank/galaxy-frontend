@@ -11,6 +11,8 @@
 
 import jQuery from 'jquery';
 
+import * as _ from "lodash";
+
 (function ($) {
 
     $.fn.wikiblurb = function (options) {

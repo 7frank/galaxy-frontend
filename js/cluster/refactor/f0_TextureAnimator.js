@@ -2,6 +2,7 @@
  * Created by Frank on 16.07.2017.
  */
 
+import * as THREE from "three";
 
 
 export default
