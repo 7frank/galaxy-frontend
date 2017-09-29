@@ -283,103 +283,91 @@ export function getGraphDataSets() {
     var db = new ApolloDS()
 
 
-
     //convert the current(prototypical) data structure of the data provider into our notation
-    function alterDBResponse(data)
-    {
-        window.dbdata=data
-        var newdata={nodes:[],edges:[]}
+    function alterDBResponse(data) {
+        window.dbdata = data
+        var newdata = {nodes: [], edges: []}
 
-     var companyByNameAsID={}
+        var companyByNameAsID = {}
 
 
-        var countriesByID={}
-        countriesByID[-1]="-no country-"
-        data.countries.forEach(function(country){
-            countriesByID[country.id]=country.name
+        var countriesByID = {}
+        countriesByID[-1] = "-no country-"
+        data.countries.forEach(function (country) {
+            countriesByID[country.id] = country.name
         })
 
 
-
-        var industrialSectorsByID={}
-        industrialSectorsByID[-1]="-no sector-"
-        data.industries.forEach(function(industry){
-            industrialSectorsByID[industry.id]=industry.name
+        var industrialSectorsByID = {}
+        industrialSectorsByID[-1] = "-no sector-"
+        data.industries.forEach(function (industry) {
+            industrialSectorsByID[industry.id] = industry.name
         })
 
 
-      data.companies.forEach(function(_company){
+        data.companies.forEach(function (_company) {
 
 
+            var company = {}
+            _.extend(company, _company)
 
-var company={}
-_.extend(company,_company)
+            companyByNameAsID[company.name] = company
 
-          companyByNameAsID[company.name]=company
+            if (!company.country)
+                company.country = -1
 
-          if (!company.country)
-              company.country=-1
+            if (!company.industry)
+                company.industry = -1
 
-          if (!company.industry)
-              company.industry=-1
-
-          //FIXME
-          var _sentiment=company.sentiment
-          if (!_sentiment)
-              _sentiment={sentiment:_.random(0,100)}
-
-
-          var countryName=countriesByID[company.country]
-          var industryName=industrialSectorsByID[company.industry]
-
-          newdata.nodes.push(  {
-              "id": company.id,
-              "name": company.name,
-              "country":countryName,
-              "industry":industryName,
-              "ticker": company.ticker,
-              "sentiment": _sentiment.sentiment,
-              "price": ""+(company.trend*100)+"%",
-              "itemCount": company.newsCount //FIXME not real values in db
-          })
+            //FIXME
+            var _sentiment = company.sentiment
+            if (!_sentiment)
+                _sentiment = {sentiment: _.random(0, 100)}
 
 
+            var countryName = countriesByID[company.country]
+            var industryName = industrialSectorsByID[company.industry]
 
-      })
+            newdata.nodes.push({
+                "id": company.id,
+                "name": company.name,
+                "country": countryName,
+                "industry": industryName,
+                "ticker": company.ticker,
+                "sentiment": _sentiment.sentiment,
+                "price": "" + (company.trend * 100) + "%",
+                "itemCount": company.newsCount //FIXME not real values in db
+            })
 
 
+        })
 
-            data.dbedges.forEach(function(edge){
 
-                if (companyByNameAsID[edge.target])
+        data.dbedges.forEach(function (edge) {
+
+            if (companyByNameAsID[edge.target])
                 newdata.edges.push({
                     "source": edge.source,
                     "target": companyByNameAsID[edge.target].id,
                     "strength": 42 //FIXME not real values in db
                 })
 
-            })
+        })
 
 
-
-
-
-
-
-
-return newdata
+        return newdata
     }
 
 
     function queryDatabase(query, successCallback) {
         return function (notUsed, onSuccess) {
 
-console.log(query)
+            console.log(query)
             db.query(query, function (response) {
 
-            var rdata=response.data
+                var rdata = response.data
                 if (successCallback)
-                    rdata=successCallback(rdata)
+                    rdata = successCallback(rdata)
 
 
                 var _nodes = rdata.nodes.map(function (r) {
@@ -620,13 +608,12 @@ console.log(query)
     if (c) extraCountriesTODO = c.replace(new RegExp("_", "gi"), " ")
 
     return [
-       // queryDatabase(getCountryQueryDB(extraCountriesTODO),alterDBResponse),
-     //   queryDatabase(getCountryQueryDB(extraCountriesTODO ? extraCountriesTODO : "France,Taiwan"),alterDBResponse),
+        // queryDatabase(getCountryQueryDB(extraCountriesTODO),alterDBResponse),
+        //   queryDatabase(getCountryQueryDB(extraCountriesTODO ? extraCountriesTODO : "France,Taiwan"),alterDBResponse),
 
 
-     //   queryDatabase(getCountryQuery(extraCountriesTODO)),
-      //  queryDatabase(getCountryQuery(extraCountriesTODO ? extraCountriesTODO : "France,Taiwan")),
-
+        //   queryDatabase(getCountryQuery(extraCountriesTODO)),
+        //  queryDatabase(getCountryQuery(extraCountriesTODO ? extraCountriesTODO : "France,Taiwan")),
 
 
         loadRealDataSampleOnly("assets/realDataNodesv5_ticker.csv", "assets/realDataLinksv5.csv", function (graph) {

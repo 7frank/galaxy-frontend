@@ -1,8 +1,7 @@
 import ApolloClient, {createBatchingNetworkInterface} from 'apollo-client';
 import gql from 'graphql-tag';
 
-export default
-class ApolloDS {
+export default class ApolloDS {
 
     constructor(url) {
 
@@ -11,7 +10,7 @@ class ApolloDS {
 
     }
 
-    connect(url="http://localhost:8088/graphql") {
+    connect(url = "http://localhost:8088/graphql") {
 
         this.client = new ApolloClient({
             networkInterface: createBatchingNetworkInterface({
@@ -22,9 +21,6 @@ class ApolloDS {
                 },
             }),
         });
-
-
-
 
 
     }
@@ -42,8 +38,7 @@ class ApolloDS {
     */
 
 
-    query(qry,onResult) {
-
+    query(qry, onResult) {
 
 
         this.client.query({

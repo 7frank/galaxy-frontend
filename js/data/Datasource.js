@@ -7,16 +7,14 @@
 
 import io from 'socket.io-client'
 
-export default
-class Datasource
-{
+export default class Datasource {
 
-    constructor(serviceURL){
+    constructor(serviceURL) {
 
         //TODO add some listeners to retrieve data about current stock prices and news
 
         // Connect to our node/websockets server
-        var socket =this.mSocket=io.connect(serviceURL);
+        var socket = this.mSocket = io.connect(serviceURL);
 
 
     }

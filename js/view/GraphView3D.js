@@ -10,15 +10,13 @@ import RootCluster from "../cluster/RootCluster"
 import GraphData from "../cluster/GraphData"
 
 import "../cluster/utils/DefaultColorScheme"
+import "../gui/GraphHUD"
+
+import {GUI} from "../cluster/refactor/SpecificDataUtils"
 
 //import skyDomeImage from "./coordinates.png"
 
 //import Hexasphere from "hexasphere.js"
-
-
-import "../gui/GraphHUD"
-
-import {GUI} from "../cluster/refactor/SpecificDataUtils"
 
 
 export default class GraphView3D extends View3D {
@@ -29,17 +27,14 @@ export default class GraphView3D extends View3D {
         this.mRootCluster = null;
 
 
-
-
-
         //debug code
         //options to be used in onBeforeRender for hull and edges
 
         var gl = this.mRenderer.context;
 
-        window.test={gl:gl,renderer:this.mRenderer}
+        window.test = {gl: gl, renderer: this.mRenderer}
 
-        if ( this.mRenderer.debug) throw new Error("already exists")
+        if (this.mRenderer.debug) throw new Error("already exists")
 
 
         //gl=test.gl;st=test.renderer.debug.stencil;st.state(true);st.func=[[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xFF]];st.op=[[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]];
@@ -53,39 +48,34 @@ export default class GraphView3D extends View3D {
         }
 
 
-
-
-
     }
 
+    static get observedAttributes() {
+        return ['text-visible'];
+    }
 
     connectedCallback() {
         super.connectedCallback();
 
     }
 
-
-    static get observedAttributes() {return ['text-visible']; }
-
     // Respond to attribute changes.
     attributeChangedCallback(attr, oldValue, newValue) {
-        console.warn("attr changed",arguments)
+        console.warn("attr changed", arguments)
         if (attr == 'text-visible') {
 
 
             let visible;
-            if (newValue=="true") visible=true;
+            if (newValue == "true") visible = true;
+            else if (newValue == "false") visible = false;
             else
-            if (newValue=="false") visible=false;
-             else
-               visible=Boolean(newValue)
+                visible = Boolean(newValue)
 
             if (this.mRootCluster && this.mRootCluster.mTextOverlay)
-            this.mRootCluster.mTextOverlay.get(0).enabled=visible;
+                this.mRootCluster.mTextOverlay.get(0).enabled = visible;
 
         }
     }
-
 
 
     setSpeccs(speccs) {
@@ -217,9 +207,9 @@ export default class GraphView3D extends View3D {
             _.each(cluster.findClusters("*"), function (cluster) {
                 cluster.on('before-render', function () {
 
-                    if (_____skipFrames % 20!=0) return;
+                    if (_____skipFrames % 20 != 0) return;
 
-                        if (cluster.mExpanded == false) {
+                    if (cluster.mExpanded == false) {
                         visibleNodes.push(cluster);
                     }
 
@@ -251,9 +241,8 @@ export default class GraphView3D extends View3D {
 
         //$(that).off();
 
-      // if (!$(that).hasClass("before-render-inited"))
-        $(that).
-           // .addClass("before-render-inited").
+        // if (!$(that).hasClass("before-render-inited"))
+        $(that).// .addClass("before-render-inited").
         on("before-render", onBeforeRender);
 
 
@@ -263,15 +252,14 @@ export default class GraphView3D extends View3D {
             if (that.isMaximised()) {
 
                 //update company info only every 20 frames to increse overall performance
-                if (_____skipFrames++ % 20==0) {
+                if (_____skipFrames++ % 20 == 0) {
                     let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
 
-                 if (vl.length!=0) //FIXME this should prevent the flickering but it does not solve the underlying problem that the handlers are bound incorrect
-                    GUI.updateFromVisibleNodes(vl);
+                    if (vl.length != 0) //FIXME this should prevent the flickering but it does not solve the underlying problem that the handlers are bound incorrect
+                        GUI.updateFromVisibleNodes(vl);
                     visibleNodes = []
                 }
             }
-
 
 
         }
@@ -291,7 +279,6 @@ export default class GraphView3D extends View3D {
 
 
         let preparedData = graphData.createClusterNodesAndEdges(this);
-
 
 
         var res = new RootCluster(preparedData.nodes, undefined, this);
@@ -325,7 +312,7 @@ export default class GraphView3D extends View3D {
             this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
 
             //debug code..
-            window.test.root=this.mRootCluster
+            window.test.root = this.mRootCluster
 
             this.addCompanyCountListenersToCluster(this.mRootCluster);
 
@@ -366,15 +353,15 @@ export default class GraphView3D extends View3D {
         return this
     }
 
-    resizeCanvas(){
+    resizeCanvas() {
         super.resizeCanvas()
 
         var root = this.mRootCluster;
 
         if (root && root.mParentView && root.mTextOverlay) {
 
-                root.mTextOverlay.height(root.mParentView.clientHeight);
-                root.mTextOverlay.width(root.mParentView.clientWidth);
+            root.mTextOverlay.height(root.mParentView.clientHeight);
+            root.mTextOverlay.width(root.mParentView.clientWidth);
 
         }
 
@@ -386,13 +373,13 @@ export default class GraphView3D extends View3D {
      * by rendering all objects but cluster edges first
      */
 
-    render(){
+    render() {
 
 
-        var that=this
+        var that = this
         //that.setStencil(true);
-        that.mRenderer.autoClear=false
-        that.mRenderer.autoClearStencil=false
+        that.mRenderer.autoClear = false
+        that.mRenderer.autoClearStencil = false
         that.mRenderer.clear();
         that.mCamera.layers.set(0) //render the other objects which should mask the stencil buffer for lines to be hidden as they should be
 
@@ -400,11 +387,10 @@ export default class GraphView3D extends View3D {
         that.mRenderer.render(that.mScene, that.mCamera);
 
         that.mCamera.layers.set(1) //render lines in background
-       // that.mRenderer.clearDepth();
+        // that.mRenderer.clearDepth();
         that.mRenderer.render(that.mScene, that.mCamera);
 
     }
-
 
 
 }

@@ -7,8 +7,7 @@ import TWEEN from "../lib/Tween"
 import BaseCluster3D from "../cluster/BaseCluster3D";
 
 //TODO refactor existing samples
-export default
-class ZoomUtil {
+export default class ZoomUtil {
 
 
     static moveToCluster(cluster, options) {
@@ -35,26 +34,22 @@ class ZoomUtil {
     }
 
 
-
-    static
-    moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
+    static moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
     }) {
 
-         var position = new THREE.Vector3();
+        var position = new THREE.Vector3();
         position.setFromMatrixPosition(mesh.matrixWorld);
 
 
         //fixes cluster hull center if one is present
-        if (mesh instanceof BaseCluster3D && mesh.mHull)
-        {
+        if (mesh instanceof BaseCluster3D && mesh.mHull) {
             console.log(mesh.mHull.mBoundingBox.getCenter())
-           let hullCenterPos= mesh.mHull.mBoundingBox.getCenter()
-            position= mesh.localToWorld(hullCenterPos)
+            let hullCenterPos = mesh.mHull.mBoundingBox.getCenter()
+            position = mesh.localToWorld(hullCenterPos)
         }
 
 
-
-       ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
+        ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
 
 
     }
@@ -69,8 +64,7 @@ class ZoomUtil {
      * @param cameraDistanceToMesh
      * @param onComplete
      */
-    static
-    moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
+    static moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
     }) {
 
 
@@ -80,12 +74,12 @@ class ZoomUtil {
         var vec3Start = camera.position
 
 
-        var isComplete1=false
-        var isComplete2=false
+        var isComplete1 = false
+        var isComplete2 = false
 
-      //  var vec3End = new THREE.Vector3();
-      //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
-        var vec3End=position
+        //  var vec3End = new THREE.Vector3();
+        //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
+        var vec3End = position
 
         //we want to have a fixed distance to a node when selecting
         var distVec = vec3End.clone().sub(vec3Start)
@@ -99,13 +93,10 @@ class ZoomUtil {
         //rotate the vector to be orientated on 0,0,1   //this will have not much impact on the 3d zoom but will prevent the 2d zoom from rotating
         //TODO find an alternative solution
 
-        let distVec2d=new THREE.Vector3(0,0,-1).multiplyScalar(distVec.length())
+        let distVec2d = new THREE.Vector3(0, 0, -1).multiplyScalar(distVec.length())
         alteredVecEnd = vec3End.clone().sub(distVec2d)
 
         // -------------------------------------
-
-
-
 
 
         //change distance to target
@@ -115,14 +106,14 @@ class ZoomUtil {
             .onComplete(function () {
                 onComplete.bind(this)();
                 cancelAnimationFrame(mTimeout)
-                isComplete1=true
+                isComplete1 = true
             })
             .start();
 
         //lookat target
         var tween2 = new TWEEN.Tween(cameraTargetPosition)
-            .to(vec3End, 400) .onComplete(function () {
-                isComplete2=true
+            .to(vec3End, 400).onComplete(function () {
+                isComplete2 = true
             })
             .start();
 
@@ -130,7 +121,7 @@ class ZoomUtil {
 
         function animate(time) {
 
-            if (isComplete1 && isComplete2) return ;
+            if (isComplete1 && isComplete2) return;
 
             mTimeout = requestAnimationFrame(animate);
             tween.update(time);

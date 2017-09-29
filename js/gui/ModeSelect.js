@@ -11,11 +11,11 @@ class ModeSelect extends HTMLElement {
     }
 
 
-    addModeBtn(caption, mode,bSelected) {
+    addModeBtn(caption, mode, bSelected) {
 
         var that = this
 
-        if (! (mode instanceof Default3DGraphConfig)) throw new Error("must be instanceof Default3DGraphConfig")
+        if (!(mode instanceof Default3DGraphConfig)) throw new Error("must be instanceof Default3DGraphConfig")
 
 
         function selectBtn(btn) {
@@ -39,7 +39,7 @@ class ModeSelect extends HTMLElement {
             if (that.prevMode == caption) return;//  prevMode = mode;
 
 
-                mode.setView(main.getCurrentView()).setMode(function () {
+            mode.setView(main.getCurrentView()).setMode(function () {
 
                 that.prevMode = caption
 
@@ -55,9 +55,9 @@ class ModeSelect extends HTMLElement {
 
     connectedCallback() {
 
-        this.addModeBtn("3D",new Default3DGraphConfig(),true)
-        this.addModeBtn("2D",new Default2DGraphConfig())
-        this.addModeBtn("2D+",new Extended2DGraphConfig())
+        this.addModeBtn("3D", new Default3DGraphConfig(), true)
+        this.addModeBtn("2D", new Default2DGraphConfig())
+        this.addModeBtn("2D+", new Extended2DGraphConfig())
 
     }
 }

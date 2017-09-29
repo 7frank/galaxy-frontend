@@ -89,11 +89,8 @@ class TreeDataGenerator {
                 // remove node2 from chunk2
 
 
-
             })
         })
-
-
 
 
     }

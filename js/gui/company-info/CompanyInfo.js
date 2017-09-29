@@ -1,4 +1,3 @@
-
 import template from "./company-info.html"
 
 import "../searchable-option-list/SearchableOptionList"
@@ -10,45 +9,43 @@ class CompanyInfo extends HTMLElement {
     constructor(...args) {
         super(...args);
 
-   this.myds=new ApolloDS()
-var that=this
+        this.myds = new ApolloDS()
+        var that = this
 
 
+        function generateNews() {
 
-        function generateNews(){
-
-            that.myds.query(that.getNewsQuery(),function(response){
+            that.myds.query(that.getNewsQuery(), function (response) {
 
 
                 //TODO add new news incrementally currently db replaces news again
                 // response.data.news.forEach(n => that.addNews(n))
-                that.addNews( response.data.news[0])
-
+                that.addNews(response.data.news[0])
 
 
             })
 
         }
+
         generateNews()
-        setInterval( generateNews,11000 )
+        setInterval(generateNews, 11000)
 
 
     }
 
-    connectedCallback(){
+    connectedCallback() {
 
-        $(this).append(template).
-       addClass("rightCompanyInfo")
+        $(this).append(template).addClass("rightCompanyInfo")
 
     }
 
-    getNewsQuery(){
+    getNewsQuery() {
 
-     //  var time= Date.now()
-        var time= _.random(0,990000)
+        //  var time= Date.now()
+        var time = _.random(0, 990000)
 
 
-        return  `
+        return `
         query News{
           news(latest:${time}){
             title
@@ -62,13 +59,13 @@ var that=this
 
     }
 
-    addNews(obj){
+    addNews(obj) {
 
-      let container=  $(this).find("#djnews")
+        let container = $(this).find("#djnews")
 
 
-        let newsEntry=$("<div>")
-        newsEntry.append("<b>"+obj.title+"</b>","<br>",obj.content,"<hr>")
+        let newsEntry = $("<div>")
+        newsEntry.append("<b>" + obj.title + "</b>", "<br>", obj.content, "<hr>")
         newsEntry.hide()
         container.prepend(newsEntry)
         newsEntry.slideDown(500)

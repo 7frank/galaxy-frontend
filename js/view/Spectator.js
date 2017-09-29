@@ -6,20 +6,16 @@
  * a spectator/viewer does have contain properties for cameras and controls to be able to change them
  */
 
-export default
-class Spectator
-{
-    setCamera(camera)
-    {
+export default class Spectator {
+    setCamera(camera) {
 
 
     }
 
-    setControls(){
+    setControls() {
 
 
     }
-
 
 
 }

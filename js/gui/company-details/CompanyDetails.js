@@ -1,8 +1,5 @@
-
 import bodyHTML from "./company-details-body.html"
 import TemplateString from "../../utils/TemplateString";
-
-
 
 
 class CompanyDetails extends HTMLElement {
@@ -11,24 +8,22 @@ class CompanyDetails extends HTMLElement {
         super(...args);
 
 
+    }
 
+    connectedCallback() {
+
+
+        this.setStuff()
 
     }
 
-    connectedCallback(){
+
+    setStuff(o) {
+
+        o = _.extend({name: "CompanyName", link: ""}, o)
 
 
-            this.setStuff()
-
-    }
-
-
-    setStuff(o){
-
-            o=_.extend({name:"CompanyName",link:""},o)
-
-
-        let str=  new TemplateString(bodyHTML).format(o)
+        let str = new TemplateString(bodyHTML).format(o)
 
         $(this).html(str)
 
@@ -36,13 +31,11 @@ class CompanyDetails extends HTMLElement {
     }
 
 
-
-
     //placeholder use polymer highstock component instead if possible
-    initBody()
-    {
+    initBody() {
         dj_recent();
-        var seriesOptions = [],seriesCounter = 0,names = ['stockprice', 'sentiment'];
+        var seriesOptions = [], seriesCounter = 0, names = ['stockprice', 'sentiment'];
+
         function createChart() {
             Highcharts.stockChart(
                 'max-chart',
@@ -52,14 +45,14 @@ class CompanyDetails extends HTMLElement {
                             fontFamily: 'robotoCondensed-light'
                         }
                         ,
-                        backgroundColor:'rgba(0, 0, 0, 0.31)'
+                        backgroundColor: 'rgba(0, 0, 0, 0.31)'
                     },
                     credits: {
                         enabled: false
                     },
                     rangeSelector: {
                         selected: 4,
-                        enabled:true,
+                        enabled: true,
                         inputEnabled: $('#max-chart').width() > 300
                     },
                     xAxis: {
@@ -108,7 +101,6 @@ class CompanyDetails extends HTMLElement {
 
 
     }
-
 
 
 }

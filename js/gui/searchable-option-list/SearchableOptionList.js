@@ -1,4 +1,3 @@
-
 import "./sol"
 import "./sol.css"
 import searchListOoptions from "./searchOptions.json"
@@ -28,9 +27,7 @@ class SearchableOptionList extends HTMLElement {
     }
 
 
-
-
 }
 
 
-customElements.define("searchable-option-list", SearchableOptionList,{extends:"select"});
+customElements.define("searchable-option-list", SearchableOptionList, {extends: "select"});

@@ -301,24 +301,20 @@ export default class View3D extends HTMLElement {
     }
 
 
-    setStencil(bTrue)
-    {
+    setStencil(bTrue) {
 
         //TODO have a switch to be able to debug options
         var gl = this.mRenderer.context;
 
         // enable stencil test
-        if(bTrue)
-        gl.enable(gl.STENCIL_TEST);
+        if (bTrue)
+            gl.enable(gl.STENCIL_TEST);
         else
             gl.disable(gl.STENCIL_TEST);
     }
 
 
-
-    render(){
-
-
+    render() {
 
 
         this.mRenderer.render(that.mScene, that.mCamera);
@@ -327,8 +323,6 @@ export default class View3D extends HTMLElement {
 
     // Kick-off renderer
     animate() {
-
-
 
 
         if (this._a) return
@@ -384,11 +378,10 @@ export default class View3D extends HTMLElement {
             that.mControls.update();
 
 
-
             $(that).trigger("before-render", time);
 
 
-           that.render()
+            that.render()
 
 
             $(that).trigger("after-render", time);

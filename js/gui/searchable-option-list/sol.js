@@ -10,10 +10,8 @@
  *
  */
 
-import jQuery from "jquery"
+import jQuery from "jquery";
 
-/*jslint nomen: true */
-;
 (function ($, window, document) {
     'use strict';
 
@@ -31,18 +29,18 @@ import jQuery from "jquery"
     SearchableOptionList.prototype = {
 
         SOL_OPTION_FORMAT: {
-            type:     'option',        // fixed
-            value:    undefined,       // value that will be submitted
+            type: 'option',        // fixed
+            value: undefined,       // value that will be submitted
             selected: false,           // boolean selected state
             disabled: false,           // boolean disabled state
-            label:    undefined,       // label string
-            tooltip:  undefined,       // tooltip string
+            label: undefined,       // label string
+            tooltip: undefined,       // tooltip string
             cssClass: ''               // custom css class for container
         },
         SOL_OPTIONGROUP_FORMAT: {
-            type:     'optiongroup',    // fixed
-            label:    undefined,        // label string
-            tooltip:  undefined,        // tooltip string
+            type: 'optiongroup',    // fixed
+            label: undefined,        // label string
+            tooltip: undefined,        // tooltip string
             disabled: false,            // all children disabled boolean property
             children: undefined         // array of SOL_OPTION_FORMAT objects
         },
@@ -404,8 +402,8 @@ import jQuery from "jquery"
                 })
                 .on('propertychange input', function (e) {
                     var valueChanged = true;
-                    if (e.type=='propertychange') {
-                        valueChanged = e.originalEvent.propertyName.toLowerCase()=='value';
+                    if (e.type == 'propertychange') {
+                        valueChanged = e.originalEvent.propertyName.toLowerCase() == 'value';
                     }
                     if (valueChanged) {
                         self._applySearchTermFilter();
@@ -639,7 +637,7 @@ import jQuery from "jquery"
                 if (solOptiongroup.disabled) {
                     solOption.disabled = true;
                 }
-				
+
                 solOptiongroup.children.push(solOption);
             });
 
@@ -849,15 +847,15 @@ import jQuery from "jquery"
             }
 
             if ($changeItem.prop('checked')) {
-				document.getElementById('DJSearch').value += "|"+$changeItem[0]['value'];
-				ajax_searchTo();
+                document.getElementById('DJSearch').value += "|" + $changeItem[0]['value'];
+                ajax_searchTo();
                 this._addSelectionDisplayItem($changeItem);
             } else {
-				
-				var replace = "|"+$changeItem[0]['value'];
-				var str = document.getElementById('DJSearch').value;
-				document.getElementById('DJSearch').value=str.replace(replace, '');
-				ajax_searchTo();
+
+                var replace = "|" + $changeItem[0]['value'];
+                var str = document.getElementById('DJSearch').value;
+                document.getElementById('DJSearch').value = str.replace(replace, '');
+                ajax_searchTo();
                 this._removeSelectionDisplayItem($changeItem);
             }
 
@@ -1008,7 +1006,7 @@ import jQuery from "jquery"
                 }
             }
         },
-        invert: function() {
+        invert: function () {
             if (this.config.multiple) {
                 var $closedInputs = this.$selectionContainer
                     .find('input[type="checkbox"]:not([disabled], :checked)')
@@ -1016,9 +1014,9 @@ import jQuery from "jquery"
                     .find('input[type="checkbox"]').filter('[disabled], :checked')
 
                 $openedInputs.prop('checked', false)
-                             .trigger('change', true);
+                    .trigger('change', true);
                 $closedInputs.prop('checked', true)
-                             .trigger('change', true)
+                    .trigger('change', true)
 
                 this.options.closeOnClick && this.close();
 
@@ -1063,7 +1061,7 @@ import jQuery from "jquery"
                 var newSol = new SearchableOptionList($this, options);
                 result.push(newSol);
 
-                setTimeout(function() {
+                setTimeout(function () {
                     newSol.init();
                 }, 0);
             }

@@ -8,16 +8,14 @@ import $ from 'jquery';
 import 'jquery-ui/themes/base/core.css';
 import 'jquery-ui/themes/base/autocomplete.css';
 import 'jquery-ui/themes/base/menu.css';
-
-
-//import 'jquery-ui/themes/base/theme.css';
-
-
 import 'jquery-ui/ui/core';
 import 'jquery-ui/ui/widgets/autocomplete';
 
 
-import {highlightNodeElements,unhighlightNodeElements,doOnClickNode} from "../cluster/refactor/f1"
+import {doOnClickNode, highlightNodeElements, unhighlightNodeElements} from "../cluster/refactor/f1"
+
+
+//import 'jquery-ui/themes/base/theme.css';
 
 
 $(function () {
@@ -129,7 +127,6 @@ $(function () {
     }
 
 
-
     //-----------------
     var ac_instance = searchbar.autocomplete({
         minLength: 3,
@@ -159,7 +156,7 @@ $(function () {
 
             //moveToNode(ui.item)
             doOnClickNode(ui.item, false, function () {
-            //    globalEnv.updateTextWhenCameraIsMoving2()
+                //    globalEnv.updateTextWhenCameraIsMoving2()
                 console.warn("TODO updateTextWhenCameraIsMoving2 ")
             }, false, false, false, true)
 
@@ -196,7 +193,6 @@ $(function () {
 
 
         ul.addClass("searchbar-autocomplete-popup")
-
 
 
         var $row = $("<li>").addClass('searchbar-search-row')
@@ -249,10 +245,9 @@ $(function () {
 
     }
 
-    Mousetrap.bind('ctrl+f',toggleSearch);
+    Mousetrap.bind('ctrl+f', toggleSearch);
 
-    Mousetrap(searchbar.get(0)).bind('ctrl+f',toggleSearch);
-
+    Mousetrap(searchbar.get(0)).bind('ctrl+f', toggleSearch);
 
 
 })

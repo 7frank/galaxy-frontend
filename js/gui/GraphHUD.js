@@ -19,14 +19,12 @@ class GraphHUD extends HTMLElement {
 
     }
 
-    connectedCallback(){
+    connectedCallback() {
 
         $(this).append(template)
 
 
     }
-
-
 
 
 }
