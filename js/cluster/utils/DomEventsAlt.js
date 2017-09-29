@@ -78,6 +78,8 @@
 import * as THREE from "three";
 import * as _ from "lodash";
 
+import  "../../lib/CombinedCamera"
+
 
 // # Constructor
 export default function DomEventsAlt(camera, domElement, scene) {

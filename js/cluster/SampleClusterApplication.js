@@ -30,12 +30,10 @@ import "./refactor/AppDataService"
 
 //used by View3D
 //TODO fix imports
-import CombinedCamera from "../lib/CombinedCamera"
-import TrackballControls from "../lib/TrackballControls"
+//import CombinedCamera from "../lib/CombinedCamera"
+//import TrackballControls from "../lib/TrackballControls"
 
-//used by ConvexVolume
-import ConvexGeometry from "../lib/ConvexGeometry"
-import QuickHull from "../lib/QuickHull"
+
 
 // --------------------------------
 

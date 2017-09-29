@@ -7,6 +7,9 @@ import BoxVolume from "./BoxVolume"
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin"
 import * as THREE from "three";
 
+import "../../lib/ConvexGeometry"
+import "../../lib/QuickHull"
+
 
 export default class ConvexVolume extends BoxVolume {
 
