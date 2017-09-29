@@ -1,43 +1,71 @@
 import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
-import BaseVolume from "../hull/BaseVolume";
-import ClusterMeshEdges from "../edges/ClusterMeshEdges";
+
 import FlatVolume from "../hull/FlatVolume";
 import Default2DGraphConfig from "./Default2DGraphConfig";
-//import * as THREE from "three";
-
-export default
-class Extended2DGraphConfig extends Default2DGraphConfig {
+import * as THREE from "three";
 
 
-    constructor(target, backgroundColor = 0xdddddd) {
+export default class Extended2DGraphConfig extends Default2DGraphConfig {
+
+
+    constructor(target, backgroundColor = 0xFF0000) {
 
         super(target, backgroundColor)
-
-
 
 
     }
 
 
+    setControls() {
 
-    /**
-     * this is a plane 2d configuration for the graph
-     */
+        //TODO instead of setting true and false we should create new controls by cloning the current with default options
+        let view = this.getView();
+
+
+        view.mControls.target.set(new THREE.Vector3(0, 0, 0));
+        view.mControls.noRotate = false;
+        view.mControls.reset();
+
+
+    }
+
 
     getSpeccs() {
 
 
-        //the function that is called to create the  country groups
-        function countrySetGenerator(groupFunction, node) {
-            // the group function takes 2 arguments
-            // the first is the value that will determine the key of the group
-            //in this case node.group contains country names
-            //the second argument is the node itself that is passed into the group created
-            groupFunction(node.group, node)
+
+
+
+        function groupNameForCustomers(node, size) {
+
+            return node.children.length > size ? node.name : null
+
+        }
+
+
+        function findBiggerCompany(node)
+        {
+
+
+        }
+
+
+        function bigCompanySetGenerator(groupFunction, node) {
+
+            groupFunction(node.industry, node)
+            return
+
+
+            let grpName = groupNameForCustomers(node, 20);
+            if (grpName)
+                groupFunction(grpName, node)
+            //else
+             //   findBiggerCompany()
         }
 
         //same goes for the industy clusters that are sub-clusters of the country clusters in this example
         function industrySetGenerator(groupFunction, node) {
+
             groupFunction(node.industry, node)
         }
 
@@ -64,19 +92,18 @@ class Extended2DGraphConfig extends Default2DGraphConfig {
         //but is necessary for other components like picking and tet rendering
 
 
-
-     //   let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
+        //   let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
 
 
         return [
 
-            {
-                generator: countrySetGenerator,
+          /*  {
+                generator: bigCompanySetGenerator,
                 distribution: countryDistribution,
                 options: {
                     minClusterSize: 40,
-                    hull:BaseVolume,// rootHull,
-                    edges:ClusterMeshEdges,
+                    hull: BaseVolume,// rootHull,
+                    edges: ClusterMeshEdges,
                     colors: {
                         edge: [0x000000, 0.8],
                         hull: [0x6A5ACD, 0.8] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
@@ -84,7 +111,9 @@ class Extended2DGraphConfig extends Default2DGraphConfig {
                     }
                 }
             },
-            {
+            */
+
+           /* {
                 generator: industrySetGenerator,
                 distribution: industryDistribution,
                 events: {
@@ -97,19 +126,19 @@ class Extended2DGraphConfig extends Default2DGraphConfig {
                 options: {
                     minClusterSize: 15,
                     hull: FlatVolume,//ConvexVolume,
-                    edges:ClusterMeshEdges,
+                    edges: ClusterMeshEdges,
                     expanded: function () {
                         // return true
                         return this.name == "United States"
                     }
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
             }
-            , {
+            ,*/ {
                 distribution: nodesWithinIndustryDistribution,
                 events: {
                     click: function () {
-                        this.toggleCollapse()
-                        console.log("toggled leaf", this.name)
+                      //  this.toggleCollapse()
+                       // console.log("toggled leaf", this.name)
                     },
                     mouseover: function () {
 
@@ -125,8 +154,8 @@ class Extended2DGraphConfig extends Default2DGraphConfig {
                     hull: FlatVolume,
 
                     expanded: function () {
-
-                        let par=this.getParentCluster()
+                return true
+                        let par = this.getParentCluster()
                         if (!par) return false
 
                         return /*par.getParentCluster().name == "United States" &&*/ this.name == "Healthcare"// false //true// return false//
