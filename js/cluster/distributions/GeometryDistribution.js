@@ -12,13 +12,11 @@ import BaseDistribution from "./BaseDistribution"
 
 
 //TODO stub
-export default
-class GeometryDistribution extends BaseDistribution
-{
-    constructor(geometry){
+export default class GeometryDistribution extends BaseDistribution {
+    constructor(geometry) {
 
 
-        super(1,0);
+        super(1, 0);
     }
 
 }

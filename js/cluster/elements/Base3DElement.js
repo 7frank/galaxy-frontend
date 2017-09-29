@@ -9,19 +9,18 @@
  *
  */
 
-export default
-class Base3DElement extends THREE.Object3D {
+export default class Base3DElement extends THREE.Object3D {
 
 
-    constructor(domEvents,env) {
+    constructor(domEvents, env) {
         super();
 
         var obj = this;
 
         this._instances = {};
 
-        this.mEnv=env||{};
-        this.mDomEvents=domEvents;
+        this.mEnv = env || {};
+        this.mDomEvents = domEvents;
 
         return self
     }
@@ -43,7 +42,6 @@ class Base3DElement extends THREE.Object3D {
 
 
         this.mDomEvents._notify(eventName, this, node, intersect);
-
 
 
     }

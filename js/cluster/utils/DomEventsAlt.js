@@ -80,59 +80,74 @@ import * as _ from "lodash";
 
 
 // # Constructor
-export default
-function DomEventsAlt(camera, domElement,scene)
-{
-    this._camera	= camera || null;
-    this._domElement= domElement || document;
+export default function DomEventsAlt(camera, domElement, scene) {
+    this._camera = camera || null;
+    this._domElement = domElement || document;
     this._raycaster = new THREE.Raycaster();
 
 
-    this._selected	= null;
-    this._boundObjs	= {};
+    this._selected = null;
+    this._boundObjs = {};
 
-    this.scene=scene
+    this.scene = scene
 
     // Bind dom event for mouse and touch
-    var _this	= this;
+    var _this = this;
 
-    this._$onClick		= function(){ _this._onClick.apply(_this, arguments);		};
-    this._$onDblClick	= function(){ _this._onDblClick.apply(_this, arguments);	};
-    this._$onMouseMove	= function(){ _this._onMouseMove.apply(_this, arguments);	};
-    this._$onMouseDown	= function(){ _this._onMouseDown.apply(_this, arguments);	};
-    this._$onMouseUp	= function(){ _this._onMouseUp.apply(_this, arguments);		};
-    this._$onTouchMove	= function(){ _this._onTouchMove.apply(_this, arguments);	};
-    this._$onTouchStart	= function(){ _this._onTouchStart.apply(_this, arguments);	};
-    this._$onTouchEnd	= function(){ _this._onTouchEnd.apply(_this, arguments);	};
-    this._$onContextmenu	= function(){ _this._onContextmenu.apply(_this, arguments);	};
-    this._domElement.addEventListener( 'click'	, this._$onClick	, false );
-    this._domElement.addEventListener( 'dblclick'	, this._$onDblClick	, false );
-    this._domElement.addEventListener( 'mousemove'	, this._$onMouseMove	, false );
-    this._domElement.addEventListener( 'mousedown'	, this._$onMouseDown	, false );
-    this._domElement.addEventListener( 'mouseup'	, this._$onMouseUp	, false );
-    this._domElement.addEventListener( 'touchmove'	, this._$onTouchMove	, false );
-    this._domElement.addEventListener( 'touchstart'	, this._$onTouchStart	, false );
-    this._domElement.addEventListener( 'touchend'	, this._$onTouchEnd	, false );
-    this._domElement.addEventListener( 'contextmenu', this._$onContextmenu	, false );
+    this._$onClick = function () {
+        _this._onClick.apply(_this, arguments);
+    };
+    this._$onDblClick = function () {
+        _this._onDblClick.apply(_this, arguments);
+    };
+    this._$onMouseMove = function () {
+        _this._onMouseMove.apply(_this, arguments);
+    };
+    this._$onMouseDown = function () {
+        _this._onMouseDown.apply(_this, arguments);
+    };
+    this._$onMouseUp = function () {
+        _this._onMouseUp.apply(_this, arguments);
+    };
+    this._$onTouchMove = function () {
+        _this._onTouchMove.apply(_this, arguments);
+    };
+    this._$onTouchStart = function () {
+        _this._onTouchStart.apply(_this, arguments);
+    };
+    this._$onTouchEnd = function () {
+        _this._onTouchEnd.apply(_this, arguments);
+    };
+    this._$onContextmenu = function () {
+        _this._onContextmenu.apply(_this, arguments);
+    };
+    this._domElement.addEventListener('click', this._$onClick, false);
+    this._domElement.addEventListener('dblclick', this._$onDblClick, false);
+    this._domElement.addEventListener('mousemove', this._$onMouseMove, false);
+    this._domElement.addEventListener('mousedown', this._$onMouseDown, false);
+    this._domElement.addEventListener('mouseup', this._$onMouseUp, false);
+    this._domElement.addEventListener('touchmove', this._$onTouchMove, false);
+    this._domElement.addEventListener('touchstart', this._$onTouchStart, false);
+    this._domElement.addEventListener('touchend', this._$onTouchEnd, false);
+    this._domElement.addEventListener('contextmenu', this._$onContextmenu, false);
 
 }
 
 // # Destructor
-DomEventsAlt.prototype.destroy	= function()
-{
+DomEventsAlt.prototype.destroy = function () {
     // unBind dom event for mouse and touch
-    this._domElement.removeEventListener( 'click'		, this._$onClick	, false );
-    this._domElement.removeEventListener( 'dblclick'	, this._$onDblClick	, false );
-    this._domElement.removeEventListener( 'mousemove'	, this._$onMouseMove	, false );
-    this._domElement.removeEventListener( 'mousedown'	, this._$onMouseDown	, false );
-    this._domElement.removeEventListener( 'mouseup'		, this._$onMouseUp	, false );
-    this._domElement.removeEventListener( 'touchmove'	, this._$onTouchMove	, false );
-    this._domElement.removeEventListener( 'touchstart'	, this._$onTouchStart	, false );
-    this._domElement.removeEventListener( 'touchend'	, this._$onTouchEnd	, false );
-    this._domElement.removeEventListener( 'contextmenu'	, this._$onContextmenu	, false );
+    this._domElement.removeEventListener('click', this._$onClick, false);
+    this._domElement.removeEventListener('dblclick', this._$onDblClick, false);
+    this._domElement.removeEventListener('mousemove', this._$onMouseMove, false);
+    this._domElement.removeEventListener('mousedown', this._$onMouseDown, false);
+    this._domElement.removeEventListener('mouseup', this._$onMouseUp, false);
+    this._domElement.removeEventListener('touchmove', this._$onTouchMove, false);
+    this._domElement.removeEventListener('touchstart', this._$onTouchStart, false);
+    this._domElement.removeEventListener('touchend', this._$onTouchEnd, false);
+    this._domElement.removeEventListener('contextmenu', this._$onContextmenu, false);
 }
 
-DomEventsAlt.eventNames	= [
+DomEventsAlt.eventNames = [
     "click",
     "dblclick",
     "mouseover",
@@ -145,7 +160,7 @@ DomEventsAlt.eventNames	= [
     "touchend"
 ];
 
-DomEventsAlt.prototype._getRelativeMouseXY	= function(domEvent){
+DomEventsAlt.prototype._getRelativeMouseXY = function (domEvent) {
     var element = domEvent.target || domEvent.srcElement;
     if (element.nodeType === 3) {
         element = element.parentNode; // Safari fix -- see http://www.quirksmode.org/js/events_properties.html
@@ -153,30 +168,30 @@ DomEventsAlt.prototype._getRelativeMouseXY	= function(domEvent){
 
     //get the real position of an element relative to the page starting point (0, 0)
     //credits go to brainjam on answering http://stackoverflow.com/questions/5755312/getting-mouse-position-relative-to-content-area-of-an-element
-    var elPosition	= { x : 0 , y : 0};
-    var tmpElement	= element;
+    var elPosition = {x: 0, y: 0};
+    var tmpElement = element;
     //store padding
-    var style	= getComputedStyle(tmpElement, null);
+    var style = getComputedStyle(tmpElement, null);
     elPosition.y += parseInt(style.getPropertyValue("padding-top"), 10);
     elPosition.x += parseInt(style.getPropertyValue("padding-left"), 10);
     //add positions
     do {
-        elPosition.x	+= tmpElement.offsetLeft;
-        elPosition.y	+= tmpElement.offsetTop;
-        style		= getComputedStyle(tmpElement, null);
+        elPosition.x += tmpElement.offsetLeft;
+        elPosition.y += tmpElement.offsetTop;
+        style = getComputedStyle(tmpElement, null);
 
-        elPosition.x	+= parseInt(style.getPropertyValue("border-left-width"), 10);
-        elPosition.y	+= parseInt(style.getPropertyValue("border-top-width"), 10);
-    } while(tmpElement = tmpElement.offsetParent);
+        elPosition.x += parseInt(style.getPropertyValue("border-left-width"), 10);
+        elPosition.y += parseInt(style.getPropertyValue("border-top-width"), 10);
+    } while (tmpElement = tmpElement.offsetParent);
 
-    var elDimension	= {
-        width	: (element === window) ? window.innerWidth	: element.offsetWidth,
-        height	: (element === window) ? window.innerHeight	: element.offsetHeight
+    var elDimension = {
+        width: (element === window) ? window.innerWidth : element.offsetWidth,
+        height: (element === window) ? window.innerHeight : element.offsetHeight
     };
 
     return {
-        x : +((domEvent.pageX - elPosition.x) / elDimension.width ) * 2 - 1,
-        y : -((domEvent.pageY - elPosition.y) / elDimension.height) * 2 + 1
+        x: +((domEvent.pageX - elPosition.x) / elDimension.width ) * 2 - 1,
+        y: -((domEvent.pageY - elPosition.y) / elDimension.height) * 2 + 1
     };
 };
 
@@ -187,16 +202,16 @@ DomEventsAlt.prototype._getRelativeMouseXY	= function(domEvent){
 
 // handle domevent context in object3d instance
 
-DomEventsAlt.prototype._objectCtxInit	= function(object3d){
+DomEventsAlt.prototype._objectCtxInit = function (object3d) {
     object3d._3xDomEvent = {};
 }
-DomEventsAlt.prototype._objectCtxDeinit	= function(object3d){
+DomEventsAlt.prototype._objectCtxDeinit = function (object3d) {
     delete object3d._3xDomEvent;
 }
-DomEventsAlt.prototype._objectCtxIsInit	= function(object3d){
+DomEventsAlt.prototype._objectCtxIsInit = function (object3d) {
     return object3d._3xDomEvent ? true : false;
 }
-DomEventsAlt.prototype._objectCtxGet		= function(object3d){
+DomEventsAlt.prototype._objectCtxGet = function (object3d) {
     return object3d._3xDomEvent;
 }
 
@@ -207,62 +222,58 @@ DomEventsAlt.prototype._objectCtxGet		= function(object3d){
 /**
  * Getter/Setter for camera
  */
-DomEventsAlt.prototype.camera	= function(value)
-{
-    if( value )	this._camera	= value;
+DomEventsAlt.prototype.camera = function (value) {
+    if (value) this._camera = value;
     return this._camera;
 }
 
-DomEventsAlt.prototype.bind	= function(object3d, eventName, callback, useCapture)
-{
-    console.assert( DomEventsAlt.eventNames.indexOf(eventName) !== -1, "not available events:"+eventName );
+DomEventsAlt.prototype.bind = function (object3d, eventName, callback, useCapture) {
+    console.assert(DomEventsAlt.eventNames.indexOf(eventName) !== -1, "not available events:" + eventName);
 
-    if( !this._objectCtxIsInit(object3d) )	this._objectCtxInit(object3d);
-    var objectCtx	= this._objectCtxGet(object3d);
-    if( !objectCtx[eventName+'Handlers'] )	objectCtx[eventName+'Handlers']	= [];
+    if (!this._objectCtxIsInit(object3d)) this._objectCtxInit(object3d);
+    var objectCtx = this._objectCtxGet(object3d);
+    if (!objectCtx[eventName + 'Handlers']) objectCtx[eventName + 'Handlers'] = [];
 
-    objectCtx[eventName+'Handlers'].push({
-        callback	: callback,
-        useCapture	: useCapture
+    objectCtx[eventName + 'Handlers'].push({
+        callback: callback,
+        useCapture: useCapture
     });
 
     // add this object in this._boundObjs
-    if( this._boundObjs[eventName] === undefined ){
-        this._boundObjs[eventName]	= [];
+    if (this._boundObjs[eventName] === undefined) {
+        this._boundObjs[eventName] = [];
     }
     this._boundObjs[eventName].push(object3d);
 }
-DomEventsAlt.prototype.addEventListener	= DomEventsAlt.prototype.bind
+DomEventsAlt.prototype.addEventListener = DomEventsAlt.prototype.bind
 
-DomEventsAlt.prototype.unbind	= function(object3d, eventName, callback, useCapture)
-{
-    console.assert( DomEventsAlt.eventNames.indexOf(eventName) !== -1, "not available events:"+eventName );
+DomEventsAlt.prototype.unbind = function (object3d, eventName, callback, useCapture) {
+    console.assert(DomEventsAlt.eventNames.indexOf(eventName) !== -1, "not available events:" + eventName);
 
-    if( !this._objectCtxIsInit(object3d) )	this._objectCtxInit(object3d);
+    if (!this._objectCtxIsInit(object3d)) this._objectCtxInit(object3d);
 
-    var objectCtx	= this._objectCtxGet(object3d);
-    if( !objectCtx[eventName+'Handlers'] )	objectCtx[eventName+'Handlers']	= [];
+    var objectCtx = this._objectCtxGet(object3d);
+    if (!objectCtx[eventName + 'Handlers']) objectCtx[eventName + 'Handlers'] = [];
 
-    var handlers	= objectCtx[eventName+'Handlers'];
-    for(var i = 0; i < handlers.length; i++){
-        var handler	= handlers[i];
-        if( callback != handler.callback )	continue;
-        if( useCapture != handler.useCapture )	continue;
+    var handlers = objectCtx[eventName + 'Handlers'];
+    for (var i = 0; i < handlers.length; i++) {
+        var handler = handlers[i];
+        if (callback != handler.callback) continue;
+        if (useCapture != handler.useCapture) continue;
         handlers.splice(i, 1)
         break;
     }
     // from this object from this._boundObjs
-    var index	= this._boundObjs[eventName].indexOf(object3d);
-    console.assert( index !== -1 );
+    var index = this._boundObjs[eventName].indexOf(object3d);
+    console.assert(index !== -1);
     this._boundObjs[eventName].splice(index, 1);
 }
-DomEventsAlt.prototype.removeEventListener	= DomEventsAlt.prototype.unbind
+DomEventsAlt.prototype.removeEventListener = DomEventsAlt.prototype.unbind
 
-DomEventsAlt.prototype._bound	= function(eventName, object3d)
-{
-    var objectCtx	= this._objectCtxGet(object3d);
-    if( !objectCtx )	return false;
-    return objectCtx[eventName+'Handlers'] ? true : false;
+DomEventsAlt.prototype._bound = function (eventName, object3d) {
+    var objectCtx = this._objectCtxGet(object3d);
+    if (!objectCtx) return false;
+    return objectCtx[eventName + 'Handlers'] ? true : false;
 }
 
 /********************************************************************************/
@@ -271,59 +282,57 @@ DomEventsAlt.prototype._bound	= function(eventName, object3d)
 
 // # handle mousemove kind of events
 
-DomEventsAlt.prototype._onMove	= function(eventName, mouseX, mouseY, origDomEvent)
-{
+DomEventsAlt.prototype._onMove = function (eventName, mouseX, mouseY, origDomEvent) {
 //console.log('eventName', eventName, 'boundObjs', this._boundObjs[eventName])
     // get objects bound to this event
-   // var boundObjs	= this._boundObjs[eventName];
-   // if( boundObjs === undefined || boundObjs.length === 0 )	return;
+    // var boundObjs	= this._boundObjs[eventName];
+    // if( boundObjs === undefined || boundObjs.length === 0 )	return;
     // compute the intersection
     var vector = new THREE.Vector2();
 
     // update the picking ray with the camera and mouse position
-    vector.set( mouseX, mouseY );
+    vector.set(mouseX, mouseY);
 
     let mCamera;
 
-    if (this._camera instanceof THREE.CombinedCamera)
-    {
+    if (this._camera instanceof THREE.CombinedCamera) {
 
-        if (this._camera.inPerspectiveMode) mCamera=this._camera.cameraP;
-        if (this._camera.inOrthographicMode) mCamera=this._camera.cameraO;
+        if (this._camera.inPerspectiveMode) mCamera = this._camera.cameraP;
+        if (this._camera.inOrthographicMode) mCamera = this._camera.cameraO;
 
     }
     else
-        mCamera=this._camera;
+        mCamera = this._camera;
 
-    this._raycaster.setFromCamera( vector, mCamera);
+    this._raycaster.setFromCamera(vector, mCamera);
 
     //@frank4711 altering intersection from flat array will improve mouse move performance for many elements bound
-    var intersects = this._raycaster.intersectObjects( this.scene.children,true );
+    var intersects = this._raycaster.intersectObjects(this.scene.children, true);
     // intersects=  intersects.filter( i => this._objectCtxIsInit(i.object) );
-    intersects=  this.getRelevantIntersections(intersects)
+    intersects = this.getRelevantIntersections(intersects)
     //var intersects = this._raycaster.intersectObjects( boundObjs );
 
-    var oldSelected	= this._selected;
+    var oldSelected = this._selected;
 
-    if( intersects.length > 0 ){
+    if (intersects.length > 0) {
 
         var notifyOver, notifyOut, notifyMove;
-        var intersect	= intersects[ 0 ];
-        var newSelected	= intersect.object;
-        this._selected	= newSelected;
+        var intersect = intersects[0];
+        var newSelected = intersect.object;
+        this._selected = newSelected;
         // if newSelected bound mousemove, notify it
-        notifyMove	= this._bound('mousemove', newSelected);
+        notifyMove = this._bound('mousemove', newSelected);
 
-        if( oldSelected != newSelected ){
+        if (oldSelected != newSelected) {
             // if newSelected bound mouseenter, notify it
-            notifyOver	= this._bound('mouseover', newSelected);
+            notifyOver = this._bound('mouseover', newSelected);
             // if there is a oldSelect and oldSelected bound mouseleave, notify it
-            notifyOut	= oldSelected && this._bound('mouseout', oldSelected);
+            notifyOut = oldSelected && this._bound('mouseout', oldSelected);
         }
-    }else{
+    } else {
         // if there is a oldSelect and oldSelected bound mouseleave, notify it
-        notifyOut	= oldSelected && this._bound('mouseout', oldSelected);
-        this._selected	= null;
+        notifyOut = oldSelected && this._bound('mouseout', oldSelected);
+        this._selected = null;
     }
 
 
@@ -332,37 +341,34 @@ DomEventsAlt.prototype._onMove	= function(eventName, mouseX, mouseY, origDomEven
     // notify mouseEnter - done at the end with a copy of the list to allow callback to remove handlers
     notifyOver && this._notify('mouseover', newSelected, origDomEvent, intersect);
     // notify mouseLeave - done at the end with a copy of the list to allow callback to remove handlers
-    notifyOut  && this._notify('mouseout' , oldSelected, origDomEvent, intersect);
+    notifyOut && this._notify('mouseout', oldSelected, origDomEvent, intersect);
 }
-
 
 
 //@author frank1147
 //retrieves the bound objects for the intersected elements using the recursive approach
-DomEventsAlt.prototype.getRelevantIntersections= function getRelevantIntersections(intersects){
+DomEventsAlt.prototype.getRelevantIntersections = function getRelevantIntersections(intersects) {
 
 
-    if( intersects.length === 0 )	return intersects;
+    if (intersects.length === 0) return intersects;
 
-    var relevant=[];
-    var that=this;
-    intersects.forEach(function(i){
+    var relevant = [];
+    var that = this;
+    intersects.forEach(function (i) {
 
 
-        if (that._objectCtxIsInit(i.object))relevant.push(i)
+        if (that._objectCtxIsInit(i.object)) relevant.push(i)
         else {
-            var el=i.object
-            while( el=el.parent)
-            {
+            var el = i.object
+            while (el = el.parent) {
                 //NOTE: using this recursive approach will return parent element of a intersected element that has the context
                 //this can result in a difference between the clicked point of a child element and the assumed point of the bound geometry of the parent element
                 if (that._objectCtxIsInit(el)) {
-                    i.object=el
+                    i.object = el
                     relevant.push(i);
                     break;//we found the parent element that has the given context, so we can break the loop
                 }
             }
-
 
 
         }
@@ -370,21 +376,21 @@ DomEventsAlt.prototype.getRelevantIntersections= function getRelevantIntersectio
     });
 
 
-    if (relevant.length==0) return relevant
+    if (relevant.length == 0) return relevant
 
     return this.sortByDepth(relevant);
 
 }
 
 
-DomEventsAlt.prototype.sortByDepth=function(intersects){
+DomEventsAlt.prototype.sortByDepth = function (intersects) {
 
 
     //calculate depth in scene
-    intersects.forEach(function(i){
+    intersects.forEach(function (i) {
 
-        var el=i.object
-        var depth=0;
+        var el = i.object
+        var depth = 0;
 
         //TODO check alternatives
         //our ClusterLeafElements do get a depth property attached bythe raycaster
@@ -392,11 +398,10 @@ DomEventsAlt.prototype.sortByDepth=function(intersects){
         if (i.depth)
             return i.depth
 
-        while( el=el.parent)
-        {
+        while (el = el.parent) {
             depth++;
         }
-        i.depth=depth;
+        i.depth = depth;
 
     });
 
@@ -404,7 +409,7 @@ DomEventsAlt.prototype.sortByDepth=function(intersects){
     // and DESC depth
     //so elements that are closer and deeper within the scene are more relevant
 
-    intersects= _.sortBy(intersects, [ (o) => -o.depth,o => o.distanceToRay]);  //,o => o.distance
+    intersects = _.sortBy(intersects, [(o) => -o.depth, o => o.distanceToRay]);  //,o => o.distance
 
 
     return intersects
@@ -416,84 +421,81 @@ DomEventsAlt.prototype.sortByDepth=function(intersects){
 
 // # handle click kind of events
 
-DomEventsAlt.prototype._onEvent	= function(eventName, mouseX, mouseY, origDomEvent)
-{
+DomEventsAlt.prototype._onEvent = function (eventName, mouseX, mouseY, origDomEvent) {
     //console.log('eventName', eventName, 'boundObjs', this._boundObjs[eventName])
     // get objects bound to this event
 
 
-    var boundObjs	= this._boundObjs[eventName];
-    if( boundObjs === undefined || boundObjs.length === 0 )	return;
+    var boundObjs = this._boundObjs[eventName];
+    if (boundObjs === undefined || boundObjs.length === 0) return;
     // compute the intersection
     var vector = new THREE.Vector2();
 
     // update the picking ray with the camera and mouse position
-    vector.set( mouseX, mouseY );
+    vector.set(mouseX, mouseY);
 
 
     let mCamera;
 
-    if (this._camera instanceof THREE.CombinedCamera)
-    {
+    if (this._camera instanceof THREE.CombinedCamera) {
 
-        if (this._camera.inPerspectiveMode) mCamera=this._camera.cameraP;
-        if (this._camera.inOrthographicMode) mCamera=this._camera.cameraO;
+        if (this._camera.inPerspectiveMode) mCamera = this._camera.cameraP;
+        if (this._camera.inOrthographicMode) mCamera = this._camera.cameraO;
 
     }
     else
-        mCamera=this._camera
+        mCamera = this._camera
 
-    this._raycaster.setFromCamera( vector,mCamera );
+    this._raycaster.setFromCamera(vector, mCamera);
 
     //var intersects = this._raycaster.intersectObjects( boundObjs, true);
 
     //@frank4711 altering intersection from flat array will improve mouse move performance for many elements bound
-    var intersects = this._raycaster.intersectObjects( this.scene.children,true );
+    var intersects = this._raycaster.intersectObjects(this.scene.children, true);
     // intersects=  intersects.filter( i => this._objectCtxIsInit(i.object) );
-    intersects=  this.getRelevantIntersections(intersects)
+    intersects = this.getRelevantIntersections(intersects)
     // if there are no intersections, return now
-    if( intersects.length === 0 )	return;
+    if (intersects.length === 0) return;
 
     // init some variables
-    var intersect	= intersects[0];
-    var object3d	= intersect.object;
+    var intersect = intersects[0];
+    var object3d = intersect.object;
 
 
     // notify handlers
     this._notify(eventName, object3d, origDomEvent, intersect);
 }
 
-DomEventsAlt.prototype._notify	= function(eventName, object3d, origDomEvent, intersect)
-{
-    var objectCtx	= this._objectCtxGet(object3d);
-    var handlers	= objectCtx ? objectCtx[eventName+'Handlers'] : null;
+DomEventsAlt.prototype._notify = function (eventName, object3d, origDomEvent, intersect) {
+    var objectCtx = this._objectCtxGet(object3d);
+    var handlers = objectCtx ? objectCtx[eventName + 'Handlers'] : null;
 
     // parameter check
     console.assert(arguments.length === 4)
 
     // do bubbling
-    if( !objectCtx || !handlers || handlers.length === 0 ){
+    if (!objectCtx || !handlers || handlers.length === 0) {
         object3d.parent && this._notify(eventName, object3d.parent, origDomEvent, intersect);
         return;
     }
 
     // notify all handlers
-    var handlers	= objectCtx[eventName+'Handlers'];
-    for(var i = 0; i < handlers.length; i++){
-        var handler	= handlers[i];
-        var toPropagate	= true;
+    var handlers = objectCtx[eventName + 'Handlers'];
+    for (var i = 0; i < handlers.length; i++) {
+        var handler = handlers[i];
+        var toPropagate = true;
         handler.callback({
-            type		: eventName,
-            target		: object3d,
-            origDomEvent	: origDomEvent,
-            intersect	: intersect,
-            stopPropagation	: function(){
-                toPropagate	= false;
+            type: eventName,
+            target: object3d,
+            origDomEvent: origDomEvent,
+            intersect: intersect,
+            stopPropagation: function () {
+                toPropagate = false;
             }
         });
-        if( !toPropagate )	continue;
+        if (!toPropagate) continue;
         // do bubbling
-        if( handler.useCapture === false ){
+        if (handler.useCapture === false) {
             object3d.parent && this._notify(eventName, object3d.parent, origDomEvent, intersect);
         }
     }
@@ -504,12 +506,15 @@ DomEventsAlt.prototype._notify	= function(eventName, object3d, origDomEvent, int
 /********************************************************************************/
 // # handle mouse events
 
-DomEventsAlt.prototype._onMouseDown	= function(event){ return this._onMouseEvent('mousedown', event);	}
-DomEventsAlt.prototype._onMouseUp	= function(event){ return this._onMouseEvent('mouseup'	, event);	}
+DomEventsAlt.prototype._onMouseDown = function (event) {
+    return this._onMouseEvent('mousedown', event);
+}
+DomEventsAlt.prototype._onMouseUp = function (event) {
+    return this._onMouseEvent('mouseup', event);
+}
 
 
-DomEventsAlt.prototype._onMouseEvent	= function(eventName, domEvent)
-{
+DomEventsAlt.prototype._onMouseEvent = function (eventName, domEvent) {
     var mouseCoords = this._getRelativeMouseXY(domEvent);
     this._onEvent(eventName, mouseCoords.x, mouseCoords.y, domEvent);
 }
@@ -523,21 +528,18 @@ DomEventsAlt.prototype._onMouseMove	= function(domEvent)
    // this._onMove('mouseout' , mouseCoords.x, mouseCoords.y, domEvent);
 }*/
 
-DomEventsAlt.prototype._onClick		= function(event)
-{
+DomEventsAlt.prototype._onClick = function (event) {
     // TODO handle touch ?
-    this._onMouseEvent('click'	, event);
+    this._onMouseEvent('click', event);
 }
-DomEventsAlt.prototype._onDblClick		= function(event)
-{
+DomEventsAlt.prototype._onDblClick = function (event) {
     // TODO handle touch ?
-    this._onMouseEvent('dblclick'	, event);
+    this._onMouseEvent('dblclick', event);
 }
 
-DomEventsAlt.prototype._onContextmenu	= function(event)
-{
+DomEventsAlt.prototype._onContextmenu = function (event) {
     //TODO don't have a clue about how this should work with touch..
-    this._onMouseEvent('contextmenu'	, event);
+    this._onMouseEvent('contextmenu', event);
 }
 
 /********************************************************************************/
@@ -546,40 +548,41 @@ DomEventsAlt.prototype._onContextmenu	= function(event)
 // # handle touch events
 
 
-DomEventsAlt.prototype._onTouchStart	= function(event){ return this._onTouchEvent('touchstart', event);	}
-DomEventsAlt.prototype._onTouchEnd	= function(event){ return this._onTouchEvent('touchend'	, event);	}
-
-DomEventsAlt.prototype._onTouchMove	= function(domEvent)
-{
-    if( domEvent.touches.length != 1 )	return undefined;
-
-    domEvent.preventDefault();
-
-    var mouseX	= +(domEvent.touches[ 0 ].pageX / window.innerWidth ) * 2 - 1;
-    var mouseY	= -(domEvent.touches[ 0 ].pageY / window.innerHeight) * 2 + 1;
-    this._onMove('mousemove', mouseX, mouseY, domEvent);
-  //  this._onMove('mouseover', mouseX, mouseY, domEvent);
-  //  this._onMove('mouseout' , mouseX, mouseY, domEvent);
+DomEventsAlt.prototype._onTouchStart = function (event) {
+    return this._onTouchEvent('touchstart', event);
+}
+DomEventsAlt.prototype._onTouchEnd = function (event) {
+    return this._onTouchEvent('touchend', event);
 }
 
-DomEventsAlt.prototype._onTouchEvent	= function(eventName, domEvent)
-{
-    if( domEvent.touches.length != 1 )	return undefined;
+DomEventsAlt.prototype._onTouchMove = function (domEvent) {
+    if (domEvent.touches.length != 1) return undefined;
 
     domEvent.preventDefault();
 
-    var mouseX	= +(domEvent.touches[ 0 ].pageX / window.innerWidth ) * 2 - 1;
-    var mouseY	= -(domEvent.touches[ 0 ].pageY / window.innerHeight) * 2 + 1;
+    var mouseX = +(domEvent.touches[0].pageX / window.innerWidth ) * 2 - 1;
+    var mouseY = -(domEvent.touches[0].pageY / window.innerHeight) * 2 + 1;
+    this._onMove('mousemove', mouseX, mouseY, domEvent);
+    //  this._onMove('mouseover', mouseX, mouseY, domEvent);
+    //  this._onMove('mouseout' , mouseX, mouseY, domEvent);
+}
+
+DomEventsAlt.prototype._onTouchEvent = function (eventName, domEvent) {
+    if (domEvent.touches.length != 1) return undefined;
+
+    domEvent.preventDefault();
+
+    var mouseX = +(domEvent.touches[0].pageX / window.innerWidth ) * 2 - 1;
+    var mouseY = -(domEvent.touches[0].pageY / window.innerHeight) * 2 + 1;
     this._onEvent(eventName, mouseX, mouseY, domEvent);
 }
 
 
 //throttle move events to about 50 fps
 //let origMouseMove=THREEx.DomEvents.prototype._onMouseMove;
-DomEventsAlt.prototype._onMouseMove = _.throttle(function (domEvent)
-{
+DomEventsAlt.prototype._onMouseMove = _.throttle(function (domEvent) {
     var mouseCoords = this._getRelativeMouseXY(domEvent);
     this._onMove('mousemove', mouseCoords.x, mouseCoords.y, domEvent);
-   // this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
-   // this._onMove('mouseout', mouseCoords.x, mouseCoords.y, domEvent);
+    // this._onMove('mouseover', mouseCoords.x, mouseCoords.y, domEvent);
+    // this._onMove('mouseout', mouseCoords.x, mouseCoords.y, domEvent);
 }, 40);  //25 (f)ps

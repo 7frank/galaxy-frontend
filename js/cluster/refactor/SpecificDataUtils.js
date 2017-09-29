@@ -8,7 +8,6 @@ import 'jquery-ui/ui/widgets/draggable';
 import 'jquery-ui/ui/widgets/resizable';
 
 
-
 import "../../gui/company-details/CompanyDetails"
 import {AppDataService} from "./AppDataService";
 
@@ -37,8 +36,7 @@ function getNextGradient() {
 
 }
 
-export
-function computeCompanyNodeColor(val = 0, attr = "sent") {
+export function computeCompanyNodeColor(val = 0, attr = "sent") {
 
 
     var sentRanges = [[92, Number.MAX_SAFE_INTEGER], [85, 92], [78, 85], [71, 78], [64, 71], [57, 64], [50, 57], [43, 50], [36, 43], [29, 36], [22, 29], [15, 22], [Number.MIN_SAFE_INTEGER, 22]]
@@ -145,14 +143,13 @@ $(function () {
         */
 
 
-    }).appendTo( getBody())
+    }).appendTo(getBody())
 
 })
 
 
-function getBody()
-{
-   return $("sample-cluster-application graph-hud")
+function getBody() {
+    return $("sample-cluster-application graph-hud")
 
 }
 
@@ -201,7 +198,7 @@ export var GUI = {
                 "margin-top": "0.5em",
             })
 
-        slider.appendTo( getBody())
+        slider.appendTo(getBody())
 
 
     },
@@ -216,7 +213,7 @@ export var GUI = {
             id: "companyCountry",
             content: "United States, 80%<br>Japan, 10%<br>Germany, 4%"
         }])
-        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo( getBody())
+        a.css({top: 80, left: 10, position: "absolute", zIndex: 999, width: 200}).appendTo(getBody())
         GUI.$el = a
 
 
@@ -230,7 +227,7 @@ export var GUI = {
         GUI.$info = $("<div>")
 
 
-        GUI.$info.hide().appendTo( getBody())
+        GUI.$info.hide().appendTo(getBody())
 
         GUI.$info.addClass("graph-node-info").draggable().resizable()
 
@@ -253,13 +250,7 @@ export var GUI = {
         $header.append($search, stockPrice, $close)
 
 
-
         var $body = $("<div>").addClass("graph-node-info-body")
-
-
-
-
-
 
 
         $body.html("")
@@ -284,8 +275,8 @@ export var GUI = {
                 ////////////////////////////////////////////////////////
                 console.warn("TODO implement node data from database")
 
-              let link="<a target='_blank' href='https://www.iqbanker.com/charts/"+node.id+"/supply_chain'>iq maps</a>"
-                $("company-details").get(0).setStuff({name:node.name,link})
+                let link = "<a target='_blank' href='https://www.iqbanker.com/charts/" + node.id + "/supply_chain'>iq maps</a>"
+                $("company-details").get(0).setStuff({name: node.name, link})
 
                 return;
 
@@ -295,7 +286,7 @@ export var GUI = {
                     "Behind Kushner Companies, a Chinese agency skirts visa-for-investment rules",
                     "In blow to Trump, GE backs NAFTA and plans growth in Mexico"]
 
-               let lorem = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+                let lorem = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
 
 
                 //header

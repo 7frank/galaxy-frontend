@@ -7,9 +7,9 @@
  *
  * • TEST: collapse country nodes without collapse hull and expand with delay
 
-    – collapsehull option
+ – collapsehull option
 
-     ∗ Ring(Volume)
+ ∗ Ring(Volume)
 
-     – timeout from biggest to smallest countries +=200ms
+ – timeout from biggest to smallest countries +=200ms
  */

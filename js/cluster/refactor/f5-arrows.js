@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 import * as _ from "lodash";
 
@@ -24,8 +23,7 @@ function _findSceneForMesh(mesh, maxIter = 99) {
 
 
 //NOTE: add arrows only to selection to improve performance
-export
-function addArrow(d3LinkObj, color, options) {
+export function addArrow(d3LinkObj, color, options) {
 
 
     var defaults = {
@@ -110,19 +108,18 @@ function addArrow(d3LinkObj, color, options) {
 
     var scene = _findSceneForMesh(d3LinkObj.source.get3DRoot());
 
-    if (!scene)   scene = _findSceneForMesh(d3LinkObj.target.get3DRoot());
+    if (!scene) scene = _findSceneForMesh(d3LinkObj.target.get3DRoot());
 
     if (!scene) {
         console.warn("no scene found arrows can't be created");
-      //  debugger;
+        //  debugger;
     }
     else
         scene.add(arrowHelper);
 
 }
 
-export
-function removeArrow(d3LinkObj) {
+export function removeArrow(d3LinkObj) {
     if (!d3LinkObj.arrow) return;
     //TODO
     //var env=globalEnv;

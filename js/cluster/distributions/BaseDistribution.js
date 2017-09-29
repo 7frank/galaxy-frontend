@@ -16,7 +16,7 @@ import * as THREE from "three";
 import * as _ from "lodash";
 
 
-export default  class BaseDistribution {
+export default class BaseDistribution {
     constructor(scale = 50, dimensions = 1) {
 
         //TODO have some kind of dynamic width function as alternative to the static scale value

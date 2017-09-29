@@ -11,13 +11,12 @@
 import * as THREE from "three";
 
 
-export default
-class BaseVolume extends THREE.Object3D {
+export default class BaseVolume extends THREE.Object3D {
 
     constructor(...args) {
         super(...args);
-        this.lod=1;
-        this.maxOpacity=0.0
+        this.lod = 1;
+        this.maxOpacity = 0.0
     }
 
 
@@ -27,34 +26,34 @@ class BaseVolume extends THREE.Object3D {
      *
      * @param newLOD
      */
-    setLOD(newLOD)
-    {
+    setLOD(newLOD) {
 
 
-        if (newLOD<0) newLOD=0;
-        if (newLOD>1) newLOD=1;
+        if (newLOD < 0) newLOD = 0;
+        if (newLOD > 1) newLOD = 1;
 
 
-        this.lod=newLOD
+        this.lod = newLOD
 
 
     }
 
 
-    getMaterial()
-    {
+    getMaterial() {
         if (this.mMaterial) return this.mMaterial;
 
-        this.mMaterial= new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 5, opacity: this.maxOpacity, transparent: false});
+        this.mMaterial = new THREE.LineBasicMaterial({
+            color: 0xffffff,
+            linewidth: 5,
+            opacity: this.maxOpacity,
+            transparent: false
+        });
 
-        this.mMaterial.visible=  this.canBeVisible();
+        this.mMaterial.visible = this.canBeVisible();
 
-        return  this.mMaterial
+        return this.mMaterial
 
     }
-
-
-
 
 
     /**
@@ -63,17 +62,16 @@ class BaseVolume extends THREE.Object3D {
      * @returns {boolean}
      */
 
-    canBeVisible()
-    {
+    canBeVisible() {
         return false
     }
 
 
 //FIXME have a better approach to generate the hull
 //? rather: create from vertices
-    createFromBoundingBox(vertices,boundingBox) {
+    createFromBoundingBox(vertices, boundingBox) {
 
-        this.mBoundingBox=boundingBox;
+        this.mBoundingBox = boundingBox;
 
 
         let _center = boundingBox.getCenter();
@@ -87,40 +85,35 @@ class BaseVolume extends THREE.Object3D {
 
         let wireframe = new THREE.LineSegments(geo, mat);
         wireframe.position.add(_center);
-        wireframe.geometry.boundingBox=boundingBox;
+        wireframe.geometry.boundingBox = boundingBox;
 
 
         if (this.mesh) this.remove(this.mesh);
-        this.mesh=wireframe;
+        this.mesh = wireframe;
         this.add(wireframe);
 
 
         return this.mesh
 
 
+    }
 
+
+    setActive() {
+
+        this.maxOpacity = 1
 
     }
 
 
+    setInactive() {
 
-
-    setActive(){
-
-        this.maxOpacity=1
+        this.maxOpacity = 0.3
 
     }
 
 
-    setInactive(){
-
-        this.maxOpacity=0.3
-
-    }
-
-
-    dispose()
-    {
+    dispose() {
         this.mesh.geometry.dispose()
         this.mesh.material.dispose()
 
@@ -128,8 +121,6 @@ class BaseVolume extends THREE.Object3D {
             this.parent.remove(this)
 
     }
-
-
 
 
 }

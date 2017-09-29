@@ -280,9 +280,8 @@ export default class ClusterLeafElement extends THREE.Mesh {
     }
 
 
-
     setLOD(levelOfDetail) {
-       console.error("!!!FIXME!!! setLOD")
+        console.error("!!!FIXME!!! setLOD")
         return  //FIXME interferes with collapse feature not showing anything while in transition
 
         if (this.mNodeParticles)
@@ -409,7 +408,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
     //TODO refactor
-    setDistributionHandler(distribution, onComplete = ()=>0, onStep = ()=>0 ) {
+    setDistributionHandler(distribution, onComplete = () => 0, onStep = () => 0) {
 
         var that = this;
         distribution.setNodes(this.mNodes, function (vec, i) {

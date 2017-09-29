@@ -48,13 +48,11 @@ export default class ConvexVolume extends BoxVolume {
     }
 
 
-
-    getMaterial()
-    {
+    getMaterial() {
         if (this.mMaterial) return this.mMaterial;
 
 
-    let mat = this.mMaterial= new THREE.MeshBasicMaterial({
+        let mat = this.mMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             opacity: 0.03,
             transparent: true,
@@ -63,16 +61,16 @@ export default class ConvexVolume extends BoxVolume {
             //  ,   wireframe:true
         });
 
-        this.mMaterial.visible=  this.canBeVisible();
+        this.mMaterial.visible = this.canBeVisible();
 
 
         MaterialFadeMixin(mat);
 
         //FIXME test if previous material exists and take its fade value to prevent flickering
-      /*  if (this.mesh && this.mesh.material && this.mesh.material.fade)
-            mat.fade = this.mesh.material.fade;
-        else*/
-            mat.fade = 0;
+        /*  if (this.mesh && this.mesh.material && this.mesh.material.fade)
+              mat.fade = this.mesh.material.fade;
+          else*/
+        mat.fade = 0;
 
         mat.fadeTo(1, 2000);
 
@@ -130,9 +128,6 @@ export default class ConvexVolume extends BoxVolume {
 
 
         this.mBoundingBox = boundingBox;
-
-
-
 
 
         //   let mesh = new THREE.Mesh(geo, mat);

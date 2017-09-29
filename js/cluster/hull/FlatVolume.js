@@ -47,11 +47,11 @@ export default class FlatVolume extends BoxVolume {
         })
 
 
-        var resShape = new THREE.Shape( resArr );
-        var resGeo = new THREE.ShapeGeometry( resShape );
+        var resShape = new THREE.Shape(resArr);
+        var resGeo = new THREE.ShapeGeometry(resShape);
 
 
-      return  resGeo
+        return resGeo
 
     }
 
@@ -71,7 +71,7 @@ export default class FlatVolume extends BoxVolume {
         }
 
 
-        let convexGeoWithMargin =   this.createConvexShapeGeometry(marginGeo.vertices) //new THREE.ConvexGeometry(marginGeo.vertices);
+        let convexGeoWithMargin = this.createConvexShapeGeometry(marginGeo.vertices) //new THREE.ConvexGeometry(marginGeo.vertices);
 
 
         return convexGeoWithMargin
@@ -114,8 +114,7 @@ export default class FlatVolume extends BoxVolume {
         try {
 
 
-
-            geo0 = this.mGeometryZero =this.createConvexShapeGeometry(vertices)// new THREE.ConvexGeometry(vertices);
+            geo0 = this.mGeometryZero = this.createConvexShapeGeometry(vertices)// new THREE.ConvexGeometry(vertices);
         }
         catch (e) {
             geo0 = this.mGeometryZero = this.createBoxGeometryFromBoundingBox(boundingBox);
@@ -127,14 +126,13 @@ export default class FlatVolume extends BoxVolume {
         this.mBoundingBox = boundingBox;
 
 
-
         let mat = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             opacity: 0.03,
             transparent: true,
             depthWrite: true,
             depthTest: false //disabling depth test instead of using polygonOffset to prevent flickering
-           // side: THREE.BackSide
+            // side: THREE.BackSide
             //  ,   wireframe:true
         });
 
@@ -148,8 +146,6 @@ export default class FlatVolume extends BoxVolume {
         mat.fade = 0;
 
         mat.fadeTo(1, 400);
-
-
 
 
         //   let mesh = new THREE.Mesh(geo, mat);
@@ -240,13 +236,12 @@ export default class FlatVolume extends BoxVolume {
 
         let y = mTransfer(l);
 
-        super.setLOD(y * this.maxOpacity*2);
+        super.setLOD(y * this.maxOpacity * 2);
 
 
         /*     if (l < 0.8) this.mesh.geometry = this.geometryLowPoly;
          if (l >= 0.8 && l <= 0.95) this.mesh.geometry = this.geometryAveragePoly;
          if (l > 0.95) this.mesh.geometry = this.geometryHighPoly*/
-
 
 
         if (l < 0.2)

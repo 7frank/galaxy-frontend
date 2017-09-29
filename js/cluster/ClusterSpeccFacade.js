@@ -18,72 +18,69 @@ class ClusterSpeccFacade {
 
     constructor() {
 
-        this.events= {};
-        this.options={};
+        this.events = {};
+        this.options = {};
     }
 
 
     on(eventName, handler) {
 
-        if ( this.events[eventName] )  throw new Error("currently only one handler per event");
+        if (this.events[eventName]) throw new Error("currently only one handler per event");
 
         this.events[eventName] = handler
         return this;
     }
 
-    setHullVolume(clazz){
+    setHullVolume(clazz) {
 
-        if (! clazz == BaseVolume || !BaseVolume.isPrototypeOf(clazz)) throw new TypeError();
+        if (!clazz == BaseVolume || !BaseVolume.isPrototypeOf(clazz)) throw new TypeError();
 
         this.options.hull = clazz
         return this;
     }
 
 
+    setDistribution(distribution) {
 
-    setDistribution(distribution){
+        if (!distribution instanceof BaseDistribution) throw new TypeError();
 
-        if (! distribution instanceof BaseDistribution) throw new TypeError();
-
-        this.distribution=distribution;
-
-        return this;
-    }
-
-
-
-    setGenerator(generatorFunction,minClusterSize)
-    {
-        if (typeof generatorFunction!="function") throw new TypeError("must be a function")
-
-
-        this.generator=distribution;
-
-        if (typeof minClusterSize =="number")
-            this.options.generator=distribution;
-
-
-    }
-
-
-    setExpanded(){
-        this.expanded=true;
-
-        return this;
-    }
-    setCollapsed(){
-        this.expanded=false;
-        return this;
-    }
-
-    setExpandedFunction(fn){
-        if (typeof fn!="function") throw new TypeError("must be a function")
-
-        this.expanded=fn;
+        this.distribution = distribution;
 
         return this;
     }
 
+
+    setGenerator(generatorFunction, minClusterSize) {
+        if (typeof generatorFunction != "function") throw new TypeError("must be a function")
+
+
+        this.generator = distribution;
+
+        if (typeof minClusterSize == "number")
+            this.options.generator = distribution;
+
+
+    }
+
+
+    setExpanded() {
+        this.expanded = true;
+
+        return this;
+    }
+
+    setCollapsed() {
+        this.expanded = false;
+        return this;
+    }
+
+    setExpandedFunction(fn) {
+        if (typeof fn != "function") throw new TypeError("must be a function")
+
+        this.expanded = fn;
+
+        return this;
+    }
 
 
 }

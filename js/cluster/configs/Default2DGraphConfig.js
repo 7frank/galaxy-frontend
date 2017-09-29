@@ -1,10 +1,5 @@
-
-
-
-
 import Default3DGraphConfig from "./Default3DGraphConfig";
 import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
-import BoxVolume from "../hull/BoxVolume";
 import BaseVolume from "../hull/BaseVolume";
 import ClusterMeshEdges from "../edges/ClusterMeshEdges";
 import FlatVolume from "../hull/FlatVolume";
@@ -13,15 +8,12 @@ import FlatVolume from "../hull/FlatVolume";
 import * as THREE from "three";
 
 
-export default
-class Default2DGraphConfig extends Default3DGraphConfig {
+export default class Default2DGraphConfig extends Default3DGraphConfig {
 
 
     constructor(target, backgroundColor = 0xFFFFFF) {
 
         super(target, backgroundColor)
-
-
 
 
     }
@@ -34,7 +26,7 @@ class Default2DGraphConfig extends Default3DGraphConfig {
 
 
         view.mControls.target.set(new THREE.Vector3(0, 0, 0));
-         view.mControls.noRotate = true;
+        view.mControls.noRotate = true;
         view.mControls.reset();
 
 
@@ -43,7 +35,7 @@ class Default2DGraphConfig extends Default3DGraphConfig {
 
     //TODO refactor to support multiple classes instead of add remove darker
     setDomElements() {
-        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").addClass(    this.mCssClass)
+        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").addClass(this.mCssClass)
         //  $("cluster-text-overlay").removeClass(    this.mCssClass)
 
     }
@@ -93,8 +85,7 @@ class Default2DGraphConfig extends Default3DGraphConfig {
         //but is necessary for other components like picking and tet rendering
 
 
-
-     //   let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
+        //   let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
 
 
         return [
@@ -104,8 +95,8 @@ class Default2DGraphConfig extends Default3DGraphConfig {
                 distribution: countryDistribution,
                 options: {
                     minClusterSize: 40,
-                    hull:BaseVolume,// rootHull,
-                    edges:ClusterMeshEdges,
+                    hull: BaseVolume,// rootHull,
+                    edges: ClusterMeshEdges,
                     colors: {
                         edge: [0x000000, 0.8],
                         hull: [0x6A5ACD, 0.8] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
@@ -126,7 +117,7 @@ class Default2DGraphConfig extends Default3DGraphConfig {
                 options: {
                     minClusterSize: 15,
                     hull: FlatVolume,//ConvexVolume,
-                    edges:ClusterMeshEdges,
+                    edges: ClusterMeshEdges,
                     expanded: function () {
                         // return true
                         return this.name == "United States"
@@ -155,7 +146,7 @@ class Default2DGraphConfig extends Default3DGraphConfig {
 
                     expanded: function () {
 
-                        let par=this.getParentCluster()
+                        let par = this.getParentCluster()
                         if (!par) return false
 
                         return /*par.getParentCluster().name == "United States" &&*/ this.name == "Healthcare"// false //true// return false//

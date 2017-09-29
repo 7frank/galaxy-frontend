@@ -1,7 +1,3 @@
-
-
-
-
 import GraphView3D from "../../view/GraphView3D";
 import BaseCluster3D from "../BaseCluster3D";
 import {IndustrialSectorAbbreviation} from "../utils/IndustrialSectorIcon";
@@ -15,23 +11,22 @@ import {removeSelections} from "../refactor/f1";
 import * as THREE from "three";
 
 
-export default
-class Default3DGraphConfig {
+export default class Default3DGraphConfig {
 
 
-    constructor(target,backgroundColor=0x000000,cssClass="darker") {
+    constructor(target, backgroundColor = 0x000000, cssClass = "darker") {
 
         this.setView(target)
 
 
         this.mBackgroundColor = backgroundColor
-        this.mCssClass= cssClass
+        this.mCssClass = cssClass
 
     }
 
-    setView(target){
+    setView(target) {
 
-        this.mView=target
+        this.mView = target
         return this
 
     }
@@ -42,14 +37,12 @@ class Default3DGraphConfig {
         let view = this.getView();
 
 
-
         view.mControls.target.set(new THREE.Vector3(0, 0, 0));
         view.mControls.noRotate = false;
 
         view.mControls.reset();
 
     }
-
 
 
     /**
@@ -99,7 +92,7 @@ class Default3DGraphConfig {
         //but is necessary for other components like picking and tet rendering
 
 
-       // let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
+        // let rootHull = this.isDebug() ? BoxVolume : BaseVolume;
 
         //TODO these options are a little bit confusing atm.. the mCS option refers to the dist of the sub-clusters
         // while the hull option is used by the cluster itself
@@ -109,7 +102,7 @@ class Default3DGraphConfig {
             {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull:BaseVolume}// rootHull}
+                options: {minClusterSize: 40, hull: BaseVolume}// rootHull}
             },
             {
                 generator: industrySetGenerator,
@@ -164,12 +157,10 @@ class Default3DGraphConfig {
 
 
     setDomElements() {
-        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass(    this.mCssClass)
+        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass(this.mCssClass)
         //  $("cluster-text-overlay").removeClass(    this.mCssClass)
 
     }
-
-
 
 
     getView() {
@@ -179,9 +170,6 @@ class Default3DGraphConfig {
         return this.mView
 
     }
-
-
-
 
 
     restartGraph() {
@@ -236,7 +224,7 @@ class Default3DGraphConfig {
         rootCluster.on("hull-updated", function () {
 
             //FIXME called too often
-          //  that.doZoomToRelevant(rootCluster)
+            //  that.doZoomToRelevant(rootCluster)
 
             rootCluster.setLock(false)
             onComplete()

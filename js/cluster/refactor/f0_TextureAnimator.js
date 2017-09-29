@@ -5,8 +5,7 @@
 import * as THREE from "three";
 
 
-export default
-function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) {
+export default function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) {
     // note: texture passed by reference, will be updated by the update function.
 
     this.tilesHorizontal = tilesHoriz;

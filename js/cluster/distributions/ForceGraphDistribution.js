@@ -5,7 +5,6 @@
 import BaseDistribution from "./BaseDistribution"
 
 
-
 import BaseCluster3D from "../BaseCluster3D"
 
 import RoundRobin from "../utils/RoundRobin"
@@ -101,18 +100,17 @@ export default class ForceGraphDistribution extends BaseDistribution {
                 .iterations(2))
 
 
-
         for (let i = 0; i < this.initialEngineTicks; i++) {
             layout.tick();
         } // Initial ticks before starting to render
 
         let cntTicks = 0;
         const startTickTime = new Date();
-        var alphaAbort=0.2
+        var alphaAbort = 0.2
 
         this.queue().add(function onQueue() {
 
-            if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime > that.maxConvergeTime || layout.alpha()<alphaAbort) {
+            if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime > that.maxConvergeTime || layout.alpha() < alphaAbort) {
                 layout.alpha(0); //trigger end
                 layout.stop(); // Stop ticking graph
             }
@@ -127,21 +125,21 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
 
         layout// .on('start', start)
-          /*  .on("tick", function () {
+        /*  .on("tick", function () {
 
-                if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime > that.maxConvergeTime ) {
-                    layout.alpha(0); //trigger end
-                    layout.stop(); // Stop ticking graph
-                }
+              if (cntTicks++ > that.maxConvergeFrames || (new Date()) - startTickTime > that.maxConvergeTime ) {
+                  layout.alpha(0); //trigger end
+                  layout.stop(); // Stop ticking graph
+              }
 
-                onTick(layout, nodes, edges)
+              onTick(layout, nodes, edges)
 
-            })*/
-          .on('end', function () {
+          })*/
+            .on('end', function () {
 
-            if (onComplete) onComplete()
+                if (onComplete) onComplete()
 
-        })
+            })
         //.restart();
 
 
@@ -194,10 +192,10 @@ export default class ForceGraphDistribution extends BaseDistribution {
         }
 
         var that = this
-        _.each(mNodes,function(n){
+        _.each(mNodes, function (n) {
             //reset y,z dimension of dist to to animate node onto the plane it should be
-            if (that.dimensions<3) n.z=0;
-            if (that.dimensions<2) n.y=0;
+            if (that.dimensions < 3) n.z = 0;
+            if (that.dimensions < 2) n.y = 0;
 
         })
 

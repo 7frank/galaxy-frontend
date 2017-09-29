@@ -16,8 +16,7 @@ import * as THREE from "three";
  *
  */
 
-export default
-class EdgesContainer extends THREE.Object3D {
+export default class EdgesContainer extends THREE.Object3D {
     constructor(...args) {
         super(...args);
         this.initLineMesh();
@@ -161,7 +160,7 @@ class EdgesContainer extends THREE.Object3D {
         function initLineGroup(options) {
 
 
-       let     defaults = {
+            let defaults = {
                 opacity: 0.01,
                 transparent: true,
                 //lineIsVisible:true, // if disabled the line won't be shown on the scene

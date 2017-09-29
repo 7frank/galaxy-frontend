@@ -18,13 +18,12 @@
 
  */
 
-import {addArrow,removeArrow} from "./f5-arrows"
+import {addArrow, removeArrow} from "./f5-arrows"
 import ZoomUtil from "../../utils/ZoomUtil";
 import {GUI} from "./SpecificDataUtils";
 
 
 import * as _ from "lodash";
-
 
 
 //current selected node
@@ -41,26 +40,22 @@ var previousNodes;
  * removes/cleans up all selections from previous selected elements
  *
  */
-export
-function removeSelections()
-{
+export function removeSelections() {
 
-    function undoStuff(node){
+    function undoStuff(node) {
 
         unhighlightNodeElements.apply(node);
 
     }
 
 
-    _.each(previousNodeClicked,undoStuff)
-    _.each(previousNodes,undoStuff)
-
+    _.each(previousNodeClicked, undoStuff)
+    _.each(previousNodes, undoStuff)
 
 
 }
 
-export
-function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) {
+export function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) {
 
 
     //TODO
@@ -91,8 +86,7 @@ function highlightNodeElements(bShowOtherNodes = false, bShowEdgeArrows = true) 
         }
 }
 
-export
-function unhighlightNodeElements() {
+export function unhighlightNodeElements() {
 
     this.hideHighlight();
 
@@ -104,8 +98,8 @@ function unhighlightNodeElements() {
 
     //console.log("unhighlighting edges:" + (this.edges.length))
 
-  //  for (let edge of this.edges)
-   //     edge.hideHighlight()
+    //  for (let edge of this.edges)
+    //     edge.hideHighlight()
 
     for (let edge of this.edges)
         removeArrow(edge)
@@ -174,7 +168,7 @@ function extendElement(elements, attrName, options, env) {
 
         el.hideHighlight = function () {
 
-        el.hide()
+            el.hide()
             if (!this.isHighlighted) return;
             this.isHighlighted = false;
 
@@ -209,7 +203,7 @@ function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
     let camera = view.mCamera;
     let controls = view.mControls;
 
-    ZoomUtil.moveToMesh(mesh,camera,controls,minMaxDistance,onEnd)
+    ZoomUtil.moveToMesh(mesh, camera, controls, minMaxDistance, onEnd)
 
 
 }
@@ -217,8 +211,7 @@ function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
 
 //helper to being able to handle click events
 //isSelected == false will prevent the actual node selection and only will trigger the zoom+highlight parts
-export
-function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelected = true, doHighlighNeighbours = true, doHighlighEdges = true, doZoomIn = true) {
+export function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelected = true, doHighlighNeighbours = true, doHighlighEdges = true, doZoomIn = true) {
 
     if (previousNodeClicked.indexOf(currNodeClicked) < 0)
     //if (previousNodeClicked!=currNodeClicked)
@@ -227,7 +220,6 @@ function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelecte
         highlightNodeElements.apply(currNodeClicked, [doHighlighNeighbours, doHighlighEdges]);
 
         currNodeClicked.show()//make sure
-
 
 
         if (doZoomIn)
@@ -280,8 +272,7 @@ function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, isSelecte
         mixin additional functionality
  */
 
-export
-function extendGraphElements(d3Nodes, d3Links, env) {
+export function extendGraphElements(d3Nodes, d3Links, env) {
 
     addGraphHierarchy(d3Nodes, d3Links);
 
@@ -289,15 +280,15 @@ function extendGraphElements(d3Nodes, d3Links, env) {
     extendElement(d3Nodes, "_bubble", {
         mousemove: function (e) {
 
-            if (previousNodeClicked.indexOf(this) >= 0)return;
+            if (previousNodeClicked.indexOf(this) >= 0) return;
 
-             highlightNodeElements.apply(this, [true, false])
+            highlightNodeElements.apply(this, [true, false])
 
 
         },
         mouseleave: function () {
 
-            if (previousNodeClicked.indexOf(this) >= 0)return;
+            if (previousNodeClicked.indexOf(this) >= 0) return;
             unhighlightNodeElements.apply(this)
 
         },
@@ -359,7 +350,7 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
         if (!node.edges)
             node.edges = [];
-       if (!node.children)
+        if (!node.children)
             node.children = [];
         if (!node.parents)
             node.parents = [];
@@ -370,14 +361,13 @@ function addGraphHierarchy(d3Nodes, d3Links) {
 
     for (let item of d3Links) {
 
-       // item._line.edge = item;
+        // item._line.edge = item;
 
         //add edge list to nodes
-       if (item.source.edges.indexOf(item) < 0)
+        if (item.source.edges.indexOf(item) < 0)
             item.source.edges.push(item);
         if (item.target.edges.indexOf(item) < 0)
             item.target.edges.push(item);
-
 
 
         //add target of current link to children list of source
@@ -387,7 +377,6 @@ function addGraphHierarchy(d3Nodes, d3Links) {
         //add source of current link to parent list of target
         if (item.target.parents.indexOf(item.source) < 0)
             item.target.parents.push(item.source);
-
 
 
     }

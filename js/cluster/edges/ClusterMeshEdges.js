@@ -24,7 +24,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         super(...args)
 
         this.smoothenWidth = true;
-        this.minLinkStrength=0
+        this.minLinkStrength = 0
     }
 
 
@@ -74,7 +74,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         let edges = this.createEdgesForClusters(this.mClusters);
 
 
-        if (edges.length==0) return
+        if (edges.length == 0) return
 
         var line_geom = new THREE.Geometry();
 
@@ -82,14 +82,14 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         this.geometry.dispose();
         this.geometry = line_geom;
 
-        var that=this
+        var that = this
         var invalidEdges = [];
 
 
         //TODO sort and show only certain amount of edges based on relative size
 
         var orderedEdges = _.orderBy(edges, ['link_strength'], ['desc']);
-        that.minLinkStrength=0.4*orderedEdges[0].link_strength;//set minLinkStrength to pass the test to 40% of biggest edge
+        that.minLinkStrength = 0.4 * orderedEdges[0].link_strength;//set minLinkStrength to pass the test to 40% of biggest edge
 
 
         for (let edge of edges) {
@@ -97,7 +97,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
             //TODO also we should use the center of the hull feature instead
             //FIXME for cluster: add edges only if mHull exists
 
-           if (edge.link_strength<that.minLinkStrength) continue;
+            if (edge.link_strength < that.minLinkStrength) continue;
 
             let src, dst;
 
@@ -141,7 +141,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
                     return Math.pow(4 * x * ( 1 - x ), k);
                 }
 
-                widthFN=function widthFunction(p) {
+                widthFN = function widthFunction(p) {
 
                     return 1
                     // return 1 * parabola(p, 1)
@@ -154,7 +154,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
 
             //TODO
             var material = new MeshLineMaterial({
-                lineWidth: edge.link_strength/5 || 1, //TODO have a proper width
+                lineWidth: edge.link_strength / 5 || 1, //TODO have a proper width
                 color: new THREE.Color(0x333333),
                 transparent: true,
                 opacity: 0.5,

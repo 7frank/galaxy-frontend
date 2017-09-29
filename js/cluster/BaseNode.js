@@ -19,154 +19,6 @@ import * as Mousetrap from "mousetrap";
  */
 export default class BaseNode extends THREE.Mesh {
 
-    /**
-     * there are 3 types of events handled for a node
-     * (1) mouse events via THREEx.domEvents
-     * (2) keyboard hotkeys that are bound to "keyup" via jQuery.hotkeys
-     * (3) any other custom event
-     * NOTE: customise in sub class as needed
-     */
-
-
-    getRegisteredCustomEvents() {
-        return this.mCustomEventNames
-
-    }
-
-    registerCustomEvent(eventName) {
-
-        if (!this.mCustomEventNames) this.mCustomEventNames = [];
-
-        this.mCustomEventNames.push(eventName);
-
-    }
-
-
-    isCustomEvent(eventName) {
-        return this.getRegisteredCustomEvents().indexOf(eventName) >= 0
-    }
-
-    isMouseEvent(eventName) {
-        return DomEventsAlt.eventNames.indexOf(eventName) >= 0
-    }
-
-
-    //------------------------------------------------
-    onCustomEvent(eventName, eventhandler) {
-        this.mCustomEvents.on(eventName, eventhandler.bind(this))
-    }
-
-    offCustomEvent(eventName, eventhandler) {
-        this.mCustomEvents.off(eventName, eventhandler)
-    }
-
-
-    triggerCustomEvent(eventName, origDomEvent, intersect) {
-        this.mCustomEvents.trigger(eventName, origDomEvent, intersect)
-    }
-
-    //------------------------------------------------
-
-
-    // we need a single window keyup listener that listens for keyevents and forwards/triggers
-    // them on the current element similar to how the mouse events do
-    //Note: the current implementation only triggers keypresses every 300 ms
-    onKey(eventName, eventhandler) {
-        let handler = _.throttle(eventhandler.bind(this), 300)
-
-        this.mKeyboardEvents.bind(eventName, handler, 'keydown');
-
-    }
-
-    //TODO wont work with debounced handler
-    offKey(eventName, eventhandler) {
-        this.mKeyboardEvents.unbind(eventName, eventhandler);
-        // $(window).off(eventName, eventhandler);
-
-    }
-
-    triggerKey(eventName, origDomEvent, intersect) {
-        this.mKeyboardEvents.trigger(eventName, origDomEvent, intersect);
-        // $(window).trigger(eventName, origDomEvent, intersect);
-    }
-
-    /**
-     * gets called on the node that the mouse is hovering over
-     *
-     */
-    resolveKeyEvent(event) {
-
-
-        this.mKeyboardEvents.handleKeyEvent(event)
-
-    }
-
-
-    //------------------------------------------------
-    on(eventName, eventhandler) {
-
-
-        for (let eName of eventName.split(" ")) {
-
-            if (this.isCustomEvent(eName))
-                this.onCustomEvent(eName, eventhandler);
-            else if (this.isMouseEvent(eName))
-                this.getDOMEvents().addEventListener(this, eName, eventhandler.bind(this), false);
-            else
-                this.onKey(eName, eventhandler)
-
-        }
-        ;
-
-        return this;
-    }
-
-    off(eventName, eventhandler) {
-
-        for (let eName of eventName.split(" "))
-
-
-            for (let eName of eventName.split(" ")) {
-
-                if (this.isCustomEvent(eName))
-                    this.offCustomEvent(eName, eventhandler);
-                else if (this.isMouseEvent(eName))
-                    this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
-                else
-                    this.offKey(eName, eventhandler)
-
-            }
-
-
-        return this;
-
-
-    }
-
-    trigger(eventName, origDomEvent, intersect) {
-
-
-        for (let eName of eventName.split(" ")) {
-
-
-            if (this.isCustomEvent(eName))
-                this.triggerCustomEvent(eName, origDomEvent, intersect);
-            else if (this.isMouseEvent(eName))
-                this.getDOMEvents()._notify(eName, this, origDomEvent, intersect);
-            else
-                this.triggerKey(eName, origDomEvent, intersect)
-
-        }
-        ;
-
-        return this;
-
-
-    }
-
-
-    //---------------end of event definition part----------------------
-
     constructor(view) {
 
 
@@ -216,64 +68,6 @@ export default class BaseNode extends THREE.Mesh {
 
     }
 
-
-    addDefaultHandlers() {
-
-
-        //store the current cluster/node
-        //TODO mouseover seems not to work correct  if a childcluster was hovered before
-
-        this.on("mouseover", function (e) {
-            e.stopPropagation()
-            BaseNode.lastHoveredNode = e.target
-
-        })
-
-        this.on("mouseout", function (e) {
-            //reset hover state to work if child element was selected
-              BaseNode.lastHoveredNode =null;
-              e.stopPropagation()
-
-        })
-
-
-        // adding before-render event
-
-        function onBeforeRender() {
-            this.trigger("before-render",null,arguments)
-
-        }
-
-        Object.defineProperty(this, "onBeforeRender", {
-            enumerable: false,
-            configurable: false,
-            get: function () {
-                return onBeforeRender.bind(this);
-            }.bind(this),
-            set: function (newValue) {
-
-                console.warn("onBeforeRender cannot be overridden use .on('before-render',function(){}) instead")
-
-
-            }
-
-        });
-        //------------------
-
-        // adding before-render event default handler
-        this.on("before-render", function () {
-
-            //the update is currently called from the view3D for the root element
-            //and all child elements..
-            // TODO check what impact this has on the workflow
-            this.update()
-
-        })
-
-
-    }
-
-
     static initStatic() {
         if (BaseNode._static_initialised_) return
 
@@ -306,6 +100,206 @@ export default class BaseNode extends THREE.Mesh {
 
     }
 
+    /**
+     * there are 3 types of events handled for a node
+     * (1) mouse events via THREEx.domEvents
+     * (2) keyboard hotkeys that are bound to "keyup" via jQuery.hotkeys
+     * (3) any other custom event
+     * NOTE: customise in sub class as needed
+     */
+
+
+    getRegisteredCustomEvents() {
+        return this.mCustomEventNames
+
+    }
+
+    registerCustomEvent(eventName) {
+
+        if (!this.mCustomEventNames) this.mCustomEventNames = [];
+
+        this.mCustomEventNames.push(eventName);
+
+    }
+
+    isCustomEvent(eventName) {
+        return this.getRegisteredCustomEvents().indexOf(eventName) >= 0
+    }
+
+    isMouseEvent(eventName) {
+        return DomEventsAlt.eventNames.indexOf(eventName) >= 0
+    }
+
+    //------------------------------------------------
+    onCustomEvent(eventName, eventhandler) {
+        this.mCustomEvents.on(eventName, eventhandler.bind(this))
+    }
+
+    //------------------------------------------------
+
+
+    // we need a single window keyup listener that listens for keyevents and forwards/triggers
+    // them on the current element similar to how the mouse events do
+
+    offCustomEvent(eventName, eventhandler) {
+        this.mCustomEvents.off(eventName, eventhandler)
+    }
+
+    triggerCustomEvent(eventName, origDomEvent, intersect) {
+        this.mCustomEvents.trigger(eventName, origDomEvent, intersect)
+    }
+
+    //Note: the current implementation only triggers keypresses every 300 ms
+    onKey(eventName, eventhandler) {
+        let handler = _.throttle(eventhandler.bind(this), 300)
+
+        this.mKeyboardEvents.bind(eventName, handler, 'keydown');
+
+    }
+
+    //TODO wont work with debounced handler
+    offKey(eventName, eventhandler) {
+        this.mKeyboardEvents.unbind(eventName, eventhandler);
+        // $(window).off(eventName, eventhandler);
+
+    }
+
+    triggerKey(eventName, origDomEvent, intersect) {
+        this.mKeyboardEvents.trigger(eventName, origDomEvent, intersect);
+        // $(window).trigger(eventName, origDomEvent, intersect);
+    }
+
+    /**
+     * gets called on the node that the mouse is hovering over
+     *
+     */
+    resolveKeyEvent(event) {
+
+
+        this.mKeyboardEvents.handleKeyEvent(event)
+
+    }
+
+    //------------------------------------------------
+    on(eventName, eventhandler) {
+
+
+        for (let eName of eventName.split(" ")) {
+
+            if (this.isCustomEvent(eName))
+                this.onCustomEvent(eName, eventhandler);
+            else if (this.isMouseEvent(eName))
+                this.getDOMEvents().addEventListener(this, eName, eventhandler.bind(this), false);
+            else
+                this.onKey(eName, eventhandler)
+
+        }
+        ;
+
+        return this;
+    }
+
+
+    //---------------end of event definition part----------------------
+
+    off(eventName, eventhandler) {
+
+        for (let eName of eventName.split(" "))
+
+
+            for (let eName of eventName.split(" ")) {
+
+                if (this.isCustomEvent(eName))
+                    this.offCustomEvent(eName, eventhandler);
+                else if (this.isMouseEvent(eName))
+                    this.getDOMEvents().removeEventListener(this, eName, eventhandler, false);
+                else
+                    this.offKey(eName, eventhandler)
+
+            }
+
+
+        return this;
+
+
+    }
+
+    trigger(eventName, origDomEvent, intersect) {
+
+
+        for (let eName of eventName.split(" ")) {
+
+
+            if (this.isCustomEvent(eName))
+                this.triggerCustomEvent(eName, origDomEvent, intersect);
+            else if (this.isMouseEvent(eName))
+                this.getDOMEvents()._notify(eName, this, origDomEvent, intersect);
+            else
+                this.triggerKey(eName, origDomEvent, intersect)
+
+        }
+        ;
+
+        return this;
+
+
+    }
+
+    addDefaultHandlers() {
+
+
+        //store the current cluster/node
+        //TODO mouseover seems not to work correct  if a childcluster was hovered before
+
+        this.on("mouseover", function (e) {
+            e.stopPropagation()
+            BaseNode.lastHoveredNode = e.target
+
+        })
+
+        this.on("mouseout", function (e) {
+            //reset hover state to work if child element was selected
+            BaseNode.lastHoveredNode = null;
+            e.stopPropagation()
+
+        })
+
+
+        // adding before-render event
+
+        function onBeforeRender() {
+            this.trigger("before-render", null, arguments)
+
+        }
+
+        Object.defineProperty(this, "onBeforeRender", {
+            enumerable: false,
+            configurable: false,
+            get: function () {
+                return onBeforeRender.bind(this);
+            }.bind(this),
+            set: function (newValue) {
+
+                console.warn("onBeforeRender cannot be overridden use .on('before-render',function(){}) instead")
+
+
+            }
+
+        });
+        //------------------
+
+        // adding before-render event default handler
+        this.on("before-render", function () {
+
+            //the update is currently called from the view3D for the root element
+            //and all child elements..
+            // TODO check what impact this has on the workflow
+            this.update()
+
+        })
+
+
+    }
 
     /**
      * update stub, override in descending class

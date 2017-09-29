@@ -2,7 +2,7 @@
  * Created by Frank on 16.07.2017.
  */
 
-import {basicSpriteSize, basicElementExtend} from "./f0-basic-element-3d-classes"
+import {basicElementExtend, basicSpriteSize} from "./f0-basic-element-3d-classes"
 
 import {highlightNodeElements,} from "./f1"
 
@@ -20,18 +20,13 @@ var singleNodeMaterial = new THREE.MeshBasicMaterial({
 
 export default function nodeMixin(env, node) {
 
- if (!node)
-     console.warn("fu")
+    if (!node)
+        console.warn("fu")
     if (node._mixin_)
         return node
 
 
     node._mixin = true;
-
-
-
-
-
 
 
     //TODO have a container as root element  instead of the mesh itself
@@ -103,7 +98,7 @@ export default function nodeMixin(env, node) {
 
 
     node._bubble.name = env.nameAccessor(node) || '';
-    node.size=env.sizeAccessor(node) || undefined;
+    node.size = env.sizeAccessor(node) || undefined;
 
 
     return self

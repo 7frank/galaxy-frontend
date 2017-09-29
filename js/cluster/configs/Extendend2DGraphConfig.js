@@ -33,9 +33,6 @@ export default class Extended2DGraphConfig extends Default2DGraphConfig {
     getSpeccs() {
 
 
-
-
-
         function groupNameForCustomers(node, size) {
 
             return node.children.length > size ? node.name : null
@@ -43,8 +40,7 @@ export default class Extended2DGraphConfig extends Default2DGraphConfig {
         }
 
 
-        function findBiggerCompany(node)
-        {
+        function findBiggerCompany(node) {
 
 
         }
@@ -60,7 +56,7 @@ export default class Extended2DGraphConfig extends Default2DGraphConfig {
             if (grpName)
                 groupFunction(grpName, node)
             //else
-             //   findBiggerCompany()
+            //   findBiggerCompany()
         }
 
         //same goes for the industy clusters that are sub-clusters of the country clusters in this example
@@ -97,48 +93,48 @@ export default class Extended2DGraphConfig extends Default2DGraphConfig {
 
         return [
 
-          /*  {
-                generator: bigCompanySetGenerator,
-                distribution: countryDistribution,
-                options: {
-                    minClusterSize: 40,
-                    hull: BaseVolume,// rootHull,
-                    edges: ClusterMeshEdges,
-                    colors: {
-                        edge: [0x000000, 0.8],
-                        hull: [0x6A5ACD, 0.8] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
+            /*  {
+                  generator: bigCompanySetGenerator,
+                  distribution: countryDistribution,
+                  options: {
+                      minClusterSize: 40,
+                      hull: BaseVolume,// rootHull,
+                      edges: ClusterMeshEdges,
+                      colors: {
+                          edge: [0x000000, 0.8],
+                          hull: [0x6A5ACD, 0.8] //TODO maxOpacity for convexHull is a bit bugged.. initially its set correct but due to transfer it is changed again on hover
 
-                    }
-                }
-            },
-            */
+                      }
+                  }
+              },
+              */
 
-           /* {
-                generator: industrySetGenerator,
-                distribution: industryDistribution,
-                events: {
-                    click: function () {
-                        this.toggleCollapse()
+            /* {
+                 generator: industrySetGenerator,
+                 distribution: industryDistribution,
+                 events: {
+                     click: function () {
+                         this.toggleCollapse()
 
-                        console.log("toggled country?", this.name)
-                    }
-                },
-                options: {
-                    minClusterSize: 15,
-                    hull: FlatVolume,//ConvexVolume,
-                    edges: ClusterMeshEdges,
-                    expanded: function () {
-                        // return true
-                        return this.name == "United States"
-                    }
-                }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
-            }
-            ,*/ {
+                         console.log("toggled country?", this.name)
+                     }
+                 },
+                 options: {
+                     minClusterSize: 15,
+                     hull: FlatVolume,//ConvexVolume,
+                     edges: ClusterMeshEdges,
+                     expanded: function () {
+                         // return true
+                         return this.name == "United States"
+                     }
+                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored
+             }
+             ,*/ {
                 distribution: nodesWithinIndustryDistribution,
                 events: {
                     click: function () {
-                      //  this.toggleCollapse()
-                       // console.log("toggled leaf", this.name)
+                        //  this.toggleCollapse()
+                        // console.log("toggled leaf", this.name)
                     },
                     mouseover: function () {
 
@@ -154,7 +150,7 @@ export default class Extended2DGraphConfig extends Default2DGraphConfig {
                     hull: FlatVolume,
 
                     expanded: function () {
-                return true
+                        return true
                         let par = this.getParentCluster()
                         if (!par) return false
 

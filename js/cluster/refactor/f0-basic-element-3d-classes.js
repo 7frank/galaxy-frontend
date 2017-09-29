@@ -5,10 +5,10 @@
 
 import TextureAnimator from "./f0_TextureAnimator"
 
-import  dot9Image from "../../../img/dot9.png"
-import  dot7Image from "../../../img/dot7.png"
-import  ring2Image from "../../../img/ring2.png"
-import  ring3Image from "../../../img/ring3.png"
+import dot9Image from "../../../img/dot9.png"
+import dot7Image from "../../../img/dot7.png"
+import ring2Image from "../../../img/ring2.png"
+import ring3Image from "../../../img/ring3.png"
 
 
 import * as THREE from "three";
@@ -19,8 +19,7 @@ import * as _ from "lodash";
 var _classes = {};
 
 
-export
-function register3DClass(className, options) {
+export function register3DClass(className, options) {
 
     var defaults = {
         geometry: function (env, el) {
@@ -149,8 +148,7 @@ function basicSpriteGeometry(env, el) {
 
 }
 
-export
-function basicSpriteSize(env, el, scale = 1) {
+export function basicSpriteSize(env, el, scale = 1) {
     // Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize
     let size = el.size ? el.size : 32;
     size = Math.cbrt(size) * env.nodeRelSize;
@@ -221,7 +219,7 @@ register3DClass("basic-sprite-collapsed", {
         });
         return material
 
-    }, instance(env, el){
+    }, instance(env, el) {
 
         var mPointMesh = new THREE.Points(this.geometry(env, el), this.material(env, el));
 
@@ -253,7 +251,7 @@ register3DClass("basic-ring", {
         });
         return material
 
-    }, instance(env, el){
+    }, instance(env, el) {
 
         var mPointMesh = new THREE.Points(this.geometry(env, el), this.material(env, el));
 
@@ -286,7 +284,7 @@ register3DClass("basic-ring-2", {
         });
         return material
 
-    }, instance(env, el){
+    }, instance(env, el) {
 
         var mPointMesh = new THREE.Points(this.geometry(env, el), this.material(env, el));
 
@@ -334,7 +332,7 @@ register3DClass("basic-animated", {
         });
         return material
 
-    }, instance(env, el){
+    }, instance(env, el) {
 
         var mPointMesh = new THREE.Points(this.geometry(env, el), this.material(env, el));
 
@@ -366,7 +364,7 @@ register3DClass("basic-sprite-expanded", {
         });
         return material
 
-    }, instance(env, el){
+    }, instance(env, el) {
 
         return new THREE.Points(this.geometry(env, el), this.material(env, el));
 
@@ -398,7 +396,7 @@ register3DClass("basic-sprite", {
 
         return material
 
-    }, instance(env, el){
+    }, instance(env, el) {
 
         return new THREE.Points(this.geometry(env, el), this.material(env, el));
 
@@ -426,7 +424,7 @@ register3DClass("node-highlighted", {
 
         return material
 
-    }, instance(env, el){
+    }, instance(env, el) {
 
         return new THREE.Points(this.geometry(env, el), this.material(env, el));
 
@@ -444,8 +442,7 @@ register3DClass("node-highlighted", {
  TODO refactor => BaseXElement
 
  */
-export
-function basicElementExtend(env, obj, _mesh) {
+export function basicElementExtend(env, obj, _mesh) {
     var mDomEvents = env.domEvents;
 
 
@@ -461,27 +458,27 @@ function basicElementExtend(env, obj, _mesh) {
             off: function (eventName, eventhandler) {
                 mDomEvents.removeEventListener(_mesh, eventName, eventhandler, false)
             },
-            show:function(){
+            show: function () {
                 //needs a parent element it is attached to
-                let el=this.get3DRoot()
+                let el = this.get3DRoot()
                 this._parent.add(el)
 
 
-               // el.updateMatrix()
+                // el.updateMatrix()
                 el.updateMatrixWorld()
 
             },
-            hide:function(){
+            hide: function () {
                 //needs a parent element it is attached to
                 this._parent.remove(this.get3DRoot())
             },
             trigger: function (eventName, intersect, node) {
 
 
-            mDomEvents._notify(eventName, _mesh, node, intersect);
+                mDomEvents._notify(eventName, _mesh, node, intersect);
 
 
-        }, get3DRoot: function () {
+            }, get3DRoot: function () {
 
             return this._bubble
         },
@@ -513,7 +510,7 @@ function basicElementExtend(env, obj, _mesh) {
 
                 }
                 return this
-            }, removeClass(className){
+            }, removeClass(className) {
             for (className of className.split(" ")) {
                 var mMesh;
                 if (this._instances[className]) {

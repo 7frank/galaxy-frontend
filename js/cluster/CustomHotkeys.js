@@ -10,23 +10,20 @@
  *
  */
 
-export default
-class CustomHotkeys
-{
-    constructor(){
-        this.mActions={}
+export default class CustomHotkeys {
+    constructor() {
+        this.mActions = {}
 
 
     }
 
     //TODO implement and make use of it
-    registerAction(actionName,eventFunction,defaultEvent=null){
+    registerAction(actionName, eventFunction, defaultEvent = null) {
 
-        if (typeof this.mActions[actionName]=="undefined")  this.mActions[actionName]={}
+        if (typeof this.mActions[actionName] == "undefined") this.mActions[actionName] = {}
 
 
     }
-
 
 
 }

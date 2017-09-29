@@ -10,79 +10,72 @@
  */
 
 
-export default
-class RoundRobin  {
+export default class RoundRobin {
 
     /**
      *
      * @param maxMilliSecondsPerFrame determines the maximum amount of milli seconds functions are called within one requestAnimationFrame
      */
-    constructor(maxMilliSecondsPerFrame=100){
+    constructor(maxMilliSecondsPerFrame = 100) {
 
-        this.maxMilliSecondsPerFrame=maxMilliSecondsPerFrame;
-        this.current=0
-        this.entries=[]
+        this.maxMilliSecondsPerFrame = maxMilliSecondsPerFrame;
+        this.current = 0
+        this.entries = []
 
         this.start();
 
 
     }
 
-    start(){
-        var that=this;
+    start() {
+        var that = this;
         requestAnimationFrame(function loop(time) {
 
-        var startIndex=that.current
+            var startIndex = that.current
 
-        function exec() {
-            var fn = that.entries[that.current]
-            if (typeof fn == "function")
-                fn()
+            function exec() {
+                var fn = that.entries[that.current]
+                if (typeof fn == "function")
+                    fn()
 
-            that.current++
-            if (that.current >= that.entries.length) that.current = 0
+                that.current++
+                if (that.current >= that.entries.length) that.current = 0
 
 
+                return startIndex != that.current
+            }
 
-           return startIndex!=that.current
-        }
+            //TODO define a maximum time interval like 20ms that the queue runs until it waits for the next frame
+            //also have a mechanism to prevent too fast animations for faster devices:-D
 
-        //TODO define a maximum time interval like 20ms that the queue runs until it waits for the next frame
-       //also have a mechanism to prevent too fast animations for faster devices:-D
+            while (exec()) {
 
-      while(exec()) {
+                if (performance.now() - time > that.maxMilliSecondsPerFrame)
+                    break;
 
-        if (performance.now()-time>that.maxMilliSecondsPerFrame)
-            break;
+            }
 
-      }
-
-                requestAnimationFrame(loop);
+            requestAnimationFrame(loop);
         })
     }
 
-    add(fn){
+    add(fn) {
 
         this.entries.push(fn)
 
 
-
     }
 
 
-    remove(fn){
+    remove(fn) {
 
-        let  index =this.entries.indexOf(fn);
+        let index = this.entries.indexOf(fn);
 
         if (index > -1) {
             this.entries.splice(index, 1);
         }
 
     }
-
-
-
-
 
 
 }

@@ -3,26 +3,24 @@
  */
 
 import BaseVolume from "./BaseVolume"
+
 /**
  * a slight derivative of it's base class
  * allowing for user to add to sub-cluster
  *
  */
 
-export default
-class BoxVolume extends  BaseVolume {
+export default class BoxVolume extends BaseVolume {
 
     constructor(...args) {
         super(...args);
-        this.maxOpacity=0.1;
-        this.getMaterial().transparent=true;
+        this.maxOpacity = 0.1;
+        this.getMaterial().transparent = true;
     }
 
 
-
-    transferFunction(x)
-    {
-     return 1
+    transferFunction(x) {
+        return 1
     }
 
     /**
@@ -31,19 +29,18 @@ class BoxVolume extends  BaseVolume {
      *
      * @param newLOD
      */
-    setLOD(newLOD)
-    {
-      super.setLOD(newLOD);
+    setLOD(newLOD) {
+        super.setLOD(newLOD);
 
         //by default just set the opacity and visibility accordingly
-        let y=this.transferFunction(newLOD)
-        if ( this.mesh && this.mesh.material) {
-            this.mesh.material.opacity =this.maxOpacity*y; //TODO add transferFunction
+        let y = this.transferFunction(newLOD)
+        if (this.mesh && this.mesh.material) {
+            this.mesh.material.opacity = this.maxOpacity * y; //TODO add transferFunction
 
-            if (y<=0)
-                this.mesh.material.visible=false;
+            if (y <= 0)
+                this.mesh.material.visible = false;
             else
-                this.mesh.material.visible=true;
+                this.mesh.material.visible = true;
 
 
         }
@@ -51,9 +48,7 @@ class BoxVolume extends  BaseVolume {
     }
 
 
-
-    canBeVisible()
-    {
+    canBeVisible() {
         return true
     }
 

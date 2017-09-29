@@ -4,8 +4,7 @@
 
 import BaseCluster3D from "./BaseCluster3D"
 
-export default
-class EdgeUtil {
+export default class EdgeUtil {
 
     /**
      *
@@ -45,9 +44,9 @@ class EdgeUtil {
                 let otherClusters = info[key].clustersConnectedTo;
                 let edgesForCluster = info[key].edges;
 
-              //  let linkStrength = Object.keys(edgesForCluster).length
+                //  let linkStrength = Object.keys(edgesForCluster).length
 
-                let linkStrength = _.sum(_.map(edgesForCluster,el => el.length ))
+                let linkStrength = _.sum(_.map(edgesForCluster, el => el.length))
 
 
                 edgesArray.push({

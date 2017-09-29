@@ -137,6 +137,59 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
+    /**
+     * free the given gclusters again
+     *
+     *
+     * TODO check if changes to collapsed/expanded groups are relevant to cleaning up clusters
+     */
+
+    static cleanUpClusters(clusters, self) {
+        clusters.push(self);
+
+        _.each(clusters, function (cluster) {
+
+            cluster.mClusterClusteringApplied = false;//reset initial state
+
+            cluster.mCollapsedGroup.remove(cluster.mCollapsedClusterHull);
+            cluster.mCollapsedClusterHull = null
+
+
+            if (cluster.tn) {
+                cluster.tn.remove();
+                delete (cluster.tn)
+            }
+
+
+            if (cluster.mHull) {
+                cluster.mHull.dispose();
+                delete (cluster.mHull);
+
+                cluster.mHull = null;
+            }
+
+
+            cluster.removeEdges();
+
+
+            if (cluster == self) return;//don't detach the current root element
+
+
+            if (cluster.parent) {
+
+                if (cluster.parent.mClusters && cluster.name)
+                    delete(cluster.parent.mClusters[cluster.name]);
+                cluster.parent.remove(cluster)
+            }
+
+
+            delete cluster._LeafsCached;
+
+
+        })
+
+
+    }
 
     setLeafsVisible(bVisible) {
 
@@ -175,7 +228,6 @@ export default class BaseCluster3D extends BaseNode {
         this.getLeafs().forEach(l => l.setEdgesVisible(bVisible))
 
     }
-
 
     //TODO update position and radius
     getSphereHull(boundingBox) {
@@ -348,7 +400,6 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-
     toggleCollapse() {
 
 
@@ -364,7 +415,6 @@ export default class BaseCluster3D extends BaseNode {
 
 
     }
-
 
     collapse() {
 
@@ -425,7 +475,6 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-
     expand() {
 
         var that = this;
@@ -472,7 +521,6 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-
     /**
      *
      *
@@ -511,7 +559,6 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-
     /**
      * add one or many nodes to the cluster
      *
@@ -532,7 +579,6 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-
     /**
      * returns the nodes that where used to generate the current iteration of the cluster
      * if the cluster has sub-clusters the node represent the sum of all nodes of the sub-clusters as well
@@ -541,7 +587,6 @@ export default class BaseCluster3D extends BaseNode {
     getNodes() {
         return this.mNodes;
     }
-
 
     /**
      * pushes the clusters to the mesh stack to render them
@@ -554,68 +599,12 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-
     /**
      *  used for recursive cluster generation if class is used for inheritance
      */
 
     getChildClusterConstructor() {
         return this.constructor
-
-    }
-
-
-    /**
-     * free the given gclusters again
-     *
-     *
-     * TODO check if changes to collapsed/expanded groups are relevant to cleaning up clusters
-     */
-
-    static cleanUpClusters(clusters, self) {
-        clusters.push(self);
-
-        _.each(clusters, function (cluster) {
-
-            cluster.mClusterClusteringApplied = false;//reset initial state
-
-            cluster.mCollapsedGroup.remove(cluster.mCollapsedClusterHull);
-            cluster.mCollapsedClusterHull = null
-
-
-            if (cluster.tn) {
-                cluster.tn.remove();
-                delete (cluster.tn)
-            }
-
-
-            if (cluster.mHull) {
-                cluster.mHull.dispose();
-                delete (cluster.mHull);
-
-                cluster.mHull = null;
-            }
-
-
-            cluster.removeEdges();
-
-
-            if (cluster == self) return;//don't detach the current root element
-
-
-            if (cluster.parent) {
-
-                if (cluster.parent.mClusters && cluster.name)
-                    delete(cluster.parent.mClusters[cluster.name]);
-                cluster.parent.remove(cluster)
-            }
-
-
-            delete cluster._LeafsCached;
-
-
-        })
-
 
     }
 
@@ -1019,7 +1008,6 @@ export default class BaseCluster3D extends BaseNode {
             this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
 
 
-
     }
 
 
@@ -1050,15 +1038,15 @@ export default class BaseCluster3D extends BaseNode {
 
         this.mChildClustersEdgesMesh = new edgeClass(null, options)
 
-/*
-        //TODO this should enable stencil testing for the current two implementations of edges
-         if (this.mChildClustersEdgesMesh.children.length > 0)
-              //for (let i=0;i<this.mChildClustersEdgesMesh.children.length;i++)
-              //this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[i])
-             this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[0])
-          else
-        this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
-*/
+        /*
+                //TODO this should enable stencil testing for the current two implementations of edges
+                 if (this.mChildClustersEdgesMesh.children.length > 0)
+                      //for (let i=0;i<this.mChildClustersEdgesMesh.children.length;i++)
+                      //this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[i])
+                     this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[0])
+                  else
+                this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
+        */
 
         this.mExpandedGroup.add(this.mChildClustersEdgesMesh);
 
@@ -1250,7 +1238,7 @@ export default class BaseCluster3D extends BaseNode {
             var gl = renderer.context;
             // config the stencil buffer to collect data for testing
             let func = opt.func[0]
-            gl.stencilFunc(func[0], depth+func[1], func[2]);
+            gl.stencilFunc(func[0], depth + func[1], func[2]);
             gl.stencilOp(... opt.op[0]);
 
             if (callback)
@@ -1277,7 +1265,7 @@ export default class BaseCluster3D extends BaseNode {
             var gl = renderer.context;
             // config the stencil buffer to collect data for testing
             let func = opt.func[1]
-            gl.stencilFunc(func[0], depth+func[1], func[2]);
+            gl.stencilFunc(func[0], depth + func[1], func[2]);
             gl.stencilOp(... opt.op[1]);
 
             if (callback)
@@ -1611,8 +1599,8 @@ export default class BaseCluster3D extends BaseNode {
 
         });
 
-        if (selector=="*")
-        clusters.shift(); //remove first element as it is "this"
+        if (selector == "*")
+            clusters.shift(); //remove first element as it is "this"
 
         return clusters
 
