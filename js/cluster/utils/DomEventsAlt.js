@@ -78,7 +78,7 @@
 import * as THREE from "three";
 import * as _ from "lodash";
 
-import  "../../lib/CombinedCamera"
+import "../../lib/CombinedCamera"
 
 
 // # Constructor
