@@ -1,48 +1,15 @@
-/**
- *  TODO re-structure graph
- * -into graph + subgraphs or simply multiple graphs
- * -each graph may have distribution class/function which handles the layouting of the node/edges
- * -for example a node-set might divided into different sub-sets depending on current assosiations
- *  they may further contain sub-sets
- * - for rendering, these sets are going to be put into a container class like the "nodeClouds"
- * so a "nodesContainer" and a nodesClusterContainer will be needed which also have the distribution function
- */
-
-
-//--------------------------------
-
-//TODO find a better way to import libraries as simple scripts
-//NOTE:don't remove imports
-
 
 import "./SampleClusterApplication.css"
 
 import "../../css/style.css"
 import "../../css/force-graph.css"
-//import "../../css/jquery-ui.css"  //TODO refactor and only use necessary parts
-
-
 import "../gui/searchbar"
 
 
 import "./refactor/SpecificDataUtils"
 import "./refactor/AppDataService"
-
-//used by View3D
-//TODO fix imports
-//import CombinedCamera from "../lib/CombinedCamera"
-//import TrackballControls from "../lib/TrackballControls"
-
-
-
-// --------------------------------
-
-
-
-
 import "../view/GraphView3D"
 import "../gui/ModeSelect"
-
 
 
 import CompanyNewsDS from "../data/CompanyNewsDS"
@@ -53,21 +20,25 @@ import Default3DGraphConfig from "./configs/Default3DGraphConfig";
 import * as Mousetrap from "mousetrap";
 
 
-//-----------------------------------------
-//-----------DEBUG-------------------------
-//-----------------------------------------
-
-
-
 
 /**
- * currently used for debugging purposes.. TODO should receive a mayor overhaul, if used for production
+ *  TODO re-structure graph
+ * -into graph + subgraphs or simply multiple graphs
+ * -each graph may have distribution class/function which handles the layouting of the node/edges
+ * -for example a node-set might divided into different sub-sets depending on current assosiations
+ *  they may further contain sub-sets
+ * - for rendering, these sets are going to be put into a container class like the "nodeClouds"
+ * so a "nodesContainer" and a nodesClusterContainer will be needed which also have the distribution function
+
+ * NOTE: currently used for debugging purposes..
+ * TODO should receive a mayor overhaul, if used for production
  */
 
 
 export class SampleClusterApplication extends HTMLElement {
 
 
+    // noinspection JSUnusedGlobalSymbols
     connectedCallback() {
 
         let datasets = getGraphDataSets()
@@ -315,9 +286,6 @@ export class SampleClusterApplication extends HTMLElement {
 
 
         } else {
-
-
-
 
 
             var config = new Default3DGraphConfig()
