@@ -323,6 +323,10 @@ export default class GraphView3D extends View3D {
 
         if (!this.mRootCluster) {
             this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
+
+            //debug code..
+            window.test.root=this.mRootCluster
+
             this.addCompanyCountListenersToCluster(this.mRootCluster);
 
 
@@ -396,7 +400,7 @@ export default class GraphView3D extends View3D {
         that.mRenderer.render(that.mScene, that.mCamera);
 
         that.mCamera.layers.set(1) //render lines in background
-        that.mRenderer.clearDepth();
+       // that.mRenderer.clearDepth();
         that.mRenderer.render(that.mScene, that.mCamera);
 
     }

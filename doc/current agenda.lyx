@@ -72,6 +72,133 @@
 
 \begin_body
 
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Itemize
+flickering leafs
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+fade material and setLOD interfere
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+clusterleafelement setlod
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+interference with collapse feature so disabled until fixed
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+2d hull not 100% in front of edges which it should due to second render
+ pass
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+is the stencil sometimes not drawn? 
+\end_layout
+
+\begin_layout Itemize
+or the depth comparison somewhat off?
+\end_layout
+
+\begin_layout Itemize
+this behaviour is recursive
+\end_layout
+
+\begin_layout Itemize
+the top layer works up to a certain distance then boom 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+new depth works aswell up to certain distance
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+clustermeshedges are cause of parts of it using normal edges the top layer
+ does work
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+but the next depth still doesn't 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+the stencil test was added before the element contained edges threfore no
+ children existed and none could be bound to
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+when a leaf is expanded the parent hull stencil does not work...
+\end_layout
+
+\begin_layout Itemize
+when too close the hull isn't drawn due to lod
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+hide edges in 3d show on 2d b default
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+show in 3d on hover
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\bar under
+edges within cluster are missing or are to few? 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\bar under
+minLinkStrength absolute does hide them if to few
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\bar under
+cluster edges show only percentage instead of absolute count
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+setLOD for clusteredges to show more the closter?
+\end_layout
+
+\end_deeper
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 [9/11/2017 7:11:11 AM] Frank Reimann: the line-width feature has a bug i'm
  currently trying to fix.

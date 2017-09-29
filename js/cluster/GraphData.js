@@ -2,7 +2,6 @@
  * Created by Frank on 11.06.2017.
  */
 
-import linkMixin from "../deprecated/f0_linkmixin"
 import nodeMixin from "./refactor/f0_nodemixin"
 import {extendGraphElements} from "./refactor/f1"
 
