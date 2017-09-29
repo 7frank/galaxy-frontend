@@ -14,6 +14,10 @@ import Color from 'easy-color';
 
 import ClusterBaseEdges from "./edges/ClusterBaseEdges";
 
+
+import * as THREE from "three";
+import * as _ from "lodash";
+
 /**
  * NOTE: possible future work flow/use case
  *  cluster=new BaseCluster3D(allNodes)
@@ -269,27 +273,24 @@ export default class BaseCluster3D extends BaseNode {
         }
 
 
-
-
-
-    function beforeRender(renderer, scene, camera, geometry, material, group) {
+        function beforeRender(renderer, scene, camera, geometry, material, group) {
             //billboard effect
-          //  this.position.set(0, 0, 0)
+            //  this.position.set(0, 0, 0)
 
             this.setRotationFromQuaternion(camera.quaternion)
 
 
-         /*   var vec3 = new THREE.Vector3(0, 0, 1)// camera.position.clone().sub(this.position).normalize()
+            /*   var vec3 = new THREE.Vector3(0, 0, 1)// camera.position.clone().sub(this.position).normalize()
 
-            // translate the object 10% of it's size into the foreground
-            //TODO smaller collapsed hulls should be in front of bigger ones
-            this.translateOnAxis(vec3, boundingSphere.radius / 10)
-        */
+               // translate the object 10% of it's size into the foreground
+               //TODO smaller collapsed hulls should be in front of bigger ones
+               this.translateOnAxis(vec3, boundingSphere.radius / 10)
+           */
         };
 
 
-        this.addHullStencilBeforeRender(outer,beforeRender)
-        this.addHullStencilBeforeRender(inner,beforeRender)
+        this.addHullStencilBeforeRender(outer, beforeRender)
+        this.addHullStencilBeforeRender(inner, beforeRender)
 
 
         _hull.position.copy(boundingSphere.center);
@@ -310,7 +311,7 @@ export default class BaseCluster3D extends BaseNode {
 
         //------
 
-       // _hull.renderOrder = -1
+        // _hull.renderOrder = -1
 
         // hull.onBeforeRender = function( renderer ) { renderer.clearDepth(); };
 
@@ -960,7 +961,6 @@ export default class BaseCluster3D extends BaseNode {
             that.trigger("cluster-ready")
 
 
-
             that.adjustHullSize();
 
         }, _.throttle(function () {
@@ -1009,6 +1009,17 @@ export default class BaseCluster3D extends BaseNode {
         this.mChildClustersEdgesMesh.setClusters(this.mClusters)
         this.mChildClustersEdgesMesh.update()
 
+
+        //TODO this should enable stencil testing for the current two implementations of edges
+        if (this.mChildClustersEdgesMesh.children.length > 0)
+        //for (let i=0;i<this.mChildClustersEdgesMesh.children.length;i++)
+        //this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[i])
+            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[0])
+        else
+            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
+
+
+
     }
 
 
@@ -1039,16 +1050,15 @@ export default class BaseCluster3D extends BaseNode {
 
         this.mChildClustersEdgesMesh = new edgeClass(null, options)
 
-
-
-
+/*
         //TODO this should enable stencil testing for the current two implementations of edges
-      /*  if (this.mChildClustersEdgesMesh.children.length > 0)
-            for (let i=0;i<this.mChildClustersEdgesMesh.children.length;i++)
-            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[i])
-        else*/
-            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
-
+         if (this.mChildClustersEdgesMesh.children.length > 0)
+              //for (let i=0;i<this.mChildClustersEdgesMesh.children.length;i++)
+              //this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[i])
+             this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[0])
+          else
+        this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
+*/
 
         this.mExpandedGroup.add(this.mChildClustersEdgesMesh);
 
@@ -1173,9 +1183,8 @@ export default class BaseCluster3D extends BaseNode {
         //TODO translation,rotation,scale by using different per-node function
 
 
-
         //FIXME redundant updating multiple edges and potentially leafs
-        var updateLeafsEdges = _.throttle( function (cluster) {
+        var updateLeafsEdges = _.throttle(function (cluster) {
 
             //TODO the timeout fixes the problem that the edges aren't on spot but this should be reviewed and fixed without it
 
@@ -1188,28 +1197,26 @@ export default class BaseCluster3D extends BaseNode {
         }, 100);
 
 //TODO it seems as if this part was no longer in use
-    /*    if (this.isLeaf())
-            this.mLeaf.setDistributionHandler(distribution, onComplete,function(){
-                updateLeafsEdges(that);
-                onStep()   });
-        else*/
-            distribution.setNodes(this,
-                function onNodePositionChanged(vecPosition, i) {
-                },
-                function _onStep(p) {
-
+        /*    if (this.isLeaf())
+                this.mLeaf.setDistributionHandler(distribution, onComplete,function(){
                     updateLeafsEdges(that);
+                    onStep()   });
+            else*/
+        distribution.setNodes(this,
+            function onNodePositionChanged(vecPosition, i) {
+            },
+            function _onStep(p) {
+
+                updateLeafsEdges(that);
 
 
-                    onStep()
-                    //that.addChildClusterEdges();
+                onStep()
+                //that.addChildClusterEdges();
 
-                }, function () {
+            }, function () {
 
-                    onComplete();
-                });
-
-
+                onComplete();
+            });
 
 
     }
@@ -1231,46 +1238,46 @@ export default class BaseCluster3D extends BaseNode {
     }
 
 
-    addHullStencilBeforeRender(mesh,callback) {
-        var that=this
+    addHullStencilBeforeRender(mesh, callback) {
+        var that = this
 
         mesh.onBeforeRender = function (renderer) {
 
-            var depth=that.getDepth()+1
+            var depth = that.getDepth()
 
             let opt = renderer.debug.stencil
             opt.state(true)
             var gl = renderer.context;
             // config the stencil buffer to collect data for testing
-            let func=opt.func[0]
-            gl.stencilFunc(func[0],depth,func[2]);
+            let func = opt.func[0]
+            gl.stencilFunc(func[0], depth+func[1], func[2]);
             gl.stencilOp(... opt.op[0]);
 
             if (callback)
-            callback.bind(this)(...arguments)
+                callback.bind(this)(...arguments)
 
         }
 
         mesh.onAfterRender = function (renderer) {
 
             let opt = renderer.debug.stencil
-            opt.state(false)
+//            opt.state(false)
         }
 
     }
 
-    addEdgeStencilBeforeRender(mesh,callback) {
-        var that=this
+    addEdgeStencilBeforeRender(mesh, callback) {
+        var that = this
 
         mesh.onBeforeRender = function (renderer) {
 
-            var depth=that.getDepth()+1
+            var depth = that.getDepth()
             let opt = renderer.debug.stencil
             opt.state(true)
             var gl = renderer.context;
             // config the stencil buffer to collect data for testing
-            let func=opt.func[1]
-            gl.stencilFunc(func[0],depth,func[2]);
+            let func = opt.func[1]
+            gl.stencilFunc(func[0], depth+func[1], func[2]);
             gl.stencilOp(... opt.op[1]);
 
             if (callback)
@@ -1279,8 +1286,8 @@ export default class BaseCluster3D extends BaseNode {
 
         mesh.onAfterRender = function (renderer) {
 
-         //   let opt = renderer.debug.stencil
-         //   opt.state(false)
+            //   let opt = renderer.debug.stencil
+            //   opt.state(false)
         }
 
     }
@@ -1358,7 +1365,7 @@ export default class BaseCluster3D extends BaseNode {
 
                 this.mHull.name = "HullElement"
 
-               // this.mHull.renderOrder = -1
+                // this.mHull.renderOrder = -1
 
                 // mOptions.onHullCreated(this.mHull)
                 this.mExpandedGroup.add(this.mHull);
@@ -1392,7 +1399,7 @@ export default class BaseCluster3D extends BaseNode {
 
         this.setHullColorFromOptions(this.mHull)
 
-var that=this
+        var that = this
         this.addHullStencilBeforeRender(this.mHull.mesh)
 
         //notify listeners that the hull size changed
@@ -1438,7 +1445,7 @@ var that=this
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
 
-        var updateLeafsEdges = _.throttle( function (cluster) {
+        var updateLeafsEdges = _.throttle(function (cluster) {
 
             //TODO the timeout fixes the problem that the edges aren't on spot but this should be reviewed and fixed without it
 
@@ -1462,7 +1469,7 @@ var that=this
                 that.updateIfIsLeaf()
 
 
-        },function(){
+        }, function () {
 
             updateLeafsEdges(that)
 
@@ -1585,15 +1592,27 @@ var that=this
      * TODO make use of the selector attribute like #china or #other
      *
      */
-    findClusters(selector) {
+    findClusters(selector = "*") {
         var clusters = [];
 
         this.traverse(function (item) {
-            if (item instanceof BaseCluster3D)
+
+            if (!(item instanceof BaseCluster3D)) return
+
+            if (selector == "*") {
+
                 clusters.push(item)
+                return
+            }
+
+            if (item.name.indexOf(selector) > -1)
+                clusters.push(item)
+
+
         });
 
-        clusters.shift(); //remove first elemn as it is "this"
+        if (selector=="*")
+        clusters.shift(); //remove first element as it is "this"
 
         return clusters
 
