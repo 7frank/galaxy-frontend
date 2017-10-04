@@ -14,15 +14,33 @@ import * as Mousetrap from "mousetrap";
 import * as $ from "jquery"
 
 /**
- * simple node implementation for interaction and basic visualisation
+ * a simple graph-node implementation for interaction and basic visualisation via threejs
+ *
+ * registered custom events:
+ * "before-render" - is triggered before the node gets rendered within the threejs scenegraph
+ *
+ * TODO change below behaviour of initStatic and possibly elevate/refactor this part into the root node or a mixin
+ * Note: the current implementation has some limitations for multiple graphs of BaseBode instances to be rendered at a time
+ *  parameters like "currentSelection" set by the method  BaseNode::initStatic() will be shared among simultaneously running instances
+ *
  *
  */
 export default class BaseNode extends THREE.Mesh {
+
+    /**
+     * the constructor needs an instance of the view it is rendered within to be able to connect dom events
+     *
+     * @param view extends View3D
+     */
 
     constructor(view) {
 
 
         BaseNode.initStatic()
+
+        // this part might be redundant
+        // it is supposed to add a material which enabled dom events testing for the invisible object
+        //TODO find out if this could be removed in future versions
 
         var material = new THREE.MeshBasicMaterial({
             color: 0xffffff,
@@ -68,6 +86,13 @@ export default class BaseNode extends THREE.Mesh {
 
     }
 
+
+    /**
+     * sets some basic parameters for a graph of base nodes
+     *
+     */
+
+
     static initStatic() {
         if (BaseNode._static_initialised_) return
 
@@ -81,15 +106,11 @@ export default class BaseNode extends THREE.Mesh {
 
         BaseNode.lastHoveredNode = null;
 
-        //FIXME set camera and domElement not via env attribute ...
-        // BaseNode.domEvents = new THREEx.DomEvents(/*camera, renderer.domElement*/)
-        // BaseNode.domEvents = globalEnv.domEvents
-
-
         BaseNode._static_initialised_ = true
 
 
-        //have one gloabal listener for all nodes and let them
+        //this part is by far not optimal..
+        //currently this lets us have one global listener for all instances of BaseNode that handles keyboard shortcuts for the whole graph
         $(window).on("keydown", function (e) {
             if (!BaseNode.lastHoveredNode) return
 
@@ -114,6 +135,16 @@ export default class BaseNode extends THREE.Mesh {
 
     }
 
+
+    /**
+     * this method is primarily for inheritance purposes.
+     * this way a custom event can be named, which can be used via BaseNode::on() to listen to custom events
+     * if a listener is bound to/triggered for an non-existing event a notification is sent. this should simplify debugging event errors that occur by misspelling
+     *
+     *
+     * @param eventName th name of the event stub generated
+     */
+
     registerCustomEvent(eventName) {
 
         if (!this.mCustomEventNames) this.mCustomEventNames = [];
@@ -122,47 +153,87 @@ export default class BaseNode extends THREE.Mesh {
 
     }
 
+    /**
+     * checks if a event is a registered custom event
+     * */
+
     isCustomEvent(eventName) {
         return this.getRegisteredCustomEvents().indexOf(eventName) >= 0
     }
+
+    /**
+     * checks if an event is a mouse event that the THREEx.DomEvents library can handle
+     *
+     *
+     **/
+
 
     isMouseEvent(eventName) {
         return DomEventsAlt.eventNames.indexOf(eventName) >= 0
     }
 
     //------------------------------------------------
+
+    /**
+     * allows to bind custom event listeners to node
+     *
+     * TODO we could need a single window key-up listener that listens for key events and forwards/triggers
+     * them on the current element similar to how the mouse events do
+     * the current implementation handles this by having only one key-up event bound in BaseNode::initStatic()
+     **/
+
+
     onCustomEvent(eventName, eventhandler) {
         this.mCustomEvents.on(eventName, eventhandler.bind(this))
     }
 
     //------------------------------------------------
 
-
-    // we need a single window keyup listener that listens for keyevents and forwards/triggers
-    // them on the current element similar to how the mouse events do
+    /**
+     * allows to unbind custom event listeners from node
+     **/
 
     offCustomEvent(eventName, eventhandler) {
         this.mCustomEvents.off(eventName, eventhandler)
     }
 
+    /**
+     * allows to trigger custom events
+     **/
+
     triggerCustomEvent(eventName, origDomEvent, intersect) {
         this.mCustomEvents.trigger(eventName, origDomEvent, intersect)
     }
 
-    //Note: the current implementation only triggers keypresses every 300 ms
+    /**
+     * allows to bind keyboard event listeners to node
+     *
+     * this implementation supports all key combinations supported by the Mousetrap library
+     *
+     * Note: the current implementation only triggers keypresses every 100 ms
+     */
+
     onKey(eventName, eventhandler) {
-        let handler = _.throttle(eventhandler.bind(this), 300)
+        let handler = _.throttle(eventhandler.bind(this), 100)
 
         this.mKeyboardEvents.bind(eventName, handler, 'keydown');
 
     }
 
-    //TODO wont work with debounced handler
+
+    /**
+     * allows to unbind keyboard event listeners from node
+     **/
+
     offKey(eventName, eventhandler) {
         this.mKeyboardEvents.unbind(eventName, eventhandler);
         // $(window).off(eventName, eventhandler);
 
     }
+
+    /**
+     * allows to trigger keyboard events
+     **/
 
     triggerKey(eventName, origDomEvent, intersect) {
         this.mKeyboardEvents.trigger(eventName, origDomEvent, intersect);
@@ -181,6 +252,13 @@ export default class BaseNode extends THREE.Mesh {
     }
 
     //------------------------------------------------
+
+    /**
+     * allows to bind event listeners to node
+     * forwards binding for keyboard-, mouse-, and custom events to respective methods
+     */
+
+
     on(eventName, eventhandler) {
 
 
@@ -200,7 +278,9 @@ export default class BaseNode extends THREE.Mesh {
     }
 
 
-    //---------------end of event definition part----------------------
+    /**
+     *  allows to unbind event listeners from node
+     **/
 
     off(eventName, eventhandler) {
 
@@ -224,6 +304,10 @@ export default class BaseNode extends THREE.Mesh {
 
     }
 
+    /**
+     * allows to trigger keyboard-, mouse-, and custom events for node
+     **/
+
     trigger(eventName, origDomEvent, intersect) {
 
 
@@ -245,6 +329,12 @@ export default class BaseNode extends THREE.Mesh {
 
     }
 
+
+    //---------------end of event definition part----------------------
+
+
+
+
     addDefaultHandlers() {
 
 
@@ -265,13 +355,13 @@ export default class BaseNode extends THREE.Mesh {
         })
 
 
-        // adding before-render event
-
+        // the default implementation allows only for one handler to be bound
+        // instead we change the implementation to support multiple handlers in a standard event -like manner
         function onBeforeRender() {
             this.trigger("before-render", null, arguments)
 
         }
-
+        //freezes THREE.Mesh::onBeforeRender method so it can't be overridden
         Object.defineProperty(this, "onBeforeRender", {
             enumerable: false,
             configurable: false,
@@ -288,48 +378,44 @@ export default class BaseNode extends THREE.Mesh {
         });
         //------------------
 
-        // adding before-render event default handler
+        // adding a default 'before-render' event handler that calls the update method of a node
         this.on("before-render", function () {
-
-            //the update is currently called from the view3D for the root element
-            //and all child elements..
-            // TODO check what impact this has on the workflow
             this.update()
-
         })
 
 
     }
 
     /**
-     * update stub, override in descending class
-     * NOTE:don't call update for any cluster directly,it will be called via before-render
+     * update - stub: override in inheriting class
+     * NOTE:don't call update for any cluster directly,it will be called via before-render automatically
      *
      */
     update() {
     }
 
 
+
     /**
      * stub
      *
-     *
+     * the inheriting class must implement this method which must return the containing dom element in which the graph and its individual nodes are rendered
+     * this is necessary to allow for multiple views to be rendered at the same time
      */
+
     getDOMElement() {
 
-
         throw new Error("implement method 'getDOMElement' in sub class (return valid domElement) ")
-
     }
 
 
     /**
      * stub
      *
+     * the inheriting class must return an instance of Threex.DomEvents or other compatible classes for mouse and keyboard events to be working
      *
      */
     getDOMEvents() {
-
 
         throw new Error("implement method 'getDOMEvents' in sub class (return valid THREEx.domEvents) ")
 

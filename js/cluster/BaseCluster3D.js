@@ -19,12 +19,37 @@ import * as THREE from "three";
 import * as _ from "lodash";
 
 /**
- * NOTE: possible future work flow/use case
+ *
+ * this part contains the mayor parts for the graph clusters
+ * it handles rendering of child-clusters, cluster-hull elements, leaf elements, edges and other
+ *
+ *
+ * child clusters:
+ * -the implementation allows to build a graph of clusters with a hierarchical structure
+ * -for example a  graph may contain clusters of nodes of elements like companies, which can be clustered by country, which can further by clustered by industrial sector
+ *
+ * cluster-hull:
+ * - the cluster hull is a specific implementation of {@see  BaseVolume}, its purpose is to generate a visible hull around a cluster of nodes
+ * - for example for 3D a {@see  ConvexVolume}  can be used
+ *
+ *
+ * leaf-elements:
+ * - handle the specific rendering of BaseCluster3D::mNodes set by BaseCluster3D::addNodes
+ * - the default implementation for example uses a THREE.Point structure to render a stack of nodes via point clouds
+ * - a leaf {@see  ClusterLeafElement} for the default implemetatin, consists of the mNodes rendered, its particles (the small rectangles within the node-sprite) and the edges between the mNode elements
+ *
+ * edge-containers:
+ * - {@see ClusterBaseEdges} {@see ClusterMeshEdges}
+ * - renders edges between a set of sibling clusters
+ * - an edge by default unidirectional from sender to target and the interpretation is up to the specific use case
+ *
+ *
+ * NOTE: possible use cases when navigating the graph
  *  cluster=new BaseCluster3D(allNodes)
  *  cluster.applyClustering(...) // copy existing stuff
  *  _dist= new ForceGraphDistribution() // set nodes internally
  *
- *  cluster.find("#other").setDistribution(_dist)
+ *  cluster.find("other").setDistribution(_dist)
  *  cluster.find("United States").applyClustering(...)
  */
 
@@ -61,19 +86,20 @@ export default class BaseCluster3D extends BaseNode {
         this.add(this.mCollapsedGroup);
         this.add(this.mExpandedGroup);
 
-//some helpers for testing
+        //some helpers for testing
         /*        var axisHelper = new THREE.AxisHelper( 2500 );
                 this.add( axisHelper );
                 this.mCollapsedGroup.add( axisHelper );
                 this.mExpandedGroup.add( axisHelper );
         */
 
+
+
         this.registerCustomEvent("hull-updated"); // gets called if the hull got adjusted
-
         this.registerCustomEvent("initial-expand"); //triggered when a collapsed cluster gets expanded
-
-
         this.registerCustomEvent("cluster-ready"); //if the cluster animation is finished
+
+
 
         this.mClusters = {};
         //Cluster if present, use to cluster nodes into sub-clusters
@@ -83,20 +109,8 @@ export default class BaseCluster3D extends BaseNode {
         // else this.updateCluster()
 
 
-        //add collapse behaviour to left click
-        //TODO this interferes with zoom.. we can't bind everything from the gerhobelt demo to the same mouse button
-
-
-        /*    this.on("click", function (e) {
-
-                e.stopPropagation();
-
-                this.getClusterOptions().click.bind(this)()
-
-            });*/
-
-
-        //update lod //TODO the function should forward onBeforeRender args in a way
+        //bind 'before-render' - listener updates level-of-detail for cluster
+        //TODO the function should forward onBeforeRender args in a way
         this.on("before-render", function () {
 
             //   if (!this.mHull) return;
@@ -138,16 +152,22 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     * free the given gclusters again
-     *
-     *
+     * static method to free the given clusters again
      * TODO check if changes to collapsed/expanded groups are relevant to cleaning up clusters
+     * @param clusters ... the clusters whose memory shall be freed by GC
+     * @param self ... convenience parameter, usually the parent cluster of clusters, this way no sorting is necessary as the root gets cleaned up last
+     *
+     * NOTE:the original goal was to be able to clean up parts of the graph individually to apply different distribution functions
+     * and to speed up the creation of different views by reusing structures
      */
+
 
     static cleanUpClusters(clusters, self) {
         clusters.push(self);
 
         _.each(clusters, function (cluster) {
+
+            if (!cluster) return
 
             cluster.mClusterClusteringApplied = false;//reset initial state
 
@@ -191,11 +211,20 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
+    /**
+     * set visibility of leaf elements within cluster
+     */
+
     setLeafsVisible(bVisible) {
 
         this.getLeafs().forEach(l => l.visible = bVisible)
 
     }
+
+
+    /**
+     * set visibility of particle elements within cluster
+     */
 
     setParticlesVisible(bVisible) {
 
@@ -203,13 +232,20 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
+    /**
+     * set visibility of particle elements within cluster
+     */
+
     setNodesVisible(bVisible) {
 
         this.getLeafs().forEach(l => l.setNodesVisible(bVisible))
 
     }
 
-//FIXME does not work
+    /**
+     * FIXME does not work, the visibility is reset by LOD and on-before-render functions elsewhere
+     *
+     **/
     setEdgesVisible(bVisible) {
 
         //TODO interference with lod
@@ -229,13 +265,15 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-    //TODO update position and radius
+    /**
+     * generates a spherical hull which is used to render instead of its child clusters/leafs if a cluster is in a collapsed state
+     * TODO refactor into own class
+     */
     getSphereHull(boundingBox) {
         let boundingSphere;
 
         if (this.mCollapsedClusterHull != null) {
 
-            //FIXME hull offset
             if (this.mHull) {
                 let boundingBox = this.mHull.mBoundingBox;
                 boundingSphere = boundingBox.getBoundingSphere();
@@ -263,7 +301,7 @@ export default class BaseCluster3D extends BaseNode {
         var color = new Color(Object.values(table)[id]);
 
 
-//FIXME MeshPhongMaterial does not get light
+        //TODO currently not proper lighting set to be albe to use MeshPhongMaterial
         let materialInnerRing = new THREE.MeshBasicMaterial({
             color: 0x00FFFF, // 0xfaebd7, //antique-white
             wireframe: false,
@@ -400,6 +438,13 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
+
+    /**
+     * call to toggle between expand and collapse state of the cluster
+     * Note: this method can be used by specific implementations to hide/show clusters of the graph via user interaction
+     * to do so, generate a configuration of clusters and have some events (eg. keyboard- or  mouse events) bound that call this method
+     */
+
     toggleCollapse() {
 
 
@@ -415,6 +460,13 @@ export default class BaseCluster3D extends BaseNode {
 
 
     }
+
+
+
+    /**
+     * call to collapse a cluster
+     * which will render a spherical hull instead of the cluster and its child elements
+     */
 
     collapse() {
 
@@ -475,6 +527,12 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
+
+    /**
+     * call to expand a cluster
+     */
+
+
     expand() {
 
         var that = this;
@@ -522,6 +580,11 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
+     * handles level of detail (LOD) related optimisations for child elements
+     * for example: the greater the distance between THREE.Camera (the position of the viewer) and the cluster,
+     * the fewer details need to be rendered. most of the optimisations are forwarded to the element itself and handled there
+     *
+
      *
      *
      *
@@ -560,9 +623,9 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     * add one or many nodes to the cluster
-     *
-     * TODO could this be used to dynamically add nodes an re-run the clustering
+     * Add one or many nodes to the cluster. These nodes differ from the {@see BaseNode} although there is a naming similarity
+     * Instead, these nodes are those rendered within a {@see ClusterLeafElement} and represent the nodes of the visible graph
+     * TODO could this be used to dynamically add nodes an re-run the clustering?
      *
      */
 
@@ -589,7 +652,7 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     * pushes the clusters to the mesh stack to render them
+     * pushes the clusters to the mesh stack (mExpandedGroup) for them to be rendered
      *
      */
 
@@ -601,6 +664,7 @@ export default class BaseCluster3D extends BaseNode {
 
     /**
      *  used for recursive cluster generation if class is used for inheritance
+     *
      */
 
     getChildClusterConstructor() {
@@ -609,9 +673,7 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     * free leaf elements
-     *
-     *
+     * GC - free leaf elements
      */
 
 
@@ -632,9 +694,10 @@ export default class BaseCluster3D extends BaseNode {
 
 
     /**
+     * after reclustering we can use these to update the new positions to match the old ones in world coords
      * TODO we want to get the node positions relative to the current root? cluster
-     *      after reclustering we can use these to update the new positions to match the old ones in world coords
-     *
+     * TODO this is not 100% wokrin as intended, it should be possible to morph from one configuration of clusters and distributions into another
+     * with smooth transitions.
      */
 
     storeParentPositionInNodes() {
@@ -679,14 +742,28 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-
+    /**
+     * {@see setEntries}
+     */
     setEntry(entry) {
         this.mEntry = entry
     }
 
+
+    /**
+     * {@see getEntries}
+     */
     getEntry() {
         return this.mEntry
     }
+
+
+    /**
+     * "entry" is a specific configuration
+     * TODO documentation
+     *
+     * @param entries
+     */
 
     setEntries(entries) {
         this.mEntrys = entries;
@@ -694,9 +771,34 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
+    /**
+     * {@see setEntries}
+     */
     getEntries() {
         return this.mEntrys || []
     }
+
+
+    /**
+     *
+     * @returns {Object}
+     *
+     * @param Object.minClusterSize ... is the lower bound for the nodes within the cluster
+     * if the cluster has fewer elements all clusters previously generated are places within this "other" cluster
+     *
+     * @param Object.defaultMergeGroupName the name of the "other" cluster can be changed by this value
+     *
+     * @param Object.hull can be used to add a volume around the cluster
+     * by default if no value gets set, the BaseVolume class is used which is invisible by default
+     * but is necessary for other components like picking and tet rendering
+     *
+     * @param Object.onHullCreated gets called after creating an instance of 'Object.hull'
+     *
+     * @param Object.edges the class that is used to generate visible edges between sibling clusters. must be instanceof {@see ClusterBaseEdges}
+     *
+     * @param Object.edges if set to true the whole sub-cluster is rendered. if set to false only the placeholder (spherical object) is rendered
+     *
+     */
 
 
     getClusterOptions() {
@@ -971,6 +1073,10 @@ export default class BaseCluster3D extends BaseNode {
     }
 
 
+    /**
+     * GC the edge meshes
+     */
+
     removeEdges() {
 
         if (this.mChildClustersEdges) this.mChildClustersEdges = null; //delete edge references
@@ -1010,9 +1116,6 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-
-    //TODO refactor into class like EdgesContainer for leaf/node edges
-
     /**
      * generated and updates edges between clusters
      *
@@ -1020,7 +1123,7 @@ export default class BaseCluster3D extends BaseNode {
     addChildClusterEdges(options) {
 
 
-        //TODO
+        //TODO this should be done by the mesh itself probably
         if (this.mChildClustersEdgesMesh) {
 
             this.mChildClustersEdgesMesh.geometry.verticesNeedUpdate = true;
@@ -1079,6 +1182,13 @@ export default class BaseCluster3D extends BaseNode {
     }
 
 
+    /**
+     * retrieves the vertices from a given bounding box
+     *
+     * @param boundingBox instanceof THREE.Box3
+     * @returns {Array} of THREE.Vector3
+     */
+
     getVerticesFromBoundingBox(boundingBox) {
 
 
@@ -1093,7 +1203,12 @@ export default class BaseCluster3D extends BaseNode {
     }
 
 
-    //TODO it  seems, the vertices aren't calculated properly
+    /**
+     *
+     * generates a compound box of all contained sub clusters of this cluster
+     *
+     * TODO it  seems, the vertices aren't calculated properly
+     */
     getCompoundBoundingBoxInfo() {
         var that = this;
         var box = new THREE.Box3;
@@ -1184,7 +1299,7 @@ export default class BaseCluster3D extends BaseNode {
 
         }, 100);
 
-//TODO it seems as if this part was no longer in use
+        //TODO it seems as if this part was no longer in use
         /*    if (this.isLeaf())
                 this.mLeaf.setDistributionHandler(distribution, onComplete,function(){
                     updateLeafsEdges(that);
@@ -1210,6 +1325,12 @@ export default class BaseCluster3D extends BaseNode {
     }
 
 
+    /**
+     * sets the color of the hull to the omitted value
+     *
+     * @param hull
+     */
+
     setHullColorFromOptions(hull) {
         let o = this.getClusterOptions()
 
@@ -1225,6 +1346,13 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
+
+    /**
+     * below method is used to hide edges of a parent cluster behind the hull element of the current cluster
+     * this way a cleaner look with less edges should be possible (especially in 2D)
+     * TODO refactor.. currently this part does not render without flaws and it uses some global reference values for debuging
+     * FIXME work flow
+     **/
 
     addHullStencilBeforeRender(mesh, callback) {
         var that = this
@@ -1253,6 +1381,10 @@ export default class BaseCluster3D extends BaseNode {
         }
 
     }
+
+    /**
+     *  {@see addHullStencilBeforeRender}
+     **/
 
     addEdgeStencilBeforeRender(mesh, callback) {
         var that = this
@@ -1530,28 +1662,6 @@ export default class BaseCluster3D extends BaseNode {
 
 
     /**
-     * has to be called after initialisation to re-calculate dependent elements
-     * like dot clouds and cluster boder and hull
-     */
-
-    /* onAfterClusteredAndDistributed() {
-
-
-     //  return //FIXME
-     _.each(_.reverse(this.findClusters("*")), function (cluster) {
-
-     if (!cluster.isLeaf())
-     cluster.adjustHullSize();
-
-
-     })
-
-     if (!this.isLeaf())
-     this.adjustHullSize()
-     }*/
-
-
-    /**
      * returns an array of the actual ClusterLeafElements
      * that render the nodes itself
      *
@@ -1607,6 +1717,10 @@ export default class BaseCluster3D extends BaseNode {
     }
 
 
+    /**
+     * {@see BaseNode.getDOMElement}
+     **/
+
     getDOMElement() {
 
 
@@ -1621,12 +1735,10 @@ export default class BaseCluster3D extends BaseNode {
     }
 
 
+
     /**
-     *
-     *
-     *
-     *
-     */
+     * {@see BaseNode.getDOMEvents}
+     **/
     getDOMEvents() {
 
 
@@ -1664,9 +1776,6 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     *
-     *
-     *
      * returns the root element of the cluster
      */
 
@@ -1682,6 +1791,11 @@ export default class BaseCluster3D extends BaseNode {
 
         return _root
     }
+
+
+    /**
+     * returns an array of parent clusters sorted from top to bottom
+     */
 
     getParents(maxDepth = 20) {
         var _root = this;
@@ -1704,7 +1818,14 @@ export default class BaseCluster3D extends BaseNode {
 
     }
 
-    //TODO performance wise this is too redundant
+    /**
+     * returns the depth of the cluster within the graph
+     * eg. for a graph that is clustered by country and then by industrial sector, each country cluster like "United States" or Taiwan have the depth 1
+     * each industrial sector would have a depth of 2
+     * main purpose of this function is to order the elements for the stencil test to hide edges in a correct manner
+     *
+     * TODO performance wise this is too redundant
+     */
     getDepth() {
         return this.getParents().length
     }
