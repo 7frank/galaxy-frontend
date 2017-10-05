@@ -83,8 +83,8 @@ export default class BaseDistribution {
         if (this.dimensions == 3)
             _len = Math.pow(len, 1 / 3);
 
-        if (this.dimensions < 3) k = 0.5 * _len
-        if (this.dimensions < 2) j = 0.5 * _len
+        if (this.dimensions < 3) k = 0.5 * (_len-1)
+        if (this.dimensions < 2) j = 0.5 * (_len-1)
 
 
         let step = 1 / _len
@@ -115,7 +115,8 @@ export default class BaseDistribution {
             }
 
 
-            var dist = that.distribute(n, i / _len - 0.5, j / _len - 0.5, k / _len - 0.5);
+
+            var dist = that.distribute(n, i / (_len-1) - 0.5, j / (_len-1) - 0.5, k / (_len-1) - 0.5);
 
 
             //  onNodePositionChange(dist.position,c)
