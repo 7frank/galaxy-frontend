@@ -373,7 +373,7 @@ export default class ClusterTextOverlay extends HTMLElement {
 
 }
 
-
+if (!customElements.get("cluster-text-overlay"))
 customElements.define("cluster-text-overlay", ClusterTextOverlay);
 
 

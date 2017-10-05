@@ -105,5 +105,5 @@ class CompanyDetails extends HTMLElement {
 
 }
 
-
+if (!customElements.get("company-details"))
 customElements.define("company-details", CompanyDetails);

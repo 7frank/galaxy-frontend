@@ -29,5 +29,5 @@ class GraphHUD extends HTMLElement {
 
 }
 
-
+if (!customElements.get("graph-hud"))
 customElements.define("graph-hud", GraphHUD);

@@ -12,8 +12,7 @@ import ZoomUtil from "../utils/ZoomUtil"
 
 
 /**
- * extended cluster
-
+ * TODO refactor some methods from BaseCluster that are not part of the core
  */
 
 //refactoring current cluster structure

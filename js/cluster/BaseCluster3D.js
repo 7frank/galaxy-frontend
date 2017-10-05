@@ -1754,28 +1754,6 @@ export default class BaseCluster3D extends BaseNode {
 
 
     /**
-     * tries to get the view3d element, which the cluster is rendered within
-     * @returns a View3D if attached to the view before, else null
-     */
-    getView() {
-        //  var rootCluster=this.getRoot()
-        // if (!rootCluster.mParentView) return null
-        return this.mParentView
-    }
-
-    /**
-     * sets the view element for the root
-     * the view must be a View3D (extends HTMLElement)
-     *
-     */
-    setView(view3d) {
-        // var rootCluster=this.getRoot()
-
-        this.mParentView = view3d;
-        return this
-    }
-
-    /**
      * returns the root element of the cluster
      */
 

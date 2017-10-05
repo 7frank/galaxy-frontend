@@ -560,5 +560,5 @@ export default class View3D extends HTMLElement {
 
 }
 
-
+if (!customElements.get("view-3d"))
 customElements.define("view-3d", View3D);

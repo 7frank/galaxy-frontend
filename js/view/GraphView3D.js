@@ -396,5 +396,5 @@ export default class GraphView3D extends View3D {
 
 
 }
-
+if (!customElements.get("graph-view-3d"))
 customElements.define("graph-view-3d", GraphView3D);

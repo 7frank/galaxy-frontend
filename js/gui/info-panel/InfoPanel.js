@@ -53,5 +53,5 @@ class InfoPanel extends HTMLElement {
 
 }
 
-
+if (!customElements.get("info-panel"))
 customElements.define("info-panel", InfoPanel);

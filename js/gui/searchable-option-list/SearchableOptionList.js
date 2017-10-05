@@ -30,5 +30,5 @@ class SearchableOptionList extends HTMLElement {
 
 }
 
-
+if (!customElements.get("searchable-option-list"))
 customElements.define("searchable-option-list", SearchableOptionList, {extends: "select"});

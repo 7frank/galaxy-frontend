@@ -76,5 +76,5 @@ class CompanyInfo extends HTMLElement {
 
 }
 
-
+if (!customElements.get("company-info"))
 customElements.define("company-info", CompanyInfo);

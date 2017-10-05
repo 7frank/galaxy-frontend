@@ -61,5 +61,6 @@ export default class DefaultColorScheme extends HTMLElement {
 
 }
 
+if (!customElements.get("default-color-scheme"))
 customElements.define("default-color-scheme", DefaultColorScheme)
 
