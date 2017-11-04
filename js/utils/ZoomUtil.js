@@ -1,15 +1,28 @@
 /**
  * Created by Frank on 08.06.2017.
  */
-//import TWEEN from "@tweenjs/tween.js"
 
 import TWEEN from "../lib/Tween"
 import BaseCluster3D from "../cluster/BaseCluster3D";
 
-//TODO refactor existing samples
+
+/**
+ * static helper for smooth navigation within 3D space
+ *
+ */
+
 export default class ZoomUtil {
 
 
+    /**
+     * used to
+     * for further details {@see ZoomUtil.moveToPosition}
+     *
+     * @param cluster
+     * @param options: an object containing a 'complete' callback function and a 'distance' parameter
+     *
+     *
+     */
     static moveToCluster(cluster, options) {
 
         let defaults = {
@@ -34,6 +47,14 @@ export default class ZoomUtil {
     }
 
 
+    /**
+     * moves the camera position to a target mesh
+     * for further details {@see ZoomUtil.moveToPosition}
+     *
+     * @param mesh: {@see THREE.Mesh}
+     *
+     */
+
     static moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
     }) {
 
@@ -56,13 +77,13 @@ export default class ZoomUtil {
 
 
     /**
+     * animates the position and rotation of a given camera {@see THREE.Camera} to the target position
      *
-     *
-     * @param position must be in world coordiantes
-     * @param camera
-     * @param controls
-     * @param cameraDistanceToMesh
-     * @param onComplete
+     * @param position: instanceof {@see THREE.Vector3} ... a target position must be provided in world coordinates
+     * @param camera: instanceof {@see THREE.Camera}
+     * @param controls: instanceof THREE a THREE control class like TrackballControls
+     * @param cameraDistanceToMesh: the distance to the target position the camera will stop at
+     * @param onComplete: a callback function that is triggered when the animation fphase has ended and the camera is at the target location
      */
     static moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
     }) {

@@ -15,13 +15,30 @@ import * as d3_force from "d3-force-3d";
 
 
 /*
- * TODO the forceGraphDistribution should work like a normal force graph
- * but optimally is could use a initial distribution from another dist function with no animation enabled
+ * ForceGraphDistribution implements a distribution animation using a force graph simulation.
  *
+ * Because the force graph distribution might be more resource consuming especially with a bigger node set,
+ * in addition a queue-like approach is used.
+ * This way all instances of the ForceGraphDistribution share one queue that guarantees that all simultaniously running distribution processes
+ * get an equal amount of cpu time.
+ *
+ * NOTE: As a side effect it is possible that on low cpu machines the distribution looks
+ *         different because not as many cycles are run within the same time frame.
+ *
+ * NOTE: To improve performance, when using this class, a second distribution function might be called previously
+ *          to have the nodes pre-positioned
+
  * */
 
 
 export default class ForceGraphDistribution extends BaseDistribution {
+
+    /**
+     * the default constructor
+     * {@see BaseDistribution}
+     *
+     */
+
     constructor(scale = 50, dimensions = 1) {
         super(scale, dimensions);
 
@@ -29,11 +46,16 @@ export default class ForceGraphDistribution extends BaseDistribution {
         this.initialEngineTicks = 0;
 
         // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime = 9000//2000;//ms ... 5 seconds upper bound for loading phase
-        this.maxConvergeFrames = 700//90//frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
+        this.maxConvergeTime = 9000  //2000; //ms     ... 5 seconds upper bound for loading phase
+        this.maxConvergeFrames = 700 //90   //frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
 
     }
 
+
+    /**
+     * A queue shared among all instances of ForceGraphDistribution so all get an equal amount of cpu time to interpolate.
+     * This approach makes the rendering smoother conpared to not using a queue.
+     **/
     queue() {
         if (!this.constructor._queue) this.constructor._queue = new RoundRobin()
         return this.constructor._queue
@@ -42,12 +64,14 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
 
     /**
-     * a reduced simulation (for testing)
-     * TODO add edges and rest of original src
-     * @param nodes
-     * @param edges
-     * @param onTick
-     * @param onTICKComplete
+     * The core of the force graph simulation using a queue to smooth out rendering.
+     * NOTE: only a subset of possible options is used to improve performance for large amounts of nodes.
+     *   For a full set of options see the online documentation for {@see d3_force.forceSimulation}
+     *
+     * @param nodes ... an array of nodes for the graph
+     * @param edges ... an array of edges representing a relation between certain nodes
+     * @param onTick ... a callback function which is triggered each tick (whenever one batch was iterated) of the simulation
+     * @param onComplete  ... a callback function triggered when the simulation has finished
      */
     startSimulation(nodes, edges = [], onTick, onComplete) {
 
@@ -146,9 +170,13 @@ export default class ForceGraphDistribution extends BaseDistribution {
     }
 
 
-    //TODO nodes + setNodes should provide an instanceof BaseCluster3D as default or an array of node primitives
-    //in both cases we can determine the edges from it
-
+    /**
+     *
+     *  For further information: {@see BaseDistribution.setNodes}
+     *
+     * @param nodes ...  should be an instanceof BaseCluster3D as default or an array of node primitives
+     *               Those are used to determine the edges / links for the simulation
+     */
     setNodes(nodes, onNodePositionChange, onStep, onComplete) {
 
 
@@ -212,14 +240,14 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
     }
 
-    //this is called to distribute the elements
-    //TODO add rotation as well in the future
+    /**
+     * Although the distribution function is not used by the ForceGraphDistribution it is overridden for clarification.
+     *
+     **/
 
     distribute(node, dx, dy, dz) {
 
         return {position: new THREE.Vector3(0, 0, 0)}
-
-        //  return {position:new THREE.Vector3(dx,dy,dz).multiplyScalar(this.mScale)};
 
     }
 }

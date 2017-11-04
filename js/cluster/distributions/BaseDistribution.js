@@ -2,11 +2,6 @@
  * Created by Frank on 29.05.2017.
  */
 
-/**
- * TODO  possible different ways to distribute elements => moveTo, goTo, stack?
- *
- *
- */
 
 import BaseCluster3D from "../BaseCluster3D"
 //import TWEEN from "@tweenjs/tween.js"
@@ -16,11 +11,37 @@ import * as THREE from "three";
 import * as _ from "lodash";
 
 
+/**
+ * The distribution classes used here are supposed to be used to distribute nodes and links of a graph
+ * within a n-dimensional space for rendering purposes.
+ * This process interpolates the position vector of the node over time to create an animation.
+ * For that purpose the BaseDistribution  by default uses linear interpolation via the 'mEasingFunction' attribute.
+ * Also it distributes the number of nodes equally over the given space
+ * (which is dependant on the given dimensions possible - 1 to 3 - ).
+ *
+ * For example: A distribution with two dimensions it will create a quadratic plane of nodes.
+ *              When dimensions are set to three, it will create a cube-like structure of nodes
+ *
+ *
+ * TODO evaluate possible different ways to distribute elements => moveTo, goTo, stack?
+ */
+
+
 export default class BaseDistribution {
+
+
+    /**
+     * @param scale ... the scaling factor used for each node to multiply the position by.
+     * @param dimensions ... 1,2 or 3
+     *
+     *
+     * TODO have some kind of dynamic width function as alternative to the static scale value
+     *      this way it would be possible to have equal with child nodes for example
+     *
+     *
+     */
     constructor(scale = 50, dimensions = 1) {
 
-        //TODO have some kind of dynamic width function as alternative to the static scale value
-        //this way it would be possible to have equal with child nodes for example
         let defaults = {scale: () => 50, dimensions: 1}
 
 
@@ -32,12 +53,19 @@ export default class BaseDistribution {
     }
 
 
-    //TODO have an options setter instead that checks if this["key"] exists and warns if option not exists
+    /**
+     * The function called when sorting elements
+     *
+     * TODO have an options setter instead that checks if this["key"] exists and warns if option not exists
+     */
     onSort(sortFN) {
         this.mSortFunction = sortFN
         return this
     }
 
+    /**
+     * The nodes are sorted before distributing them. This way they can be ordered in a specific manner (like alphanumeric).
+     */
     doSort(nodesArray) {
         if (!this.mSortFunction) return
 
@@ -46,7 +74,13 @@ export default class BaseDistribution {
 
     }
 
-
+    /**
+     *
+     * @param nodes ... an array of nodes of the graph
+     * @param onNodePositionChange ... callback function triggerd when the position of a individual node is interpolated.
+     * @param onStepComplete  ... callback function triggered after the batch of nodes where interpolated once and every step until the distribution function halts
+     * @param onEnd  ... callback function triggered after the all nodes reached their final position
+     */
     setNodes(nodes, onNodePositionChange, onStepComplete, onEnd) {
 
 
@@ -83,8 +117,8 @@ export default class BaseDistribution {
         if (this.dimensions == 3)
             _len = Math.pow(len, 1 / 3);
 
-        if (this.dimensions < 3) k = 0.5 * (_len-1)
-        if (this.dimensions < 2) j = 0.5 * (_len-1)
+        if (this.dimensions < 3) k = 0.5 * (_len - 1)
+        if (this.dimensions < 2) j = 0.5 * (_len - 1)
 
 
         let step = 1 / _len
@@ -115,8 +149,7 @@ export default class BaseDistribution {
             }
 
 
-
-            var dist = that.distribute(n, i / (_len-1) - 0.5, j / (_len-1) - 0.5, k / (_len-1) - 0.5);
+            var dist = that.distribute(n, i / (_len - 1) - 0.5, j / (_len - 1) - 0.5, k / (_len - 1) - 0.5);
 
 
             //  onNodePositionChange(dist.position,c)
@@ -197,6 +230,11 @@ export default class BaseDistribution {
 
     }
 
+
+    /**
+     * brings the distribution to a halt.
+     *
+     */
     stop() {
 
 
@@ -208,9 +246,14 @@ export default class BaseDistribution {
 
     }
 
-
-    //TODO this should be called to distribute the elements of the country layer when finished
-    //TODO also it will be useful to add rotation as well in the future
+    /**
+     *
+     * Not much going on here.
+     * By default the values dx,dy,dz are the normalised [-0.5,0.5] position data for each axis.
+     * These are simply scaled up and returned.
+     *
+     * TODO it might be useful to add rotation as well in the future
+     */
 
 
     distribute(node, dx, dy, dz) {

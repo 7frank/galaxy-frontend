@@ -5,19 +5,15 @@
 
 import BaseDistribution from "./BaseDistribution"
 
-/*
-* the geometry distribution takes an arbitrary geometry and uses its
+/**
+ * TODO stub
+ * the geometry distribution takes an arbitrary geometry and uses its vertex data to create a point cloud
+ *  of graph nodes looking similar to the original geometry
+ **/
 
-**/
-
-
-//TODO stub
 export default class GeometryDistribution extends BaseDistribution {
     constructor(geometry) {
-
-
         super(1, 0);
     }
-
 }
 

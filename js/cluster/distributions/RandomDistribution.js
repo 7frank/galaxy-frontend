@@ -2,24 +2,33 @@
  * Created by Frank on 30.05.2017.
  */
 
-
 import BaseDistribution from "./BaseDistribution"
-
-
 import * as THREE from "three";
 import * as _ from "lodash";
 
 
 /**
- * a simple random distribution function
+ * A simple random distribution function which positions nodes via some pseudo random algorithm
  *
+ * {@see BaseDistribution}
  */
 
 export default class RandomDistribution extends BaseDistribution {
+
+
+    /**
+     * for details {@see BaseDistribution.constructor}
+     **/
+
     constructor(...args) {
         super(...args);
         this.maxDiameter = this.mScale * 2;
     }
+
+
+    /**
+     * for details {@see BaseDistribution.distribute}
+     **/
 
     distribute(node, dx, dy) {
         let min = this.maxDiameter / -2, max = this.maxDiameter / 2

@@ -16,6 +16,20 @@ import "../lib/TrackballControls"
 
 import * as $ from "jquery"
 
+
+/**
+ * This is the constructor for a web component 'view-3d' which is initialised at the end of the file.
+ * It contains most relevant code (camera, scene, animation loop, etc.) to create a Three-js 3D-Canvas
+ * In addition the element has got a caption element which can be used to render some info text eg.
+ * as well as some parameters to limit the frames per second (FPS) of the rendered 3D-Scene.
+ *
+ * Usage: create a dom element <view-3d></view-3d> and use it the way you would use any other html element
+ *
+ * Note: to customise FPS set the attributes 'minFPS' or 'maxFPS'
+ *
+ */
+
+
 export default class View3D extends HTMLElement {
 
     constructor(...args) {
@@ -42,10 +56,13 @@ export default class View3D extends HTMLElement {
 
     }
 
+    /**
+     * initialise the camera classes with some default values
+     *
+     * TODO have access methods for camera controls and domEvents to be able to change controls and camera mode
+     */
 
-    //FIXME have accesss methods for camera controls and domEvents to be able to change controls and camera mode
-
-    initCamera() {
+    createCamera() {
 
         var initialCameraPosition = new THREE.Vector3(-5500, -4000, 50000);
 
@@ -80,8 +97,14 @@ export default class View3D extends HTMLElement {
 
     }
 
-    setControls() {
-        // Add camera interaction
+
+    /**
+     *  Add user (mouse,keyboard) interaction
+     *
+     * TODO have an option to change controls so a user may be able to use different ways of navigation
+     */
+
+    createControls() {
         this.mControls = new THREE.TrackballControls(this.mCamera, this.mRenderer.domElement);
 
         this.mControls.maxDistance = Math.min(this.mCamera.far, 200000);
@@ -92,10 +115,14 @@ export default class View3D extends HTMLElement {
 
     }
 
-    setDomEvents() {
+
+    /**
+     * initialise THREEx helper class that provides dom-like mouse events for 3D elements
+     * NOTE: The available 3D mouse events are only a subset of otherwise (for native dom elements) existing mouse events
+     */
+    createDomEvents() {
 
 
-        //init domEnvents
         //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
         this.mDomEvents = new DomEventsAlt(this.mCamera, this.mRenderer.domElement, this.mScene);
 
@@ -106,6 +133,9 @@ export default class View3D extends HTMLElement {
     }
 
 
+    /**
+     * updates the camera and dependant controls and events classes
+     */
     updateCamera() {
         this.mCamera.updateProjectionMatrix();
 
@@ -116,8 +146,11 @@ export default class View3D extends HTMLElement {
         //update domEvents camera with current camera
         this.mDomEvents._camera = this.mCamera
 
-
     }
+
+    /**
+     * set the camera to orthographic mode
+     */
 
     set2D() {
 
@@ -130,6 +163,10 @@ export default class View3D extends HTMLElement {
 
     }
 
+
+    /**
+     * set the camera to perspective mode
+     */
     set3D() {
         //  this.mCameraP.copy( this.mCamera);
 
@@ -140,6 +177,9 @@ export default class View3D extends HTMLElement {
     }
 
 
+    /**
+     * updates the 3D context to match the dimensions of the HTML container element
+     */
     resizeCanvas() {
         if (this.mRenderer && this.mCamera) {
             this.mRenderer.setSize(this.clientWidth, this.clientHeight);
@@ -169,12 +209,13 @@ export default class View3D extends HTMLElement {
     }
 
 
-    /* get scene() {
-     return ""+ this.mScene
-     }
-     set scene(scene) {
-     this.mScene=scene
-     }
+    /**
+     * sets the value of a text element that functions as a caption. the element is a native child dom-element
+     * within our <view-3d></view-3d> element and can be styled via css in a usual way.
+     * Note: To customise styling use the css class '.view-3d-caption'
+     *
+     * @param text ... a string value representing the text that shall be shown
+     * @returns {View3D} for chaining
      */
     setCaption(text) {
 
@@ -220,7 +261,7 @@ export default class View3D extends HTMLElement {
         // Add nav info section
         //createTooltip()
 
-        this.initCamera();
+        this.createCamera();
 
         this.mRenderer.setClearColor(0x000000);
         this.mRenderer.setPixelRatio(window.devicePixelRatio);
@@ -249,7 +290,7 @@ export default class View3D extends HTMLElement {
 
 
         //------------------------------------------------
-        this.setDomEvents();
+        this.createDomEvents();
 
         //------------------------------------------------
 
@@ -292,7 +333,7 @@ export default class View3D extends HTMLElement {
         });
 
 
-        this.setControls();
+        this.createControls();
 
         this.resizeCanvas();
 
@@ -303,6 +344,11 @@ export default class View3D extends HTMLElement {
 
     }
 
+
+    /**
+     * Enable or disable stencil tests.
+     * This can be useful to render special effects like multiple layers or for masking objects.
+     */
 
     setStencil(bTrue) {
 
@@ -317,21 +363,26 @@ export default class View3D extends HTMLElement {
     }
 
 
+    /**
+     * wrapper method to call renderer
+     * Note: override in subclass to provide option to use multiple renderers
+     */
     render() {
-
 
         this.mRenderer.render(that.mScene, that.mCamera);
 
     }
 
-    // Kick-off renderer
+    /**
+     * start the main animation loop for the 3D context
+     */
     animate() {
 
 
         if (this._a) return
         this._a = true;
 
-        console.log("animate")
+        console.log("starting 'view-3d' animation loop")
         var initialFrames = 0;
         var that = this;
         var accTime = 0, accFrames = 0;
@@ -397,11 +448,22 @@ export default class View3D extends HTMLElement {
     }
 
 
+    /**
+     * convenience method to add 3d elements
+     *
+     * @param object3D ... an instance of a {@see THRE.Mesh}
+     *
+     */
     add(object3D) {
         this.mScene.add(object3D)
 
     }
 
+
+    /**
+     * Maximises the view within the available browser window and bringing
+     * it on top of all other potential existing view-3d instances.
+     */
 
     maximise() {
         $(this).addClass("view-3d-maximised");
@@ -413,6 +475,9 @@ export default class View3D extends HTMLElement {
 
     }
 
+    /**
+     * tests if the view is maximised
+     */
     isMaximised() {
 
         return $(this).hasClass("view-3d-maximised")
@@ -420,6 +485,9 @@ export default class View3D extends HTMLElement {
     }
 
 
+    /**
+     * reverts the effects of {@see View3D.maximise}
+     */
     undoMaximise() {
         $(this).removeClass("view-3d-maximised");
 
@@ -428,6 +496,10 @@ export default class View3D extends HTMLElement {
 
     }
 
+
+    /**
+     * setting a view active will result in the renderer using the maximum allowed FPS.
+     */
 
     setActive() {
 
@@ -439,6 +511,9 @@ export default class View3D extends HTMLElement {
 
     }
 
+    /**
+     * setting a view inactive will result in the renderer using only the  minFPS value resulting in lower GPU usage.
+     */
     setInactive() {
         //  $(this).removeClass("view-3d-maximised")
         this.mFPS = this.minFPS;
@@ -446,6 +521,11 @@ export default class View3D extends HTMLElement {
         this.resizeCanvas()
     }
 
+
+    /**
+     * access method to start rendering the 3D content
+     *
+     */
 
     start() {
 
@@ -456,10 +536,22 @@ export default class View3D extends HTMLElement {
 
     }
 
+
+    /**
+     * access method to stop rendering the 3D content
+     * FIXME it appears that the animation loop wasn't canceled correctly which resulted in performance issues
+     *
+     */
     stop() {
         //  window.cancelAnimationFrame(this.mFrameId)
+          window.cancelAnimationFrame(this.mFrameId)
     }
 
+
+    /**
+     * convenience method
+     *
+     */
     resume() {
 
         this.start()
@@ -467,16 +559,29 @@ export default class View3D extends HTMLElement {
     }
 
 
+    /**
+     * starts the animation loop and shows the dom element
+     */
+
     show() {
         this.resume()
-
-
+        $(this).show()
     }
 
+
+    /**
+     * stops the animation loop and hides the dom element
+     */
     hide() {
         this.stop()
+        $(this).hide()
     }
 
+
+    /**
+     * A callback invoked when the HTML-element is attached to the DOM.
+     * We'll use it here to initialise the 3D context and start the rendering loop.
+     */
 
     connectedCallback() {
 
@@ -491,7 +596,10 @@ export default class View3D extends HTMLElement {
 
     }
 
-
+    /**
+     * Create the DOM element for the tooltip element which can be used to show
+     * a 2D overlay on top of a 3D scene projecting the 3D position into 2D coordinates
+     */
     createTooltip() {
 
         // Setup tooltip
@@ -546,10 +654,7 @@ export default class View3D extends HTMLElement {
 
 
     /**
-     * set the content of the tooltip
-     *
-     *
-     * @param text
+     * set the content of the tooltip element
      */
     setTooltip(text) {
 
@@ -560,5 +665,10 @@ export default class View3D extends HTMLElement {
 
 }
 
+
+/**
+ * creates the web component itself
+ *
+ */
 if (!customElements.get("view-3d"))
 customElements.define("view-3d", View3D);

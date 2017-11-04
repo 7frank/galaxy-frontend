@@ -2,18 +2,17 @@
  * Created by Frank on 29.05.2017.
  */
 
-/**
- * TODO  possible different ways to distribute elements => moveTo, goTo, stack?
- *
- *
- */
-
-
 import BaseDistribution from "./BaseDistribution"
 
 import BaseCluster3D from "../BaseCluster3D"
 import * as THREE from "three";
 
+
+/**
+ * A distribution function that simply uses position data present at each node without changing or animating.
+ * NOTE: In case a initial set of positions is provided the this can be used instead of other distribution classes.
+ *
+ */
 
 export default class DefaultDistribution extends BaseDistribution {
     constructor(scale = 1, dimensions = 3) {
@@ -24,7 +23,11 @@ export default class DefaultDistribution extends BaseDistribution {
     }
 
 
-//TODO this is quite redundant we want the same work flow but not at idle copy costs if possible
+    /**
+     * the distribution function
+     *
+     * TODO this is quite redundant we want the same work flow but not at idle copy costs if possible
+     */
     distribute(node, dx, dy, dz) {
 
 

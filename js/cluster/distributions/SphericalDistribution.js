@@ -7,9 +7,17 @@ import BaseDistribution from "./BaseDistribution"
 import * as THREE from "three";
 
 
+/**
+ *
+ * distributes nodes on a sphere using equirectangular projection
+ *
+ */
+
 export default class SphericalDistribution extends BaseDistribution {
 
-
+    /**
+     * for details {@see BaseDistribution.constructor}
+     **/
     constructor(scale = 50, dimensions = 1) {
         super(scale, 2) //only 2d
 
@@ -34,6 +42,10 @@ export default class SphericalDistribution extends BaseDistribution {
 
     }
 
+
+    /**
+     * for details {@see BaseDistribution.distribute}
+     **/
 
     distribute(node, dx, dy, dz) {
         let mv3 = this.project2dNormalisedToSphere(new THREE.Vector2(2 * dx, 2 * dy), this.mScale / 2)

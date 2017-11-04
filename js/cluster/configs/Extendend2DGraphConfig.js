@@ -5,6 +5,12 @@ import Default2DGraphConfig from "./Default2DGraphConfig";
 import * as THREE from "three";
 
 
+/**
+ * another configuration for some graph data
+ * this one was supposed to be able to support the requirements of a 2D scene as it was shown on the iq-banker website
+ * FIXME make visualisation the same as it is shown on web site
+ */
+
 export default class Extended2DGraphConfig extends Default2DGraphConfig {
 
 
