@@ -7,12 +7,12 @@ module.exports = function(config) {
             'build/bundle.js',
            // 'build/*.js',
            // 'build/tests/test_*.js',
-            'test/*.js'
+            'test/**/*.js'
         ],
         exclude: [
         ],
         preprocessors: {
-            'test/*.js':['webpack','sourcemap']
+            'test/**/*.js':['webpack','sourcemap']
         },
         //contains partial copy of webpack.config.js
         webpack: {
