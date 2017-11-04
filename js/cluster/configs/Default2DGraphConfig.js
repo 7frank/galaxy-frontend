@@ -9,6 +9,15 @@ import * as THREE from "three";
 import * as $ from "jquery"
 
 
+/**
+ * the default settings for a 2d representation of the given data(nodes)
+ *
+ * for details: {@see Default3DGraphConfig}
+ *
+ */
+
+
+
 export default class Default2DGraphConfig extends Default3DGraphConfig {
 
 

@@ -12,6 +12,16 @@ import * as THREE from "three";
 import * as $ from "jquery"
 
 
+/**
+ * Some simple configuration-helper class that stores individual properties to render a graph.
+ *
+ * This includes simple values like background color, graph dimensions (1D,2D,3D),
+ * options how the sub-clustering of the data(nodes) is applied
+ * as well as the individual distributions (the dependencies in n-D space between a set of sub clustered nodes).
+ *
+ */
+
+
 export default class Default3DGraphConfig {
 
 
@@ -25,12 +35,26 @@ export default class Default3DGraphConfig {
 
     }
 
+
+    /**
+     * currently the configuration needs a {@see View3D} instance which is later used to bind the keyboard and mouse controls to the 3d graph {@see RootCluster}
+     *
+     * @param target ... instanceof  View3D
+     *
+     */
+
     setView(target) {
 
         this.mView = target
         return this
 
     }
+
+
+    /**
+     * Set individual behaviour of a threejs control.
+     * Note: The current implementation uses THREE.TrackballControls exclusively.
+     */
 
     setControls() {
 
@@ -52,6 +76,9 @@ export default class Default3DGraphConfig {
      *                              -followed by industry
      *
      */
+
+
+
 
     getSpeccs() {
 
@@ -157,12 +184,26 @@ export default class Default3DGraphConfig {
     //-----------------------------------------
 
 
+    /**
+     * TODO this should only be temporary
+     *
+     * what this is supposed to do is to reset all dom elements of the HUD
+     * the css class determined the look and feel. for example the presets "dark" and "lite"
+     *
+     */
+
     setDomElements() {
         $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass(this.mCssClass)
         //  $("cluster-text-overlay").removeClass(    this.mCssClass)
 
     }
 
+
+    /**
+     *
+     *  Returns the instance of the {@see View3D} container which is used to render the graph within.
+     *
+     */
 
     getView() {
 
@@ -172,6 +213,13 @@ export default class Default3DGraphConfig {
 
     }
 
+
+    /**
+     * TODO refactor
+     *
+     * currently used to restarts / reinitialises the rendering process of the graph
+     *
+     */
 
     restartGraph() {
         let speccs = this.getSpeccs();
@@ -190,6 +238,15 @@ export default class Default3DGraphConfig {
 
     }
 
+
+    /**
+     *
+     * initialises creating the graph
+     *
+     * @param onComplete  ... is a callback-function that must be called internally by "setMode" to forward the information that creating the graph has finished
+     *
+     *
+     **/
 
     setMode(onComplete = function () {
     }) {
@@ -241,7 +298,14 @@ export default class Default3DGraphConfig {
     }
 
 
-    doZoomToRelevant(rootCluster) {
+    /**
+     * helper that gets called after graph creation to zoom to specific initial position.
+     *
+     *
+     * TODO refactor/remove?
+     */
+
+    doZoomToRelevant() {
 
         setTimeout(function () {
 
@@ -266,6 +330,16 @@ export default class Default3DGraphConfig {
 
     }
 
+
+    /**
+     * TODO refactor
+     *
+     * is used internally to move  the user camera to a specific location in 3D - space
+     *
+     *  @param position  ...  an instance of THREE.Vector3
+     *  @param onComplete  ... is a callback-function
+     *
+     **/
 
     zoomToPosition(position, onComplete) {
 
