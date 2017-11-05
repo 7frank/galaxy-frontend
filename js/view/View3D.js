@@ -36,6 +36,10 @@ export default class View3D extends HTMLElement {
         super(...args);
 
 
+
+        this.isRunning=false
+
+
         // this.createCSSRule();
         this.mTime = -1;
         this.mActualFPS = 0;
@@ -379,8 +383,8 @@ export default class View3D extends HTMLElement {
     animate() {
 
 
-        if (this._a) return
-        this._a = true;
+        if (this.isRunning) return
+        this.isRunning = true;
 
         console.log("starting 'view-3d' animation loop")
         var initialFrames = 0;
@@ -539,12 +543,16 @@ export default class View3D extends HTMLElement {
 
     /**
      * access method to stop rendering the 3D content
-     * FIXME it appears that the animation loop wasn't canceled correctly which resulted in performance issues
+     * FIXME it appears that the animation loop isn't canceled correctly which breaks the whole rendering
      *
      */
     stop() {
-        //  window.cancelAnimationFrame(this.mFrameId)
-          window.cancelAnimationFrame(this.mFrameId)
+
+        if (this.isRunning) {
+            window.cancelAnimationFrame(this.mFrameId)
+            this.isRunning=false;
+        }
+
     }
 
 
