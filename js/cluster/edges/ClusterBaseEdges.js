@@ -9,7 +9,6 @@ import * as _ from "lodash";
 /**
  * the default implementation for the cluster-to-neighboring-clusters edges
  *
- *
  * simple/fast/no width support (line width = 1)
  *
  * usage:
@@ -24,14 +23,20 @@ import * as _ from "lodash";
 export default class ClusterBaseEdges extends THREE.Line {
 
 
-    constructor(siblingClustersObj, materialOptions) {
+    /**
+     * the default constructor
+     *
+     * @param siblingClustersArray ... an array of clusters {@see BaseCluster3D}
+     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@see THREE.LineBasicMaterial}
+     */
+    constructor(siblingClustersArray, materialOptions) {
         super();
 
         this.layers.set(1)
 
 
-        if (siblingClustersObj)
-            this.setClusters(siblingClustersObj);
+        if (siblingClustersArray)
+            this.setClusters(siblingClustersArray);
 
         this.name = "EdgesElement";
 
@@ -39,6 +44,13 @@ export default class ClusterBaseEdges extends THREE.Line {
 
 
     }
+
+    /**
+     * defines and returns a default material {@see THREE.LineBasicMaterial} and adds {@see MaterialFadeMixin}
+     * to be able to use a fading parameter for the level-of-detail (LOD) optimisations of the graph
+     *
+     * @param options ... object containing a subset (opacity, transparent, color) of options for {@see THREE.LineBasicMaterial}
+     */
 
     getDefaultMaterial(options) {
 
@@ -90,6 +102,12 @@ export default class ClusterBaseEdges extends THREE.Line {
 
     }
 
+    /**
+     *
+     * supposed to optimise edge-line performance by using shader material
+     *
+     * @deprecated
+     */
 
     getShaderLineMaterial() {
 
@@ -165,10 +183,12 @@ export default class ClusterBaseEdges extends THREE.Line {
     }
 
     /**
-     * TODO have a mechaminsm that resets this stae in case other clsuters get streamed afterwards
+     * determines edges between clusters by looking up relations between nodes of each cluster and
+     * whether they lead into another set of nodes of an other cluster
      *
+     * TODO have a mechanism that reinitialises mChildClustersEdges in case other clusters get streamed/added in a later stage
      *
-     * @param clusters
+     * @param clusters ... array of {@see BaseCluster3D}
      */
     createEdgesForClusters(clusters) {
 
@@ -179,15 +199,16 @@ export default class ClusterBaseEdges extends THREE.Line {
     }
 
     /**
-     * generated and updates edges between clusters
+     * generates and updates edges between clusters  {@see BaseCluster3D}
      *
+     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@see THREE.LineBasicMaterial}
      */
-    initEdgeMesh(options) {
+    initEdgeMesh(materialOptions) {
 
 
         var line_geom = new THREE.Geometry();
 
-        var lineMaterial = this.getDefaultMaterial(options);
+        var lineMaterial = this.getDefaultMaterial(materialOptions);
 
 
         // this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
@@ -209,10 +230,23 @@ export default class ClusterBaseEdges extends THREE.Line {
 
     }
 
+
+    /**
+     * setter
+     *
+     * @param clusters .. array of {@see BaseCluster3D}
+     */
+
     setClusters(clusters) {
         this.mClusters = clusters
 
     }
+
+    /**
+     *
+     * @param el .. instanceof {@see BaseCluster3D}
+     * @returns the center position of a cluster as instanceof {@see THREE.Vector3}
+     */
 
 
     getPositionForElement(el) {
@@ -244,8 +278,7 @@ export default class ClusterBaseEdges extends THREE.Line {
 
 
     /**
-     * updates the edges of the clusters as soon as the hull feature is rendered
-     *
+     * updates the edges of the clusters as soon as the hull feature of the cluster was initialised
      *
      */
 
