@@ -3,15 +3,22 @@
  */
 
 /**
- * the default implementation for a hull/volume around a cluster/sub-cluster
+ * The default implementation for a hull/volume around a cluster of nodes.
+ * This will create an invisible box  using the bounding box of the cluster.
+ * Nothing is renderd but some properties of the resulting volume are used to determine distances between
+ * neighboring elements in the cluster section.
  *
- *
+ * NOTE: for an implementation of a visible volume see {@see BoxVolume}
  */
 
 import * as THREE from "three";
 
 
 export default class BaseVolume extends THREE.Object3D {
+
+    /**
+     * default constructor
+     */
 
     constructor(...args) {
         super(...args);
@@ -26,6 +33,7 @@ export default class BaseVolume extends THREE.Object3D {
      *
      * @param newLOD
      */
+
     setLOD(newLOD) {
 
 
@@ -38,6 +46,10 @@ export default class BaseVolume extends THREE.Object3D {
 
     }
 
+    /**
+     * Creates  and returns a Three.js material ( in this case a {@see THREE.LineBasicMaterial} )
+     * that is used to render the object.
+     */
 
     getMaterial() {
         if (this.mMaterial) return this.mMaterial;
@@ -57,7 +69,8 @@ export default class BaseVolume extends THREE.Object3D {
 
 
     /**
-     * determines if the volume is can be made visible to the user
+     * Determines if the volume  can be made visible to the user.
+     * If set to false the volume is never shown but its dimensions are still used for other processes
      *
      * @returns {boolean}
      */
@@ -67,9 +80,21 @@ export default class BaseVolume extends THREE.Object3D {
     }
 
 
-//FIXME have a better approach to generate the hull
-//? rather: create from vertices
-    createFromBoundingBox(vertices, boundingBox) {
+
+
+
+    /**
+     * The overall goal of this method and all its inheriting implementations like {@see ConvexVolume.createVolumeFromVertices}
+     * is that based on the vertices a {@see THREE.Mesh} is created which functions as a hull structure around the vertices.
+     *
+     * NOTE: The BaseVolume does not make use of the vertices instead it creates the mesh based on the second (boundingBox) parameter
+     *
+     * @param vertices ... a set of  {@see THREE.Vector3} representing positions in 3D-space
+     * @param boundingBox ... a {@see THREE.Box3} which holds bounding box data for the vertices
+     * @returns {*}
+     */
+
+    createVolumeFromVertices(vertices, boundingBox) {
 
         this.mBoundingBox = boundingBox;
 
@@ -99,11 +124,23 @@ export default class BaseVolume extends THREE.Object3D {
     }
 
 
+    /**
+     * The created volume does have two states 'active' and 'inactive' which can be used for a visual feedback when the user interacts with it.
+     * For example, it can be used to highlight the volume when the user hovers over the volume with the mouse cursor.
+     *
+     * The BaseVolume simply changes an opacity multiplicator 'maxOpacity' which is used to alter the current opacity (which itself can vary based on distance between camera and mesh)
+     */
+
     setActive() {
 
         this.maxOpacity = 1
 
     }
+
+    /**
+     * {@see setActive}
+     *
+     */
 
 
     setInactive() {
@@ -112,6 +149,11 @@ export default class BaseVolume extends THREE.Object3D {
 
     }
 
+
+    /**
+     * Starts freeing memory when called via GC
+     * to prevent memory leaks.
+     */
 
     dispose() {
         this.mesh.geometry.dispose()

@@ -1495,12 +1495,12 @@ export default class BaseCluster3D extends BaseNode {
 
         //--------------
         let vertices = info.vertices;
-        this.mHull.createFromBoundingBox(vertices, boundingBox);
+        this.mHull.createVolumeFromVertices(vertices, boundingBox);
 
         mOptions.onHullCreated(this.mHull)
 
         //--------------
-        //copy the geometry for the doeEvents to work
+        //copy the geometry for the domEvents to work
         if (!this.mHull && this.mHull.geometry) {
 
             this.geometry = this.mHull.geometry;

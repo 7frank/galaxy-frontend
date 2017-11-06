@@ -11,13 +11,21 @@ import "../../lib/ConvexGeometry"
 import "../../lib/QuickHull"
 
 
+/**
+ *
+ * Implementation of a convex hull around a set of nodes in 3D space using {@see QuickHull} algorithm.
+ * In addition multiple separate geometries with different resolutions (triangle count) are generated for rendering,
+ * to improve overall GPU load.
+ *
+ */
+
+
 export default class ConvexVolume extends BoxVolume {
 
 
-    //leaf- bbox => geometry => sum(vertex)
-    //ConvexGeometry
-    //NOTE also have compute different detailed hulls to set by lod factor
-    //eg. if lod <0.3 this.mesh.geometry=this.lowpolyMesh
+    /**
+     * default constructor
+     */
 
     constructor(...args) {
         super(...args);
@@ -27,10 +35,22 @@ export default class ConvexVolume extends BoxVolume {
     }
 
 
-    //geometry ... at best a convexGeometry
-    //numSegments ... determines the smoothing of the rounded edges
-    //margin ... the margin of the convex geometry around the original geometry
-    myModifier(geometry, numSegments, margin) {
+    /**
+     *
+     * The following modifier creates a special hull effect (in or case for a convex hull),
+     * which will result in a hull around the convex hull that has a fixed margin.
+     * It rounds/smoothens the sharp edges of the original convex hull.
+     *
+     * NOTE:A modifier for three.js is some algorithm that uses a {@see THREE.Geometry} and alters vertex positions or/and count in some way.
+     *
+     *
+     * @param geometry ... at best a convexGeometry
+     * @param numSegments ... determines the smoothing of the rounded edges
+     * @param  ... the margin of the convex geometry around the original geometry
+     * @returns {THREE.ConvexGeometry}
+     */
+
+    smoothHullModifier(geometry, numSegments, margin) {
 
         let marginGeo = new THREE.Geometry();
 
@@ -50,6 +70,11 @@ export default class ConvexVolume extends BoxVolume {
 
     }
 
+
+    /**
+     * Returns the material used for the mesh rendered.
+     * {@see BaseVolume.getMaterial}
+     */
 
     getMaterial() {
         if (this.mMaterial) return this.mMaterial;
@@ -80,10 +105,14 @@ export default class ConvexVolume extends BoxVolume {
         return this.mMaterial
     }
 
+    /**
+     * Creates the actual convex geometry which is later used to create the visible mesh.
+     *
+     * for details {@see BaseVolume.createVolumeFromVertices}
+     */
+    createVolumeFromVertices(vertices, boundingBox) {
 
-    createFromBoundingBox(vertices, boundingBox) {
-
-        //adding a timestamp for the different lods of the mesh
+        //adding a timestamp to distinguish between the different LOD-based meshes created
         this.mTime = Date.now();
 
         let vert = vertices.filter(v => !(v.x == 0 && v.y == 0 && v.z == 0 ));
@@ -160,6 +189,14 @@ export default class ConvexVolume extends BoxVolume {
 
     }
 
+
+    /**
+     * Creates a box geometry.
+     *
+     * @param boundingBox ..  {@see THREE.Box3}
+     * @returns {THREE.BoxGeometry}
+     */
+
     createBoxGeometryFromBoundingBox(boundingBox) {
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize();
@@ -170,6 +207,12 @@ export default class ConvexVolume extends BoxVolume {
         return box;
     }
 
+
+    /**
+     * Returns the vertices as an array of THREE.Vector3 for the bounding box given.
+     *
+     */
+
     getVerticesFromBoundingBox(boundingBox) {
 
         let box = this.createBoxGeometryFromBoundingBox(boundingBox);
@@ -178,20 +221,30 @@ export default class ConvexVolume extends BoxVolume {
         return box.vertices
     }
 
+    /**
+     * {@see BoxVolume.transferFunction}
+     *
+     * TODO test some more useful transfer functions
+     */
 
-    //TODO
     transferFunction(x) {
         return x
     }
 
 
-    createResolutionGeometry(name, resolution) {
+    /**
+     * Used to create geometries with a varying amount of polygons for for LOD purposes (different camera-mesh distances)
+     * to increase overall frame rates and prevent unnecessary GPU load.
+     *
+     */
+
+    createVariousResolutionSubGeometry(name, resolution) {
 
         if (!this['geometry' + name] || this['geometry' + name].mTime != this.mTime) {
 
             let margin = this.mBoundingBox.getSize().length() / 10;
 
-            let geo2 = this.myModifier(this.mGeometryZero, resolution, margin);
+            let geo2 = this.smoothHullModifier(this.mGeometryZero, resolution, margin);
             geo2.computeBoundingBox();
             geo2.mTime = this.mTime;
             this['geometry' + name] = geo2;
@@ -200,9 +253,17 @@ export default class ConvexVolume extends BoxVolume {
         return this['geometry' + name]
     }
 
+    /**
+     * Uses lower polygon geometry for mesh when camera is further away and higher when camera is closer to the mesh.
+     * Also uses private transfer function to blend in/out mesh on zoom. With bigger or minimal distances the mesh gets more transparent.
+     * at an average distance between camera and mesh, it reaches its maximmum opacity.
+     *
+     * For  further details {@see BaseVolume.setLOD}
+     *
+     * TODO it is probably better to separate the LOD from the visibility/opacity parameter
+     */
 
-    //TODO it is probably better to separate the LOD from the visiblility/opacity
-    //
+
     setLOD(l) {
 
         if (l < 0) l = 0;
@@ -210,6 +271,7 @@ export default class ConvexVolume extends BoxVolume {
 
         var minOpacity = 0.00;
 
+        //TODO put this into ConvexVolume.transferFunction .. to do so make minOpacity potentially an attribute for all implementations
         function mTransfer(x) {
             //transfer function y= 0.5*sin(1.5*pi+x*pi*2)+0.5
             return 0.5 * Math.sin(1.5 * Math.PI + x * Math.PI * 2) + 0.5 + minOpacity
@@ -231,26 +293,32 @@ export default class ConvexVolume extends BoxVolume {
         l = 0.1;
 
         if (l < 0.2)
-            this.mesh.geometry = this.createResolutionGeometry("Least", 1);
+            this.mesh.geometry = this.createVariousResolutionSubGeometry("Least", 1);
         else if (l > 0.2 && l < 0.6)
-            this.mesh.geometry = this.createResolutionGeometry("Low", 4);
+            this.mesh.geometry = this.createVariousResolutionSubGeometry("Low", 4);
         else if (l >= 0.6)
-            this.mesh.geometry = this.createResolutionGeometry("Average", 6);
+            this.mesh.geometry = this.createVariousResolutionSubGeometry("Average", 6);
 
 
     }
 
-
+    /**
+     * {@see BaseVolume.setActive}
+     */
     setActive() {
         this.maxOpacity = 0.4;
     }
 
-
+    /**
+     *  {@see BaseVolume.setActive}
+     */
     setInactive() {
         this.maxOpacity = 0.2;
     }
 
-
+    /**
+     * Frees memory used for geometry.
+     */
     dispose() {
 
         this.mesh.material.dispose();

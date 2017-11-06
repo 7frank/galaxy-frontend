@@ -5,8 +5,8 @@
 import BaseVolume from "./BaseVolume"
 
 /**
- * a slight derivative of it's base class
- * allowing for user to add to sub-cluster
+ * A slight (and visible) derivative of it's base class {@see BaseVolume}
+ *
  *
  */
 
@@ -17,6 +17,12 @@ export default class BoxVolume extends BaseVolume {
         this.maxOpacity = 0.1;
         this.getMaterial().transparent = true;
     }
+
+
+    /**
+     * A transfer function which is used to manipulate the opacity of the hull, depending on the distance between camera and mesh.
+     * This can be used to achieve various easing effects - like fading in our out - when the camera moves relative to the mesh.
+     */
 
 
     transferFunction(x) {
@@ -35,7 +41,7 @@ export default class BoxVolume extends BaseVolume {
         //by default just set the opacity and visibility accordingly
         let y = this.transferFunction(newLOD)
         if (this.mesh && this.mesh.material) {
-            this.mesh.material.opacity = this.maxOpacity * y; //TODO add transferFunction
+            this.mesh.material.opacity = this.maxOpacity * y;
 
             if (y <= 0)
                 this.mesh.material.visible = false;
@@ -47,6 +53,11 @@ export default class BoxVolume extends BaseVolume {
 
     }
 
+
+    /**
+     * The created geometry can be visible and is treated accordingly if certain other parameters - like proper LOD - apply.
+     * NOTE: Actual visibility is up to the specific Implementation.
+     */
 
     canBeVisible() {
         return true

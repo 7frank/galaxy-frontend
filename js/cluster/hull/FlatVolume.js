@@ -1,12 +1,6 @@
-//technically not a "volume" but for naming convenience
-
-
 /**
  * Created by Frank on 23.06.2017.
  */
-
-
-//FIXME this is only a cheap bad performing version of the 3d hull with minor changes to match a 2d hull
 
 
 import BoxVolume from "./BoxVolume"
@@ -16,14 +10,16 @@ import * as _ from "lodash";
 
 import convexHull2d from "monotone-convex-hull-2d"
 
+/**
+ * This is quick&dirty copy of {@see ConvexVolume} with some changes, using a more optimised algorithm
+ * for 2D {@see convexHull2d} and generating a 2D convex hull instead of the former.
+ *
+ * TODO inherit from ConvexVolume for redundancy reasons
+ */
 
 export default class FlatVolume extends BoxVolume {
 
 
-    //leaf- bbox => geometry => sum(vertex)
-    //ConvexGeometry
-    //NOTE also have compute different detailed hulls to set by lod factor
-    //eg. if lod <0.3 this.mesh.geometry=this.lowpolyMesh
 
     constructor(...args) {
         super(...args);
@@ -32,6 +28,12 @@ export default class FlatVolume extends BoxVolume {
 
     }
 
+    /**
+     * Creates a flat {@see THREE.ShapeGeometry} for further processing.
+     *
+     * @param vertices ... the vertices the convex shape is based on
+     * @returns {ShapeGeometry}
+     */
 
     createConvexShapeGeometry(vertices) {
         var pts = _.map(vertices, v => [v.x, v.y]);
@@ -55,10 +57,16 @@ export default class FlatVolume extends BoxVolume {
 
     }
 
-    //geometry ... at best a convexGeometry
-    //numSegments ... determines the smoothing of the rounded edges
-    //margin ... the margin of the convex geometry around the original geometry
-    myModifier(geometry, numSegments, margin) {
+    /**
+     * {@see ConvexVolume.smoothHullModifier}
+     *
+     * @param geometry  ... at best ca convex geometry
+     * @param numSegments ... determines the smoothing of the rounded edges
+     * @param margin ... the margin of the convex geometry around the original geometry
+     * @returns {ShapeGeometry}
+     */
+
+    smoothHullModifier(geometry, numSegments, margin) {
 
         let marginGeo = new THREE.Geometry();
 
@@ -78,8 +86,12 @@ export default class FlatVolume extends BoxVolume {
 
     }
 
-
-    createFromBoundingBox(vertices, boundingBox) {
+    /**
+     * Creates the actual convex geometry which is later used to create the visible mesh.
+     *
+     * for details {@see BaseVolume.createVolumeFromVertices}
+     */
+    createVolumeFromVertices(vertices, boundingBox) {
 
         //adding a timestamp for the different lods of the mesh
         this.mTime = Date.now();
@@ -176,6 +188,11 @@ export default class FlatVolume extends BoxVolume {
 
     }
 
+    /**
+     * Returns the vertices as an array of THREE.Vector3 for the bounding box given.
+     *
+     */
+
     createBoxGeometryFromBoundingBox(boundingBox) {
         let _center = boundingBox.getCenter();
         let _size = boundingBox.getSize();
@@ -186,6 +203,11 @@ export default class FlatVolume extends BoxVolume {
         return box;
     }
 
+
+    /**
+     * Returns the vertices as an array of THREE.Vector3 for the bounding box given.
+     *
+     */
     getVerticesFromBoundingBox(boundingBox) {
 
         let box = this.createBoxGeometryFromBoundingBox(boundingBox);
@@ -195,19 +217,29 @@ export default class FlatVolume extends BoxVolume {
     }
 
 
-    //TODO
+    /**
+     * {@see BoxVolume.transferFunction}
+     *
+     */
+
     transferFunction(x) {
         return x
     }
 
 
-    createResolutionGeometry(name, resolution) {
+    /**
+     * Used to create geometries with a varying amount of polygons for for LOD purposes (different camera-mesh distances)
+     * to increase overall frame rates and prevent unnecessary GPU load.
+     *
+     */
+
+    createVariousResolutionSubGeometry(name, resolution) {
 
         if (!this['geometry' + name] || this['geometry' + name].mTime != this.mTime) {
 
             let margin = this.mBoundingBox.getSize().length() / 10;
 
-            let geo2 = this.myModifier(this.mGeometryZero, resolution, margin);
+            let geo2 = this.smoothHullModifier(this.mGeometryZero, resolution, margin);
             geo2.computeBoundingBox();
             geo2.mTime = this.mTime;
             this['geometry' + name] = geo2;
@@ -217,8 +249,16 @@ export default class FlatVolume extends BoxVolume {
     }
 
 
-    //TODO it is probably better to separate the LOD from the visiblility/opacity
-    //
+    /**
+     * Uses lower polygon geometry for mesh when camera is further away and higher when camera is closer to the mesh.
+     * Also uses private transfer function to blend in/out mesh on zoom. With bigger or minimal distances the mesh gets more transparent.
+     * at an average distance between camera and mesh, it reaches its maximmum opacity.
+     *
+     * For  further details {@see BaseVolume.setLOD}
+     *
+     * TODO it is probably better to separate the LOD from the visibility/opacity parameter
+     */
+
     setLOD(l) {
 
 
@@ -245,26 +285,34 @@ export default class FlatVolume extends BoxVolume {
 
 
         if (l < 0.2)
-            this.mesh.geometry = this.createResolutionGeometry("Least", 1);
+            this.mesh.geometry = this.createVariousResolutionSubGeometry("Least", 1);
         else if (l > 0.2 && l < 0.6)
-            this.mesh.geometry = this.createResolutionGeometry("Low", 4);
+            this.mesh.geometry = this.createVariousResolutionSubGeometry("Low", 4);
         else if (l >= 0.6)
-            this.mesh.geometry = this.createResolutionGeometry("Average", 6);
+            this.mesh.geometry = this.createVariousResolutionSubGeometry("Average", 6);
 
 
     }
 
 
+    /**
+     * {@see BaseVolume.setActive}
+     */
     setActive() {
         this.maxOpacity = 0.4;
     }
 
 
+    /**
+     * {@see BaseVolume.setActive}
+     */
     setInactive() {
         this.maxOpacity = 0.2;
     }
 
-
+    /**
+     * Frees memory used for geometry.
+     */
     dispose() {
 
         this.mesh.material.dispose();
