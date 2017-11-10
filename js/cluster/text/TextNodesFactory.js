@@ -1,32 +1,43 @@
-/**
- * 2.5d text feature
- * text nodes get rendered from a finite subset of given nodes depending on parameters like min/max distance
- */
-
-/**
- *
- * for the method to work env  needs to contain the following paraams :
- * env={..
- *  renderer.domElement
- *   currentNodesVisible to select visible text nodes from
- *	textNode node container that is overlay with pointerevents none
- *  camera
- *  }
- */
-
-
 import * as THREE from "three";
 import * as _ from "lodash";
 import * as $ from "jquery"
+
+/**
+ * A factory to generate the 2.5D text feature.
+ * Text nodes get rendered from a finite subset of given nodes depending on parameters like 'minDistance' and 'maxDistance'
+ *
+ * @param env ... A configuration object.
+ *
+ *  For the method to work env  needs to contain the following params:
+ *
+ * @param env.renderer.domElement ... a  <canvas></canvas> element with a valid 3D context
+ *                                      (the container where the 3D scene/geometries are rendered to)
+ *
+ * @param env.currentNodesVisible ... an array containing the currently visible cluster nodes.
+ *                                      Updating the array and calling the 'update'-method will invalidate obsolete text-nodes
+ *                                      and create new ones.
+ *
+ * @param textNode ... A HTML-element that functions as container, which is used as overlay holding the text elements
+ *                      for the nodes with the attribute 'pointer-events' set to 'none'
+ *                      so all events get passed to the 3D scene for further processing.
+ *                      By default textNOde should be an instance of {@see ClusterTextOverlay}
+ *
+ * @param  camera ... The camera that represents the position/viewport of the user observing the {@see RootCluster}
+ *
+ * @param options .. see below for details
+ *
+ * @returns {{update: simpleUpdate, remove: remove}}
+ *
+ */
 
 
 export default function TextNodesFactory(env, options) {
     var domEl = env.renderer.domElement
 
     options = _.extend({
-        interactable: false, //node can't be clicked, selected
-        minVisibleCount: 0, //the minimum amount of items ignoring distance
-        maxVisibleCount: 10, //the max amount of rendered text labels
+        interactable: false, //determines if the text element for the node can be clicked/selected or not
+        minVisibleCount: 0, //the minimum amount of items. If the depth test fails at least this amount of the 'env.currentNodesVisible'-array is drawn (if they are in viewport of the camera)
+        maxVisibleCount: 10, //the maximum amount of rendered text labels
         maxDistance: 700, //the maximum distance between the node and the observer/camera to be accepted as a valid visible node
         minDistance: 10, //the minimum distance between the node and the observer/camera to be accepted as a valid visible node
         getNodes: function () {
@@ -100,6 +111,8 @@ export default function TextNodesFactory(env, options) {
     //--------------------------------
     //update text nodes
 
+
+    /*
     //@deprecated
     function getScreenPos2(p, domEl) {
 
@@ -112,13 +125,12 @@ export default function TextNodesFactory(env, options) {
 
         return vector;
     }
-
+    */
 
     /**
      *
-     *
-     * @param p THREE.Vector3 .. position of element
-     * @param camera ... camera object
+     * @param p ... an instanceof {@see THREE.Vector3} representing the position of the node/element in 3D space.
+     * @param camera ... an instanceof {@see THREE.Camera} representing the position and viewport of the user/observer.
      * @param viewOffsetWidthBy2  .. the relative screen offset of the container (view) divided by two
      * @param viewOffsetHeightBy2 .. the relative screen offset of the container (view)divided by two
      */
@@ -135,7 +147,7 @@ export default function TextNodesFactory(env, options) {
     }
 
     //--------------------------------
-    //test if node matches criterias to be part of the current text node set
+    //test if the node matches certain criteria to be part of the current visible set of text-nodes
     function testIfRelevantNode(node) {
 
         var point1 = env.camera.position;
@@ -181,6 +193,12 @@ export default function TextNodesFactory(env, options) {
 
     var maxVisibleTextNodes = options.maxVisibleCount
 
+
+    /**
+     * Compares the next batch of visible nodes to the previously nodes visible (one frame earlier) and updates their position/visibility according to the configuration.
+     *
+     * @param nodeInfosCurrentBatch ... a set of node infos each containing a reference (node) to the original node element.
+     */
     function compareAndHidePreviousBatch(nodeInfosCurrentBatch) {
 
 
@@ -281,7 +299,10 @@ export default function TextNodesFactory(env, options) {
     }
 
     //--------------------------------
-    //update function that finds relevant text labels and positions them on top of the 3d elements
+    /**
+     *  Update function that determines relevant text labels (based on visibility of the 3D-element associated) and positions them on next to the 3D-elements.
+     */
+
     function simpleUpdate() {
 
         //let's take the result set of the last renderer loop as a start
@@ -307,7 +328,7 @@ export default function TextNodesFactory(env, options) {
 
               if (res.distance > _maxDistance * 1.5)
                   break; //shorten the search for large graphs
-  */
+            */
 
         }
 
@@ -333,15 +354,9 @@ export default function TextNodesFactory(env, options) {
     }
 
     return {
-        update: simpleUpdate// _.throttle(simpleUpdate, 20, {
-        //leading: true,
-        //trailing: false
-        //}),
-        ,
+        update: simpleUpdate,
         remove: function () {
-
             compareAndHidePreviousBatch([])
-
         }
     }
 }

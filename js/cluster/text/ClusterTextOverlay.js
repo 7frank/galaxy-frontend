@@ -3,20 +3,6 @@
  */
 
 
-/**
- * the text overlay class can be used to put text elements on top of an other container element
- *
- *
- *
- *  ...
- *  TODO
- collect onbefore render of eeach cluster and nodeMixin(
- order from node which is more relevant to cluster
- if visible nodes => show them else show cluster elements
- *
- */
-
-
 import TextNodesFactory from "./TextNodesFactory"
 import GraphView3D from "../../view/GraphView3D"
 
@@ -28,6 +14,18 @@ import * as THREE from "three";
 import * as _ from "lodash";
 import * as $ from "jquery"
 
+
+/**
+ * A overlay class that can be used to put text elements on top of a{@see View3D}.
+ * Primarily this is used to create text elements for clusters and nodes,
+ * instead of generating 3D text which should be considerably slower.
+ *
+ *  TODO collect onBefore render of each cluster and nodeMixin(
+ *  TODO change order of importance. From text for single node which is more relevant to text nodes for clusters.
+ *
+ */
+
+
 export default class ClusterTextOverlay extends HTMLElement {
 
     constructor() {
@@ -36,15 +34,14 @@ export default class ClusterTextOverlay extends HTMLElement {
         this.possibleClusters = [];
         this.possibleLeafClusters = [];
         this.selectedLeafCluster = null;
+        this.separator = " - ";
 
         this.enabled = true;
 
     }
 
     /**
-     *
-     * init css and wait for data/graph to be loaded
-     * then create overlay
+     * Initializes CSS and waits for graph {@see GraphView3D} to be loaded, before continuing to create the overlay.
      */
 
     connectedCallback() {
@@ -66,14 +63,10 @@ export default class ClusterTextOverlay extends HTMLElement {
 
     }
 
-
     /**
-     *
-     * add listeners to collect the visible cluster and leaf elements
-     *
+     * Add listeners to the  {@see GraphView3D} to collect data of the visible cluster and leaf elements
+     * when rendering each frame to update the current visible text nodes.
      */
-
-
     bindToCluster(rootcluster) {
 
 
@@ -126,18 +119,25 @@ export default class ClusterTextOverlay extends HTMLElement {
     }
 
     /**
-     * add style attributes to the overlay
-     *
-     * TODO import css directly
+     * Load/add style attributes to the overlay.
      *
      */
     initCSS() {
 
-
+        //TODO import css directly: check if this css class still has styleing code somewhere else
         $(this).addClass("graph-captions-container")
 
     }
 
+
+    /**
+     * Add a container that shows additional informations of the current position
+     * of the user within the 3D-space by showing a breadcrum-like trail of text elements of the 3D-cluster.
+     * NOTE: The text used is the name of the cluster/node excluding the root.
+     * For a set of nodes which is clustered by 'country' first and 'industrial' sector second the text will
+     * show up as follows: 'country-name' - 'industrial-sector'
+     *
+     */
     addBreadcrumbContainer() {
         if (this.mBreadcrumb) {
             $(this).append(this.mBreadcrumb)
@@ -148,6 +148,13 @@ export default class ClusterTextOverlay extends HTMLElement {
         $(this).append(this.mBreadcrumb)
 
     }
+
+
+    /**
+     * Updates the visible text of the breadcrumb.
+     *
+     * @param parentClusters ... a set of parent clusters in hierarchical order from root to leaf
+     */
 
     setBreadcrumb(parentClusters) {
 
@@ -166,31 +173,17 @@ export default class ClusterTextOverlay extends HTMLElement {
 
         });
 
-        this.mBreadcrumb.empty().append(res.join(" - "))
+        this.mBreadcrumb.empty().append(res.join(this.separator))
 
     }
 
 
     /**
-     *
-     * TODO the root cluster manages the visibility of all of it's currently visible nodes
-     * we do have a hierarchical structure that we can use to speed up the rendering a bit
-     *
+     * This method will be invoked after the ClusterTextOverlay finishes waiting for the {@see GraphView3D} to load.
+     *  It will initialise the factory responsible for updating and recycling text nodes whenever the user navigates the 3D-graph
      */
 
     addGlobalNodeCaptions(view) {
-
-
-        /**
-         * for the method to work the "env" object  needs to contain the following params :
-         * env={
-         *  renderer.domElement,  for get dimensions and text pos
-         *   currentNodesVisible,   // ... nodes visible==all nodes in set is to harsh let rootcluster handle it probably
-         *	textNode,               // node container that is overlay with pointerevents none
-         *  camera
-         *  }
-         */
-
 
         var mTextNode = $(this)
             .height(view.clientHeight)
@@ -201,6 +194,9 @@ export default class ClusterTextOverlay extends HTMLElement {
 
 
         var that = this;
+
+
+        // for explanation of parameters {@see TextNodesFactory}
         let env = {
             renderer: view.mRenderer,
             currentNodesVisible: [],//can be left empty if below nodes function is used
@@ -209,7 +205,7 @@ export default class ClusterTextOverlay extends HTMLElement {
 
         };
 
-
+        //determine the distance between user and cluster
         function getDistance(cluster) {
             let point1 = view.mCamera.position;
             let point2 = cluster.localToWorld(new THREE.Vector3);
@@ -219,6 +215,7 @@ export default class ClusterTextOverlay extends HTMLElement {
 
         }
 
+        //sort clusters from smallest distance to biggest
         function sortClusters(clusters) {
 
             var res = _.map(clusters, function (c) {
@@ -232,6 +229,10 @@ export default class ClusterTextOverlay extends HTMLElement {
         }
 
 
+        /**
+         * Determines the nodes and clusters that are relevant for their text-node to be shown.
+         *
+         */
         function getNodesForLeaf() {
             //return only the closest cluster
             that.selectedLeafCluster = null
@@ -291,8 +292,7 @@ export default class ClusterTextOverlay extends HTMLElement {
             });
 
 
-        // TODO the bounding volume determines the visibility of the text nodes
-        //TODO so currently with no volume generated properly the text nodes are invisible
+        // TODO The bounding volume determines the visibility of the text nodes. So when text nodes are not properly generated - with no volume - the text nodes are invisible.
 
         function getNodeParentCluster(node) {
             return node.parent.parent
@@ -305,10 +305,10 @@ export default class ClusterTextOverlay extends HTMLElement {
             maxVisibleCount: 30,
             maxDistance: function (node) {
                 return getNodeParentCluster(node).getRadius(getNodeParentCluster(node).mNodes.length) / 3 * 10
-            },//30000
+            },  //eg. 30000
             minDistance: function (node) {
                 return getNodeParentCluster(node).getRadius(getNodeParentCluster(node).mNodes.length) / 3 * 3
-            }, //3000
+            },  //eg. 3000
             getNodes: function () {
 
                 if (that.possibleClusters.length > 0) {
@@ -373,8 +373,12 @@ export default class ClusterTextOverlay extends HTMLElement {
 
 }
 
+
+/**
+ * initialize the dom element
+ */
 if (!customElements.get("cluster-text-overlay"))
-customElements.define("cluster-text-overlay", ClusterTextOverlay);
+    customElements.define("cluster-text-overlay", ClusterTextOverlay);
 
 
 
