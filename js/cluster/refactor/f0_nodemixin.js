@@ -19,10 +19,18 @@ var singleNodeMaterial = new THREE.MeshBasicMaterial({
 });
 
 
+/**
+ *
+ * TODO this should already have been replaced by {@see Node3D}
+ **/
+
 export default function nodeMixin(env, node) {
 
     if (!node)
-        console.warn("fu")
+       throw new Error("2nd param must be a valid node");
+
+
+
     if (node._mixin_)
         return node
 

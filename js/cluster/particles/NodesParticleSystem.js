@@ -1,13 +1,35 @@
-//{groupKeyName:"group_data",groupValueName:"group_data",nodeKey:'size'}
-
 import TWEEN from "@tweenjs/tween.js"
 import * as THREE from "three";
 import * as _ from "lodash";
 
 
+/**
+ * Creates a sub-particle system for a set of nodes.
+ * This particle system is based on a point cloud which holds all the positions of the particles.
+ * The particles visible in this implementation are small rectangular dots rendered within the vicinity of each node.
+ * The number of particles per node is determined by the value of  - node[options.nodeKey] -
+ * For the default case default this is - node.itemCount - where 'itemCount' is the an integer attribute for a node.
+ *
+ * The particles are meant to be partially independent of the node itself.
+ * For example: If a graph is rendered and its node reaches a certain position in space, the animation for the particle system can be triggered for the whole set of nodes.
+ * The result is a transition effect of many particles to their destination (each node) from an initial position.
+ *
+ *
+ * @param nodes .. A set of nodes for  which the particles are created.
+ *                  Use multiple particle systems for different clusters of nodes to prevent unnecessary calculations
+ *                  to otherwise to the user invisible nodes.
+ * @param options ... an object containing parameters .. see below for details
+ * @returns {{destination: Float32Array, pointCloud: Points, particleCount: *, nodes: *, updateDestinations: updateDestinations, updateColors: updateColors, start: start, stop: stop, update: animateParticles, remove: remove}}
+ */
+
 export default function NodesParticleSystem(nodes, options) {
 
 
+    /**
+     * Creates a shader material shich is used to render the point cloud/ particle system.
+     *
+     * @returns {THREE.ShaderMaterial}
+     */
     function getParticleShaderMaterial() {
         var vertexShader = `
 			
@@ -79,17 +101,23 @@ export default function NodesParticleSystem(nodes, options) {
     }
 
 
+    /**
+     * the default values for the second (options) parameter of NodesParticleSystem
+     */
+
     options = _.extend({
         groupKeyName: "isGroupNode",
         groupValueName: "nodes",
         nodeKey: 'itemCount',
-        increment: 5,
-        duration: 1000,
-        easing: TWEEN.Easing.Linear.None,
-        position: {x: 0, y: 50000, z: 50000}
+        increment: 5, //the increment value for the animation to the destination. Bigger values equals faster transition to destination.
+        duration: 1000, //The time in milliseconds the transition takes.
+        easing: TWEEN.Easing.Linear.None, //the easing function used. Can be used for example for bouncing effects of particles.
+        position: {x: 0, y: 50000, z: 50000} // the initial position of the particle.
     }, options)
 
-
+    /**
+     * a method to calculate the particle count of a node
+     */
     function getNodeParticleCount(node) {
 
         if (node[options.groupKeyName])
@@ -157,6 +185,11 @@ export default function NodesParticleSystem(nodes, options) {
     particleSystem.frustrumCulled = true;
 
 
+    /**
+     * Updates the color property of the float array of the point cloud geometry
+     * based on the color value of the nodes.
+     *
+     */
     function updateColors() {
 
 

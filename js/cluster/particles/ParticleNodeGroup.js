@@ -2,20 +2,31 @@ import * as THREE from "three";
 import * as _ from "lodash";
 
 /**
- **    use for group of nodes that share some similarities (nCountry <= company)
- *    this approach does not allow for adding removing nodes as of yet
+ * The ParticleNodeGroup handles the rendering of a set of graph-nodes via a {@see THREE.Points} point cloud.
+ * Use for group of nodes that share some similarities (country, company, ...)
+ *
+ * NOTE: This approach does not allow for adding removing nodes as of yet.
+ *
+ * @param nodes .. a set of nodes to be rendered
+ * @param options ..configuration object
+ * @param domEvents ... in instance of {@see  cluster.utils.DomEventsAlt}
+ * @returns {{nodes: *, pointCloud: Points, update: update, updateNode: updateNode, updateNodePosition: updateNodePosition, updateNodeColor: updateNodeColor, updateNodeSize: updateNodeSize, on: on, remove: remove}}
  */
 export default function ParticleNodeGroup(nodes, options, domEvents) {
 
     options = _.extend({
-
-        nodeDefaultSize: 10,
-        nodeDefaultScale: 1,
-        nodeTexture: "img/dot7.png",
-        baseColor: 0xFFFFFF
+        nodeDefaultSize: 10, //by default the node size is set to 10 units
+        nodeDefaultScale: 1, // a scaling factor for the size
+        nodeTexture: "img/dot7.png", // the texture/image that will be used as the default node representation
+        baseColor: 0xFFFFFF  // the default color of the node
     }, options)
 
 
+    /**
+     * Uses a shader material to render the node.
+     *
+     * @returns {ShaderMaterial}
+     */
     function getParticleShaderMaterial2() {
         var vertexShader = `
 									
@@ -117,6 +128,11 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
     for (let i = 0; i < nCount; i++)
         updateNode(i)
 
+
+    /**
+     * For convenience.
+     *
+     */
     function updateNode(i) {
         updateNodePosition(i)
         updateNodeColor(i)
@@ -124,6 +140,13 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
     }
 
+
+    /**
+     * This method is called to update the position data (position) of the point cloud buffer geometry,
+     * based on the 'x,y,z'-coordinates of the node.
+     *
+     * @param i .. the i-th node to update
+     */
     function updateNodePosition(i) {
         //updates the current nodes properties
 
@@ -137,6 +160,13 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
     }
 
+
+    /**
+     * This method is called to update the color data (customColor) of the point cloud buffer geometry
+     * based on the 'color'-attribute of the node.
+     *
+     * @param i .. the i-th node to update
+     */
     function updateNodeColor(i) {
         var colors = geometry.attributes.customColor.array;
 
@@ -148,6 +178,13 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
         geometry.attributes.customColor.needsUpdate = true;
     }
+
+    /**
+     * This method is called to update the size data (size) of the point cloud buffer geometry
+     * based on the 'size'-attribute of the node.
+     *
+     * @param i .. the i-th node to update
+     */
 
     function updateNodeSize(i) {
         var sizes = geometry.attributes.size.array;
@@ -218,9 +255,9 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
 /**
  *
- * this is a custom implementation for the raytracer of the point cloud
+ * This is a custom implementation for the ray-tracer of the point cloud
  * NOTE: currently it is not used because the nodes are handled partially as empty meshes
- * so the default threex.domEvents library can be used instead of the current work around
+ * so the default THREEx.DomEvents library can be used
  *
  * @deprecated
  *
