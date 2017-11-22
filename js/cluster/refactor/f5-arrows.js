@@ -6,10 +6,16 @@ import * as _ from "lodash";
  */
 
 
-//------------------------------------------------
-//Feature 5 arrows
+/**
+ * Code below is related to the arrows-feature of the graph.
+ * The arrows are shown for specific edges.
+ *
+ * @param mesh .. instanceof {@see THREE.Mesh}
+ * @param maxIter ... to prevent infinite loops a max amount of iterations is set
 
-
+ * @returns {@see THREE.Scene}
+ * @private
+ */
 function _findSceneForMesh(mesh, maxIter = 99) {
     var scene = null;
     while (mesh.parent && maxIter--) {

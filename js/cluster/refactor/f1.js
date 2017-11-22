@@ -2,6 +2,14 @@
  * Created by Frank on 16.07.2017.
  */
 
+import {addArrow, removeArrow} from "./f5-arrows"
+import ZoomUtil from "../../utils/ZoomUtil";
+import {GUI} from "./SpecificDataUtils";
+
+
+import * as _ from "lodash";
+import * as $ from "jquery"
+
 /**
  NOTE: set initialEngineTicks to a appropriate value to speed up bigger graphs
 
@@ -10,21 +18,15 @@
 
 
  TODO scale arrow depending on  group link size
- TODO expanding nodes will result in still showing group tooltips
- probably remove group nodes from raycaster or something like that
+ TODO expanding nodes will result in still showing group tooltips, probably remove group nodes from raycaster or something like that
 
  TODO ?when using hull feature? sometimes nodes cannot be clicked .. probably due to hull back or front preventing events from triggering on nodes
  TODO search filter for hidden nodes.. expand before zoom
 
  */
 
-import {addArrow, removeArrow} from "./f5-arrows"
-import ZoomUtil from "../../utils/ZoomUtil";
-import {GUI} from "./SpecificDataUtils";
 
 
-import * as _ from "lodash";
-import * as $ from "jquery"
 
 //current selected node
 var previousNodeClicked = [];
@@ -34,7 +36,6 @@ var previousNodeDblClicked;
 //Feature 1
 
 var previousNodes;
-
 
 /**
  * removes/cleans up all selections from previous selected elements
