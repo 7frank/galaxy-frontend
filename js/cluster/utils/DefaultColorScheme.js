@@ -1,16 +1,15 @@
 /**
  *
- * manage color for cluster
- * have listeners so that listeners can handle changes
+ * A web component that manages colors for our node clusters.
+ * This is supposed to help manage / change color and presents of the cluster when multiple configurations {@see Default3DGraphConfig} are used.
  *
+ * TODO Have some event listeners so that listeners can handle change events
  *
+ * @deprecated
  */
 import Color from 'easy-color';
 import * as $ from "jquery"
 
-//OptionsManager
-// colors
-//TODO currently not in use
 export default class DefaultColorScheme extends HTMLElement {
 
 

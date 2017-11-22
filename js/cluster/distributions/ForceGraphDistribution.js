@@ -7,7 +7,7 @@ import BaseDistribution from "./BaseDistribution"
 
 import BaseCluster3D from "../BaseCluster3D"
 
-import RoundRobin from "../utils/RoundRobin"
+import RoundRobin from "../utils/AnimationFrameBasedScheduler"
 
 import * as THREE from "three";
 import * as _ from "lodash";
