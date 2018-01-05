@@ -20,9 +20,9 @@ import * as $ from "jquery"
  * @param textNode ... A HTML-element that functions as container, which is used as overlay holding the text elements
  *                      for the nodes with the attribute 'pointer-events' set to 'none'
  *                      so all events get passed to the 3D scene for further processing.
- *                      By default textNOde should be an instance of {@see ClusterTextOverlay}
+ *                      By default textNOde should be an instance of {@link ClusterTextOverlay}
  *
- * @param  camera ... The camera that represents the position/viewport of the user observing the {@see RootCluster}
+ * @param  camera ... The camera that represents the position/viewport of the user observing the {@link RootCluster}
  *
  * @param options .. see below for details
  *
@@ -129,8 +129,8 @@ export default function TextNodesFactory(env, options) {
 
     /**
      *
-     * @param p ... an instanceof {@see THREE.Vector3} representing the position of the node/element in 3D space.
-     * @param camera ... an instanceof {@see THREE.Camera} representing the position and viewport of the user/observer.
+     * @param p ... an instanceof {@link THREE.Vector3} representing the position of the node/element in 3D space.
+     * @param camera ... an instanceof {@link THREE.Camera} representing the position and viewport of the user/observer.
      * @param viewOffsetWidthBy2  .. the relative screen offset of the container (view) divided by two
      * @param viewOffsetHeightBy2 .. the relative screen offset of the container (view)divided by two
      */

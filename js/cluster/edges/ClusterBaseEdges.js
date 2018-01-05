@@ -26,8 +26,8 @@ export default class ClusterBaseEdges extends THREE.Line {
     /**
      * the default constructor
      *
-     * @param siblingClustersArray ... an array of clusters {@see BaseCluster3D}
-     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@see THREE.LineBasicMaterial}
+     * @param siblingClustersArray ... an array of clusters {@link BaseCluster3D}
+     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@link THREE.LineBasicMaterial}
      */
     constructor(siblingClustersArray, materialOptions) {
         super();
@@ -46,10 +46,10 @@ export default class ClusterBaseEdges extends THREE.Line {
     }
 
     /**
-     * defines and returns a default material {@see THREE.LineBasicMaterial} and adds {@see MaterialFadeMixin}
+     * defines and returns a default material {@link THREE.LineBasicMaterial} and adds {@link MaterialFadeMixin}
      * to be able to use a fading parameter for the level-of-detail (LOD) optimisations of the graph
      *
-     * @param options ... object containing a subset (opacity, transparent, color) of options for {@see THREE.LineBasicMaterial}
+     * @param options ... object containing a subset (opacity, transparent, color) of options for {@link THREE.LineBasicMaterial}
      */
 
     getDefaultMaterial(options) {
@@ -188,7 +188,7 @@ export default class ClusterBaseEdges extends THREE.Line {
      *
      * TODO have a mechanism that reinitialises mChildClustersEdges in case other clusters get streamed/added in a later stage
      *
-     * @param clusters ... array of {@see BaseCluster3D}
+     * @param clusters ... array of {@link BaseCluster3D}
      */
     createEdgesForClusters(clusters) {
 
@@ -199,9 +199,9 @@ export default class ClusterBaseEdges extends THREE.Line {
     }
 
     /**
-     * generates and updates edges between clusters  {@see BaseCluster3D}
+     * generates and updates edges between clusters  {@link BaseCluster3D}
      *
-     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@see THREE.LineBasicMaterial}
+     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@link THREE.LineBasicMaterial}
      */
     initEdgeMesh(materialOptions) {
 
@@ -234,7 +234,7 @@ export default class ClusterBaseEdges extends THREE.Line {
     /**
      * setter
      *
-     * @param clusters .. array of {@see BaseCluster3D}
+     * @param clusters .. array of {@link BaseCluster3D}
      */
 
     setClusters(clusters) {
@@ -244,8 +244,8 @@ export default class ClusterBaseEdges extends THREE.Line {
 
     /**
      *
-     * @param el .. instanceof {@see BaseCluster3D}
-     * @returns the center position of a cluster as instanceof {@see THREE.Vector3}
+     * @param el .. instanceof {@link BaseCluster3D}
+     * @returns the center position of a cluster as instanceof {@link THREE.Vector3}
      */
 
 

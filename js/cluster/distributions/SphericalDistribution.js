@@ -16,7 +16,7 @@ import * as THREE from "three";
 export default class SphericalDistribution extends BaseDistribution {
 
     /**
-     * for details {@see BaseDistribution.constructor}
+     * for details {@link BaseDistribution.constructor}
      **/
     constructor(scale = 50, dimensions = 1) {
         super(scale, 2) //only 2d
@@ -44,7 +44,7 @@ export default class SphericalDistribution extends BaseDistribution {
 
 
     /**
-     * for details {@see BaseDistribution.distribute}
+     * for details {@link BaseDistribution.distribute}
      **/
 
     distribute(node, dx, dy, dz) {

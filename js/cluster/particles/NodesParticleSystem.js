@@ -40,7 +40,7 @@ export default function NodesParticleSystem(nodes, options) {
 
 
     /**
-     * Creates a shader material which is used to render the particle system via {@see THREE.Points} point cloud.
+     * Creates a shader material which is used to render the particle system via {@link THREE.Points} point cloud.
      *
      * @returns {ShaderMaterial}
      */
@@ -115,7 +115,7 @@ export default function NodesParticleSystem(nodes, options) {
     }
 
     /**
-     * The default options for the {@see NodesParticleSystem} .
+     * The default options for the {@link NodesParticleSystem} .
      */
 
     options = _.extend({

@@ -2,14 +2,14 @@ import * as THREE from "three";
 import * as _ from "lodash";
 
 /**
- * The ParticleNodeGroup handles the rendering of a set of graph-nodes via a {@see THREE.Points} point cloud.
+ * The ParticleNodeGroup handles the rendering of a set of graph-nodes via a {@link THREE.Points} point cloud.
  * Use for group of nodes that share some similarities (country, company, ...)
  *
  * NOTE: This approach does not allow for adding removing nodes as of yet.
  *
  * @param nodes .. a set of nodes to be rendered
  * @param options ..configuration object
- * @param domEvents ... in instance of {@see  cluster.utils.DomEventsAlt}
+ * @param domEvents ... in instance of {@link  cluster.utils.DomEventsAlt}
  * @returns {{nodes: *, pointCloud: Points, update: update, updateNode: updateNode, updateNodePosition: updateNodePosition, updateNodeColor: updateNodeColor, updateNodeSize: updateNodeSize, on: on, remove: remove}}
  */
 export default function ParticleNodeGroup(nodes, options, domEvents) {

@@ -12,7 +12,7 @@ import * as $ from "jquery"
 /**
  * the default settings for a 2d representation of the given node data
  *
- * for details: {@see Default3DGraphConfig}
+ * for details: {@link Default3DGraphConfig}
  *
  */
 

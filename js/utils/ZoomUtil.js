@@ -16,7 +16,7 @@ export default class ZoomUtil {
 
     /**
      * used to
-     * for further details {@see ZoomUtil.moveToPosition}
+     * for further details {@link ZoomUtil.moveToPosition}
      *
      * @param cluster
      * @param options: an object containing a 'complete' callback function and a 'distance' parameter
@@ -49,9 +49,9 @@ export default class ZoomUtil {
 
     /**
      * moves the camera position to a target mesh
-     * for further details {@see ZoomUtil.moveToPosition}
+     * for further details {@link ZoomUtil.moveToPosition}
      *
-     * @param mesh: {@see THREE.Mesh}
+     * @param mesh: {@link THREE.Mesh}
      *
      */
 
@@ -77,10 +77,10 @@ export default class ZoomUtil {
 
 
     /**
-     * animates the position and rotation of a given camera {@see THREE.Camera} to the target position
+     * animates the position and rotation of a given camera {@link THREE.Camera} to the target position
      *
-     * @param position: instanceof {@see THREE.Vector3} ... a target position must be provided in world coordinates
-     * @param camera: instanceof {@see THREE.Camera}
+     * @param position: instanceof {@link THREE.Vector3} ... a target position must be provided in world coordinates
+     * @param camera: instanceof {@link THREE.Camera}
      * @param controls: instanceof THREE a THREE control class like TrackballControls
      * @param cameraDistanceToMesh: the distance to the target position the camera will stop at
      * @param onComplete: a callback function that is triggered when the animation fphase has ended and the camera is at the target location

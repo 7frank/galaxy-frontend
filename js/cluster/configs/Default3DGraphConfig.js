@@ -37,7 +37,7 @@ export default class Default3DGraphConfig {
 
 
     /**
-     * currently the configuration needs a {@see View3D} instance which is later used to bind the keyboard and mouse controls to the 3d graph {@see RootCluster}
+     * currently the configuration needs a {@link View3D} instance which is later used to bind the keyboard and mouse controls to the 3d graph {@link RootCluster}
      *
      * @param target ... instanceof  View3D
      *
@@ -201,7 +201,7 @@ export default class Default3DGraphConfig {
 
     /**
      *
-     *  Returns the instance of the {@see View3D} container which is used to render the graph within.
+     *  Returns the instance of the {@link View3D} container which is used to render the graph within.
      *
      */
 

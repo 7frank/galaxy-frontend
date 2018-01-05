@@ -1,7 +1,7 @@
 /**
  *
  * A web component that manages colors for our node clusters.
- * This is supposed to help manage / change color and presents of the cluster when multiple configurations {@see Default3DGraphConfig} are used.
+ * This is supposed to help manage / change color and presents of the cluster when multiple configurations {@link Default3DGraphConfig} are used.
  *
  * TODO Have some event listeners so that listeners can handle change events
  *

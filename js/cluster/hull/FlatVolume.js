@@ -11,8 +11,8 @@ import * as _ from "lodash";
 import convexHull2d from "monotone-convex-hull-2d"
 
 /**
- * This is quick&dirty copy of {@see ConvexVolume} with some changes, using a more optimised algorithm
- * for 2D {@see convexHull2d} and generating a 2D convex hull instead of the former.
+ * This is quick&dirty copy of {@link ConvexVolume} with some changes, using a more optimised algorithm
+ * for 2D {@link convexHull2d} and generating a 2D convex hull instead of the former.
  *
  * TODO inherit from ConvexVolume for redundancy reasons
  */
@@ -29,7 +29,7 @@ export default class FlatVolume extends BoxVolume {
     }
 
     /**
-     * Creates a flat {@see THREE.ShapeGeometry} for further processing.
+     * Creates a flat {@link THREE.ShapeGeometry} for further processing.
      *
      * @param vertices ... the vertices the convex shape is based on
      * @returns {ShapeGeometry}
@@ -58,7 +58,7 @@ export default class FlatVolume extends BoxVolume {
     }
 
     /**
-     * {@see ConvexVolume.smoothHullModifier}
+     * {@link ConvexVolume.smoothHullModifier}
      *
      * @param geometry  ... at best ca convex geometry
      * @param numSegments ... determines the smoothing of the rounded edges
@@ -89,7 +89,7 @@ export default class FlatVolume extends BoxVolume {
     /**
      * Creates the actual convex geometry which is later used to create the visible mesh.
      *
-     * for details {@see BaseVolume.createVolumeFromVertices}
+     * for details {@link BaseVolume.createVolumeFromVertices}
      */
     createVolumeFromVertices(vertices, boundingBox) {
 
@@ -218,7 +218,7 @@ export default class FlatVolume extends BoxVolume {
 
 
     /**
-     * {@see BoxVolume.transferFunction}
+     * {@link BoxVolume.transferFunction}
      *
      */
 
@@ -254,7 +254,7 @@ export default class FlatVolume extends BoxVolume {
      * Also uses private transfer function to blend in/out mesh on zoom. With bigger or minimal distances the mesh gets more transparent.
      * at an average distance between camera and mesh, it reaches its maximmum opacity.
      *
-     * For  further details {@see BaseVolume.setLOD}
+     * For  further details {@link BaseVolume.setLOD}
      *
      * TODO it is probably better to separate the LOD from the visibility/opacity parameter
      */
@@ -296,7 +296,7 @@ export default class FlatVolume extends BoxVolume {
 
 
     /**
-     * {@see BaseVolume.setActive}
+     * {@link BaseVolume.setActive}
      */
     setActive() {
         this.maxOpacity = 0.4;
@@ -304,7 +304,7 @@ export default class FlatVolume extends BoxVolume {
 
 
     /**
-     * {@see BaseVolume.setActive}
+     * {@link BaseVolume.setActive}
      */
     setInactive() {
         this.maxOpacity = 0.2;

@@ -16,7 +16,7 @@ import * as $ from "jquery"
 
 
 /**
- * A overlay class that can be used to put text elements on top of a{@see View3D}.
+ * A overlay class that can be used to put text elements on top of a{@link View3D}.
  * Primarily this is used to create text elements for clusters and nodes,
  * instead of generating 3D text which should be considerably slower.
  *
@@ -41,7 +41,7 @@ export default class ClusterTextOverlay extends HTMLElement {
     }
 
     /**
-     * Initializes CSS and waits for graph {@see GraphView3D} to be loaded, before continuing to create the overlay.
+     * Initializes CSS and waits for graph {@link GraphView3D} to be loaded, before continuing to create the overlay.
      */
 
     connectedCallback() {
@@ -64,7 +64,7 @@ export default class ClusterTextOverlay extends HTMLElement {
     }
 
     /**
-     * Add listeners to the  {@see GraphView3D} to collect data of the visible cluster and leaf elements
+     * Add listeners to the  {@link GraphView3D} to collect data of the visible cluster and leaf elements
      * when rendering each frame to update the current visible text nodes.
      */
     bindToCluster(rootcluster) {
@@ -179,7 +179,7 @@ export default class ClusterTextOverlay extends HTMLElement {
 
 
     /**
-     * This method will be invoked after the ClusterTextOverlay finishes waiting for the {@see GraphView3D} to load.
+     * This method will be invoked after the ClusterTextOverlay finishes waiting for the {@link GraphView3D} to load.
      *  It will initialise the factory responsible for updating and recycling text nodes whenever the user navigates the 3D-graph
      */
 
@@ -196,7 +196,7 @@ export default class ClusterTextOverlay extends HTMLElement {
         var that = this;
 
 
-        // for explanation of parameters {@see TextNodesFactory}
+        // for explanation of parameters {@link TextNodesFactory}
         let env = {
             renderer: view.mRenderer,
             currentNodesVisible: [],//can be left empty if below nodes function is used

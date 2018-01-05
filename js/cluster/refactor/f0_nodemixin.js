@@ -21,7 +21,7 @@ var singleNodeMaterial = new THREE.MeshBasicMaterial({
 
 /**
  *
- * TODO this should already have been replaced by {@see Node3D}
+ * TODO this should already have been replaced by {@link Node3D}
  **/
 
 export default function nodeMixin(env, node) {

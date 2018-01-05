@@ -13,7 +13,7 @@ import "../../lib/QuickHull"
 
 /**
  *
- * Implementation of a convex hull around a set of nodes in 3D space using {@see QuickHull} algorithm.
+ * Implementation of a convex hull around a set of nodes in 3D space using {@link QuickHull} algorithm.
  * In addition multiple separate geometries with different resolutions (triangle count) are generated for rendering,
  * to improve overall GPU load.
  *
@@ -41,7 +41,7 @@ export default class ConvexVolume extends BoxVolume {
      * which will result in a hull around the convex hull that has a fixed margin.
      * It rounds/smoothens the sharp edges of the original convex hull.
      *
-     * NOTE:A modifier for three.js is some algorithm that uses a {@see THREE.Geometry} and alters vertex positions or/and count in some way.
+     * NOTE:A modifier for three.js is some algorithm that uses a {@link THREE.Geometry} and alters vertex positions or/and count in some way.
      *
      *
      * @param geometry ... at best a convexGeometry
@@ -73,7 +73,7 @@ export default class ConvexVolume extends BoxVolume {
 
     /**
      * Returns the material used for the mesh rendered.
-     * {@see BaseVolume.getMaterial}
+     * {@link BaseVolume.getMaterial}
      */
 
     getMaterial() {
@@ -108,7 +108,7 @@ export default class ConvexVolume extends BoxVolume {
     /**
      * Creates the actual convex geometry which is later used to create the visible mesh.
      *
-     * for details {@see BaseVolume.createVolumeFromVertices}
+     * for details {@link BaseVolume.createVolumeFromVertices}
      */
     createVolumeFromVertices(vertices, boundingBox) {
 
@@ -193,7 +193,7 @@ export default class ConvexVolume extends BoxVolume {
     /**
      * Creates a box geometry.
      *
-     * @param boundingBox ..  {@see THREE.Box3}
+     * @param boundingBox ..  {@link THREE.Box3}
      * @returns {THREE.BoxGeometry}
      */
 
@@ -222,7 +222,7 @@ export default class ConvexVolume extends BoxVolume {
     }
 
     /**
-     * {@see BoxVolume.transferFunction}
+     * {@link BoxVolume.transferFunction}
      *
      * TODO test some more useful transfer functions
      */
@@ -258,7 +258,7 @@ export default class ConvexVolume extends BoxVolume {
      * Also uses private transfer function to blend in/out mesh on zoom. With bigger or minimal distances the mesh gets more transparent.
      * at an average distance between camera and mesh, it reaches its maximmum opacity.
      *
-     * For  further details {@see BaseVolume.setLOD}
+     * For  further details {@link BaseVolume.setLOD}
      *
      * TODO it is probably better to separate the LOD from the visibility/opacity parameter
      */
@@ -303,14 +303,14 @@ export default class ConvexVolume extends BoxVolume {
     }
 
     /**
-     * {@see BaseVolume.setActive}
+     * {@link BaseVolume.setActive}
      */
     setActive() {
         this.maxOpacity = 0.4;
     }
 
     /**
-     *  {@see BaseVolume.setActive}
+     *  {@link BaseVolume.setActive}
      */
     setInactive() {
         this.maxOpacity = 0.2;

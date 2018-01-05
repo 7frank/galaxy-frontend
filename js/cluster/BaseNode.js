@@ -14,7 +14,7 @@ import * as Mousetrap from "mousetrap";
 import * as $ from "jquery"
 
 /**
- * A simple graph-node that contains methods for user interaction and basic visualisation via threejs {@see THREE}.
+ * A simple graph-node that contains methods for user interaction and basic visualisation via threejs {@link THREE}.
  *
  *
  * Makes use of different types of events (mouse-, keyboard- and custom-events) to be used.
@@ -26,7 +26,7 @@ import * as $ from "jquery"
  * Note: The current implementation has some limitations for multiple graphs of BaseBode instances to be rendered at the same time.
  *   For example: Parameters like "currentSelection" set by the method  BaseNode::initStatic() will be shared among simultaneously running instances.
  *
- * TODO change behaviour of {@see initStatic} and possibly refactor this part into the root node or a mixin
+ * TODO change behaviour of {@link initStatic} and possibly refactor this part into the root node or a mixin
  *
  *
  */
@@ -35,7 +35,7 @@ import * as $ from "jquery"
 export default class BaseNode extends THREE.Mesh {
 
     /**
-     * The constructor needs an instance of a view. {@see View3D} It is rendered within the view container to be able to attach DOM events.
+     * The constructor needs an instance of a view. {@link View3D} It is rendered within the view container to be able to attach DOM events.
      *
      * @param view extends View3D
      */
@@ -94,7 +94,7 @@ export default class BaseNode extends THREE.Mesh {
     }
 
     /**
-     * Tries to return the {@see View3D} element. There is one view that functions as container for a cluster and all its sub-clusters and nodes.
+     * Tries to return the {@link View3D} element. There is one view that functions as container for a cluster and all its sub-clusters and nodes.
      *
      * @returns a View3D if attached to the view before, else null
      */

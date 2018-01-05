@@ -10,10 +10,10 @@ import * as _ from "lodash";
  * Code below is related to the arrows-feature of the graph.
  * The arrows are shown for specific edges.
  *
- * @param mesh .. instanceof {@see THREE.Mesh}
+ * @param mesh .. instanceof {@link THREE.Mesh}
  * @param maxIter ... to prevent infinite loops a max amount of iterations is set
 
- * @returns {@see THREE.Scene}
+ * @returns {@link THREE.Scene}
  * @private
  */
 function _findSceneForMesh(mesh, maxIter = 99) {

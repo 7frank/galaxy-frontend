@@ -3,7 +3,7 @@ import * as _ from "lodash";
 
 /**
  * Code in here contains some helper functions to manage different layout types for industrial sector captions.
- * This is mainly used to override the way the caption of a cluster is displayed. {@see Default3DGraphConfig}
+ * This is mainly used to override the way the caption of a cluster is displayed. {@link Default3DGraphConfig}
  */
 
 

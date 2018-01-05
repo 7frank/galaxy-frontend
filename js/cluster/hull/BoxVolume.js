@@ -5,7 +5,7 @@
 import BaseVolume from "./BaseVolume"
 
 /**
- * A slight (and visible) derivative of it's base class {@see BaseVolume}
+ * A slight (and visible) derivative of it's base class {@link BaseVolume}
  *
  *
  */

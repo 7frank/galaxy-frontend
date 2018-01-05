@@ -35,7 +35,7 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
     /**
      * the default constructor
-     * {@see BaseDistribution}
+     * {@link BaseDistribution}
      *
      */
 
@@ -66,7 +66,7 @@ export default class ForceGraphDistribution extends BaseDistribution {
     /**
      * The core of the force graph simulation using a queue to smooth out rendering.
      * NOTE: only a subset of possible options is used to improve performance for large amounts of nodes.
-     *   For a full set of options see the online documentation for {@see d3_force.forceSimulation}
+     *   For a full set of options see the online documentation for {@link d3_force.forceSimulation}
      *
      * @param nodes ... an array of nodes for the graph
      * @param edges ... an array of edges representing a relation between certain nodes
@@ -172,7 +172,7 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
     /**
      *
-     *  For further information: {@see BaseDistribution.setNodes}
+     *  For further information: {@link BaseDistribution.setNodes}
      *
      * @param nodes ...  should be an instanceof BaseCluster3D as default or an array of node primitives
      *               Those are used to determine the edges / links for the simulation

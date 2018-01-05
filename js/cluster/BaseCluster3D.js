@@ -29,17 +29,17 @@ import * as _ from "lodash";
  * -for example a  graph may contain clusters of nodes of elements like companies, which can be clustered by country, which can further by clustered by industrial sector
  *
  * cluster-hull:
- * - the cluster hull is a specific implementation of {@see  BaseVolume}, its purpose is to generate a visible hull around a cluster of nodes
- * - for example for 3D a {@see  ConvexVolume}  can be used
+ * - the cluster hull is a specific implementation of {@link  BaseVolume}, its purpose is to generate a visible hull around a cluster of nodes
+ * - for example for 3D a {@link  ConvexVolume}  can be used
  *
  *
  * leaf-elements:
  * - handle the specific rendering of BaseCluster3D::mNodes set by BaseCluster3D::addNodes
  * - the default implementation for example uses a THREE.Point structure to render a stack of nodes via point clouds
- * - a leaf {@see  ClusterLeafElement} for the default implemetatin, consists of the mNodes rendered, its particles (the small rectangles within the node-sprite) and the edges between the mNode elements
+ * - a leaf {@link  ClusterLeafElement} for the default implemetatin, consists of the mNodes rendered, its particles (the small rectangles within the node-sprite) and the edges between the mNode elements
  *
  * edge-containers:
- * - {@see ClusterBaseEdges} {@see ClusterMeshEdges}
+ * - {@link ClusterBaseEdges} {@link ClusterMeshEdges}
  * - renders edges between a set of sibling clusters
  * - an edge by default unidirectional from sender to target and the interpretation is up to the specific use case
  *
@@ -623,8 +623,8 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     * Add one or many nodes to the cluster. These nodes differ from the {@see BaseNode} although there is a naming similarity
-     * Instead, these nodes are those rendered within a {@see ClusterLeafElement} and represent the nodes of the visible graph
+     * Add one or many nodes to the cluster. These nodes differ from the {@link BaseNode} although there is a naming similarity
+     * Instead, these nodes are those rendered within a {@link ClusterLeafElement} and represent the nodes of the visible graph
      * TODO could this be used to dynamically add nodes an re-run the clustering?
      *
      */
@@ -743,7 +743,7 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     * {@see setEntries}
+     * {@link setEntries}
      */
     setEntry(entry) {
         this.mEntry = entry
@@ -751,7 +751,7 @@ export default class BaseCluster3D extends BaseNode {
 
 
     /**
-     * {@see getEntries}
+     * {@link getEntries}
      */
     getEntry() {
         return this.mEntry
@@ -772,7 +772,7 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     * {@see setEntries}
+     * {@link setEntries}
      */
     getEntries() {
         return this.mEntrys || []
@@ -794,7 +794,7 @@ export default class BaseCluster3D extends BaseNode {
      *
      * @param Object.onHullCreated gets called after creating an instance of 'Object.hull'
      *
-     * @param Object.edges the class that is used to generate visible edges between sibling clusters. must be instanceof {@see ClusterBaseEdges}
+     * @param Object.edges the class that is used to generate visible edges between sibling clusters. must be instanceof {@link ClusterBaseEdges}
      *
      * @param Object.edges if set to true the whole sub-cluster is rendered. if set to false only the placeholder (spherical object) is rendered
      *
@@ -1160,7 +1160,7 @@ export default class BaseCluster3D extends BaseNode {
     /**
      * the current cluster gets subdivided into smaller clusters
      * based on the result of the filterFunction
-     * the resulting groups are used by @see doClusteringForOnlyThis to create the actual visible child clusters
+     * the resulting groups are used by @link doClusteringForOnlyThis to create the actual visible child clusters
      */
     groupBy(filterFunction) {
         var clazz = this.getChildClusterConstructor();
@@ -1383,7 +1383,7 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     /**
-     *  {@see addHullStencilBeforeRender}
+     *  {@link addHullStencilBeforeRender}
      **/
 
     addEdgeStencilBeforeRender(mesh, callback) {
@@ -1416,7 +1416,7 @@ export default class BaseCluster3D extends BaseNode {
     /**
      *
      *  current implementation of the hull is a simple invisible boundingBox with
-     *  @see BaseVolume
+     *  @link BaseVolume
      *
      *  this function get's called after a cluster has triggered the "hull-update" event in which case
      * the current set "hull" - option is used to recalculate the hull feature
@@ -1718,7 +1718,7 @@ export default class BaseCluster3D extends BaseNode {
 
 
     /**
-     * {@see BaseNode.getDOMElement}
+     * {@link BaseNode.getDOMElement}
      **/
 
     getDOMElement() {
@@ -1737,7 +1737,7 @@ export default class BaseCluster3D extends BaseNode {
 
 
     /**
-     * {@see BaseNode.getDOMEvents}
+     * {@link BaseNode.getDOMEvents}
      **/
     getDOMEvents() {
 

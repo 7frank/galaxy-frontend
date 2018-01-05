@@ -8,7 +8,7 @@
  * Nothing is renderd but some properties of the resulting volume are used to determine distances between
  * neighboring elements in the cluster section.
  *
- * NOTE: for an implementation of a visible volume see {@see BoxVolume}
+ * NOTE: for an implementation of a visible volume see {@link BoxVolume}
  */
 
 import * as THREE from "three";
@@ -47,7 +47,7 @@ export default class BaseVolume extends THREE.Object3D {
     }
 
     /**
-     * Creates  and returns a Three.js material ( in this case a {@see THREE.LineBasicMaterial} )
+     * Creates  and returns a Three.js material ( in this case a {@link THREE.LineBasicMaterial} )
      * that is used to render the object.
      */
 
@@ -84,13 +84,13 @@ export default class BaseVolume extends THREE.Object3D {
 
 
     /**
-     * The overall goal of this method and all its inheriting implementations like {@see ConvexVolume.createVolumeFromVertices}
-     * is that based on the vertices a {@see THREE.Mesh} is created which functions as a hull structure around the vertices.
+     * The overall goal of this method and all its inheriting implementations like {@link ConvexVolume.createVolumeFromVertices}
+     * is that based on the vertices a {@link THREE.Mesh} is created which functions as a hull structure around the vertices.
      *
      * NOTE: The BaseVolume does not make use of the vertices instead it creates the mesh based on the second (boundingBox) parameter
      *
-     * @param vertices ... a set of  {@see THREE.Vector3} representing positions in 3D-space
-     * @param boundingBox ... a {@see THREE.Box3} which holds bounding box data for the vertices
+     * @param vertices ... a set of  {@link THREE.Vector3} representing positions in 3D-space
+     * @param boundingBox ... a {@link THREE.Box3} which holds bounding box data for the vertices
      * @returns {*}
      */
 
@@ -138,7 +138,7 @@ export default class BaseVolume extends THREE.Object3D {
     }
 
     /**
-     * {@see setActive}
+     * {@link setActive}
      *
      */
 

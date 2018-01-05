@@ -10,14 +10,14 @@ import * as _ from "lodash";
 /**
  * A simple random distribution function which positions nodes via some pseudo random algorithm
  *
- * {@see BaseDistribution}
+ * {@link BaseDistribution}
  */
 
 export default class RandomDistribution extends BaseDistribution {
 
 
     /**
-     * for details {@see BaseDistribution.constructor}
+     * for details {@link BaseDistribution.constructor}
      **/
 
     constructor(...args) {
@@ -27,7 +27,7 @@ export default class RandomDistribution extends BaseDistribution {
 
 
     /**
-     * for details {@see BaseDistribution.distribute}
+     * for details {@link BaseDistribution.distribute}
      **/
 
     distribute(node, dx, dy) {

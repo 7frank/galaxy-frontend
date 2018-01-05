@@ -455,7 +455,7 @@ export default class View3D extends HTMLElement {
     /**
      * convenience method to add 3d elements
      *
-     * @param object3D ... an instance of a {@see THRE.Mesh}
+     * @param object3D ... an instance of a {@link THRE.Mesh}
      *
      */
     add(object3D) {
@@ -490,7 +490,7 @@ export default class View3D extends HTMLElement {
 
 
     /**
-     * reverts the effects of {@see View3D.maximise}
+     * reverts the effects of {@link View3D.maximise}
      */
     undoMaximise() {
         $(this).removeClass("view-3d-maximised");

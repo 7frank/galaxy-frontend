@@ -8,11 +8,11 @@ import * as _ from "lodash";
 
 
 /**
- * an extended implementation of {@see ClusterBaseEdges}
- * to support line width via {@see THREE.MeshLine
+ * an extended implementation of {@link ClusterBaseEdges}
+ * to support line width via {@link THREE.MeshLine
  *
  * NOTE: As this approach is more GPU-intensive it should be used whenever a fewer amount of lines is drawn.
- *  For larger amounts  {@see ClusterBaseEdges} should be favoured, depending on the target device and such.
+ *  For larger amounts  {@link ClusterBaseEdges} should be favoured, depending on the target device and such.
  */
 
 
@@ -21,7 +21,7 @@ import * as _ from "lodash";
 export default class ClusterMeshEdges extends ClusterBaseEdges {
 
     /**
-     * {@see ClusterBaseEdges.constructor}
+     * {@link ClusterBaseEdges.constructor}
      */
 
     constructor(...args) {
@@ -32,7 +32,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
     }
 
     /**
-     * {@see ClusterBaseEdges.constructor}
+     * {@link ClusterBaseEdges.constructor}
      */
     getDefaultMaterial(options) {
 
@@ -65,7 +65,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
     }
 
     /**
-     * {@see ClusterBaseEdges.constructor}
+     * {@link ClusterBaseEdges.constructor}
      */
     update() {
 

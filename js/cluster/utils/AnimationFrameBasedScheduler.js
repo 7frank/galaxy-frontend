@@ -24,7 +24,7 @@ export default class AnimationFrameBasedScheduler {
     /**
      *
      * @param maxMilliSecondsPerFrame determines the maximum amount of milliseconds pass,
-     *          while functions are called within one animation frame. {@see window.requestAnimationFrame}
+     *          while functions are called within one animation frame. {@link window.requestAnimationFrame}
      *        The scheduler tries to execute each method in the queue at most once per frame,
      *          but if the execution time exceeds 'maxMilliSecondsPerFrame' further computations
      *          are delayed until the next animation frame is triggered.
@@ -42,7 +42,7 @@ export default class AnimationFrameBasedScheduler {
 
 
     /**
-     * Starts the scheduler. Methods added by using {@see add} will be called per animation frame.
+     * Starts the scheduler. Methods added by using {@link add} will be called per animation frame.
      *
      * @private
      *
@@ -96,7 +96,7 @@ export default class AnimationFrameBasedScheduler {
 
 
     /**
-     * Remove a function previously added using {@see add}
+     * Remove a function previously added using {@link add}
      *
      * @param fn ... the function that shall be removed.
      * @returns {AnimationFrameBasedScheduler}
