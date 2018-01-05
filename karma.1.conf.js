@@ -3,23 +3,28 @@ module.exports = function(config) {
         basePath: '',
         frameworks: ['jasmine'],
         files: [
-            'build/node-modules-bundle.js',
-            'build/bundle.js',
-           // 'build/*.js',
-           // 'build/tests/test_*.js',
-            //'js/**/*.js',
-            'test/**/*.js'
+           // 'build/node-modules-bundle.js',
+           // 'build/bundle.js',
+            // 'build/*.js',
+            // 'build/tests/test_*.js',
+
+            'test/**/*.js',
+            'js/**/*.js'
+
         ],
         exclude: [
         ],
         preprocessors: {
-            'test/**/*.js':['webpack','sourcemap'],
-           // 'js/**/*.js': ['coverage']
+           // 'js/**/*.js':['babel'], //,'webpack','sourcemap'
+            'test/**/*.js':['babel',
+                //'webpack',
+               // 'sourcemap'
+            ]
         },
-       /* coverageReporter: {
-            type : 'html',
-            dir : 'coverage/'
-        },*/
+        /* coverageReporter: {
+             type : 'html',
+             dir : 'coverage/'
+         },*/
         //contains partial copy of webpack.config.js
         webpack: {
             devtool: 'inline-source-map',
@@ -55,7 +60,20 @@ module.exports = function(config) {
             }
 
         },
-        reporters: ['dots','progress'],  //,'coverage'
+        reporters: ['coverage-istanbul'],
+
+        coverageIstanbulReporter: {
+            reports: ['json-summary'],
+            dir:"./coverage/"
+        },
+
+        loggers: [{
+            type: 'file',
+            filename: "fu.txt"
+            //filename: OUTPUT_LOG_FILE
+        }],
+
+        //reporters: ['dots','progress'],  //,'coverage'
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
@@ -64,3 +82,6 @@ module.exports = function(config) {
         singleRun: true
     });
 };
+
+
+//module.exports.OUTPUT_LOG_FILE = OUTPUT_LOG_FILE;
