@@ -321,6 +321,22 @@ export default class GraphView3D extends View3D {
 
             $(this).append("<default-color-scheme>")
 
+
+
+            //------
+            //add zoom key support
+
+            function doZoom()
+            {
+
+                console.log("todo implement key zoom")
+
+            }
+
+            let mt=Mousetrap(this)
+            mt.bind("up",doZoom)
+            mt.bind("down",doZoom)
+
         }
 
 

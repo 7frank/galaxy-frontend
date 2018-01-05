@@ -14,21 +14,28 @@ import * as Mousetrap from "mousetrap";
 import * as $ from "jquery"
 
 /**
- * a simple graph-node implementation for interaction and basic visualisation via threejs
+ * A simple graph-node that contains methods for user interaction and basic visualisation via threejs {@see THREE}.
  *
- * registered custom events:
- * "before-render" - is triggered before the node gets rendered within the threejs scenegraph
  *
- * TODO change below behaviour of initStatic and possibly elevate/refactor this part into the root node or a mixin
- * Note: the current implementation has some limitations for multiple graphs of BaseBode instances to be rendered at a time
- *  parameters like "currentSelection" set by the method  BaseNode::initStatic() will be shared among simultaneously running instances
+ * Makes use of different types of events (mouse-, keyboard- and custom-events) to be used.
+ * Where custom-events are need to be registered first by the class ebfore
+ *
+ * Registered custom events:
+ *      "before-render" - is triggered before the node gets rendered within the threejs scenegraph
+ *
+ * Note: The current implementation has some limitations for multiple graphs of BaseBode instances to be rendered at the same time.
+ *   For example: Parameters like "currentSelection" set by the method  BaseNode::initStatic() will be shared among simultaneously running instances.
+ *
+ * TODO change behaviour of {@see initStatic} and possibly refactor this part into the root node or a mixin
  *
  *
  */
+
+
 export default class BaseNode extends THREE.Mesh {
 
     /**
-     * the constructor needs an instance of the view it is rendered within to be able to connect dom events
+     * The constructor needs an instance of a view. {@see View3D} It is rendered within the view container to be able to attach DOM events.
      *
      * @param view extends View3D
      */
@@ -87,7 +94,8 @@ export default class BaseNode extends THREE.Mesh {
     }
 
     /**
-     * tries to get the view3d element, which the cluster is rendered within
+     * Tries to return the {@see View3D} element. There is one view that functions as container for a cluster and all its sub-clusters and nodes.
+     *
      * @returns a View3D if attached to the view before, else null
      */
     getView() {
@@ -97,7 +105,7 @@ export default class BaseNode extends THREE.Mesh {
     }
 
     /**
-     * sets the view element for the root
+     * Sets the view element
      * the view must be a View3D (extends HTMLElement)
      *
      */

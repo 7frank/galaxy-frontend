@@ -281,7 +281,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
 
     setLOD(levelOfDetail) {
-        console.error("!!!FIXME!!! setLOD")
+        console.error("!!!FIXME!!! setLOD interferes with collapse feature not showing anything while in transition")
         return  //FIXME interferes with collapse feature not showing anything while in transition
 
         if (this.mNodeParticles)
@@ -492,7 +492,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
             var nodes = this.mNodes;
             var demoOptions = {
-                increment: 1,
+                //increment: 1, //deprecated
                 duration: 1000,
                 easing: TWEEN.Easing.Exponential.Out,
                 position: {
