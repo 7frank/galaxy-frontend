@@ -371,6 +371,22 @@ export default class GraphView3D extends View3D {
         return this
     }
 
+    loadDatasource(datasource) {
+        var that = this;
+        datasource.load(function onSuccess(mGraphData) {
+            console.log("data loaded");
+            that.setData(mGraphData);
+            function triggerColorChange() {
+                let selectEl = $(".cloudNodeColorSelect")
+                if (selectEl.length == 0) setTimeout(triggerColorChange, 100)
+                else
+                    selectEl.val("group").trigger("change")
+            }
+            triggerColorChange();
+        });
+        return this
+    }
+
     resizeCanvas() {
         super.resizeCanvas()
 

@@ -13,7 +13,10 @@ import "../gui/ModeSelect"
 
 import CompanyNewsDS from "../data/CompanyNewsDS"
 
-import {getGraphDataSets} from "../data/data-set-loader"
+import CsvDatasource from "../data/CsvDatasource"
+import GraphQLDatasource from "../data/GraphQLDatasource"
+
+export {CsvDatasource, GraphQLDatasource}
 
 import Default3DGraphConfig from "./configs/Default3DGraphConfig";
 import * as Mousetrap from "mousetrap";
@@ -41,9 +44,13 @@ export class SampleClusterApplication extends HTMLElement {
     // noinspection JSUnusedGlobalSymbols
     connectedCallback() {
 
-        let datasets = getGraphDataSets()
+        if (!this.datasource) {
+            this.datasource = new CsvDatasource(
+                "assets/realDataNodesv5_ticker.csv",
+                "assets/realDataLinksv5.csv"
+            )
+        }
 
-        this.setDataSets(datasets);
         this.setupViews()
 
         this.addNewsListeners()
@@ -257,7 +264,7 @@ export class SampleClusterApplication extends HTMLElement {
 
             var speccs = config.getSpeccs()// this.getForceSpeccs();
             let view2 = createView("new force-graph", speccs, true)
-                .loadDataSet(this.getDSByID(1));
+                .loadDatasource(that.datasource);
 
             config.setView(view2)
 
@@ -292,7 +299,7 @@ export class SampleClusterApplication extends HTMLElement {
 
             var speccs = config.getSpeccs()
             let view2 = createView("new force-graph", speccs, true)
-                .loadDataSet(this.getDSByID(0));
+                .loadDatasource(that.datasource);
             config.setView(view2)
             views.push(view2)
 
@@ -325,17 +332,6 @@ export class SampleClusterApplication extends HTMLElement {
 
         */
 
-    }
-
-
-    setDataSets(datasets) {
-        this.mDataSets = datasets;
-
-    }
-
-
-    getDSByID(id) {
-        return this.mDataSets[id]
     }
 
 

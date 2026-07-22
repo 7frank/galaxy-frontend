@@ -37,10 +37,23 @@ npm start
 
 ## Data Sources
 
-Configured in `js/data/data-set-loader.js`. Two modes are supported:
+The graph accepts a `datasource` property on the `<sample-cluster-application>` element before it connects. Two built-in adapters are available (exported as `clusters.CsvDatasource` and `clusters.GraphQLDatasource`):
 
-- **GraphQL** via Apollo Client — connects to `http://localhost:8088/graphql` by default (see `galaxy-backend`)
-- **Local CSV / JSON files** — parsed directly in the browser via PapaParse / qwest
+```js
+const el = document.querySelector('sample-cluster-application')
+
+// CSV (default — used when no datasource is set)
+el.datasource = new clusters.CsvDatasource('assets/nodes.csv', 'assets/links.csv')
+
+// GraphQL (see galaxy-backend)
+el.datasource = new clusters.GraphQLDatasource('http://localhost:8088/graphql')
+```
+
+When no `datasource` is set, the element falls back to CSV files at `assets/realDataNodesv5_ticker.csv` and `assets/realDataLinksv5.csv`.
+
+Custom adapters can be created by extending `Datasource` from `js/data/Datasource.js` and implementing `load(onSuccess)`.
+
+See `galaxy-samson/` for a full integration example that configures the datasource and wraps the graph with a news panel.
 
 ## Project Structure
 

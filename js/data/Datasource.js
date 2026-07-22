@@ -1,23 +1,18 @@
 /**
- * what we want is a simple baisc abstraction layer to retrieve data .. nothing fancy just some structure for different services and probably topics
+ * Base class for graph data sources.
  *
+ * Subclasses must implement load(onSuccess).
+ * onSuccess receives: { nodes, links, expand, hasCountryGroups }
  *
- * @deprecated
+ * nodes: object keyed by id, each value: { id, name, group, industry, sent, price, itemCount, ticker, color }
+ * links: array of [sourceId, targetId]
+ * expand: object of group names to pre-expand, e.g. { "United States": true }
+ * hasCountryGroups: boolean
  */
-
-//import io from 'socket.io-client'
-
 export default class Datasource {
 
-    constructor(serviceURL) {
-
-        //TODO add some listeners to retrieve data about current stock prices and news
-
-        // Connect to our node/websockets server
-     //   var socket = this.mSocket = io.connect(serviceURL);
-
-
+    load(onSuccess) {
+        throw new Error("Datasource.load() must be implemented by subclass")
     }
-
 
 }
