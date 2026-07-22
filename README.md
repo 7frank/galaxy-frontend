@@ -21,7 +21,7 @@ npm install --legacy-peer-deps
 ## Building
 
 ```bash
-npm run build-graph
+npm run build
 ```
 
 Outputs to `./build/`:
@@ -30,11 +30,9 @@ Outputs to `./build/`:
 
 ## Running
 
-Serve the project root with a static or PHP-capable web server and open `index.php`:
-
 ```bash
-php -S localhost:8080
-# then open http://localhost:8080/index.php
+npm start
+# opens http://localhost:8080/index.html
 ```
 
 ## Data Sources

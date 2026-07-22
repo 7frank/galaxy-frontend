@@ -4,13 +4,9 @@
   "description": "contains a component to render node/edge data with threejs and d3_force",
   "main": "index.js",
   "scripts": {
-    "build-graph": "node_modules/.bin/webpack  --display-error-details --config webpack.config.js",
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "build": "node_modules/.bin/webpack --display-error-details --config webpack.config.js",
+    "start": "http-server . -p 8080 -o /index.html",
+    "test": "karma start karma.conf.js"
   },
   "repository": {
     "type": "git",
@@ -56,6 +52,7 @@
     "typescript": "~2.3.3",
     "url-loader": "^0.5.9",
     "webpack": "^2.6.1",
+    "http-server": "^14.1.1",
     "webpack-bundle-analyzer": "^2.9.0"
   },
   "dependencies": {
