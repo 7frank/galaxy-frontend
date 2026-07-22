@@ -2,8 +2,6 @@ var webpack = require('webpack');
 var path = require('path');
 
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-var HardSourceWebpackPlugin =require("hard-source-webpack-plugin")
-
 module.exports = {
     entry: "./js/cluster/SampleClusterApplication.js",
     devtool: 'source-map',
