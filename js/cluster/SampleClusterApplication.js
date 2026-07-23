@@ -220,6 +220,8 @@ export class SampleClusterApplication extends HTMLElement {
 
             });
 
+            mGraphView.initStatic();
+
             //FIXME
             if (isMaximised)
                 maximiseView.bind(mGraphView)();
@@ -230,8 +232,6 @@ export class SampleClusterApplication extends HTMLElement {
                 mGraphView.el.dispatchEvent(new CustomEvent("resize"));
 
             }, 100));
-
-            mGraphView.init();
 
             return mGraphView;
         }
