@@ -1,9 +1,3 @@
-import $ from 'jquery';
-import 'jquery-ui/themes/base/core.css';
-import 'jquery-ui/ui/core';
-import 'jquery-ui/ui/widgets/draggable';
-import 'jquery-ui/ui/widgets/resizable';
-
 
 import "../../gui/company-details/CompanyDetails"
 import {AppDataService} from "./AppDataService";
@@ -120,6 +114,34 @@ function getBody() {
 }
 
 
+function makeDraggable(element) {
+    var startX, startY, startLeft, startTop;
+
+    function onMouseDown(e) {
+        startX = e.clientX;
+        startY = e.clientY;
+        var style = window.getComputedStyle(element);
+        startLeft = parseInt(style.left) || 0;
+        startTop = parseInt(style.top) || 0;
+        element.style.position = "absolute";
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+        e.preventDefault();
+    }
+
+    function onMouseMove(e) {
+        element.style.left = (startLeft + e.clientX - startX) + "px";
+        element.style.top = (startTop + e.clientY - startY) + "px";
+    }
+
+    function onMouseUp() {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+    }
+
+    element.addEventListener("mousedown", onMouseDown);
+}
+
 function el(tag, props = {}) {
     var e = document.createElement(tag);
     if (props.className) e.className = props.className;
@@ -160,19 +182,6 @@ export var GUI = {
     },
 
     createSlider: function () {
-        var sliderEl = document.createElement("div");
-        sliderEl.className = "zoom-slider";
-        Object.assign(sliderEl.style, {width: "200px", marginLeft: "2em", marginTop: "0.5em"});
-
-        $(sliderEl).slider({
-            min: 10, max: 1000,
-            slide: function (event, ui) {
-                doZoomByVal(ui.value);
-            }
-        });
-
-        var body = getBody();
-        if (body) body.appendChild(sliderEl);
     },
 
     createSample() {
@@ -204,7 +213,7 @@ export var GUI = {
         var body = getBody();
         if (body) body.appendChild(infoEl);
 
-        $(infoEl).draggable().resizable();
+        makeDraggable(infoEl);
         GUI._infoEl = infoEl;
 
         var header = el("div", {className: "graph-node-info-header"});
@@ -314,5 +323,5 @@ document.addEventListener("DOMContentLoaded", function () {
     GUI.createSample();
 
     var rightInfo = document.querySelector(".rightCompanyInfo");
-    if (rightInfo) $(rightInfo).draggable();
+    if (rightInfo) makeDraggable(rightInfo);
 });
