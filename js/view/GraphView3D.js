@@ -251,26 +251,17 @@ export default class GraphView3D extends View3D {
 
     updateOutlineSelection() {
         if (!this.mBorderEffect || !this.mRootCluster) return;
-        const meshes = [];
-        this.mRootCluster.traverse(obj => {
-            if (obj instanceof ConvexVolume && obj.mesh) {
-                meshes.push(obj.mesh);
-            }
-        });
-        this.mBorderEffect.effectDim.selection.set(meshes);
-        this.mBorderEffect.effect.selection.clear();
+        const effect = this.mBorderEffect;
 
         this.mRootCluster.findClusters("*").forEach(cluster => {
             if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
             const mesh = cluster.mHull.mesh;
-            cluster.on("mouseover", () => {
-                this.mBorderEffect.effectDim.selection.delete(mesh);
-                this.mBorderEffect.effect.selection.add(mesh);
-            });
-            cluster.on("mouseout", () => {
-                this.mBorderEffect.effect.selection.delete(mesh);
-                this.mBorderEffect.effectDim.selection.add(mesh);
-            });
+            const mode = (cluster.getClusterOptions && cluster.getClusterOptions().hullBorderMode) || "none";
+
+            effect.onHullRegister(mesh, mode);
+
+            cluster.on("mouseover", () => effect.onHullActive(mesh));
+            cluster.on("mouseout", () => effect.onHullInactive(mesh));
         });
     }
 

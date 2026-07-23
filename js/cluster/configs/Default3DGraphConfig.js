@@ -149,6 +149,7 @@ export default class Default3DGraphConfig {
                     minClusterSize: 15
                     // ,hull:BoxVolume
                     , hull: ConvexVolume,
+                    hullBorderMode: "hover",
                     onHullCreated: function (volume) {
                     }
 
@@ -158,6 +159,7 @@ export default class Default3DGraphConfig {
                 distribution: nodesWithinIndustryDistribution,
                 options: {
                     hull: ConvexVolume,
+                    hullBorderMode: "ambient",
 
                     text: function () {
                         //return IndustrialSectorIcon(this.name)

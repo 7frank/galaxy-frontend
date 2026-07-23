@@ -60,12 +60,42 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
 
         this.effect = outlineEffect;
         this.effectDim = outlineEffectDim;
+        this.mModeMap = new Map();
 
         const outlinePass = new EffectPass(camera, outlineEffectDim, outlineEffect);
         const smaaPass = new EffectPass(camera, smaaEffect);
 
         this.mComposer.addPass(outlinePass);
         this.mComposer.addPass(smaaPass);
+    }
+
+    onHullRegister(mesh, mode) {
+        this.mModeMap.set(mesh, mode);
+        if (mode === "ambient" || mode === "hover") {
+            this.effectDim.selection.add(mesh);
+        }
+    }
+
+    onHullUnregister(mesh) {
+        this.effect.selection.delete(mesh);
+        this.effectDim.selection.delete(mesh);
+        this.mModeMap.delete(mesh);
+    }
+
+    onHullActive(mesh) {
+        const mode = this.mModeMap.get(mesh);
+        if (mode === "hover") {
+            this.effectDim.selection.delete(mesh);
+            this.effect.selection.add(mesh);
+        }
+    }
+
+    onHullInactive(mesh) {
+        const mode = this.mModeMap.get(mesh);
+        if (mode === "hover") {
+            this.effect.selection.delete(mesh);
+            this.effectDim.selection.add(mesh);
+        }
     }
 
     render() {

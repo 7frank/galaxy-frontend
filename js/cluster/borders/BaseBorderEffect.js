@@ -8,4 +8,12 @@ export default class BaseBorderEffect {
 
     dispose() {}
 
+    onHullRegister(mesh, mode) {}
+
+    onHullUnregister(mesh) {}
+
+    onHullActive(mesh) {}
+
+    onHullInactive(mesh) {}
+
 }
