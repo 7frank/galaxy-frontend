@@ -257,7 +257,21 @@ export default class GraphView3D extends View3D {
                 meshes.push(obj.mesh);
             }
         });
-        this.mBorderEffect.effect.selection.set(meshes);
+        this.mBorderEffect.effectDim.selection.set(meshes);
+        this.mBorderEffect.effect.selection.clear();
+
+        this.mRootCluster.findClusters("*").forEach(cluster => {
+            if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
+            const mesh = cluster.mHull.mesh;
+            cluster.on("mouseover", () => {
+                this.mBorderEffect.effectDim.selection.delete(mesh);
+                this.mBorderEffect.effect.selection.add(mesh);
+            });
+            cluster.on("mouseout", () => {
+                this.mBorderEffect.effect.selection.delete(mesh);
+                this.mBorderEffect.effectDim.selection.add(mesh);
+            });
+        });
     }
 
     initClusterForView(rawGraphData, parentEl3D) {

@@ -139,12 +139,9 @@ export default class Default3DGraphConfig {
                         // this.toggleCollapse()
                     },
                     mouseover: function () {
-                        this.mHull.visible = true
                         // this.bClusterEdgesVisible= true
-
                     },
                     mouseout: function () {
-                        this.mHull.visible = false
                         //  this.bClusterEdgesVisible= false
                     }
                 },
@@ -153,7 +150,6 @@ export default class Default3DGraphConfig {
                     // ,hull:BoxVolume
                     , hull: ConvexVolume,
                     onHullCreated: function (volume) {
-                        volume.visible = false
                     }
 
                 }// new BoxVolume() ConvexVolume//FIXME  this option is used twice for leaf and parent  and below is ignored

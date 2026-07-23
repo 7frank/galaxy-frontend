@@ -46,9 +46,22 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
             xRay: true
         });
 
-        this.effect = outlineEffect;
+        const outlineEffectDim = new OutlineEffect(scene, camera, {
+            blendFunction: BlendFunction.SCREEN,
+            multisampling: Math.min(4, renderer.capabilities.maxSamples),
+            edgeStrength: 0.8,
+            pulseSpeed: 0.0,
+            visibleEdgeColor: 0x8888aa,
+            hiddenEdgeColor: 0x111111,
+            height: 480,
+            blur: false,
+            xRay: false
+        });
 
-        const outlinePass = new EffectPass(camera, outlineEffect);
+        this.effect = outlineEffect;
+        this.effectDim = outlineEffectDim;
+
+        const outlinePass = new EffectPass(camera, outlineEffectDim, outlineEffect);
         const smaaPass = new EffectPass(camera, smaaEffect);
 
         this.mComposer.addPass(outlinePass);
