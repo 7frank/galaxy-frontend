@@ -52,31 +52,14 @@ export default class GraphView3D extends View3D {
 
     }
 
-    static get observedAttributes() {
-        return ['text-visible'];
-    }
+    setTextVisible(newValue) {
+        let visible;
+        if (newValue == "true") visible = true;
+        else if (newValue == "false") visible = false;
+        else visible = Boolean(newValue)
 
-    connectedCallback() {
-        super.connectedCallback();
-
-    }
-
-    // Respond to attribute changes.
-    attributeChangedCallback(attr, oldValue, newValue) {
-        console.warn("attr changed", arguments)
-        if (attr == 'text-visible') {
-
-
-            let visible;
-            if (newValue == "true") visible = true;
-            else if (newValue == "false") visible = false;
-            else
-                visible = Boolean(newValue)
-
-            if (this.mRootCluster && this.mRootCluster.mTextOverlay)
-                this.mRootCluster.mTextOverlay.enabled = visible;
-
-        }
+        if (this.mRootCluster && this.mRootCluster.mTextOverlay)
+            this.mRootCluster.mTextOverlay.enabled = visible;
     }
 
 

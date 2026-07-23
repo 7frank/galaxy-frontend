@@ -16,7 +16,7 @@ class InfoPanel extends HTMLElement {
         $(this).find("#clusterTextVisible").change(function () {
             let val = $(this).val()
             let view = document.querySelector("sample-cluster-application").getView();
-            view.setAttribute("text-visible", val)
+            view.setTextVisible(val)
         })
 
         $(this).find("#nodes").change(function () {
