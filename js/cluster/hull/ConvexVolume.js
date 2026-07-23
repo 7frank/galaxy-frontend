@@ -193,6 +193,7 @@ export default class ConvexVolume extends BoxVolume {
 
         if (this.mesh) this.remove(this.mesh);
         this.mesh = mesh;
+        this.mesh.visible = false;
         this.add(mesh);
 
         return this.mesh;

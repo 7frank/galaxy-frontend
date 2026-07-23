@@ -146,6 +146,7 @@ export default class OutlineHullEffect extends BaseHullEffect {
     }
 
     onAttach(mesh) {
+        mesh.visible = true;
         this.mMesh = mesh;
         if (this.mComposer) this.mComposer.add(mesh, this.mMode);
         if (!this.mFillMesh) {
@@ -159,6 +160,7 @@ export default class OutlineHullEffect extends BaseHullEffect {
 
     onDetach(mesh) {
         if (this.mComposer) this.mComposer.remove(mesh);
+        mesh.visible = false;
         if (this.mMesh) this.mMesh.layers.set(0);
         if (this.mFillMesh && this.mFillMesh.parent) this.mFillMesh.parent.remove(this.mFillMesh);
         this.mFillMesh = null;

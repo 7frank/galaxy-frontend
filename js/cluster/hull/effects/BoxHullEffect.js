@@ -26,7 +26,6 @@ export default class BoxHullEffect extends BaseHullEffect {
     }
 
     onAttach(hullMesh) {
-        hullMesh.visible = false;
         const hull = hullMesh.parent;
         const bb = hull && hull.mBoundingBox;
         if (!bb) return;
@@ -52,7 +51,6 @@ export default class BoxHullEffect extends BaseHullEffect {
     }
 
     onDetach(hullMesh) {
-        hullMesh.visible = true;
         for (const [, own] of this.mOwnMeshes) {
             if (own.parent) own.parent.remove(own);
             own.geometry.dispose();
