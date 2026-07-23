@@ -43,11 +43,10 @@ export default class ForceGraphDistribution extends BaseDistribution {
         super(scale, dimensions);
 
 
-        this.initialEngineTicks = 0;
+        this.initialEngineTicks = 200;
 
-        // NOTE: using values lower than 3000ms and 90 frames to stop the force graph will sometimes show the nodes in a line instead
-        this.maxConvergeTime = 9000  //2000; //ms     ... 5 seconds upper bound for loading phase
-        this.maxConvergeFrames = 700 //90   //frames  ... for slower machines the time will be reached earlier for faster it will hit th frame limit earlier
+        this.maxConvergeTime = 9000;
+        this.maxConvergeFrames = 700;
 
     }
 
@@ -88,6 +87,8 @@ export default class ForceGraphDistribution extends BaseDistribution {
         //TODO containers need links
         layout
             .numDimensions(this.dimensions)
+            .alphaDecay(0.05)
+            .velocityDecay(0.6)
             .nodes(nodes)
             .force('link', d3_force.forceLink().id(function (d) {
                     return d._id
@@ -130,7 +131,7 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
         let cntTicks = 0;
         const startTickTime = new Date();
-        var alphaAbort = 0.2
+        var alphaAbort = 0.01
 
         this.queue().add(function onQueue() {
 

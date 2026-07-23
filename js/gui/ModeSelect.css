@@ -5,6 +5,44 @@ mode-select {
     cursor: pointer;
 }
 
+layout-select {
+    position: absolute;
+    top: 100px;
+    right: 100px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+layout-select label {
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    padding: 0.2em 0.6em;
+    border: none;
+    margin: 0;
+}
+
+layout-select span {
+    padding: 0.2em 1.8em;
+    color: white;
+    margin: 0.2em;
+    border-radius: 1px;
+    border: 1px solid rgba(128, 128, 128, 0.51);
+}
+
+layout-select span:hover {
+    outline: none;
+    border-color: #9ecaed;
+    box-shadow: 0 0 10px #9ecaed;
+}
+
+layout-select .selected {
+    outline: none;
+    border-color: #9ecaed;
+    box-shadow: 0 0 10px #9ecaed;
+}
+
 datasource-select {
     position: absolute;
     top: 70px;

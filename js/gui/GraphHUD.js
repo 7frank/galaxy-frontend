@@ -11,6 +11,7 @@ import "./info-panel/InfoPanel"
 import "./company-info/CompanyInfo"
 import "./BorderSelect"
 import "./DataSourceSelect"
+import "./LayoutSelect"
 
 class GraphHUD extends HTMLElement {
 
