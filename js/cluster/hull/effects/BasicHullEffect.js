@@ -24,6 +24,7 @@ export default class BasicHullEffect extends BaseHullEffect {
     }
 
     onAttach(hullMesh) {
+        hullMesh.visible = false;
         if (!this._mat) this._mat = this._makeMat();
         let own = this.mOwnMeshes.get(hullMesh);
         if (!own) {
@@ -38,11 +39,11 @@ export default class BasicHullEffect extends BaseHullEffect {
     }
 
     onDetach(hullMesh) {
-        const own = this.mOwnMeshes.get(hullMesh);
-        if (own) {
+        hullMesh.visible = true;
+        for (const [, own] of this.mOwnMeshes) {
             if (own.parent) own.parent.remove(own);
-            this.mOwnMeshes.delete(hullMesh);
         }
+        this.mOwnMeshes.clear();
     }
 
     onActive(hullMesh) {

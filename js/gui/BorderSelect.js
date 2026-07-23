@@ -1,6 +1,7 @@
 import "./ModeSelect.css";
 import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";
 import BasicHullEffect from "../cluster/hull/effects/BasicHullEffect";
+import BoxHullEffect from "../cluster/hull/effects/BoxHullEffect";
 import OutlineHullEffect, { OutlineComposer } from "../cluster/hull/effects/OutlineHullEffect";
 import ConvexVolume from "../cluster/hull/ConvexVolume";
 
@@ -8,6 +9,7 @@ const EFFECTS = [
     { label: "None",    makeEffect: () => new NoneHullEffect(),                        makeComposer: () => null },
     { label: "Outline", makeEffect: (mode, c) => new OutlineHullEffect(mode, c),       makeComposer: (v) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; } },
     { label: "Basic",   makeEffect: () => new BasicHullEffect(),                       makeComposer: () => null },
+    { label: "Box",     makeEffect: () => new BoxHullEffect(),                         makeComposer: () => null },
 ];
 
 class BorderSelect extends HTMLElement {
@@ -18,7 +20,7 @@ class BorderSelect extends HTMLElement {
         EFFECTS.forEach(({ label }, i) => {
             const btn = document.createElement("span");
             btn.textContent = label;
-            if (i === 2) btn.classList.add("selected");
+            if (i === 1) btn.classList.add("selected");
             btn.addEventListener("click", () => this._select(btn, label));
             this.appendChild(btn);
         });
@@ -39,11 +41,7 @@ class BorderSelect extends HTMLElement {
 
         const composer = entry.makeComposer(view);
 
-        let attached = 0;
-        const allClusters = view.mRootCluster.findClusters("*");
-        const passing = allClusters.filter(c => c.mHull && c.mHull instanceof ConvexVolume && c.mHull.mesh);
-        console.log('[BorderSelect] all clusters:', allClusters.length, 'passing ConvexVolume filter:', passing.length);
-        allClusters.forEach(cluster => {
+        view.mRootCluster.findClusters("*").forEach(cluster => {
             if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
 
             if (cluster._hullEffect) {
@@ -55,13 +53,9 @@ class BorderSelect extends HTMLElement {
             const effect = entry.makeEffect(mode, composer);
             cluster._hullEffect = effect;
             effect.onAttach(cluster.mHull.mesh);
-            attached++;
-            console.log('[BorderSelect] attached', label, 'mode=', mode, 'mesh=', cluster.mHull.mesh, 'composer=', composer);
         });
-        console.log('[BorderSelect] total attached:', attached, 'composer:', composer, 'view.mBorderEffect:', view.mBorderEffect);
 
         if (composer) view.setBorderEffect(composer);
-        console.log('[BorderSelect] after setBorderEffect, view.mBorderEffect:', view.mBorderEffect);
 
         this.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
         btn.classList.add("selected");

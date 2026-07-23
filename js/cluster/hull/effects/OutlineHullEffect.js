@@ -104,6 +104,9 @@ export class OutlineComposer {
     resize(w, h) { this.mComposer?.setSize(w, h); }
 
     dispose() {
+        if (this.effectDim) this.effectDim.selection.clear();
+        if (this.effectBright) this.effectBright.selection.clear();
+        this.mMeshModes.clear();
         this.mComposer?.dispose();
         this.mComposer = null;
         if (this.mRenderer) {
@@ -156,7 +159,7 @@ export default class OutlineHullEffect extends BaseHullEffect {
 
     onDetach(mesh) {
         if (this.mComposer) this.mComposer.remove(mesh);
-        mesh.layers.set(0);
+        if (this.mMesh) this.mMesh.layers.set(0);
         if (this.mFillMesh && this.mFillMesh.parent) this.mFillMesh.parent.remove(this.mFillMesh);
         this.mFillMesh = null;
         this.mMesh = null;
