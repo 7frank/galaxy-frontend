@@ -8,7 +8,6 @@
  * @deprecated
  */
 import Color from 'easy-color';
-import * as $ from "jquery"
 
 export default class DefaultColorScheme extends EventTarget {
 

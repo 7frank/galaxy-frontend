@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import * as _ from "lodash";
-import * as $ from "jquery"
 
 /**
  * A factory to generate the 2.5D text feature.
@@ -34,7 +33,7 @@ import * as $ from "jquery"
 export default function TextNodesFactory(env, options) {
     var domEl = env.renderer.domElement
 
-    options = _.extend({
+    options = Object.assign({
         interactable: false, //determines if the text element for the node can be clicked/selected or not
         minVisibleCount: 0, //the minimum amount of items. If the depth test fails at least this amount of the 'env.currentNodesVisible'-array is drawn (if they are in viewport of the camera)
         maxVisibleCount: 10, //the maximum amount of rendered text labels
@@ -83,28 +82,22 @@ export default function TextNodesFactory(env, options) {
         lastNodeID = _id
         lastNode = node;
 
-        node.text = $("<span>").hide().addClass(options.getCSSClasses())
-            .addClass("noselect").on("mousewheel", e => e.preventDefault())
-            .attr('unselectable', 'on')
-            .css('user-select', 'none')
-            .on('selectstart', false)
-            .html(_id).css({
-                position: "absolute"
-            });
-
-        if (options.interactable)
-            node.text.css({
-                "pointer-events": "all"
-            });
-        else
-            node.text.css({
-                "pointer-events": "none"
-            });
+        var el = document.createElement("span");
+        el.classList.add(options.getCSSClasses(), "noselect");
+        el.setAttribute('unselectable', 'on');
+        el.style.userSelect = 'none';
+        el.style.position = 'absolute';
+        el.style.display = 'none';
+        el.innerHTML = _id;
+        el.addEventListener('mousewheel', e => e.preventDefault());
+        el.addEventListener('selectstart', e => e.preventDefault());
+        el.style.pointerEvents = options.interactable ? 'all' : 'none';
+        node.text = el;
 
         options.onAfterCreateTextField(node, node.text);
 
         //TODO make the container variable
-        env.textNode.append(node.text);
+        env.textNode.appendChild(node.text);
         return node.text;
     }
 
@@ -227,7 +220,7 @@ export default function TextNodesFactory(env, options) {
             var coords = getScreenPos(pos, camera, dw, dh, dl, dt);
 
             //TODO this offset stuff might need some parameters in the options section
-            var centered = coords.x - node.text.width() / 2;
+            var centered = coords.x - node.text.offsetWidth / 2;
             var adjustedTop = coords.y - 500 / distance * 10
 
             /*	node.text.css({
@@ -235,7 +228,7 @@ export default function TextNodesFactory(env, options) {
                     left: centered
                 })*/
 
-            node.text.get(0).style.transform = 'translate(' + _.round(centered - dw, 2) + 'px, ' + _.round(adjustedTop, 2) + 'px)';
+            node.text.style.transform = 'translate(' + _.round(centered - dw, 2) + 'px, ' + _.round(adjustedTop, 2) + 'px)';
 
 
         }
@@ -253,7 +246,7 @@ export default function TextNodesFactory(env, options) {
 
                 if (typeof preNode.text != "undefined") {
 
-                    preNode.text.stop().hide()
+                    preNode.text.style.display = 'none';
                     preNode.text.remove();
                     delete (preNode.text)
 
@@ -288,9 +281,7 @@ export default function TextNodesFactory(env, options) {
         for (var nodeInfo of nodeInfosCurrentBatch) {
             if (nodeInfo.node.text && !nodeInfo.node.text._marked_for_deletion_)
 
-            //if (!nodeInfo.node.text.is( ":animated"))
-            //nodeInfo.node.text.stop().fadeIn(100);
-                nodeInfo.node.text.show()
+                nodeInfo.node.text.style.display = '';
 
             updatePos(nodeInfo.node, nodeInfo.distance);
         }

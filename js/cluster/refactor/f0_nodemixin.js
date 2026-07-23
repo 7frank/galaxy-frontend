@@ -8,7 +8,6 @@ import {highlightNodeElements,} from "./f1"
 
 import * as THREE from "three";
 import * as _ from "lodash";
-import * as $ from "jquery"
 
 var sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
 
@@ -92,8 +91,7 @@ export default function nodeMixin(env, node) {
 
 
         if (info.trim() != "") {
-            var content = $("<span class='content'>").html(info);
-            $(env.toolTipElem).html(content)
+            if (env.toolTipElem) env.toolTipElem.innerHTML = "<span class='content'>" + info + "</span>";
 
 
             if (node.getParentCluster() && node.getParentCluster().getView())

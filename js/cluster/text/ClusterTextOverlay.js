@@ -12,7 +12,6 @@ import "./cluster-text-overlay.css"
 
 import * as THREE from "three";
 import * as _ from "lodash";
-import $ from "jquery"
 
 
 /**
@@ -188,7 +187,7 @@ export default class ClusterTextOverlay {
         this.el.style.height = view.clientHeight + "px";
         this.el.style.width = view.clientWidth + "px";
         this.el.innerHTML = "";
-        var mTextNode = $(this.el);
+        var mTextNode = this.el;
 
         this.addBreadcrumbContainer()
 
@@ -348,8 +347,10 @@ export default class ClusterTextOverlay {
                     newSize = 12 + Math.ceil(Math.log2(node.mNodes.length) - 5);
 
                     var newText = node.getClusterOptions().text.bind(node)();
-                    if (newText)
-                        el.html("").append(newText)
+                    if (newText) {
+                        el.innerHTML = "";
+                        el.appendChild(typeof newText === 'string' ? Object.assign(document.createElement('span'), {innerHTML: newText}) : newText);
+                    }
 
 
                 }
@@ -358,9 +359,9 @@ export default class ClusterTextOverlay {
 
                 newSize = _.round(newSize / 12, 3) + "em";
 
-                el.css("font-size", newSize);
+                el.style.fontSize = newSize;
 
-                el.on("click", function () {
+                el.addEventListener("click", function () {
                     node.zoomToCluster();
                 })
 
