@@ -3,7 +3,6 @@ import template from "./company-info.html"
 import "../searchable-option-list/SearchableOptionList"
 import ApolloDS from "../../data/ApolloDS";
 import _ from "lodash"
-import * as $ from "jquery"
 
 
 class CompanyInfo extends HTMLElement {
@@ -37,7 +36,8 @@ class CompanyInfo extends HTMLElement {
 
     connectedCallback() {
 
-        $(this).append(template).addClass("rightCompanyInfo")
+        this.innerHTML = template;
+        this.classList.add("rightCompanyInfo");
 
     }
 
@@ -63,14 +63,14 @@ class CompanyInfo extends HTMLElement {
 
     addNews(obj) {
 
-        let container = $(this).find("#djnews")
+        let container = this.querySelector("#djnews");
+        if (!container) return;
 
-
-        let newsEntry = $("<div>")
-        newsEntry.append("<b>" + obj.title + "</b>", "<br>", obj.content, "<hr>")
-        newsEntry.hide()
-        container.prepend(newsEntry)
-        newsEntry.slideDown(500)
+        let newsEntry = document.createElement("div");
+        newsEntry.innerHTML = "<b>" + obj.title + "</b><br>" + obj.content + "<hr>";
+        newsEntry.style.display = "none";
+        container.insertBefore(newsEntry, container.firstChild);
+        newsEntry.style.display = "";
 
     }
 

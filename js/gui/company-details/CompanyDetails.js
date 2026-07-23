@@ -1,6 +1,5 @@
 import bodyHTML from "./company-details-body.html"
 import TemplateString from "../../utils/TemplateString";
-import * as $ from "jquery"
 
 class CompanyDetails extends HTMLElement {
 
@@ -20,12 +19,11 @@ class CompanyDetails extends HTMLElement {
 
     setStuff(o) {
 
-        o = _.extend({name: "CompanyName", link: ""}, o)
+        o = Object.assign({name: "CompanyName", link: ""}, o);
 
+        let str = new TemplateString(bodyHTML).format(o);
 
-        let str = new TemplateString(bodyHTML).format(o)
-
-        $(this).html(str)
+        this.innerHTML = str;
 
 
     }

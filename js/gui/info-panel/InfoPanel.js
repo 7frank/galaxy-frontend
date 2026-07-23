@@ -1,5 +1,4 @@
 import template from "./info-panel.html"
-import * as $ from "jquery"
 
 class InfoPanel extends HTMLElement {
 
@@ -11,41 +10,29 @@ class InfoPanel extends HTMLElement {
 
     connectedCallback() {
 
-        $(this).append(template)
+        this.innerHTML = template;
 
-        $(this).find("#clusterTextVisible").change(function () {
-            let val = $(this).val()
-            let view = document.querySelector("sample-cluster-application").getView();
-            view.setTextVisible(val)
-        })
+        const getView = () => document.querySelector("sample-cluster-application").getView();
 
-        $(this).find("#nodes").change(function () {
-            let val = $(this).val()
-            let view = document.querySelector("sample-cluster-application").getView();
+        this.querySelector("#clusterTextVisible").addEventListener("change", function () {
+            getView().setTextVisible(this.value);
+        });
 
-            view.mRootCluster.setNodesVisible(val == "true")
-        })
+        this.querySelector("#nodes").addEventListener("change", function () {
+            getView().mRootCluster.setNodesVisible(this.value == "true");
+        });
 
-        $(this).find("#edges").change(function () {
-            let val = $(this).val()
-            let view = document.querySelector("sample-cluster-application").getView();
+        this.querySelector("#edges").addEventListener("change", function () {
+            getView().mRootCluster.setEdgesVisible(this.value == "true");
+        });
 
-            view.mRootCluster.setEdgesVisible(val == "true")
-        })
+        this.querySelector("#leafs").addEventListener("change", function () {
+            getView().mRootCluster.setLeafsVisible(this.value == "true");
+        });
 
-        $(this).find("#leafs").change(function () {
-            let val = $(this).val()
-            let view = document.querySelector("sample-cluster-application").getView();
-
-            view.mRootCluster.setLeafsVisible(val == "true")
-        })
-
-        $(this).find("#particles").change(function () {
-            let val = $(this).val()
-            let view = document.querySelector("sample-cluster-application").getView();
-
-            view.mRootCluster.setParticlesVisible(val == "true")
-        })
+        this.querySelector("#particles").addEventListener("change", function () {
+            getView().mRootCluster.setParticlesVisible(this.value == "true");
+        });
 
 
     }

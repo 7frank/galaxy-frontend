@@ -2,7 +2,6 @@ import "./ModeSelect.css"
 import Extended2DGraphConfig from "../cluster/configs/Extendend2DGraphConfig";
 import Default3DGraphConfig from "../cluster/configs/Default3DGraphConfig";
 import Default2DGraphConfig from "../cluster/configs/Default2DGraphConfig";
-import * as $ from "jquery"
 
 
 class ModeSelect extends HTMLElement {
@@ -21,22 +20,22 @@ class ModeSelect extends HTMLElement {
 
 
         function selectBtn(btn) {
-            btn.parent().find(".selected").removeClass("selected")
-            btn.addClass("selected")
-
+            btn.parentElement.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
+            btn.classList.add("selected");
         }
 
-        let modeBtn = $("<span>").html(caption).on("click", onModeClick);
+        let modeBtn = document.createElement("span");
+        modeBtn.innerHTML = caption;
+        modeBtn.addEventListener("click", onModeClick);
 
         if (bSelected) {
-
             that.prevMode == caption
-            modeBtn.addClass("selected")
+            modeBtn.classList.add("selected");
         }
 
         function onModeClick() {
 
-            let main = $("sample-cluster-application").get(0)
+            let main = document.querySelector("sample-cluster-application")
 
             if (that.prevMode == caption) return;//  prevMode = mode;
 
@@ -51,7 +50,7 @@ class ModeSelect extends HTMLElement {
 
         }
 
-        $(this).append(modeBtn)
+        this.appendChild(modeBtn);
 
     }
 

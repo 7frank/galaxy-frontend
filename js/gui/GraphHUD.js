@@ -5,8 +5,6 @@
 //TODO import css rules
 //TODO import other vusual components and templates
 
-import $ from "jquery"
-
 import template from "./graph-hud.html"
 
 import "./info-panel/InfoPanel"
@@ -21,7 +19,7 @@ class GraphHUD extends HTMLElement {
 
     connectedCallback() {
 
-        $(this).append(template)
+        this.innerHTML = template;
 
 
     }

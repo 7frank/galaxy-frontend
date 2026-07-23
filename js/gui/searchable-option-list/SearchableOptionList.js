@@ -4,15 +4,15 @@ import searchListOoptions from "./searchOptions.json"
 
 
 import template from "./searchable-option-list.html"
-import * as $ from "jquery"
+import $ from "jquery"
 
 class SearchableOptionList extends HTMLElement {
 
 
     connectedCallback() {
 
-        $(this).append(template)
-            .searchableOptionList({
+        this.innerHTML = template;
+        $(this).searchableOptionList({
                 maxHeight: '250px', showSelectAll: false,
                 data: searchListOoptions,
                 converter: function (sol, rawDataFromUrl) {

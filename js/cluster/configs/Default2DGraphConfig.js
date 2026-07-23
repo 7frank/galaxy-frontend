@@ -6,8 +6,6 @@ import FlatVolume from "../hull/FlatVolume";
 
 
 import * as THREE from "three";
-import * as $ from "jquery"
-
 
 /**
  * the default settings for a 2d representation of the given node data
@@ -49,7 +47,7 @@ export default class Default2DGraphConfig extends Default3DGraphConfig {
      */
 
     setDomElements() {
-        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").addClass(this.mCssClass)
+        document.querySelectorAll(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").forEach(el => el.classList.add(this.mCssClass))
         //  $("cluster-text-overlay").removeClass(    this.mCssClass)
 
     }
