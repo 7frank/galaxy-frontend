@@ -58,7 +58,7 @@ export default class EdgesContainer extends THREE.Object3D {
 
         function createExternalNodeHelper(node, internalOtherNode) {
             var nPos = node._bubble.position;
-            var adjustedPos = new THREE.Vector3;
+            var adjustedPos = new THREE.Vector3();
 
             return {
                 position: adjustedPos,
@@ -70,7 +70,7 @@ export default class EdgesContainer extends THREE.Object3D {
                     adjustedPos.setFromMatrixPosition(node.getParentCluster().matrixWorld);
                     //setFromMatrix
                     adjustedPos.add(nPos);
-                    let other = new THREE.Vector3;
+                    let other = new THREE.Vector3();
                     other.setFromMatrixPosition(internalOtherNode.getParentCluster().matrixWorld);
                     adjustedPos.sub(other)
 
@@ -90,25 +90,21 @@ export default class EdgesContainer extends THREE.Object3D {
         if (!_edge.isSrcInternalNode) {
             let helper = createExternalNodeHelper(_edge.source, _edge.target);
             this.mExternalNodesHelpers.push(helper);
-            this.mEdges.geometry.vertices.push(helper.position);
+            this._vertexList.push(helper.position);
 
         }
         else
-            this.mEdges.geometry.vertices.push(newEdge.getStart());
+            this._vertexList.push(newEdge.getStart());
 
 
         if (!_edge.isTrgInternalNode) {
             let helper = createExternalNodeHelper(_edge.target, _edge.source);
             this.mExternalNodesHelpers.push(helper);
-            this.mEdges.geometry.vertices.push(helper.position);
+            this._vertexList.push(helper.position);
 
         }
         else
-            this.mEdges.geometry.vertices.push(newEdge.getEnd());
-
-
-        // this.mEdges.geometry.vertices.push(newEdge.getStart());
-        // this.mEdges.geometry.vertices.push(newEdge.getEnd());
+            this._vertexList.push(newEdge.getEnd());
 
 
         return newEdge;
@@ -116,11 +112,19 @@ export default class EdgesContainer extends THREE.Object3D {
 
     updateEdges() {
 
-        this.mEdges.geometry.verticesNeedUpdate = true;
+        if (this.mExternalNodesHelpers.length > 0)
+            _.each(this.mExternalNodesHelpers, helper => helper.update());
 
-        if (this.mExternalNodesHelpers.length == 0) return;
-        _.each(this.mExternalNodesHelpers, helper => helper.update());
-
+        const verts = this._vertexList;
+        const arr = new Float32Array(verts.length * 3);
+        for (let i = 0; i < verts.length; i++) {
+            arr[i * 3] = verts[i].x;
+            arr[i * 3 + 1] = verts[i].y;
+            arr[i * 3 + 2] = verts[i].z;
+        }
+        const attr = new THREE.BufferAttribute(arr, 3);
+        this.mEdges.geometry.setAttribute('position', attr);
+        this.mEdges.geometry.attributes.position.needsUpdate = true;
 
     }
 
@@ -154,23 +158,21 @@ export default class EdgesContainer extends THREE.Object3D {
 
     initLineMesh() {
 
-        var line_geom = new THREE.Geometry();
-        var lineMaterial;
-        var mergedLineMesh;
+        this._vertexList = [];
 
-        function initLineGroup(options) {
+        const line_geom = new THREE.BufferGeometry();
+        line_geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(0), 3));
 
-
+        const initLineGroup = (options) => {
             let defaults = {
                 opacity: 0.01,
                 transparent: true,
-                //lineIsVisible:true, // if disabled the line won't be shown on the scene
                 color: 0xffffff
             };
 
             options = _.extend(defaults, options);
 
-            lineMaterial = new THREE.MeshBasicMaterial({
+            const lineMaterial = new THREE.LineBasicMaterial({
                 color: options.color,
                 transparent: options.transparent,
                 opacity: options.opacity,
@@ -178,16 +180,8 @@ export default class EdgesContainer extends THREE.Object3D {
                 depthWrite: false
             });
 
-
-            mergedLineMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
-
-
-            //TODO compute boundingbox to prevent flicker when edges are partially off screen
-            //   mergedLineMesh.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
-
-
-            return mergedLineMesh;
-        }
+            return new THREE.LineSegments(line_geom, lineMaterial);
+        };
 
 
         this.mEdges = initLineGroup({

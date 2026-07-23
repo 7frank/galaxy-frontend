@@ -14,6 +14,7 @@ import "../gui/GraphHUD"
 
 import {GUI} from "../cluster/refactor/SpecificDataUtils"
 import _ from "lodash";
+import * as THREE from "three";
 
 //import skyDomeImage from "./coordinates.png"
 
@@ -31,22 +32,19 @@ export default class GraphView3D extends View3D {
         //debug code
         //options to be used in onBeforeRender for hull and edges
 
-        var gl = this.mRenderer.context;
+        var gl = this.mRenderer.getContext();
 
         window.test = {gl: gl, renderer: this.mRenderer}
 
-        if (this.mRenderer.debug) throw new Error("already exists")
-
-
         //gl=test.gl;st=test.renderer.debug.stencil;st.state(true);st.func=[[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xFF]];st.op=[[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]];
 
-        this.mRenderer.debug = {
+        this.mRenderer.debug = Object.assign(this.mRenderer.debug || {}, {
             stencil: {
                 func: [[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xff]],
                 op: [[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]],
                 state: (b) => this.setStencil(b)
             }
-        }
+        });
 
 
     }
@@ -143,18 +141,19 @@ export default class GraphView3D extends View3D {
             var t = hexasphere.tiles[i];
             var latLon = t.getLatLon(hexasphere.radius);
 
-            var geometry = new THREE.Geometry();
-
-            for (var j = 0; j < t.boundary.length; j++) {
-                var bp = t.boundary[j];
-                geometry.vertices.push(new THREE.Vector3(bp.x, bp.y, bp.z));
+            const bps = t.boundary;
+            const verts = bps.map(bp => new THREE.Vector3(bp.x, bp.y, bp.z));
+            const faceIndices = [[0,1,2],[0,2,3],[0,3,4]];
+            if (verts.length > 5) faceIndices.push([0,4,5]);
+            const positions = [];
+            for (const [a,b,c] of faceIndices) {
+                positions.push(verts[a].x, verts[a].y, verts[a].z);
+                positions.push(verts[b].x, verts[b].y, verts[b].z);
+                positions.push(verts[c].x, verts[c].y, verts[c].z);
             }
-            geometry.faces.push(new THREE.Face3(0, 1, 2));
-            geometry.faces.push(new THREE.Face3(0, 2, 3));
-            geometry.faces.push(new THREE.Face3(0, 3, 4));
-            if (geometry.vertices.length > 5) {
-                geometry.faces.push(new THREE.Face3(0, 4, 5));
-            }
+            var geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+            geometry.computeVertexNormals();
 
             if (isLand(latLon.lat, latLon.lon)) {
                 material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]

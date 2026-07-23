@@ -303,7 +303,7 @@ export default class View3D extends EventTarget {
 
     setStencil(bTrue) {
 
-        var gl = this.mRenderer.context;
+        var gl = this.mRenderer.getContext();
 
         if (bTrue)
             gl.enable(gl.STENCIL_TEST);

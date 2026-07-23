@@ -151,7 +151,7 @@ export default function TextNodesFactory(env, options) {
 
         //calc angle to discard nodes that are to far at the sides of the screen or possible behind the camera
         let dir1 = new THREE.Vector3().copy(point2).sub(point1)
-        let dir2 = env.camera.getWorldDirection()
+        let dir2 = env.camera.getWorldDirection(new THREE.Vector3())
         var angle = dir1.angleTo(dir2)
 
 

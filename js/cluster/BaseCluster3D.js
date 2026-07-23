@@ -121,7 +121,7 @@ export default class BaseCluster3D extends BaseNode {
 
             let dst;
             if (this.mHull && this.mHull.mesh && this.mHull.mesh.geometry && this.mHull.mesh.geometry.boundingBox)
-                dst = this.mHull.mesh.geometry.boundingBox.getCenter();
+                dst = this.mHull.mesh.geometry.boundingBox.getCenter(new THREE.Vector3());
             else
                 dst = this.position;
 
@@ -276,7 +276,7 @@ export default class BaseCluster3D extends BaseNode {
 
             if (this.mHull) {
                 let boundingBox = this.mHull.mBoundingBox;
-                boundingSphere = boundingBox.getBoundingSphere();
+                boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
 
 
                 //  this.mCollapsedClusterHull.position.copy(boundingSphere.center);
@@ -330,9 +330,9 @@ export default class BaseCluster3D extends BaseNode {
 
 
         if (boundingBox)
-            boundingSphere = boundingBox.getBoundingSphere();
+            boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
         else
-            boundingSphere = new THREE.Sphere(new THREE.Vector3, this.mNodes.length * 7);
+            boundingSphere = new THREE.Sphere(new THREE.Vector3(), this.mNodes.length * 7);
         //FIXME estimated hull size differs from forcegraph collision box
 
         let ringGeometryOuter = new THREE.RingGeometry(boundingSphere.radius * 0.85, boundingSphere.radius, 64);
@@ -487,7 +487,7 @@ export default class BaseCluster3D extends BaseNode {
         var pos_offset = new THREE.Vector3
         //change position of mCollapsedGroup based on center of mHull
         if (this.mHull.mBoundingBox)
-            pos_offset = this.mHull.mBoundingBox.getCenter()//.multiplyScalar(-1);
+            pos_offset = this.mHull.mBoundingBox.getCenter(new THREE.Vector3())//.multiplyScalar(-1);
 
 
         var that = this
@@ -516,7 +516,7 @@ export default class BaseCluster3D extends BaseNode {
         //change position of mCollapsedGroup based on center of mHull
         if (!this.mHull.mBoundingBox) console.warn("hull should have a bounding box", this.mHull)
         else {
-            var offset = this.mHull.mBoundingBox.getCenter()//.multiplyScalar(3);
+            var offset = this.mHull.mBoundingBox.getCenter(new THREE.Vector3())//.multiplyScalar(3);
 
             //this.mCollapsedGroup.position.copy(offset)
 
@@ -562,7 +562,7 @@ export default class BaseCluster3D extends BaseNode {
         var pos_offset = new THREE.Vector3
         //change position of mCollapsedGroup based on center of mHull
         if (this.mHull && this.mHull.mBoundingBox)
-            pos_offset = this.mHull.mBoundingBox.getCenter()//.multiplyScalar(-1);
+            pos_offset = this.mHull.mBoundingBox.getCenter(new THREE.Vector3())//.multiplyScalar(-1);
 
 
         this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}, position: pos_offset}}, 200)
@@ -1192,14 +1192,18 @@ export default class BaseCluster3D extends BaseNode {
     getVerticesFromBoundingBox(boundingBox) {
 
 
-        let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize();
+        let _center = boundingBox.getCenter(new THREE.Vector3());
+        let _size = boundingBox.getSize(new THREE.Vector3());
 
-        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
-
+        const box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
         box.translate(_center.x, _center.y, _center.z);
 
-        return box.vertices
+        const pos = box.getAttribute('position');
+        const verts = [];
+        for (let i = 0; i < pos.count; i++) {
+            verts.push(new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i)));
+        }
+        return verts;
     }
 
 
@@ -1363,7 +1367,7 @@ export default class BaseCluster3D extends BaseNode {
 
             let opt = renderer.debug.stencil
             opt.state(true)
-            var gl = renderer.context;
+            var gl = renderer.getContext();
             // config the stencil buffer to collect data for testing
             let func = opt.func[0]
             gl.stencilFunc(func[0], depth + func[1], func[2]);
@@ -1394,7 +1398,7 @@ export default class BaseCluster3D extends BaseNode {
             var depth = that.getDepth()
             let opt = renderer.debug.stencil
             opt.state(true)
-            var gl = renderer.context;
+            var gl = renderer.getContext();
             // config the stencil buffer to collect data for testing
             let func = opt.func[1]
             gl.stencilFunc(func[0], depth + func[1], func[2]);
@@ -1509,7 +1513,7 @@ export default class BaseCluster3D extends BaseNode {
         else {
 
             //have some default geometry for the domEvents //TODO find out why it fails without this part
-            let boundingSphere = boundingBox.getBoundingSphere();
+            let boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
             //TODO this is currently used for the mouse interactions but should be refactored and removed
             var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
             sphereGeometry.boundingBox = boundingBox;

@@ -99,8 +99,8 @@ export default class BaseVolume extends THREE.Object3D {
         this.mBoundingBox = boundingBox;
 
 
-        let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize();
+        let _center = boundingBox.getCenter(new THREE.Vector3());
+        let _size = boundingBox.getSize(new THREE.Vector3());
 
         let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
 

@@ -70,10 +70,11 @@
     "monotone-convex-hull-2d": "^1.0.1",
     "mousetrap": "^1.6.1",
     "papaparse": "^4.3.5",
+    "postprocessing": "^6.39.3",
     "qwest": "^4.4.6",
     "rxjs": "^5.4.2",
     "socket.io": "^2.0.3",
-    "three": "^0.86.0",
+    "three": "^0.185.1",
     "three.meshline": "^1.0.3",
     "zone.js": "^0.8.16"
   }

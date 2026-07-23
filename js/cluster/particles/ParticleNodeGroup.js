@@ -50,7 +50,7 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
         var fragmentShader = `
 									uniform float opacity;
 									uniform vec3 color;
-									uniform sampler2D texture;
+									uniform sampler2D pointTexture;
 
 									varying vec3 vColor;
 
@@ -58,7 +58,7 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
 										gl_FragColor = vec4( color * vColor, opacity );
 
-										gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+										gl_FragColor = gl_FragColor * texture( pointTexture, gl_PointCoord );
 									}
 							`;
 
@@ -72,7 +72,7 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
                 type: "f",
                 value: 1.0
             },
-            texture: {
+            pointTexture: {
                 type: "t",
                 value: new THREE.TextureLoader().load(options.nodeTexture)
             }
@@ -107,9 +107,9 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
     var values_size = new Float32Array(nCount);
     var geometry = new THREE.BufferGeometry();
 
-    geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.addAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
-    geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(values_size, 1));
 
     var particleSystem = new THREE.Points(geometry, shaderMaterial);
 

@@ -52,18 +52,21 @@ export default class ConvexVolume extends BoxVolume {
 
     smoothHullModifier(geometry, numSegments, margin) {
 
-        let marginGeo = new THREE.Geometry();
+        const allPoints = [];
 
         for (let v of geometry.vertices) {
-            let sphere = new THREE.SphereGeometry(margin, numSegments, numSegments);
-            sphere.translate(v.x, v.y, v.z);
-
-            marginGeo.merge(sphere, sphere.matrix)
-
+            const sphere = new THREE.SphereGeometry(margin, numSegments, numSegments);
+            const pos = sphere.getAttribute('position');
+            for (let i = 0; i < pos.count; i++) {
+                allPoints.push(new THREE.Vector3(
+                    pos.getX(i) + v.x,
+                    pos.getY(i) + v.y,
+                    pos.getZ(i) + v.z
+                ));
+            }
         }
 
-
-        let convexGeoWithMargin = new ConvexGeometry(marginGeo.vertices);
+        let convexGeoWithMargin = new ConvexGeometry(allPoints);
 
 
         return convexGeoWithMargin
@@ -131,7 +134,7 @@ export default class ConvexVolume extends BoxVolume {
 
             //test if the boudningBox is valid, else (f)make it so. this way it does not interrupt the work flow and generates a minimal hull
             //TODO   alternativly an empty Geometry would also be sufficient
-            if (boundingBox.getSize().length() == 0)
+            if (boundingBox.getSize(new THREE.Vector3()).length() == 0)
                 boundingBox.max.add(new THREE.Vector3(0.1, 0.1, 0.1));
 
             vertices = this.getVerticesFromBoundingBox(boundingBox);
@@ -163,10 +166,10 @@ export default class ConvexVolume extends BoxVolume {
 
 
         //   let mesh = new THREE.Mesh(geo, mat);
-        let mesh = new THREE.Mesh(this.geo0, this.getMaterial());
+        let mesh = new THREE.Mesh(geo0, this.getMaterial());
 
         mesh.geometry.boundingBox = boundingBox;
-        mesh.geometry.boundingSphere = boundingBox.getBoundingSphere();
+        mesh.geometry.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
 
         //this part is to prevent an exception in the raycaster where position is not present but element initialised
         //TODO maybe change the element itself so it stays in a valid state
@@ -198,8 +201,8 @@ export default class ConvexVolume extends BoxVolume {
      */
 
     createBoxGeometryFromBoundingBox(boundingBox) {
-        let _center = boundingBox.getCenter();
-        let _size = boundingBox.getSize();
+        let _center = boundingBox.getCenter(new THREE.Vector3());
+        let _size = boundingBox.getSize(new THREE.Vector3());
 
         let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
 
@@ -215,10 +218,13 @@ export default class ConvexVolume extends BoxVolume {
 
     getVerticesFromBoundingBox(boundingBox) {
 
-        let box = this.createBoxGeometryFromBoundingBox(boundingBox);
-
-
-        return box.vertices
+        const box = this.createBoxGeometryFromBoundingBox(boundingBox);
+        const pos = box.getAttribute('position');
+        const verts = [];
+        for (let i = 0; i < pos.count; i++) {
+            verts.push(new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i)));
+        }
+        return verts;
     }
 
     /**
@@ -242,7 +248,7 @@ export default class ConvexVolume extends BoxVolume {
 
         if (!this['geometry' + name] || this['geometry' + name].mTime != this.mTime) {
 
-            let margin = this.mBoundingBox.getSize().length() / 10;
+            let margin = this.mBoundingBox.getSize(new THREE.Vector3()).length() / 10;
 
             let geo2 = this.smoothHullModifier(this.mGeometryZero, resolution, margin);
             geo2.computeBoundingBox();

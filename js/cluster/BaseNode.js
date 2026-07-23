@@ -128,8 +128,8 @@ export default class BaseNode extends THREE.Mesh {
 
         //BaseNode.sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
         BaseNode.sphereGeometry = new THREE.SphereGeometry(10, 10, 5);
-        BaseNode.emptyGeometry = new THREE.Geometry();
-        BaseNode.emptyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
+        BaseNode.emptyGeometry = new THREE.BufferGeometry();
+        BaseNode.emptyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1);
 
 
         BaseNode.lastSelectedNode = null;

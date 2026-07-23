@@ -84,11 +84,8 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
 
         if (edges.length == 0) return
 
-        var line_geom = new THREE.Geometry();
-
-
         this.geometry.dispose();
-        this.geometry = line_geom;
+        this.geometry = new THREE.BufferGeometry();
 
         var that = this
         var invalidEdges = [];
@@ -121,43 +118,29 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
             src = this.getPositionForElement(s);
             dst = this.getPositionForElement(d);
 
-            //Note: currently there is no need to cut off edges because they are only drawn from src to dest
-            //cut off dst at 50% because the element should occure twice
-            // let l_50=dst.clone().sub(src).multiplyScalar(0.5)
-            // dst.sub(l_50)
-
-            // line_geom.vertices.push(src);
-            //  line_geom.vertices.push(dst);
-
             //----------------------------------
-            //TODO have an option to change the line implementation
-            var geometry = new THREE.Geometry();
-            geometry.vertices.push(src);
-
-
+            let linePoints;
             let widthFN;
-            if (this.smoothenWidth == false)
-                geometry.vertices.push(dst);
-            else {
-
-                // smoothing the line with like in the demo
-
-                for (let i = 0; i <= 1; i += 0.1)
-                    geometry.vertices.push(src.clone().lerp(dst, i));
-
-                function parabola(x, k) {
-                    return Math.pow(4 * x * ( 1 - x ), k);
+            if (this.smoothenWidth == false) {
+                linePoints = new Float32Array([
+                    src.x, src.y, src.z,
+                    dst.x, dst.y, dst.z
+                ]);
+            } else {
+                const pts = [];
+                for (let i = 0; i <= 1; i += 0.1) {
+                    const p = src.clone().lerp(dst, i);
+                    pts.push(p.x, p.y, p.z);
                 }
+                linePoints = new Float32Array(pts);
 
                 widthFN = function widthFunction(p) {
-
                     return 1
-                    // return 1 * parabola(p, 1)
                 }
             }
 
             var meshLine = new MeshLine();
-            meshLine.setGeometry(geometry, widthFN);
+            meshLine.setGeometry(linePoints, widthFN);
 
 
             //TODO

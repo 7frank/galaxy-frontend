@@ -3,6 +3,12 @@ import { resolve } from 'path';
 
 export default defineConfig({
     root: '.',
+    resolve: {
+        alias: {
+            three: resolve(__dirname, 'node_modules/three'),
+        },
+        dedupe: ['three'],
+    },
     build: {
         outDir: 'build',
         emptyOutDir: true,

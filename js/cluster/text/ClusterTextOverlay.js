@@ -335,7 +335,7 @@ export default class ClusterTextOverlay {
 
                 //fixing the offset/position as soon as the hull is created
                 if (node.mHull)
-                    mVec3.add(node.mHull.mBoundingBox.getCenter());
+                    mVec3.add(node.mHull.mBoundingBox.getCenter(new THREE.Vector3()));
 
                 return mVec3; //node.position.clone()
             },

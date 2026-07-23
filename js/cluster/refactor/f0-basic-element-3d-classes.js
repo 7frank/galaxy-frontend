@@ -23,7 +23,7 @@ export function register3DClass(className, options) {
 
     var defaults = {
         geometry: function (env, el) {
-            return new THREE.CubeGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize);
+            return new THREE.BoxGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize);
             ;
         },
         material: function (env, el) {
@@ -139,9 +139,8 @@ function _newClassViaFactory(className, env, el) {
 
 function basicSpriteGeometry(env, el) {
 
-    var geometry = new THREE.Geometry();
-    var vertex = new THREE.Vector3();
-    geometry.vertices.push(vertex);
+    var geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
 
 
     return (function (env, el) {
@@ -164,7 +163,7 @@ register3DClass("basic-cube", {});
 //----------------------------------------
 register3DClass("hull-hint", {
     geometry: function (env, el) {
-        return new THREE.CubeGeometry(20, 20, 20);
+        return new THREE.BoxGeometry(20, 20, 20);
     }
 });
 
@@ -172,7 +171,7 @@ register3DClass("hull-hint", {
 //----------------------------------------
 register3DClass("basic-cube-highlighted", {
     geometry: function (env, el) {
-        return new THREE.CubeGeometry(11, 11, 11);
+        return new THREE.BoxGeometry(11, 11, 11);
     },
     material: function (env, el) {
         return new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true});
@@ -303,7 +302,7 @@ register3DClass("basic-animated", {
     material: function (env, el) {
 
 
-        var runnerTexture = new THREE.ImageUtils.loadTexture('img/run.png');
+        var runnerTexture = new THREE.TextureLoader().load('img/run.png');
         var annie = new TextureAnimator(runnerTexture, 10, 1, 10, 75); // texture, #horiz, #vert, #total, duration.
         //var runnerMaterial = new THREE.MeshBasicMaterial( { map: runnerTexture, side:THREE.DoubleSide } );
         //var runnerGeometry = new THREE.PlaneGeometry(50, 50, 1, 1);

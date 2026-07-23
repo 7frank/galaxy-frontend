@@ -83,7 +83,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
                 //
 
-                inverseMatrix.getInverse(matrixWorld);
+                inverseMatrix.copy(matrixWorld).invert();
                 ray.copy(raycaster.ray).applyMatrix4(inverseMatrix);
 
 
@@ -105,7 +105,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
                     if (rayPointDistanceSq < thresholdFromSize(size)) {
 
-                        var intersectPoint = ray.closestPointToPoint(point);
+                        var intersectPoint = ray.closestPointToPoint(point, new THREE.Vector3());
                         intersectPoint.applyMatrix4(matrixWorld);
 
                         var distance = raycaster.ray.origin.distanceTo(intersectPoint);

@@ -5,6 +5,22 @@ import BaseCluster3D from "../BaseCluster3D";
 import * as THREE from "three";
 import * as _ from "lodash";
 
+function buildLinePositions(pairs) {
+    const arr = new Float32Array(pairs.length * 6);
+    for (let i = 0; i < pairs.length; i++) {
+        const [s, d] = pairs[i];
+        arr[i * 6 + 0] = s.x; arr[i * 6 + 1] = s.y; arr[i * 6 + 2] = s.z;
+        arr[i * 6 + 3] = d.x; arr[i * 6 + 4] = d.y; arr[i * 6 + 5] = d.z;
+    }
+    return arr;
+}
+
+function makeLineGeometry(pairs) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(buildLinePositions(pairs), 3));
+    return geo;
+}
+
 
 /**
  * the default implementation for the cluster-to-neighboring-clusters edges
@@ -205,28 +221,16 @@ export default class ClusterBaseEdges extends THREE.Line {
      */
     initEdgeMesh(materialOptions) {
 
-
-        var line_geom = new THREE.Geometry();
-
         var lineMaterial = this.getDefaultMaterial(materialOptions);
 
-
-        // this.mChildClustersEdgesMesh = new THREE.Line(line_geom, lineMaterial, THREE.LineSegments);
-        this.geometry = line_geom;
+        this.geometry = makeLineGeometry([]);
         this.material = lineMaterial;
 
-        //TODO check if this might be helpful to put edges behind nodes
-
-        // this.renderOrder = -2;
-
-
-        this.geometry.boundingBox = new THREE.Box3;
-        this.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 1);
-
+        this.geometry.boundingBox = new THREE.Box3();
+        this.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1);
 
         lineMaterial.fade = 0;
         lineMaterial.fadeTo(1, 2000)
-
 
     }
 
@@ -254,7 +258,7 @@ export default class ClusterBaseEdges extends THREE.Line {
         if (el.mExpanded == true) {
             //expanded: we use the bounding box of the hull if it exists
             if (el.mHull)
-                pos = el.mHull.mBoundingBox.getCenter();
+                pos = el.mHull.mBoundingBox.getCenter(new THREE.Vector3());
 
 
         }
@@ -285,22 +289,12 @@ export default class ClusterBaseEdges extends THREE.Line {
 
     update() {
 
-
         let edges = this.createEdgesForClusters(this.mClusters);
 
-
-        var line_geom = new THREE.Geometry();
-
-
-        this.geometry.dispose();
-        this.geometry = line_geom;
-
-
         var invalidEdges = [];
+        var pairs = [];
 
         for (let edge of edges) {
-
-            let src, dst;
 
             let s, d;
             s = edge.source instanceof BaseCluster3D ? edge.source : edge.source._el;
@@ -311,23 +305,15 @@ export default class ClusterBaseEdges extends THREE.Line {
                 continue
             }
 
-            src = this.getPositionForElement(s);
-            dst = this.getPositionForElement(d);
-
-            //Note: currently there is no need to cut off edges because they are only drawn from src to dest
-            //cut off dst at 50% because the element should occure twice
-            // let l_50=dst.clone().sub(src).multiplyScalar(0.5)
-            // dst.sub(l_50)
-
-            line_geom.vertices.push(src);
-            line_geom.vertices.push(dst);
+            pairs.push([this.getPositionForElement(s), this.getPositionForElement(d)]);
 
         }
 
+        this.geometry.dispose();
+        this.geometry = makeLineGeometry(pairs);
 
         if (invalidEdges.length > 0)
             console.error("invalid edges", invalidEdges)
-
 
     }
 
