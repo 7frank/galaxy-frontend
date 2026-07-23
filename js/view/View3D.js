@@ -179,6 +179,10 @@ export default class View3D extends EventTarget {
             this.mControls.rotateSpeed = 1600 / this.el.clientWidth * this.mouseSpeed
         }
 
+        if (this.mBorderEffect) {
+            this.mBorderEffect.resize(this.el.clientWidth, this.el.clientHeight);
+        }
+
     }
 
 
@@ -289,6 +293,9 @@ export default class View3D extends EventTarget {
 
         this.resizeCanvas();
 
+        if (this.mBorderEffect) {
+            this.mBorderEffect.init(this.mRenderer, this.mScene, this.mCamera);
+        }
 
         this._inited_static_ = true;
 
@@ -312,12 +319,23 @@ export default class View3D extends EventTarget {
     }
 
 
+    setBorderEffect(borderEffect) {
+        this.mBorderEffect = borderEffect;
+        if (this._inited_static_) {
+            borderEffect.init(this.mRenderer, this.mScene, this.mCamera);
+        }
+    }
+
     /**
      * wrapper method to call renderer
      */
     render() {
 
-        this.mRenderer.render(this.mScene, this.mCamera);
+        if (this.mBorderEffect) {
+            this.mBorderEffect.render();
+        } else {
+            this.mRenderer.render(this.mScene, this.mCamera);
+        }
 
     }
 

@@ -11,6 +11,8 @@ import GraphData from "../cluster/GraphData"
 
 import DefaultColorScheme from "../cluster/utils/DefaultColorScheme"
 import "../gui/GraphHUD"
+import OutlineBorderEffect from "../cluster/borders/OutlineBorderEffect"
+import ConvexVolume from "../cluster/hull/ConvexVolume"
 
 import {GUI} from "../cluster/refactor/SpecificDataUtils"
 import _ from "lodash";
@@ -247,6 +249,17 @@ export default class GraphView3D extends View3D {
     }
 
 
+    updateOutlineSelection() {
+        if (!this.mBorderEffect || !this.mRootCluster) return;
+        const meshes = [];
+        this.mRootCluster.traverse(obj => {
+            if (obj instanceof ConvexVolume && obj.mesh) {
+                meshes.push(obj.mesh);
+            }
+        });
+        this.mBorderEffect.effect.selection.set(meshes);
+    }
+
     initClusterForView(rawGraphData, parentEl3D) {
 
 
@@ -288,7 +301,12 @@ export default class GraphView3D extends View3D {
 
 
         if (!this.mRootCluster) {
+            const borderEffect = new OutlineBorderEffect();
+            this.setBorderEffect(borderEffect);
+
             this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
+
+            this.mRootCluster.on("hull-updated", _.throttle(() => this.updateOutlineSelection(), 500));
 
             //debug code..
             window.test.root = this.mRootCluster
@@ -459,6 +477,10 @@ export default class GraphView3D extends View3D {
 
     render() {
 
+        if (this.mBorderEffect) {
+            this.mBorderEffect.render();
+            return;
+        }
 
         var that = this
         //that.setStencil(true);
