@@ -127,6 +127,7 @@ export default class OutlineHullEffect extends BaseHullEffect {
 
     setComposer(composer) {
         this.mComposer = composer;
+        if (this.mMesh) this.mComposer.add(this.mMesh, this.mMode);
     }
 
     onAttach(mesh) {

@@ -1515,12 +1515,15 @@ export default class BaseCluster3D extends BaseNode {
 
         //--------------
         let vertices = info.vertices;
+        const prevMesh = this.mHull.mesh;
         this.mHull.createVolumeFromVertices(vertices, boundingBox);
 
         mOptions.onHullCreated(this.mHull)
 
         if (this.mHull.mesh) {
             const hullEffect = mOptions.hullEffect;
+            if (this._hullEffect && prevMesh)
+                this._hullEffect.onDetach(prevMesh);
             hullEffect.onAttach(this.mHull.mesh);
             this._hullEffect = hullEffect;
         }

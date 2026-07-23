@@ -39,20 +39,28 @@ class BorderSelect extends HTMLElement {
 
         const composer = entry.makeComposer(view);
 
-        view.mRootCluster.findClusters("*").forEach(cluster => {
+        let attached = 0;
+        const allClusters = view.mRootCluster.findClusters("*");
+        console.log('[BorderSelect] all clusters:', allClusters.length, allClusters.map(c => ({ name: c.name, hull: c.mHull?.constructor?.name, mesh: !!c.mHull?.mesh, isConvex: c.mHull instanceof ConvexVolume })));
+        allClusters.forEach(cluster => {
             if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
 
             if (cluster._hullEffect) {
                 cluster._hullEffect.onDetach(cluster.mHull.mesh);
             }
 
-            const mode = (cluster.getClusterOptions && cluster.getClusterOptions().hullBorderMode) || "hover";
+            const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
+            if (!cluster._hullMode) cluster._hullMode = mode;
             const effect = entry.makeEffect(mode, composer);
             cluster._hullEffect = effect;
             effect.onAttach(cluster.mHull.mesh);
+            attached++;
+            console.log('[BorderSelect] attached', label, 'mode=', mode, 'mesh=', cluster.mHull.mesh, 'composer=', composer);
         });
+        console.log('[BorderSelect] total attached:', attached, 'composer:', composer, 'view.mBorderEffect:', view.mBorderEffect);
 
         if (composer) view.setBorderEffect(composer);
+        console.log('[BorderSelect] after setBorderEffect, view.mBorderEffect:', view.mBorderEffect);
 
         this.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
         btn.classList.add("selected");

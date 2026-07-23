@@ -4,5 +4,5 @@ export default class NoneHullEffect extends BaseHullEffect {
     onAttach(mesh) {
         mesh.visible = false;
     }
-    onDetach(mesh) {}
+    onDetach(mesh) { mesh.visible = true; }
 }

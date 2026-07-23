@@ -47,7 +47,20 @@ export default class Default3DGraphConfig {
 
     setView(target) {
 
-        this.mView = target
+        this.mView = target;
+
+        if (target && target.mRenderer) {
+            if (!this.mOutlineComposer) {
+                this.mOutlineComposer = new OutlineComposer();
+                this.mOutlineComposer.init(target.mRenderer, target.mScene, target.mCamera);
+                target.setBorderEffect(this.mOutlineComposer);
+            }
+            this.getSpeccs().forEach(spec => {
+                const hullEffect = spec.options && spec.options.hullEffect;
+                if (hullEffect && hullEffect.setComposer) hullEffect.setComposer(this.mOutlineComposer);
+            });
+        }
+
         return this
 
     }
@@ -83,6 +96,12 @@ export default class Default3DGraphConfig {
 
 
     getSpeccs() {
+        if (this._speccs) return this._speccs;
+        this._speccs = this._buildSpeccs();
+        return this._speccs;
+    }
+
+    _buildSpeccs() {
 
 
         //the function that is called to create the  country groups
@@ -151,7 +170,7 @@ export default class Default3DGraphConfig {
                 options: {
                     minClusterSize: 15
                     , hull: ConvexVolume,
-                    hullEffect: new OutlineHullEffect("hover", this.mOutlineComposer),
+                    hullEffect: new OutlineHullEffect("hover"),
                     onHullCreated: function (volume) {
                     }
 
@@ -161,7 +180,7 @@ export default class Default3DGraphConfig {
                 distribution: nodesWithinIndustryDistribution,
                 options: {
                     hull: ConvexVolume,
-                    hullEffect: new OutlineHullEffect("ambient", this.mOutlineComposer),
+                    hullEffect: new OutlineHullEffect("ambient"),
 
                     text: function () {
                         //return IndustrialSectorIcon(this.name)
@@ -264,9 +283,7 @@ export default class Default3DGraphConfig {
 
         rootCluster.setLock(true);
 
-        if (!this.mOutlineComposer) {
-            this.mOutlineComposer = new OutlineComposer();
-            this.mOutlineComposer.init(view.mRenderer, view.mScene, view.mCamera);
+        if (this.mOutlineComposer) {
             view.setBorderEffect(this.mOutlineComposer);
         }
 
