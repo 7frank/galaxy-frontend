@@ -5,7 +5,7 @@
 //TODO import css rules
 //TODO import other vusual components and templates
 
-import template from "./graph-hud.html"
+import template from "./graph-hud.html?raw"
 
 import "./info-panel/InfoPanel"
 import "./company-info/CompanyInfo"

@@ -1,4 +1,4 @@
-import bodyHTML from "./company-details-body.html"
+import bodyHTML from "./company-details-body.html?raw"
 import TemplateString from "../../utils/TemplateString";
 
 class CompanyDetails extends HTMLElement {

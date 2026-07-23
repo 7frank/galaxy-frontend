@@ -11,8 +11,8 @@ import DomEventsAlt from "../cluster/utils/DomEventsAlt"
 import "./View3D.css"
 
 import * as THREE from "three";
-import "../lib/CombinedCamera"
-import "../lib/TrackballControls"
+import { CombinedCamera } from "../lib/CombinedCamera";
+import { TrackballControls } from "../lib/TrackballControls";
 
 
 
@@ -70,9 +70,9 @@ export default class View3D extends EventTarget {
         this.mCameraO.position.copy(initialCameraPosition)
 
 
-        this.mCamera = new THREE.CombinedCamera();
+        this.mCamera = new CombinedCamera();
 
-        if (this.mCamera instanceof THREE.CombinedCamera) {
+        if (this.mCamera instanceof CombinedCamera) {
             this.mCamera.setFar(5000000);
 
             this.mCamera.setFov(50);
@@ -93,7 +93,7 @@ export default class View3D extends EventTarget {
      */
 
     createControls() {
-        this.mControls = new THREE.TrackballControls(this.mCamera, this.mRenderer.domElement);
+        this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
 
         this.mControls.maxDistance = Math.min(this.mCamera.far, 200000);
 
@@ -158,7 +158,7 @@ export default class View3D extends EventTarget {
             this.mCamera.aspect = this.el.clientWidth / this.el.clientHeight;
 
 
-            if (this.mCamera instanceof THREE.CombinedCamera)
+            if (this.mCamera instanceof CombinedCamera)
                 this.mCamera.setSize(this.el.clientWidth, this.el.clientHeight);
             this.mCamera.updateProjectionMatrix();
 

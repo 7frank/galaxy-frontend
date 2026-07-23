@@ -4,8 +4,10 @@
   "description": "contains a component to render node/edge data with threejs and d3_force",
   "main": "index.js",
   "scripts": {
-    "build": "node_modules/.bin/webpack --display-error-details --config webpack.config.js && node -e \"const fs=require('fs');const t=Date.now();const f='index.html';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/__BUILDTIME__/g,t));\"",
-    "start": "http-server . -p 8080 -o /index.html -c-1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite",
     "test": "karma start karma.conf.js"
   },
   "repository": {
@@ -52,6 +54,7 @@
     "tslint": "~5.3.2",
     "typescript": "~2.3.3",
     "url-loader": "^0.5.9",
+    "vite": "^8.1.5",
     "webpack": "^2.6.1",
     "webpack-bundle-analyzer": "^2.9.0"
   },

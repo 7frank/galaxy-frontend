@@ -4,7 +4,7 @@
 
 import nodeMixin from "./refactor/f0_nodemixin"
 import {extendGraphElements} from "./refactor/f1"
-
+import _ from "lodash";
 
 export default class GraphData {
 

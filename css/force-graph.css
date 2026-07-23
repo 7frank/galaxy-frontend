@@ -311,7 +311,8 @@
   
 	.graph-country-caption
 	{
-	color:ffffff;
+		color:#ffffff;
+		
 	    padding: 2 5 2 5;
 		background: rgba(0, 0, 0, 0.5);
 		
@@ -343,7 +344,7 @@
 	.node-caption-highlighted
 	{
 		color: white !important;
-		//font-weight: bold;
+		/* font-weight: bold; */
 		text-shadow: 0 0 0.3em white, 0 0 0.3em white, 0 0 0.3em white;
 	}
 	

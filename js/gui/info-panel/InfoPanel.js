@@ -1,4 +1,4 @@
-import template from "./info-panel.html"
+import template from "./info-panel.html?raw"
 
 class InfoPanel extends HTMLElement {
 

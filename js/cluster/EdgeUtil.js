@@ -3,6 +3,7 @@
  */
 
 import BaseCluster3D from "./BaseCluster3D"
+import _ from "lodash";
 
 export default class EdgeUtil {
 

@@ -79,7 +79,7 @@
 import * as THREE from "three";
 import * as _ from "lodash";
 
-import "../../lib/CombinedCamera"
+import { CombinedCamera } from "../../lib/CombinedCamera";
 
 
 // # Constructor
@@ -298,7 +298,7 @@ DomEventsAlt.prototype._onMove = function (eventName, mouseX, mouseY, origDomEve
 
     let mCamera;
 
-    if (this._camera instanceof THREE.CombinedCamera) {
+    if (this._camera instanceof CombinedCamera) {
 
         if (this._camera.inPerspectiveMode) mCamera = this._camera.cameraP;
         if (this._camera.inOrthographicMode) mCamera = this._camera.cameraO;
@@ -457,7 +457,7 @@ DomEventsAlt.prototype._onEvent = function (eventName, mouseX, mouseY, origDomEv
 
     let mCamera;
 
-    if (this._camera instanceof THREE.CombinedCamera) {
+    if (this._camera instanceof CombinedCamera) {
 
         if (this._camera.inPerspectiveMode) mCamera = this._camera.cameraP;
         if (this._camera.inOrthographicMode) mCamera = this._camera.cameraO;

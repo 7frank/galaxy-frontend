@@ -10,7 +10,7 @@ import DomEventsAlt from "./utils/DomEventsAlt"
 import * as THREE from "three";
 import * as _ from "lodash";
 
-import * as Mousetrap from "mousetrap";
+import Mousetrap from "mousetrap";
 
 /**
  * A simple graph-node that contains methods for user interaction and basic visualisation via threejs {@link THREE}.

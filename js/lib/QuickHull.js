@@ -5,8 +5,10 @@
  *
  */
 
-import * as THREE from "three";
+import { Vector3, Line3, Plane, Triangle } from "three";
 
+
+var QuickHullClass;
 
 ( function() {
 
@@ -43,13 +45,13 @@ import * as THREE from "three";
 
 			if ( Array.isArray( points ) !== true ) {
 
-				console.error( 'THREE.QuickHull: Points parameter is not an array.' );
+				console.error( 'QuickHull: Points parameter is not an array.' );
 
 			}
 
 			if ( points.length < 4 ) {
 
-				console.error( 'THREE.QuickHull: The algorithm needs at least four points.' );
+				console.error( 'QuickHull: The algorithm needs at least four points.' );
 
 			}
 
@@ -102,7 +104,7 @@ import * as THREE from "three";
 
 							for ( i = 0, l = attribute.count; i < l; i ++ ) {
 
-								point = new THREE.Vector3();
+								point = new Vector3();
 
 								point.fromBufferAttribute( attribute, i ).applyMatrix4( node.matrixWorld );
 
@@ -330,8 +332,8 @@ import * as THREE from "three";
 
 		computeExtremes: function () {
 
-			var min = new THREE.Vector3();
-			var max = new THREE.Vector3();
+			var min = new Vector3();
+			var max = new Vector3();
 
 			var minVertices = [];
 			var maxVertices = [];
@@ -407,9 +409,9 @@ import * as THREE from "three";
 
 				if ( line3 === undefined ) {
 
-					line3 = new THREE.Line3();
-					plane = new THREE.Plane();
-					closestPoint = new THREE.Vector3();
+					line3 = new Line3();
+					plane = new Plane();
+					closestPoint = new Vector3();
 
 				}
 
@@ -846,8 +848,8 @@ import * as THREE from "three";
 
 	function Face() {
 
-		this.normal = new THREE.Vector3();
-		this.midpoint = new THREE.Vector3();
+		this.normal = new Vector3();
+		this.midpoint = new Vector3();
 		this.area = 0;
 
 		this.constant = 0; // signed distance from face to the origin
@@ -913,7 +915,7 @@ import * as THREE from "three";
 
 			return function compute () {
 
-				if ( triangle === undefined ) triangle = new THREE.Triangle();
+				if ( triangle === undefined ) triangle = new Triangle();
 
 				var a = this.edge.tail();
 				var b = this.edge.head();
@@ -1213,9 +1215,9 @@ import * as THREE from "three";
 
 	} );
 
-	// export
-
-	THREE.QuickHull = QuickHull;
-
+	QuickHullClass = QuickHull;
 
 } ) ();
+
+var QuickHull = QuickHullClass;
+export { QuickHull };

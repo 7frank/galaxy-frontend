@@ -19,7 +19,8 @@ import GraphQLDatasource from "../data/GraphQLDatasource"
 export {CsvDatasource, GraphQLDatasource}
 
 import Default3DGraphConfig from "./configs/Default3DGraphConfig";
-import * as Mousetrap from "mousetrap";
+import Mousetrap from "mousetrap";
+import _ from "lodash";
 
 
 

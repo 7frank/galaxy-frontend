@@ -6,6 +6,7 @@
 import BaseEdge from "./BaseEdge"
 import EdgeUtil from "./EdgeUtil"
 import * as THREE from "three";
+import _ from "lodash";
 
 /**
  * NOTE: the nodes for this container need to be child elements of the  same cluster

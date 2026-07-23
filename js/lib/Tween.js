@@ -910,3 +910,5 @@ TWEEN.Interpolation = {
 	}
 
 })(this);
+
+export default TWEEN;

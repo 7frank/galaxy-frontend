@@ -7,8 +7,8 @@ import BoxVolume from "./BoxVolume"
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin"
 import * as THREE from "three";
 
-import "../../lib/ConvexGeometry"
-import "../../lib/QuickHull"
+import { ConvexGeometry } from "../../lib/ConvexGeometry";
+
 
 
 /**
@@ -63,7 +63,7 @@ export default class ConvexVolume extends BoxVolume {
         }
 
 
-        let convexGeoWithMargin = new THREE.ConvexGeometry(marginGeo.vertices);
+        let convexGeoWithMargin = new ConvexGeometry(marginGeo.vertices);
 
 
         return convexGeoWithMargin
@@ -150,7 +150,7 @@ export default class ConvexVolume extends BoxVolume {
             if (vertices[0].y == 0) vertices[0].y = 0.1;
             if (vertices[0].z == 0) vertices[0].z = 0.1;
 
-            geo0 = this.mGeometryZero = new THREE.ConvexGeometry(vertices);
+            geo0 = this.mGeometryZero = new ConvexGeometry(vertices);
         }
         catch (e) {
             geo0 = this.mGeometryZero = this.createBoxGeometryFromBoundingBox(boundingBox);

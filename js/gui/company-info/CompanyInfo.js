@@ -1,4 +1,4 @@
-import template from "./company-info.html"
+import template from "./company-info.html?raw"
 
 import ApolloDS from "../../data/ApolloDS";
 import _ from "lodash"
