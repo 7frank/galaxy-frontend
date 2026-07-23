@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
     root: '.',
@@ -20,5 +21,12 @@ export default defineConfig({
         port: 8080,
         open: '/index.html',
     },
-    plugins: [],
+    plugins: [
+        process.env.ANALYZE && visualizer({
+            filename: 'build/stats.html',
+            open: true,
+            gzipSize: true,
+            brotliSize: true,
+        }),
+    ].filter(Boolean),
 });
