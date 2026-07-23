@@ -31,6 +31,7 @@
     "file-loader": "^0.11.2",
     "html-loader": "^0.5.1",
     "html-webpack-plugin": "^2.29.0",
+    "http-server": "^14.1.1",
     "imports-loader": "^0.7.1",
     "jasmine-core": "~2.6.2",
     "jasmine-spec-reporter": "~4.1.0",
@@ -52,7 +53,6 @@
     "typescript": "~2.3.3",
     "url-loader": "^0.5.9",
     "webpack": "^2.6.1",
-    "http-server": "^14.1.1",
     "webpack-bundle-analyzer": "^2.9.0"
   },
   "dependencies": {
@@ -63,8 +63,6 @@
     "easy-color": "^1.0.4",
     "graphql-tag": "^2.4.2",
     "hexasphere.js": "^0.2.2",
-    "jquery": "^3.2.1",
-    "jquery-ui": "^1.12.1",
     "lodash": "^4.17.4",
     "monotone-convex-hull-2d": "^1.0.1",
     "mousetrap": "^1.6.1",
