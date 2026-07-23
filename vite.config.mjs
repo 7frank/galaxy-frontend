@@ -7,6 +7,7 @@ export default defineConfig({
     resolve: {
         alias: {
             three: resolve(__dirname, 'node_modules/three'),
+            'postprocessing/src': resolve(__dirname, 'node_modules/postprocessing/src'),
         },
         dedupe: ['three'],
     },
@@ -33,7 +34,18 @@ export default defineConfig({
         port: 8080,
         open: '/index.html',
     },
+    optimizeDeps: {
+        exclude: ['postprocessing'],
+    },
     plugins: [
+        {
+            name: 'glsl-raw',
+            transform(code, id) {
+                if (/\.(glsl|vert|frag)$/.test(id)) {
+                    return { code: `export default ${JSON.stringify(code)};`, map: null };
+                }
+            },
+        },
         process.env.ANALYZE && visualizer({
             filename: 'build/stats.html',
             open: true,

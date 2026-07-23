@@ -190,7 +190,7 @@ export class SampleClusterApplication extends HTMLElement {
 
             }
 
-            mGraphView.showFPSCounter = that.isDebug();
+            mGraphView.showFPSCounter = true;
 
 
             viewEl.classList.add("view-thumbnail");

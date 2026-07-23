@@ -1,18 +1,21 @@
-import {
-    EffectComposer,
-    RenderPass,
-    EffectPass,
-    OutlineEffect,
-    SMAAEffect,
-    SMAAPreset,
-    EdgeDetectionMode,
-    BlendFunction
-} from "postprocessing";
+import { EffectComposer } from "postprocessing/src/core/EffectComposer.js";
+import { RenderPass } from "postprocessing/src/passes/RenderPass.js";
+import { EffectPass } from "postprocessing/src/passes/EffectPass.js";
+import { OutlineEffect } from "postprocessing/src/effects/OutlineEffect.js";
+import { SMAAEffect } from "postprocessing/src/effects/SMAAEffect.js";
+import { SMAAPreset } from "postprocessing/src/enums/SMAAPreset.js";
+import { EdgeDetectionMode } from "postprocessing/src/enums/EdgeDetectionMode.js";
+import { BlendFunction } from "postprocessing/src/enums/BlendFunction.js";
 import { HalfFloatType, LinearSRGBColorSpace } from "three/src/constants.js";
 
 import BaseBorderEffect from "./BaseBorderEffect";
 
 export default class OutlineBorderEffect extends BaseBorderEffect {
+
+    constructor({ enableSmaa = false } = {}) {
+        super();
+        this.enableSmaa = enableSmaa;
+    }
 
     init(renderer, scene, camera) {
         this.mRenderer = renderer;
@@ -27,12 +30,11 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
         renderPass.renderToScreen = false;
         this.mComposer.addPass(renderPass);
 
-        const smaaEffect = new SMAAEffect({
-            preset: SMAAPreset.HIGH,
-            edgeDetectionMode: EdgeDetectionMode.COLOR
-        });
-
-        smaaEffect.edgeDetectionMaterial.setEdgeDetectionThreshold(0.05);
+        let smaaEffect;
+        if (this.enableSmaa) {
+            smaaEffect = new SMAAEffect({ preset: SMAAPreset.HIGH, edgeDetectionMode: EdgeDetectionMode.COLOR });
+            smaaEffect.edgeDetectionMaterial.setEdgeDetectionThreshold(0.05);
+        }
 
         const outlineEffect = new OutlineEffect(scene, camera, {
             blendFunction: BlendFunction.SCREEN,
@@ -63,10 +65,10 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
         this.mModeMap = new Map();
 
         const outlinePass = new EffectPass(camera, outlineEffectDim, outlineEffect);
-        const smaaPass = new EffectPass(camera, smaaEffect);
-
         this.mComposer.addPass(outlinePass);
-        this.mComposer.addPass(smaaPass);
+        if (this.enableSmaa) {
+            this.mComposer.addPass(new EffectPass(camera, smaaEffect));
+        }
     }
 
     onHullRegister(mesh, mode) {
