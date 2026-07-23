@@ -2,7 +2,7 @@ import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
 
 import FlatVolume from "../hull/FlatVolume";
 import Default2DGraphConfig from "./Default2DGraphConfig";
-import * as THREE from "three";
+import { Vector3 } from "three/src/math/Vector3.js";
 
 
 /**
@@ -28,7 +28,7 @@ export default class Extended2DGraphConfig extends Default2DGraphConfig {
         let view = this.getView();
 
 
-        view.mControls.target.set(new THREE.Vector3(0, 0, 0));
+        view.mControls.target.set(new Vector3(0, 0, 0));
         view.mControls.noRotate = false;
         view.mControls.reset();
 

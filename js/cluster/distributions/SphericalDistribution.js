@@ -4,7 +4,8 @@
 
 import BaseDistribution from "./BaseDistribution"
 
-import * as THREE from "three";
+import { Vector2 } from "three/src/math/Vector2.js";
+import { Vector3 } from "three/src/math/Vector3.js";
 
 
 /**
@@ -26,7 +27,7 @@ export default class SphericalDistribution extends BaseDistribution {
 
     /**
      *  implementation of the equirectangular projection
-     * @param mVec2 - a THREE.Vector2 that has been transformed into normalised coordinates
+     * @param mVec2 - a Vector2 that has been transformed into normalised coordinates
      *
      */
     project2dNormalisedToSphere(mVec2, radius) {
@@ -38,7 +39,7 @@ export default class SphericalDistribution extends BaseDistribution {
         var y = radius * Math.cos(latitude) * Math.sin(longitude)
         var z = radius * Math.sin(latitude)
 
-        return new THREE.Vector3(y, z, x) //?different coordinate system in skybox?
+        return new Vector3(y, z, x) //?different coordinate system in skybox?
 
     }
 
@@ -48,7 +49,7 @@ export default class SphericalDistribution extends BaseDistribution {
      **/
 
     distribute(node, dx, dy, dz) {
-        let mv3 = this.project2dNormalisedToSphere(new THREE.Vector2(2 * dx, 2 * dy), this.mScale / 2)
+        let mv3 = this.project2dNormalisedToSphere(new Vector2(2 * dx, 2 * dy), this.mScale / 2)
         return {position: mv3};
     }
 

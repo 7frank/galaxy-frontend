@@ -1,4 +1,5 @@
-import * as THREE from "three";
+import { Camera } from "three/src/cameras/Camera.js";
+import { Vector3 } from "three/src/math/Vector3.js";
 import * as _ from "lodash";
 
 /**
@@ -51,9 +52,9 @@ export default function TextNodesFactory(env, options) {
 
         },
         getNodePosition: function (node) {
-            //should return a THREE.Vector3 represention the source nodes poistion in 3d space
+            //should return a Vector3 represention the source nodes poistion in 3d space
 
-            var vector = new THREE.Vector3();
+            var vector = new Vector3();
             vector.setFromMatrixPosition(node._bubble.matrixWorld);
             return vector;
 
@@ -122,8 +123,8 @@ export default function TextNodesFactory(env, options) {
 
     /**
      *
-     * @param p ... an instanceof {@link THREE.Vector3} representing the position of the node/element in 3D space.
-     * @param camera ... an instanceof {@link THREE.Camera} representing the position and viewport of the user/observer.
+     * @param p ... an instanceof {@link Vector3} representing the position of the node/element in 3D space.
+     * @param camera ... an instanceof {@link Camera} representing the position and viewport of the user/observer.
      * @param viewOffsetWidthBy2  .. the relative screen offset of the container (view) divided by two
      * @param viewOffsetHeightBy2 .. the relative screen offset of the container (view)divided by two
      */
@@ -150,8 +151,8 @@ export default function TextNodesFactory(env, options) {
         //var size=500/distance*10*scaling
 
         //calc angle to discard nodes that are to far at the sides of the screen or possible behind the camera
-        let dir1 = new THREE.Vector3().copy(point2).sub(point1)
-        let dir2 = env.camera.getWorldDirection(new THREE.Vector3())
+        let dir1 = new Vector3().copy(point2).sub(point1)
+        let dir2 = env.camera.getWorldDirection(new Vector3())
         var angle = dir1.angleTo(dir2)
 
 

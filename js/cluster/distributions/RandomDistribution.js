@@ -3,7 +3,7 @@
  */
 
 import BaseDistribution from "./BaseDistribution"
-import * as THREE from "three";
+import { Vector3 } from "three/src/math/Vector3.js";
 import * as _ from "lodash";
 
 
@@ -39,7 +39,7 @@ export default class RandomDistribution extends BaseDistribution {
 
 
         return {
-            position: new THREE.Vector3(x, y, z)
+            position: new Vector3(x, y, z)
         }
     }
 }

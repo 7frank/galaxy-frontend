@@ -16,7 +16,20 @@ import ConvexVolume from "../cluster/hull/ConvexVolume"
 
 import {GUI} from "../cluster/refactor/SpecificDataUtils"
 import _ from "lodash";
-import * as THREE from "three";
+import { BackSide } from "three/src/constants.js";
+import { BufferAttribute } from "three/src/core/BufferAttribute.js";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { ImageUtils } from "three/src/extras/ImageUtils.js";
+import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
+import { Box3Helper } from "three/src/helpers/Box3Helper.js";
+import { AmbientLight } from "three/src/lights/AmbientLight.js";
+import { DirectionalLight } from "three/src/lights/DirectionalLight.js";
+import { PointLight } from "three/src/lights/PointLight.js";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
+import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Group } from "three/src/objects/Group.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 
 //import skyDomeImage from "./coordinates.png"
 
@@ -76,30 +89,30 @@ export default class GraphView3D extends View3D {
     createSkyDome() {
 
 
-        var material = new THREE.MeshBasicMaterial();
+        var material = new MeshBasicMaterial();
 
 
         let scene = this.mScene;
 
-        var ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.5);
+        var ambientLight = new AmbientLight(0xFFFFFF, 1.5);
         scene.add(ambientLight);
-        /* var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        /* var dirLight = new DirectionalLight(0xffffff, 1);
          dirLight.position.set(0, 10000, 0);
          dirLight.intensity = 1;
          scene.add(dirLight);
      */
-        /* var pointLight = new THREE.PointLight( 0xffffff, 100, 1000000000 );
+        /* var pointLight = new PointLight( 0xffffff, 100, 1000000000 );
          pointLight.position.set( 0, 0, 20000 );
          scene.add(pointLight);
      */
-        /*  var geometry = new THREE.SphereGeometry(300000, 60, 40);
-          var material = new THREE.MeshBasicMaterial();
+        /*  var geometry = new SphereGeometry(300000, 60, 40);
+          var material = new MeshBasicMaterial();
 
-         material.map = THREE.ImageUtils.loadTexture(skyDomeImage);
-          material.side = THREE.BackSide;
+         material.map = ImageUtils.loadTexture(skyDomeImage);
+          material.side = BackSide;
           material.opacity=0.05;
           material.transparent=true;
-          var skydome = new THREE.Mesh(geometry, material);
+          var skydome = new Mesh(geometry, material);
 
           this.mSkyDome=skydome
 
@@ -110,19 +123,19 @@ export default class GraphView3D extends View3D {
 
         //--------------------------------
         var meshMaterials = [];
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x397d02, transparent: true}));
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x77ee00, transparent: true}));
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x61b329, transparent: true}));
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x83f52c, transparent: true}));
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00ee00, transparent: true}));
-        meshMaterials.push(new THREE.MeshPhongMaterial({color: 0x00aa11, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x397d02, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x77ee00, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x61b329, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x83f52c, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x4cbb17, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x00ee00, transparent: true}));
+        meshMaterials.push(new MeshPhongMaterial({color: 0x00aa11, transparent: true}));
 
         var oceanMaterial = []
-        oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f2342, transparent: true}));
-        oceanMaterial.push(new THREE.MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
+        oceanMaterial.push(new MeshPhongMaterial({color: 0x0f2342, transparent: true}));
+        oceanMaterial.push(new MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
 
 
         var radius = 300000;        // Radius used to calculate position of tiles
@@ -136,7 +149,7 @@ export default class GraphView3D extends View3D {
 
         }
 
-        var hexaGroup = new THREE.Group();
+        var hexaGroup = new Group();
 
         var hexasphere = new Hexasphere(radius, subDivisions, tileSize);
         for (var i = 0; i < hexasphere.tiles.length; i++) {
@@ -144,7 +157,7 @@ export default class GraphView3D extends View3D {
             var latLon = t.getLatLon(hexasphere.radius);
 
             const bps = t.boundary;
-            const verts = bps.map(bp => new THREE.Vector3(bp.x, bp.y, bp.z));
+            const verts = bps.map(bp => new Vector3(bp.x, bp.y, bp.z));
             const faceIndices = [[0,1,2],[0,2,3],[0,3,4]];
             if (verts.length > 5) faceIndices.push([0,4,5]);
             const positions = [];
@@ -153,8 +166,8 @@ export default class GraphView3D extends View3D {
                 positions.push(verts[b].x, verts[b].y, verts[b].z);
                 positions.push(verts[c].x, verts[c].y, verts[c].z);
             }
-            var geometry = new THREE.BufferGeometry();
-            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+            var geometry = new BufferGeometry();
+            geometry.setAttribute('position', new BufferAttribute(new Float32Array(positions), 3));
             geometry.computeVertexNormals();
 
             if (isLand(latLon.lat, latLon.lon)) {
@@ -165,9 +178,9 @@ export default class GraphView3D extends View3D {
 
             material.opacity = 0.3;
 
-            material.side = THREE.BackSide;
+            material.side = BackSide;
 
-            var mesh = new THREE.Mesh(geometry, material.clone());
+            var mesh = new Mesh(geometry, material.clone());
             hexaGroup.add(mesh);
             hexasphere.tiles[i].mesh = mesh;
 
@@ -352,18 +365,18 @@ export default class GraphView3D extends View3D {
                         return;
                     }
 
-                    grp = new THREE.Group();
+                    grp = new Group();
                     grp.name = DEBUG_GROUP_NAME;
                     root.updateMatrixWorld(true);
 
                     function addBoxes(cluster) {
                         if (_debugState.mode === 1 && cluster.mHull && cluster.mHull.mBoundingBox) {
                             const bbWorld = cluster.mHull.mBoundingBox.clone().applyMatrix4(cluster.matrixWorld);
-                            grp.add(new THREE.Box3Helper(bbWorld, 0xffff00));
+                            grp.add(new Box3Helper(bbWorld, 0xffff00));
                         }
                         if (_debugState.mode === 2 && cluster.geometry && cluster.geometry.boundingBox) {
                             const bbWorld = cluster.geometry.boundingBox.clone().applyMatrix4(cluster.matrixWorld);
-                            grp.add(new THREE.Box3Helper(bbWorld, 0xff0000));
+                            grp.add(new Box3Helper(bbWorld, 0xff0000));
                         }
                         if (cluster.mClusters)
                             Object.values(cluster.mClusters).forEach(addBoxes);
@@ -378,13 +391,13 @@ export default class GraphView3D extends View3D {
                 function v3(v) { return v ? `(${v.x.toFixed(0)},${v.y.toFixed(0)},${v.z.toFixed(0)})` : 'null'; }
                 function bbStr(bb) {
                     if (!bb) return 'no-bb';
-                    const c = bb.getCenter(new THREE.Vector3());
-                    const s = bb.getSize(new THREE.Vector3());
+                    const c = bb.getCenter(new Vector3());
+                    const s = bb.getSize(new Vector3());
                     return `center=${v3(c)} size=${v3(s)}`;
                 }
                 function dumpCluster(cluster, indent) {
                     const isLeaf = cluster.isLeaf ? cluster.isLeaf() : false;
-                    const wp = new THREE.Vector3();
+                    const wp = new Vector3();
                     cluster.getWorldPosition(wp);
                     const hullBB = cluster.mHull && cluster.mHull.mBoundingBox;
                     const geoBB = cluster.geometry && cluster.geometry.boundingBox;

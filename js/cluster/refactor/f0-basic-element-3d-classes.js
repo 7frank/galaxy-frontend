@@ -11,7 +11,17 @@ import ring2Image from "../../../img/ring2.png"
 import ring3Image from "../../../img/ring3.png"
 
 
-import * as THREE from "three";
+import { AdditiveBlending, BackSide, DoubleSide } from "three/src/constants.js";
+import { BufferAttribute } from "three/src/core/BufferAttribute.js";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { BoxGeometry } from "three/src/geometries/BoxGeometry.js";
+import { PlaneGeometry } from "three/src/geometries/PlaneGeometry.js";
+import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
+import { TextureLoader } from "three/src/loaders/TextureLoader.js";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
+import { PointsMaterial } from "three/src/materials/PointsMaterial.js";
+import { Mesh } from "three/src/objects/Mesh.js";
+import { Points } from "three/src/objects/Points.js";
 import * as _ from "lodash";
 
 //------------------------------------------------
@@ -23,14 +33,14 @@ export function register3DClass(className, options) {
 
     var defaults = {
         geometry: function (env, el) {
-            return new THREE.BoxGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize);
+            return new BoxGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize);
             ;
         },
         material: function (env, el) {
-            return new THREE.MeshBasicMaterial({color: env.colorAccessor(el) || 0xffffff, transparent: true})
+            return new MeshBasicMaterial({color: env.colorAccessor(el) || 0xffffff, transparent: true})
         },
         instance: function (env, el) {
-            return new THREE.Mesh(this.geometry(env, el), this.material(env, el));
+            return new Mesh(this.geometry(env, el), this.material(env, el));
         }, onAdd: function (completeCallback) {
             if (completeCallback)
                 completeCallback();
@@ -88,7 +98,7 @@ function _newClassViaFactory(className, env, el) {
         //throw new Error("3d class "+className+" not found")
         console.error("3d class " + className + " not found");
 
-        var mMesh = new THREE.Mesh();
+        var mMesh = new Mesh();
         mMesh.onAdd = function () {
         };
         mMesh.onRemove = mMesh.onAdd = function (c) {
@@ -139,8 +149,8 @@ function _newClassViaFactory(className, env, el) {
 
 function basicSpriteGeometry(env, el) {
 
-    var geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
+    var geometry = new BufferGeometry();
+    geometry.setAttribute('position', new BufferAttribute(new Float32Array([0, 0, 0]), 3));
 
 
     return (function (env, el) {
@@ -163,7 +173,7 @@ register3DClass("basic-cube", {});
 //----------------------------------------
 register3DClass("hull-hint", {
     geometry: function (env, el) {
-        return new THREE.BoxGeometry(20, 20, 20);
+        return new BoxGeometry(20, 20, 20);
     }
 });
 
@@ -171,44 +181,44 @@ register3DClass("hull-hint", {
 //----------------------------------------
 register3DClass("basic-cube-highlighted", {
     geometry: function (env, el) {
-        return new THREE.BoxGeometry(11, 11, 11);
+        return new BoxGeometry(11, 11, 11);
     },
     material: function (env, el) {
-        return new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true});
+        return new MeshBasicMaterial({color: 0xff0000, transparent: true});
     },
     unique: false
 });
 //----------------------------------------
 register3DClass("basic-sphere", {
     material: function (env, el) {
-        return new THREE.MeshBasicMaterial({color: env.colorAccessor(el) || 0xffffff, transparent: true});
+        return new MeshBasicMaterial({color: env.colorAccessor(el) || 0xffffff, transparent: true});
     },
     geometry: function (env, el) {
-        return new THREE.SphereGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, 12, 10);
+        return new SphereGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize, 12, 10);
     },
     unique: false
 });
 //----------------------------------------
 register3DClass("basic-selection", {
     material: function (env, el) {
-        return new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.3/*,side: THREE.BackSide*/});
+        return new MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.3/*,side: BackSide*/});
     },
     geometry: function (env, el) {
-        return new THREE.SphereGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize / 3.5, 25, 25);
+        return new SphereGeometry(Math.cbrt(env.valAccessor(el) || 1) * env.nodeRelSize / 3.5, 25, 25);
     },
     unique: true
 });
 
 //----------------------------------------
 
-var basicCollapsedSprite = new THREE.TextureLoader().load(dot9Image);
+var basicCollapsedSprite = new TextureLoader().load(dot9Image);
 
 register3DClass("basic-sprite-collapsed", {
     geometry: basicSpriteGeometry
     ,
     material: function (env, el) {
 
-        material = new THREE.PointsMaterial({
+        material = new PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el),
             sizeAttenuation: true,
@@ -222,7 +232,7 @@ register3DClass("basic-sprite-collapsed", {
 
     }, instance(env, el) {
 
-        var mPointMesh = new THREE.Points(this.geometry(env, el), this.material(env, el));
+        var mPointMesh = new Points(this.geometry(env, el), this.material(env, el));
 
 
         return mPointMesh;
@@ -233,14 +243,14 @@ register3DClass("basic-sprite-collapsed", {
 
 
 //----------------------------------------
-var ring3Sprite = new THREE.TextureLoader().load(ring3Image);
+var ring3Sprite = new TextureLoader().load(ring3Image);
 
 register3DClass("basic-ring", {
     geometry: basicSpriteGeometry,
     material: function (env, el) {
 
 
-        material = new THREE.PointsMaterial({
+        material = new PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el),
             sizeAttenuation: true,
@@ -254,7 +264,7 @@ register3DClass("basic-ring", {
 
     }, instance(env, el) {
 
-        var mPointMesh = new THREE.Points(this.geometry(env, el), this.material(env, el));
+        var mPointMesh = new Points(this.geometry(env, el), this.material(env, el));
 
 
         return mPointMesh;
@@ -265,7 +275,7 @@ register3DClass("basic-ring", {
 
 
 //----------------------------------------
-var ring2Sprite = new THREE.TextureLoader().load(ring2Image);
+var ring2Sprite = new TextureLoader().load(ring2Image);
 
 register3DClass("basic-ring-2", {
     geometry: basicSpriteGeometry
@@ -273,7 +283,7 @@ register3DClass("basic-ring-2", {
     material: function (env, el) {
 
 
-        material = new THREE.PointsMaterial({
+        material = new PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el),
             sizeAttenuation: true,
@@ -287,7 +297,7 @@ register3DClass("basic-ring-2", {
 
     }, instance(env, el) {
 
-        var mPointMesh = new THREE.Points(this.geometry(env, el), this.material(env, el));
+        var mPointMesh = new Points(this.geometry(env, el), this.material(env, el));
 
 
         return mPointMesh;
@@ -302,11 +312,11 @@ register3DClass("basic-animated", {
     material: function (env, el) {
 
 
-        var runnerTexture = new THREE.TextureLoader().load('img/run.png');
+        var runnerTexture = new TextureLoader().load('img/run.png');
         var annie = new TextureAnimator(runnerTexture, 10, 1, 10, 75); // texture, #horiz, #vert, #total, duration.
-        //var runnerMaterial = new THREE.MeshBasicMaterial( { map: runnerTexture, side:THREE.DoubleSide } );
-        //var runnerGeometry = new THREE.PlaneGeometry(50, 50, 1, 1);
-        //var runner = new THREE.Mesh(runnerGeometry, runnerMaterial);
+        //var runnerMaterial = new MeshBasicMaterial( { map: runnerTexture, side:DoubleSide } );
+        //var runnerGeometry = new PlaneGeometry(50, 50, 1, 1);
+        //var runner = new Mesh(runnerGeometry, runnerMaterial);
         //runner.position.set(-100,25,0);
         //scene.add(runner);
 
@@ -320,8 +330,8 @@ register3DClass("basic-animated", {
         requestAnimationFrame(animate);
 
 
-        //var sprite = new THREE.TextureLoader().load(dot9Image);
-        material = new THREE.PointsMaterial({
+        //var sprite = new TextureLoader().load(dot9Image);
+        material = new PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el),
             sizeAttenuation: true,
@@ -335,7 +345,7 @@ register3DClass("basic-animated", {
 
     }, instance(env, el) {
 
-        var mPointMesh = new THREE.Points(this.geometry(env, el), this.material(env, el));
+        var mPointMesh = new Points(this.geometry(env, el), this.material(env, el));
 
 
         return mPointMesh;
@@ -347,13 +357,13 @@ register3DClass("basic-animated", {
 
 //----------------------------------------
 
-var expandedSprite = new THREE.TextureLoader().load("img/minus-square-o.png");
+var expandedSprite = new TextureLoader().load("img/minus-square-o.png");
 register3DClass("basic-sprite-expanded", {
     geometry: basicSpriteGeometry,
     material: function (env, el) {
 
 
-        material = new THREE.PointsMaterial({
+        material = new PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el),
             sizeAttenuation: true,
@@ -367,7 +377,7 @@ register3DClass("basic-sprite-expanded", {
 
     }, instance(env, el) {
 
-        return new THREE.Points(this.geometry(env, el), this.material(env, el));
+        return new Points(this.geometry(env, el), this.material(env, el));
 
     },
     unique: false
@@ -376,12 +386,12 @@ register3DClass("basic-sprite-expanded", {
 
 //----------------------------------------
 
-var basicSprite = new THREE.TextureLoader().load(dot7Image);
+var basicSprite = new TextureLoader().load(dot7Image);
 register3DClass("basic-sprite", {
     geometry: basicSpriteGeometry,
     material: function (env, el) {
 
-        var material = new THREE.PointsMaterial({
+        var material = new PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el),
             sizeAttenuation: true,
@@ -392,14 +402,14 @@ register3DClass("basic-sprite", {
             depthTest: false
         });
 
-        //depthTest:false, fog:false,blending:THREE.AdditiveBlending,
+        //depthTest:false, fog:false,blending:AdditiveBlending,
 
 
         return material
 
     }, instance(env, el) {
 
-        return new THREE.Points(this.geometry(env, el), this.material(env, el));
+        return new Points(this.geometry(env, el), this.material(env, el));
 
     },
     unique: false
@@ -408,8 +418,8 @@ register3DClass("basic-sprite", {
 register3DClass("node-highlighted", {
     geometry: basicSpriteGeometry,
     material: function (env, el) {
-        var sprite = new THREE.TextureLoader().load(dot7Image);
-        var material = new THREE.PointsMaterial({
+        var sprite = new TextureLoader().load(dot7Image);
+        var material = new PointsMaterial({
             color: env.colorAccessor(el) || 0xffffff,
             size: basicSpriteSize(env, el) * 1.8,
             sizeAttenuation: true,
@@ -420,14 +430,14 @@ register3DClass("node-highlighted", {
             depthTest: false
         });
 
-        //depthTest:false, fog:false,blending:THREE.AdditiveBlending,
+        //depthTest:false, fog:false,blending:AdditiveBlending,
 
 
         return material
 
     }, instance(env, el) {
 
-        return new THREE.Points(this.geometry(env, el), this.material(env, el));
+        return new Points(this.geometry(env, el), this.material(env, el));
 
     },
     unique: false

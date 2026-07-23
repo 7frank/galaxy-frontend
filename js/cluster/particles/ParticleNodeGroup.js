@@ -1,8 +1,16 @@
-import * as THREE from "three";
+import { AdditiveBlending, NormalBlending } from "three/src/constants.js";
+import { BufferAttribute } from "three/src/core/BufferAttribute.js";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { TextureLoader } from "three/src/loaders/TextureLoader.js";
+import { ShaderMaterial } from "three/src/materials/ShaderMaterial.js";
+import { Color } from "three/src/math/Color.js";
+import { Sphere } from "three/src/math/Sphere.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Points } from "three/src/objects/Points.js";
 import * as _ from "lodash";
 
 /**
- * The ParticleNodeGroup handles the rendering of a set of graph-nodes via a {@link THREE.Points} point cloud.
+ * The ParticleNodeGroup handles the rendering of a set of graph-nodes via a {@link Points} point cloud.
  * Use for group of nodes that share some similarities (country, company, ...)
  *
  * NOTE: This approach does not allow for adding removing nodes as of yet.
@@ -66,7 +74,7 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
             color: {
                 type: "c",
-                value: new THREE.Color(options.baseColor)
+                value: new Color(options.baseColor)
             },
             opacity: {
                 type: "f",
@@ -74,20 +82,20 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
             },
             pointTexture: {
                 type: "t",
-                value: new THREE.TextureLoader().load(options.nodeTexture)
+                value: new TextureLoader().load(options.nodeTexture)
             }
 
         };
 
-        var shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new ShaderMaterial({
 
             uniforms: uniforms,
             // attributes:     attributes,
             vertexShader: vertexShader,
             fragmentShader: fragmentShader,
 
-            //blending: THREE.AdditiveBlending,
-            blending: THREE.NormalBlending,
+            //blending: AdditiveBlending,
+            blending: NormalBlending,
 
             depthTest: true,
             depthWrite: false,
@@ -105,13 +113,13 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
     var values_color = new Float32Array(nCount * 3);
     var values_size = new Float32Array(nCount);
-    var geometry = new THREE.BufferGeometry();
+    var geometry = new BufferGeometry();
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(values_size, 1));
+    geometry.setAttribute('position', new BufferAttribute(positions, 3));
+    geometry.setAttribute('customColor', new BufferAttribute(values_color, 3));
+    geometry.setAttribute('size', new BufferAttribute(values_size, 1));
 
-    var particleSystem = new THREE.Points(geometry, shaderMaterial);
+    var particleSystem = new Points(geometry, shaderMaterial);
 
     //TODO we might be able to remove the meshes and enable the raycasting in here again
 
@@ -123,7 +131,7 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
     particleSystem.frustrumCulled = true;
 
     //for now just have a huge bounding volume //TODO recalc sphere every now and then
-    particleSystem.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
+    particleSystem.geometry.boundingSphere = new Sphere(new Vector3, 50000);
 
     for (let i = 0; i < nCount; i++)
         updateNode(i)
@@ -170,7 +178,7 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
     function updateNodeColor(i) {
         var colors = geometry.attributes.customColor.array;
 
-        var color = (typeof nodes[i].color == "number") ? new THREE.Color(nodes[i].color) : new THREE.Color(0xffffff);
+        var color = (typeof nodes[i].color == "number") ? new Color(nodes[i].color) : new Color(0xffffff);
 
         colors[i * 3 + 0] = color.r;
         colors[i * 3 + 1] = color.g;

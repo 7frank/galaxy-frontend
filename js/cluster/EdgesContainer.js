@@ -5,7 +5,12 @@
 
 import BaseEdge from "./BaseEdge"
 import EdgeUtil from "./EdgeUtil"
-import * as THREE from "three";
+import { BufferAttribute } from "three/src/core/BufferAttribute.js";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { Object3D } from "three/src/core/Object3D.js";
+import { LineBasicMaterial } from "three/src/materials/LineBasicMaterial.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { LineSegments } from "three/src/objects/LineSegments.js";
 import _ from "lodash";
 
 /**
@@ -17,7 +22,7 @@ import _ from "lodash";
  *
  */
 
-export default class EdgesContainer extends THREE.Object3D {
+export default class EdgesContainer extends Object3D {
     constructor(...args) {
         super(...args);
         this.initLineMesh();
@@ -58,7 +63,7 @@ export default class EdgesContainer extends THREE.Object3D {
 
         function createExternalNodeHelper(node, internalOtherNode) {
             var nPos = node._bubble.position;
-            var adjustedPos = new THREE.Vector3();
+            var adjustedPos = new Vector3();
 
             return {
                 position: adjustedPos,
@@ -70,7 +75,7 @@ export default class EdgesContainer extends THREE.Object3D {
                     adjustedPos.setFromMatrixPosition(node.getParentCluster().matrixWorld);
                     //setFromMatrix
                     adjustedPos.add(nPos);
-                    let other = new THREE.Vector3();
+                    let other = new Vector3();
                     other.setFromMatrixPosition(internalOtherNode.getParentCluster().matrixWorld);
                     adjustedPos.sub(other)
 
@@ -122,7 +127,7 @@ export default class EdgesContainer extends THREE.Object3D {
             arr[i * 3 + 1] = verts[i].y;
             arr[i * 3 + 2] = verts[i].z;
         }
-        const attr = new THREE.BufferAttribute(arr, 3);
+        const attr = new BufferAttribute(arr, 3);
         this.mEdges.geometry.setAttribute('position', attr);
         this.mEdges.geometry.attributes.position.needsUpdate = true;
 
@@ -160,8 +165,8 @@ export default class EdgesContainer extends THREE.Object3D {
 
         this._vertexList = [];
 
-        const line_geom = new THREE.BufferGeometry();
-        line_geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(0), 3));
+        const line_geom = new BufferGeometry();
+        line_geom.setAttribute('position', new BufferAttribute(new Float32Array(0), 3));
 
         const initLineGroup = (options) => {
             let defaults = {
@@ -172,7 +177,7 @@ export default class EdgesContainer extends THREE.Object3D {
 
             options = _.extend(defaults, options);
 
-            const lineMaterial = new THREE.LineBasicMaterial({
+            const lineMaterial = new LineBasicMaterial({
                 color: options.color,
                 transparent: options.transparent,
                 opacity: options.opacity,
@@ -180,7 +185,7 @@ export default class EdgesContainer extends THREE.Object3D {
                 depthWrite: false
             });
 
-            return new THREE.LineSegments(line_geom, lineMaterial);
+            return new LineSegments(line_geom, lineMaterial);
         };
 
 

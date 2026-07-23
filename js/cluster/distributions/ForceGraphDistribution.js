@@ -9,7 +9,7 @@ import BaseCluster3D from "../BaseCluster3D"
 
 import RoundRobin from "../utils/AnimationFrameBasedScheduler"
 
-import * as THREE from "three";
+import { Vector3 } from "three/src/math/Vector3.js";
 import * as _ from "lodash";
 import * as d3_force from "d3-force-3d";
 
@@ -247,7 +247,7 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
     distribute(node, dx, dy, dz) {
 
-        return {position: new THREE.Vector3(0, 0, 0)}
+        return {position: new Vector3(0, 0, 0)}
 
     }
 }

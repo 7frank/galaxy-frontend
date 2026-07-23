@@ -15,7 +15,19 @@ import Color from 'easy-color';
 import ClusterBaseEdges from "./edges/ClusterBaseEdges";
 
 
-import * as THREE from "three";
+import { Camera } from "three/src/cameras/Camera.js";
+import { NoBlending } from "three/src/constants.js";
+import { BoxGeometry } from "three/src/geometries/BoxGeometry.js";
+import { CircleGeometry } from "three/src/geometries/CircleGeometry.js";
+import { RingGeometry } from "three/src/geometries/RingGeometry.js";
+import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
+import { Box3 } from "three/src/math/Box3.js";
+import { Color as ThreeColor } from "three/src/math/Color.js";
+import { Sphere } from "three/src/math/Sphere.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Group } from "three/src/objects/Group.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 import * as _ from "lodash";
 
 /**
@@ -77,8 +89,8 @@ export default class BaseCluster3D extends BaseNode {
         //add collapse/expand stuff
         //  this.mExpanded = true;
         this.mClusterClusteringApplied = false;
-        this.mCollapsedGroup = new THREE.Group();
-        this.mExpandedGroup = new THREE.Group();
+        this.mCollapsedGroup = new Group();
+        this.mExpandedGroup = new Group();
 
         this.mCollapsedGroup.name = "CollapsedGroup"
         this.mExpandedGroup.name = "ExpandedGroup"
@@ -121,7 +133,7 @@ export default class BaseCluster3D extends BaseNode {
 
             let dst;
             if (this.mHull && this.mHull.mesh && this.mHull.mesh.geometry && this.mHull.mesh.geometry.boundingBox)
-                dst = this.mHull.mesh.geometry.boundingBox.getCenter(new THREE.Vector3());
+                dst = this.mHull.mesh.geometry.boundingBox.getCenter(new Vector3());
             else
                 dst = this.position;
 
@@ -276,7 +288,7 @@ export default class BaseCluster3D extends BaseNode {
 
             if (this.mHull) {
                 let boundingBox = this.mHull.mBoundingBox;
-                boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
+                boundingSphere = boundingBox.getBoundingSphere(new Sphere());
 
 
                 //  this.mCollapsedClusterHull.position.copy(boundingSphere.center);
@@ -302,7 +314,7 @@ export default class BaseCluster3D extends BaseNode {
 
 
         //TODO currently not proper lighting set to be albe to use MeshPhongMaterial
-        let materialInnerRing = new THREE.MeshBasicMaterial({
+        let materialInnerRing = new MeshBasicMaterial({
             color: 0x00FFFF, // 0xfaebd7, //antique-white
             wireframe: false,
             transparent: true,
@@ -311,13 +323,13 @@ export default class BaseCluster3D extends BaseNode {
             polygonOffset: true,
             polygonOffsetFactor: -4,
             depthTest: false, //enabled, it will half way hide BaseVolume lines //TODO this is because the ring is only a flat surface in 3d space ...
-            blending: THREE.NoBlending
+            blending: NoBlending
         });
 
 
-        materialInnerRing.color = new THREE.Color(color.rgb.r / 255, color.rgb.g / 255, color.rgb.b / 255)
+        materialInnerRing.color = new ThreeColor(color.rgb.r / 255, color.rgb.g / 255, color.rgb.b / 255)
 
-        let materialOtherBlue = new THREE.MeshBasicMaterial({
+        let materialOtherBlue = new MeshBasicMaterial({
             color: 0x555555, //0x6a5acd, //slate-blue
             wireframe: false,
             transparent: true,
@@ -330,27 +342,27 @@ export default class BaseCluster3D extends BaseNode {
 
 
         if (boundingBox)
-            boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
+            boundingSphere = boundingBox.getBoundingSphere(new Sphere());
         else
-            boundingSphere = new THREE.Sphere(new THREE.Vector3(), this.mNodes.length * 7);
+            boundingSphere = new Sphere(new Vector3(), this.mNodes.length * 7);
         //FIXME estimated hull size differs from forcegraph collision box
 
-        let ringGeometryOuter = new THREE.RingGeometry(boundingSphere.radius * 0.85, boundingSphere.radius, 64);
+        let ringGeometryOuter = new RingGeometry(boundingSphere.radius * 0.85, boundingSphere.radius, 64);
         //  ringGeometryOuter.boundingSphere = boundingSphere;
 
 
-        let ringGeometryInner = new THREE.CircleGeometry(boundingSphere.radius * 0.85, 64);
+        let ringGeometryInner = new CircleGeometry(boundingSphere.radius * 0.85, 64);
         //  ringGeometryInner.boundingSphere = boundingSphere;
 
 
-        let inner = new THREE.Mesh(ringGeometryInner, materialInnerRing);
-        let outer = new THREE.Mesh(ringGeometryOuter, materialOtherBlue);
+        let inner = new Mesh(ringGeometryInner, materialInnerRing);
+        let outer = new Mesh(ringGeometryOuter, materialOtherBlue);
 
         MaterialFadeMixin(materialInnerRing)
         MaterialFadeMixin(materialOtherBlue)
 
 
-        let _hull = new THREE.Group();
+        let _hull = new Group();
 
         _hull.name = "CollapsedHull"
 
@@ -370,7 +382,7 @@ export default class BaseCluster3D extends BaseNode {
             this.setRotationFromQuaternion(camera.quaternion)
 
 
-            /*   var vec3 = new THREE.Vector3(0, 0, 1)// camera.position.clone().sub(this.position).normalize()
+            /*   var vec3 = new Vector3(0, 0, 1)// camera.position.clone().sub(this.position).normalize()
 
                // translate the object 10% of it's size into the foreground
                //TODO smaller collapsed hulls should be in front of bigger ones
@@ -393,13 +405,13 @@ export default class BaseCluster3D extends BaseNode {
         //TODO make it more robust
 
         if (!this.geometry) {
-            this.geometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
+            this.geometry = new SphereGeometry(boundingSphere.radius, 10, 5);
             this.geometry.translate(boundingSphere.center.x, boundingSphere.center.y, boundingSphere.center.z);
         }
         if (!this.geometry.boundingSphere)
             this.geometry.boundingSphere = boundingSphere;
         if (!this.geometry.boundingBox)
-            this.geometry.boundingBox = boundingSphere.getBoundingBox(new THREE.Box3());
+            this.geometry.boundingBox = boundingSphere.getBoundingBox(new Box3());
 
 
         //------
@@ -487,10 +499,10 @@ export default class BaseCluster3D extends BaseNode {
         //TODO have a container for children so deferred elements are hidden too
         // _.each(this.children,el => el.visible=false )
 
-        var pos_offset = new THREE.Vector3
+        var pos_offset = new Vector3
         //change position of mCollapsedGroup based on center of mHull
         if (this.mHull.mBoundingBox)
-            pos_offset = this.mHull.mBoundingBox.getCenter(new THREE.Vector3())//.multiplyScalar(-1);
+            pos_offset = this.mHull.mBoundingBox.getCenter(new Vector3())//.multiplyScalar(-1);
 
 
         var that = this
@@ -519,7 +531,7 @@ export default class BaseCluster3D extends BaseNode {
         //change position of mCollapsedGroup based on center of mHull
         if (!this.mHull.mBoundingBox) console.warn("hull should have a bounding box", this.mHull)
         else {
-            var offset = this.mHull.mBoundingBox.getCenter(new THREE.Vector3())//.multiplyScalar(3);
+            var offset = this.mHull.mBoundingBox.getCenter(new Vector3())//.multiplyScalar(3);
 
             //this.mCollapsedGroup.position.copy(offset)
 
@@ -562,10 +574,10 @@ export default class BaseCluster3D extends BaseNode {
         //TODO handle if not created.. via callback/event
         //also currently if not already created the placeholder sphere gets removed again (restructure)
 
-        var pos_offset = new THREE.Vector3
+        var pos_offset = new Vector3
         //change position of mCollapsedGroup based on center of mHull
         if (this.mHull && this.mHull.mBoundingBox)
-            pos_offset = this.mHull.mBoundingBox.getCenter(new THREE.Vector3())//.multiplyScalar(-1);
+            pos_offset = this.mHull.mBoundingBox.getCenter(new Vector3())//.multiplyScalar(-1);
 
 
         this.animate({mCollapsedGroup: {scale: {x: 0.001, y: 0.001, z: 0.001}, position: pos_offset}}, 200)
@@ -584,7 +596,7 @@ export default class BaseCluster3D extends BaseNode {
 
     /**
      * handles level of detail (LOD) related optimisations for child elements
-     * for example: the greater the distance between THREE.Camera (the position of the viewer) and the cluster,
+     * for example: the greater the distance between Camera (the position of the viewer) and the cluster,
      * the fewer details need to be rendered. most of the optimisations are forwarded to the element itself and handled there
      *
 
@@ -711,7 +723,7 @@ export default class BaseCluster3D extends BaseNode {
             _.each(mNodes, function (node) {
 
 
-                var c1 = new THREE.Vector3();
+                var c1 = new Vector3();
                 c1.setFromMatrixPosition(leaf.matrixWorld);
 
                 node._parentPosAbs = c1;
@@ -733,7 +745,7 @@ export default class BaseCluster3D extends BaseNode {
                 let c1 = node._parentPosAbs;
 
                 if (!c1) return;
-                var c2 = new THREE.Vector3();
+                var c2 = new Vector3();
                 c2.setFromMatrixPosition(leaf.matrixWorld);
 
                 node._bubble.position.add(c1).sub(c2);
@@ -1188,23 +1200,23 @@ export default class BaseCluster3D extends BaseNode {
     /**
      * retrieves the vertices from a given bounding box
      *
-     * @param boundingBox instanceof THREE.Box3
-     * @returns {Array} of THREE.Vector3
+     * @param boundingBox instanceof Box3
+     * @returns {Array} of Vector3
      */
 
     getVerticesFromBoundingBox(boundingBox) {
 
 
-        let _center = boundingBox.getCenter(new THREE.Vector3());
-        let _size = boundingBox.getSize(new THREE.Vector3());
+        let _center = boundingBox.getCenter(new Vector3());
+        let _size = boundingBox.getSize(new Vector3());
 
-        const box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
+        const box = new BoxGeometry(_size.x, _size.y, _size.z);
         box.translate(_center.x, _center.y, _center.z);
 
         const pos = box.getAttribute('position');
         const verts = [];
         for (let i = 0; i < pos.count; i++) {
-            verts.push(new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i)));
+            verts.push(new Vector3(pos.getX(i), pos.getY(i), pos.getZ(i)));
         }
         return verts;
     }
@@ -1218,10 +1230,10 @@ export default class BaseCluster3D extends BaseNode {
      */
     getCompoundBoundingBoxInfo() {
         var that = this;
-        var box = new THREE.Box3;
+        var box = new Box3;
         var vertices = [];
         _.each(this.mClusters, function (subCluster) {
-            let boundingBox = new THREE.Box3;
+            let boundingBox = new Box3;
 
             const _sourceBB = (subCluster.mHull && subCluster.mHull.mBoundingBox)
                 || (subCluster.geometry && subCluster.geometry.boundingBox);
@@ -1265,7 +1277,7 @@ export default class BaseCluster3D extends BaseNode {
         var positions = attributes.position.array;
         let vert = [];
         for (var i = 0; i < positions.length; i += 3) {
-            let v = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+            let v = new Vector3(positions[i], positions[i + 1], positions[i + 2]);
             vert.push(v.add(leafOffset));
         }
 
@@ -1337,7 +1349,7 @@ export default class BaseCluster3D extends BaseNode {
 
         if (hull.canBeVisible()) {
 
-            hull.mesh.material.color = new THREE.Color(o.colors.hull[0])
+            hull.mesh.material.color = new ThreeColor(o.colors.hull[0])
 
             //TODO test this
             //hull.mesh.material.transparent =o.colors.hull[0]!=1
@@ -1435,7 +1447,7 @@ export default class BaseCluster3D extends BaseNode {
         }
 
 
-        let info = {box: new THREE.Box3(), vertices: []};
+        let info = {box: new Box3(), vertices: []};
 
         //generate the boundingBox for the node particles if the clster is a leaf
         if (this.isLeaf()) {
@@ -1468,7 +1480,7 @@ export default class BaseCluster3D extends BaseNode {
 
 
             //it  can happen initially
-            if (info.box.min.x == Infinity) info.box = new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1))
+            if (info.box.min.x == Infinity) info.box = new Box3(new Vector3(-1, -1, -1), new Vector3(1, 1, 1))
 
         }
 
@@ -1512,9 +1524,9 @@ export default class BaseCluster3D extends BaseNode {
         else {
 
             //have some default geometry for the domEvents //TODO find out why it fails without this part
-            let boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
+            let boundingSphere = boundingBox.getBoundingSphere(new Sphere());
             //TODO this is currently used for the mouse interactions but should be refactored and removed
-            var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
+            var sphereGeometry = new SphereGeometry(boundingSphere.radius, 10, 5);
             sphereGeometry.translate(boundingSphere.center.x, boundingSphere.center.y, boundingSphere.center.z);
             sphereGeometry.boundingBox = boundingBox;
             this.geometry = sphereGeometry;
@@ -1787,7 +1799,7 @@ export default class BaseCluster3D extends BaseNode {
             if (r == null) return parents;
 
             //the actual parent cluster has one group element where the sub-cluster resides
-            if (r instanceof THREE.Group && r.parent instanceof BaseCluster3D) r = r.parent;
+            if (r instanceof Group && r.parent instanceof BaseCluster3D) r = r.parent;
 
             if (!(r instanceof BaseCluster3D)) return parents;
             _root = r;

@@ -5,7 +5,14 @@
 
 import BoxVolume from "./BoxVolume"
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin"
-import * as THREE from "three";
+import { BackSide } from "three/src/constants.js";
+import { BoxGeometry } from "three/src/geometries/BoxGeometry.js";
+import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
+import { Box3 } from "three/src/math/Box3.js";
+import { Sphere } from "three/src/math/Sphere.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 
 import { ConvexGeometry } from "../../lib/ConvexGeometry";
 
@@ -55,10 +62,10 @@ export default class ConvexVolume extends BoxVolume {
         const allPoints = [];
 
         for (let v of geometry.vertices) {
-            const sphere = new THREE.SphereGeometry(margin, numSegments, numSegments);
+            const sphere = new SphereGeometry(margin, numSegments, numSegments);
             const pos = sphere.getAttribute('position');
             for (let i = 0; i < pos.count; i++) {
-                allPoints.push(new THREE.Vector3(
+                allPoints.push(new Vector3(
                     pos.getX(i) + v.x,
                     pos.getY(i) + v.y,
                     pos.getZ(i) + v.z
@@ -83,12 +90,12 @@ export default class ConvexVolume extends BoxVolume {
         if (this.mMaterial) return this.mMaterial;
 
 
-        let mat = this.mMaterial = new THREE.MeshBasicMaterial({
+        let mat = this.mMaterial = new MeshBasicMaterial({
             color: 0xffffff,
             opacity: 0.03,
             transparent: true,
             depthWrite: false,
-            side: THREE.BackSide
+            side: BackSide
             //  ,   wireframe:true
         });
 
@@ -122,8 +129,8 @@ export default class ConvexVolume extends BoxVolume {
 
         if (vert.length < 4 && vertices.length > 4) {
             vertices = [];
-            boundingBox.min = new THREE.Vector3(-1, -1, -1);
-            boundingBox.max = new THREE.Vector3(1, 1, 1);
+            boundingBox.min = new Vector3(-1, -1, -1);
+            boundingBox.max = new Vector3(1, 1, 1);
 
         }
 
@@ -134,8 +141,8 @@ export default class ConvexVolume extends BoxVolume {
 
             //test if the boudningBox is valid, else (f)make it so. this way it does not interrupt the work flow and generates a minimal hull
             //TODO   alternativly an empty Geometry would also be sufficient
-            if (boundingBox.getSize(new THREE.Vector3()).length() == 0)
-                boundingBox.max.add(new THREE.Vector3(0.1, 0.1, 0.1));
+            if (boundingBox.getSize(new Vector3()).length() == 0)
+                boundingBox.max.add(new Vector3(0.1, 0.1, 0.1));
 
             vertices = this.getVerticesFromBoundingBox(boundingBox);
 
@@ -165,11 +172,11 @@ export default class ConvexVolume extends BoxVolume {
         this.mBoundingBox = boundingBox;
 
 
-        //   let mesh = new THREE.Mesh(geo, mat);
-        let mesh = new THREE.Mesh(geo0, this.getMaterial());
+        //   let mesh = new Mesh(geo, mat);
+        let mesh = new Mesh(geo0, this.getMaterial());
 
         mesh.geometry.boundingBox = boundingBox;
-        mesh.geometry.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
+        mesh.geometry.boundingSphere = boundingBox.getBoundingSphere(new Sphere());
 
         //this part is to prevent an exception in the raycaster where position is not present but element initialised
         //TODO maybe change the element itself so it stays in a valid state
@@ -196,15 +203,15 @@ export default class ConvexVolume extends BoxVolume {
     /**
      * Creates a box geometry.
      *
-     * @param boundingBox ..  {@link THREE.Box3}
-     * @returns {THREE.BoxGeometry}
+     * @param boundingBox ..  {@link Box3}
+     * @returns {BoxGeometry}
      */
 
     createBoxGeometryFromBoundingBox(boundingBox) {
-        let _center = boundingBox.getCenter(new THREE.Vector3());
-        let _size = boundingBox.getSize(new THREE.Vector3());
+        let _center = boundingBox.getCenter(new Vector3());
+        let _size = boundingBox.getSize(new Vector3());
 
-        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
+        let box = new BoxGeometry(_size.x, _size.y, _size.z);
 
         box.translate(_center.x, _center.y, _center.z);
         return box;
@@ -212,7 +219,7 @@ export default class ConvexVolume extends BoxVolume {
 
 
     /**
-     * Returns the vertices as an array of THREE.Vector3 for the bounding box given.
+     * Returns the vertices as an array of Vector3 for the bounding box given.
      *
      */
 
@@ -222,7 +229,7 @@ export default class ConvexVolume extends BoxVolume {
         const pos = box.getAttribute('position');
         const verts = [];
         for (let i = 0; i < pos.count; i++) {
-            verts.push(new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i)));
+            verts.push(new Vector3(pos.getX(i), pos.getY(i), pos.getZ(i)));
         }
         return verts;
     }
@@ -248,7 +255,7 @@ export default class ConvexVolume extends BoxVolume {
 
         if (!this['geometry' + name] || this['geometry' + name].mTime != this.mTime) {
 
-            let margin = this.mBoundingBox.getSize(new THREE.Vector3()).length() / 10;
+            let margin = this.mBoundingBox.getSize(new Vector3()).length() / 10;
 
             let geo2 = this.smoothHullModifier(this.mGeometryZero, resolution, margin);
             geo2.computeBoundingBox();

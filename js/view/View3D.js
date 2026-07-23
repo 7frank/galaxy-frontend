@@ -10,7 +10,12 @@
 import DomEventsAlt from "../cluster/utils/DomEventsAlt"
 import "./View3D.css"
 
-import * as THREE from "three";
+import { OrthographicCamera } from "three/src/cameras/OrthographicCamera.js";
+import { PerspectiveCamera } from "three/src/cameras/PerspectiveCamera.js";
+import { Vector2 } from "three/src/math/Vector2.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
+import { Scene } from "three/src/scenes/Scene.js";
 import { CombinedCamera } from "../lib/CombinedCamera";
 import { TrackballControls } from "../lib/TrackballControls";
 
@@ -40,7 +45,7 @@ export default class View3D extends EventTarget {
         this.mouseSpeed = 2;
 
         // Setup renderer
-        this.mRenderer = new THREE.WebGLRenderer({
+        this.mRenderer = new WebGLRenderer({
             antialias: true
         });
 
@@ -57,14 +62,14 @@ export default class View3D extends EventTarget {
 
     createCamera() {
 
-        var initialCameraPosition = new THREE.Vector3(-5500, -4000, 50000);
+        var initialCameraPosition = new Vector3(-5500, -4000, 50000);
 
 
         // Setup camera
-        this.mCameraP = new THREE.PerspectiveCamera();
+        this.mCameraP = new PerspectiveCamera();
 
 
-        this.mCameraO = new THREE.OrthographicCamera();
+        this.mCameraO = new OrthographicCamera();
         this.mCameraO.far = 5000000;
         this.mCameraO.lookAt(this.mScene.position);
         this.mCameraO.position.copy(initialCameraPosition)
@@ -226,11 +231,10 @@ export default class View3D extends EventTarget {
 
         // Setup scene
 
-        this.mScene = new THREE.Scene();
+        this.mScene = new Scene();
 
         //added to be able to use threejs inspector
         window.scene = this.mScene;
-        window.THREE = THREE;
 
         this.createCamera();
 
@@ -570,7 +574,7 @@ export default class View3D extends EventTarget {
 
         this.el.appendChild(this.toolTipElem);
 
-        this.mouse = new THREE.Vector2();
+        this.mouse = new Vector2();
         this.mouse.x = -2;
         this.mouse.y = -2;
         this.el.addEventListener("mousemove", ev => {

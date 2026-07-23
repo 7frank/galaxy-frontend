@@ -9,11 +9,16 @@ import ParticleNodeGroup from "./particles/ParticleNodeGroup"
 
 
 import {TWEEN} from "../lib/Tween"
-import * as THREE from "three";
+import { Object3D } from "three/src/core/Object3D.js";
+import { Matrix4 } from "three/src/math/Matrix4.js";
+import { Ray } from "three/src/math/Ray.js";
+import { Sphere } from "three/src/math/Sphere.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 import * as _ from "lodash";
 
 
-export default class ClusterLeafElement extends THREE.Mesh {
+export default class ClusterLeafElement extends Mesh {
     constructor(nodes, domEvents) {
         super();
 
@@ -56,9 +61,9 @@ export default class ClusterLeafElement extends THREE.Mesh {
         pcWrapper.pointCloud.raycast = ( function () {
 
 
-            var inverseMatrix = new THREE.Matrix4();
-            var ray = new THREE.Ray();
-            var sphere = new THREE.Sphere();
+            var inverseMatrix = new Matrix4();
+            var ray = new Ray();
+            var sphere = new Sphere();
 
             return function raycast(raycaster, intersects) {
 
@@ -97,7 +102,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
                 }
 
 
-                var position = new THREE.Vector3();
+                var position = new Vector3();
 
                 function testPoint(point, index, size = 1) {
 
@@ -105,7 +110,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
 
                     if (rayPointDistanceSq < thresholdFromSize(size)) {
 
-                        var intersectPoint = ray.closestPointToPoint(point, new THREE.Vector3());
+                        var intersectPoint = ray.closestPointToPoint(point, new Vector3());
                         intersectPoint.applyMatrix4(matrixWorld);
 
                         var distance = raycaster.ray.origin.distanceTo(intersectPoint);
@@ -368,7 +373,7 @@ export default class ClusterLeafElement extends THREE.Mesh {
     appendNodes(nodes) {
 
         if (!this.mNodeMeshes) {
-            this.mNodeMeshes = new THREE.Object3D;
+            this.mNodeMeshes = new Object3D;
             this.add(this.mNodeMeshes)
 
         }

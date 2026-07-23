@@ -5,7 +5,7 @@
 import BaseDistribution from "./BaseDistribution"
 
 import BaseCluster3D from "../BaseCluster3D"
-import * as THREE from "three";
+import { Vector3 } from "three/src/math/Vector3.js";
 
 
 /**
@@ -34,7 +34,7 @@ export default class DefaultDistribution extends BaseDistribution {
         var mesh = (node._bubble) ? node._bubble : node;
         var absPos;
         if (mesh) {
-            absPos = new THREE.Vector3();
+            absPos = new Vector3();
             absPos.setFromMatrixPosition(mesh.matrixWorld);
 
             //TODO this is only working for specific cases currently
@@ -53,7 +53,7 @@ export default class DefaultDistribution extends BaseDistribution {
             (typeof node.z != "undefined") ? absPos.z = node.x : 0;
 
         }
-        return {position: new THREE.Vector3(absPos.x, absPos.y, absPos.z).multiplyScalar(this.mScale)};
+        return {position: new Vector3(absPos.x, absPos.y, absPos.z).multiplyScalar(this.mScale)};
     }
 }
 

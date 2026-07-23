@@ -7,7 +7,13 @@ import AnimationMixin from "../utils/AnimationMixin"
 
 import DomEventsAlt from "./utils/DomEventsAlt"
 
-import * as THREE from "three";
+import { BackSide } from "three/src/constants.js";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
+import { Sphere } from "three/src/math/Sphere.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 import * as _ from "lodash";
 
 import Mousetrap from "mousetrap";
@@ -31,7 +37,7 @@ import Mousetrap from "mousetrap";
  */
 
 
-export default class BaseNode extends THREE.Mesh {
+export default class BaseNode extends Mesh {
 
     /**
      * The constructor needs an instance of a view. {@link View3D} It is rendered within the view container to be able to attach DOM events.
@@ -48,12 +54,12 @@ export default class BaseNode extends THREE.Mesh {
         // it is supposed to add a material which enabled dom events testing for the invisible object
         //TODO find out if this could be removed in future versions
 
-        var material = new THREE.MeshBasicMaterial({
+        var material = new MeshBasicMaterial({
             color: 0xffffff,
             // wireframe: true,
             visible: true,
             opacity: 0.01,
-            side: THREE.BackSide,
+            side: BackSide,
             // opacity: env.useDebugSphere ? 1 : 0,
             transparent: true,
             alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
@@ -126,10 +132,10 @@ export default class BaseNode extends THREE.Mesh {
     static initStatic() {
         if (BaseNode._static_initialised_) return
 
-        //BaseNode.sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
-        BaseNode.sphereGeometry = new THREE.SphereGeometry(10, 10, 5);
-        BaseNode.emptyGeometry = new THREE.BufferGeometry();
-        BaseNode.emptyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1);
+        //BaseNode.sphereGeometry = new SphereGeometry(1, 3, 2);
+        BaseNode.sphereGeometry = new SphereGeometry(10, 10, 5);
+        BaseNode.emptyGeometry = new BufferGeometry();
+        BaseNode.emptyGeometry.boundingSphere = new Sphere(new Vector3(), 1);
 
 
         BaseNode.lastSelectedNode = null;
@@ -389,7 +395,7 @@ export default class BaseNode extends THREE.Mesh {
             this.trigger("before-render", null, arguments)
 
         }
-        //freezes THREE.Mesh::onBeforeRender method so it can't be overridden
+        //freezes Mesh::onBeforeRender method so it can't be overridden
         Object.defineProperty(this, "onBeforeRender", {
             enumerable: false,
             configurable: false,

@@ -1,4 +1,7 @@
-import * as THREE from "three";
+import { ArrowHelper } from "three/src/helpers/ArrowHelper.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Mesh } from "three/src/objects/Mesh.js";
+import { Scene } from "three/src/scenes/Scene.js";
 import * as _ from "lodash";
 
 /**
@@ -10,16 +13,16 @@ import * as _ from "lodash";
  * Code below is related to the arrows-feature of the graph.
  * The arrows are shown for specific edges.
  *
- * @param mesh .. instanceof {@link THREE.Mesh}
+ * @param mesh .. instanceof {@link Mesh}
  * @param maxIter ... to prevent infinite loops a max amount of iterations is set
 
- * @returns {@link THREE.Scene}
+ * @returns {@link Scene}
  * @private
  */
 function _findSceneForMesh(mesh, maxIter = 99) {
     var scene = null;
     while (mesh.parent && maxIter--) {
-        if (mesh.parent instanceof THREE.Scene) return mesh.parent;
+        if (mesh.parent instanceof Scene) return mesh.parent;
         mesh = mesh.parent
     }
 
@@ -51,11 +54,11 @@ export function addArrow(d3LinkObj, color, options) {
     //	var to0 = d3LinkObj.mEnd
 
 
-    var from0 = new THREE.Vector3();
+    var from0 = new Vector3();
     from0.setFromMatrixPosition(d3LinkObj.source._bubble.matrixWorld);
 
 
-    var to0 = new THREE.Vector3();
+    var to0 = new Vector3();
     to0.setFromMatrixPosition(d3LinkObj.target._bubble.matrixWorld);
 
 
@@ -91,7 +94,7 @@ export function addArrow(d3LinkObj, color, options) {
         let dir = to0.clone().sub(from0);
         let len = dir.length();
 
-        arrowHelper = new THREE.ArrowHelper(dir.normalize(), from0, len, color || 0x0000FF, 0.001, 0.001); //setting headlength and with to zero will trigger lots of warnings
+        arrowHelper = new ArrowHelper(dir.normalize(), from0, len, color || 0x0000FF, 0.001, 0.001); //setting headlength and with to zero will trigger lots of warnings
 
 
     }
@@ -103,7 +106,7 @@ export function addArrow(d3LinkObj, color, options) {
 
     }
     else if (env.highlightArrowType == "simple")
-        arrowHelper = new THREE.ArrowHelper(direction.normalize(), from, length, color || 0x0000FF, headLength, 0.4 * headLength);
+        arrowHelper = new ArrowHelper(direction.normalize(), from, length, color || 0x0000FF, headLength, 0.4 * headLength);
     else if (env.highlightArrowType == "double")
         arrowHelper = new ArrowExt(direction.normalize(), from, length, color || 0x0000FF, headLength, 0.4 * headLength);
 

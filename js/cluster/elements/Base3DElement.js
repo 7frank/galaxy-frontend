@@ -9,7 +9,9 @@
  *
  */
 
-export default class Base3DElement extends THREE.Object3D {
+import { Object3D } from "three/src/core/Object3D.js";
+
+export default class Base3DElement extends Object3D {
 
 
     constructor(domEvents, env) {

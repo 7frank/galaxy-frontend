@@ -8,7 +8,8 @@ import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
 import ZoomUtil from "../../utils/ZoomUtil";
 import {removeSelections} from "../refactor/f1";
 
-import * as THREE from "three";
+import { Color } from "three/src/math/Color.js";
+import { Vector3 } from "three/src/math/Vector3.js";
 
 
 /**
@@ -61,7 +62,7 @@ export default class Default3DGraphConfig {
         let view = this.getView();
 
 
-        view.mControls.target.set(new THREE.Vector3(0, 0, 0));
+        view.mControls.target.set(new Vector3(0, 0, 0));
         view.mControls.noRotate = false;
 
         view.mControls.reset();
@@ -263,7 +264,7 @@ export default class Default3DGraphConfig {
         rootCluster.setLock(true);
 
 
-        // view.mScene.background.copy(new THREE.Color(0x000000));
+        // view.mScene.background.copy(new Color(0x000000));
         view.mRenderer.setClearColor(this.mBackgroundColor)
 
 
@@ -311,7 +312,7 @@ export default class Default3DGraphConfig {
              else*/
 
 
-            this.zoomToPosition(new THREE.Vector3(0, 0, 150000), () => {
+            this.zoomToPosition(new Vector3(0, 0, 150000), () => {
                 //TODO moake it work without line below...  currently needs another zoom call to be able to use controls again
                 this.getView().mRootCluster.zoomToCluster(150000)
 
@@ -332,7 +333,7 @@ export default class Default3DGraphConfig {
      *
      * is used internally to move  the user camera to a specific location in 3D - space
      *
-     *  @param position  ...  an instance of THREE.Vector3
+     *  @param position  ...  an instance of Vector3
      *  @param onComplete  ... is a callback-function
      *
      **/

@@ -2,7 +2,7 @@
  * Created by Frank on 16.07.2017.
  */
 
-import * as THREE from "three";
+import { RepeatWrapping } from "three/src/constants.js";
 
 
 export default function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) {
@@ -14,7 +14,7 @@ export default function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles
     //  usually equals tilesHoriz * tilesVert, but not necessarily,
     //  if there at blank tiles at the bottom of the spritesheet.
     this.numberOfTiles = numTiles;
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.wrapS = texture.wrapT = RepeatWrapping;
     texture.repeat.set(1 / this.tilesHorizontal, 1 / this.tilesVertical);
 
     // how long should each image be displayed?

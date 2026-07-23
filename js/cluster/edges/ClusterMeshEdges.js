@@ -3,7 +3,10 @@ import ClusterBaseEdges from "./ClusterBaseEdges";
 import {MeshLine, MeshLineMaterial} from "three.meshline"
 import BaseCluster3D from "../BaseCluster3D";
 
-import * as THREE from "three";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { Color } from "three/src/math/Color.js";
+import { Vector2 } from "three/src/math/Vector2.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 import * as _ from "lodash";
 
 
@@ -50,12 +53,12 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         //TODO wireframe meshlines to check if minimal triangle count
         var material = new MeshLineMaterial({
             lineWidth: 1,
-            color: new THREE.Color(options.color),
+            color: new Color(options.color),
             transparent: options.transparent,
             opacity: options.opacity,
             depthTest: true,
             depthWrite: false,
-            resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
+            resolution: new Vector2(window.innerWidth, window.innerHeight)
         });
 
         MaterialFadeMixin(material);
@@ -86,7 +89,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         if (edges.length == 0) return
 
         this.geometry.dispose();
-        this.geometry = new THREE.BufferGeometry();
+        this.geometry = new BufferGeometry();
 
         var that = this
         var invalidEdges = [];
@@ -147,12 +150,12 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
             //TODO
             var material = new MeshLineMaterial({
                 lineWidth: edge.link_strength / 5 || 1,
-                color: new THREE.Color(0x333333),
+                color: new Color(0x333333),
                 transparent: true,
                 opacity: 0.5,
                 depthTest: false,
                 depthWrite: false,
-                resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
+                resolution: new Vector2(window.innerWidth, window.innerHeight)
             });
             // var material = new MeshLineMaterial();
 
@@ -166,7 +169,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
                 console.error("edge does not have a link_strength''")
 
 
-            var mesh = new THREE.Mesh(meshLine, material);
+            var mesh = new Mesh(meshLine, material);
             mesh.layers.set(1)
 
             this.add(mesh);

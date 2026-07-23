@@ -7,7 +7,7 @@ import BaseCluster3D from "../BaseCluster3D"
 //import TWEEN from "@tweenjs/tween.js"
 import {TWEEN} from "../../lib/Tween"
 
-import * as THREE from "three";
+import { Vector3 } from "three/src/math/Vector3.js";
 import * as _ from "lodash";
 
 
@@ -258,7 +258,7 @@ export default class BaseDistribution {
 
     distribute(node, dx, dy, dz) {
 
-        return {position: new THREE.Vector3(dx, dy, dz).multiplyScalar(this.mScale)};
+        return {position: new Vector3(dx, dy, dz).multiplyScalar(this.mScale)};
     }
 }
 

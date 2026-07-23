@@ -11,10 +11,17 @@
  * NOTE: for an implementation of a visible volume see {@link BoxVolume}
  */
 
-import * as THREE from "three";
+import { Object3D } from "three/src/core/Object3D.js";
+import { BoxGeometry } from "three/src/geometries/BoxGeometry.js";
+import { EdgesGeometry } from "three/src/geometries/EdgesGeometry.js";
+import { LineBasicMaterial } from "three/src/materials/LineBasicMaterial.js";
+import { Box3 } from "three/src/math/Box3.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { LineSegments } from "three/src/objects/LineSegments.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 
 
-export default class BaseVolume extends THREE.Object3D {
+export default class BaseVolume extends Object3D {
 
     /**
      * default constructor
@@ -47,14 +54,14 @@ export default class BaseVolume extends THREE.Object3D {
     }
 
     /**
-     * Creates  and returns a Three.js material ( in this case a {@link THREE.LineBasicMaterial} )
+     * Creates  and returns a Three.js material ( in this case a {@link LineBasicMaterial} )
      * that is used to render the object.
      */
 
     getMaterial() {
         if (this.mMaterial) return this.mMaterial;
 
-        this.mMaterial = new THREE.LineBasicMaterial({
+        this.mMaterial = new LineBasicMaterial({
             color: 0xffffff,
             linewidth: 5,
             opacity: this.maxOpacity,
@@ -85,12 +92,12 @@ export default class BaseVolume extends THREE.Object3D {
 
     /**
      * The overall goal of this method and all its inheriting implementations like {@link ConvexVolume.createVolumeFromVertices}
-     * is that based on the vertices a {@link THREE.Mesh} is created which functions as a hull structure around the vertices.
+     * is that based on the vertices a {@link Mesh} is created which functions as a hull structure around the vertices.
      *
      * NOTE: The BaseVolume does not make use of the vertices instead it creates the mesh based on the second (boundingBox) parameter
      *
-     * @param vertices ... a set of  {@link THREE.Vector3} representing positions in 3D-space
-     * @param boundingBox ... a {@link THREE.Box3} which holds bounding box data for the vertices
+     * @param vertices ... a set of  {@link Vector3} representing positions in 3D-space
+     * @param boundingBox ... a {@link Box3} which holds bounding box data for the vertices
      * @returns {*}
      */
 
@@ -99,16 +106,16 @@ export default class BaseVolume extends THREE.Object3D {
         this.mBoundingBox = boundingBox;
 
 
-        let _center = boundingBox.getCenter(new THREE.Vector3());
-        let _size = boundingBox.getSize(new THREE.Vector3());
+        let _center = boundingBox.getCenter(new Vector3());
+        let _size = boundingBox.getSize(new Vector3());
 
-        let box = new THREE.BoxGeometry(_size.x, _size.y, _size.z);
+        let box = new BoxGeometry(_size.x, _size.y, _size.z);
 
-        let geo = new THREE.EdgesGeometry(box); // or WireframeGeometry( geometry )
+        let geo = new EdgesGeometry(box); // or WireframeGeometry( geometry )
 
         let mat = this.getMaterial();
 
-        let wireframe = new THREE.LineSegments(geo, mat);
+        let wireframe = new LineSegments(geo, mat);
         wireframe.position.add(_center);
         wireframe.geometry.boundingBox = boundingBox;
 

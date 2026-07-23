@@ -6,7 +6,9 @@ import {TWEEN} from "../lib/Tween"
 import BaseCluster3D from "../cluster/BaseCluster3D";
 
 import * as _ from "lodash";
-import * as THREE from "three";
+import { Camera } from "three/src/cameras/Camera.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 
 /**
  * static helper for smooth navigation within 3D space
@@ -53,21 +55,21 @@ export default class ZoomUtil {
      * moves the camera position to a target mesh
      * for further details {@link ZoomUtil.moveToPosition}
      *
-     * @param mesh: {@link THREE.Mesh}
+     * @param mesh: {@link Mesh}
      *
      */
 
     static moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
     }) {
 
-        var position = new THREE.Vector3();
+        var position = new Vector3();
         position.setFromMatrixPosition(mesh.matrixWorld);
 
 
         //fixes cluster hull center if one is present
         if (mesh instanceof BaseCluster3D && mesh.mHull) {
-            console.log(mesh.mHull.mBoundingBox.getCenter(new THREE.Vector3()))
-            let hullCenterPos = mesh.mHull.mBoundingBox.getCenter(new THREE.Vector3())
+            console.log(mesh.mHull.mBoundingBox.getCenter(new Vector3()))
+            let hullCenterPos = mesh.mHull.mBoundingBox.getCenter(new Vector3())
             position = mesh.localToWorld(hullCenterPos)
         }
 
@@ -79,10 +81,10 @@ export default class ZoomUtil {
 
 
     /**
-     * animates the position and rotation of a given camera {@link THREE.Camera} to the target position
+     * animates the position and rotation of a given camera {@link Camera} to the target position
      *
-     * @param position: instanceof {@link THREE.Vector3} ... a target position must be provided in world coordinates
-     * @param camera: instanceof {@link THREE.Camera}
+     * @param position: instanceof {@link Vector3} ... a target position must be provided in world coordinates
+     * @param camera: instanceof {@link Camera}
      * @param controls: instanceof THREE a THREE control class like TrackballControls
      * @param cameraDistanceToMesh: the distance to the target position the camera will stop at
      * @param onComplete: a callback function that is triggered when the animation fphase has ended and the camera is at the target location
@@ -100,7 +102,7 @@ export default class ZoomUtil {
         var isComplete1 = false
         var isComplete2 = false
 
-        //  var vec3End = new THREE.Vector3();
+        //  var vec3End = new Vector3();
         //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
         var vec3End = position
 
@@ -116,7 +118,7 @@ export default class ZoomUtil {
         //rotate the vector to be orientated on 0,0,1   //this will have not much impact on the 3d zoom but will prevent the 2d zoom from rotating
         //TODO find an alternative solution
 
-        let distVec2d = new THREE.Vector3(0, 0, -1).multiplyScalar(distVec.length())
+        let distVec2d = new Vector3(0, 0, -1).multiplyScalar(distVec.length())
         alteredVecEnd = vec3End.clone().sub(distVec2d)
 
         // -------------------------------------

@@ -5,7 +5,7 @@ import ClusterMeshEdges from "../edges/ClusterMeshEdges";
 import FlatVolume from "../hull/FlatVolume";
 
 
-import * as THREE from "three";
+import { Vector3 } from "three/src/math/Vector3.js";
 
 /**
  * the default settings for a 2d representation of the given node data
@@ -34,7 +34,7 @@ export default class Default2DGraphConfig extends Default3DGraphConfig {
 
         let view = this.getView();
 
-        view.mControls.target.set(new THREE.Vector3(0, 0, 0));
+        view.mControls.target.set(new Vector3(0, 0, 0));
         view.mControls.noRotate = true;
         view.mControls.reset();
 

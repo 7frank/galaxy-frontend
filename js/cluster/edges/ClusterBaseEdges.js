@@ -2,7 +2,16 @@ import EdgeUtil from "../EdgeUtil";
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin";
 import BaseCluster3D from "../BaseCluster3D";
 
-import * as THREE from "three";
+import { AdditiveBlending, NeverDepth } from "three/src/constants.js";
+import { BufferAttribute } from "three/src/core/BufferAttribute.js";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { LineBasicMaterial } from "three/src/materials/LineBasicMaterial.js";
+import { ShaderMaterial } from "three/src/materials/ShaderMaterial.js";
+import { Box3 } from "three/src/math/Box3.js";
+import { Color } from "three/src/math/Color.js";
+import { Sphere } from "three/src/math/Sphere.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Line } from "three/src/objects/Line.js";
 import * as _ from "lodash";
 
 function buildLinePositions(pairs) {
@@ -16,8 +25,8 @@ function buildLinePositions(pairs) {
 }
 
 function makeLineGeometry(pairs) {
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(buildLinePositions(pairs), 3));
+    const geo = new BufferGeometry();
+    geo.setAttribute('position', new BufferAttribute(buildLinePositions(pairs), 3));
     return geo;
 }
 
@@ -36,14 +45,14 @@ function makeLineGeometry(pairs) {
 
 
 
-export default class ClusterBaseEdges extends THREE.Line {
+export default class ClusterBaseEdges extends Line {
 
 
     /**
      * the default constructor
      *
      * @param siblingClustersArray ... an array of clusters {@link BaseCluster3D}
-     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@link THREE.LineBasicMaterial}
+     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@link LineBasicMaterial}
      */
     constructor(siblingClustersArray, materialOptions) {
         super();
@@ -62,10 +71,10 @@ export default class ClusterBaseEdges extends THREE.Line {
     }
 
     /**
-     * defines and returns a default material {@link THREE.LineBasicMaterial} and adds {@link MaterialFadeMixin}
+     * defines and returns a default material {@link LineBasicMaterial} and adds {@link MaterialFadeMixin}
      * to be able to use a fading parameter for the level-of-detail (LOD) optimisations of the graph
      *
-     * @param options ... object containing a subset (opacity, transparent, color) of options for {@link THREE.LineBasicMaterial}
+     * @param options ... object containing a subset (opacity, transparent, color) of options for {@link LineBasicMaterial}
      */
 
     getDefaultMaterial(options) {
@@ -81,28 +90,28 @@ export default class ClusterBaseEdges extends THREE.Line {
         options = _.extend(defaults, options);
 
 
-        var lineMaterial = new THREE.LineBasicMaterial({
+        var lineMaterial = new LineBasicMaterial({
             color: options.color,
             transparent: options.transparent,
             opacity: options.opacity,
             depthTest: true,
             depthWrite: false
-            //depthFunc:THREE.NeverDepth
+            //depthFunc:NeverDepth
         });
 
-        /*     var lineMaterial = new THREE.LineBasicMaterial({
+        /*     var lineMaterial = new LineBasicMaterial({
                  color: 0xffffff,//options.color,
                  transparent:false,// options.transparent,
                  opacity: 1,//options.opacity,
                  depthTest: true,
                  depthWrite: true//,
-                 //depthFunc:THREE.NeverDepth
+                 //depthFunc:NeverDepth
              });*/
 
         //   FIXME lines should not interfere with it's cluster (currently are overdrawing)
         /*
           lineMaterial = this.getShaderLineMaterial();
-          lineMaterial.color = new THREE.Color(options.color);
+          lineMaterial.color = new Color(options.color);
           lineMaterial.opacity = options.opacity;
 
           if (!window["lineMaterial"]) window["lineMaterial"] = []
@@ -160,17 +169,17 @@ export default class ClusterBaseEdges extends THREE.Line {
 
             amplitude: {type: "f", value: 5.0},
             opacity: {type: "f", value: 0.3},
-            color: {type: "c", value: new THREE.Color(0xff0000)}
+            color: {type: "c", value: new Color(0xff0000)}
 
         };
 
-        var lineMaterial = new THREE.ShaderMaterial({
+        var lineMaterial = new ShaderMaterial({
 
             uniforms: uniforms,
             // attributes:     attributes,
             //  vertexShader:   vertexShader,
             fragmentShader: fragmentShader,
-            blending: THREE.AdditiveBlending,
+            blending: AdditiveBlending,
             depthTest: false,
             transparent: true
 
@@ -217,7 +226,7 @@ export default class ClusterBaseEdges extends THREE.Line {
     /**
      * generates and updates edges between clusters  {@link BaseCluster3D}
      *
-     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@link THREE.LineBasicMaterial}
+     * @param materialOptions ... object containing a subset (opacity, transparent, color) of options for {@link LineBasicMaterial}
      */
     initEdgeMesh(materialOptions) {
 
@@ -226,8 +235,8 @@ export default class ClusterBaseEdges extends THREE.Line {
         this.geometry = makeLineGeometry([]);
         this.material = lineMaterial;
 
-        this.geometry.boundingBox = new THREE.Box3();
-        this.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1);
+        this.geometry.boundingBox = new Box3();
+        this.geometry.boundingSphere = new Sphere(new Vector3(), 1);
 
         lineMaterial.fade = 0;
         lineMaterial.fadeTo(1, 2000)
@@ -249,7 +258,7 @@ export default class ClusterBaseEdges extends THREE.Line {
     /**
      *
      * @param el .. instanceof {@link BaseCluster3D}
-     * @returns the center position of a cluster as instanceof {@link THREE.Vector3}
+     * @returns the center position of a cluster as instanceof {@link Vector3}
      */
 
 
@@ -258,7 +267,7 @@ export default class ClusterBaseEdges extends THREE.Line {
         if (el.mExpanded == true) {
             //expanded: we use the bounding box of the hull if it exists
             if (el.mHull)
-                pos = el.mHull.mBoundingBox.getCenter(new THREE.Vector3());
+                pos = el.mHull.mBoundingBox.getCenter(new Vector3());
 
 
         }
@@ -271,7 +280,7 @@ export default class ClusterBaseEdges extends THREE.Line {
 
         }
 
-        if (!pos) pos = new THREE.Vector3;
+        if (!pos) pos = new Vector3;
 
         //above elements do only contain the relative position to its container, so we'll add the position of the cluster
         pos.add(el.position);

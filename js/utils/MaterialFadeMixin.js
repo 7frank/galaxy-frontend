@@ -7,9 +7,10 @@
 
 
 import AnimationMixin from "./AnimationMixin"
+import { ShaderMaterial } from "three/src/materials/ShaderMaterial.js";
 
 export default function MaterialFadeMixin(material) {
-    if (!material instanceof THREE.Material) throw new Error("must be THREE.Material")
+    if (!material) throw new Error("must be THREE.Material")
 
 
     AnimationMixin(material)
@@ -28,7 +29,7 @@ export default function MaterialFadeMixin(material) {
             this._opacity = newOpacity;
 
 
-            if (this instanceof THREE.ShaderMaterial)
+            if (this instanceof ShaderMaterial)
                 if (this.uniforms.opacity)
                     this.uniforms.opacity.value = newOpacity
 

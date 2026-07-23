@@ -1,4 +1,6 @@
 import _ from "lodash";
+import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
 /**
  * Created by Frank on 16.07.2017.
  */
@@ -82,11 +84,11 @@ export default class Node3D extends Base3DElement {
     // the element itself is almost? invisible specific visible 3d structures are attached using "addClass"
     createInvisibleAvatar() {
 
-        var sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
+        var sphereGeometry = new SphereGeometry(1, 3, 2);
 
 
         //have only one material instance for the invis element
-        var singleNodeMaterial = Node3D.nodeMaterialSingleton ? Node3D.nodeMaterialSingleton : Node3D.nodeMaterialSingleton = new THREE.MeshBasicMaterial({
+        var singleNodeMaterial = Node3D.nodeMaterialSingleton ? Node3D.nodeMaterialSingleton : Node3D.nodeMaterialSingleton = new MeshBasicMaterial({
             color: 0xffff00, wireframe: true, visible: true, opacity: 0, transparent: true,
             alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
 

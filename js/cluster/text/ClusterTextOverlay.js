@@ -10,7 +10,7 @@ import Cluster3DExtended from "../Cluster3DExtended"
 
 import "./cluster-text-overlay.css"
 
-import * as THREE from "three";
+import { Vector3 } from "three/src/math/Vector3.js";
 import * as _ from "lodash";
 
 
@@ -207,7 +207,7 @@ export default class ClusterTextOverlay {
         //determine the distance between user and cluster
         function getDistance(cluster) {
             let point1 = view.mCamera.position;
-            let point2 = cluster.localToWorld(new THREE.Vector3);
+            let point2 = cluster.localToWorld(new Vector3);
             let distance = point1.distanceTo(point2);
 
             return distance
@@ -330,12 +330,12 @@ export default class ClusterTextOverlay {
             },
             getNodePosition: function (node) {
 
-                var mVec3 = new THREE.Vector3();
+                var mVec3 = new Vector3();
                 mVec3.setFromMatrixPosition(node.matrixWorld);
 
                 //fixing the offset/position as soon as the hull is created
                 if (node.mHull)
-                    mVec3.add(node.mHull.mBoundingBox.getCenter(new THREE.Vector3()));
+                    mVec3.add(node.mHull.mBoundingBox.getCenter(new Vector3()));
 
                 return mVec3; //node.position.clone()
             },

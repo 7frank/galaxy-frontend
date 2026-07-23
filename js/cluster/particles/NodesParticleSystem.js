@@ -1,5 +1,13 @@
 import TWEEN from "@tweenjs/tween.js"
-import * as THREE from "three";
+import { AdditiveBlending } from "three/src/constants.js";
+import { BufferAttribute } from "three/src/core/BufferAttribute.js";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { TextureLoader } from "three/src/loaders/TextureLoader.js";
+import { ShaderMaterial } from "three/src/materials/ShaderMaterial.js";
+import { Color } from "three/src/math/Color.js";
+import { Sphere } from "three/src/math/Sphere.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Points } from "three/src/objects/Points.js";
 import * as _ from "lodash";
 
 
@@ -40,7 +48,7 @@ export default function NodesParticleSystem(nodes, options) {
 
 
     /**
-     * Creates a shader material which is used to render the particle system via {@link THREE.Points} point cloud.
+     * Creates a shader material which is used to render the particle system via {@link Points} point cloud.
      *
      * @returns {ShaderMaterial}
      */
@@ -90,20 +98,20 @@ export default function NodesParticleSystem(nodes, options) {
 
         var uniforms = {
 
-            color: {type: "c", value: new THREE.Color(0xffffff)},
-            pointTexture: {type: "t", value: new THREE.TextureLoader().load("img/block.png")}
+            color: {type: "c", value: new Color(0xffffff)},
+            pointTexture: {type: "t", value: new TextureLoader().load("img/block.png")}
 
         };
 
 
-        var shaderMaterial = new THREE.ShaderMaterial({
+        var shaderMaterial = new ShaderMaterial({
 
             uniforms: uniforms,
             // attributes:     attributes,
             vertexShader: vertexShader,
             fragmentShader: fragmentShader,
 
-            //blending:       THREE.AdditiveBlending,
+            //blending:       AdditiveBlending,
             //depthTest:      false,
             //transparent:    true
 
@@ -156,7 +164,7 @@ export default function NodesParticleSystem(nodes, options) {
     var destination = new Float32Array(particles * 3);
     var values_color = new Float32Array(particles * 3);
     var values_size = new Float32Array(particles);
-    var geometry = new THREE.BufferGeometry();
+    var geometry = new BufferGeometry();
 
     var v = 0;
     for (var n in nodes) {
@@ -166,7 +174,7 @@ export default function NodesParticleSystem(nodes, options) {
         for (var i = 0; i < count; i++) {
 
 
-            var color = (typeof n.color == "number") ? new THREE.Color(n.color) : new THREE.Color(0xffff00);
+            var color = (typeof n.color == "number") ? new Color(n.color) : new Color(0xffff00);
 
 
             values_size[v] = 2.5;
@@ -185,11 +193,11 @@ export default function NodesParticleSystem(nodes, options) {
         }
     }
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(values_size, 1));
+    geometry.setAttribute('position', new BufferAttribute(positions, 3));
+    geometry.setAttribute('customColor', new BufferAttribute(values_color, 3));
+    geometry.setAttribute('size', new BufferAttribute(values_size, 1));
 
-    var particleSystem = new THREE.Points(geometry, shaderMaterial);
+    var particleSystem = new Points(geometry, shaderMaterial);
 
     //override raycaster
     particleSystem.raycast = function () {
@@ -214,7 +222,7 @@ export default function NodesParticleSystem(nodes, options) {
 
 
             for (var i = 0; i < count; i++) {
-                var color = (typeof node.color == "number") ? new THREE.Color(node.color) : new THREE.Color(0xffff00);
+                var color = (typeof node.color == "number") ? new Color(node.color) : new Color(0xffff00);
 
                 var rnd = Math.random() * 0.1;
                 values_color[v * 3 + 0] = color.r * 1.1 + rnd;
@@ -368,7 +376,7 @@ export default function NodesParticleSystem(nodes, options) {
             tween.start();
 
             //for now just have a huge bounding volume that keeps the particle system visible
-            particleSystem.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3, 50000);
+            particleSystem.geometry.boundingSphere = new Sphere(new Vector3, 50000);
 
 
         },

@@ -6,12 +6,14 @@ import {basicElementExtend, basicSpriteSize} from "./f0-basic-element-3d-classes
 
 import {highlightNodeElements,} from "./f1"
 
-import * as THREE from "three";
+import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 import * as _ from "lodash";
 
-var sphereGeometry = new THREE.SphereGeometry(1, 3, 2);
+var sphereGeometry = new SphereGeometry(1, 3, 2);
 
-var singleNodeMaterial = new THREE.MeshBasicMaterial({
+var singleNodeMaterial = new MeshBasicMaterial({
     color: 0xffff00, wireframe: true, visible: false, opacity: 1, transparent: true,
     alphaTest: 0.99 //if set to 1.0 it somehow gets converted to int which will result in the shader failing
 
@@ -41,7 +43,7 @@ export default function nodeMixin(env, node) {
 
 
     //the single material is only for the node counting. so it should be irrelevant for rendering itself
-    node._bubble = new THREE.Mesh(sphereGeometry, singleNodeMaterial);
+    node._bubble = new Mesh(sphereGeometry, singleNodeMaterial);
 
     var mMesh = node._bubble;
 
