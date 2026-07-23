@@ -479,18 +479,17 @@ export default class GraphView3D extends View3D {
         }
 
         var that = this
-        //that.setStencil(true);
         that.mRenderer.autoClear = false
         that.mRenderer.autoClearStencil = false
-        that.mRenderer.clear();
-        that.mCamera.layers.set(0) //render the other objects which should mask the stencil buffer for lines to be hidden as they should be
-
+        that.mRenderer.clear(true, true, true);
+        that.mCamera.layers.set(0)
 
         that.mRenderer.render(that.mScene, that.mCamera);
 
-        that.mCamera.layers.set(1) //render lines in background
-        // that.mRenderer.clearDepth();
+        that.mCamera.layers.set(1)
         that.mRenderer.render(that.mScene, that.mCamera);
+
+        that.mCamera.layers.enableAll();
 
     }
 

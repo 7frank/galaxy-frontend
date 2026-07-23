@@ -827,7 +827,7 @@ export default class BaseCluster3D extends BaseNode {
             minClusterSize: 10,
             defaultMergeGroupName: "other",
             hull: BaseVolume,
-            hullEffect: new BaseHullEffect(),
+            makeHullEffect: () => new BaseHullEffect(),
             onHullCreated: function () {
             },
             edges: ClusterBaseEdges,
@@ -1521,11 +1521,13 @@ export default class BaseCluster3D extends BaseNode {
         mOptions.onHullCreated(this.mHull)
 
         if (this.mHull.mesh) {
-            const hullEffect = mOptions.hullEffect;
             if (this._hullEffect && prevMesh)
                 this._hullEffect.onDetach(prevMesh);
-            hullEffect.onAttach(this.mHull.mesh);
-            this._hullEffect = hullEffect;
+            if (!this._hullEffect) {
+                const makeEffect = mOptions.makeHullEffect || (() => mOptions.hullEffect);
+                this._hullEffect = makeEffect();
+            }
+            this._hullEffect.onAttach(this.mHull.mesh);
         }
 
         //--------------

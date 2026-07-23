@@ -4,7 +4,7 @@ import { Color } from "three/src/math/Color.js";
 import { Mesh } from "three/src/objects/Mesh.js";
 import BaseHullEffect from "./BaseHullEffect";
 
-export default class ToonHullEffect extends BaseHullEffect {
+export default class BasicHullEffect extends BaseHullEffect {
 
     constructor({ opacity = 0.15, hoverOpacity = 0.35 } = {}) {
         super();

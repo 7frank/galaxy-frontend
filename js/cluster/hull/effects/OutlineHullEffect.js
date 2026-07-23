@@ -6,7 +6,10 @@ import { SMAAEffect } from "postprocessing/src/effects/SMAAEffect.js";
 import { SMAAPreset } from "postprocessing/src/enums/SMAAPreset.js";
 import { EdgeDetectionMode } from "postprocessing/src/enums/EdgeDetectionMode.js";
 import { BlendFunction } from "postprocessing/src/enums/BlendFunction.js";
-import { HalfFloatType, LinearSRGBColorSpace } from "three/src/constants.js";
+import { HalfFloatType, LinearSRGBColorSpace, FrontSide } from "three/src/constants.js";
+import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
+import { Color } from "three/src/math/Color.js";
+import { Mesh } from "three/src/objects/Mesh.js";
 import BaseHullEffect from "./BaseHullEffect";
 
 /**
@@ -35,7 +38,7 @@ export class OutlineComposer {
             blendFunction: BlendFunction.SCREEN,
             edgeStrength: 0.8,
             pulseSpeed: 0.0,
-            visibleEdgeColor: 0x8888aa,
+            visibleEdgeColor: 0xffffff,
             hiddenEdgeColor: 0x111111,
             height: 480,
             blur: false,
@@ -104,6 +107,7 @@ export class OutlineComposer {
         this.mComposer?.dispose();
         this.mComposer = null;
         if (this.mRenderer) {
+            this.mRenderer.setRenderTarget(null);
             this.mRenderer.autoClear = true;
             this.mRenderer.autoClearStencil = true;
             if (this.mPrevColorSpace !== undefined)
@@ -123,6 +127,14 @@ export default class OutlineHullEffect extends BaseHullEffect {
         this.mMode = mode;
         this.mComposer = composer;
         this.mMesh = null;
+        this.mFillMesh = null;
+        this.mFillMat = new MeshBasicMaterial({
+            color: new Color().setHSL(Math.random(), 0.6, 0.4),
+            opacity: 0.25,
+            transparent: true,
+            depthWrite: false,
+            side: FrontSide,
+        });
     }
 
     setComposer(composer) {
@@ -133,23 +145,38 @@ export default class OutlineHullEffect extends BaseHullEffect {
     onAttach(mesh) {
         this.mMesh = mesh;
         if (this.mComposer) this.mComposer.add(mesh, this.mMode);
+        if (!this.mFillMesh) {
+            this.mFillMesh = new Mesh(mesh.geometry, this.mFillMat);
+            this.mFillMesh.layers.set(0);
+            mesh.parent.add(this.mFillMesh);
+        } else {
+            this.mFillMesh.geometry = mesh.geometry;
+        }
     }
 
     onDetach(mesh) {
         if (this.mComposer) this.mComposer.remove(mesh);
+        mesh.layers.set(0);
+        if (this.mFillMesh && this.mFillMesh.parent) this.mFillMesh.parent.remove(this.mFillMesh);
+        this.mFillMesh = null;
         this.mMesh = null;
     }
 
     onActive(mesh) {
         if (this.mComposer) this.mComposer.activate(mesh);
+        if (this.mFillMesh) this.mFillMesh.material.opacity = 0.45;
     }
 
     onInactive(mesh) {
         if (this.mComposer) this.mComposer.deactivate(mesh);
+        if (this.mFillMesh) this.mFillMesh.material.opacity = 0.25;
     }
 
     dispose() {
         if (this.mMesh && this.mComposer) this.mComposer.remove(this.mMesh);
+        if (this.mFillMesh && this.mFillMesh.parent) this.mFillMesh.parent.remove(this.mFillMesh);
+        this.mFillMat.dispose();
+        this.mFillMesh = null;
         this.mMesh = null;
     }
 }

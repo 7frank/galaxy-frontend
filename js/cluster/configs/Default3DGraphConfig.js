@@ -5,6 +5,7 @@ import ConvexVolume from "../hull/ConvexVolume";
 import BaseVolume from "../hull/BaseVolume";
 import OutlineHullEffect, { OutlineComposer } from "../hull/effects/OutlineHullEffect";
 import NoneHullEffect from "../hull/effects/NoneHullEffect";
+import BasicHullEffect from "../hull/effects/BasicHullEffect";
 
 import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
 import ZoomUtil from "../../utils/ZoomUtil";
@@ -49,17 +50,7 @@ export default class Default3DGraphConfig {
 
         this.mView = target;
 
-        if (target && target.mRenderer) {
-            if (!this.mOutlineComposer) {
-                this.mOutlineComposer = new OutlineComposer();
-                this.mOutlineComposer.init(target.mRenderer, target.mScene, target.mCamera);
-                target.setBorderEffect(this.mOutlineComposer);
-            }
-            this.getSpeccs().forEach(spec => {
-                const hullEffect = spec.options && spec.options.hullEffect;
-                if (hullEffect && hullEffect.setComposer) hullEffect.setComposer(this.mOutlineComposer);
-            });
-        }
+        this._targetView = target;
 
         return this
 
@@ -151,7 +142,7 @@ export default class Default3DGraphConfig {
             {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: BaseVolume, hullEffect: new NoneHullEffect()}// rootHull}
+                options: {minClusterSize: 40, hull: BaseVolume, makeHullEffect: () => new NoneHullEffect()}
             },
             {
                 generator: industrySetGenerator,
@@ -170,7 +161,8 @@ export default class Default3DGraphConfig {
                 options: {
                     minClusterSize: 15
                     , hull: ConvexVolume,
-                    hullEffect: new OutlineHullEffect("hover"),
+                    makeHullEffect: () => new BasicHullEffect(),
+                    hullBorderMode: "hover",
                     onHullCreated: function (volume) {
                     }
 
@@ -180,7 +172,8 @@ export default class Default3DGraphConfig {
                 distribution: nodesWithinIndustryDistribution,
                 options: {
                     hull: ConvexVolume,
-                    hullEffect: new OutlineHullEffect("ambient"),
+                    makeHullEffect: () => new BasicHullEffect(),
+                    hullBorderMode: "ambient",
 
                     text: function () {
                         //return IndustrialSectorIcon(this.name)
@@ -282,10 +275,6 @@ export default class Default3DGraphConfig {
         }
 
         rootCluster.setLock(true);
-
-        if (this.mOutlineComposer) {
-            view.setBorderEffect(this.mOutlineComposer);
-        }
 
         // view.mScene.background.copy(new Color(0x000000));
         view.mRenderer.setClearColor(this.mBackgroundColor)

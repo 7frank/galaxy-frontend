@@ -1,13 +1,13 @@
 import "./ModeSelect.css";
 import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";
-import ToonHullEffect from "../cluster/hull/effects/ToonHullEffect";
+import BasicHullEffect from "../cluster/hull/effects/BasicHullEffect";
 import OutlineHullEffect, { OutlineComposer } from "../cluster/hull/effects/OutlineHullEffect";
 import ConvexVolume from "../cluster/hull/ConvexVolume";
 
 const EFFECTS = [
     { label: "None",    makeEffect: () => new NoneHullEffect(),                        makeComposer: () => null },
     { label: "Outline", makeEffect: (mode, c) => new OutlineHullEffect(mode, c),       makeComposer: (v) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; } },
-    { label: "Toon",    makeEffect: () => new ToonHullEffect(),                        makeComposer: () => null },
+    { label: "Basic",   makeEffect: () => new BasicHullEffect(),                       makeComposer: () => null },
 ];
 
 class BorderSelect extends HTMLElement {
@@ -18,7 +18,7 @@ class BorderSelect extends HTMLElement {
         EFFECTS.forEach(({ label }, i) => {
             const btn = document.createElement("span");
             btn.textContent = label;
-            if (i === 1) btn.classList.add("selected");
+            if (i === 2) btn.classList.add("selected");
             btn.addEventListener("click", () => this._select(btn, label));
             this.appendChild(btn);
         });
@@ -41,7 +41,8 @@ class BorderSelect extends HTMLElement {
 
         let attached = 0;
         const allClusters = view.mRootCluster.findClusters("*");
-        console.log('[BorderSelect] all clusters:', allClusters.length, allClusters.map(c => ({ name: c.name, hull: c.mHull?.constructor?.name, mesh: !!c.mHull?.mesh, isConvex: c.mHull instanceof ConvexVolume })));
+        const passing = allClusters.filter(c => c.mHull && c.mHull instanceof ConvexVolume && c.mHull.mesh);
+        console.log('[BorderSelect] all clusters:', allClusters.length, 'passing ConvexVolume filter:', passing.length);
         allClusters.forEach(cluster => {
             if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
 
