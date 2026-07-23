@@ -9,7 +9,7 @@ import View3D from "./View3D"
 import RootCluster from "../cluster/RootCluster"
 import GraphData from "../cluster/GraphData"
 
-import "../cluster/utils/DefaultColorScheme"
+import DefaultColorScheme from "../cluster/utils/DefaultColorScheme"
 import "../gui/GraphHUD"
 
 import {GUI} from "../cluster/refactor/SpecificDataUtils"
@@ -74,7 +74,7 @@ export default class GraphView3D extends View3D {
                 visible = Boolean(newValue)
 
             if (this.mRootCluster && this.mRootCluster.mTextOverlay)
-                this.mRootCluster.mTextOverlay.get(0).enabled = visible;
+                this.mRootCluster.mTextOverlay.enabled = visible;
 
         }
     }
@@ -318,7 +318,7 @@ export default class GraphView3D extends View3D {
             this.addCompanyCountListenersToCluster(this.mRootCluster);
 
 
-            $(this).append("<default-color-scheme>")
+            this.mColorScheme = new DefaultColorScheme()
 
 
 
@@ -393,8 +393,8 @@ export default class GraphView3D extends View3D {
 
         if (root && root.mParentView && root.mTextOverlay) {
 
-            root.mTextOverlay.height(root.mParentView.clientHeight);
-            root.mTextOverlay.width(root.mParentView.clientWidth);
+            root.mTextOverlay.el.style.height = root.mParentView.clientHeight + "px";
+            root.mTextOverlay.el.style.width = root.mParentView.clientWidth + "px";
 
         }
 

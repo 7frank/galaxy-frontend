@@ -4,7 +4,7 @@
 //TODO refactor RootCluster
 import Cluster3DExtended from "./Cluster3DExtended"
 
-import "./text/ClusterTextOverlay"
+import ClusterTextOverlay from "./text/ClusterTextOverlay"
 import DefaultColorScheme from "./utils/DefaultColorScheme"
 
 
@@ -162,11 +162,12 @@ export default class RootCluster extends Cluster3DExtended {
     resetTextOverlay() {
 
 
-        if (this.mTextOverlay) this.mTextOverlay.remove()
+        if (this.mTextOverlay) this.mTextOverlay.el.remove()
 
-        this.mTextOverlay = $("<cluster-text-overlay>");
+        this.mTextOverlay = new ClusterTextOverlay();
+        this.mTextOverlay.init(this.mParentView);
 
-        $(this.mParentView).append(this.mTextOverlay)
+        this.mParentView.appendChild(this.mTextOverlay.el)
 
     }
 

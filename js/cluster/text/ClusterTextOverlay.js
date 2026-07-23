@@ -26,10 +26,10 @@ import * as $ from "jquery"
  */
 
 
-export default class ClusterTextOverlay extends HTMLElement {
+export default class ClusterTextOverlay {
 
     constructor() {
-        super();
+        this.el = document.createElement("div");
 
         this.possibleClusters = [];
         this.possibleLeafClusters = [];
@@ -44,8 +44,7 @@ export default class ClusterTextOverlay extends HTMLElement {
      * Initializes CSS and waits for graph {@link GraphView3D} to be loaded, before continuing to create the overlay.
      */
 
-    connectedCallback() {
-        let view = this.parentElement;
+    init(view) {
         if (!view instanceof GraphView3D)
             throw new Error("parent must be instance of GraphView3D");
 
@@ -54,10 +53,8 @@ export default class ClusterTextOverlay extends HTMLElement {
 
         const _onLoadedOrChanged = () => {
 
-            if (!this.parentElement) return;
-
-            this.bindToCluster(this.parentElement.mRootCluster);
-            this.addGlobalNodeCaptions(this.parentElement)
+            this.bindToCluster(view.mRootCluster);
+            this.addGlobalNodeCaptions(view)
 
         };
         view.addEventListener("loaded", _onLoadedOrChanged);
@@ -87,7 +84,7 @@ export default class ClusterTextOverlay extends HTMLElement {
 
         _view.addEventListener("after-render", () => {
 
-            $(that).toggle(that.enabled);
+            that.el.style.display = that.enabled ? "" : "none";
             if (!that.enabled) return;
 
             this.tn.update();
@@ -127,7 +124,7 @@ export default class ClusterTextOverlay extends HTMLElement {
     initCSS() {
 
         //TODO import css directly: check if this css class still has styleing code somewhere else
-        $(this).addClass("graph-captions-container")
+        this.el.classList.add("graph-captions-container")
 
     }
 
@@ -142,12 +139,13 @@ export default class ClusterTextOverlay extends HTMLElement {
      */
     addBreadcrumbContainer() {
         if (this.mBreadcrumb) {
-            $(this).append(this.mBreadcrumb)
+            this.el.appendChild(this.mBreadcrumb)
             return
         }
-        this.mBreadcrumb = $("<span class='cluster-text-overlay-breadcrumb'></span>")
+        this.mBreadcrumb = document.createElement("span");
+        this.mBreadcrumb.className = "cluster-text-overlay-breadcrumb";
 
-        $(this).append(this.mBreadcrumb)
+        this.el.appendChild(this.mBreadcrumb)
 
     }
 
@@ -175,7 +173,7 @@ export default class ClusterTextOverlay extends HTMLElement {
 
         });
 
-        this.mBreadcrumb.empty().append(res.join(this.separator))
+        this.mBreadcrumb.innerHTML = res.join(this.separator)
 
     }
 
@@ -187,10 +185,10 @@ export default class ClusterTextOverlay extends HTMLElement {
 
     addGlobalNodeCaptions(view) {
 
-        var mTextNode = $(this)
-            .height(view.clientHeight)
-            .width(view.clientWidth)
-            .empty();
+        this.el.style.height = view.clientHeight + "px";
+        this.el.style.width = view.clientWidth + "px";
+        this.el.innerHTML = "";
+        var mTextNode = $(this.el);
 
         this.addBreadcrumbContainer()
 
@@ -376,11 +374,6 @@ export default class ClusterTextOverlay extends HTMLElement {
 }
 
 
-/**
- * initialize the dom element
- */
-if (!customElements.get("cluster-text-overlay"))
-    customElements.define("cluster-text-overlay", ClusterTextOverlay);
 
 
 

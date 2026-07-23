@@ -10,37 +10,29 @@
 import Color from 'easy-color';
 import * as $ from "jquery"
 
-export default class DefaultColorScheme extends HTMLElement {
+export default class DefaultColorScheme extends EventTarget {
 
 
     constructor() {
         super();
 
+        this._attrs = {};
 
         this.addEventListener("edge-color-changed", function () {
             console.warn(arguments)
-
-
         })
 
-
-        this.setAttribute("edge-color", "#00AAFFFF")
-        this.setAttribute("background-color", "black")
+        this._setAttr("edge-color", "#00AAFFFF")
+        this._setAttr("background-color", "black")
 
     }
 
-    static get observedAttributes() {
-        return ['edge-color', "background-color"];
-    }
-
-    // Respond to attribute changes.
-    attributeChangedCallback(attr, oldValue, newValue) {
-
-
-        var parser = new Color(newValue); // You can also add: # 0af, rgb (0, 170, 255), hsl (..., etc ...
-
+    _setAttr(attr, newValue) {
+        var parser = new Color(newValue);
         newValue = parser.toRGBA();
-        if (oldValue != newValue)
+        var oldValue = this._attrs[attr];
+        this._attrs[attr] = newValue;
+        if (oldValue != null && oldValue != newValue)
             this.trigger(attr + "-changed", [newValue, oldValue])
     }
 
@@ -59,7 +51,4 @@ export default class DefaultColorScheme extends HTMLElement {
     }
 
 }
-
-if (!customElements.get("default-color-scheme"))
-customElements.define("default-color-scheme", DefaultColorScheme)
 
