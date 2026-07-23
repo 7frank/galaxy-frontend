@@ -74,6 +74,8 @@ export default function AnimationMixin(origObject) {
         var flattened_from = {}
         keys.forEach(k => flattened_from[k] = getValue(that, k))
 
+        that.mAnimating = (that.mAnimating || 0) + 1;
+
         var tween = new TWEEN.Tween(flattened_from);
         tween.to(flattened_to, mDuration)
             .onUpdate(function () {
@@ -91,6 +93,7 @@ export default function AnimationMixin(origObject) {
                 cancelAnimationFrame(mTimeout);
 
                 stopped = true
+                that.mAnimating = Math.max(0, (that.mAnimating || 1) - 1);
                 if (typeof onComplete == "function")
                     onComplete.bind(origObject)()
             })
