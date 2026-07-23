@@ -15,6 +15,18 @@ export default defineConfig({
         emptyOutDir: true,
         rollupOptions: {
             input: resolve(__dirname, 'index.html'),
+            treeshake: {
+                moduleSideEffects: false,
+                propertyReadSideEffects: false,
+                unknownGlobalSideEffects: false,
+            },
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules/three/')) return 'three';
+                    if (id.includes('node_modules/postprocessing/')) return 'postprocessing';
+                    if (id.includes('node_modules/three.meshline/')) return 'three';
+                },
+            },
         },
     },
     server: {
