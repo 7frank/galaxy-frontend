@@ -232,50 +232,6 @@ export default class Cluster3DExtended extends BaseCluster3D {
 
     }
 
-    /**
-     * add some text to the sub-clusters providing informations
-     *
-     * deprecated, text is handled via overlay
-     *
-     */
-
-    /*
-        addNodeCaptions() {
-
-            if (this._hasNodeCaptions_) return;
-            console.log("addNodeCaptions");
-            this._hasNodeCaptions_=true;
-            var rootCluster = this.getRoot();
-            if (!rootCluster.mParentView) return;
-
-
-            function _getNodePosition(node) {
-
-                var mVec3 = new THREE.Vector3();
-                mVec3.setFromMatrixPosition(node.matrixWorld);
-
-
-                return mVec3; //node.position.clone()
-            }
-
-            var nodes = Object.values(this.mClusters);
-
-            //TODO remove global dependency in TextNodes
-
-
-            var mTextNode = $(rootCluster.mParentView.el.querySelector(".graph-captions-container"));
-
-
-            let env = {
-                renderer: rootCluster.mParentView.mRenderer,
-                currentNodesVisible: [],//can be left empty if below nodes function is used
-                textNode: mTextNode,
-                camera: rootCluster.mParentView.mCamera
-
-            };
-
-        }
-        */
 
     isSelected() {
         return this.selected

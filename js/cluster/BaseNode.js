@@ -257,7 +257,6 @@ export default class BaseNode extends THREE.Mesh {
 
     offKey(eventName, eventhandler) {
         this.mKeyboardEvents.unbind(eventName, eventhandler);
-        // $(window).off(eventName, eventhandler);
 
     }
 
@@ -267,7 +266,6 @@ export default class BaseNode extends THREE.Mesh {
 
     triggerKey(eventName, origDomEvent, intersect) {
         this.mKeyboardEvents.trigger(eventName, origDomEvent, intersect);
-        // $(window).trigger(eventName, origDomEvent, intersect);
     }
 
     /**

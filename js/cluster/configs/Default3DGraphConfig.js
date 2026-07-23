@@ -193,7 +193,6 @@ export default class Default3DGraphConfig {
 
     setDomElements() {
         document.querySelectorAll(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").forEach(el => el.classList.remove(this.mCssClass))
-        //  $("cluster-text-overlay").removeClass(    this.mCssClass)
 
     }
 

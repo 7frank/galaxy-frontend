@@ -252,22 +252,6 @@ export default function TextNodesFactory(env, options) {
 
                     //FIXME elements wont disappear the way they are supposed to
 
-                    /*
-                    preNode.text._marked_for_deletion_=true
-
-
-                    preNode.text.stop().fadeOut(100
-                , function() { $(this).remove(); delete(preNode.text) ;preNode.text=undefined  }
-                    );
-
-                    if (typeof preNode.text!="undefined")
-                {
-                    updatePos(preNode)
-                    newPreviousVisibleNodes.push(preNode) //re-add the previous node that needs to be rendered/handled until it is deleted
-                    // preNode.text=null
-                    }
-                     */
-
                 }
 
             }

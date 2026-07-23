@@ -199,9 +199,7 @@ export class SampleClusterApplication extends HTMLElement {
 
             mGraphView.setSpeccs(speccs);
 
-            //TODO per view ... mGraphView.mRenderer.domElement
             let events = new Mousetrap();
-
 
             var edgesVisible = true;
             events.bind("e", function () {
@@ -212,8 +210,6 @@ export class SampleClusterApplication extends HTMLElement {
                     leaf.mEdgesContainer2.visible = edgesVisible
 
                 })
-
-
             });
 
             var infoVisible = true;
@@ -227,12 +223,6 @@ export class SampleClusterApplication extends HTMLElement {
             //FIXME
             if (isMaximised)
                 maximiseView.bind(mGraphView)();
-            /*$(mGraphView).on("loaded",function (){
-
-             maximiseView.bind(mGraphView)()
-             } );
-             */
-
             window.addEventListener("resize", _.throttle(function () {
 
                 if (!mGraphView.isMaximised()) return;
@@ -243,8 +233,7 @@ export class SampleClusterApplication extends HTMLElement {
 
             mGraphView.init();
 
-            return mGraphView
-
+            return mGraphView;
         }
 
 
