@@ -435,6 +435,12 @@ export default class GraphView3D extends View3D {
 
     loadDatasource(datasource) {
         var that = this;
+        if (that.mRootCluster) {
+            that.mScene.remove(that.mRootCluster);
+            if (that.mRootCluster.mTextOverlay && that.mRootCluster.mTextOverlay.el)
+                that.mRootCluster.mTextOverlay.el.remove();
+            that.mRootCluster = null;
+        }
         datasource.load(function onSuccess(mGraphData) {
             console.log("data loaded");
             that.setData(mGraphData);

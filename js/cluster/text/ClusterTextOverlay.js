@@ -56,8 +56,10 @@ export default class ClusterTextOverlay {
             this.addGlobalNodeCaptions(view)
 
         };
-        view.addEventListener("loaded", _onLoadedOrChanged);
+        view.addEventListener("loaded", _onLoadedOrChanged, { once: true });
         view.addEventListener("graph-changed", _onLoadedOrChanged);
+
+        if (view.mRootCluster) _onLoadedOrChanged();
 
     }
 
