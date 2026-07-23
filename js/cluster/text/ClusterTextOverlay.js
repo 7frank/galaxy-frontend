@@ -52,14 +52,16 @@ export default class ClusterTextOverlay extends HTMLElement {
 
         this.initCSS();
 
-        $(view).on("loaded graph-changed", () => {
+        const _onLoadedOrChanged = () => {
 
             if (!this.parentElement) return;
 
             this.bindToCluster(this.parentElement.mRootCluster);
             this.addGlobalNodeCaptions(this.parentElement)
 
-        })
+        };
+        view.addEventListener("loaded", _onLoadedOrChanged);
+        view.addEventListener("graph-changed", _onLoadedOrChanged);
 
     }
 
@@ -70,12 +72,12 @@ export default class ClusterTextOverlay extends HTMLElement {
     bindToCluster(rootcluster) {
 
 
-        var $view = $(rootcluster.getView());
+        var _view = rootcluster.getView();
 
         var that = this;
 
 
-        $view.on("before-render", function () {
+        _view.addEventListener("before-render", function () {
 
             //reset nodes
             that.possibleClusters = [];
@@ -83,7 +85,7 @@ export default class ClusterTextOverlay extends HTMLElement {
         });
 
 
-        $view.on("after-render", () => {
+        _view.addEventListener("after-render", () => {
 
             $(that).toggle(that.enabled);
             if (!that.enabled) return;

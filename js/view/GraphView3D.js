@@ -244,8 +244,7 @@ export default class GraphView3D extends View3D {
         //$(that).off();
 
         // if (!$(that).hasClass("before-render-inited"))
-        $(that).// .addClass("before-render-inited").
-        on("before-render", onBeforeRender);
+        that.addEventListener("before-render", onBeforeRender);
 
 
         function onBeforeRender() {
@@ -340,7 +339,7 @@ export default class GraphView3D extends View3D {
         }
 
 
-        $(this).trigger("loaded")
+        this.dispatchEvent(new CustomEvent("loaded"))
 
 
     }

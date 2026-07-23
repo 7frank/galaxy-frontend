@@ -234,7 +234,7 @@ export default class Default3DGraphConfig {
         view.addCompanyCountListenersToCluster(rootCluster);
 
         //TODO text is shown to early on update
-        $(view).trigger("graph-changed");
+        view.dispatchEvent(new CustomEvent("graph-changed"));
 
     }
 

@@ -17,7 +17,7 @@ export default class DefaultColorScheme extends HTMLElement {
         super();
 
 
-        $(this).on("edge-color-changed", function () {
+        this.addEventListener("edge-color-changed", function () {
             console.warn(arguments)
 
 
@@ -45,7 +45,7 @@ export default class DefaultColorScheme extends HTMLElement {
     }
 
     on(evntName, handler) {
-        $(this).on(evntName, handler.bind(this))
+        this.addEventListener(evntName, handler.bind(this))
         return this
     }
 
@@ -54,7 +54,7 @@ export default class DefaultColorScheme extends HTMLElement {
     //maybe generate materials also
 
     trigger(evntName, args) {
-        $(this).trigger(evntName, args)
+        this.dispatchEvent(new CustomEvent(evntName, {detail: args}))
         return this
     }
 

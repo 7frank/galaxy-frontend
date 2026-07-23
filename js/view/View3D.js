@@ -55,7 +55,7 @@ export default class View3D extends HTMLElement {
         });
 
 
-        $(this).on("resize", () => this.resizeCanvas())
+        this.addEventListener("resize", () => this.resizeCanvas())
 
 
     }
@@ -114,7 +114,7 @@ export default class View3D extends HTMLElement {
         this.mControls.maxDistance = Math.min(this.mCamera.far, 200000);
 
 
-        this.mControls.addEventListener("change", (...args) => $(this).trigger("change", ...args));
+        this.mControls.addEventListener("change", (e) => this.dispatchEvent(new CustomEvent("change", {detail: e})));
 
 
     }
@@ -436,13 +436,13 @@ export default class View3D extends HTMLElement {
             that.mControls.update();
 
 
-            $(that).trigger("before-render", time);
+            that.dispatchEvent(new CustomEvent("before-render", {detail: time}));
 
 
             that.render()
 
 
-            $(that).trigger("after-render", time);
+            that.dispatchEvent(new CustomEvent("after-render", {detail: time}));
 
             that.mFrameId = requestAnimationFrame(doAnimate);
         }
@@ -599,7 +599,7 @@ export default class View3D extends HTMLElement {
         this.initStatic();
         this.start();
 
-        $(this).trigger("connected")
+        this.dispatchEvent(new CustomEvent("connected"))
 
 
     }
