@@ -3,6 +3,7 @@
  */
 
 
+import _ from "lodash";
 import BaseCluster3D from "./BaseCluster3D"
 
 import BaseDistribution from "./distributions/BaseDistribution"

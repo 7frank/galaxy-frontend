@@ -1,3 +1,4 @@
+import _ from "lodash";
 /**
  *
  * FIXME ok for the 2d parent child graph it would be best to create the edges by scratch
