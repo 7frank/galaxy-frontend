@@ -9,7 +9,6 @@ import DefaultColorScheme from "./utils/DefaultColorScheme"
 
 
 import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
-import * as $ from "jquery"
 
 /**
  *
@@ -100,7 +99,8 @@ export default class RootCluster extends Cluster3DExtended {
 
         var countryNames = null;
 
-        $(window).on("node-color-change", function (e, val) {
+        window.addEventListener("node-color-change", function (e) {
+            var val = e.detail;
 
 
             if (!countryNames) countryNames = getCountryNamesFromNodes(nodes)

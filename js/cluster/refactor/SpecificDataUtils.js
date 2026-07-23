@@ -125,7 +125,7 @@ $(function () {
     $sel.on("change", function (e, ui) {
         var val = $sel.val()
 
-        $(window).trigger("node-color-change", val)
+        window.dispatchEvent(new CustomEvent("node-color-change", {detail: val}))
 
         /*
                 var helper=computeGroupNodeColorHelper(globalEnv.nodeClouds.groupIdList)

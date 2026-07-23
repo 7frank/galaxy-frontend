@@ -13,7 +13,6 @@ import DefaultColorScheme from "../cluster/utils/DefaultColorScheme"
 import "../gui/GraphHUD"
 
 import {GUI} from "../cluster/refactor/SpecificDataUtils"
-import * as $ from "jquery"
 
 
 //import skyDomeImage from "./coordinates.png"
@@ -224,9 +223,6 @@ export default class GraphView3D extends View3D {
         var that = this;
 
 
-        //$(that).off();
-
-        // if (!$(that).hasClass("before-render-inited"))
         that.addEventListener("before-render", onBeforeRender);
 
 
@@ -338,11 +334,13 @@ export default class GraphView3D extends View3D {
 
             //TODO element does not jet exist.. create webcomponent for that
             function triggerColorChange() {
-                let selectEl = $(".cloudNodeColorSelect")
+                let selectEl = document.querySelector(".cloudNodeColorSelect")
 
-                if (selectEl.length == 0) setTimeout(triggerColorChange, 100)
-                else
-                    selectEl.val("group").trigger("change")
+                if (!selectEl) setTimeout(triggerColorChange, 100)
+                else {
+                    selectEl.value = "group";
+                    selectEl.dispatchEvent(new Event("change"));
+                }
             }
 
             triggerColorChange();
@@ -359,10 +357,12 @@ export default class GraphView3D extends View3D {
             console.log("data loaded");
             that.setData(mGraphData);
             function triggerColorChange() {
-                let selectEl = $(".cloudNodeColorSelect")
-                if (selectEl.length == 0) setTimeout(triggerColorChange, 100)
-                else
-                    selectEl.val("group").trigger("change")
+                let selectEl = document.querySelector(".cloudNodeColorSelect")
+                if (!selectEl) setTimeout(triggerColorChange, 100)
+                else {
+                    selectEl.value = "group";
+                    selectEl.dispatchEvent(new Event("change"));
+                }
             }
             triggerColorChange();
         });

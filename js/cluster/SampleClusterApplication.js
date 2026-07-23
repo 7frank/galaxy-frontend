@@ -22,7 +22,6 @@ import Default3DGraphConfig from "./configs/Default3DGraphConfig";
 import * as Mousetrap from "mousetrap";
 
 
-import * as $ from "jquery"
 
 /**
  *  TODO re-structure graph
@@ -56,7 +55,8 @@ export class SampleClusterApplication extends HTMLElement {
         this.addNewsListeners()
 
 
-        $(this).append("<graph-hud></graph-hud>")
+        const hud = document.createElement("graph-hud");
+        this.appendChild(hud);
 
 
     }
@@ -111,27 +111,28 @@ export class SampleClusterApplication extends HTMLElement {
             };
 
 
-            var container = $("<div>")
-                .css(containerCSS)//.hide()
-                .appendTo("body");
+            var container = document.createElement("div");
+            Object.assign(container.style, containerCSS);
+            document.body.appendChild(container);
 
-            let title = $("<div>press 'space' to toggle menu, 'double-click' elements to maximise </div>")
-                .css({
-                    position: "absolute",
-                    "pointer-events": "none",
-                    width: "100%",
-                    "font-size": "1em",
-                    color: "rgba(255, 255, 255, 0.5)"
-                });
+            let title = document.createElement("div");
+            title.textContent = "press 'space' to toggle menu, 'double-click' elements to maximise";
+            Object.assign(title.style, {
+                position: "absolute",
+                pointerEvents: "none",
+                width: "100%",
+                fontSize: "1em",
+                color: "rgba(255, 255, 255, 0.5)"
+            });
 
 
             function toggleMenu() {
-                container.toggle()
+                container.style.display = container.style.display === "none" ? "" : "none";
             }
 
-            title.on("click", toggleMenu);
+            title.addEventListener("click", toggleMenu);
 
-            container.append(title);
+            container.appendChild(title);
 
 
             Mousetrap.bind("space", toggleMenu);
@@ -158,7 +159,7 @@ export class SampleClusterApplication extends HTMLElement {
 
                 this.el.classList.remove("view-thumbnail");
 
-                container.hide();
+                container.style.display = "none";
 
                 var prevViews = that._views || [];
 
@@ -166,7 +167,7 @@ export class SampleClusterApplication extends HTMLElement {
 
                     if (view.isMaximised()) {
                         view.undoMaximise();
-                        container[0].appendChild(view.el);
+                        container.appendChild(view.el);
                     }
 
                 });
@@ -218,7 +219,7 @@ export class SampleClusterApplication extends HTMLElement {
             var infoVisible = true;
             events.bind("h", function () {
                 infoVisible = !infoVisible;
-                $(that).find("info-panel").toggle(infoVisible)
+                that.querySelectorAll("info-panel").forEach(el => el.style.display = infoVisible ? "" : "none");
 
 
             });
@@ -306,7 +307,7 @@ export class SampleClusterApplication extends HTMLElement {
 
         _.each(views, function (view) {
             if (!view.el.parentElement)
-                container[0].appendChild(view.el)
+                container.appendChild(view.el)
         })
 
 

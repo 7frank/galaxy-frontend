@@ -14,7 +14,6 @@ import * as THREE from "three";
 import "../lib/CombinedCamera"
 import "../lib/TrackballControls"
 
-import * as $ from "jquery"
 
 
 /**
@@ -187,10 +186,13 @@ export default class View3D extends EventTarget {
      */
     setCaption(text) {
 
-        if (!this.mCaption)
-            this.mCaption = $("<span></span>").html(this.name).addClass(".view-3d-caption");
+        if (!this.mCaption) {
+            this.mCaption = document.createElement("span");
+            this.mCaption.className = "view-3d-caption";
+            this.el.appendChild(this.mCaption);
+        }
 
-        this.mCaption.html("").append(text);
+        this.mCaption.textContent = text;
         return this
     }
 
@@ -231,11 +233,12 @@ export default class View3D extends EventTarget {
         this.el.appendChild(this.mRenderer.domElement);
 
 
-        $(this.mRenderer.domElement).css({position: "absolute", top: 0, left: 0, width: "100%", height: "100%"});
+        Object.assign(this.mRenderer.domElement.style, {position: "absolute", top: 0, left: 0, width: "100%", height: "100%"});
 
 
-        this.mFpsCounter = $("<span     style='color: white;position: absolute;' >");
-        this.el.appendChild(this.mFpsCounter[0]);
+        this.mFpsCounter = document.createElement("span");
+        Object.assign(this.mFpsCounter.style, {color: "white", position: "absolute"});
+        this.el.appendChild(this.mFpsCounter);
 
 
         //------------------------------------------------
@@ -245,7 +248,7 @@ export default class View3D extends EventTarget {
 
 
         //FIXME binding events will interfere with controls
-        $(this.mRenderer.domElement).on("mouseover", function (e) {
+        this.mRenderer.domElement.addEventListener("mouseover", function (e) {
 
             if (that.isMaximised()) return;
 
@@ -254,13 +257,13 @@ export default class View3D extends EventTarget {
 
             that.el.setAttribute("hasFocus", true);
 
-            that.mCaption.stop(true, false).fadeOut(200)
+            that.mCaption.style.opacity = "0"
 
 
         });
 
 
-        $(this.mRenderer.domElement).on("mouseout", function (e) {
+        this.mRenderer.domElement.addEventListener("mouseout", function (e) {
 
             if (that.isMaximised()) return;
 
@@ -269,7 +272,7 @@ export default class View3D extends EventTarget {
             that.el.removeAttribute("hasFocus");
             if (!that.el.classList.contains("view-3d-maximised")) {
 
-                that.mCaption.stop(true, false).delay(400).fadeIn();
+                that.mCaption.style.opacity = "1";
 
                 that.setInactive();
 
@@ -358,7 +361,7 @@ export default class View3D extends EventTarget {
                 that.mActualFPS = accFrames;
 
                 if (that.showFPSCounter)
-                    that.mFpsCounter.html(that.mActualFPS);
+                    that.mFpsCounter.textContent = that.mActualFPS;
 
                 accTime = 0;
                 accFrames = 0;
@@ -404,7 +407,7 @@ export default class View3D extends EventTarget {
     maximise() {
         this.el.classList.add("view-3d-maximised");
 
-        this.mCaption.fadeOut();
+        this.mCaption.style.opacity = "0";
 
         this.setActive()
 
@@ -538,10 +541,10 @@ export default class View3D extends EventTarget {
         this.toolTipElem = document.createElement('div');
         this.toolTipElem.classList.add('graph-tooltip');
 
-        $(this.toolTipElem).css({
-            "z-index": 1,
+        Object.assign(this.toolTipElem.style, {
+            zIndex: 1,
             position: "absolute",
-            "user-select": "none"
+            userSelect: "none"
         });
 
         this.el.appendChild(this.toolTipElem);
@@ -580,7 +583,10 @@ export default class View3D extends EventTarget {
      */
     setTooltip(text) {
 
-        $(this.toolTipElem).html("").append(text).show()
+        this.toolTipElem.innerHTML = "";
+        if (typeof text === "string") this.toolTipElem.innerHTML = text;
+        else this.toolTipElem.appendChild(text);
+        this.toolTipElem.style.display = "";
 
     }
 
