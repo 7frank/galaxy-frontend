@@ -8,7 +8,7 @@ import {
     EdgeDetectionMode,
     BlendFunction
 } from "postprocessing";
-import { HalfFloatType, LinearSRGBColorSpace } from "three";
+import { HalfFloatType, LinearSRGBColorSpace } from "three/src/constants.js";
 
 import BaseBorderEffect from "./BaseBorderEffect";
 

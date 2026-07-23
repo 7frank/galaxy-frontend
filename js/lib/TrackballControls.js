@@ -5,12 +5,10 @@
  * @author Luca Antiga 	/ http://lantiga.github.io
  */
 
-import {
-	EventDispatcher,
-	Vector2,
-	Vector3,
-	Quaternion,
-} from "three";
+import { EventDispatcher } from "three/src/core/EventDispatcher.js";
+import { Vector2 } from "three/src/math/Vector2.js";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Quaternion } from "three/src/math/Quaternion.js";
 
 
 function TrackballControls( object, domElement ) {

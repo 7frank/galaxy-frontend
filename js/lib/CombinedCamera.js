@@ -8,11 +8,9 @@
  *
  */
 
-import {
-	Camera,
-	OrthographicCamera,
-	PerspectiveCamera,
-} from "three";
+import { Camera } from "three/src/cameras/Camera.js";
+import { OrthographicCamera } from "three/src/cameras/OrthographicCamera.js";
+import { PerspectiveCamera } from "three/src/cameras/PerspectiveCamera.js";
 
 const RAD2DEG = 180 / Math.PI;
 

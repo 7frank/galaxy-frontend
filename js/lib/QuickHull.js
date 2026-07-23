@@ -5,7 +5,10 @@
  *
  */
 
-import { Vector3, Line3, Plane, Triangle } from "three";
+import { Vector3 } from "three/src/math/Vector3.js";
+import { Line3 } from "three/src/math/Line3.js";
+import { Plane } from "three/src/math/Plane.js";
+import { Triangle } from "three/src/math/Triangle.js";
 
 
 var QuickHullClass;

@@ -3,7 +3,9 @@
  * Updated to use BufferGeometry only (three.js r125+)
  */
 
-import { BufferGeometry, Float32BufferAttribute, Vector3 } from "three";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
+import { Float32BufferAttribute } from "three/src/core/BufferAttribute.js";
+import { Vector3 } from "three/src/math/Vector3.js";
 import { QuickHull } from "./QuickHull";
 
 
