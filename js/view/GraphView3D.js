@@ -23,8 +23,8 @@ import * as $ from "jquery"
 
 export default class GraphView3D extends View3D {
 
-    constructor(...args) {
-        super(...args);
+    constructor(el) {
+        super(el);
 
         this.mRootCluster = null;
 
@@ -315,7 +315,7 @@ export default class GraphView3D extends View3D {
 
             }
 
-            let mt=Mousetrap(this)
+            let mt=Mousetrap(this.el)
             mt.bind("up",doZoom)
             mt.bind("down",doZoom)
 
@@ -410,5 +410,3 @@ export default class GraphView3D extends View3D {
 
 
 }
-if (!customElements.get("graph-view-3d"))
-customElements.define("graph-view-3d", GraphView3D);

@@ -7,7 +7,7 @@ import "../gui/searchbar"
 
 import "./refactor/SpecificDataUtils"
 import "./refactor/AppDataService"
-import "../view/GraphView3D"
+import GraphView3D from "../view/GraphView3D"
 import "../gui/ModeSelect"
 
 
@@ -151,39 +151,35 @@ export class SampleClusterApplication extends HTMLElement {
 
                 if (this.isMaximised()) {
 
-                    $(this)
-                        .addClass("view-thumbnail")
+                    this.el.classList.add("view-thumbnail");
                     return;
                 }
 
 
-                $(this)
-                    .removeClass("view-thumbnail")
+                this.el.classList.remove("view-thumbnail");
 
                 container.hide();
 
-                let maximisedContainer = $(that) //$("#3d-graph");
-                //globalEnv.scene=mGraphView.mScene
-                var prevMaximisedElement = maximisedContainer.children(".view-3d");//("graph-view-3d")
+                var prevViews = that._views || [];
 
-                _.each(prevMaximisedElement, function (view) {
+                _.each(prevViews, function (view) {
 
-                    view.undoMaximise()
+                    if (view.isMaximised()) {
+                        view.undoMaximise();
+                        container[0].appendChild(view.el);
+                    }
 
                 });
 
-                container.append(prevMaximisedElement);
-
-
-                //TODO remove small bug with connectCallback in view3D recursion
-                maximisedContainer.append(this);
+                that.appendChild(this.el);
 
                 this.maximise()
 
             }
 
 
-            let mGraphView = document.createElement("graph-view-3d");
+            let viewEl = document.createElement("div");
+            let mGraphView = new GraphView3D(viewEl);
             mGraphView.setCaption(name);
 
 
@@ -195,10 +191,9 @@ export class SampleClusterApplication extends HTMLElement {
             mGraphView.showFPSCounter = that.isDebug();
 
 
-            $(mGraphView)
-                .addClass("view-thumbnail")
-
-            $(mGraphView).on("dblclick", maximiseView);
+            viewEl.classList.add("view-thumbnail");
+            viewEl._view3d = mGraphView;
+            viewEl.addEventListener("dblclick", maximiseView.bind(mGraphView));
 
 
             mGraphView.setSpeccs(speccs);
@@ -237,15 +232,15 @@ export class SampleClusterApplication extends HTMLElement {
              } );
              */
 
-            $(window).on("resize", _.throttle(function () {
-                //TODO use native events
+            window.addEventListener("resize", _.throttle(function () {
 
                 if (!mGraphView.isMaximised()) return;
 
-                $(mGraphView).trigger("resize")
-                //console.warn("TODO handle window resize + (f11)")
+                mGraphView.el.dispatchEvent(new CustomEvent("resize"));
+
             }, 100));
 
+            mGraphView.init();
 
             return mGraphView
 
@@ -307,9 +302,11 @@ export class SampleClusterApplication extends HTMLElement {
         }
 
 
+        that._views = views;
+
         _.each(views, function (view) {
-            if ($(view).parent().length == 0)
-                container.append(view)
+            if (!view.el.parentElement)
+                container[0].appendChild(view.el)
         })
 
 
@@ -337,8 +334,13 @@ export class SampleClusterApplication extends HTMLElement {
 
     getCurrentView() {
 
-        return $(".view-3d.view-3d-maximised").get(0)
+        let el = document.querySelector(".view-3d.view-3d-maximised");
+        return el ? el._view3d : null
 
+    }
+
+    getView() {
+        return this.getCurrentView()
     }
 
 

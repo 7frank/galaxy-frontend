@@ -548,7 +548,7 @@ export default class BaseCluster3D extends BaseNode {
 
 
             // primarily notify text overlay here
-            $(this.getRoot().getView()).trigger("graph-changed");
+            this.getRoot().getView().dispatchEvent(new CustomEvent("graph-changed"));
 
             this.trigger("initial-expand");
 

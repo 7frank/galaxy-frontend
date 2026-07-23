@@ -18,52 +18,42 @@ import * as $ from "jquery"
 
 
 /**
- * This is the constructor for a web component 'view-3d' which is initialised at the end of the file.
- * It contains most relevant code (camera, scene, animation loop, etc.) to create a Three-js 3D-Canvas
- * In addition the element has got a caption element which can be used to render some info text eg.
- * as well as some parameters to limit the frames per second (FPS) of the rendered 3D-Scene.
+ * View3D manages a Three.js 3D canvas inside a given DOM container element.
+ * Pass a DOM element as the first constructor argument.
  *
- * Usage: create a dom element <view-3d></view-3d> and use it the way you would use any other html element
- *
- * Note: to customise FPS set the attributes 'minFPS' or 'maxFPS'
- *
+ * Note: to customise FPS set the properties 'minFPS' or 'maxFPS'
  */
 
 
-export default class View3D extends HTMLElement {
+export default class View3D extends EventTarget {
 
-    constructor(...args) {
-        super(...args);
+    constructor(el) {
+        super();
 
+        this.el = el || document.createElement("div");
+        this.el.classList.add("view-3d");
 
+        this.isRunning = false;
 
-        this.isRunning=false
-
-
-        // this.createCSSRule();
         this.mTime = -1;
         this.mActualFPS = 0;
         this.showFPSCounter = false;
         this.mouseSpeed = 2;
-
-
-        //   this.initStatic()
 
         // Setup renderer
         this.mRenderer = new THREE.WebGLRenderer({
             antialias: true
         });
 
-
-        this.addEventListener("resize", () => this.resizeCanvas())
-
+        this.el.addEventListener("resize", () => this.resizeCanvas())
 
     }
 
+    get clientWidth() { return this.el.clientWidth }
+    get clientHeight() { return this.el.clientHeight }
+
     /**
      * initialise the camera classes with some default values
-     *
-     * TODO have access methods for camera controls and domEvents to be able to change controls and camera mode
      */
 
     createCamera() {
@@ -83,9 +73,6 @@ export default class View3D extends HTMLElement {
 
         this.mCamera = new THREE.CombinedCamera();
 
-        // this.mCamera =   this.mCameraO// new THREE.CombinedCamera();
-
-
         if (this.mCamera instanceof THREE.CombinedCamera) {
             this.mCamera.setFar(5000000);
 
@@ -104,8 +91,6 @@ export default class View3D extends HTMLElement {
 
     /**
      *  Add user (mouse,keyboard) interaction
-     *
-     * TODO have an option to change controls so a user may be able to use different ways of navigation
      */
 
     createControls() {
@@ -113,26 +98,17 @@ export default class View3D extends HTMLElement {
 
         this.mControls.maxDistance = Math.min(this.mCamera.far, 200000);
 
-
         this.mControls.addEventListener("change", (e) => this.dispatchEvent(new CustomEvent("change", {detail: e})));
-
 
     }
 
 
     /**
      * initialise THREEx helper class that provides dom-like mouse events for 3D elements
-     * NOTE: The available 3D mouse events are only a subset of otherwise (for native dom elements) existing mouse events
      */
     createDomEvents() {
 
-
-        //this.mDomEvents = new THREEx.DomEvents(this.mCamera,this.mRenderer.domElement);
         this.mDomEvents = new DomEventsAlt(this.mCamera, this.mRenderer.domElement, this.mScene);
-
-        //Note: have a factory in case we need this kind of injection multiple times
-        // THREEx.DomEvents.prototype._onMouseMove=origMouseMove;//restore non throttled work flow to not interfere with other implementations
-
 
     }
 
@@ -143,11 +119,8 @@ export default class View3D extends HTMLElement {
     updateCamera() {
         this.mCamera.updateProjectionMatrix();
 
-
-        //update controls
         this.mControls.object = this.mCamera
 
-        //update domEvents camera with current camera
         this.mDomEvents._camera = this.mCamera
 
     }
@@ -158,10 +131,7 @@ export default class View3D extends HTMLElement {
 
     set2D() {
 
-        //   this.mCameraO.copy( this.mCamera);
-
         this.mCamera = this.mCameraO
-
 
         this.updateCamera()
 
@@ -172,7 +142,6 @@ export default class View3D extends HTMLElement {
      * set the camera to perspective mode
      */
     set3D() {
-        //  this.mCameraP.copy( this.mCamera);
 
         this.mCamera = this.mCameraP
 
@@ -186,43 +155,37 @@ export default class View3D extends HTMLElement {
      */
     resizeCanvas() {
         if (this.mRenderer && this.mCamera) {
-            this.mRenderer.setSize(this.clientWidth, this.clientHeight);
-            this.mCamera.aspect = this.clientWidth / this.clientHeight;
+            this.mRenderer.setSize(this.el.clientWidth, this.el.clientHeight);
+            this.mCamera.aspect = this.el.clientWidth / this.el.clientHeight;
 
 
             if (this.mCamera instanceof THREE.CombinedCamera)
-                this.mCamera.setSize(this.clientWidth, this.clientHeight);
+                this.mCamera.setSize(this.el.clientWidth, this.el.clientHeight);
             this.mCamera.updateProjectionMatrix();
 
             //adjust orthographic camera
             let camFactor = 2
-            this.mCameraO.left = -this.clientWidth / camFactor;
-            this.mCameraO.right = this.clientWidth / camFactor;
-            this.mCameraO.top = this.clientHeight / camFactor;
-            this.mCameraO.bottom = -this.clientHeight / camFactor;
+            this.mCameraO.left = -this.el.clientWidth / camFactor;
+            this.mCameraO.right = this.el.clientWidth / camFactor;
+            this.mCameraO.top = this.el.clientHeight / camFactor;
+            this.mCameraO.bottom = -this.el.clientHeight / camFactor;
             this.mCameraO.updateProjectionMatrix();
 
 
         }
 
         if (this.mRenderer && this.mControls) {
-            this.mControls.panSpeed = 1600 / this.clientWidth * this.mouseSpeed * 0.3
-            this.mControls.rotateSpeed = 1600 / this.clientWidth * this.mouseSpeed
+            this.mControls.panSpeed = 1600 / this.el.clientWidth * this.mouseSpeed * 0.3
+            this.mControls.rotateSpeed = 1600 / this.el.clientWidth * this.mouseSpeed
         }
 
     }
 
 
     /**
-     * sets the value of a text element that functions as a caption. the element is a native child dom-element
-     * within our <view-3d></view-3d> element and can be styled via css in a usual way.
-     * Note: To customise styling use the css class '.view-3d-caption'
-     *
-     * @param text ... a string value representing the text that shall be shown
-     * @returns {View3D} for chaining
+     * sets the value of a text element that functions as a caption.
      */
     setCaption(text) {
-
 
         if (!this.mCaption)
             this.mCaption = $("<span></span>").html(this.name).addClass(".view-3d-caption");
@@ -233,8 +196,7 @@ export default class View3D extends HTMLElement {
 
 
     /**
-     *   set up controls,  scene,   renderer,     animation
-     *
+     * set up controls, scene, renderer, animation
      */
     initStatic() {
 
@@ -252,8 +214,6 @@ export default class View3D extends HTMLElement {
 
         this.setCaption(this.name)
 
-        $(this).addClass("view-3d");
-
 
         // Setup scene
 
@@ -262,35 +222,20 @@ export default class View3D extends HTMLElement {
         //added to be able to use threejs inspector
         window.scene = this.mScene;
         window.THREE = THREE;
-        // Add nav info section
-        //createTooltip()
 
         this.createCamera();
 
         this.mRenderer.setClearColor(0x000000);
         this.mRenderer.setPixelRatio(window.devicePixelRatio);
 
-        this.appendChild(this.mRenderer.domElement);
+        this.el.appendChild(this.mRenderer.domElement);
 
 
         $(this.mRenderer.domElement).css({position: "absolute", top: 0, left: 0, width: "100%", height: "100%"});
 
 
-        //init basic keyboard io
-        //FIXME this probably interferes with domEvents here..
-        /*
-
-         this.mOtherEvents = new Mousetrap(this.mRenderer.domElement);
-         //  this.mOtherEvents
-         Mousetrap .bind("shift+r",function(e){
-         e.preventDefault();
-         e.stopPropagation();
-         console.log("actualFPS",   that.mActualFPS)
-
-         })*/
-
         this.mFpsCounter = $("<span     style='color: white;position: absolute;' >");
-        $(this).append(this.mFpsCounter);
+        this.el.appendChild(this.mFpsCounter[0]);
 
 
         //------------------------------------------------
@@ -307,8 +252,7 @@ export default class View3D extends HTMLElement {
             e.stopPropagation();
             that.setActive();
 
-            $(that).attr("hasFocus", true);
-
+            that.el.setAttribute("hasFocus", true);
 
             that.mCaption.stop(true, false).fadeOut(200)
 
@@ -322,13 +266,11 @@ export default class View3D extends HTMLElement {
 
             e.stopPropagation();
 
-
-            $(that).removeAttr("hasFocus");
-            if (!$(that).hasClass("view-3d-maximised")) {
+            that.el.removeAttribute("hasFocus");
+            if (!that.el.classList.contains("view-3d-maximised")) {
 
                 that.mCaption.stop(true, false).delay(400).fadeIn();
 
-                //keep maximised element active or whatever state it currently holds
                 that.setInactive();
 
 
@@ -351,15 +293,12 @@ export default class View3D extends HTMLElement {
 
     /**
      * Enable or disable stencil tests.
-     * This can be useful to render special effects like multiple layers or for masking objects.
      */
 
     setStencil(bTrue) {
 
-        //TODO have a switch to be able to debug options
         var gl = this.mRenderer.context;
 
-        // enable stencil test
         if (bTrue)
             gl.enable(gl.STENCIL_TEST);
         else
@@ -369,11 +308,10 @@ export default class View3D extends HTMLElement {
 
     /**
      * wrapper method to call renderer
-     * Note: override in subclass to provide option to use multiple renderers
      */
     render() {
 
-        this.mRenderer.render(that.mScene, that.mCamera);
+        this.mRenderer.render(this.mScene, this.mCamera);
 
     }
 
@@ -393,8 +331,6 @@ export default class View3D extends HTMLElement {
 
         function doAnimate(time) {
             that.mTime = time;
-            // console.log("doAnimate",time)
-            //that.mControls.update();
             initialFrames--;
             if (that.mFPS == 0) {
 
@@ -454,9 +390,6 @@ export default class View3D extends HTMLElement {
 
     /**
      * convenience method to add 3d elements
-     *
-     * @param object3D ... an instance of a {@link THRE.Mesh}
-     *
      */
     add(object3D) {
         this.mScene.add(object3D)
@@ -465,12 +398,11 @@ export default class View3D extends HTMLElement {
 
 
     /**
-     * Maximises the view within the available browser window and bringing
-     * it on top of all other potential existing view-3d instances.
+     * Maximises the view within the available browser window.
      */
 
     maximise() {
-        $(this).addClass("view-3d-maximised");
+        this.el.classList.add("view-3d-maximised");
 
         this.mCaption.fadeOut();
 
@@ -484,16 +416,16 @@ export default class View3D extends HTMLElement {
      */
     isMaximised() {
 
-        return $(this).hasClass("view-3d-maximised")
+        return this.el.classList.contains("view-3d-maximised")
 
     }
 
 
     /**
-     * reverts the effects of {@link View3D.maximise}
+     * reverts the effects of maximise
      */
     undoMaximise() {
-        $(this).removeClass("view-3d-maximised");
+        this.el.classList.remove("view-3d-maximised");
 
         this.setInactive()
 
@@ -507,7 +439,6 @@ export default class View3D extends HTMLElement {
 
     setActive() {
 
-        //fps
         this.mFPS = this.maxFPS;
 
         this.resizeCanvas();
@@ -516,10 +447,9 @@ export default class View3D extends HTMLElement {
     }
 
     /**
-     * setting a view inactive will result in the renderer using only the  minFPS value resulting in lower GPU usage.
+     * setting a view inactive will result in the renderer using only the minFPS value.
      */
     setInactive() {
-        //  $(this).removeClass("view-3d-maximised")
         this.mFPS = this.minFPS;
 
         this.resizeCanvas()
@@ -528,7 +458,6 @@ export default class View3D extends HTMLElement {
 
     /**
      * access method to start rendering the 3D content
-     *
      */
 
     start() {
@@ -543,14 +472,12 @@ export default class View3D extends HTMLElement {
 
     /**
      * access method to stop rendering the 3D content
-     * FIXME it appears that the animation loop isn't canceled correctly which breaks the whole rendering
-     *
      */
     stop() {
 
         if (this.isRunning) {
             window.cancelAnimationFrame(this.mFrameId)
-            this.isRunning=false;
+            this.isRunning = false;
         }
 
     }
@@ -558,7 +485,6 @@ export default class View3D extends HTMLElement {
 
     /**
      * convenience method
-     *
      */
     resume() {
 
@@ -573,7 +499,7 @@ export default class View3D extends HTMLElement {
 
     show() {
         this.resume()
-        $(this).show()
+        this.el.style.display = ""
     }
 
 
@@ -582,35 +508,31 @@ export default class View3D extends HTMLElement {
      */
     hide() {
         this.stop()
-        $(this).hide()
+        this.el.style.display = "none"
     }
 
 
     /**
-     * A callback invoked when the HTML-element is attached to the DOM.
-     * We'll use it here to initialise the 3D context and start the rendering loop.
+     * Initialise the 3D context and start the rendering loop.
+     * Call this after appending el to the DOM.
      */
 
-    connectedCallback() {
+    init() {
 
         this.createTooltip();
-
 
         this.initStatic();
         this.start();
 
         this.dispatchEvent(new CustomEvent("connected"))
 
-
     }
 
     /**
-     * Create the DOM element for the tooltip element which can be used to show
-     * a 2D overlay on top of a 3D scene projecting the 3D position into 2D coordinates
+     * Create the DOM element for the tooltip element
      */
     createTooltip() {
 
-        // Setup tooltip
         if (this.toolTipElem) return;
 
         this.toolTipElem = document.createElement('div');
@@ -622,28 +544,20 @@ export default class View3D extends HTMLElement {
             "user-select": "none"
         });
 
-        this.appendChild(this.toolTipElem);
-
-        // Capture mouse coords on move
+        this.el.appendChild(this.toolTipElem);
 
         this.mouse = new THREE.Vector2();
-        this.mouse.x = -2; // Initialize off canvas
+        this.mouse.x = -2;
         this.mouse.y = -2;
-        this.addEventListener("mousemove", ev => {
-            // update the mouse pos
+        this.el.addEventListener("mousemove", ev => {
 
-
-            //$(env.toolTipElem).show()
-
-            const offset = getOffset(this),
+            const offset = getOffset(this.el),
                 relPos = {
                     x: ev.pageX - offset.left,
                     y: ev.pageY - offset.top
                 };
-            this.mouse.x = (relPos.x / this.clientWidth) * 2 - 1;
-            this.mouse.y = -(relPos.y / this.clientHeight) * 2 + 1;
-            //console.log(offset);
-            // Move tooltip
+            this.mouse.x = (relPos.x / this.el.clientWidth) * 2 - 1;
+            this.mouse.y = -(relPos.y / this.el.clientHeight) * 2 + 1;
             this.toolTipElem.style.top = (relPos.y - 40) + 'px';
             this.toolTipElem.style.left = (relPos.x - 20) + 'px';
 
@@ -672,11 +586,3 @@ export default class View3D extends HTMLElement {
 
 
 }
-
-
-/**
- * creates the web component itself
- *
- */
-if (!customElements.get("view-3d"))
-customElements.define("view-3d", View3D);
