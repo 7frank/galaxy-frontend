@@ -129,8 +129,12 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
             this.mComposer.dispose();
             this.mComposer = null;
         }
-        if (this.mRenderer && this.mPrevColorSpace !== undefined) {
-            this.mRenderer.outputColorSpace = this.mPrevColorSpace;
+        if (this.mRenderer) {
+            this.mRenderer.autoClear = true;
+            this.mRenderer.autoClearStencil = true;
+            if (this.mPrevColorSpace !== undefined)
+                this.mRenderer.outputColorSpace = this.mPrevColorSpace;
+            this.mCamera.layers.enableAll();
         }
     }
 

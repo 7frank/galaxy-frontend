@@ -5,26 +5,43 @@ mode-select {
     cursor: pointer;
 }
 
+border-select {
+    position: absolute;
+    top: 40px;
+    right: 100px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
 
-mode-select * {
+border-select label {
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    padding: 0.2em 0.6em;
+    border: none;
+    margin: 0;
+}
 
+
+mode-select *,
+border-select span {
     padding: 0.2em 1.8em;
     color: white;
     margin: 0.2em;
     border-radius: 1px;
     border: 1px solid rgba(128, 128, 128, 0.51);
-
 }
 
-
-mode-select span:hover {
+mode-select span:hover,
+border-select span:hover {
     outline: none;
     border-color: #9ecaed;
     box-shadow: 0 0 10px #9ecaed;
 }
 
-
-mode-select .selected{
+mode-select .selected,
+border-select .selected {
     outline: none;
     border-color: #9ecaed;
     box-shadow: 0 0 10px #9ecaed;

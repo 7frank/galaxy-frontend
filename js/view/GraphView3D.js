@@ -273,8 +273,14 @@ export default class GraphView3D extends View3D {
 
             effect.onHullRegister(mesh, mode);
 
-            cluster.on("mouseover", () => effect.onHullActive(mesh));
-            cluster.on("mouseout", () => effect.onHullInactive(mesh));
+            if (cluster._borderMouseover) cluster.off("mouseover", cluster._borderMouseover);
+            if (cluster._borderMouseout) cluster.off("mouseout", cluster._borderMouseout);
+
+            cluster._borderMouseover = () => this.mBorderEffect && this.mBorderEffect.onHullActive(mesh);
+            cluster._borderMouseout = () => this.mBorderEffect && this.mBorderEffect.onHullInactive(mesh);
+
+            cluster.on("mouseover", cluster._borderMouseover);
+            cluster.on("mouseout", cluster._borderMouseout);
         });
     }
 
