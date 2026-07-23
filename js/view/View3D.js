@@ -174,6 +174,7 @@ export default class View3D extends EventTarget {
         }
 
         if (this.mRenderer && this.mControls) {
+            this.mControls.handleResize();
             this.mControls.panSpeed = 1600 / this.el.clientWidth * this.mouseSpeed * 0.3
             this.mControls.rotateSpeed = 1600 / this.el.clientWidth * this.mouseSpeed
         }

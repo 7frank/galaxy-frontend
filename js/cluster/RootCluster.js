@@ -167,7 +167,7 @@ export default class RootCluster extends Cluster3DExtended {
         this.mTextOverlay = new ClusterTextOverlay();
         this.mTextOverlay.init(this.mParentView);
 
-        this.mParentView.appendChild(this.mTextOverlay.el)
+        this.mParentView.el.appendChild(this.mTextOverlay.el)
 
     }
 
