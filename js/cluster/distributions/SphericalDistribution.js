@@ -4,7 +4,6 @@
 
 import BaseDistribution from "./BaseDistribution"
 
-import { Vector2 } from "three/src/math/Vector2.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 
 
@@ -49,8 +48,13 @@ export default class SphericalDistribution extends BaseDistribution {
      **/
 
     distribute(node, dx, dy, dz) {
-        let mv3 = this.project2dNormalisedToSphere(new Vector2(2 * dx, 2 * dy), this.mScale / 2)
-        return {position: mv3};
+        const radius = this.mScale / 2;
+        const theta = 2 * Math.PI * dx;
+        const phi = Math.acos(1 - 2 * (dy + 0.5));
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.sin(phi) * Math.sin(theta);
+        const z = radius * Math.cos(phi);
+        return { position: new Vector3(x, y, z) };
     }
 
 

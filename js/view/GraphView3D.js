@@ -435,6 +435,7 @@ export default class GraphView3D extends View3D {
 
     loadDatasource(datasource) {
         var that = this;
+        this._currentDatasource = datasource;
         if (that.mRootCluster) {
             that.mScene.remove(that.mRootCluster);
             if (that.mRootCluster.mTextOverlay && that.mRootCluster.mTextOverlay.el)
