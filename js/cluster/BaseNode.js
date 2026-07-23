@@ -154,7 +154,7 @@ export default class BaseNode extends THREE.Mesh {
     /**
      * there are 3 types of events handled for a node
      * (1) mouse events via THREEx.domEvents
-     * (2) keyboard hotkeys that are bound to "keyup" via jQuery.hotkeys
+     * (2) keyboard hotkeys bound to a single "keyup" listener in BaseNode::initStatic()
      * (3) any other custom event
      * NOTE: customise in sub class as needed
      */
