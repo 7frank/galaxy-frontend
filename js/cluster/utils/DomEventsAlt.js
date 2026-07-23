@@ -79,7 +79,6 @@
 import * as THREE from "three";
 import * as _ from "lodash";
 
-import { CombinedCamera } from "../../lib/CombinedCamera";
 
 
 // # Constructor
@@ -164,7 +163,7 @@ DomEventsAlt.eventNames = [
 ];
 
 DomEventsAlt.prototype._getRelativeMouseXY = function (domEvent) {
-    var element = domEvent.target || domEvent.srcElement;
+    var element = this._domElement;
     if (element.nodeType === 3) {
         element = element.parentNode; // Safari fix -- see http://www.quirksmode.org/js/events_properties.html
     }
@@ -228,6 +227,13 @@ DomEventsAlt.prototype._objectCtxGet = function (object3d) {
 DomEventsAlt.prototype.camera = function (value) {
     if (value) this._camera = value;
     return this._camera;
+}
+
+DomEventsAlt.prototype._getActiveCamera = function () {
+    const c = this._camera;
+    if (c && c.inPerspectiveMode) return c.cameraP;
+    if (c && c.inOrthographicMode) return c.cameraO;
+    return c;
 }
 
 DomEventsAlt.prototype.bind = function (object3d, eventName, callback, useCapture) {
@@ -296,18 +302,11 @@ DomEventsAlt.prototype._onMove = function (eventName, mouseX, mouseY, origDomEve
     // update the picking ray with the camera and mouse position
     vector.set(mouseX, mouseY);
 
-    let mCamera;
-
-    if (this._camera instanceof CombinedCamera) {
-
-        if (this._camera.inPerspectiveMode) mCamera = this._camera.cameraP;
-        if (this._camera.inOrthographicMode) mCamera = this._camera.cameraO;
-
-    }
-    else
-        mCamera = this._camera;
-
-    this._raycaster.setFromCamera(vector, mCamera);
+    const _cam = this._getActiveCamera();
+    _cam.position.copy(this._camera.position);
+    _cam.quaternion.copy(this._camera.quaternion);
+    _cam.updateMatrixWorld(true);
+    this._raycaster.setFromCamera(vector, _cam);
 
     //@frank4711 altering intersection from flat array will improve mouse move performance for many elements bound
     var intersects = this._raycaster.intersectObjects(this.scene.children, true);
@@ -454,19 +453,11 @@ DomEventsAlt.prototype._onEvent = function (eventName, mouseX, mouseY, origDomEv
     // update the picking ray with the camera and mouse position
     vector.set(mouseX, mouseY);
 
-
-    let mCamera;
-
-    if (this._camera instanceof CombinedCamera) {
-
-        if (this._camera.inPerspectiveMode) mCamera = this._camera.cameraP;
-        if (this._camera.inOrthographicMode) mCamera = this._camera.cameraO;
-
-    }
-    else
-        mCamera = this._camera
-
-    this._raycaster.setFromCamera(vector, mCamera);
+    const _cam2 = this._getActiveCamera();
+    _cam2.position.copy(this._camera.position);
+    _cam2.quaternion.copy(this._camera.quaternion);
+    _cam2.updateMatrixWorld(true);
+    this._raycaster.setFromCamera(vector, _cam2);
 
     //var intersects = this._raycaster.intersectObjects( boundObjs, true);
 

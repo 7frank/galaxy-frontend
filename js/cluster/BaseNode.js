@@ -275,7 +275,7 @@ export default class BaseNode extends THREE.Mesh {
     resolveKeyEvent(event) {
 
 
-        this.mKeyboardEvents.handleKeyEvent(event)
+        this.mKeyboardEvents.handleKey(event.key, [], event)
 
     }
 

@@ -392,11 +392,14 @@ export default class BaseCluster3D extends BaseNode {
         //the geometry that is necessary to be able to click stuff is generated in ajdustHullSize which isn't called when cluster is collapsed
         //TODO make it more robust
 
-        if (!this.geometry) this.geometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
+        if (!this.geometry) {
+            this.geometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
+            this.geometry.translate(boundingSphere.center.x, boundingSphere.center.y, boundingSphere.center.z);
+        }
         if (!this.geometry.boundingSphere)
             this.geometry.boundingSphere = boundingSphere;
         if (!this.geometry.boundingBox)
-            this.geometry.boundingBox = boundingSphere.getBoundingBox();
+            this.geometry.boundingBox = boundingSphere.getBoundingBox(new THREE.Box3());
 
 
         //------
@@ -1220,13 +1223,12 @@ export default class BaseCluster3D extends BaseNode {
         _.each(this.mClusters, function (subCluster) {
             let boundingBox = new THREE.Box3;
 
-            if (!subCluster.geometry.boundingBox) return; //not computed bbox, ignore
-            boundingBox.copy(subCluster.geometry.boundingBox);
+            const _sourceBB = (subCluster.mHull && subCluster.mHull.mBoundingBox)
+                || (subCluster.geometry && subCluster.geometry.boundingBox);
+            if (!_sourceBB) return;
+            boundingBox.copy(_sourceBB);
 
-
-            let offset_parent = that.localToWorld(new THREE.Vector3);
-            let offset_world = subCluster.localToWorld(new THREE.Vector3);
-            boundingBox.translate(offset_world.sub(offset_parent));
+            boundingBox.translate(subCluster.position);
 
             let vert = that.getVerticesFromBoundingBox(boundingBox);
 
@@ -1256,20 +1258,15 @@ export default class BaseCluster3D extends BaseNode {
 
         let el = leaf.mNodeParticles.pointCloud;
 
-        let offset_parent = that.localToWorld(new THREE.Vector3);
-        let offset_world = el.localToWorld(new THREE.Vector3);
-
-
-        let translateOffset = offset_world.sub(offset_parent);
+        const leafOffset = leaf.position.clone();
 
         let geometry = el.geometry;
         var attributes = geometry.attributes;
         var positions = attributes.position.array;
         let vert = [];
         for (var i = 0; i < positions.length; i += 3) {
-
             let v = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
-            vert.push(v.add(translateOffset));
+            vert.push(v.add(leafOffset));
         }
 
         return vert
@@ -1455,6 +1452,8 @@ export default class BaseCluster3D extends BaseNode {
 
                 //   boundingBox.setFromObject(pc);//would create wrong bb because of other elements within pc getting changed while animation loop runs
                 info.box.setFromArray(pc.geometry.attributes.position.array);
+                const _leafOffset = this.mLeaf.position.clone();
+                info.box.translate(_leafOffset);
                 // info.vertices = this.getVerticesFromBoundingBox(info.box)  //TODO get vertices from array
                 info.vertices = this.getVerticesForLeaf();
 
@@ -1516,6 +1515,7 @@ export default class BaseCluster3D extends BaseNode {
             let boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
             //TODO this is currently used for the mouse interactions but should be refactored and removed
             var sphereGeometry = new THREE.SphereGeometry(boundingSphere.radius, 10, 5);
+            sphereGeometry.translate(boundingSphere.center.x, boundingSphere.center.y, boundingSphere.center.z);
             sphereGeometry.boundingBox = boundingBox;
             this.geometry = sphereGeometry;
         }

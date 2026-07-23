@@ -313,6 +313,75 @@ export default class GraphView3D extends View3D {
             let mt=Mousetrap(this.el)
             mt.bind("up",doZoom)
             mt.bind("down",doZoom)
+            const _debugState = { mode: 0 };
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'F2') {
+                    e.preventDefault();
+                    const root = this.mRootCluster;
+                    if (!root) return;
+                    const DEBUG_GROUP_NAME = '__hullDebug__';
+                    let grp = this.mScene.getObjectByName(DEBUG_GROUP_NAME);
+                    if (grp) this.mScene.remove(grp);
+
+                    _debugState.mode = (_debugState.mode + 1) % 3;
+                    if (_debugState.mode === 0) {
+                        console.log('[F2] mode: none');
+                        return;
+                    }
+
+                    grp = new THREE.Group();
+                    grp.name = DEBUG_GROUP_NAME;
+                    root.updateMatrixWorld(true);
+
+                    function addBoxes(cluster) {
+                        if (_debugState.mode === 1 && cluster.mHull && cluster.mHull.mBoundingBox) {
+                            const bbWorld = cluster.mHull.mBoundingBox.clone().applyMatrix4(cluster.matrixWorld);
+                            grp.add(new THREE.Box3Helper(bbWorld, 0xffff00));
+                        }
+                        if (_debugState.mode === 2 && cluster.geometry && cluster.geometry.boundingBox) {
+                            const bbWorld = cluster.geometry.boundingBox.clone().applyMatrix4(cluster.matrixWorld);
+                            grp.add(new THREE.Box3Helper(bbWorld, 0xff0000));
+                        }
+                        if (cluster.mClusters)
+                            Object.values(cluster.mClusters).forEach(addBoxes);
+                    }
+                    addBoxes(root);
+                    this.mScene.add(grp);
+                    console.log('[F2] mode:', _debugState.mode === 1 ? 'yellow (hull.mBoundingBox)' : 'red (geometry.boundingBox)', '— boxes:', grp.children.length);
+                    return;
+                }
+                if (e.key !== 'F1') return;
+                e.preventDefault();
+                function v3(v) { return v ? `(${v.x.toFixed(0)},${v.y.toFixed(0)},${v.z.toFixed(0)})` : 'null'; }
+                function bbStr(bb) {
+                    if (!bb) return 'no-bb';
+                    const c = bb.getCenter(new THREE.Vector3());
+                    const s = bb.getSize(new THREE.Vector3());
+                    return `center=${v3(c)} size=${v3(s)}`;
+                }
+                function dumpCluster(cluster, indent) {
+                    const isLeaf = cluster.isLeaf ? cluster.isLeaf() : false;
+                    const wp = new THREE.Vector3();
+                    cluster.getWorldPosition(wp);
+                    const hullBB = cluster.mHull && cluster.mHull.mBoundingBox;
+                    const geoBB = cluster.geometry && cluster.geometry.boundingBox;
+                    const lines = [
+                        `${indent}[${isLeaf ? 'LEAF' : 'CLUSTER'}] ${cluster.name || cluster.id || '?'}`,
+                        `${indent}  pos=${v3(cluster.position)} worldPos=${v3(wp)}`,
+                        `${indent}  hull.mBoundingBox: ${bbStr(hullBB)}`,
+                        `${indent}  geometry.boundingBox: ${bbStr(geoBB)}`,
+                    ];
+                    if (cluster.mClusters) {
+                        Object.values(cluster.mClusters).forEach(c => {
+                            lines.push(...dumpCluster(c, indent + '  '));
+                        });
+                    }
+                    return lines;
+                }
+                const root = this.mRootCluster;
+                if (!root) { console.log('[F1] no root cluster'); return; }
+                console.log('[F1] cluster tree:\n' + dumpCluster(root, '').join('\n'));
+            })
 
         }
 
