@@ -11,7 +11,6 @@ import * as THREE from "three";
 import * as _ from "lodash";
 
 import * as Mousetrap from "mousetrap";
-import * as $ from "jquery"
 
 /**
  * A simple graph-node that contains methods for user interaction and basic visualisation via threejs {@link THREE}.
@@ -71,11 +70,11 @@ export default class BaseNode extends THREE.Mesh {
         // this.add( axisHelper );
 
 
-        if (view instanceof HTMLElement)
+        if (view)
             this.setView(view)
 
 
-        this.mCustomEvents = $({})
+        this.mCustomEvents = new EventTarget();
 
 
         this.addDefaultHandlers();
@@ -142,7 +141,7 @@ export default class BaseNode extends THREE.Mesh {
 
         //this part is by far not optimal..
         //currently this lets us have one global listener for all instances of BaseNode that handles keyboard shortcuts for the whole graph
-        $(window).on("keydown", function (e) {
+        window.addEventListener("keydown", function (e) {
             if (!BaseNode.lastHoveredNode) return
 
             BaseNode.lastHoveredNode.resolveKeyEvent(e)
@@ -215,7 +214,7 @@ export default class BaseNode extends THREE.Mesh {
 
 
     onCustomEvent(eventName, eventhandler) {
-        this.mCustomEvents.on(eventName, eventhandler.bind(this))
+        this.mCustomEvents.addEventListener(eventName, eventhandler.bind(this))
     }
 
     //------------------------------------------------
@@ -225,7 +224,7 @@ export default class BaseNode extends THREE.Mesh {
      **/
 
     offCustomEvent(eventName, eventhandler) {
-        this.mCustomEvents.off(eventName, eventhandler)
+        this.mCustomEvents.removeEventListener(eventName, eventhandler)
     }
 
     /**
@@ -233,7 +232,7 @@ export default class BaseNode extends THREE.Mesh {
      **/
 
     triggerCustomEvent(eventName, origDomEvent, intersect) {
-        this.mCustomEvents.trigger(eventName, origDomEvent, intersect)
+        this.mCustomEvents.dispatchEvent(new CustomEvent(eventName, {detail: {origDomEvent, intersect}}))
     }
 
     /**

@@ -263,7 +263,7 @@ export default class Cluster3DExtended extends BaseCluster3D {
             //TODO remove global dependency in TextNodes
 
 
-            var mTextNode = $(rootCluster.mParentView.mRenderer.domElement).parent().children(".graph-captions-container");
+            var mTextNode = $(rootCluster.mParentView.el.querySelector(".graph-captions-container"));
 
 
             let env = {

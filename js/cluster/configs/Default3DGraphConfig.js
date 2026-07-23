@@ -9,7 +9,6 @@ import ZoomUtil from "../../utils/ZoomUtil";
 import {removeSelections} from "../refactor/f1";
 
 import * as THREE from "three";
-import * as $ from "jquery"
 
 
 /**
@@ -193,7 +192,7 @@ export default class Default3DGraphConfig {
      */
 
     setDomElements() {
-        $(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").removeClass(this.mCssClass)
+        document.querySelectorAll(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").forEach(el => el.classList.remove(this.mCssClass))
         //  $("cluster-text-overlay").removeClass(    this.mCssClass)
 
     }

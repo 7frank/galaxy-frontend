@@ -7,8 +7,7 @@ import ZoomUtil from "../../utils/ZoomUtil";
 import {GUI} from "./SpecificDataUtils";
 
 
-import * as _ from "lodash";
-import * as $ from "jquery"
+import * as _ from "lodash"
 
 /**
  NOTE: set initialEngineTicks to a appropriate value to speed up bigger graphs
@@ -125,7 +124,7 @@ function extendElement(elements, attrName, options, env) {
         click: _TODO("click"),
         dblclick: _TODO("dblclick")
     };
-    options = $.extend(true, {}, defaults, options);
+    options = Object.assign({}, defaults, options);
 
 
     for (let el of elements) {
@@ -194,9 +193,9 @@ function extendElement(elements, attrName, options, env) {
 function doZoomToMesh(mesh, onEnd, minMaxDistance = 400) {
 
 
-    let view = $(".view-3d[hasFocus]")[0];
-
-    if (!view) view = $(".view-3d.view-3d-maximised").get(0);
+    let viewEl = document.querySelector(".view-3d[hasFocus]");
+    if (!viewEl) viewEl = document.querySelector(".view-3d.view-3d-maximised");
+    let view = viewEl ? viewEl._view3d : null;
 
     if (!view) console.warn("no view focused to be able to zoom");
 
