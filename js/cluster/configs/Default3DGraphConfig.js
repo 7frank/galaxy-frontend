@@ -3,6 +3,8 @@ import BaseCluster3D from "../BaseCluster3D";
 import {IndustrialSectorAbbreviation} from "../utils/IndustrialSectorIcon";
 import ConvexVolume from "../hull/ConvexVolume";
 import BaseVolume from "../hull/BaseVolume";
+import OutlineHullEffect, { OutlineComposer } from "../hull/effects/OutlineHullEffect";
+import NoneHullEffect from "../hull/effects/NoneHullEffect";
 
 import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
 import ZoomUtil from "../../utils/ZoomUtil";
@@ -130,7 +132,7 @@ export default class Default3DGraphConfig {
             {
                 generator: countrySetGenerator,
                 distribution: countryDistribution,
-                options: {minClusterSize: 40, hull: BaseVolume}// rootHull}
+                options: {minClusterSize: 40, hull: BaseVolume, hullEffect: new NoneHullEffect()}// rootHull}
             },
             {
                 generator: industrySetGenerator,
@@ -148,9 +150,8 @@ export default class Default3DGraphConfig {
                 },
                 options: {
                     minClusterSize: 15
-                    // ,hull:BoxVolume
                     , hull: ConvexVolume,
-                    hullBorderMode: "hover",
+                    hullEffect: new OutlineHullEffect("hover", this.mOutlineComposer),
                     onHullCreated: function (volume) {
                     }
 
@@ -160,7 +161,7 @@ export default class Default3DGraphConfig {
                 distribution: nodesWithinIndustryDistribution,
                 options: {
                     hull: ConvexVolume,
-                    hullBorderMode: "ambient",
+                    hullEffect: new OutlineHullEffect("ambient", this.mOutlineComposer),
 
                     text: function () {
                         //return IndustrialSectorIcon(this.name)
@@ -263,6 +264,11 @@ export default class Default3DGraphConfig {
 
         rootCluster.setLock(true);
 
+        if (!this.mOutlineComposer) {
+            this.mOutlineComposer = new OutlineComposer();
+            this.mOutlineComposer.init(view.mRenderer, view.mScene, view.mCamera);
+            view.setBorderEffect(this.mOutlineComposer);
+        }
 
         // view.mScene.background.copy(new Color(0x000000));
         view.mRenderer.setClearColor(this.mBackgroundColor)

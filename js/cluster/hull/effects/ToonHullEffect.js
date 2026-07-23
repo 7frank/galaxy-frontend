@@ -1,9 +1,8 @@
 import { DataTexture } from "three/src/textures/DataTexture.js";
 import { MeshToonMaterial } from "three/src/materials/MeshToonMaterial.js";
-import { RedFormat, UnsignedByteType } from "three/src/constants.js";
+import { RedFormat, UnsignedByteType, FrontSide } from "three/src/constants.js";
 import { Color } from "three/src/math/Color.js";
-import { FrontSide } from "three/src/constants.js";
-import BaseBorderEffect from "./BaseBorderEffect";
+import BaseHullEffect from "./BaseHullEffect";
 
 function buildGradientMap(steps) {
     const data = new Uint8Array(steps);
@@ -15,26 +14,22 @@ function buildGradientMap(steps) {
     return tex;
 }
 
-export default class ToonBorderEffect extends BaseBorderEffect {
+export default class ToonHullEffect extends BaseHullEffect {
 
     constructor({ steps = 4, opacity = 0.15, color = 0xaaccff, hoverOpacity = 0.35, hoverColor = 0xffffff } = {}) {
         super();
-        console.log("[Toon] constructed");
-        this.mSteps = steps;
         this.mOpacity = opacity;
         this.mColor = color;
         this.mHoverOpacity = hoverOpacity;
         this.mHoverColor = hoverColor;
         this.mGradientMap = buildGradientMap(steps);
-        this.mOriginalMaterials = new Map();
-        this.mModeMap = new Map();
+        this.mOriginals = new Map();
     }
 
-    onHullRegister(mesh, mode) {
-        if (mode === "none") return;
-        console.log("[Toon] register", mode, "mesh.visible=", mesh.visible, "mat.visible=", mesh.material.visible, mesh);
-        this.mModeMap.set(mesh, mode);
-        this.mOriginalMaterials.set(mesh, mesh.material);
+    onAttach(mesh) {
+        if (!this.mOriginals.has(mesh)) {
+            this.mOriginals.set(mesh, { material: mesh.material, visible: mesh.visible });
+        }
         const mat = new MeshToonMaterial({
             color: new Color(this.mColor),
             gradientMap: this.mGradientMap,
@@ -43,46 +38,44 @@ export default class ToonBorderEffect extends BaseBorderEffect {
             depthWrite: false,
             side: FrontSide,
         });
-        mat.visible = true;
         mesh.material = mat;
         mesh.visible = true;
         mesh.layers.set(0);
     }
 
-    onHullUnregister(mesh) {
-        const original = this.mOriginalMaterials.get(mesh);
+    onDetach(mesh) {
+        const original = this.mOriginals.get(mesh);
         if (original) {
-            mesh.material.dispose();
-            mesh.material = original;
+            if (mesh.material !== original.material) mesh.material.dispose();
+            mesh.material = original.material;
             mesh.visible = original.visible;
             mesh.layers.enableAll();
-            this.mOriginalMaterials.delete(mesh);
+            this.mOriginals.delete(mesh);
         }
-        this.mModeMap.delete(mesh);
     }
 
-    onHullActive(mesh) {
-        if (this.mModeMap.get(mesh) === "hover" && mesh.material.isMeshToonMaterial) {
+    onActive(mesh) {
+        if (mesh.material.isMeshToonMaterial) {
             mesh.material.color.set(this.mHoverColor);
             mesh.material.opacity = this.mHoverOpacity;
         }
     }
 
-    onHullInactive(mesh) {
-        if (this.mModeMap.get(mesh) === "hover" && mesh.material.isMeshToonMaterial) {
+    onInactive(mesh) {
+        if (mesh.material.isMeshToonMaterial) {
             mesh.material.color.set(this.mColor);
             mesh.material.opacity = this.mOpacity;
         }
     }
 
     dispose() {
-        this.mGradientMap.dispose();
-        for (const [mesh, original] of this.mOriginalMaterials) {
-            mesh.material.dispose();
-            mesh.material = original;
+        for (const [mesh, original] of this.mOriginals) {
+            if (mesh.material !== original.material) mesh.material.dispose();
+            mesh.material = original.material;
+            mesh.visible = original.visible;
+            mesh.layers.enableAll();
         }
-        this.mOriginalMaterials.clear();
-        this.mModeMap.clear();
+        this.mOriginals.clear();
+        this.mGradientMap.dispose();
     }
-
 }

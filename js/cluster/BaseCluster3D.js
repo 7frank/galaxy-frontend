@@ -7,6 +7,7 @@ import ClusterLeafElement from "./ClusterLeafElement"
 import BaseNode from "./BaseNode"
 import EdgeUtil from "./EdgeUtil"
 import BaseVolume from "./hull/BaseVolume"
+import BaseHullEffect from "./hull/effects/BaseHullEffect"
 
 import MaterialFadeMixin from "../utils/MaterialFadeMixin"
 
@@ -194,9 +195,10 @@ export default class BaseCluster3D extends BaseNode {
 
 
             if (cluster.mHull) {
+                if (cluster._hullEffect && cluster.mHull.mesh)
+                    cluster._hullEffect.onDetach(cluster.mHull.mesh);
                 cluster.mHull.dispose();
                 delete (cluster.mHull);
-
                 cluster.mHull = null;
             }
 
@@ -432,9 +434,10 @@ export default class BaseCluster3D extends BaseNode {
                 if (this.mCollapsedClusterHull) {
                     origScale = this.mCollapsedClusterHull.scale.clone()
                     this.mCollapsedClusterHull.scale.multiplyScalar(1.05)
-
                 }
 
+            if (this._hullEffect && this.mHull && this.mHull.mesh)
+                this._hullEffect.onActive(this.mHull.mesh);
         })
         this.on("mouseout", function () {
 
@@ -442,7 +445,8 @@ export default class BaseCluster3D extends BaseNode {
                 if (this.mCollapsedClusterHull && origScale)
                     this.mCollapsedClusterHull.scale.copy(origScale)
 
-
+            if (this._hullEffect && this.mHull && this.mHull.mesh)
+                this._hullEffect.onInactive(this.mHull.mesh);
         })
 
 
@@ -823,6 +827,7 @@ export default class BaseCluster3D extends BaseNode {
             minClusterSize: 10,
             defaultMergeGroupName: "other",
             hull: BaseVolume,
+            hullEffect: new BaseHullEffect(),
             onHullCreated: function () {
             },
             edges: ClusterBaseEdges,
@@ -1513,6 +1518,12 @@ export default class BaseCluster3D extends BaseNode {
         this.mHull.createVolumeFromVertices(vertices, boundingBox);
 
         mOptions.onHullCreated(this.mHull)
+
+        if (this.mHull.mesh) {
+            const hullEffect = mOptions.hullEffect;
+            hullEffect.onAttach(this.mHull.mesh);
+            this._hullEffect = hullEffect;
+        }
 
         //--------------
         //copy the geometry for the domEvents to work
