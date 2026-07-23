@@ -7,6 +7,7 @@
  * Thank you all, you're awesome!
  */
 
+export 
 var TWEEN = TWEEN || (function () {
 
 	var _tweens = {};
@@ -911,4 +912,3 @@ TWEEN.Interpolation = {
 
 })(this);
 
-export default TWEEN;
