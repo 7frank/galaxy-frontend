@@ -205,6 +205,8 @@ export default class View3D extends EventTarget {
         if (this._inited_static_) return;
         var that = this;
 
+        this.createTooltip();
+
 
         this.mFPS = 0.5;
         this.minFPS = this.minFPS || 0;
