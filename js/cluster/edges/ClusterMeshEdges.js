@@ -54,7 +54,8 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
             transparent: options.transparent,
             opacity: options.opacity,
             depthTest: true,
-            depthWrite: false
+            depthWrite: false,
+            resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
         });
 
         MaterialFadeMixin(material);
@@ -140,18 +141,18 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
             }
 
             var meshLine = new MeshLine();
-            meshLine.setGeometry(linePoints, widthFN);
+            meshLine.setPoints(linePoints, widthFN);
 
 
             //TODO
             var material = new MeshLineMaterial({
-                lineWidth: edge.link_strength / 5 || 1, //TODO have a proper width
+                lineWidth: edge.link_strength / 5 || 1,
                 color: new THREE.Color(0x333333),
                 transparent: true,
                 opacity: 0.5,
-
                 depthTest: false,
-                depthWrite: false
+                depthWrite: false,
+                resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
             });
             // var material = new MeshLineMaterial();
 
@@ -165,7 +166,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
                 console.error("edge does not have a link_strength''")
 
 
-            var mesh = new THREE.Mesh(meshLine.geometry, material); // this syntax could definitely be improved!
+            var mesh = new THREE.Mesh(meshLine, material);
             mesh.layers.set(1)
 
             this.add(mesh);
