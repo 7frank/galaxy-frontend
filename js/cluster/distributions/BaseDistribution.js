@@ -5,7 +5,7 @@
 
 import BaseCluster3D from "../BaseCluster3D"
 //import TWEEN from "@tweenjs/tween.js"
-import TWEEN from "../../lib/Tween"
+import {TWEEN} from "../../lib/Tween"
 
 import * as THREE from "three";
 import * as _ from "lodash";

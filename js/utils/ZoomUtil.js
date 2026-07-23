@@ -2,9 +2,10 @@
  * Created by Frank on 08.06.2017.
  */
 
-import TWEEN from "../lib/Tween"
+import {TWEEN} from "../lib/Tween"
 import BaseCluster3D from "../cluster/BaseCluster3D";
 
+import * as _ from "lodash";
 
 /**
  * static helper for smooth navigation within 3D space

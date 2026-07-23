@@ -7,7 +7,7 @@
  * options does contain all the animated properties
  */
 //import TWEEN from "@tweenjs/tween.js"
-import TWEEN from "../lib/Tween"
+import {TWEEN} from "../lib/Tween"
 
 export default function AnimationMixin(origObject) {
     if (typeof origObject == "undefined") throw new Error("must be an object");

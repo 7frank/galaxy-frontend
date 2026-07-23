@@ -8,7 +8,7 @@ import NodesParticleSystem from "./particles/NodesParticleSystem"
 import ParticleNodeGroup from "./particles/ParticleNodeGroup"
 
 
-import TWEEN from "../lib/Tween"
+import {TWEEN} from "../lib/Tween"
 import * as THREE from "three";
 import * as _ from "lodash";
 
