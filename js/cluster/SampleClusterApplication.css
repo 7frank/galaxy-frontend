@@ -13,7 +13,7 @@ sample-cluster-application .view-thumbnail{
 pointer-events: all;
 height: 300px;
 width: 400px;
-display: flex;
+/* display: flex; */
 border: 1px solid rgba(128, 128, 128, 0.5);
 margin: 0.2em;
 }
