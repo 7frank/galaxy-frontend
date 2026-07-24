@@ -14,7 +14,6 @@ import CsvDatasource from "../data/CsvDatasource";
 import GeneratorDatasource from "../data/GeneratorDatasource";
 
 import ForceLayoutEngine from "../cluster/distributions/engines/ForceLayoutEngine";
-import SphericalLayoutEngine from "../cluster/distributions/engines/SphericalLayoutEngine";
 import DagreLayoutEngine from "../cluster/distributions/engines/DagreLayoutEngine";
 
 const MODES = {
@@ -42,7 +41,6 @@ const SOURCES = {
 const LAYOUTS = {
     "3D":       new ForceLayoutEngine(3),
     "Plane":    new ForceLayoutEngine(2),
-    "Spherical":new SphericalLayoutEngine(),
     "Dagre LR": new DagreLayoutEngine("LR"),
     "Dagre TB": new DagreLayoutEngine("TB"),
 };
@@ -87,11 +85,18 @@ export function initTweakpane() {
     const pane = new Pane({ title: "Controls", expanded: true });
     pane.element.parentElement.style.zIndex = "100";
 
+    const DEPTHS = {
+        "Flat":      1,
+        "Countries": 2,
+        "Full":      3,
+    };
+
     const state = {
         mode:   "3D",
         border: "Outline",
         source: "CSV",
         layout: "3D",
+        depth:  "Full",
     };
 
     let prevMode = "3D";
@@ -145,6 +150,17 @@ export function initTweakpane() {
                 const scale = spec.distribution ? spec.distribution.mScale : null;
                 if (scale !== null) spec.distribution = engine.forLevel(i, scale);
             });
+            view.loadDatasource(view._currentDatasource);
+        });
+
+    pane.addBinding(state, "depth", { label: "Depth", options: Object.fromEntries(Object.keys(DEPTHS).map(k => [k, k])) })
+        .on("change", ({ value }) => {
+            const view = getView();
+            if (!view || !view._currentDatasource) return;
+            const depth = DEPTHS[value];
+            const speccs = view.getSpeccs();
+            if (!speccs) return;
+            view._clusterDepth = depth;
             view.loadDatasource(view._currentDatasource);
         });
 

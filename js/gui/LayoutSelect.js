@@ -1,12 +1,10 @@
 import "./ModeSelect.css";
 import ForceLayoutEngine from "../cluster/distributions/engines/ForceLayoutEngine";
-import SphericalLayoutEngine from "../cluster/distributions/engines/SphericalLayoutEngine";
 import DagreLayoutEngine from "../cluster/distributions/engines/DagreLayoutEngine";
 
 const ENGINES = [
     new ForceLayoutEngine(3),
     new ForceLayoutEngine(2),
-    new SphericalLayoutEngine(),
     new DagreLayoutEngine("LR"),
     new DagreLayoutEngine("TB"),
 ];

@@ -283,7 +283,8 @@ export default class GraphView3D extends View3D {
         //FIXME workflow below ..
         //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this);
-        res.applyClustering(speccs);
+        const depth = this._clusterDepth || speccs.length;
+        res.applyClustering(speccs.slice(0, depth));
 
 
         this.start();
