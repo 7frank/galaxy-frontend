@@ -84,6 +84,11 @@ export default class GraphView3D extends View3D {
         return this.mSpeccs
     }
 
+    setClusterDepth(depth) {
+        this._clusterDepth = depth;
+        return this;
+    }
+
 
     createSkyDome() {
 

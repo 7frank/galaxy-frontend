@@ -1,0 +1,14 @@
+{
+  "name": "cluster-graph-3d-example",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "cluster-graph-3d": "file:../.."
+  },
+  "devDependencies": {
+    "vite": "^8.1.5"
+  }
+}

@@ -3,15 +3,11 @@ import { resolve } from 'path';
 
 export default defineConfig({
     entry: {
-        graph:         'js/view/GraphView3D.js',
-        config:        'js/cluster/configs/Default3DGraphConfig.js',
-        data:          'js/data/index.js',
-        hull:          'js/cluster/hull/index.js',
-        distributions: 'js/cluster/distributions/index.js',
+        index: 'js/index.js',
     },
     format: ['esm', 'cjs'],
     outDir: 'dist',
-    splitting: true,
+    splitting: false,
     sourcemap: true,
     clean: true,
     dts: false,

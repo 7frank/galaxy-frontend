@@ -17,11 +17,12 @@ const LAST = ["Corp", "Industries", "Group", "Holdings", "Systems", "Solutions",
 
 export default class GeneratorDatasource extends Datasource {
 
-    constructor({ nodeCount = 100, edgeCount = 150, seed = 42 } = {}) {
+    constructor({ nodeCount = 100, edgeCount = 150, seed = 42, maxItemsPerNode=20 } = {}) {
         super();
         this.nodeCount = nodeCount;
         this.edgeCount = edgeCount;
         this.seed = seed;
+        this.maxItemsPerNode=maxItemsPerNode
     }
 
     _rng(s) {
@@ -46,7 +47,7 @@ export default class GeneratorDatasource extends Datasource {
                 industry: INDUSTRIES[Math.floor(rnd() * INDUSTRIES.length)],
                 sent: +(rnd() * 2 - 1).toFixed(3),
                 price: +(rnd() * 1000).toFixed(2),
-                itemCount: Math.floor(rnd() * 500) + 1,
+                itemCount: Math.floor(rnd() * this.maxItemsPerNode) + 1,
                 ticker: first.slice(0, 3).toUpperCase() + (Math.floor(rnd() * 9) + 1),
                 color: 0x00ff00
             };
