@@ -53,16 +53,32 @@
 }
 
 .edge-indicator-list {
-    display: none;
+    display: flex;
     flex-direction: column;
     gap: 2px;
-    margin-top: 2px;
     max-height: 200px;
     overflow-y: auto;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    min-width: 120px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
 }
 
 .edge-indicator:hover .edge-indicator-list {
-    display: flex;
+    opacity: 1;
+    pointer-events: all;
+}
+
+.edge-indicator.near-bottom .edge-indicator-list {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 4px;
 }
 
 .edge-indicator-list-item {

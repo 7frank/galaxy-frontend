@@ -149,6 +149,7 @@ export function initEdgeIndicatorOverlay() {
             const pos = anyOffscreen ? primary.clamped : { x: primary.sx, y: primary.sy };
             el.style.left = pos.x + "px";
             el.style.top  = pos.y + "px";
+            el.classList.toggle("near-bottom", pos.y > H * 0.6);
             el.style.setProperty("--arrow-color", color);
             el.style.setProperty("--arrow-angle", primary.angle + "deg");
             el.style.opacity = "1";
@@ -157,6 +158,7 @@ export function initEdgeIndicatorOverlay() {
             label.style.color = color;
             label.textContent = primary.neighbour.name || primary.neighbour.id || "?";
             if (rest.length > 0) label.textContent += ` +${rest.length}`;
+            list.style.display = rest.length === 0 ? "none" : "flex";
 
             // only rebuild list when contents changed
             const listKey = items.map(i => i.neighbour.id || i.neighbour.name).join(",");
