@@ -306,16 +306,12 @@ export function extendGraphElements(d3Nodes, d3Links, env) {
         },
         dblclick: function (e) {
             e.stopPropagation();
-            //setCollapsedSateOfChildNodesAndEdgesOfNode(e.target.node)
             var currNodeDblClicked = e.target.node;
-
-            GUI.updateNodeInfo(currNodeDblClicked, currNodeDblClicked != previousNodeDblClicked);
-
-            if (previousNodeDblClicked == currNodeDblClicked)
-                previousNodeDblClicked = null;
-            else
-                previousNodeDblClicked = currNodeDblClicked;
-            //unhighlightNodeElements.apply(e.target.node)
+            const isDeselect = previousNodeDblClicked == currNodeDblClicked;
+            window.dispatchEvent(new CustomEvent("node-selected", {
+                detail: isDeselect ? null : currNodeDblClicked
+            }));
+            previousNodeDblClicked = isDeselect ? null : currNodeDblClicked;
             return false;
         }
     }, env);

@@ -169,5 +169,46 @@ export function initTweakpane() {
     pane.element.parentElement.appendChild(spacer);
     initStatsPane(pane.element.parentElement);
 
+    const spacer2 = document.createElement("div");
+    spacer2.style.height = "1em";
+    pane.element.parentElement.appendChild(spacer2);
+    initNodePane(pane.element.parentElement);
+
     return pane;
+}
+
+function initNodePane(container) {
+    const nodePane = new Pane({ title: "Selected Node", expanded: true, container });
+    nodePane.element.style.display = "none";
+
+    const data = {
+        name:     "",
+        ticker:   "",
+        country:  "",
+        industry: "",
+        price:    "",
+        sent:     "",
+    };
+
+    nodePane.addBinding(data, "name",     { label: "Name",     readonly: true });
+    nodePane.addBinding(data, "ticker",   { label: "Ticker",   readonly: true });
+    nodePane.addBinding(data, "country",  { label: "Country",  readonly: true });
+    nodePane.addBinding(data, "industry", { label: "Industry", readonly: true });
+    nodePane.addBinding(data, "price",    { label: "Price",    readonly: true });
+    nodePane.addBinding(data, "sent",     { label: "Sentiment",readonly: true });
+
+    window.addEventListener("node-selected", ({ detail: node }) => {
+        if (!node) {
+            nodePane.element.style.display = "none";
+            return;
+        }
+        data.name     = node.name     || "";
+        data.ticker   = node.ticker   || "";
+        data.country  = node.group    || "";
+        data.industry = node.industry || "";
+        data.price    = node.price    != null ? String(node.price)    : "";
+        data.sent     = node.sent     != null ? String(node.sent)     : "";
+        nodePane.element.style.display = "";
+        nodePane.refresh();
+    });
 }
