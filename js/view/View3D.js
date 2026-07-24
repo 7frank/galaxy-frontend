@@ -41,7 +41,7 @@ export default class View3D extends EventTarget {
 
         this.mTime = -1;
         this.mActualFPS = 0;
-        this.showFPSCounter = true;
+      
         this.mouseSpeed = 2;
 
         // Setup renderer
@@ -247,10 +247,6 @@ export default class View3D extends EventTarget {
         Object.assign(this.mRenderer.domElement.style, {position: "absolute", top: 0, left: 0, width: "100%", height: "100%"});
 
 
-        this.mFpsCounter = document.createElement("span");
-        this.mFpsCounter.className="fps"
-        Object.assign(this.mFpsCounter.style, {color: "white", position: "absolute"});
-        this.el.appendChild(this.mFpsCounter);
 
 
         //------------------------------------------------
@@ -391,9 +387,7 @@ export default class View3D extends EventTarget {
             if (accTime > 1000) {
                 that.mActualFPS = Math.round(accFrames * 1000 / accTime);
 
-                if (that.showFPSCounter)
-                    that.mFpsCounter.textContent = that.mActualFPS + " fps";
-
+     
                 accTime = 0;
                 accFrames = 0;
             }

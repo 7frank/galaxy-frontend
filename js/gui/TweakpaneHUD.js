@@ -52,6 +52,37 @@ function getView() {
     return app && app.getCurrentView();
 }
 
+function initStatsPane(container) {
+    const stats = new Pane({ title: "Stats", expanded: true, container });
+
+    const data = { fps: 0, clusters: 0, nodes: 0, relations: 0 };
+
+    stats.addBinding(data, "fps",       { label: "FPS",       readonly: true, view: "graph", series: 0, min: 0, max: 144 });
+    stats.addBinding(data, "clusters",  { label: "Clusters",  readonly: true });
+    stats.addBinding(data, "nodes",     { label: "Nodes",     readonly: true });
+    stats.addBinding(data, "relations", { label: "Relations", readonly: true });
+
+    setInterval(() => {
+        const view = getView();
+        if (!view) return;
+
+ 
+        data.fps = view.mActualFPS || 0;
+
+        const root = view.mRootCluster;
+        if (root) {
+            const leafs = root.getLeafs();
+            data.clusters = root.findClusters("*").length;
+            data.nodes = leafs.reduce((sum, l) => sum + (l.mNodes ? l.mNodes.length : 0), 0);
+            data.relations = leafs.reduce((sum, l) => sum + (l.mNodes ? l.mNodes.reduce((s, n) => s + (n.edges ? n.edges.length : 0), 0) : 0), 0);
+        }
+
+        stats.refresh();
+    }, 1000);
+
+    return stats;
+}
+
 export function initTweakpane() {
     const pane = new Pane({ title: "Controls", expanded: true });
     pane.element.parentElement.style.zIndex = "100";
@@ -116,6 +147,11 @@ export function initTweakpane() {
             });
             view.loadDatasource(view._currentDatasource);
         });
+
+    const spacer = document.createElement("div");
+    spacer.style.height = "1em";
+    pane.element.parentElement.appendChild(spacer);
+    initStatsPane(pane.element.parentElement);
 
     return pane;
 }
