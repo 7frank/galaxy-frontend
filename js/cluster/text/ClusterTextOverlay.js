@@ -33,7 +33,7 @@ export default class ClusterTextOverlay {
         this.possibleClusters = [];
         this.possibleLeafClusters = [];
         this.selectedLeafCluster = null;
-        this.separator = " - ";
+        this.separator = " › ";
 
         this.enabled = true;
 

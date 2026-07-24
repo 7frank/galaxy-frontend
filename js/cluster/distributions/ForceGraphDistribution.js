@@ -106,23 +106,19 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
 
         //enable collision only for clusters not for leafs to improve performance
-        if (nodes.length > 0 && nodes[0]._el && nodes[0]._el instanceof BaseCluster3D)
+        if (nodes.length > 0 && nodes[0]._el && nodes[0]._el instanceof BaseCluster3D) {
+            const is2D = this.dimensions < 3;
+            const collideRadius = is2D ? scale * 1.2 : scale / 2;
+            const collideIterations = is2D ? 8 : 2;
             layout.force("collide", d3_force
-                .forceCollide(scale / 2)
-
-                /*
-                //TODO this isn't doing much for us currently
-                 //-improve node size value by updating it when hull is generated to
-                 //
-                .radius(function (node) {
-
-                    //NOTE: can't use radius here because it is not already generated
-                    //   let backupVal=1//that.dimensions*scale/nodes.length;
-                    //   let rad=backupVal//node._el?node._el.getRadius()*10: backupVal;
-                    return scale/nodes.length  //  node.size * 10 || 1//rad
-                })
-                */
-                .iterations(2))
+                .forceCollide(collideRadius)
+                .iterations(collideIterations));
+            if (is2D) {
+                layout
+                    .force("forceX", d3_force.forceX(0).strength(0.05))
+                    .force("forceY", d3_force.forceY(0).strength(0.05));
+            }
+        }
 
 
         for (let i = 0; i < this.initialEngineTicks; i++) {
