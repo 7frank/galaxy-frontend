@@ -23,55 +23,53 @@ import BoxHullEffect from "../cluster/hull/effects/BoxHullEffect";
 import { BackSide } from "three/src/constants.js";
 import { BufferAttribute } from "three/src/core/BufferAttribute.js";
 import { BufferGeometry } from "three/src/core/BufferGeometry.js";
-import { ImageUtils } from "three/src/extras/ImageUtils.js";
-import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
 import { Box3Helper } from "three/src/helpers/Box3Helper.js";
 import { AmbientLight } from "three/src/lights/AmbientLight.js";
-import { DirectionalLight } from "three/src/lights/DirectionalLight.js";
-import { PointLight } from "three/src/lights/PointLight.js";
 import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
 import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Group } from "three/src/objects/Group.js";
 import { Mesh } from "three/src/objects/Mesh.js";
 import { initEdgeIndicatorOverlay } from "../gui/EdgeIndicatorOverlay.js";
+import type { ParticleNodeGroupOptions } from "../cluster/particles/ParticleNodeGroup";
 
-//import skyDomeImage from "./coordinates.png"
-
-//import Hexasphere from "hexasphere.js"
-
+export interface GraphView3DOptions extends ParticleNodeGroupOptions {
+    [key: string]: any
+}
 
 export default class GraphView3D extends View3D {
 
-    constructor(el, options = {}) {
+    mRootCluster: RootCluster | null
+    mOptions: GraphView3DOptions
+    mSpeccs: any
+    mColorScheme: any
+    declare mBorderEffect: any
+    mSkyDome: any
+    _clusterDepth: number | undefined
+    _hullOptions: any
+    _currentDatasource: any
+
+    constructor(el: HTMLElement, options: GraphView3DOptions = {}) {
         super(el);
 
         this.mRootCluster = null;
         this.mOptions = options;
 
-
-        //debug code
-        //options to be used in onBeforeRender for hull and edges
-
         var gl = this.mRenderer.getContext();
 
-        window.test = {gl: gl, renderer: this.mRenderer}
+        ;(window as any).test = {gl: gl, renderer: this.mRenderer}
 
-        //gl=test.gl;st=test.renderer.debug.stencil;st.state(true);st.func=[[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xFF]];st.op=[[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]];
-
-        this.mRenderer.debug = Object.assign(this.mRenderer.debug || {}, {
+        ;(this.mRenderer as any).debug = Object.assign((this.mRenderer as any).debug || {}, {
             stencil: {
                 func: [[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xff]],
                 op: [[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]],
-                state: (b) => this.setStencil(b)
+                state: (b: any) => this.setStencil(b)
             }
         });
-
-
     }
 
-    setTextVisible(newValue) {
-        let visible;
+    setTextVisible(newValue: string | boolean): void {
+        let visible: boolean;
         if (newValue == "true") visible = true;
         else if (newValue == "false") visible = false;
         else visible = Boolean(newValue)
@@ -80,36 +78,34 @@ export default class GraphView3D extends View3D {
             this.mRootCluster.mTextOverlay.enabled = visible;
     }
 
-
-    setSpeccs(speccs) {
+    setSpeccs(speccs: any): this {
         this.mSpeccs = speccs;
         return this
     }
 
-    getSpeccs() {
-
+    getSpeccs(): any {
         return this.mSpeccs
     }
 
-    setClusterDepth(depth) {
+    setClusterDepth(depth: number): this {
         this._clusterDepth = depth;
         return this;
     }
 
-    setHullOptions(options) {
+    setHullOptions(options: any): this {
         this._hullOptions = options;
         return this;
     }
 
-    edgeIndicator(enabled) {
+    edgeIndicator(enabled: boolean): this {
         if (enabled) initEdgeIndicatorOverlay(this);
         return this;
     }
 
-    setBorderStyle(style) {
-        const BORDERS = {
+    setBorderStyle(style: string): this {
+        const BORDERS: Record<string, any> = {
             "None":    { makeEffect: () => new NoneHullEffect(),                  makeComposer: () => null },
-            "Outline": { makeEffect: (mode, c) => new OutlineHullEffect(mode, c), makeComposer: (v) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; } },
+            "Outline": { makeEffect: (mode: any, c: any) => new OutlineHullEffect(mode, c), makeComposer: (v: any) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; } },
             "Basic":   { makeEffect: () => new BasicHullEffect(),                 makeComposer: () => null },
             "Box":     { makeEffect: () => new BoxHullEffect(),                   makeComposer: () => null },
         };
@@ -118,7 +114,7 @@ export default class GraphView3D extends View3D {
         if (this.mBorderEffect) { this.mBorderEffect.dispose(); this.mBorderEffect = null; }
         const composer = entry.makeComposer(this);
         if (this.mRootCluster) {
-            this.mRootCluster.findClusters("*").forEach(cluster => {
+            this.mRootCluster.findClusters("*").forEach((cluster: any) => {
                 if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
                 if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh);
                 const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
@@ -133,43 +129,16 @@ export default class GraphView3D extends View3D {
     }
 
 
-    createSkyDome() {
+    createSkyDome(): void {
 
-
-        var material = new MeshBasicMaterial();
-
+        var material: any = new MeshBasicMaterial();
 
         let scene = this.mScene;
 
         var ambientLight = new AmbientLight(0xFFFFFF, 1.5);
         scene.add(ambientLight);
-        /* var dirLight = new DirectionalLight(0xffffff, 1);
-         dirLight.position.set(0, 10000, 0);
-         dirLight.intensity = 1;
-         scene.add(dirLight);
-     */
-        /* var pointLight = new PointLight( 0xffffff, 100, 1000000000 );
-         pointLight.position.set( 0, 0, 20000 );
-         scene.add(pointLight);
-     */
-        /*  var geometry = new SphereGeometry(300000, 60, 40);
-          var material = new MeshBasicMaterial();
 
-         material.map = ImageUtils.loadTexture(skyDomeImage);
-          material.side = BackSide;
-          material.opacity=0.05;
-          material.transparent=true;
-          var skydome = new Mesh(geometry, material);
-
-          this.mSkyDome=skydome
-
-
-      */
-        //   scene.add(skydome);
-
-
-        //--------------------------------
-        var meshMaterials = [];
+        var meshMaterials: MeshPhongMaterial[] = [];
         meshMaterials.push(new MeshPhongMaterial({color: 0x7cfc00, transparent: true}));
         meshMaterials.push(new MeshPhongMaterial({color: 0x397d02, transparent: true}));
         meshMaterials.push(new MeshPhongMaterial({color: 0x77ee00, transparent: true}));
@@ -180,34 +149,30 @@ export default class GraphView3D extends View3D {
         meshMaterials.push(new MeshPhongMaterial({color: 0x00ee00, transparent: true}));
         meshMaterials.push(new MeshPhongMaterial({color: 0x00aa11, transparent: true}));
 
-        var oceanMaterial = []
+        var oceanMaterial: MeshPhongMaterial[] = []
         oceanMaterial.push(new MeshPhongMaterial({color: 0x0f2342, transparent: true}));
         oceanMaterial.push(new MeshPhongMaterial({color: 0x0f1e38, transparent: true}));
 
-
-        var radius = 300000;        // Radius used to calculate position of tiles
-        var subDivisions = 3;   // Divide each edge of the icosohedron into this many segments
-        var tileSize = 0.9;    // Add padding (1.0 = no padding; 0.1 = mostly padding)
-
+        var radius = 300000;
+        var subDivisions = 3;
+        var tileSize = 0.9;
 
         function isLand() {
-
             return _.random(0, 1)
-
         }
 
         var hexaGroup = new Group();
 
-        var hexasphere = new Hexasphere(radius, subDivisions, tileSize);
+        var hexasphere = new (window as any).Hexasphere(radius, subDivisions, tileSize);
         for (var i = 0; i < hexasphere.tiles.length; i++) {
             var t = hexasphere.tiles[i];
-            var latLon = t.getLatLon(hexasphere.radius);
+            void t.getLatLon(hexasphere.radius);
 
             const bps = t.boundary;
-            const verts = bps.map(bp => new Vector3(bp.x, bp.y, bp.z));
-            const faceIndices = [[0,1,2],[0,2,3],[0,3,4]];
+            const verts = bps.map((bp: any) => new Vector3(bp.x, bp.y, bp.z));
+            const faceIndices: number[][] = [[0,1,2],[0,2,3],[0,3,4]];
             if (verts.length > 5) faceIndices.push([0,4,5]);
-            const positions = [];
+            const positions: number[] = [];
             for (const [a,b,c] of faceIndices) {
                 positions.push(verts[a].x, verts[a].y, verts[a].z);
                 positions.push(verts[b].x, verts[b].y, verts[b].z);
@@ -217,39 +182,31 @@ export default class GraphView3D extends View3D {
             geometry.setAttribute('position', new BufferAttribute(new Float32Array(positions), 3));
             geometry.computeVertexNormals();
 
-            if (isLand(latLon.lat, latLon.lon)) {
+            if (isLand()) {
                 material = meshMaterials[Math.floor(Math.random() * meshMaterials.length)]
             } else {
                 material = oceanMaterial[Math.floor(Math.random() * oceanMaterial.length)]
             }
 
             material.opacity = 0.3;
-
             material.side = BackSide;
 
             var mesh = new Mesh(geometry, material.clone());
             hexaGroup.add(mesh);
             hexasphere.tiles[i].mesh = mesh;
-
         }
         scene.add(hexaGroup);
         this.mSkyDome = hexaGroup
-
-
     }
 
 
-    addCompanyCountListenersToCluster(rootCluster) {
+    addCompanyCountListenersToCluster(rootCluster: any): void {
 
-
-        var visibleNodes = [];
+        var visibleNodes: any[] = [];
         var _____skipFrames = 0;
 
-
-        function attachListeners(cluster) {
-
-
-            _.each(cluster.findClusters("*"), function (cluster) {
+        function attachListeners(cluster: any) {
+            _.each(cluster.findClusters("*"), function (cluster: any) {
                 cluster.on('before-render', function () {
 
                     if (_____skipFrames % 20 != 0) return;
@@ -258,59 +215,38 @@ export default class GraphView3D extends View3D {
                         visibleNodes.push(cluster);
                     }
 
-
                     if (cluster.isLeaf()) {
                         visibleNodes.push(cluster);
                     }
-
-
                 })
 
                 cluster.on('initial-expand', function () {
-
                     attachListeners(this)
-
-
                 })
-
-
             });
         }
 
-
         attachListeners(rootCluster);
-
 
         var that = this;
 
-
         that.addEventListener("before-render", onBeforeRender);
 
-
         function onBeforeRender() {
-
-
             if (that.isMaximised()) {
-
-                //update company info only every 20 frames to increse overall performance
                 if (_____skipFrames++ % 20 == 0) {
-                    let vl = _.flatten(visibleNodes.map(leaf => leaf.mNodes))
+                    let vl = _.flatten(visibleNodes.map((leaf: any) => leaf.mNodes))
 
-                    if (vl.length != 0) //FIXME this should prevent the flickering but it does not solve the underlying problem that the handlers are bound incorrect
+                    if (vl.length != 0)
                         GUI.updateFromVisibleNodes(vl);
                     visibleNodes = []
                 }
             }
-
-
         }
-
-
     }
 
 
-    initClusterForView(rawGraphData, parentEl3D) {
-
+    initClusterForView(rawGraphData: any, parentEl3D: any): any {
 
         if (!rawGraphData) return;
 
@@ -318,68 +254,46 @@ export default class GraphView3D extends View3D {
 
         let graphData = new GraphData(rawGraphData);
 
-
         let preparedData = graphData.createClusterNodesAndEdges(this);
 
-
         var res = new RootCluster(preparedData.nodes, undefined, this);
-
 
         parentEl3D.add(res);
         res.position.set(0, 0, 0);
 
-        //FIXME workflow below ..
-        //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this);
         const depth = this._clusterDepth || speccs.length;
         const hullOptions = this._hullOptions;
         const finalSpeccs = hullOptions
-            ? speccs.slice(0, depth).map(s => ({ ...s, options: { ...s.options, ...hullOptions } }))
+            ? speccs.slice(0, depth).map((s: any) => ({ ...s, options: { ...s.options, ...hullOptions } }))
             : speccs.slice(0, depth);
         res.applyClustering(finalSpeccs);
-
 
         this.start();
 
         return res
-
-
     }
 
 
-    setData(mGraphData) {
+    setData(mGraphData: any): void {
         this.initStatic();
-
-
-        //this.createSkyDome();
-
 
         if (!this.mRootCluster) {
             this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
 
-            //debug code..
-            window.test.root = this.mRootCluster
+            ;(window as any).test.root = this.mRootCluster
 
             this.addCompanyCountListenersToCluster(this.mRootCluster);
 
-
             this.mColorScheme = new DefaultColorScheme()
 
-
-
-            //------
-            //add zoom key support
-
-            function doZoom()
-            {
-
+            function doZoom() {
                 console.log("todo implement key zoom")
-
             }
 
-            let mt=Mousetrap(this.el)
-            mt.bind("up",doZoom)
-            mt.bind("down",doZoom)
+            let mt = (window as any).Mousetrap(this.el)
+            mt.bind("up", doZoom)
+            mt.bind("down", doZoom)
             const _debugState = { mode: 0 };
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'F2') {
@@ -400,7 +314,7 @@ export default class GraphView3D extends View3D {
                     grp.name = DEBUG_GROUP_NAME;
                     root.updateMatrixWorld(true);
 
-                    function addBoxes(cluster) {
+                    function addBoxes(cluster: any) {
                         if (_debugState.mode === 1 && cluster.mHull && cluster.mHull.mBoundingBox) {
                             const bbWorld = cluster.mHull.mBoundingBox.clone().applyMatrix4(cluster.matrixWorld);
                             grp.add(new Box3Helper(bbWorld, 0xffff00));
@@ -419,14 +333,14 @@ export default class GraphView3D extends View3D {
                 }
                 if (e.key !== 'F1') return;
                 e.preventDefault();
-                function v3(v) { return v ? `(${v.x.toFixed(0)},${v.y.toFixed(0)},${v.z.toFixed(0)})` : 'null'; }
-                function bbStr(bb) {
+                function v3(v: any) { return v ? `(${v.x.toFixed(0)},${v.y.toFixed(0)},${v.z.toFixed(0)})` : 'null'; }
+                function bbStr(bb: any) {
                     if (!bb) return 'no-bb';
                     const c = bb.getCenter(new Vector3());
                     const s = bb.getSize(new Vector3());
                     return `center=${v3(c)} size=${v3(s)}`;
                 }
-                function dumpCluster(cluster, indent) {
+                function dumpCluster(cluster: any, indent: string): string[] {
                     const isLeaf = cluster.isLeaf ? cluster.isLeaf() : false;
                     const wp = new Vector3();
                     cluster.getWorldPosition(wp);
@@ -439,7 +353,7 @@ export default class GraphView3D extends View3D {
                         `${indent}  geometry.boundingBox: ${bbStr(geoBB)}`,
                     ];
                     if (cluster.mClusters) {
-                        Object.values(cluster.mClusters).forEach(c => {
+                        Object.values(cluster.mClusters).forEach((c: any) => {
                             lines.push(...dumpCluster(c, indent + '  '));
                         });
                     }
@@ -449,27 +363,21 @@ export default class GraphView3D extends View3D {
                 if (!root) { console.log('[F1] no root cluster'); return; }
                 console.log('[F1] cluster tree:\n' + dumpCluster(root, '').join('\n'));
             })
-
         }
 
-
         this.dispatchEvent(new CustomEvent("loaded"))
-
-
     }
 
-    loadDataSet(ds) {
+    loadDataSet(ds: Function): this {
 
         var that = this;
 
-        ds(null, function onSuccess(mGraphData) {
+        ds(null, function onSuccess(mGraphData: any) {
             console.log("data loaded");
             that.setData(mGraphData);
 
-
-            //TODO element does not jet exist.. create webcomponent for that
             function triggerColorChange() {
-                let selectEl = document.querySelector(".cloudNodeColorSelect")
+                let selectEl = document.querySelector(".cloudNodeColorSelect") as HTMLSelectElement | null
 
                 if (!selectEl) setTimeout(triggerColorChange, 100)
                 else {
@@ -479,14 +387,12 @@ export default class GraphView3D extends View3D {
             }
 
             triggerColorChange();
-
-
         });
 
         return this
     }
 
-    loadDatasource(datasource) {
+    loadDatasource(datasource: any): this {
         var that = this;
         this._currentDatasource = datasource;
         if (that.mRootCluster) {
@@ -495,11 +401,11 @@ export default class GraphView3D extends View3D {
                 that.mRootCluster.mTextOverlay.el.remove();
             that.mRootCluster = null;
         }
-        datasource.load(function onSuccess(mGraphData) {
+        datasource.load(function onSuccess(mGraphData: any) {
             console.log("data loaded");
             that.setData(mGraphData);
             function triggerColorChange() {
-                let selectEl = document.querySelector(".cloudNodeColorSelect")
+                let selectEl = document.querySelector(".cloudNodeColorSelect") as HTMLSelectElement | null
                 if (!selectEl) setTimeout(triggerColorChange, 100)
                 else {
                     selectEl.value = "group";
@@ -511,18 +417,15 @@ export default class GraphView3D extends View3D {
         return this
     }
 
-    resizeCanvas() {
+    resizeCanvas(): void {
         super.resizeCanvas()
 
         var root = this.mRootCluster;
 
         if (root && root.mParentView && root.mTextOverlay) {
-
             root.mTextOverlay.el.style.height = root.mParentView.clientHeight + "px";
             root.mTextOverlay.el.style.width = root.mParentView.clientWidth + "px";
-
         }
-
     }
 
     /**
@@ -530,8 +433,7 @@ export default class GraphView3D extends View3D {
      * this provides stencil based per cluster edge masking
      * by rendering all objects but cluster edges first
      */
-
-    render() {
+    render(): void {
 
         if (this.mBorderEffect) {
             this.mBorderEffect.render();
@@ -550,8 +452,5 @@ export default class GraphView3D extends View3D {
         that.mRenderer.render(that.mScene, that.mCamera);
 
         that.mCamera.layers.enableAll();
-
     }
-
-
 }

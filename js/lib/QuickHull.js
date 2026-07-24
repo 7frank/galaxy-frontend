@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @author Mugen87 / https://github.com/Mugen87
  *
@@ -18,6 +19,7 @@ var QuickHullClass;
 	var Visible = 0;
 	var Deleted = 1;
 
+	/** @constructor */
 	function QuickHull() {
 
 		this.tolerance = - 1;
@@ -1222,5 +1224,6 @@ var QuickHullClass;
 
 } ) ();
 
+/** @type {new () => any} */
 var QuickHull = QuickHullClass;
 export { QuickHull };

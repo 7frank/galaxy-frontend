@@ -1,4 +1,4 @@
-import { AdditiveBlending, NormalBlending } from "three/src/constants.js";
+import { NormalBlending } from "three/src/constants.js";
 import { BufferAttribute } from "three/src/core/BufferAttribute.js";
 import { BufferGeometry } from "three/src/core/BufferGeometry.js";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
@@ -7,7 +7,33 @@ import { Color } from "three/src/math/Color.js";
 import { Sphere } from "three/src/math/Sphere.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Points } from "three/src/objects/Points.js";
-import * as _ from "lodash";
+
+export interface GraphNode {
+    x: number
+    y: number
+    z: number
+    color?: number
+    size?: number
+}
+
+export interface ParticleNodeGroupOptions {
+    nodeDefaultSize?: number
+    nodeDefaultScale?: number
+    nodeTexture?: string
+    baseColor?: number
+}
+
+export interface ParticleNodeGroupInstance {
+    nodes: GraphNode[]
+    pointCloud: Points
+    update: () => void
+    updateNode: (i: number) => void
+    updateNodePosition: (i: number) => void
+    updateNodeColor: (i: number) => void
+    updateNodeSize: (i: number) => void
+    on: (eventName: string, eventhandler: Function) => void
+    remove: () => void
+}
 
 /**
  * The ParticleNodeGroup handles the rendering of a set of graph-nodes via a {@link Points} point cloud.
@@ -20,13 +46,13 @@ import * as _ from "lodash";
  * @param domEvents ... in instance of {@link  cluster.utils.DomEventsAlt}
  * @returns {{nodes: *, pointCloud: Points, update: update, updateNode: updateNode, updateNodePosition: updateNodePosition, updateNodeColor: updateNodeColor, updateNodeSize: updateNodeSize, on: on, remove: remove}}
  */
-export default function ParticleNodeGroup(nodes, options, domEvents) {
+export default function ParticleNodeGroup(nodes: GraphNode[], options: ParticleNodeGroupOptions = {}, domEvents: any): ParticleNodeGroupInstance {
 
-    options = _.extend({
-        nodeDefaultSize: 10, //by default the node size is set to 10 units
-        nodeDefaultScale: 1, // a scaling factor for the size
-        nodeTexture: "img/dot7.png", // the texture/image that will be used as the default node representation
-        baseColor: 0xFFFFFF  // the default color of the node
+    const resolvedOptions = Object.assign({
+        nodeDefaultSize: 10,
+        nodeDefaultScale: 1,
+        nodeTexture: "img/dot7.png",
+        baseColor: 0xFFFFFF
     }, options)
 
 
@@ -35,46 +61,46 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
      *
      * @returns {ShaderMaterial}
      */
-    function getParticleShaderMaterial2() {
+    function getParticleShaderMaterial2(): ShaderMaterial {
         var vertexShader = `
-									
-									attribute float size;
-									attribute vec3 customColor;
-									varying vec3 vColor;
+								
+								attribute float size;
+								attribute vec3 customColor;
+								varying vec3 vColor;
 
-									void main() {
+								void main() {
 
-										vColor = customColor;
+									vColor = customColor;
 
-										vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+									vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
-										gl_PointSize = size * ( 300.0 / length( mvPosition.xyz ) );
+									gl_PointSize = size * ( 300.0 / length( mvPosition.xyz ) );
 
-										gl_Position = projectionMatrix * mvPosition;
+									gl_Position = projectionMatrix * mvPosition;
 
-									}
-							`;
+								}
+						`;
 
         var fragmentShader = `
-									uniform float opacity;
-									uniform vec3 color;
-									uniform sampler2D pointTexture;
+								uniform float opacity;
+								uniform vec3 color;
+								uniform sampler2D pointTexture;
 
-									varying vec3 vColor;
+								varying vec3 vColor;
 
-									void main() {
+								void main() {
 
-										gl_FragColor = vec4( color * vColor, opacity );
+									gl_FragColor = vec4( color * vColor, opacity );
 
-										gl_FragColor = gl_FragColor * texture( pointTexture, gl_PointCoord );
-									}
-							`;
+									gl_FragColor = gl_FragColor * texture( pointTexture, gl_PointCoord );
+								}
+						`;
 
         var uniforms = {
 
             color: {
                 type: "c",
-                value: new Color(options.baseColor)
+                value: new Color(resolvedOptions.baseColor)
             },
             opacity: {
                 type: "f",
@@ -82,8 +108,8 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
             },
             pointTexture: {
                 type: "t",
-                value: new TextureLoader().load(options.nodeTexture, undefined, undefined, () => {
-                    console.error(`ParticleNodeGroup: failed to load texture "${options.nodeTexture}"`)
+                value: new TextureLoader().load(resolvedOptions.nodeTexture!, undefined, undefined, () => {
+                    console.error(`ParticleNodeGroup: failed to load texture "${resolvedOptions.nodeTexture}"`)
                 })
             }
 
@@ -92,11 +118,9 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
         var shaderMaterial = new ShaderMaterial({
 
             uniforms: uniforms,
-            // attributes:     attributes,
             vertexShader: vertexShader,
             fragmentShader: fragmentShader,
 
-            //blending: AdditiveBlending,
             blending: NormalBlending,
 
             depthTest: true,
@@ -123,62 +147,33 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
     var particleSystem = new Points(geometry, shaderMaterial);
 
-    //TODO we might be able to remove the meshes and enable the raycasting in here again
+    particleSystem.userData.srcNodes = nodes
+    ;(particleSystem as any).frustrumCulled = true;
 
-    //prevent raycasting nodes// this actually does not give the intended effect and we added invisible meshes instead
-    //particleSystem.raycast=function(){}
-
-    //added to be able to retrieve the original node from the point within the raycaster code
-    particleSystem.srcNodes = nodes
-    particleSystem.frustrumCulled = true;
-
-    //for now just have a huge bounding volume //TODO recalc sphere every now and then
-    particleSystem.geometry.boundingSphere = new Sphere(new Vector3, 50000);
+    particleSystem.geometry.boundingSphere = new Sphere(new Vector3(), 50000);
 
     for (let i = 0; i < nCount; i++)
         updateNode(i)
 
 
-    /**
-     * For convenience.
-     *
-     */
-    function updateNode(i) {
+    function updateNode(i: number) {
         updateNodePosition(i)
         updateNodeColor(i)
         updateNodeSize(i)
-
     }
 
-
-    /**
-     * This method is called to update the position data (position) of the point cloud buffer geometry,
-     * based on the 'x,y,z'-coordinates of the node.
-     *
-     * @param i .. the i-th node to update
-     */
-    function updateNodePosition(i) {
-        //updates the current nodes properties
-
-        var positions = geometry.attributes.position.array;
+    function updateNodePosition(i: number) {
+        var positions = geometry.attributes.position.array as Float32Array;
 
         positions[i * 3] = nodes[i].x
         positions[i * 3 + 1] = nodes[i].y
         positions[i * 3 + 2] = nodes[i].z
 
         geometry.attributes.position.needsUpdate = true;
-
     }
 
-
-    /**
-     * This method is called to update the color data (customColor) of the point cloud buffer geometry
-     * based on the 'color'-attribute of the node.
-     *
-     * @param i .. the i-th node to update
-     */
-    function updateNodeColor(i) {
-        var colors = geometry.attributes.customColor.array;
+    function updateNodeColor(i: number) {
+        var colors = geometry.attributes.customColor.array as Float32Array;
 
         var color = (typeof nodes[i].color == "number") ? new Color(nodes[i].color) : new Color(0xffffff);
 
@@ -189,22 +184,14 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
         geometry.attributes.customColor.needsUpdate = true;
     }
 
-    /**
-     * This method is called to update the size data (size) of the point cloud buffer geometry
-     * based on the 'size'-attribute of the node.
-     *
-     * @param i .. the i-th node to update
-     */
-
-    function updateNodeSize(i) {
-        var sizes = geometry.attributes.size.array;
+    function updateNodeSize(i: number) {
+        var sizes = geometry.attributes.size.array as Float32Array;
         if (typeof nodes[i].size == "number")
-            sizes[i] = nodes[i].size * options.nodeDefaultScale;
+            sizes[i] = nodes[i].size! * resolvedOptions.nodeDefaultScale!;
         else
-            sizes[i] = options.nodeDefaultSize * options.nodeDefaultScale
+            sizes[i] = resolvedOptions.nodeDefaultSize! * resolvedOptions.nodeDefaultScale!
 
         geometry.attributes.size.needsUpdate = true;
-
     }
 
 
@@ -212,24 +199,20 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
         nodes: nodes,
         pointCloud: particleSystem,
         update: function () {
-
-            //update node attrs
             for (let i = 0; i < nCount; i++)
                 updateNode(i)
-
         },
         updateNode: updateNode,
         updateNodePosition: updateNodePosition,
         updateNodeColor: updateNodeColor,
         updateNodeSize: updateNodeSize,
-        on: function (eventName, eventhandler) {
+        on: function (eventName: string, eventhandler: Function) {
 
             for (let eName of eventName.split(" ")) {
 
-                domEvents.addEventListener(particleSystem, eName, function (e) {
+                domEvents.addEventListener(particleSystem, eName, function (e: any) {
 
                     if (!e.intersect) {
-                        //TODO find out if it is a bug within DomEventsAlt selection that is set =null
                         console.warn("could not resolve intersection ")
                         return
                     }
@@ -242,23 +225,18 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
 
             }
 
-
         },
         remove: function () {
 
             if (particleSystem.geometry)
                 particleSystem.geometry.dispose();
             if (particleSystem.material)
-                particleSystem.material.dispose();
-
+                (particleSystem.material as ShaderMaterial).dispose();
 
             if (particleSystem.parent)
                 particleSystem.parent.remove(particleSystem)
-
-            particleSystem = null
 
         }
     }
 
 }
-

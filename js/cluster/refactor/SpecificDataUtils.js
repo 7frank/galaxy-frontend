@@ -1,6 +1,5 @@
 
 import "../../gui/company-details/CompanyDetails"
-import {AppDataService} from "./AppDataService";
 
 import * as _ from "lodash";
 

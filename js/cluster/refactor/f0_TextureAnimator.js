@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Created by Frank on 16.07.2017.
  */
@@ -26,6 +27,7 @@ export default function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles
     // which image is currently being displayed?
     this.currentTile = 0;
 
+    /** @type {(milliSec: number) => void} */
     this.update = function (milliSec) {
         this.currentDisplayTime += milliSec;
         while (this.currentDisplayTime > this.tileDisplayDuration) {

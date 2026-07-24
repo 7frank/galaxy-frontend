@@ -10,7 +10,7 @@ export default defineConfig({
     splitting: false,
     sourcemap: true,
     clean: true,
-    dts: false,
+    dts: true,
     external: [
         'three',
         'postprocessing',

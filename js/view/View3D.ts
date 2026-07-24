@@ -16,9 +16,9 @@ import { Vector2 } from "three/src/math/Vector2.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
 import { Scene } from "three/src/scenes/Scene.js";
+import { Object3D } from "three/src/core/Object3D.js";
 import { CombinedCamera } from "../lib/CombinedCamera";
 import { TrackballControls } from "../lib/TrackballControls";
-
 
 
 /**
@@ -28,155 +28,151 @@ import { TrackballControls } from "../lib/TrackballControls";
  * Note: to customise FPS set the properties 'minFPS' or 'maxFPS'
  */
 
-
 export default class View3D extends EventTarget {
 
-    constructor(el) {
+    el: HTMLElement
+    isRunning: boolean
+    mTime: number
+    mActualFPS: number
+    mouseSpeed: number
+    mRenderer: WebGLRenderer
+    mScene: Scene
+    mCamera: CombinedCamera | PerspectiveCamera | OrthographicCamera
+    mCameraP: PerspectiveCamera
+    mCameraO: OrthographicCamera
+    mControls: InstanceType<typeof TrackballControls>
+    mDomEvents: InstanceType<typeof DomEventsAlt>
+    mBorderEffect: any
+    mCaption: HTMLSpanElement | undefined
+    toolTipElem: HTMLDivElement | undefined
+    mouse: Vector2 | undefined
+    mFPS: number
+    minFPS: number
+    maxFPS: number
+    mLastFrameTime: number
+    mFrameId: number
+    name: string
+    _inited_static_: boolean
+
+    constructor(el: HTMLElement) {
         super();
 
         this.el = el || document.createElement("div");
         this.el.classList.add("view-3d");
-        this.el._view3d = this;
+        (this.el as any)._view3d = this;
 
         this.isRunning = false;
 
         this.mTime = -1;
         this.mActualFPS = 0;
-      
+
         this.mouseSpeed = 2;
 
-        // Setup renderer
         this.mRenderer = new WebGLRenderer({
             antialias: true
         });
 
         this.el.addEventListener("resize", () => this.resizeCanvas())
-
     }
 
-    get clientWidth() { return this.el.clientWidth }
-    get clientHeight() { return this.el.clientHeight }
+    get clientWidth(): number { return this.el.clientWidth }
+    get clientHeight(): number { return this.el.clientHeight }
 
     /**
      * initialise the camera classes with some default values
      */
-
-    createCamera() {
+    createCamera(): void {
 
         var initialCameraPosition = new Vector3(-5500, -4000, 50000);
 
-
-        // Setup camera
         this.mCameraP = new PerspectiveCamera();
-
 
         this.mCameraO = new OrthographicCamera();
         this.mCameraO.far = 5000000;
         this.mCameraO.lookAt(this.mScene.position);
         this.mCameraO.position.copy(initialCameraPosition)
 
-
         this.mCamera = new CombinedCamera();
 
         if (this.mCamera instanceof CombinedCamera) {
             this.mCamera.setFar(5000000);
-
             this.mCamera.setFov(50);
+        } else {
+            (this.mCamera as PerspectiveCamera | OrthographicCamera).far = 5000000;
         }
-        else
-            this.mCamera.far = 5000000;
-
 
         this.mCamera.lookAt(this.mScene.position);
         this.mCamera.position.copy(initialCameraPosition)
-
-
     }
 
 
     /**
-     *  Add user (mouse,keyboard) interaction
+     * Add user (mouse,keyboard) interaction
      */
-
-    createControls() {
+    createControls(): void {
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
 
-        this.mControls.maxDistance = Math.min(this.mCamera.far, 200000);
+        this.mControls.maxDistance = Math.min((this.mCamera as any).far, 200000);
 
-        this.mControls.addEventListener("change", (e) => this.dispatchEvent(new CustomEvent("change", {detail: e})));
-
+        (this.mControls as any).addEventListener("change", (e: any) => this.dispatchEvent(new CustomEvent("change", {detail: e})));
     }
 
 
     /**
      * initialise THREEx helper class that provides dom-like mouse events for 3D elements
      */
-    createDomEvents() {
-
+    createDomEvents(): void {
         this.mDomEvents = new DomEventsAlt(this.mCamera, this.mRenderer.domElement, this.mScene);
-
     }
 
 
     /**
      * updates the camera and dependant controls and events classes
      */
-    updateCamera() {
+    updateCamera(): void {
         this.mCamera.updateProjectionMatrix();
 
         this.mControls.object = this.mCamera
 
         this.mDomEvents._camera = this.mCamera
-
     }
 
     /**
      * set the camera to orthographic mode
      */
-
-    set2D() {
-
+    set2D(): void {
         this.mCamera = this.mCameraO
-
         this.updateCamera()
-
     }
 
 
     /**
      * set the camera to perspective mode
      */
-    set3D() {
-
+    set3D(): void {
         this.mCamera = this.mCameraP
-
         this.updateCamera()
-
     }
 
 
     /**
      * updates the 3D context to match the dimensions of the HTML container element
      */
-    resizeCanvas() {
+    resizeCanvas(): void {
         if (this.mRenderer && this.mCamera) {
             this.mRenderer.setSize(this.el.clientWidth, this.el.clientHeight);
-            this.mCamera.aspect = this.el.clientWidth / this.el.clientHeight;
-
+            (this.mCamera as any).aspect = this.el.clientWidth / this.el.clientHeight;
 
             if (this.mCamera instanceof CombinedCamera)
                 this.mCamera.setSize(this.el.clientWidth, this.el.clientHeight);
             this.mCamera.updateProjectionMatrix();
 
-            //adjust orthographic camera
             let camFactor = 2
             this.mCameraO.left = -this.el.clientWidth / camFactor;
             this.mCameraO.right = this.el.clientWidth / camFactor;
             this.mCameraO.top = this.el.clientHeight / camFactor;
             this.mCameraO.bottom = -this.el.clientHeight / camFactor;
             this.mCameraO.updateProjectionMatrix();
-
-
         }
 
         if (this.mRenderer && this.mControls) {
@@ -188,14 +184,13 @@ export default class View3D extends EventTarget {
         if (this.mBorderEffect) {
             this.mBorderEffect.resize(this.el.clientWidth, this.el.clientHeight);
         }
-
     }
 
 
     /**
      * sets the value of a text element that functions as a caption.
      */
-    setCaption(text) {
+    setCaption(text: string): this {
 
         if (!this.mCaption) {
             this.mCaption = document.createElement("span");
@@ -211,31 +206,24 @@ export default class View3D extends EventTarget {
     /**
      * set up controls, scene, renderer, animation
      */
-    initStatic() {
+    initStatic(): this | undefined {
 
         if (this._inited_static_) return;
         var that = this;
 
         this.createTooltip();
 
-
         this.mFPS = 0.5;
         this.minFPS = this.minFPS || 0;
         this.maxFPS = this.maxFPS || 144;
 
-
         this.mLastFrameTime = -1;
-
 
         this.setCaption(this.name)
 
-
-        // Setup scene
-
         this.mScene = new Scene();
 
-        //added to be able to use threejs inspector
-        window.scene = this.mScene;
+        (window as any).scene = this.mScene;
 
         this.createCamera();
 
@@ -244,19 +232,10 @@ export default class View3D extends EventTarget {
 
         this.el.appendChild(this.mRenderer.domElement);
 
-
         Object.assign(this.mRenderer.domElement.style, {position: "absolute", top: 0, left: 0, width: "100%", height: "100%"});
 
-
-
-
-        //------------------------------------------------
         this.createDomEvents();
 
-        //------------------------------------------------
-
-
-        //FIXME binding events will interfere with controls
         this.mRenderer.domElement.addEventListener("mouseover", function (e) {
 
             if (that.isMaximised()) return;
@@ -264,13 +243,10 @@ export default class View3D extends EventTarget {
             e.stopPropagation();
             that.setActive();
 
-            that.el.setAttribute("hasFocus", true);
+            that.el.setAttribute("hasFocus", "true");
 
-            that.mCaption.style.opacity = "0"
-
-
+            that.mCaption!.style.opacity = "0"
         });
-
 
         this.mRenderer.domElement.addEventListener("mouseout", function (e) {
 
@@ -280,16 +256,10 @@ export default class View3D extends EventTarget {
 
             that.el.removeAttribute("hasFocus");
             if (!that.el.classList.contains("view-3d-maximised")) {
-
-                that.mCaption.style.opacity = "1";
-
+                that.mCaption!.style.opacity = "1";
                 that.setInactive();
-
-
             }
-
         });
-
 
         this.createControls();
 
@@ -302,15 +272,13 @@ export default class View3D extends EventTarget {
         this._inited_static_ = true;
 
         return this
-
     }
 
 
     /**
      * Enable or disable stencil tests.
      */
-
-    setStencil(bTrue) {
+    setStencil(bTrue: boolean): void {
 
         var gl = this.mRenderer.getContext();
 
@@ -321,7 +289,7 @@ export default class View3D extends EventTarget {
     }
 
 
-    setBorderEffect(borderEffect) {
+    setBorderEffect(borderEffect: any): void {
         this.mBorderEffect = borderEffect;
         if (this._inited_static_) {
             borderEffect.init(this.mRenderer, this.mScene, this.mCamera);
@@ -331,21 +299,19 @@ export default class View3D extends EventTarget {
     /**
      * wrapper method to call renderer
      */
-    render() {
+    render(): void {
 
         if (this.mBorderEffect) {
             this.mBorderEffect.render();
         } else {
             this.mRenderer.render(this.mScene, this.mCamera);
         }
-
     }
 
     /**
      * start the main animation loop for the 3D context
      */
-    animate() {
-
+    animate(): void {
 
         if (this.isRunning) return
         this.isRunning = true;
@@ -355,7 +321,7 @@ export default class View3D extends EventTarget {
         var that = this;
         var accTime = 0, accFrames = 0;
 
-        function doAnimate(time) {
+        function doAnimate(time: number) {
             that.mTime = time;
             initialFrames--;
             if (that.mFPS == 0) {
@@ -364,12 +330,10 @@ export default class View3D extends EventTarget {
                     that.mFrameId = requestAnimationFrame(doAnimate);
                     return;
                 }
-            }
-            else {
+            } else {
 
                 let nextTime = that.mLastFrameTime + (1000 / that.mFPS);
                 if (nextTime > time) {
-
                     that.mFrameId = requestAnimationFrame(doAnimate);
                     return;
                 }
@@ -381,29 +345,22 @@ export default class View3D extends EventTarget {
                 return;
             }
 
-            //count frames
             accTime += time - that.mLastFrameTime;
             accFrames++;
 
             if (accTime > 1000) {
                 that.mActualFPS = Math.round(accFrames * 1000 / accTime);
-
-     
                 accTime = 0;
                 accFrames = 0;
             }
-
 
             that.mLastFrameTime = time;
 
             if (that.mControls) that.mControls.update();
 
-
             that.dispatchEvent(new CustomEvent("before-render", {detail: time}));
 
-
             that.render()
-
 
             that.dispatchEvent(new CustomEvent("after-render", {detail: time}));
 
@@ -411,74 +368,59 @@ export default class View3D extends EventTarget {
         }
 
         doAnimate(-1)
-
     }
 
 
     /**
      * convenience method to add 3d elements
      */
-    add(object3D) {
+    add(object3D: Object3D): void {
         this.mScene.add(object3D)
-
     }
 
 
     /**
      * Maximises the view within the available browser window.
      */
-
-    maximise() {
+    maximise(): void {
         this.el.classList.add("view-3d-maximised");
 
         if (this.mCaption) this.mCaption.style.opacity = "0";
 
         this.setActive()
-
-
     }
 
     /**
      * tests if the view is maximised
      */
-    isMaximised() {
-
+    isMaximised(): boolean {
         return this.el.classList.contains("view-3d-maximised")
-
     }
 
 
     /**
      * reverts the effects of maximise
      */
-    undoMaximise() {
+    undoMaximise(): void {
         this.el.classList.remove("view-3d-maximised");
-
         this.setInactive()
-
-
     }
 
 
     /**
      * setting a view active will result in the renderer using the maximum allowed FPS.
      */
-
-    setActive() {
-
+    setActive(): void {
         this.mFPS = this.maxFPS;
-
         this.resizeCanvas();
         this.start();
-
     }
 
     /**
      * setting a view inactive will result in the renderer using only the minFPS value.
      */
-    setInactive() {
+    setInactive(): void {
         this.mFPS = this.minFPS;
-
         this.resizeCanvas()
     }
 
@@ -486,45 +428,35 @@ export default class View3D extends EventTarget {
     /**
      * access method to start rendering the 3D content
      */
-
-    start() {
-
+    start(): void {
         this.stop();
-
         this.animate()
-
-
     }
 
 
     /**
      * access method to stop rendering the 3D content
      */
-    stop() {
-
+    stop(): void {
         if (this.isRunning) {
             window.cancelAnimationFrame(this.mFrameId)
             this.isRunning = false;
         }
-
     }
 
 
     /**
      * convenience method
      */
-    resume() {
-
+    resume(): void {
         this.start()
-
     }
 
 
     /**
      * starts the animation loop and shows the dom element
      */
-
-    show() {
+    show(): void {
         this.resume()
         this.el.style.display = ""
     }
@@ -533,7 +465,7 @@ export default class View3D extends EventTarget {
     /**
      * stops the animation loop and hides the dom element
      */
-    hide() {
+    hide(): void {
         this.stop()
         this.el.style.display = "none"
     }
@@ -543,22 +475,17 @@ export default class View3D extends EventTarget {
      * Initialise the 3D context and start the rendering loop.
      * Call this after appending el to the DOM.
      */
-
-    init() {
-
+    init(): void {
         this.createTooltip();
-
         this.initStatic();
         this.start();
-
         this.dispatchEvent(new CustomEvent("connected"))
-
     }
 
     /**
      * Create the DOM element for the tooltip element
      */
-    createTooltip() {
+    createTooltip(): void {
 
         if (this.toolTipElem) return;
 
@@ -583,12 +510,12 @@ export default class View3D extends EventTarget {
                     x: ev.pageX - offset.left,
                     y: ev.pageY - offset.top
                 };
-            this.mouse.x = (relPos.x / this.el.clientWidth) * 2 - 1;
-            this.mouse.y = -(relPos.y / this.el.clientHeight) * 2 + 1;
-            this.toolTipElem.style.top = (relPos.y - 40) + 'px';
-            this.toolTipElem.style.left = (relPos.x - 20) + 'px';
+            this.mouse!.x = (relPos.x / this.el.clientWidth) * 2 - 1;
+            this.mouse!.y = -(relPos.y / this.el.clientHeight) * 2 + 1;
+            this.toolTipElem!.style.top = (relPos.y - 40) + 'px';
+            this.toolTipElem!.style.left = (relPos.x - 20) + 'px';
 
-            function getOffset(el) {
+            function getOffset(el: HTMLElement) {
                 const rect = el.getBoundingClientRect(),
                     scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
                     scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -598,21 +525,17 @@ export default class View3D extends EventTarget {
                 };
             }
         }, false);
-
     }
 
 
     /**
      * set the content of the tooltip element
      */
-    setTooltip(text) {
+    setTooltip(text: string | HTMLElement): void {
 
-        this.toolTipElem.innerHTML = "";
-        if (typeof text === "string") this.toolTipElem.innerHTML = text;
-        else this.toolTipElem.appendChild(text);
-        this.toolTipElem.style.display = "";
-
+        this.toolTipElem!.innerHTML = "";
+        if (typeof text === "string") this.toolTipElem!.innerHTML = text;
+        else this.toolTipElem!.appendChild(text);
+        this.toolTipElem!.style.display = "";
     }
-
-
 }

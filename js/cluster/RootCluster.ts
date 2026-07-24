@@ -1,15 +1,14 @@
 /**
  * Created by Frank on 06.06.2017.
  */
-//TODO refactor RootCluster
 import Cluster3DExtended from "./Cluster3DExtended"
 
 import ClusterTextOverlay from "./text/ClusterTextOverlay"
 import DefaultColorScheme from "./utils/DefaultColorScheme"
 
-
 import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
 import _ from "lodash";
+import type View3D from "../view/View3D";
 
 /**
  *
@@ -19,184 +18,131 @@ import _ from "lodash";
 
 export default class RootCluster extends Cluster3DExtended {
 
-    constructor(...args) {
+    declare mParentView: View3D
+    mTextOverlay: InstanceType<typeof ClusterTextOverlay>
+    mColorScheme: InstanceType<typeof DefaultColorScheme> | undefined
+    mLock: boolean | undefined
+    declare useClusterText: boolean
+
+    constructor(...args: any[]) {
         super(...args)
 
         this.useClusterText = true;
 
-
-        //TODO have an actual event triggered for when sub-clusters are distributed to adjust elements
-        // setTimeout(()=> this.onAfterClusteredAndDistributed(),5000)
-        // "cluster-ready" as alternative event
-        this.on("hull-updated", function () {
-
-
-            this.findClusters("*").forEach(function (cluster) {
+        this.on("hull-updated", function (this: RootCluster) {
+            this.findClusters("*").forEach(function (cluster: any) {
                 cluster.useLOD = true
             })
-
-
         })
 
         this.addColorHandler()
-
-
     }
 
-    addListeners() {
+    addListeners(): void {
 
         super.addListeners();
 
-
-        this.on("u", e => {
+        this.on("u", (e: any) => {
             e.stopPropagation();
-
             this.useClusterText = !this.useClusterText;
             console.log("useClusterText", this.useClusterText)
         });
-
     }
 
 
-    addColorScheme(cs) {
+    addColorScheme(cs: InstanceType<typeof DefaultColorScheme>): void {
 
         if (!(cs instanceof DefaultColorScheme)) {
             console.warn("set proper color scheme")
         }
 
-
         this.mColorScheme = cs
-
-
     }
 
 
-    addColorHandler() {
+    addColorHandler(): void {
 
         var nodes = this.mNodes;
         var that = this
 
-
-        function getCountryNamesFromNodes(nodes) {
-            var res = {}
+        function getCountryNamesFromNodes(nodes: any[]) {
+            var res: Record<string, boolean> = {}
             _.each(nodes, (n) => res[n.group] = true)
-
             return Object.keys(res)
         }
 
-
-        function updateParticles(leaf) {
-
-
+        function updateParticles(leaf: any) {
             if (leaf && leaf.mParticles) {
-
                 leaf.mParticles.updateColors();
-
-
+            } else {
+                setTimeout(() => updateParticles(leaf), 100)
             }
-            else setTimeout(() => updateParticles(leaf), 100)
         }
 
+        var countryNames: string[] | null = null;
 
-        var countryNames = null;
-
-        window.addEventListener("node-color-change", function (e) {
+        window.addEventListener("node-color-change", function (e: any) {
             var val = e.detail;
-
 
             if (!countryNames) countryNames = getCountryNamesFromNodes(nodes)
 
             var helper = computeGroupNodeColorHelper(countryNames)
 
-
-            //   var val=$sel.val()
             if (val == "group")
-                nodes.forEach(function (v) {
+                nodes.forEach(function (v: any) {
                     v.color = helper.getColor(v.group)
                 });
             else
-                nodes.forEach(function (v) {
+                nodes.forEach(function (v: any) {
                     v.color = computeCompanyNodeColor(parseInt(v.sent), val)
                 })
 
-            _.each(that.getLeafs(), function (leaf) {
-
-
+            _.each(that.getLeafs(), function (leaf: any) {
                 leaf.mNodeParticles.update()
-
-
                 updateParticles(leaf)
-
-
             })
-
-
         })
-
-
     }
 
 
     /**
      * @override
-     * prevent multiple recursive  root clusters from being created by default
+     * prevent multiple recursive root clusters from being created by default
      */
-
-    getChildClusterConstructor() {
+    getChildClusterConstructor(): typeof Cluster3DExtended {
         return Cluster3DExtended;
-
     }
 
 
     /**
-     * attaches to root cluster to a specific View3D element to be able to perform container based operations
-     *
-     *
+     * attaches the root cluster to a specific View3D element
      */
-    attachToView3D(view3D) {
+    attachToView3D(view3D: View3D): void {
         this.mParentView = view3D
-
-
     }
 
 
-    resetTextOverlay() {
-
-
+    resetTextOverlay(): void {
         if (this.mTextOverlay) this.mTextOverlay.el.remove()
 
         this.mTextOverlay = new ClusterTextOverlay();
         this.mTextOverlay.init(this.mParentView);
 
         this.mParentView.el.appendChild(this.mTextOverlay.el)
-
     }
 
 
-    isLocked() {
-
+    isLocked(): boolean {
         return this.mLock == true
-
     }
 
-    setLock(bLocked = true) {
-
+    setLock(bLocked: boolean = true): boolean {
         return this.mLock = bLocked
-
     }
 
 
-    applyClustering(mClusteringSpeccsArray, overrideExpand = false) {
-
-        //FIXME transitions betweens graphs
-        //this.storeParentPositionInNodes()
+    applyClustering(mClusteringSpeccsArray: any, overrideExpand: boolean = false): any {
         super.applyClustering(mClusteringSpeccsArray, overrideExpand)
-
         this.resetTextOverlay()
-
-
-        // this.restoreNodePositionFromExParent()
     }
-
-
 }
