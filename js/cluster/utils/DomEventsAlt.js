@@ -520,6 +520,8 @@ DomEventsAlt.prototype._notify = function (eventName, object3d, origDomEvent, in
 // # handle mouse events
 
 DomEventsAlt.prototype._onMouseDown = function (event) {
+    this._mouseDownX = event.clientX;
+    this._mouseDownY = event.clientY;
     return this._onMouseEvent('mousedown', event);
 }
 DomEventsAlt.prototype._onMouseUp = function (event) {
@@ -533,7 +535,9 @@ DomEventsAlt.prototype._onMouseEvent = function (eventName, domEvent) {
 }
 
 DomEventsAlt.prototype._onClick = function (event) {
-    // TODO handle touch ?
+    var dx = event.clientX - (this._mouseDownX || 0);
+    var dy = event.clientY - (this._mouseDownY || 0);
+    if (Math.sqrt(dx * dx + dy * dy) > 5) return;
     this._onMouseEvent('click', event);
 }
 DomEventsAlt.prototype._onDblClick = function (event) {
