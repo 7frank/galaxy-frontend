@@ -20,7 +20,7 @@
     const graph = new GraphView3D(document.getElementById('app'))
     graph.edgeIndicator(true)
     graph.setSpeccs(config.getSpeccs())
-    graph.setClusterDepth(3)
+    graph.setClusterDepth(1)
     graph.addEventListener('loaded', () => {
       window.dispatchEvent(new CustomEvent('node-color-change', { detail: 'group' }))
     })
