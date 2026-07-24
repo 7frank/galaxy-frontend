@@ -249,16 +249,14 @@ export function doOnClickNode(currNodeClicked, stack = false, onAnimationEnd, is
 
     }
     else {
-        //GUI.updateNodeInfo(currNodeClicked,false)
-        //node unselected
         unhighlightNodeElements.apply(currNodeClicked);
-
-        //previousNodeClicked=[]
         previousNodeClicked.splice(currNodeClicked);
-
         currNodeClicked.removeClass("basic-selection")
-
     }
+
+    window.dispatchEvent(new CustomEvent("node-clicked", {
+        detail: previousNodeClicked.length > 0 ? previousNodeClicked[previousNodeClicked.length - 1] : null
+    }));
 
 }
 

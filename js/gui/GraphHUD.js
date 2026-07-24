@@ -1,6 +1,8 @@
 import template from "./graph-hud.html?raw"
 import "./info-panel/InfoPanel"
 import { initTweakpane } from "./TweakpaneHUD";
+import "./EdgeIndicatorOverlay.css";
+import { initEdgeIndicatorOverlay } from "./EdgeIndicatorOverlay";
 
 class GraphHUD extends HTMLElement {
 
@@ -11,6 +13,7 @@ class GraphHUD extends HTMLElement {
     connectedCallback() {
         this.innerHTML = template;
         initTweakpane();
+        initEdgeIndicatorOverlay();
     }
 }
 
