@@ -320,7 +320,7 @@ export var GUI = {
 
 
 document.addEventListener("DOMContentLoaded", function () {
-    GUI.createSample();
+    // GUI.createSample();
 
     var rightInfo = document.querySelector(".rightCompanyInfo");
     if (rightInfo) makeDraggable(rightInfo);

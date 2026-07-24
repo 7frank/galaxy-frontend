@@ -8,7 +8,7 @@
 import template from "./graph-hud.html?raw"
 
 import "./info-panel/InfoPanel"
-import "./company-info/CompanyInfo"
+
 import "./BorderSelect"
 import "./DataSourceSelect"
 import "./LayoutSelect"
