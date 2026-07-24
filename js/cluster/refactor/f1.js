@@ -158,7 +158,7 @@ function extendElement(elements, attrName, options, env) {
             }
 
 
-            if (this.text) {
+            if (this.text && this.text.addClass) {
                 this.text.addClass("node-caption-highlighted")
             }
 
@@ -178,7 +178,7 @@ function extendElement(elements, attrName, options, env) {
             }
 
 
-            if (this.text) {
+            if (this.text && this.text.removeClass) {
                 this.text.removeClass("node-caption-highlighted")
             }
 

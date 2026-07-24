@@ -1,10 +1,14 @@
 import { Vector3 } from "three/src/math/Vector3.js";
 import { doOnClickNode } from "../cluster/refactor/f1";
+import "./EdgeIndicatorOverlay.css";
 
 const SECTOR_COUNT = 24;
 const SECTOR_DEG = 360 / SECTOR_COUNT;
 
+let _viewOverride = null;
+
 function getView() {
+    if (_viewOverride) return _viewOverride;
     const app = document.querySelector("sample-cluster-application");
     return app && app.getCurrentView();
 }
@@ -30,7 +34,8 @@ function angleToSector(angle) {
     return Math.floor(normalized / SECTOR_DEG) % SECTOR_COUNT;
 }
 
-export function initEdgeIndicatorOverlay() {
+export function initEdgeIndicatorOverlay(view = null) {
+    if (view) _viewOverride = view;
     const overlay = document.createElement("div");
     overlay.className = "edge-indicator-overlay";
     document.body.appendChild(overlay);

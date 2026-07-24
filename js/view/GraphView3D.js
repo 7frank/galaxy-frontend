@@ -29,6 +29,7 @@ import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Group } from "three/src/objects/Group.js";
 import { Mesh } from "three/src/objects/Mesh.js";
+import { initEdgeIndicatorOverlay } from "../gui/EdgeIndicatorOverlay.js";
 
 //import skyDomeImage from "./coordinates.png"
 
@@ -86,6 +87,11 @@ export default class GraphView3D extends View3D {
 
     setClusterDepth(depth) {
         this._clusterDepth = depth;
+        return this;
+    }
+
+    edgeIndicator(enabled) {
+        if (enabled) initEdgeIndicatorOverlay(this);
         return this;
     }
 
