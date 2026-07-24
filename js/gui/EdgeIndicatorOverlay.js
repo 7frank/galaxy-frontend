@@ -6,6 +6,27 @@ function getView() {
     return app && app.getCurrentView();
 }
 
+function clampToEdge(sx, sy, W, H, padding) {
+    const cx = W / 2;
+    const cy = H / 2;
+    const dx = sx - cx;
+    const dy = sy - cy;
+
+    const minX = padding - cx;
+    const maxX = W - padding - cx;
+    const minY = padding - cy;
+    const maxY = H - padding - cy;
+
+    let tx = dx === 0 ? Infinity : (dx > 0 ? maxX : minX) / dx;
+    let ty = dy === 0 ? Infinity : (dy > 0 ? maxY : minY) / dy;
+    const t = Math.min(Math.abs(tx), Math.abs(ty));
+
+    return {
+        x: cx + dx * t,
+        y: cy + dy * t,
+    };
+}
+
 export function initEdgeIndicatorOverlay() {
     const overlay = document.createElement("div");
     overlay.className = "edge-indicator-overlay";
@@ -13,16 +34,50 @@ export function initEdgeIndicatorOverlay() {
 
     let activeNode = null;
     let rafId = null;
+    const indicators = new Map(); // key -> {el, arrow, label}
+
+    function getOrCreate(key, isOutgoing, neighbour) {
+        if (indicators.has(key)) return indicators.get(key);
+
+        const color = isOutgoing ? "#99ff99" : "#ffb2b2";
+
+        const el = document.createElement("div");
+        el.className = "edge-indicator";
+        el.style.setProperty("--arrow-color", color);
+
+        const arrow = document.createElement("div");
+        arrow.className = "edge-indicator-arrow";
+
+        const label = document.createElement("div");
+        label.className = "edge-indicator-label";
+        label.textContent = neighbour.name || neighbour.id || "?";
+        label.style.color = color;
+
+        el.appendChild(arrow);
+        el.appendChild(label);
+
+        el.addEventListener("click", (e) => {
+            e.stopPropagation();
+            doOnClickNode(neighbour, false, null, true, true, true, true);
+        });
+
+        overlay.appendChild(el);
+        const entry = { el, arrow, label };
+        indicators.set(key, entry);
+        return entry;
+    }
+
+    function clearAll() {
+        indicators.forEach(({ el }) => el.remove());
+        indicators.clear();
+    }
 
     window.addEventListener("node-clicked", ({ detail: node }) => {
         activeNode = node;
-        overlay.innerHTML = "";
-        if (!node) {
-            cancelAnimationFrame(rafId);
-            rafId = null;
-            return;
-        }
-        scheduleUpdate();
+        clearAll();
+        cancelAnimationFrame(rafId);
+        rafId = null;
+        if (node) scheduleUpdate();
     });
 
     function scheduleUpdate() {
@@ -38,72 +93,55 @@ export function initEdgeIndicatorOverlay() {
         const camera = view.mCamera;
         const W = window.innerWidth;
         const H = window.innerHeight;
-        const padding = 48;
+        const padding = 52;
 
-        const neighbours = (activeNode.edges || []).map(edge => {
+        const neighbours = (activeNode.edges || []).map((edge, i) => {
             const isOutgoing = edge.source === activeNode;
             const neighbour = isOutgoing ? edge.target : edge.source;
-            return { node: neighbour, isOutgoing };
+            return { node: neighbour, isOutgoing, key: i };
         }).filter(({ node }) => node && node._bubble);
 
-        // rebuild indicators
-        overlay.innerHTML = "";
+        const activeKeys = new Set(neighbours.map(n => n.key));
+        indicators.forEach((entry, key) => {
+            if (!activeKeys.has(key)) { entry.el.remove(); indicators.delete(key); }
+        });
 
-        neighbours.forEach(({ node: neighbour, isOutgoing }) => {
+        neighbours.forEach(({ node: neighbour, isOutgoing, key }) => {
             const worldPos = new Vector3();
             neighbour._bubble.getWorldPosition(worldPos);
 
             const projected = worldPos.clone().project(camera);
-            const sx = (projected.x * 0.5 + 0.5) * W;
-            const sy = (-projected.y * 0.5 + 0.5) * H;
             const behindCamera = projected.z > 1;
+
+            let sx = (projected.x * 0.5 + 0.5) * W;
+            let sy = (-projected.y * 0.5 + 0.5) * H;
+
+            if (behindCamera) {
+                sx = W - sx;
+                sy = H - sy;
+            }
 
             const isOffscreen = behindCamera ||
                 sx < padding || sx > W - padding ||
                 sy < padding || sy > H - padding;
 
-            if (!isOffscreen) return;
+            const entry = getOrCreate(key, isOutgoing, neighbour);
 
-            // clamp to screen edge
-            let cx = Math.max(padding, Math.min(W - padding, sx));
-            let cy = Math.max(padding, Math.min(H - padding, sy));
-
-            if (behindCamera) {
-                cx = W - sx < W / 2 ? padding : W - padding;
-                cy = H - sy < H / 2 ? padding : H - padding;
+            if (!isOffscreen) {
+                entry.el.style.display = "none";
+                return;
             }
 
-            // angle from center to target (for arrow rotation)
+            entry.el.style.display = "";
+
+            const clamped = clampToEdge(sx, sy, W, H, padding);
+            entry.el.style.left = clamped.x + "px";
+            entry.el.style.top = clamped.y + "px";
+
             const dx = sx - W / 2;
             const dy = sy - H / 2;
             const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-
-            const color = isOutgoing ? "#99ff99" : "#ffb2b2";
-
-            const el = document.createElement("div");
-            el.className = "edge-indicator";
-            el.style.left = cx + "px";
-            el.style.top = cy + "px";
-            el.style.setProperty("--arrow-color", color);
-            el.style.setProperty("--arrow-angle", angle + "deg");
-
-            const arrow = document.createElement("div");
-            arrow.className = "edge-indicator-arrow";
-
-            const label = document.createElement("div");
-            label.className = "edge-indicator-label";
-            label.textContent = neighbour.name || neighbour.id || "?";
-            label.style.color = color;
-
-            el.appendChild(arrow);
-            el.appendChild(label);
-
-            el.addEventListener("click", (e) => {
-                e.stopPropagation();
-                doOnClickNode(neighbour, false, null, true, true, true, true);
-            });
-
-            overlay.appendChild(el);
+            entry.el.style.setProperty("--arrow-angle", angle + "deg");
         });
 
         scheduleUpdate();
