@@ -44,7 +44,7 @@ export default class ClusterTextOverlay {
      */
 
     init(view) {
-        if (!view instanceof GraphView3D)
+        if (!(view instanceof GraphView3D))
             throw new Error("parent must be instance of GraphView3D");
 
 

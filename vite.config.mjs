@@ -4,6 +4,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
     root: '.',
+    base: process.env.GITHUB_ACTIONS ? '/cluster-graph-3d/' : '/',
     resolve: {
         alias: {
             three: resolve(__dirname, 'node_modules/three'),

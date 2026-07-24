@@ -2,22 +2,22 @@ import "./SampleClusterApplication.css"
 
 import "../../css/style.css"
 import "../../css/force-graph.css"
-import "../gui/searchbar"
+import "../../js/gui/searchbar"
 
 
-import "./refactor/SpecificDataUtils"
-import "./refactor/AppDataService"
-import GraphView3D from "../view/GraphView3D"
-import "../gui/ModeSelect"
+import "../../js/cluster/refactor/SpecificDataUtils"
+import "../../js/cluster/refactor/AppDataService"
+import GraphView3D from "../../js/view/GraphView3D"
+import "../../js/gui/ModeSelect"
 
 
-import CompanyNewsDS from "../data/CompanyNewsDS"
+import CompanyNewsDS from "../../js/data/CompanyNewsDS"
 
-import CsvDatasource from "../data/CsvDatasource"
+import CsvDatasource from "../../js/data/CsvDatasource"
 
 export {CsvDatasource}
 
-import Default3DGraphConfig from "./configs/Default3DGraphConfig";
+import Default3DGraphConfig from "../../js/cluster/configs/Default3DGraphConfig";
 import Mousetrap from "mousetrap";
 import _ from "lodash";
 

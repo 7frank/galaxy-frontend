@@ -1,15 +1,50 @@
 {
-  "name": "galaxy-webcomponent",
+  "name": "cluster-graph-3d",
   "version": "1.0.0",
   "description": "contains a component to render node/edge data with threejs and d3_force",
-  "main": "index.js",
+  "main": "./dist/graph.js",
+  "module": "./dist/graph.js",
+  "exports": {
+    "./graph": {
+      "import": "./dist/graph.js",
+      "require": "./dist/graph.cjs"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "require": "./dist/config.cjs"
+    },
+    "./data": {
+      "import": "./dist/data.js",
+      "require": "./dist/data.cjs"
+    },
+    "./hull": {
+      "import": "./dist/hull.js",
+      "require": "./dist/hull.cjs"
+    },
+    "./distributions": {
+      "import": "./dist/distributions.js",
+      "require": "./dist/distributions.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "css"
+  ],
+  "sideEffects": [
+    "**/gui/**",
+    "**/refactor/**",
+    "**/*.css"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run build",
+    "build:app": "vite build",
+    "build:lib": "tsup",
     "analyze": "ANALYZE=true vite build",
     "preview": "vite preview",
     "start": "vite",
-    "test": "karma start karma.conf.js"
+    "test": "karma start karma.conf.js",
+    "prepublishOnly": "bun run build:lib"
   },
   "repository": {
     "type": "git",
@@ -22,7 +57,7 @@
   "author": "nat stone, frank reimann",
   "license": "SEE LICENSE IN License.txt",
   "homepage": "https://bitbucket.org/galaxystone/galaxy#readme",
-  "private": true,
+  "private": false,
   "devDependencies": {
     "@types/jasmine": "~2.5.53",
     "@types/jasminewd2": "~2.0.2",
@@ -54,6 +89,7 @@
     "style-loader": "^0.18.2",
     "ts-node": "~3.0.4",
     "tslint": "~5.3.2",
+    "tsup": "^8.5.1",
     "typescript": "~2.3.3",
     "url-loader": "^0.5.9",
     "vite": "^8.1.5",

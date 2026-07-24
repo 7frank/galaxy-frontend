@@ -6,3 +6,4 @@ npm-debug.log
 *.lyx#
 doc/assets/
 build/
+dist/

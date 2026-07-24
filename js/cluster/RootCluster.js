@@ -60,7 +60,7 @@ export default class RootCluster extends Cluster3DExtended {
 
     addColorScheme(cs) {
 
-        if (!cs instanceof DefaultColorScheme) {
+        if (!(cs instanceof DefaultColorScheme)) {
             console.warn("set proper color scheme")
         }
 

@@ -177,7 +177,7 @@ export default class ForceGraphDistribution extends BaseDistribution {
     setNodes(nodes, onNodePositionChange, onStep, onComplete) {
 
 
-        if (!nodes instanceof BaseCluster3D && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D");
+        if (!(nodes instanceof BaseCluster3D) && !_.isArray(nodes)) throw new Error("not supported, must be array of nodes or BaseClester3D");
 
 
         let mEdges = [];

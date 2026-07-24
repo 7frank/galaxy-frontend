@@ -1,87 +1,157 @@
-# galaxy-webcomponent
+# cluster-graph-3d
 
-A WebGL/THREE.js web component that renders large graphs (50k nodes, 200k edges) in 3D using various layout algorithms. 
+A 3D force-directed graph component using ThreeJS/WebGL. Renders large graphs (50k+ nodes, 200k+ edges) in 3D with force-simulation layout, sub-clustering, convex hull grouping, and post-processing effects.
 
-The component (`<sample-cluster-application>`) is a native custom element and can be embedded in any HTML page.
+| Clamped offscreen node navigation | Full graph with box hull clusters |
+|---|---|
+| ![Clamped offscreen node navigation — selected node's connections and neighbours are pinned to the screen edges when the node itself is out of view](screenshots/image1.png) | ![Full graph rendered with country-level clusters and semi-transparent box hulls](screenshots/image2.png) |
 
-## Prerequisites
-
-- Node.js v22+
-- npm
-- A web server capable of serving static files (e.g. PHP built-in server, nginx, Apache)
-
-## Installing
+## Install
 
 ```bash
-npm install --legacy-peer-deps
+npm install cluster-graph-3d
 ```
 
-> `--legacy-peer-deps` is required due to older dependency versions that predate npm's strict peer resolution.
-
-## Building
+Peer dependencies you must also install:
 
 ```bash
-npm run build
+npm install lodash
 ```
 
-Outputs to `./build/`:
-- `bundle.js` — application code
-- `node-modules-bundle.js` — vendored dependencies
-
-## Running
-
-```bash
-npm start
-# opens http://localhost:8080/index.html
-```
-
-## Data Sources
-
-The graph accepts a `datasource` property on the `<sample-cluster-application>` element before it connects. Two built-in adapters are available (exported as `clusters.CsvDatasource` and `clusters.GraphQLDatasource`):
+## Quick Start
 
 ```js
-const el = document.querySelector('sample-cluster-application')
+import GraphView3D from 'cluster-graph-3d/graph'
+import Default3DGraphConfig from 'cluster-graph-3d/config'
 
-// CSV (default — used when no datasource is set)
-el.datasource = new clusters.CsvDatasource('assets/nodes.csv', 'assets/links.csv')
+const container = document.getElementById('graph')
 
-// GraphQL (see galaxy-backend)
-el.datasource = new clusters.GraphQLDatasource('http://localhost:8088/graphql')
+const graph = new GraphView3D(container)
+const config = new Default3DGraphConfig(graph)
+
+graph.setSpeccs(config.getSpeccs())
+
+graph.setData({
+  nodes: {
+    '1': { id: '1', name: 'Alice', group: 'A' },
+    '2': { id: '2', name: 'Bob',   group: 'A' },
+    '3': { id: '3', name: 'Carol', group: 'B' },
+  },
+  links: [
+    { source: '1', target: '2' },
+    { source: '2', target: '3' },
+  ]
+})
 ```
 
-When no `datasource` is set, the element falls back to CSV files at `assets/realDataNodesv5_ticker.csv` and `assets/realDataLinksv5.csv`.
-
-Custom adapters can be created by extending `Datasource` from `js/data/Datasource.js` and implementing `load(onSuccess)`.
-
-See `galaxy-samson/` for a full integration example that configures the datasource and wraps the graph with a news panel.
-
-## Project Structure
-
-```
-js/
-  cluster/          # Core graph components (nodes, edges, clusters, layout)
-    configs/        # 2D/3D graph configuration presets
-    distributions/  # Node distribution/layout strategies
-    edges/          # Edge rendering
-    elements/       # Individual node/cluster element rendering
-    hull/           # Convex hull rendering for node groups
-    particles/      # Particle effects
-    text/           # Text label rendering
-    utils/          # Internal helpers
-  data/             # Data source adapters (Apollo/GraphQL, CSV, JSON)
-  gui/              # UI controls (search bar, mode select, HUD)
-  lib/              # Three.js geometry utilities (ConvexGeometry, QuickHull)
-  utils/            # General utilities
-  view/             # GraphView3D — top-level 3D scene and camera management
+```html
+<div id="graph" style="width: 100vw; height: 100vh;"></div>
 ```
 
-## Built With
+## Load from CSV
 
-- [THREE.js](https://threejs.org/) — WebGL rendering
-- [d3-force-3d](https://github.com/vasturiano/d3-force-3d) — 3D force simulation
-- [Apollo Client](https://www.apollographql.com/docs/react/) — GraphQL data fetching
-- [webpack 2](https://v2.webpack.js.org/) — bundling
+```js
+import GraphView3D from 'cluster-graph-3d/graph'
+import Default3DGraphConfig from 'cluster-graph-3d/config'
+
+const graph = new GraphView3D(document.getElementById('graph'))
+const config = new Default3DGraphConfig(graph)
+graph.setSpeccs(config.getSpeccs())
+
+graph.loadDatasource(new CsvDatasource('nodes.csv', 'edges.csv'))
+```
+
+CSV format — nodes:
+
+```
+id,name,group,industry
+1,Alice,GroupA,Tech
+2,Bob,GroupA,Tech
+3,Carol,GroupB,Finance
+```
+
+CSV format — edges:
+
+```
+SourceID,TargetID,Relationship Strenght
+1,2,0.8
+2,3,0.5
+```
+
+
+## API
+
+### `new GraphView3D(domElement)`
+
+| Method | Description |
+|---|---|
+| `setData(graphData)` | Load graph from a plain object `{ nodes: {}, links: [] }` |
+| `loadDatasource(datasource)` | Load graph from a `Datasource` instance (replaces current graph) |
+| `loadDataSet(fn)` | Load graph via a callback `fn(null, onSuccess)` |
+| `setSpeccs(speccs)` | Set clustering/layout configuration from `Default3DGraphConfig` |
+| `setTextVisible(bool)` | Show or hide node text labels |
+| `resizeCanvas()` | Trigger a canvas resize manually |
+| `start()` / `stop()` | Start or stop the render loop |
+
+Inherited from `View3D`:
+
+| Method | Description |
+|---|---|
+| `set2D()` / `set3D()` | Switch between orthographic and perspective camera |
+| `add(object3D)` | Add a raw Three.js object to the scene |
+| `maximise()` / `undoMaximise()` | Expand/collapse the canvas within its container |
+| `setCaption(text)` | Set a text caption overlay on the canvas |
+| `scene()` | Access the internal `THREE.Scene` |
+| `camera()` | Access the internal camera |
+| `renderer()` | Access the internal `WebGLRenderer` |
+
+### `new Default3DGraphConfig(graphView, backgroundColor?, cssClass?)`
+
+| Method | Description |
+|---|---|
+| `getSpeccs()` | Returns the clustering spec array to pass to `graph.setSpeccs()` |
+| `setMode(onComplete?)` | Switch layout mode |
+| `doZoomToRelevant()` | Zoom camera to the relevant portion of the graph |
+| `zoomToPosition(position, onComplete)` | Animate camera to a `THREE.Vector3` position |
+| `restartGraph()` | Re-run the force simulation from scratch |
+
+## Data Format
+
+```js
+{
+  nodes: {
+    'id1': { id: 'id1', name: 'Node 1', group: 'GroupA', industry: 'Tech', color: 0xff0000 },
+    'id2': { id: 'id2', name: 'Node 2', group: 'GroupB' },
+  },
+  links: [
+    { source: 'id1', target: 'id2', strength: 0.5 }
+  ]
+}
+```
+
+| Field | Description |
+|---|---|
+| `id` | Unique node identifier (string) |
+| `name` | Display label |
+| `group` | Primary clustering key |
+| `industry` | Secondary clustering key |
+| `color` | Hex color (optional) |
+| `source` / `target` | Node ids for links |
+| `strength` | Link weight (optional, `0`–`1`) |
+
+## Build
+
+```bash
+# dev server
+npm run dev
+
+# build the app (vite)
+npm run build:app
+
+# build the library for publishing (tsup)
+npm run build:lib
+```
 
 ## License
 
-Proprietary — all rights reserved. See `LICENSE.md`.
+Proprietary — see `LICENSE.md`.
