@@ -14,9 +14,8 @@ import "../gui/ModeSelect"
 import CompanyNewsDS from "../data/CompanyNewsDS"
 
 import CsvDatasource from "../data/CsvDatasource"
-import GraphQLDatasource from "../data/GraphQLDatasource"
 
-export {CsvDatasource, GraphQLDatasource}
+export {CsvDatasource}
 
 import Default3DGraphConfig from "./configs/Default3DGraphConfig";
 import Mousetrap from "mousetrap";

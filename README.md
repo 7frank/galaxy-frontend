@@ -1,6 +1,6 @@
 # galaxy-webcomponent
 
-A WebGL/THREE.js web component that renders large graphs of nodes and edges in 3D using force-directed layout. Built with webpack 2, d3-force-3d, and Apollo Client for GraphQL data loading.
+A WebGL/THREE.js web component that renders large graphs (50k nodes, 200k edges) in 3D using various layout algorithms. 
 
 The component (`<sample-cluster-application>`) is a native custom element and can be embedded in any HTML page.
 
