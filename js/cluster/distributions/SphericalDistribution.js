@@ -24,29 +24,6 @@ export default class SphericalDistribution extends BaseDistribution {
     }
 
 
-    /**
-     *  implementation of the equirectangular projection
-     * @param mVec2 - a Vector2 that has been transformed into normalised coordinates
-     *
-     */
-    project2dNormalisedToSphere(mVec2, radius) {
-
-        var longitude = mVec2.x * Math.PI
-        var latitude = mVec2.y * Math.PI / 2
-
-        var x = radius * Math.cos(latitude) * Math.cos(longitude)
-        var y = radius * Math.cos(latitude) * Math.sin(longitude)
-        var z = radius * Math.sin(latitude)
-
-        return new Vector3(y, z, x) //?different coordinate system in skybox?
-
-    }
-
-
-    /**
-     * for details {@link BaseDistribution.distribute}
-     **/
-
     distribute(node, dx, dy, dz) {
         const radius = this.mScale / 2;
         const theta = 2 * Math.PI * dx;
