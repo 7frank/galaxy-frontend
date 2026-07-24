@@ -17,14 +17,14 @@
     import { GraphView3D, Default3DGraphConfig, GeneratorDatasource } from 'cluster-graph-3d'
     import 'cluster-graph-3d/dist/index.css'
     const config = new Default3DGraphConfig()
-    const graph = new GraphView3D(document.getElementById('app'))
+    const graph = new GraphView3D(document.getElementById('app'), { nodeTexture: 'assets/dot7.png' })
     graph.edgeIndicator(true)
     graph.setSpeccs(config.getSpeccs())
-    graph.setClusterDepth(1)
+    graph.setClusterDepth(3)
     graph.addEventListener('loaded', () => {
       window.dispatchEvent(new CustomEvent('node-color-change', { detail: 'group' }))
     })
-    graph.loadDatasource(new GeneratorDatasource({ nodeCount: 5000, edgeCount: 20000,maxItemsPerNode:50 }))
+    graph.loadDatasource(new GeneratorDatasource({ nodeCount: 5000, edgeCount: 2000, maxItemsPerNode: 50,clusterEdgeBias: 0.9 }))
     graph.maximise()
   </script>
 </body>

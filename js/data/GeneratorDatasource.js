@@ -17,12 +17,13 @@ const LAST = ["Corp", "Industries", "Group", "Holdings", "Systems", "Solutions",
 
 export default class GeneratorDatasource extends Datasource {
 
-    constructor({ nodeCount = 100, edgeCount = 150, seed = 42, maxItemsPerNode=20 } = {}) {
+    constructor({ nodeCount = 100, edgeCount = 150, seed = 42, maxItemsPerNode = 20, clusterEdgeBias = 0 } = {}) {
         super();
         this.nodeCount = nodeCount;
         this.edgeCount = edgeCount;
         this.seed = seed;
-        this.maxItemsPerNode=maxItemsPerNode
+        this.maxItemsPerNode = maxItemsPerNode;
+        this.clusterEdgeBias = clusterEdgeBias;
     }
 
     _rng(s) {
@@ -53,14 +54,27 @@ export default class GeneratorDatasource extends Datasource {
             };
         }
 
+        const nodeList = Object.values(nodes);
+        const byGroup = {};
+        nodeList.forEach(n => { (byGroup[n.group] = byGroup[n.group] || []).push(n.id); });
+        const groupKeys = Object.keys(byGroup);
+
         const links = [];
         const nodeIds = Object.keys(nodes);
         const edgeSet = new Set();
         let attempts = 0;
         while (links.length < edgeCount && attempts < edgeCount * 10) {
             attempts++;
-            const a = nodeIds[Math.floor(rnd() * nodeIds.length)];
-            const b = nodeIds[Math.floor(rnd() * nodeIds.length)];
+            let a, b;
+            if (this.clusterEdgeBias > 0 && rnd() < this.clusterEdgeBias) {
+                const group = byGroup[groupKeys[Math.floor(rnd() * groupKeys.length)]];
+                if (group.length < 2) continue;
+                a = group[Math.floor(rnd() * group.length)];
+                b = group[Math.floor(rnd() * group.length)];
+            } else {
+                a = nodeIds[Math.floor(rnd() * nodeIds.length)];
+                b = nodeIds[Math.floor(rnd() * nodeIds.length)];
+            }
             if (a === b) continue;
             const key = a < b ? `${a}:${b}` : `${b}:${a}`;
             if (edgeSet.has(key)) continue;

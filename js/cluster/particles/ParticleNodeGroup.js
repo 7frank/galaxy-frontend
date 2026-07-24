@@ -82,7 +82,9 @@ export default function ParticleNodeGroup(nodes, options, domEvents) {
             },
             pointTexture: {
                 type: "t",
-                value: new TextureLoader().load(options.nodeTexture)
+                value: new TextureLoader().load(options.nodeTexture, undefined, undefined, () => {
+                    console.error(`ParticleNodeGroup: failed to load texture "${options.nodeTexture}"`)
+                })
             }
 
         };

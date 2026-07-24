@@ -19,10 +19,11 @@ import * as _ from "lodash";
 
 
 export default class ClusterLeafElement extends Mesh {
-    constructor(nodes, domEvents) {
+    constructor(nodes, domEvents, options = {}) {
         super();
 
         this.mDomEvents = domEvents
+        this.mOptions = options
 
 
         this.mNodes = nodes;
@@ -473,11 +474,11 @@ export default class ClusterLeafElement extends Mesh {
 
         let domEvents = this.getDOMEvents()
 
-        var elem = ParticleNodeGroup(this.mNodes, {
+        var elem = ParticleNodeGroup(this.mNodes, Object.assign({
             nodeDefaultSize: 10,
             nodeDefaultScale: 10,
             nodeTexture: "img/dot7.png"
-        }, domEvents);
+        }, this.mOptions), domEvents);
 
 
         return elem

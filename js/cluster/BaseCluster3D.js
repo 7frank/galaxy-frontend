@@ -1593,7 +1593,8 @@ export default class BaseCluster3D extends BaseNode {
 
         let domEvents = this.getDOMEvents()
 
-        let leaf = new ClusterLeafElement(this.mNodes, domEvents);
+        let viewOptions = (this.getView() && this.getView().mOptions) || {}
+        let leaf = new ClusterLeafElement(this.mNodes, domEvents, viewOptions);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
 

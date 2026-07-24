@@ -38,10 +38,11 @@ import { initEdgeIndicatorOverlay } from "../gui/EdgeIndicatorOverlay.js";
 
 export default class GraphView3D extends View3D {
 
-    constructor(el) {
+    constructor(el, options = {}) {
         super(el);
 
         this.mRootCluster = null;
+        this.mOptions = options;
 
 
         //debug code

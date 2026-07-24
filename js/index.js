@@ -3,3 +3,6 @@ export { default as Default3DGraphConfig } from './cluster/configs/Default3DGrap
 export { default as Datasource } from './data/Datasource.js'
 export { default as CsvDatasource } from './data/CsvDatasource.js'
 export { default as GeneratorDatasource } from './data/GeneratorDatasource.js'
+export { default as ClusterLeafElement } from './cluster/ClusterLeafElement.js'
+export { default as RandomDistribution } from './cluster/distributions/RandomDistribution.js'
+export { default as DomEventsAlt } from './cluster/utils/DomEventsAlt.js'
