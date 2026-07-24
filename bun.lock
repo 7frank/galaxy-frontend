@@ -8,14 +8,15 @@
         "apollo-client": "^1.9.1",
         "core-js": "^2.5.0",
         "d3-force-3d": "^1.0.7",
+        "dagre": "^0.8.5",
         "easy-color": "^1.0.4",
         "graphql-tag": "^2.4.2",
         "hexasphere.js": "^0.2.2",
-        "postprocessing": "https://github.com/pmndrs/postprocessing",
         "lodash": "^4.17.4",
         "monotone-convex-hull-2d": "^1.0.1",
         "mousetrap": "^1.6.1",
         "papaparse": "^4.3.5",
+        "postprocessing": "https://github.com/pmndrs/postprocessing",
         "qwest": "^4.4.6",
         "rxjs": "^5.4.2",
         "socket.io": "^2.0.3",
@@ -517,6 +518,8 @@
 
     "d3-timer": ["d3-timer@1.0.6", "", {}, ""],
 
+    "dagre": ["dagre@0.8.5", "", { "dependencies": { "graphlib": "^2.1.8", "lodash": "^4.17.15" } }, "sha512-/aTqmnRta7x7MCCpExk7HQL2O4owCT2h8NT//9I1OQ9vt29Pa0BzSAkR5lwFUcQ7491yVi/3CXU9jQ5o0Mn2Sw=="],
+
     "dashdash": ["dashdash@1.14.1", "", { "dependencies": { "assert-plus": "^1.0.0" } }, ""],
 
     "date-now": ["date-now@0.1.4", "", {}, ""],
@@ -718,6 +721,8 @@
     "globby": ["globby@5.0.0", "", { "dependencies": { "array-union": "^1.0.1", "arrify": "^1.0.0", "glob": "^7.0.3", "object-assign": "^4.0.1", "pify": "^2.0.0", "pinkie-promise": "^2.0.0" } }, ""],
 
     "graceful-fs": ["graceful-fs@4.1.11", "", {}, ""],
+
+    "graphlib": ["graphlib@2.1.8", "", { "dependencies": { "lodash": "^4.17.15" } }, "sha512-jcLLfkpoVGmH7/InMC/1hIvOPSUh38oJtGhvrOFGzioE1DZ+0YW16RgmOJhHiuWTvGiJQ9Z1Ik43JvkRPRvE+A=="],
 
     "graphql": ["graphql@0.10.5", "", { "dependencies": { "iterall": "^1.1.0" } }, "sha512-Q7cx22DiLhwHsEfUnUip1Ww/Vfx7FS0w6+iHItNuN61+XpegHSa3k5U0+6M5BcpavQImBwFiy0z3uYwY7cXMLQ=="],
 
@@ -1699,6 +1704,8 @@
 
     "csso/source-map": ["source-map@0.5.6", "", {}, ""],
 
+    "dagre/lodash": ["lodash@4.18.1", "", {}, "sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q=="],
+
     "dashdash/assert-plus": ["assert-plus@1.0.0", "", {}, ""],
 
     "default-require-extensions/strip-bom": ["strip-bom@2.0.0", "", { "dependencies": { "is-utf8": "^0.2.0" } }, ""],
@@ -1726,6 +1733,8 @@
     "fill-range/repeat-string": ["repeat-string@1.6.1", "", {}, ""],
 
     "getpass/assert-plus": ["assert-plus@1.0.0", "", {}, ""],
+
+    "graphlib/lodash": ["lodash@4.18.1", "", {}, "sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q=="],
 
     "handlebars/async": ["async@1.5.2", "", {}, ""],
 

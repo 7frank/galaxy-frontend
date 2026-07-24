@@ -65,6 +65,7 @@
     "apollo-client": "^1.9.1",
     "core-js": "^2.5.0",
     "d3-force-3d": "^1.0.7",
+    "dagre": "^0.8.5",
     "easy-color": "^1.0.4",
     "graphql-tag": "^2.4.2",
     "hexasphere.js": "^0.2.2",
