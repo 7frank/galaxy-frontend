@@ -14,12 +14,13 @@
 <body>
   <div id="app"></div>
   <script type="module">
-    import { GraphView3D, Default3DGraphConfig, GeneratorDatasource } from 'cluster-graph-3d'
+    import { GraphView3D, Default3DGraphConfig, GeneratorDatasource, BaseVolume, NoneHullEffect } from 'cluster-graph-3d'
     import 'cluster-graph-3d/dist/index.css'
     const config = new Default3DGraphConfig()
-    const graph = new GraphView3D(document.getElementById('app'), { nodeTexture: 'assets/dot7.png' })
+    const graph = new GraphView3D(document.getElementById('app'), { nodeTexture: 'assets/dot7.png',  nodeDefaultScale: 50 })
     graph.edgeIndicator(true)
     graph.setSpeccs(config.getSpeccs())
+    graph.setHullOptions({ hull: BaseVolume, makeHullEffect: () => new NoneHullEffect() })
     graph.setClusterDepth(3)
     graph.addEventListener('loaded', () => {
       window.dispatchEvent(new CustomEvent('node-color-change', { detail: 'group' }))

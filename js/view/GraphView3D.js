@@ -15,6 +15,11 @@ import "../gui/GraphHUD"
 
 import {GUI} from "../cluster/refactor/SpecificDataUtils"
 import _ from "lodash";
+import ConvexVolume from "../cluster/hull/ConvexVolume";
+import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";
+import OutlineHullEffect, { OutlineComposer } from "../cluster/hull/effects/OutlineHullEffect";
+import BasicHullEffect from "../cluster/hull/effects/BasicHullEffect";
+import BoxHullEffect from "../cluster/hull/effects/BoxHullEffect";
 import { BackSide } from "three/src/constants.js";
 import { BufferAttribute } from "three/src/core/BufferAttribute.js";
 import { BufferGeometry } from "three/src/core/BufferGeometry.js";
@@ -91,8 +96,39 @@ export default class GraphView3D extends View3D {
         return this;
     }
 
+    setHullOptions(options) {
+        this._hullOptions = options;
+        return this;
+    }
+
     edgeIndicator(enabled) {
         if (enabled) initEdgeIndicatorOverlay(this);
+        return this;
+    }
+
+    setBorderStyle(style) {
+        const BORDERS = {
+            "None":    { makeEffect: () => new NoneHullEffect(),                  makeComposer: () => null },
+            "Outline": { makeEffect: (mode, c) => new OutlineHullEffect(mode, c), makeComposer: (v) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; } },
+            "Basic":   { makeEffect: () => new BasicHullEffect(),                 makeComposer: () => null },
+            "Box":     { makeEffect: () => new BoxHullEffect(),                   makeComposer: () => null },
+        };
+        const entry = BORDERS[style];
+        if (!entry) { console.warn(`setBorderStyle: unknown style "${style}", use one of: ${Object.keys(BORDERS).join(", ")}`); return this; }
+        if (this.mBorderEffect) { this.mBorderEffect.dispose(); this.mBorderEffect = null; }
+        const composer = entry.makeComposer(this);
+        if (this.mRootCluster) {
+            this.mRootCluster.findClusters("*").forEach(cluster => {
+                if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
+                if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh);
+                const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
+                if (!cluster._hullMode) cluster._hullMode = mode;
+                const effect = entry.makeEffect(mode, composer);
+                cluster._hullEffect = effect;
+                effect.onAttach(cluster.mHull.mesh);
+            });
+        }
+        if (composer) this.setBorderEffect(composer);
         return this;
     }
 
@@ -296,7 +332,11 @@ export default class GraphView3D extends View3D {
         //IMPORTANT: must attach after clustering is applied because "tn" aka. globalTextNodes gets removed at the start of the clustering
         res.attachToView3D(this);
         const depth = this._clusterDepth || speccs.length;
-        res.applyClustering(speccs.slice(0, depth));
+        const hullOptions = this._hullOptions;
+        const finalSpeccs = hullOptions
+            ? speccs.slice(0, depth).map(s => ({ ...s, options: { ...s.options, ...hullOptions } }))
+            : speccs.slice(0, depth);
+        res.applyClustering(finalSpeccs);
 
 
         this.start();
