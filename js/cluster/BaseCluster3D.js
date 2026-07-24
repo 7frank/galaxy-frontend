@@ -155,7 +155,7 @@ export default class BaseCluster3D extends BaseNode {
             let L = maxDistance - minDistance;
 
 
-            var lod = 1 - (distance - minDistance) / (maxDistance - minDistance);
+            var lod = Math.max(0, Math.min(1, 1 - (distance - minDistance) / (maxDistance - minDistance)));
 
             this.setLOD(lod)
 
