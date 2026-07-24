@@ -56,9 +56,12 @@ export function initEdgeIndicatorOverlay() {
         el.appendChild(arrow);
         el.appendChild(label);
 
+        el.addEventListener("mousedown", (e) => { e.stopPropagation(); e.preventDefault(); });
+        el.addEventListener("mouseup",   (e) => { e.stopPropagation(); e.preventDefault(); });
         el.addEventListener("click", (e) => {
             e.stopPropagation();
-            doOnClickNode(neighbour, false, null, true, true, true, true);
+            e.preventDefault();
+            doOnClickNode(neighbour);
         });
 
         overlay.appendChild(el);
