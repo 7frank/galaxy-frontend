@@ -15,7 +15,11 @@
     const graph = new GraphView3D(document.getElementById('app'))
     graph.setSpeccs(config.getSpeccs())
     graph.setClusterDepth(1)
-    graph.loadDatasource(new GeneratorDatasource({ nodeCount: 50000, edgeCount: 20000,maxItemsPerNode:50 }))
+    graph.addEventListener('loaded', () => {
+      window.dispatchEvent(new CustomEvent('node-color-change', { detail: 'group' }))
+    })
+    graph.loadDatasource(new GeneratorDatasource({ nodeCount: 5000, edgeCount: 20000,maxItemsPerNode:50 }))
+    graph.maximise()
   </script>
 </body>
 </html>

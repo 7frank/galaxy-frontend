@@ -36,6 +36,7 @@ export default class View3D extends EventTarget {
 
         this.el = el || document.createElement("div");
         this.el.classList.add("view-3d");
+        this.el._view3d = this;
 
         this.isRunning = false;
 
@@ -395,7 +396,7 @@ export default class View3D extends EventTarget {
 
             that.mLastFrameTime = time;
 
-            that.mControls.update();
+            if (that.mControls) that.mControls.update();
 
 
             that.dispatchEvent(new CustomEvent("before-render", {detail: time}));
@@ -430,7 +431,7 @@ export default class View3D extends EventTarget {
     maximise() {
         this.el.classList.add("view-3d-maximised");
 
-        this.mCaption.style.opacity = "0";
+        if (this.mCaption) this.mCaption.style.opacity = "0";
 
         this.setActive()
 
