@@ -22,6 +22,7 @@
         "socket.io": "^2.0.3",
         "three": "^0.185.1",
         "three.meshline": "^1.4.0",
+        "tweakpane": "^4.0.5",
         "zone.js": "^0.8.16",
       },
       "devDependencies": {
@@ -1515,6 +1516,8 @@
     "tty-browserify": ["tty-browserify@0.0.0", "", {}, ""],
 
     "tunnel-agent": ["tunnel-agent@0.6.0", "", { "dependencies": { "safe-buffer": "^5.0.1" } }, ""],
+
+    "tweakpane": ["tweakpane@4.0.5", "", {}, "sha512-rxEXdSI+ArlG1RyO6FghC4ZUX8JkEfz8F3v1JuteXSV0pEtHJzyo07fcDG+NsJfN5L39kSbCYbB9cBGHyuI/tQ=="],
 
     "tweetnacl": ["tweetnacl@0.14.5", "", {}, ""],
 

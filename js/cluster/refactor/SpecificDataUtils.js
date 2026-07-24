@@ -254,9 +254,6 @@ export var GUI = {
         return {
             setNode: function (node) {
                 console.warn("TODO implement node data from database")
-                let link = "<a target='_blank' href='https://www.iqbanker.com/charts/" + node.id + "/supply_chain'>iq maps</a>"
-                var companyDetails = document.querySelector("company-details");
-                if (companyDetails) companyDetails.setStuff({name: node.name, link});
             }
         }
     },

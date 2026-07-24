@@ -7,8 +7,7 @@ import { Vector3 } from "three/src/math/Vector3.js";
 
 /**
  * another configuration for some graph data
- * this one was supposed to be able to support the requirements of a 2D scene as it was shown on the iq-banker website
- * FIXME make visualisation the same as it is shown on web site
+ * this one is be able to support the requirements of a 2D scene
  */
 
 export default class Extended2DGraphConfig extends Default2DGraphConfig {
