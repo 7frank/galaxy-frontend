@@ -1,9 +1,11 @@
 import { defineConfig } from 'tsup';
 import { resolve } from 'path';
+import { brotliDecompress } from 'zlib';
 
 export default defineConfig({
     entry: {
-        index: 'js/index.js',
+        index: 'js/index.ts',
+        hull: 'js/hull.ts',
     },
     format: ['esm', 'cjs'],
     outDir: 'dist',
@@ -31,8 +33,7 @@ export default defineConfig({
     ],
     esbuildOptions(options) {
         options.alias = {
-            three: resolve('node_modules/three'),
-            'postprocessing/src': resolve('node_modules/postprocessing/src'),
+            three: resolve('node_modules/three')
         };
         options.loader = {
             '.glsl': 'text',

@@ -8,7 +8,7 @@ export { default as RandomDistribution } from './cluster/distributions/RandomDis
 export { default as DomEventsAlt } from './cluster/utils/DomEventsAlt.js'
 export { default as BaseVolume } from './cluster/hull/BaseVolume.js'
 export { default as ConvexVolume } from './cluster/hull/ConvexVolume.js'
+
 export { default as NoneHullEffect } from './cluster/hull/effects/NoneHullEffect.js'
 export { default as BasicHullEffect } from './cluster/hull/effects/BasicHullEffect.js'
 export { default as BoxHullEffect } from './cluster/hull/effects/BoxHullEffect.js'
-export { default as OutlineHullEffect } from './cluster/hull/effects/OutlineHullEffect.js'
