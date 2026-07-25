@@ -2,8 +2,9 @@ import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
 import { Scene } from "three/src/scenes/Scene.js";
 import { Camera } from "three/src/cameras/Camera.js";
 import { Mesh } from "three/src/objects/Mesh.js";
+import type { EffectMode } from "../hull/effects/BaseHullEffect";
 
-export type BorderEffectMode = "hover" | "ambient" | "none"
+export type BorderEffectMode = EffectMode
 
 export default class BaseBorderEffect {
 

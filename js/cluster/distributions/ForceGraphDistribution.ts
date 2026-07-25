@@ -35,6 +35,12 @@ interface D3Simulation {
     alpha(n?: number): number
 }
 
+interface ForceLink {
+    id(fn: (d: D3SimNode) => string | undefined): ForceLink
+    distance(fn: () => number): ForceLink
+    links(e: D3SimEdge[]): ForceLink
+}
+
 export default class ForceGraphDistribution extends BaseDistribution {
 
     initialEngineTicks: number
@@ -66,11 +72,6 @@ export default class ForceGraphDistribution extends BaseDistribution {
         const layout: D3Simulation = d3.forceSimulation() as unknown as D3Simulation;
         const scale = this.mScale;
 
-        interface ForceLink {
-            id(fn: (d: D3SimNode) => string | undefined): ForceLink
-            distance(fn: () => number): ForceLink
-            links(e: D3SimEdge[]): ForceLink
-        }
         layout
             .numDimensions(this.dimensions)
             .alphaDecay(0.05)

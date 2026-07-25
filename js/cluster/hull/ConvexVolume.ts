@@ -50,8 +50,8 @@ export default class ConvexVolume extends BoxVolume {
         return new ConvexGeometry(allPoints);
     }
 
-    getMaterial(): MeshBasicMaterial & { fade?: number; fadeTo?: (v: number, d: number) => void } {
-        if (this.mMaterial) return this.mMaterial as unknown as MeshBasicMaterial;
+    getMaterial(): FadeMaterial<MeshBasicMaterial> {
+        if (this.mMaterial) return this.mMaterial as unknown as FadeMaterial<MeshBasicMaterial>;
 
         const mat = new MeshBasicMaterial({
             color: 0xffffff,

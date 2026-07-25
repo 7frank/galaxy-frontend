@@ -13,10 +13,10 @@ import { Matrix4 } from "three/src/math/Matrix4.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { LineSegments } from "three/src/objects/LineSegments.js";
 import _ from "lodash";
-import type { GraphNode } from "./particles/ParticleNodeGroup";
+import type { GraphNode, BubbleNode as BaseBubbleNode } from "./particles/ParticleNodeGroup";
 
-interface BubbleNode extends GraphNode {
-    _bubble: { position: Vector3 }
+interface BubbleNode extends Omit<BaseBubbleNode, '_bubble'> {
+    _bubble: { position: Vector3; matrixWorld: Matrix4 }
     getParentCluster: () => { matrixWorld: Matrix4 } | null
 }
 

@@ -13,8 +13,10 @@ import ParticleNodeGroup, { GraphNode, BubbleNode, ParticleNodeGroupInstance, Pa
 
 
 import {TWEEN} from "../lib/Tween"
+import type { Raycaster, Intersection } from "three/src/core/Raycaster.js";
 import { Object3D } from "three/src/core/Object3D.js";
 import { Matrix4 } from "three/src/math/Matrix4.js";
+import { Material } from "three/src/materials/Material.js";
 import { Ray } from "three/src/math/Ray.js";
 import { Sphere } from "three/src/math/Sphere.js";
 import { Vector3 } from "three/src/math/Vector3.js";
@@ -62,7 +64,7 @@ export default class ClusterLeafElement extends Mesh {
             var ray = new Ray();
             var sphere = new Sphere();
 
-            return function raycast(this: { visible: boolean; geometry: { isBufferGeometry: boolean; boundingSphere: Sphere | null; computeBoundingSphere: () => void; index: { array: ArrayLike<number> } | null; attributes: { position: { array: ArrayLike<number> }; size?: { array: ArrayLike<number> } } }; matrixWorld: Matrix4; scale: Vector3 }, raycaster: import('three/src/core/Raycaster.js').Raycaster, intersects: import('three/src/core/Raycaster.js').Intersection[]) {
+            return function raycast(this: { visible: boolean; geometry: { isBufferGeometry: boolean; boundingSphere: Sphere | null; computeBoundingSphere: () => void; index: { array: ArrayLike<number> } | null; attributes: { position: { array: ArrayLike<number> }; size?: { array: ArrayLike<number> } } }; matrixWorld: Matrix4; scale: Vector3 }, raycaster: Raycaster, intersects: Intersection[]) {
 
                 if (this.visible == false)
                     return
@@ -128,7 +130,7 @@ export default class ClusterLeafElement extends Mesh {
                             distanceToRay: Math.sqrt(rayPointDistanceSq),
                             face: null,
                             object: node
-                        } as unknown as import('three/src/core/Raycaster.js').Intersection);
+                        } as unknown as Intersection);
                     }
                 }
 
@@ -204,7 +206,7 @@ export default class ClusterLeafElement extends Mesh {
 
         if (this.mEdgesContainer) {
             this.mEdgesContainer.visible = this.bEdgesVisible ? levelOfDetail > 0.75 : false;
-            ;(this.mEdgesContainer.mEdges.material as import('three/src/materials/Material.js').Material & { opacity: number }).opacity = 0.04
+            ;(this.mEdgesContainer.mEdges.material as Material & { opacity: number }).opacity = 0.04
         }
 
         if (this.mNodeMeshes)

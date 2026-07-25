@@ -3,7 +3,7 @@
  */
 
 
-import View3D from "./View3D"
+import View3D, { type BorderEffect } from "./View3D"
 
 
 import RootCluster from "../cluster/RootCluster"
@@ -129,7 +129,7 @@ export default class GraphView3D extends View3D {
                     effect.onAttach(cluster.mHull.mesh as Mesh);
                 });
             }
-            if (composer) this.setBorderEffect(composer as import('./View3D').BorderEffect);
+            if (composer) this.setBorderEffect(composer as BorderEffect);
             return this;
         };
         if (style === "Outline") {

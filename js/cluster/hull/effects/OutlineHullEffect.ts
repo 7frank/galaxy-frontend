@@ -6,9 +6,9 @@ import { Mesh } from "three/src/objects/Mesh.js";
 import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
 import { Scene } from "three/src/scenes/Scene.js";
 import { Camera } from "three/src/cameras/Camera.js";
-import BaseHullEffect from "./BaseHullEffect";
+import BaseHullEffect, { type EffectMode } from "./BaseHullEffect";
 
-export type HullEffectMode = "hover" | "ambient" | "none"
+export type HullEffectMode = EffectMode
 
 export interface OutlineComposerOptions {
     enableSmaa?: boolean
@@ -20,7 +20,7 @@ export interface OutlineComposerOptions {
 export class OutlineComposer {
 
     enableSmaa: boolean
-    mMeshModes: Map<Mesh, HullEffectMode>
+    mMeshModes: Map<Mesh, EffectMode>
     mComposer: InstanceType<typeof EffectComposer> | null = null
     mRenderer: WebGLRenderer | null = null
     mScene: Scene | null = null
@@ -75,7 +75,7 @@ export class OutlineComposer {
         }
     }
 
-    add(mesh: Mesh, mode: HullEffectMode): void {
+    add(mesh: Mesh, mode: EffectMode): void {
         this.mMeshModes.set(mesh, mode);
         if (mode === "ambient" || mode === "hover") this.effectDim.selection.add(mesh);
     }
@@ -140,13 +140,13 @@ export class OutlineComposer {
  */
 export default class OutlineHullEffect extends BaseHullEffect {
 
-    mMode: HullEffectMode
+    mMode: EffectMode
     mComposer: OutlineComposer | null
     mMesh: Mesh | null
     mFillMesh: Mesh | null
     mFillMat: MeshBasicMaterial
 
-    constructor(mode: HullEffectMode = "hover", composer: OutlineComposer | null = null) {
+    constructor(mode: EffectMode = "hover", composer: OutlineComposer | null = null) {
         super();
         this.mMode = mode;
         this.mComposer = composer;
