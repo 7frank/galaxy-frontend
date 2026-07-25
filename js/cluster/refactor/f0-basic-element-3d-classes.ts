@@ -117,7 +117,7 @@ export function register3DClass(className: string, options: Partial<ClassFactory
     _classes[className] = merged;
 }
 
-function _newClassViaFactory(className: string, env: NodeEnv, el: NodeEl): ExtendedMesh {
+export function _newClassViaFactory(className: string, env: NodeEnv, el: NodeEl): ExtendedMesh {
     const factory = _classes[className];
     if (!factory) {
         console.error("3d class " + className + " not found");

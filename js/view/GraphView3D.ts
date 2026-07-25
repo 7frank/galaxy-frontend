@@ -280,6 +280,7 @@ export default class GraphView3D extends View3D {
         let graphData = new GraphData(rawGraphData);
 
         let preparedData = graphData.createClusterNodesAndEdges(this);
+        if (!preparedData) return;
 
         var res = new RootCluster(preparedData.nodes, undefined, this);
 

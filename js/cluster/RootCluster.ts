@@ -7,7 +7,7 @@ import type { ClusterSpec } from "./BaseCluster3D"
 import ClusterTextOverlay from "./text/ClusterTextOverlay"
 import DefaultColorScheme from "./utils/DefaultColorScheme"
 
-import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
+import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./utils/ColorUtils"
 import _ from "lodash";
 import type View3D from "../view/View3D";
 import type { GraphNode } from "./particles/ParticleNodeGroup";
