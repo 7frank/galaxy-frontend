@@ -1,9 +1,9 @@
-import TextureAnimator from "./f0_TextureAnimator"
+import TextureAnimator from "./utils/TextureAnimator"
 
-import dot9Image from "../../../img/dot9.png"
-import dot7Image from "../../../img/dot7.png"
-import ring2Image from "../../../img/ring2.png"
-import ring3Image from "../../../img/ring3.png"
+import dot9Image from "../../img/dot9.png"
+import dot7Image from "../../img/dot7.png"
+import ring2Image from "../../img/ring2.png"
+import ring3Image from "../../img/ring3.png"
 
 import { AdditiveBlending, BackSide, DoubleSide } from "three/src/constants.js";
 import { BufferAttribute } from "three/src/core/BufferAttribute.js";

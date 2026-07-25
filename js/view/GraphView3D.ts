@@ -13,7 +13,7 @@ import DefaultColorScheme from "../cluster/utils/DefaultColorScheme"
 import "../gui/GraphHUD"
 
 
-import {GUI} from "../cluster/refactor/SpecificDataUtils"
+import {GUI} from "../cluster/SpecificDataUtils"
 import _ from "lodash";
 import ConvexVolume from "../cluster/hull/ConvexVolume";
 import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";

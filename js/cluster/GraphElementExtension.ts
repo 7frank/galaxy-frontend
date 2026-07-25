@@ -1,9 +1,9 @@
-import { addArrow, removeArrow, type ArrowEdge } from "./f5-arrows"
+import { addArrow, removeArrow, type ArrowEdge } from "./edges/ArrowEdge"
 import { GUI } from "./SpecificDataUtils";
-import type { ExtendedNode, NodeEnv, DomEvent } from "./f0-basic-element-3d-classes";
+import type { ExtendedNode, NodeEnv, DomEvent } from "./Node3DClassRegistry";
 import * as _ from "lodash"
 import type { Mesh } from "three/src/objects/Mesh.js";
-import NodeSelectionManager from "../NodeSelectionManager";
+import NodeSelectionManager from "./NodeSelectionManager";
 
 export interface HighlightNode extends ExtendedNode {
     edges: ArrowEdge[]

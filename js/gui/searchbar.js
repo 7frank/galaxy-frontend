@@ -2,7 +2,7 @@
  * the searchbar for the graph
  */
 
-import {doOnClickNode, highlightNodeElements, unhighlightNodeElements} from "../cluster/refactor/f1"
+import {doOnClickNode, highlightNodeElements, unhighlightNodeElements} from "../cluster/GraphElementExtension"
 import * as _ from "lodash";
 
 

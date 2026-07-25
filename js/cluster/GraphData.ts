@@ -1,6 +1,6 @@
 import NodeElement, { type NodeElementData } from "./NodeElement"
-import { extendGraphElements } from "./refactor/f1"
-import type { ArrowEdge } from "./refactor/f5-arrows"
+import { extendGraphElements } from "./GraphElementExtension"
+import type { ArrowEdge } from "./edges/ArrowEdge"
 import type View3D from "../view/View3D"
 import _ from "lodash";
 

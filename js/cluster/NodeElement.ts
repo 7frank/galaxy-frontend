@@ -1,8 +1,8 @@
 import BaseNode from "./BaseNode"
 import type View3D from "../view/View3D"
-import type { NodeEnv, ExtendedMesh, NodeEl } from "./refactor/f0-basic-element-3d-classes"
-import { basicSpriteSize, _newClassViaFactory } from "./refactor/f0-basic-element-3d-classes"
-import type { ArrowEdge } from "./refactor/f5-arrows"
+import type { NodeEnv, ExtendedMesh, NodeEl } from "./Node3DClassRegistry"
+import { basicSpriteSize, _newClassViaFactory } from "./Node3DClassRegistry"
+import type { ArrowEdge } from "./edges/ArrowEdge"
 import type DomEventsAlt from "./utils/DomEventsAlt"
 
 import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";

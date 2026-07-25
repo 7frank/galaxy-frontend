@@ -8,7 +8,7 @@ import BasicHullEffect from "../hull/effects/BasicHullEffect";
 
 import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
 import ZoomUtil from "../../utils/ZoomUtil";
-import {removeSelections} from "../refactor/f1";
+import {removeSelections} from "../GraphElementExtension";
 
 import { Color } from "three/src/math/Color.js";
 import { Vector3 } from "three/src/math/Vector3.js";

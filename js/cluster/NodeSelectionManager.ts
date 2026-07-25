@@ -1,7 +1,7 @@
 import ZoomUtil from "../utils/ZoomUtil";
-import type { HighlightNode } from "./refactor/f1";
-import type { ArrowEdge } from "./refactor/f5-arrows";
-import { addArrow, removeArrow } from "./refactor/f5-arrows";
+import type { HighlightNode } from "./GraphElementExtension";
+import type { ArrowEdge } from "./edges/ArrowEdge";
+import { addArrow, removeArrow } from "./edges/ArrowEdge";
 import type { Mesh } from "three/src/objects/Mesh.js";
 
 export default class NodeSelectionManager {

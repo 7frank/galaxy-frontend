@@ -1,5 +1,5 @@
 import { Vector3 } from "three/src/math/Vector3.js";
-import { doOnClickNode } from "../cluster/refactor/f1";
+import { doOnClickNode } from "../cluster/GraphElementExtension";
 import "./EdgeIndicatorOverlay.css";
 
 const SECTOR_COUNT = 24;

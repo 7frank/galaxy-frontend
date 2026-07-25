@@ -1,8 +1,8 @@
-import "../../gui/company-details/CompanyDetails"
+import "../gui/company-details/CompanyDetails"
 import * as _ from "lodash";
-import { cycleGradient, getCurrentGradient } from "../utils/ColorUtils";
+import { cycleGradient, getCurrentGradient } from "./utils/ColorUtils";
 
-export { computeCompanyNodeColor, computeGroupNodeColorHelper } from "../utils/ColorUtils";
+export { computeCompanyNodeColor, computeGroupNodeColorHelper } from "./utils/ColorUtils";
 
 function formatNumber(num: number): string {
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
