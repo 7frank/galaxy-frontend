@@ -22,6 +22,7 @@ import BoxHullEffect from "../cluster/hull/effects/BoxHullEffect";
 import type BaseHullEffect from "../cluster/hull/effects/BaseHullEffect";
 import type BaseCluster3D from "../cluster/BaseCluster3D";
 import type { ClusterSpec } from "../cluster/BaseCluster3D";
+import type { StencilRenderer } from "../utils/StencilRenderer";
 import { BackSide } from "three/src/constants.js";
 import { BufferAttribute } from "three/src/core/BufferAttribute.js";
 import { BufferGeometry } from "three/src/core/BufferGeometry.js";
@@ -37,7 +38,7 @@ import { Box3 } from "three/src/math/Box3.js";
 import { initEdgeIndicatorOverlay } from "../gui/EdgeIndicatorOverlay.js";
 import type { ParticleNodeGroupOptions, GraphNode } from "../cluster/particles/ParticleNodeGroup";
 import type Datasource from "../data/Datasource";
-import type DefaultColorScheme from "../cluster/utils/DefaultColorScheme";
+import type { default as DefaultColorSchemeType } from "../cluster/utils/DefaultColorScheme";
 import type BaseVolume from "../cluster/hull/BaseVolume";
 
 export type { ClusterSpec } from "../cluster/BaseCluster3D";
@@ -51,7 +52,7 @@ export default class GraphView3D extends View3D {
     mRootCluster: RootCluster | null
     mOptions: GraphView3DOptions
     mSpeccs: ClusterSpec[]
-    mColorScheme: DefaultColorScheme | null
+    mColorScheme: DefaultColorSchemeType | null
     mSkyDome: Group | null
     _clusterDepth: number | undefined
     _hullOptions: ClusterSpec['options'] | null
@@ -67,11 +68,11 @@ export default class GraphView3D extends View3D {
 
         (window as Window & { test?: unknown }).test = {gl: gl, renderer: this.mRenderer};
 
-        const renderer = this.mRenderer as WebGLRenderer & { debug?: Record<string, unknown> };
+        const renderer = this.mRenderer as unknown as StencilRenderer;
         renderer.debug = Object.assign(renderer.debug || {}, {
             stencil: {
-                func: [[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xff]],
-                op: [[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]],
+                func: [[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xff]] as [[number,number,number],[number,number,number]],
+                op: [[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]] as [[number,number,number],[number,number,number]],
                 state: (b: boolean) => this.setStencil(b)
             }
         });
@@ -120,15 +121,15 @@ export default class GraphView3D extends View3D {
             if (this.mRootCluster) {
                 this.mRootCluster.findClusters("*").forEach((cluster: BaseCluster3D) => {
                     if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
-                    if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh);
-                    const mode: string = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
+                    if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh as Mesh);
+                    const mode: string = cluster._hullMode || (cluster._hullEffect && (cluster._hullEffect as BaseHullEffect & { mMode?: string }).mMode) || "hover";
                     if (!cluster._hullMode) cluster._hullMode = mode;
                     const effect = makeEffect(mode, composer);
                     cluster._hullEffect = effect;
-                    effect.onAttach(cluster.mHull.mesh);
+                    effect.onAttach(cluster.mHull.mesh as Mesh);
                 });
             }
-            if (composer) this.setBorderEffect(composer);
+            if (composer) this.setBorderEffect(composer as import('./View3D').BorderEffect);
             return this;
         };
         if (style === "Outline") {
@@ -185,9 +186,9 @@ export default class GraphView3D extends View3D {
         var hexaGroup = new Group();
 
         type HexaPoint = {x: number; y: number; z: number};
-        type HexaTile = {boundary: HexaPoint[]; getLatLon: (r: number) => void};
+        type HexaTile = {boundary: HexaPoint[]; getLatLon: (r: number) => void; mesh?: Mesh};
         type HexaSphere = {tiles: HexaTile[]; radius: number};
-        var hexasphere = new (window as Window & { Hexasphere: new (r: number, s: number, t: number) => HexaSphere }).Hexasphere(radius, subDivisions, tileSize);
+        var hexasphere = new (window as unknown as { Hexasphere: new (r: number, s: number, t: number) => HexaSphere }).Hexasphere(radius, subDivisions, tileSize);
         for (var i = 0; i < hexasphere.tiles.length; i++) {
             var t = hexasphere.tiles[i];
             void t.getLatLon(hexasphere.radius);

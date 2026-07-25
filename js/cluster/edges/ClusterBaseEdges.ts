@@ -1,4 +1,4 @@
-import EdgeUtil, { ClusterEdge } from "../EdgeUtil";
+import EdgeUtil, { ClusterEdge, type EdgeNode } from "../EdgeUtil";
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin";
 import type { FadeMaterial } from "../../utils/FadeMaterial";
 import BaseCluster3D from "../BaseCluster3D";
@@ -161,8 +161,8 @@ export default class ClusterBaseEdges extends Line {
         const pairs: [Vector3, Vector3][] = [];
 
         for (const edge of edges) {
-            const s = edge.source instanceof BaseCluster3D ? edge.source : edge.source._el;
-            const d = edge.target instanceof BaseCluster3D ? edge.target : edge.target._el;
+            const s = edge.source instanceof BaseCluster3D ? edge.source : (edge.source as EdgeNode & { _el?: BaseCluster3D })._el;
+            const d = edge.target instanceof BaseCluster3D ? edge.target : (edge.target as EdgeNode & { _el?: BaseCluster3D })._el;
 
             if (!s || !d) {
                 invalidEdges.push(edge);

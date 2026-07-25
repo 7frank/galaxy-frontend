@@ -8,6 +8,6 @@ export interface StencilState {
     op: [StencilFunc, StencilFunc]
 }
 
-export type StencilRenderer = WebGLRenderer & {
-    debug: { stencil: StencilState }
+export type StencilRenderer = Omit<WebGLRenderer, 'debug'> & {
+    debug: { stencil: StencilState } & Record<string, unknown>
 }

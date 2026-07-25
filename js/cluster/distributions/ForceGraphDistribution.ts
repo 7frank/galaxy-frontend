@@ -66,12 +66,17 @@ export default class ForceGraphDistribution extends BaseDistribution {
         const layout: D3Simulation = d3.forceSimulation() as unknown as D3Simulation;
         const scale = this.mScale;
 
+        interface ForceLink {
+            id(fn: (d: D3SimNode) => string | undefined): ForceLink
+            distance(fn: () => number): ForceLink
+            links(e: D3SimEdge[]): ForceLink
+        }
         layout
             .numDimensions(this.dimensions)
             .alphaDecay(0.05)
             .velocityDecay(0.6)
             .nodes(nodes)
-            .force('link', (d3.forceLink() as unknown as { id: (fn: (d: D3SimNode) => string | undefined) => unknown; distance: (fn: () => number) => unknown; links: (e: D3SimEdge[]) => unknown }).id((d: D3SimNode) => d._id)
+            .force('link', (d3.forceLink() as unknown as ForceLink).id((d: D3SimNode) => d._id)
                 .distance(() => scale / 5)
                 .links(edges)
             )
@@ -131,10 +136,10 @@ export default class ForceGraphDistribution extends BaseDistribution {
         let mNodes: D3SimNode[];
 
         if (nodes instanceof BaseCluster3D) {
-            mEdges = nodes.createEdgesForChildClusters();
+            mEdges = nodes.createEdgesForChildClusters() as unknown as D3SimEdge[];
             mEdges.forEach(function (edge: D3SimEdge) {
-                edge.source = (edge.source as { position: { x: number; y: number; z: number } }).position;
-                edge.target = (edge.target as { position: { x: number; y: number; z: number } }).position;
+                edge.source = (edge.source as unknown as { position: { x: number; y: number; z: number } }).position;
+                edge.target = (edge.target as unknown as { position: { x: number; y: number; z: number } }).position;
             });
             mNodes = Object.values(nodes.mClusters).map(function (n: BaseCluster3D) {
                 const pos = n.position as unknown as D3SimNode;

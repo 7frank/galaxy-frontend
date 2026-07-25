@@ -15,7 +15,7 @@ export default class DefaultDistribution extends BaseDistribution {
         this.mDuration = 1;
     }
 
-    distribute(node: DistributionNode & Pick<BubbleNode, '_bubble'>, _dx: number, _dy: number, _dz: number): DistributeResult {
+    distribute(node: BubbleNode, _dx: number, _dy: number, _dz: number): DistributeResult {
         const mesh: Object3D | DistributionNode = node._bubble ? node._bubble as unknown as Object3D : node;
         let absPos: Vector3;
 

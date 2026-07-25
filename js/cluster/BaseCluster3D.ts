@@ -5,7 +5,7 @@
 
 import ClusterLeafElement from "./ClusterLeafElement"
 import BaseNode from "./BaseNode"
-import EdgeUtil from "./EdgeUtil"
+import EdgeUtil, { type ClusterEdge } from "./EdgeUtil"
 import BaseVolume from "./hull/BaseVolume"
 import BaseHullEffect from "./hull/effects/BaseHullEffect"
 
@@ -26,12 +26,15 @@ import { BoxGeometry } from "three/src/geometries/BoxGeometry.js";
 import { CircleGeometry } from "three/src/geometries/CircleGeometry.js";
 import { RingGeometry } from "three/src/geometries/RingGeometry.js";
 import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
+import { Camera } from "three/src/cameras/Camera.js";
+import { Material } from "three/src/materials/Material.js";
 import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
 import { Box3 } from "three/src/math/Box3.js";
 import { Color as ThreeColor } from "three/src/math/Color.js";
 import { Sphere } from "three/src/math/Sphere.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Group } from "three/src/objects/Group.js";
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
 import { Mesh } from "three/src/objects/Mesh.js";
 import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
 import { Scene } from "three/src/scenes/Scene.js";
@@ -72,7 +75,7 @@ export default class BaseCluster3D extends BaseNode {
     mExpandedGroup: Group
     mCollapsedClusterHull: Group & { animate?: Function } | null
     mChildClustersEdgesMesh: InstanceType<typeof ClusterBaseEdges> | null
-    mChildClustersEdges: unknown | null
+    mChildClustersEdges: ClusterEdge[] | null
     mExpanded: boolean
     mClusterClusteringApplied: boolean
     mEntry: ClusterSpec
@@ -161,7 +164,7 @@ export default class BaseCluster3D extends BaseNode {
 
             if (cluster.mHull) {
                 if (cluster._hullEffect && cluster.mHull.mesh)
-                    cluster._hullEffect.onDetach(cluster.mHull.mesh);
+                    cluster._hullEffect.onDetach(cluster.mHull.mesh as Mesh);
                 cluster.mHull.dispose();
                 delete (cluster as { mHull?: InstanceType<typeof BaseVolume> | null }).mHull;
                 cluster.mHull = null;
@@ -197,8 +200,8 @@ export default class BaseCluster3D extends BaseNode {
         this.findClusters("*").forEach(function (c) {
             c.bClusterEdgesVisible = bVisible;
             if (c.mChildClustersEdgesMesh) {
-                c.mChildClustersEdgesMesh.material.visible = bVisible;
-                c.mChildClustersEdgesMesh.material.needsUpdate = true;
+                (c.mChildClustersEdgesMesh.material as Material).visible = bVisible;
+                (c.mChildClustersEdgesMesh.material as Material).needsUpdate = true;
             }
         })
 
@@ -308,7 +311,7 @@ export default class BaseCluster3D extends BaseNode {
                 }
 
             if (this._hullEffect && this.mHull && this.mHull.mesh)
-                this._hullEffect.onActive(this.mHull.mesh);
+                this._hullEffect.onActive(this.mHull.mesh as Mesh);
         })
         this.on("mouseout", function (this: BaseCluster3D) {
             if (this.mExpanded == false)
@@ -316,7 +319,7 @@ export default class BaseCluster3D extends BaseNode {
                     this.mCollapsedClusterHull.scale.copy(origScale)
 
             if (this._hullEffect && this.mHull && this.mHull.mesh)
-                this._hullEffect.onInactive(this.mHull.mesh);
+                this._hullEffect.onInactive(this.mHull.mesh as Mesh);
         })
 
         this.trigger("hull-updated")
@@ -394,8 +397,8 @@ export default class BaseCluster3D extends BaseNode {
             let opa = vis
             if (opa > 0.02) opa = 0.02;
 
-            this.mChildClustersEdgesMesh.material.opacity = opa;
-            this.mChildClustersEdgesMesh.material.visible = this.bClusterEdgesVisible ? vis > 0.02 && vis < 0.9 : false;
+            (this.mChildClustersEdgesMesh.material as Material).opacity = opa;
+            (this.mChildClustersEdgesMesh.material as Material).visible = this.bClusterEdgesVisible ? vis > 0.02 && vis < 0.9 : false;
         }
     }
 
@@ -450,7 +453,7 @@ export default class BaseCluster3D extends BaseNode {
                 if (!c1) return;
                 var c2 = new Vector3();
                 c2.setFromMatrixPosition(leaf.matrixWorld);
-                node._bubble!.position.add(c1).sub(c2);
+                (node._bubble!.position as unknown as Vector3).add(c1).sub(c2);
                 _.extend(node, node._bubble!.position)
             })
         })
@@ -473,7 +476,7 @@ export default class BaseCluster3D extends BaseNode {
         return this.mEntrys || []
     }
 
-    getClusterOptions(): Required<ClusterOptions> {
+    getClusterOptions(): ClusterOptions & Required<Omit<ClusterOptions, 'hullEffect'>> {
         let options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
@@ -535,7 +538,7 @@ export default class BaseCluster3D extends BaseNode {
             if (typeof isClusterExpanded == "function")
                 isClusterExpanded = isClusterExpanded.bind(this)()
 
-            this.mExpanded = isClusterExpanded
+            this.mExpanded = isClusterExpanded as boolean
 
             if (isClusterExpanded == false) {
                 this.getSphereHull();
@@ -627,14 +630,14 @@ export default class BaseCluster3D extends BaseNode {
         this.mChildClustersEdgesMesh.update()
 
         if (this.mChildClustersEdgesMesh.children.length > 0)
-            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[0])
+            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh.children[0] as Mesh)
         else
-            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
+            this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh as unknown as Mesh)
     }
 
     addChildClusterEdges(options?: Record<string, unknown>): void {
         if (this.mChildClustersEdgesMesh) {
-            this.mChildClustersEdgesMesh.geometry.verticesNeedUpdate = true;
+            (this.mChildClustersEdgesMesh.geometry as BufferGeometry & { verticesNeedUpdate?: boolean }).verticesNeedUpdate = true;
             return;
         }
 
@@ -750,12 +753,12 @@ export default class BaseCluster3D extends BaseNode {
         }
     }
 
-    addHullStencilBeforeRender(mesh: Mesh | Group, callback?: Function): void {
+    addHullStencilBeforeRender(mesh: Mesh, callback?: Function): void {
         var that = this
 
-        (mesh as Mesh).onBeforeRender = function (this: Mesh, renderer: WebGLRenderer) {
+        mesh.onBeforeRender = function (this: Mesh, renderer: WebGLRenderer, _scene: Scene, _camera: Camera, _geometry: BufferGeometry, _material: Material, _group: Group) {
             var depth = that.getDepth()
-            let opt = (renderer as StencilRenderer).debug.stencil
+            let opt = (renderer as unknown as StencilRenderer).debug.stencil
             opt.state(true)
             var gl = renderer.getContext();
             let func = opt.func[0]
@@ -766,15 +769,15 @@ export default class BaseCluster3D extends BaseNode {
                 callback.bind(this)(...arguments)
         }
 
-        (mesh as Mesh).onAfterRender = function (_renderer: WebGLRenderer, _scene: Scene) {}
+        mesh.onAfterRender = function (_renderer: WebGLRenderer, _scene: Scene, _camera: Camera, _geometry: BufferGeometry, _material: Material, _group: Group) {}
     }
 
-    addEdgeStencilBeforeRender(mesh: Mesh | Group, callback?: Function): void {
+    addEdgeStencilBeforeRender(mesh: Mesh, callback?: Function): void {
         var that = this
 
-        (mesh as Mesh).onBeforeRender = function (this: Mesh, renderer: WebGLRenderer) {
+        mesh.onBeforeRender = function (this: Mesh, renderer: WebGLRenderer, _scene: Scene, _camera: Camera, _geometry: BufferGeometry, _material: Material, _group: Group) {
             var depth = that.getDepth()
-            let opt = (renderer as StencilRenderer).debug.stencil
+            let opt = (renderer as unknown as StencilRenderer).debug.stencil
             opt.state(true)
             var gl = renderer.getContext();
             let func = opt.func[1]
@@ -785,7 +788,7 @@ export default class BaseCluster3D extends BaseNode {
                 callback.bind(this)(...arguments)
         }
 
-        (mesh as Mesh).onAfterRender = function (_renderer: WebGLRenderer, _scene: Scene) {}
+        mesh.onAfterRender = function (_renderer: WebGLRenderer, _scene: Scene, _camera: Camera, _geometry: BufferGeometry, _material: Material, _group: Group) {}
     }
 
     adjustHullSize(): void {
@@ -833,16 +836,16 @@ export default class BaseCluster3D extends BaseNode {
 
         if (this.mHull!.mesh) {
             if (this._hullEffect && prevMesh)
-                this._hullEffect.onDetach(prevMesh);
+                this._hullEffect.onDetach(prevMesh as Mesh);
             if (!this._hullEffect) {
                 const makeEffect = mOptions.makeHullEffect || (() => mOptions.hullEffect);
                 this._hullEffect = makeEffect();
             }
-            this._hullEffect.onAttach(this.mHull!.mesh);
+            this._hullEffect.onAttach(this.mHull!.mesh as Mesh);
         }
 
         if (!this.mHull && (this.mHull as unknown as { geometry?: BufferGeometry })?.geometry) {
-            this.geometry = (this.mHull as unknown as { geometry: BufferGeometry }).geometry;
+            this.geometry = (this.mHull as unknown as { geometry: BufferGeometry }).geometry as BufferGeometry;
         } else {
             let boundingSphere = boundingBox.getBoundingSphere(new Sphere());
             var sphereGeometry = new SphereGeometry(boundingSphere.radius, 10, 5);
@@ -853,7 +856,7 @@ export default class BaseCluster3D extends BaseNode {
 
         this.setHullColorFromOptions(this.mHull!)
 
-        this.addHullStencilBeforeRender(this.mHull!.mesh)
+        this.addHullStencilBeforeRender(this.mHull!.mesh as Mesh)
 
         this.trigger("hull-updated")
     }
@@ -907,8 +910,8 @@ export default class BaseCluster3D extends BaseNode {
         return EdgeUtil.getClusterInfo(this.mClusters);
     }
 
-    createEdgesForChildClusters(): unknown {
-        if (this.mChildClustersEdges) return this.mChildClustersEdges;
+    createEdgesForChildClusters(): ClusterEdge[] {
+        if (this.mChildClustersEdges) return this.mChildClustersEdges as ClusterEdge[];
         return this.mChildClustersEdges = EdgeUtil.createEdgesBetweenClustersFromMap(this.mClusters);
     }
 

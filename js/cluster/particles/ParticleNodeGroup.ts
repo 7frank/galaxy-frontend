@@ -220,7 +220,7 @@ export default function ParticleNodeGroup(nodes: GraphNode[], options: ParticleN
 
             for (let eName of eventName.split(" ")) {
 
-                domEvents.addEventListener(particleSystem, eName, function (e: any) {
+                domEvents.addEventListener(particleSystem, eName, function (e: { intersect?: { index: number } }) {
 
                     if (!e.intersect) {
                         console.warn("could not resolve intersection ")

@@ -9,6 +9,7 @@ import { BufferAttribute } from "three/src/core/BufferAttribute.js";
 import { BufferGeometry } from "three/src/core/BufferGeometry.js";
 import { Object3D } from "three/src/core/Object3D.js";
 import { LineBasicMaterial } from "three/src/materials/LineBasicMaterial.js";
+import { Matrix4 } from "three/src/math/Matrix4.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { LineSegments } from "three/src/objects/LineSegments.js";
 import _ from "lodash";
@@ -16,7 +17,7 @@ import type { GraphNode } from "./particles/ParticleNodeGroup";
 
 interface BubbleNode extends GraphNode {
     _bubble: { position: Vector3 }
-    getParentCluster: () => { matrixWorld: { [key: string]: unknown } } | null
+    getParentCluster: () => { matrixWorld: Matrix4 } | null
 }
 
 interface ExternalNodeHelper {

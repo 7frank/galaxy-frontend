@@ -148,15 +148,15 @@ export default class FlatVolume extends BoxVolume {
 
     createVariousResolutionSubGeometry(name: string, resolution: number): BufferGeometry {
         const key = 'geometry' + name;
-        const self = this as typeof this & Record<string, BufferGeometry & { mTime?: number }>;
-        if (!self[key] || self[key].mTime != this.mTime) {
+        const cache = this as unknown as Record<string, BufferGeometry & { mTime?: number }>;
+        if (!cache[key] || cache[key].mTime != this.mTime) {
             const margin = this.mBoundingBox!.getSize(new Vector3()).length() / 10;
             const geo2 = this.smoothHullModifier(this.mGeometryZero!, resolution, margin);
             geo2.computeBoundingBox();
             (geo2 as BufferGeometry & { mTime?: number }).mTime = this.mTime;
-            self[key] = geo2;
+            cache[key] = geo2;
         }
-        return self[key];
+        return cache[key];
     }
 
     setLOD(l: number): void {

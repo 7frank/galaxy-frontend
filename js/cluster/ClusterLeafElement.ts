@@ -62,7 +62,7 @@ export default class ClusterLeafElement extends Mesh {
             var ray = new Ray();
             var sphere = new Sphere();
 
-            return function raycast(this: { visible: boolean; geometry: { isBufferGeometry: boolean; boundingSphere: Sphere | null; computeBoundingSphere: () => void; index: { array: ArrayLike<number> } | null; attributes: { position: { array: ArrayLike<number> }; size?: { array: ArrayLike<number> } } }; matrixWorld: Matrix4; scale: Vector3 }, raycaster: { params: { Points: { threshold: number } }; ray: Ray; near: number; far: number }, intersects: Array<{ depth: number; distance: number; distanceToRay: number; face: null; object: unknown }>) {
+            return function raycast(this: { visible: boolean; geometry: { isBufferGeometry: boolean; boundingSphere: Sphere | null; computeBoundingSphere: () => void; index: { array: ArrayLike<number> } | null; attributes: { position: { array: ArrayLike<number> }; size?: { array: ArrayLike<number> } } }; matrixWorld: Matrix4; scale: Vector3 }, raycaster: import('three/src/core/Raycaster.js').Raycaster, intersects: import('three/src/core/Raycaster.js').Intersection[]) {
 
                 if (this.visible == false)
                     return
@@ -128,7 +128,7 @@ export default class ClusterLeafElement extends Mesh {
                             distanceToRay: Math.sqrt(rayPointDistanceSq),
                             face: null,
                             object: node
-                        });
+                        } as unknown as import('three/src/core/Raycaster.js').Intersection);
                     }
                 }
 
@@ -190,11 +190,11 @@ export default class ClusterLeafElement extends Mesh {
 
     getParentCluster(): BaseCluster3D | null {
         let expContainer = this.parent;
-        if (expContainer) return expContainer.parent
+        if (expContainer) return expContainer.parent as unknown as BaseCluster3D
     }
 
     setLOD(levelOfDetail: number): void {
-        if (this.getParentCluster() && this.getParentCluster().mAnimating) return;
+        if (this.getParentCluster() && (this.getParentCluster() as BaseCluster3D & { mAnimating?: boolean }).mAnimating) return;
 
         if (this.mNodeParticles)
             if (this.getParentCluster().useLOD)
@@ -204,7 +204,7 @@ export default class ClusterLeafElement extends Mesh {
 
         if (this.mEdgesContainer) {
             this.mEdgesContainer.visible = this.bEdgesVisible ? levelOfDetail > 0.75 : false;
-            this.mEdgesContainer.mEdges.material.opacity = 0.04
+            ;(this.mEdgesContainer.mEdges.material as import('three/src/materials/Material.js').Material & { opacity: number }).opacity = 0.04
         }
 
         if (this.mNodeMeshes)
@@ -234,9 +234,9 @@ export default class ClusterLeafElement extends Mesh {
             this.mParticles = null;
         }
 
-        if (this.mEdgesContainer && this.mEdgesContainer.geometry) {
+        if (this.mEdgesContainer && (this.mEdgesContainer as unknown as { geometry?: { dispose: () => void } }).geometry) {
             this.remove(this.mEdgesContainer);
-            this.mEdgesContainer.geometry.dispose();
+            (this.mEdgesContainer as unknown as { geometry: { dispose: () => void } }).geometry.dispose();
             this.mEdgesContainer = null;
         }
 
