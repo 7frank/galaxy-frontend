@@ -84,7 +84,7 @@ class TreeDataGenerator {
 
             _.each(chunk2, function (node2) {
 
-                if (node.children.indexOf(node2))
+                if (node.linkedChildren.indexOf(node2))
                     console.error("impl")
                 //     createEdge(node,node2)
                 // remove node2 from chunk2

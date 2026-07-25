@@ -6,8 +6,8 @@ import NodeSelectionManager from "./NodeSelectionManager";
 
 export interface HighlightNode extends ExtendedNode {
     edges: ArrowEdge[]
-    children: HighlightNode[]
-    parents: HighlightNode[]
+    linkedChildren: HighlightNode[]
+    linkedParents: HighlightNode[]
     text?: { addClass?: (s: string) => void; removeClass?: (s: string) => void }
 }
 
@@ -145,8 +145,8 @@ export function extendGraphElements(d3Nodes: HighlightNode[], d3Links: ArrowEdge
 function addGraphHierarchy(d3Nodes: HighlightNode[], d3Links: ArrowEdge[]): void {
     for (const node of d3Nodes) {
         if (!node.edges) node.edges = [];
-        if (!node.children) node.children = [];
-        if (!node.parents) node.parents = [];
+        if (!node.linkedChildren) node.linkedChildren = [];
+        if (!node.linkedParents) node.linkedParents = [];
         (node._bubble as unknown as { node: HighlightNode }).node = node;
     }
 
@@ -156,7 +156,7 @@ function addGraphHierarchy(d3Nodes: HighlightNode[], d3Links: ArrowEdge[]): void
 
         if (src.edges.indexOf(item) < 0) src.edges.push(item);
         if (trg.edges.indexOf(item) < 0) trg.edges.push(item);
-        if (src.children.indexOf(trg) < 0) src.children.push(trg);
-        if (trg.parents.indexOf(src) < 0) trg.parents.push(src);
+        if (src.linkedChildren.indexOf(trg) < 0) src.linkedChildren.push(trg);
+        if (trg.linkedParents.indexOf(src) < 0) trg.linkedParents.push(src);
     }
 }

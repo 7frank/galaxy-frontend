@@ -33,8 +33,8 @@ export default class NodeElement extends BaseNode {
     name?: string
 
     edges: ArrowEdge[] = []
-    children: NodeElement[] = []
-    parents: NodeElement[] = []
+    linkedChildren: NodeElement[] = []
+    linkedParents: NodeElement[] = []
 
     _instances: Record<string, ExtendedMesh> = {}
     _parent: Object3D | null = null

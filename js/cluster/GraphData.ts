@@ -35,7 +35,9 @@ export default class GraphData {
             node._id = id;
             node.x = 0; node.y = 0; node.z = 0;
             const { id: _id, ...rest } = data as NodeElementData & { id?: unknown };
-            Object.assign(node, rest);
+            for (const key of Object.keys(rest)) {
+                if (!(key in node)) (node as unknown as Record<string, unknown>)[key] = (rest as Record<string, unknown>)[key];
+            }
             elements[id] = node;
         });
 

@@ -43,6 +43,9 @@ import type BaseVolume from "../cluster/hull/BaseVolume";
 export type { ClusterSpec } from "../cluster/BaseCluster3D";
 
 export interface GraphView3DOptions extends ParticleNodeGroupOptions {
+    speccs?: ClusterSpec[]
+    clusterDepth?: number
+    hullOptions?: ClusterSpec['options']
     [key: string]: unknown
 }
 
@@ -62,6 +65,10 @@ export default class GraphView3D extends View3D {
 
         this.mRootCluster = null;
         this.mOptions = options;
+
+        if (options.speccs) this.setSpeccs(options.speccs);
+        if (options.clusterDepth != null) this.setClusterDepth(options.clusterDepth);
+        if (options.hullOptions) this.setHullOptions(options.hullOptions);
 
         var gl = this.mRenderer.getContext();
 

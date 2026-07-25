@@ -13,8 +13,8 @@ export default class NodeSelectionManager {
         node.showHighlight?.();
 
         if (showNeighbours) {
-            for (const child of node.children) child.showHighlight?.();
-            for (const parent of node.parents) parent.showHighlight?.();
+            for (const child of node.linkedChildren) child.showHighlight?.();
+            for (const parent of node.linkedParents) parent.showHighlight?.();
         }
 
         if (showEdgeArrows) {
@@ -27,8 +27,8 @@ export default class NodeSelectionManager {
 
     unhighlight(node: HighlightNode): void {
         node.hideHighlight?.();
-        for (const child of node.children) child.hideHighlight?.();
-        for (const parent of node.parents) parent.hideHighlight?.();
+        for (const child of node.linkedChildren) child.hideHighlight?.();
+        for (const parent of node.linkedParents) parent.hideHighlight?.();
         for (const edge of node.edges) removeArrow(edge as ArrowEdge);
     }
 

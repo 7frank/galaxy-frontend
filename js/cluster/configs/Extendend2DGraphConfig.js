@@ -40,7 +40,7 @@ export default class Extended2DGraphConfig extends Default2DGraphConfig {
 
         function groupNameForCustomers(node, size) {
 
-            return node.children.length > size ? node.name : null
+            return node.linkedChildren.length > size ? node.name : null
 
         }
 
