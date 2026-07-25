@@ -13,7 +13,6 @@ import DefaultColorScheme from "../cluster/utils/DefaultColorScheme"
 import "../gui/GraphHUD"
 
 
-import {GUI} from "../cluster/SpecificDataUtils"
 import _ from "lodash";
 import ConvexVolume from "../cluster/hull/ConvexVolume";
 import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";
@@ -225,51 +224,6 @@ export default class GraphView3D extends View3D {
     }
 
 
-    addCompanyCountListenersToCluster(rootCluster: BaseCluster3D): void {
-
-        var visibleNodes: BaseCluster3D[] = [];
-        var _____skipFrames = 0;
-
-        function attachListeners(cluster: BaseCluster3D) {
-            _.each(cluster.findClusters("*"), function (cluster: BaseCluster3D) {
-                cluster.on('before-render', function () {
-
-                    if (_____skipFrames % 20 != 0) return;
-
-                    if (cluster.mExpanded == false) {
-                        visibleNodes.push(cluster);
-                    }
-
-                    if (cluster.isLeaf()) {
-                        visibleNodes.push(cluster);
-                    }
-                })
-
-                cluster.on('initial-expand', function () {
-                    attachListeners(this)
-                })
-            });
-        }
-
-        attachListeners(rootCluster);
-
-        var that = this;
-
-        that.addEventListener("before-render", onBeforeRender);
-
-        function onBeforeRender() {
-            if (that.isMaximised()) {
-                if (_____skipFrames++ % 20 == 0) {
-                    let vl = _.flatten(visibleNodes.map((leaf) => leaf.mNodes))
-
-                    if (vl.length != 0)
-                        GUI.updateFromVisibleNodes(vl);
-                    visibleNodes = []
-                }
-            }
-        }
-    }
-
 
     initClusterForView(rawGraphData: unknown, parentEl3D: { add: (o: unknown) => void }): RootCluster | undefined {
 
@@ -308,8 +262,6 @@ export default class GraphView3D extends View3D {
             this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
 
             (window as Window & { test?: Record<string, unknown> }).test = Object.assign((window as Window & { test?: Record<string, unknown> }).test || {}, { root: this.mRootCluster })
-
-            this.addCompanyCountListenersToCluster(this.mRootCluster);
 
             this.mColorScheme = new DefaultColorScheme()
 
@@ -403,18 +355,6 @@ export default class GraphView3D extends View3D {
         ds(null, function onSuccess(mGraphData: unknown) {
             console.log("data loaded");
             that.setData(mGraphData);
-
-            function triggerColorChange() {
-                let selectEl = document.querySelector(".cloudNodeColorSelect") as HTMLSelectElement | null
-
-                if (!selectEl) setTimeout(triggerColorChange, 100)
-                else {
-                    selectEl.value = "group";
-                    selectEl.dispatchEvent(new Event("change"));
-                }
-            }
-
-            triggerColorChange();
         });
 
         return this
@@ -432,15 +372,6 @@ export default class GraphView3D extends View3D {
         datasource.load(function onSuccess(mGraphData: unknown) {
             console.log("data loaded");
             that.setData(mGraphData);
-            function triggerColorChange() {
-                let selectEl = document.querySelector(".cloudNodeColorSelect") as HTMLSelectElement | null
-                if (!selectEl) setTimeout(triggerColorChange, 100)
-                else {
-                    selectEl.value = "group";
-                    selectEl.dispatchEvent(new Event("change"));
-                }
-            }
-            triggerColorChange();
         });
         return this
     }

@@ -203,10 +203,7 @@ export default class Default3DGraphConfig {
      *
      */
 
-    setDomElements() {
-        document.querySelectorAll(".my-accordion,.searchbar-container input, mode-select span,company-info,.graph-node-info,#sig_menu").forEach(el => el.classList.remove(this.mCssClass))
-
-    }
+    setDomElements() {}
 
 
     /**
@@ -241,7 +238,6 @@ export default class Default3DGraphConfig {
         BaseCluster3D.cleanUpClusters(rootCluster.findClusters("*"), rootCluster);
 
         rootCluster.applyClustering(speccs);
-        view.addCompanyCountListenersToCluster(rootCluster);
 
         //TODO text is shown to early on update
         view.dispatchEvent(new CustomEvent("graph-changed"));

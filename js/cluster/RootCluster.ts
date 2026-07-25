@@ -7,8 +7,6 @@ import type { ClusterSpec } from "./BaseCluster3D"
 import ClusterTextOverlay from "./text/ClusterTextOverlay"
 import DefaultColorScheme from "./utils/DefaultColorScheme"
 
-import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./utils/ColorUtils"
-import _ from "lodash";
 import type View3D from "../view/View3D";
 import type { GraphNode } from "./particles/ParticleNodeGroup";
 
@@ -37,7 +35,6 @@ export default class RootCluster extends Cluster3DExtended {
             })
         })
 
-        this.addColorHandler()
     }
 
     addListeners(): void {
@@ -61,51 +58,6 @@ export default class RootCluster extends Cluster3DExtended {
         this.mColorScheme = cs
     }
 
-
-    addColorHandler(): void {
-
-        var nodes = this.mNodes;
-        var that = this
-
-        function getCountryNamesFromNodes(nodes: Array<GraphNode & { group?: string }>) {
-            var res: Record<string, boolean> = {}
-            _.each(nodes, (n) => { if (n.group) res[n.group] = true })
-            return Object.keys(res)
-        }
-
-        function updateParticles(leaf: { mParticles?: { updateColors: () => void } } | null) {
-            if (leaf && leaf.mParticles) {
-                leaf.mParticles.updateColors();
-            } else {
-                setTimeout(() => updateParticles(leaf), 100)
-            }
-        }
-
-        var countryNames: string[] | null = null;
-
-        window.addEventListener("node-color-change", function (e: Event) {
-            const ce = e as CustomEvent<string>;
-            var val = ce.detail;
-
-            if (!countryNames) countryNames = getCountryNamesFromNodes(nodes)
-
-            var helper = computeGroupNodeColorHelper(countryNames)
-
-            if (val == "group")
-                nodes.forEach(function (v: GraphNode & { group?: string }) {
-                    v.color = helper.getColor(v.group)
-                });
-            else
-                nodes.forEach(function (v: GraphNode & { sent?: string }) {
-                    v.color = computeCompanyNodeColor(parseInt(v.sent ?? "0"), val)
-                })
-
-            _.each(that.getLeafs(), function (leaf: { mNodeParticles?: { update: () => void }; mParticles?: { updateColors: () => void } }) {
-                leaf.mNodeParticles.update()
-                updateParticles(leaf)
-            })
-        })
-    }
 
 
     /**

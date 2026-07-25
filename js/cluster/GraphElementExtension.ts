@@ -1,5 +1,4 @@
 import { addArrow, removeArrow, type ArrowEdge } from "./edges/ArrowEdge"
-import { GUI } from "./SpecificDataUtils";
 import type { ExtendedNode, NodeEnv, DomEvent } from "./Node3DClassRegistry";
 import * as _ from "lodash"
 import type { Mesh } from "three/src/objects/Mesh.js";
