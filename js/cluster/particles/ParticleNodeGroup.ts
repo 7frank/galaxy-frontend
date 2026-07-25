@@ -4,9 +4,11 @@ import { BufferGeometry } from "three/src/core/BufferGeometry.js";
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
 import { ShaderMaterial } from "three/src/materials/ShaderMaterial.js";
 import { Color } from "three/src/math/Color.js";
+import { Matrix4 } from "three/src/math/Matrix4.js";
 import { Sphere } from "three/src/math/Sphere.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Points } from "three/src/objects/Points.js";
+import type DomEventsAlt from "../utils/DomEventsAlt";
 
 export interface GraphNode {
     x: number
@@ -14,6 +16,14 @@ export interface GraphNode {
     z: number
     color?: number
     size?: number
+}
+
+export interface BubbleNode extends GraphNode {
+    _bubble?: {
+        position: { x: number; y: number; z: number; set: (x: number, y: number, z: number) => void }
+        matrixWorld: Matrix4
+        parent?: { parent?: { getRoot?: () => { position: Vector3 } } }
+    }
 }
 
 export interface ParticleNodeGroupOptions {
@@ -46,7 +56,7 @@ export interface ParticleNodeGroupInstance {
  * @param domEvents ... in instance of {@link  cluster.utils.DomEventsAlt}
  * @returns {{nodes: *, pointCloud: Points, update: update, updateNode: updateNode, updateNodePosition: updateNodePosition, updateNodeColor: updateNodeColor, updateNodeSize: updateNodeSize, on: on, remove: remove}}
  */
-export default function ParticleNodeGroup(nodes: GraphNode[], options: ParticleNodeGroupOptions = {}, domEvents: any): ParticleNodeGroupInstance {
+export default function ParticleNodeGroup(nodes: GraphNode[], options: ParticleNodeGroupOptions = {}, domEvents: InstanceType<typeof DomEventsAlt> | null): ParticleNodeGroupInstance {
 
     const resolvedOptions = Object.assign({
         nodeDefaultSize: 10,
@@ -148,7 +158,7 @@ export default function ParticleNodeGroup(nodes: GraphNode[], options: ParticleN
     var particleSystem = new Points(geometry, shaderMaterial);
 
     particleSystem.userData.srcNodes = nodes
-    ;(particleSystem as any).frustrumCulled = true;
+    ;(particleSystem as Points & { frustrumCulled?: boolean }).frustrumCulled = true;
 
     particleSystem.geometry.boundingSphere = new Sphere(new Vector3(), 50000);
 

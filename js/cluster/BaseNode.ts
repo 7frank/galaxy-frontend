@@ -121,7 +121,7 @@ export default class BaseNode extends Mesh {
     }
 
     offKey(eventName: string, eventhandler: Function): void {
-        this.mKeyboardEvents.unbind(eventName, eventhandler as any);
+        this.mKeyboardEvents.unbind(eventName, eventhandler as EventListener);
     }
 
     triggerKey(eventName: string, origDomEvent?: Event, intersect?: object): void {

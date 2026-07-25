@@ -106,12 +106,12 @@ export class OutlineComposer {
         const c = this.mCamera!;
         r.autoClear = false;
         r.autoClearStencil = false;
-        (c as any).layers.set(0);
+        c.layers.set(0);
         this.mComposer!.render();
         r.autoClear = false;
-        (c as any).layers.set(1);
+        c.layers.set(1);
         r.render(s, c);
-        (c as any).layers.enableAll();
+        c.layers.enableAll();
     }
 
     resize(w: number, h: number): void {
@@ -130,7 +130,7 @@ export class OutlineComposer {
             this.mRenderer.autoClearStencil = true;
             if (this.mPrevColorSpace !== undefined)
                 this.mRenderer.outputColorSpace = this.mPrevColorSpace;
-            (this.mCamera as any).layers.enableAll();
+            this.mCamera!.layers.enableAll();
         }
     }
 }

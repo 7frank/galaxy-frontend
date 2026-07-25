@@ -28,6 +28,13 @@ import { TrackballControls } from "../lib/TrackballControls";
  * Note: to customise FPS set the properties 'minFPS' or 'maxFPS'
  */
 
+export interface BorderEffect {
+    init(renderer: WebGLRenderer, scene: Scene, camera: View3D['mCamera']): void
+    render(): void
+    resize(width: number, height: number): void
+    dispose(): void
+}
+
 export default class View3D extends EventTarget {
 
     el: HTMLElement
@@ -42,7 +49,7 @@ export default class View3D extends EventTarget {
     mCameraO: OrthographicCamera
     mControls: InstanceType<typeof TrackballControls>
     mDomEvents: InstanceType<typeof DomEventsAlt>
-    mBorderEffect: any
+    mBorderEffect: BorderEffect | null
     mCaption: HTMLSpanElement | undefined
     toolTipElem: HTMLDivElement | undefined
     mouse: Vector2 | undefined
@@ -59,7 +66,7 @@ export default class View3D extends EventTarget {
 
         this.el = el || document.createElement("div");
         this.el.classList.add("view-3d");
-        (this.el as any)._view3d = this;
+        (this.el as HTMLElement & { _view3d?: View3D })._view3d = this;
 
         this.isRunning = false;
 
@@ -112,9 +119,9 @@ export default class View3D extends EventTarget {
     createControls(): void {
         this.mControls = new TrackballControls(this.mCamera, this.mRenderer.domElement);
 
-        this.mControls.maxDistance = Math.min((this.mCamera as any).far, 200000);
+        this.mControls.maxDistance = Math.min((this.mCamera as { far: number }).far, 200000);
 
-        (this.mControls as any).addEventListener("change", (e: any) => this.dispatchEvent(new CustomEvent("change", {detail: e})));
+        (this.mControls as unknown as EventTarget).addEventListener("change", (e: Event) => this.dispatchEvent(new CustomEvent("change", {detail: e})));
     }
 
 
@@ -161,7 +168,7 @@ export default class View3D extends EventTarget {
     resizeCanvas(): void {
         if (this.mRenderer && this.mCamera) {
             this.mRenderer.setSize(this.el.clientWidth, this.el.clientHeight);
-            (this.mCamera as any).aspect = this.el.clientWidth / this.el.clientHeight;
+            if ('aspect' in this.mCamera) (this.mCamera as PerspectiveCamera).aspect = this.el.clientWidth / this.el.clientHeight;
 
             if (this.mCamera instanceof CombinedCamera)
                 this.mCamera.setSize(this.el.clientWidth, this.el.clientHeight);
@@ -223,7 +230,7 @@ export default class View3D extends EventTarget {
 
         this.mScene = new Scene();
 
-        (window as any).scene = this.mScene;
+        (window as Window & { scene?: Scene }).scene = this.mScene;
 
         this.createCamera();
 
@@ -289,7 +296,7 @@ export default class View3D extends EventTarget {
     }
 
 
-    setBorderEffect(borderEffect: any): void {
+    setBorderEffect(borderEffect: BorderEffect): void {
         this.mBorderEffect = borderEffect;
         if (this._inited_static_) {
             borderEffect.init(this.mRenderer, this.mScene, this.mCamera);

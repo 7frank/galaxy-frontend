@@ -62,7 +62,8 @@ export default class ForceGraphDistribution extends BaseDistribution {
         onComplete: EndCallback
     ): void {
         const that = this;
-        const layout: D3Simulation = (d3_force as any).forceSimulation();
+        const d3 = d3_force as unknown as Record<string, (...args: unknown[]) => unknown>;
+        const layout: D3Simulation = d3.forceSimulation() as unknown as D3Simulation;
         const scale = this.mScale;
 
         layout
@@ -70,7 +71,7 @@ export default class ForceGraphDistribution extends BaseDistribution {
             .alphaDecay(0.05)
             .velocityDecay(0.6)
             .nodes(nodes)
-            .force('link', (d3_force as any).forceLink().id((d: D3SimNode) => d._id)
+            .force('link', (d3.forceLink() as unknown as { id: (fn: (d: D3SimNode) => string | undefined) => unknown; distance: (fn: () => number) => unknown; links: (e: D3SimEdge[]) => unknown }).id((d: D3SimNode) => d._id)
                 .distance(() => scale / 5)
                 .links(edges)
             )
@@ -82,11 +83,11 @@ export default class ForceGraphDistribution extends BaseDistribution {
             const is2D = this.dimensions < 3;
             const collideRadius = is2D ? scale * 1.2 : scale / 2;
             const collideIterations = is2D ? 8 : 2;
-            layout.force("collide", (d3_force as any).forceCollide(collideRadius).iterations(collideIterations));
+            layout.force("collide", d3.forceCollide(collideRadius, collideIterations));
             if (is2D) {
                 layout
-                    .force("forceX", (d3_force as any).forceX(0).strength(0.05))
-                    .force("forceY", (d3_force as any).forceY(0).strength(0.05));
+                    .force("forceX", d3.forceX(0))
+                    .force("forceY", d3.forceY(0));
             }
         }
 
@@ -132,8 +133,8 @@ export default class ForceGraphDistribution extends BaseDistribution {
         if (nodes instanceof BaseCluster3D) {
             mEdges = nodes.createEdgesForChildClusters();
             mEdges.forEach(function (edge: D3SimEdge) {
-                edge.source = (edge.source as any).position;
-                edge.target = (edge.target as any).position;
+                edge.source = (edge.source as { position: { x: number; y: number; z: number } }).position;
+                edge.target = (edge.target as { position: { x: number; y: number; z: number } }).position;
             });
             mNodes = Object.values(nodes.mClusters).map(function (n: BaseCluster3D) {
                 const pos = n.position as unknown as D3SimNode;

@@ -93,7 +93,7 @@ export default class BaseDistribution {
             const dist = that.distribute(n, i / (_len - 1) - 0.5, j / (_len - 1) - 0.5, k / (_len - 1) - 0.5);
 
             const mc = c;
-            const origPos = ((n as any).position) ? (n as any).position : n;
+            const origPos: { x: number; y: number; z: number } = (n instanceof BaseCluster3D) ? n.position : n as { x: number; y: number; z: number };
 
             const tween = new TWEEN.Tween(origPos)
                 .easing(that.mEasingFunction)

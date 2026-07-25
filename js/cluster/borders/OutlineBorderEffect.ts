@@ -42,12 +42,12 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
         let smaaEffect: InstanceType<typeof SMAAEffect> | undefined;
         if (this.enableSmaa) {
             smaaEffect = new SMAAEffect({ preset: SMAAPreset.HIGH, edgeDetectionMode: EdgeDetectionMode.COLOR });
-            (smaaEffect as any).edgeDetectionMaterial.setEdgeDetectionThreshold(0.05);
+            (smaaEffect as unknown as { edgeDetectionMaterial: { setEdgeDetectionThreshold: (v: number) => void } }).edgeDetectionMaterial.setEdgeDetectionThreshold(0.05);
         }
 
         this.effect = new OutlineEffect(scene, camera, {
             blendFunction: BlendFunction.SCREEN,
-            multisampling: Math.min(4, (renderer as any).capabilities.maxSamples),
+            multisampling: Math.min(4, renderer.capabilities.maxSamples),
             edgeStrength: 2.5,
             pulseSpeed: 0.0,
             visibleEdgeColor: 0xffffff,
@@ -59,7 +59,7 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
 
         this.effectDim = new OutlineEffect(scene, camera, {
             blendFunction: BlendFunction.SCREEN,
-            multisampling: Math.min(4, (renderer as any).capabilities.maxSamples),
+            multisampling: Math.min(4, renderer.capabilities.maxSamples),
             edgeStrength: 0.8,
             pulseSpeed: 0.0,
             visibleEdgeColor: 0x8888aa,
@@ -113,14 +113,14 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
         renderer.autoClear = false;
         renderer.autoClearStencil = false;
 
-        (camera as any).layers.set(0);
+        camera.layers.set(0);
         this.mComposer!.render();
 
         renderer.autoClear = false;
-        (camera as any).layers.set(1);
+        camera.layers.set(1);
         renderer.render(scene, camera);
 
-        (camera as any).layers.enableAll();
+        camera.layers.enableAll();
     }
 
     resize(width: number, height: number): void {
@@ -139,7 +139,7 @@ export default class OutlineBorderEffect extends BaseBorderEffect {
             this.mRenderer.autoClearStencil = true;
             if (this.mPrevColorSpace !== undefined)
                 this.mRenderer.outputColorSpace = this.mPrevColorSpace;
-            (this.mCamera as any).layers.enableAll();
+            this.mCamera!.layers.enableAll();
         }
     }
 }

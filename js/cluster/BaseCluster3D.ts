@@ -14,8 +14,13 @@ import MaterialFadeMixin from "../utils/MaterialFadeMixin"
 import Color from 'easy-color';
 
 import ClusterBaseEdges from "./edges/ClusterBaseEdges";
+import type BaseDistribution from "./distributions/BaseDistribution";
+import type DomEventsAlt from "./utils/DomEventsAlt";
+import type { FadeMaterial } from "../utils/FadeMaterial";
+import type { StencilRenderer } from "../utils/StencilRenderer";
+import type { BubbleNode } from "./particles/ParticleNodeGroup";
+import { Quaternion } from "three/src/math/Quaternion.js";
 
-import { Camera } from "three/src/cameras/Camera.js";
 import { NoBlending } from "three/src/constants.js";
 import { BoxGeometry } from "three/src/geometries/BoxGeometry.js";
 import { CircleGeometry } from "three/src/geometries/CircleGeometry.js";
@@ -28,13 +33,36 @@ import { Sphere } from "three/src/math/Sphere.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Group } from "three/src/objects/Group.js";
 import { Mesh } from "three/src/objects/Mesh.js";
+import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
+import { Scene } from "three/src/scenes/Scene.js";
 import * as _ from "lodash";
 import type View3D from "../view/View3D";
 import type { GraphNode } from "./particles/ParticleNodeGroup";
 
+export interface ClusterSpec {
+    generator?: (groupFn: (key: string, node: GraphNode) => void, node: GraphNode) => void
+    distribution?: BaseDistribution
+    events?: Record<string, Function>
+    options?: ClusterOptions
+}
+
+export interface ClusterOptions {
+    hull?: typeof BaseVolume
+    makeHullEffect?: () => BaseHullEffect
+    hullEffect?: BaseHullEffect
+    onHullCreated?: (hull: InstanceType<typeof BaseVolume>) => void
+    minClusterSize?: number
+    defaultMergeGroupName?: string
+    expanded?: boolean | (() => boolean)
+    text?: () => string
+    colors?: Record<string, [number, number]>
+    edges?: typeof ClusterBaseEdges
+    [key: string]: unknown
+}
+
 export default class BaseCluster3D extends BaseNode {
 
-    declare animate: (props: any, duration?: number, onComplete?: Function, onStep?: Function) => void
+    declare animate: (props: Record<string, unknown>, duration?: number, onComplete?: Function, onStep?: Function) => void
 
     mNodes: GraphNode[]
     mClusters: Record<string, BaseCluster3D>
@@ -42,24 +70,24 @@ export default class BaseCluster3D extends BaseNode {
     mHull: InstanceType<typeof BaseVolume> | null
     mCollapsedGroup: Group
     mExpandedGroup: Group
-    mCollapsedClusterHull: any
-    mChildClustersEdgesMesh: any
-    mChildClustersEdges: any
+    mCollapsedClusterHull: Group & { animate?: Function } | null
+    mChildClustersEdgesMesh: InstanceType<typeof ClusterBaseEdges> | null
+    mChildClustersEdges: unknown | null
     mExpanded: boolean
     mClusterClusteringApplied: boolean
-    mEntry: any
-    mEntrys: any[]
+    mEntry: ClusterSpec
+    mEntrys: ClusterSpec[]
     mEventsBound: boolean
-    mClusterRule: any
+    mClusterRule: ClusterSpec | undefined
     mLastCamDistance: number | undefined
-    _hullEffect: any
+    _hullEffect: BaseHullEffect | null
     _hullMode: string | undefined
     _LeafsCached: ClusterLeafElement[] | undefined
     useLOD: boolean
     bClusterEdgesVisible: boolean
     useClusterText: boolean
 
-    constructor(nodes: GraphNode[] | undefined, clusteringHandlers: any, view: View3D) {
+    constructor(nodes: GraphNode[] | undefined, clusteringHandlers: ClusterSpec[] | undefined, view: View3D) {
         super(view);
 
         this.addNodes(nodes);
@@ -125,16 +153,17 @@ export default class BaseCluster3D extends BaseNode {
             cluster.mCollapsedGroup.remove(cluster.mCollapsedClusterHull);
             cluster.mCollapsedClusterHull = null
 
-            if ((cluster as any).tn) {
-                (cluster as any).tn.remove();
-                delete (cluster as any).tn
+            const clusterExt = cluster as BaseCluster3D & { tn?: { remove: () => void } };
+            if (clusterExt.tn) {
+                clusterExt.tn.remove();
+                delete clusterExt.tn
             }
 
             if (cluster.mHull) {
                 if (cluster._hullEffect && cluster.mHull.mesh)
                     cluster._hullEffect.onDetach(cluster.mHull.mesh);
                 cluster.mHull.dispose();
-                delete (cluster as any).mHull;
+                delete (cluster as { mHull?: InstanceType<typeof BaseVolume> | null }).mHull;
                 cluster.mHull = null;
             }
 
@@ -143,8 +172,8 @@ export default class BaseCluster3D extends BaseNode {
             if (cluster == self) return;
 
             if (cluster.parent) {
-                if ((cluster.parent as any).mClusters && cluster.name)
-                    delete((cluster.parent as any).mClusters[cluster.name]);
+                if ((cluster.parent as BaseCluster3D).mClusters && cluster.name)
+                    delete((cluster.parent as BaseCluster3D).mClusters[cluster.name]);
                 cluster.parent.remove(cluster)
             }
 
@@ -238,18 +267,18 @@ export default class BaseCluster3D extends BaseNode {
         MaterialFadeMixin(materialInnerRing)
         MaterialFadeMixin(materialOtherBlue)
 
-        let _hull: any = new Group();
+        const _hull = new Group() as Group & { animate?: Function };
 
         _hull.name = "CollapsedHull"
 
         _hull.add(outer);
         _hull.add(inner);
 
-        _hull.animate = function (fade: any, duration: any, onComplete: any) {
-            (materialOtherBlue as any).animate(...arguments)
+        _hull.animate = function (_fade: number, _duration: number, _onComplete: () => void) {
+            (materialOtherBlue as FadeMaterial<MeshBasicMaterial> & { animate?: Function }).animate?.(...arguments)
         }
 
-        function beforeRender(this: any, renderer: any, scene: any, camera: any) {
+        function beforeRender(this: Mesh, _renderer: WebGLRenderer, _scene: Scene, camera: { quaternion: Quaternion }) {
             this.setRotationFromQuaternion(camera.quaternion)
         }
 
@@ -270,7 +299,7 @@ export default class BaseCluster3D extends BaseNode {
         this.mCollapsedClusterHull = _hull;
         this.mCollapsedGroup.add(this.mCollapsedClusterHull);
 
-        var origScale: any;
+        var origScale: Vector3 | undefined;
         this.on("mouseover", function (this: BaseCluster3D) {
             if (this.mExpanded == false)
                 if (this.mCollapsedClusterHull) {
@@ -378,7 +407,7 @@ export default class BaseCluster3D extends BaseNode {
         if (_.isArray(nodes))
             this.mNodes = this.mNodes.concat(nodes);
         else
-            this.mNodes.push(nodes as any)
+            this.mNodes.push(nodes as GraphNode)
     }
 
     getNodes(): GraphNode[] {
@@ -395,7 +424,7 @@ export default class BaseCluster3D extends BaseNode {
 
     cleanUpLeafs(): void {
         _.each(this.getLeafs(), function (leaf) {
-            (leaf.parent as any).mLeaf = null;
+            (leaf.parent as unknown as BaseCluster3D).mLeaf = undefined;
             leaf.cleanUp()
         })
     }
@@ -404,7 +433,7 @@ export default class BaseCluster3D extends BaseNode {
         var leafElements = this.getLeafs();
         _.each(leafElements, function (leaf) {
             let mNodes = leaf.mNodes;
-            _.each(mNodes, function (node: any) {
+            _.each(mNodes, function (node: BubbleNode & { _parentPosAbs?: Vector3 }) {
                 var c1 = new Vector3();
                 c1.setFromMatrixPosition(leaf.matrixWorld);
                 node._parentPosAbs = c1;
@@ -416,35 +445,35 @@ export default class BaseCluster3D extends BaseNode {
         var leafElements = this.getLeafs();
         _.each(leafElements, function (leaf) {
             let mNodes = leaf.mNodes;
-            _.each(mNodes, function (node: any) {
+            _.each(mNodes, function (node: BubbleNode & { _parentPosAbs?: Vector3 }) {
                 let c1 = node._parentPosAbs;
                 if (!c1) return;
                 var c2 = new Vector3();
                 c2.setFromMatrixPosition(leaf.matrixWorld);
-                node._bubble.position.add(c1).sub(c2);
-                _.extend(node, node._bubble.position)
+                node._bubble!.position.add(c1).sub(c2);
+                _.extend(node, node._bubble!.position)
             })
         })
     }
 
-    setEntry(entry: any): void {
+    setEntry(entry: ClusterSpec): void {
         this.mEntry = entry
     }
 
-    getEntry(): any {
+    getEntry(): ClusterSpec {
         return this.mEntry
     }
 
-    setEntries(entries: any[]): void {
+    setEntries(entries: ClusterSpec[]): void {
         this.mEntrys = entries;
         this.setEntry(entries[0])
     }
 
-    getEntries(): any[] {
+    getEntries(): ClusterSpec[] {
         return this.mEntrys || []
     }
 
-    getClusterOptions(): any {
+    getClusterOptions(): Required<ClusterOptions> {
         let options = _.extend({
             minClusterSize: 10,
             defaultMergeGroupName: "other",
@@ -470,7 +499,7 @@ export default class BaseCluster3D extends BaseNode {
         return options
     }
 
-    getEvents(): any {
+    getEvents(): Record<string, Function> {
         let events = _.extend({
             click: function () {}
         }, this.mEntry.events);
@@ -484,7 +513,7 @@ export default class BaseCluster3D extends BaseNode {
         if (this.mEventsBound == true) return
 
         _.each(this.getEvents(), function (handler: Function, eventName: string) {
-            that.on(eventName, function (e: any) {
+            that.on(eventName, function (e: Event & { stopPropagation: () => void }) {
                 e.stopPropagation();
                 handler.bind(this)()
             });
@@ -493,7 +522,7 @@ export default class BaseCluster3D extends BaseNode {
         this.mEventsBound = true
     }
 
-    applyClustering(mClusteringSpeccsArray: any[], overrideExpand: boolean = false): boolean | undefined {
+    applyClustering(mClusteringSpeccsArray: ClusterSpec[], overrideExpand: boolean = false): boolean | undefined {
 
         if (mClusteringSpeccsArray.length >= 0) {
             this.setEntries(mClusteringSpeccsArray);
@@ -529,7 +558,7 @@ export default class BaseCluster3D extends BaseNode {
         this.doClusteringForOnlyThis(entry);
 
         _.each(this.mClusters, function (mCluster) {
-            var nextDepthSpeccsArray = ([] as any[]).concat(mClusteringSpeccsArray);
+            var nextDepthSpeccsArray = ([] as ClusterSpec[]).concat(mClusteringSpeccsArray);
             nextDepthSpeccsArray.shift();
 
             if (nextDepthSpeccsArray.length >= 1)
@@ -540,7 +569,7 @@ export default class BaseCluster3D extends BaseNode {
         this.mClusterClusteringApplied = true;
     }
 
-    doClusteringForOnlyThis(entry: any): void {
+    doClusteringForOnlyThis(entry: ClusterSpec): void {
         var clazz = this.getChildClusterConstructor();
         var options = this.getClusterOptions();
         var that = this;
@@ -593,7 +622,7 @@ export default class BaseCluster3D extends BaseNode {
         }
     }
 
-    updateChildClusterEdges(options?: any): void {
+    updateChildClusterEdges(options?: Record<string, unknown>): void {
         this.mChildClustersEdgesMesh.setClusters(this.mClusters)
         this.mChildClustersEdgesMesh.update()
 
@@ -603,7 +632,7 @@ export default class BaseCluster3D extends BaseNode {
             this.addEdgeStencilBeforeRender(this.mChildClustersEdgesMesh)
     }
 
-    addChildClusterEdges(options?: any): void {
+    addChildClusterEdges(options?: Record<string, unknown>): void {
         if (this.mChildClustersEdgesMesh) {
             this.mChildClustersEdgesMesh.geometry.verticesNeedUpdate = true;
             return;
@@ -627,7 +656,7 @@ export default class BaseCluster3D extends BaseNode {
 
         function groupFunction(key: string, val: GraphNode) {
             if (typeof container[key] == "undefined") container[key] = new clazz(undefined, undefined, that.getView());
-            container[key].addNodes(val as any)
+            container[key].addNodes([val])
         }
 
         for (let el of this.mNodes)
@@ -691,7 +720,7 @@ export default class BaseCluster3D extends BaseNode {
         return vert
     }
 
-    setDistributionHandler(distribution: any, onComplete: () => void = () => {}, onStep: () => void = () => {}): void {
+    setDistributionHandler(distribution: BaseDistribution, onComplete: () => void = () => {}, onStep: () => void = () => {}): void {
         var that = this;
         var values = Object.values(this.mClusters);
 
@@ -703,8 +732,8 @@ export default class BaseCluster3D extends BaseNode {
         }, 100);
 
         distribution.setNodes(this,
-            function onNodePositionChanged(vecPosition: any, i: number) {},
-            function _onStep(p: any) {
+            function onNodePositionChanged(_vecPosition: unknown, _i: number) {},
+            function _onStep(_p: unknown) {
                 updateLeafsEdges(that);
                 onStep()
             }, function () {
@@ -716,17 +745,17 @@ export default class BaseCluster3D extends BaseNode {
         let o = this.getClusterOptions()
 
         if (hull.canBeVisible()) {
-            (hull.mesh.material as any).color = new ThreeColor(o.colors.hull[0])
+            (hull.mesh.material as MeshBasicMaterial).color = new ThreeColor(o.colors.hull[0])
             hull.maxOpacity = o.colors.hull[1]
         }
     }
 
-    addHullStencilBeforeRender(mesh: any, callback?: Function): void {
+    addHullStencilBeforeRender(mesh: Mesh | Group, callback?: Function): void {
         var that = this
 
-        mesh.onBeforeRender = function (this: any, renderer: any) {
+        (mesh as Mesh).onBeforeRender = function (this: Mesh, renderer: WebGLRenderer) {
             var depth = that.getDepth()
-            let opt = (renderer as any).debug.stencil
+            let opt = (renderer as StencilRenderer).debug.stencil
             opt.state(true)
             var gl = renderer.getContext();
             let func = opt.func[0]
@@ -737,15 +766,15 @@ export default class BaseCluster3D extends BaseNode {
                 callback.bind(this)(...arguments)
         }
 
-        mesh.onAfterRender = function (renderer: any) {}
+        (mesh as Mesh).onAfterRender = function (_renderer: WebGLRenderer, _scene: Scene) {}
     }
 
-    addEdgeStencilBeforeRender(mesh: any, callback?: Function): void {
+    addEdgeStencilBeforeRender(mesh: Mesh | Group, callback?: Function): void {
         var that = this
 
-        mesh.onBeforeRender = function (this: any, renderer: any) {
+        (mesh as Mesh).onBeforeRender = function (this: Mesh, renderer: WebGLRenderer) {
             var depth = that.getDepth()
-            let opt = (renderer as any).debug.stencil
+            let opt = (renderer as StencilRenderer).debug.stencil
             opt.state(true)
             var gl = renderer.getContext();
             let func = opt.func[1]
@@ -756,7 +785,7 @@ export default class BaseCluster3D extends BaseNode {
                 callback.bind(this)(...arguments)
         }
 
-        mesh.onAfterRender = function (renderer: any) {}
+        (mesh as Mesh).onAfterRender = function (_renderer: WebGLRenderer, _scene: Scene) {}
     }
 
     adjustHullSize(): void {
@@ -812,8 +841,8 @@ export default class BaseCluster3D extends BaseNode {
             this._hullEffect.onAttach(this.mHull!.mesh);
         }
 
-        if (!this.mHull && (this.mHull as any)?.geometry) {
-            this.geometry = (this.mHull as any).geometry;
+        if (!this.mHull && (this.mHull as unknown as { geometry?: BufferGeometry })?.geometry) {
+            this.geometry = (this.mHull as unknown as { geometry: BufferGeometry }).geometry;
         } else {
             let boundingSphere = boundingBox.getBoundingSphere(new Sphere());
             var sphereGeometry = new SphereGeometry(boundingSphere.radius, 10, 5);
@@ -838,12 +867,12 @@ export default class BaseCluster3D extends BaseNode {
         if (expContainer) return expContainer.parent as BaseCluster3D | undefined
     }
 
-    createParticlePointCloud(entry: any): void {
+    createParticlePointCloud(entry: ClusterSpec): void {
         var that = this;
 
         let domEvents = this.getDOMEvents()
 
-        let viewOptions = (this.getView() && (this.getView() as any).mOptions) || {}
+        let viewOptions = (this.getView() && (this.getView() as View3D & { mOptions?: Record<string, unknown> }).mOptions) || {}
         let leaf = new ClusterLeafElement(this.mNodes, domEvents, viewOptions);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
@@ -874,11 +903,11 @@ export default class BaseCluster3D extends BaseNode {
         this.addAllSubClustersToContainer();
     }
 
-    getRelationInfo(): any {
+    getRelationInfo(): unknown {
         return EdgeUtil.getClusterInfo(this.mClusters);
     }
 
-    createEdgesForChildClusters(): any {
+    createEdgesForChildClusters(): unknown {
         if (this.mChildClustersEdges) return this.mChildClustersEdges;
         return this.mChildClustersEdges = EdgeUtil.createEdgesBetweenClustersFromMap(this.mClusters);
     }
@@ -923,14 +952,15 @@ export default class BaseCluster3D extends BaseNode {
 
     getDOMElement(): HTMLElement | null {
         var view3d = this.getView();
-        if (!view3d || !(view3d as any).domElement) {
+        const domElement = view3d && (view3d as View3D & { domElement?: HTMLElement }).domElement;
+        if (!view3d || !domElement) {
             console.warn("attach graph to a view before using dom specific functions");
             return null;
         }
-        return (view3d as any).domElement
+        return domElement
     }
 
-    getDOMEvents(): any {
+    getDOMEvents(): InstanceType<typeof DomEventsAlt> | null {
         var view3d = this.getView();
         if (!view3d || !view3d.mDomEvents) {
             console.warn("attach graph to a view before using dom specific functions");
@@ -940,7 +970,7 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     getRoot(maxDepth: number = 20): BaseCluster3D {
-        var _root: any = this;
+        var _root: BaseCluster3D = this;
         while (maxDepth--) {
             let r = _root.parent;
             if (r == null) return _root;
@@ -951,7 +981,7 @@ export default class BaseCluster3D extends BaseNode {
     }
 
     getParents(maxDepth: number = 20): BaseCluster3D[] {
-        var _root: any = this;
+        var _root: BaseCluster3D | Group = this;
         var parents: BaseCluster3D[] = [];
         while (maxDepth--) {
             let r = _root.parent;

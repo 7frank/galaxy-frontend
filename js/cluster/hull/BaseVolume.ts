@@ -74,7 +74,7 @@ export default class BaseVolume extends Object3D {
 
         let wireframe = new LineSegments(geo, mat);
         wireframe.position.add(_center);
-        (wireframe.geometry as any).boundingBox = boundingBox;
+        wireframe.geometry.boundingBox = boundingBox;
 
         if (this.mesh) this.remove(this.mesh);
         this.mesh = wireframe;
@@ -93,8 +93,8 @@ export default class BaseVolume extends Object3D {
 
     dispose(): void {
         if (this.mesh) {
-            (this.mesh as any).geometry.dispose();
-            (this.mesh as any).material.dispose();
+            (this.mesh as LineSegments).geometry.dispose();
+            ((this.mesh as LineSegments).material as Material).dispose();
         }
         if (this.parent)
             this.parent.remove(this)

@@ -4,6 +4,7 @@
 
 import BoxVolume from "./BoxVolume"
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin"
+import type { FadeMaterial } from "../../utils/FadeMaterial"
 import { BackSide } from "three/src/constants.js";
 import { Shape } from "three/src/extras/core/Shape.js";
 import { BoxGeometry } from "three/src/geometries/BoxGeometry.js";
@@ -102,15 +103,15 @@ export default class FlatVolume extends BoxVolume {
         });
 
         MaterialFadeMixin(mat);
-        (mat as any).fade = 0;
-        (mat as any).fadeTo(1, 400);
+        (mat as FadeMaterial<MeshBasicMaterial>).fade = 0;
+        (mat as FadeMaterial<MeshBasicMaterial>).fadeTo!(1, 400);
 
         const mesh = new Mesh(geo0, mat);
         mesh.geometry.boundingBox = boundingBox;
         mesh.geometry.boundingSphere = boundingBox.getBoundingSphere(new Sphere());
 
         const rc = mesh.raycast.bind(mesh);
-        mesh.raycast = function (raycaster: any, intersects: any[]) {
+        mesh.raycast = function (raycaster, intersects) {
             if (this.geometry && this.geometry.attributes && !this.geometry.attributes.position)
                 return;
             return rc(raycaster, intersects);
@@ -147,14 +148,15 @@ export default class FlatVolume extends BoxVolume {
 
     createVariousResolutionSubGeometry(name: string, resolution: number): BufferGeometry {
         const key = 'geometry' + name;
-        if (!(this as any)[key] || (this as any)[key].mTime != this.mTime) {
+        const self = this as typeof this & Record<string, BufferGeometry & { mTime?: number }>;
+        if (!self[key] || self[key].mTime != this.mTime) {
             const margin = this.mBoundingBox!.getSize(new Vector3()).length() / 10;
             const geo2 = this.smoothHullModifier(this.mGeometryZero!, resolution, margin);
             geo2.computeBoundingBox();
-            (geo2 as any).mTime = this.mTime;
-            (this as any)[key] = geo2;
+            (geo2 as BufferGeometry & { mTime?: number }).mTime = this.mTime;
+            self[key] = geo2;
         }
-        return (this as any)[key];
+        return self[key];
     }
 
     setLOD(l: number): void {
@@ -191,10 +193,10 @@ export default class FlatVolume extends BoxVolume {
     dispose(): void {
         if (this.mesh) (this.mesh as Mesh).material.dispose();
 
-        const g = this as any;
-        if (g.geometryLowPoly) g.geometryLowPoly.dispose();
-        if (g.geometryAveragePoly) g.geometryAveragePoly.dispose();
-        if (g.geometryHighPoly) g.geometryHighPoly.dispose();
+        const g = this as typeof this & Record<string, { dispose?: () => void }>;
+        if (g.geometryLowPoly) g.geometryLowPoly.dispose?.();
+        if (g.geometryAveragePoly) g.geometryAveragePoly.dispose?.();
+        if (g.geometryHighPoly) g.geometryHighPoly.dispose?.();
 
         if (this.parent) this.parent.remove(this);
     }

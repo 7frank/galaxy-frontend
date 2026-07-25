@@ -14,13 +14,13 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
     smoothenWidth: boolean
     minLinkStrength: number
 
-    constructor(...args: any[]) {
+    constructor(...args: ConstructorParameters<typeof ClusterBaseEdges>) {
         super(...args);
         this.smoothenWidth = true;
         this.minLinkStrength = 0;
     }
 
-    getDefaultMaterial(options?: EdgeMaterialOptions): any {
+    getDefaultMaterial(options?: EdgeMaterialOptions): InstanceType<typeof MeshLineMaterial> {
         const defaults: Required<EdgeMaterialOptions> = {
             opacity: 1.0,
             transparent: true,
@@ -55,7 +55,7 @@ export default class ClusterMeshEdges extends ClusterBaseEdges {
         this.geometry = new BufferGeometry();
 
         const that = this;
-        const invalidEdges: any[] = [];
+        const invalidEdges: unknown[] = [];
 
         const orderedEdges = _.orderBy(edges, ['link_strength'], ['desc']);
         that.minLinkStrength = 0.4 * (orderedEdges[0].link_strength ?? 0);

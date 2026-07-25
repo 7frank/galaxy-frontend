@@ -5,7 +5,11 @@
 
 import EdgesContainer from "./EdgesContainer"
 import NodesParticleSystem from "./particles/NodesParticleSystem"
-import ParticleNodeGroup, { GraphNode, ParticleNodeGroupInstance, ParticleNodeGroupOptions } from "./particles/ParticleNodeGroup"
+import DomEventsAlt from "./utils/DomEventsAlt"
+import type BaseDistribution from "./distributions/BaseDistribution"
+import type BaseCluster3D from "./BaseCluster3D"
+import type View3D from "../view/View3D"
+import ParticleNodeGroup, { GraphNode, BubbleNode, ParticleNodeGroupInstance, ParticleNodeGroupOptions } from "./particles/ParticleNodeGroup"
 
 
 import {TWEEN} from "../lib/Tween"
@@ -20,17 +24,17 @@ import * as _ from "lodash";
 
 export default class ClusterLeafElement extends Mesh {
 
-    mDomEvents: any
+    mDomEvents: InstanceType<typeof DomEventsAlt> | null
     mOptions: ParticleNodeGroupOptions
     mNodes: GraphNode[]
     bNodesVisible: boolean
     bEdgesVisible: boolean
     mNodeParticles: ParticleNodeGroupInstance
-    mEdgesContainer: any
+    mEdgesContainer: EdgesContainer | null
     mNodeMeshes: Object3D | undefined
-    mParticles: any
+    mParticles: ReturnType<typeof NodesParticleSystem> | null
 
-    constructor(nodes: GraphNode[], domEvents: any, options: ParticleNodeGroupOptions = {}) {
+    constructor(nodes: GraphNode[], domEvents: InstanceType<typeof DomEventsAlt> | null, options: ParticleNodeGroupOptions = {}) {
         super();
 
         this.mDomEvents = domEvents
@@ -58,7 +62,7 @@ export default class ClusterLeafElement extends Mesh {
             var ray = new Ray();
             var sphere = new Sphere();
 
-            return function raycast(this: any, raycaster: any, intersects: any[]) {
+            return function raycast(this: { visible: boolean; geometry: { isBufferGeometry: boolean; boundingSphere: Sphere | null; computeBoundingSphere: () => void; index: { array: ArrayLike<number> } | null; attributes: { position: { array: ArrayLike<number> }; size?: { array: ArrayLike<number> } } }; matrixWorld: Matrix4; scale: Vector3 }, raycaster: { params: { Points: { threshold: number } }; ray: Ray; near: number; far: number }, intersects: Array<{ depth: number; distance: number; distanceToRay: number; face: null; object: unknown }>) {
 
                 if (this.visible == false)
                     return
@@ -101,13 +105,13 @@ export default class ClusterLeafElement extends Mesh {
 
                         if (distance < raycaster.near || distance > raycaster.far) return;
 
-                        let n = (pcWrapper.nodes as any)[index]
+                        let n = (pcWrapper.nodes as (GraphNode & { get3DRoot?: () => unknown })[]) [index]
                         if (!n || !n.get3DRoot) {
                             console.warn("ClusterLeaf Node Element not initialised properly")
                             return
                         }
 
-                        function getDepthForDomEventsAlt(el: any) {
+                        function getDepthForDomEventsAlt(el: { parent?: unknown }) {
                             var depth = 0;
                             while (el = el.parent) {
                                 depth++;
@@ -151,7 +155,7 @@ export default class ClusterLeafElement extends Mesh {
 
                 } else {
 
-                    const vertices = (geometry as any).vertices;
+                    const vertices = (geometry as unknown as { vertices: Vector3[] }).vertices;
                     for (let i = 0, l = vertices.length; i < l; i++) {
                         testPoint(vertices[i], i, threshold);
                     }
@@ -176,15 +180,15 @@ export default class ClusterLeafElement extends Mesh {
         this.mEdgesContainer.visible = bVisible;
     }
 
-    getView(): any {
-        return this.getParentCluster().getView()
+    getView(): View3D | null {
+        return this.getParentCluster()?.getView() ?? null
     }
 
-    getRoot(): any {
-        return this.getParentCluster().getRoot()
+    getRoot(): BaseCluster3D | null {
+        return this.getParentCluster()?.getRoot() ?? null
     }
 
-    getParentCluster(): any {
+    getParentCluster(): BaseCluster3D | null {
         let expContainer = this.parent;
         if (expContainer) return expContainer.parent
     }
@@ -236,8 +240,8 @@ export default class ClusterLeafElement extends Mesh {
             this.mEdgesContainer = null;
         }
 
-        if (this.mNodeMeshes && (this.mNodeMeshes as any).geometry) {
-            (this.mNodeMeshes as any).geometry.dispose();
+        if (this.mNodeMeshes && (this.mNodeMeshes as Mesh).geometry) {
+            (this.mNodeMeshes as Mesh).geometry.dispose();
             this.mNodeMeshes = undefined;
         }
 
@@ -256,7 +260,7 @@ export default class ClusterLeafElement extends Mesh {
         }
 
         var that = this.mNodeMeshes;
-        _.each(nodes, function (node: any) {
+        _.each(nodes, function (node: GraphNode & { _parent?: Object3D }) {
             node._parent = that
         })
     }
@@ -269,13 +273,14 @@ export default class ClusterLeafElement extends Mesh {
     }
 
 
-    setDistributionHandler(distribution: any, onComplete: () => void = () => {}, onStep: () => void = () => {}): void {
+    setDistributionHandler(distribution: BaseDistribution, onComplete: () => void = () => {}, onStep: () => void = () => {}): void {
 
         var that = this;
-        distribution.setNodes(this.mNodes, function (vec: any, i: number) {
+        distribution.setNodes(this.mNodes, function (_vec: unknown, i: number) {
 
             let n = that.mNodes[i];
-            if ((n as any)._bubble) (n as any)._bubble.position.set(n.x, n.y, n.z);
+            if ((n as BubbleNode)._bubble)
+                (n as BubbleNode)._bubble!.position.set(n.x, n.y, n.z);
 
             if (that.mNodeParticles)
                 that.mNodeParticles.updateNodePosition(i);
@@ -299,7 +304,7 @@ export default class ClusterLeafElement extends Mesh {
             this.mParticles.update(time);
     }
 
-    getDOMEvents(): any {
+    getDOMEvents(): InstanceType<typeof DomEventsAlt> | null {
         return this.mDomEvents
     }
 
@@ -328,7 +333,7 @@ export default class ClusterLeafElement extends Mesh {
         if (!this.mParticles) {
 
             var nodes = this.mNodes;
-            var demoOptions: any = {
+            var demoOptions: Record<string, unknown> = {
                 duration: 1000,
                 easing: TWEEN.Easing.Exponential.Out,
                 position: {
@@ -339,7 +344,7 @@ export default class ClusterLeafElement extends Mesh {
             };
 
             if (!nodes)
-                demoOptions.npc = function (n: any) {
+                demoOptions.npc = function (n: GraphNode & { itemCount?: number }) {
                     return n.itemCount || 5
                 };
 

@@ -4,19 +4,21 @@
 
 import _ from "lodash";
 import BaseCluster3D from "./BaseCluster3D"
+import type { ClusterSpec } from "./BaseCluster3D"
 import BaseDistribution from "./distributions/BaseDistribution"
 import ForceGraphDistribution from "./distributions/ForceGraphDistribution"
 import ZoomUtil from "../utils/ZoomUtil"
 import type { GraphNode } from "./particles/ParticleNodeGroup"
 import type ClusterLeafElement from "./ClusterLeafElement"
 import type View3D from "../view/View3D"
+import { Mesh } from "three/src/objects/Mesh.js";
 import { Object3D } from "three/src/core/Object3D.js";
 
 export default class Cluster3DExtended extends BaseCluster3D {
 
     selected: boolean
 
-    constructor(nodes: GraphNode[] | undefined, clusteringHandlers: Record<string, unknown>, view: View3D) {
+    constructor(nodes: GraphNode[] | undefined, clusteringHandlers: ClusterSpec[] | undefined, view: View3D) {
         super(nodes, clusteringHandlers, view);
         this.selected = false;
         this.addListeners();
@@ -44,15 +46,15 @@ export default class Cluster3DExtended extends BaseCluster3D {
         }
 
         this.on("z dblclick", function (this: Cluster3DExtended, e: Event) {
-            (e as any).stopPropagation();
+            e.stopPropagation();
             this.zoomToCluster();
         });
 
         let diameter: number | null = null;
         this.on("s", function (this: Cluster3DExtended, e: Event) {
-            (e as any).stopPropagation();
+            e.stopPropagation();
             if (!diameter)
-                diameter = (this.geometry as any).boundingSphere.radius * 2;
+                diameter = this.geometry.boundingSphere?.radius ?? 0 * 2;
             console.log("clicky clicky", diameter);
             const speccsRoot = [
                 { distribution: new BaseDistribution(diameter!, 1) },
@@ -64,9 +66,9 @@ export default class Cluster3DExtended extends BaseCluster3D {
         });
 
         this.on("a", function (this: Cluster3DExtended, e: Event) {
-            (e as any).stopPropagation();
+            e.stopPropagation();
             if (!diameter)
-                diameter = (this.geometry as any).boundingSphere.radius * 2;
+                diameter = this.geometry.boundingSphere?.radius ?? 0 * 2;
             console.log("clicky clicky", diameter);
             const speccsRoot = [
                 { distribution: new ForceGraphDistribution(diameter! * 0.66, 3) }
@@ -75,10 +77,10 @@ export default class Cluster3DExtended extends BaseCluster3D {
         });
 
         this.on("mouseover", function (this: Cluster3DExtended, e: Event) {
-            (e as any).stopPropagation();
+            e.stopPropagation();
 
             if (this.mHull) {
-                if (this.mHull.mesh) (this.mHull.mesh as any).material.visible = this.mHull.canBeVisible();
+                if (this.mHull.mesh) this.mHull.mesh.visible = this.mHull.canBeVisible();
                 this.mHull.setActive();
             }
 
@@ -96,15 +98,15 @@ export default class Cluster3DExtended extends BaseCluster3D {
         });
 
         this.on("mouseout", function (this: Cluster3DExtended, e: Event) {
-            (e as any).stopPropagation();
+            e.stopPropagation();
             if (this.mHull) {
                 this.mHull.setInactive();
             }
-            this.getView().setTooltip("");
+            this.getView()!.setTooltip("");
         });
 
         this.on("t", function (this: Cluster3DExtended, e: Event) {
-            (e as any).stopPropagation();
+            e.stopPropagation();
             this.toggleSelect();
         });
     }
@@ -143,7 +145,7 @@ export default class Cluster3DExtended extends BaseCluster3D {
 
         _.each(allLeafs, function (other: ClusterLeafElement) {
             const isChildOfCluster = mLeafs.indexOf(other) >= 0;
-            if (other.parent) (other.parent as any).visible = isChildOfCluster;
+            if (other.parent) other.parent.visible = isChildOfCluster;
         });
 
         this.selected = true;
@@ -155,7 +157,7 @@ export default class Cluster3DExtended extends BaseCluster3D {
         const allLeafs = this.getRoot().getLeafs();
 
         _.each(allLeafs, function (other: ClusterLeafElement) {
-            if (other.parent) (other.parent as any).visible = true;
+            if (other.parent) other.parent.visible = true;
         });
 
         this.selected = false;

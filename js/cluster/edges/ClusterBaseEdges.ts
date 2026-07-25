@@ -1,5 +1,6 @@
 import EdgeUtil, { ClusterEdge } from "../EdgeUtil";
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin";
+import type { FadeMaterial } from "../../utils/FadeMaterial";
 import BaseCluster3D from "../BaseCluster3D";
 
 import { AdditiveBlending } from "three/src/constants.js";
@@ -99,16 +100,17 @@ export default class ClusterBaseEdges extends Line {
             transparent: true
         });
 
-        (lineMaterial as any).linewidth = 1;
-        (lineMaterial as any)._color = (lineMaterial as any).color;
+        type ExtShader = ShaderMaterial & { linewidth?: number; _color?: Color; uniforms: { color: { value: Color } } };
+        (lineMaterial as ExtShader).linewidth = 1;
+        (lineMaterial as ExtShader)._color = (lineMaterial as unknown as { color: Color }).color;
 
         Reflect.defineProperty(lineMaterial, "color", {
             enumerable: false,
             configurable: false,
-            get: function () { return (this as any)._color; },
-            set: function (c: Color) {
-                (this as any)._color = c;
-                (this as any).uniforms.color.value = c;
+            get: function (this: ExtShader) { return this._color; },
+            set: function (this: ExtShader, c: Color) {
+                this._color = c;
+                this.uniforms.color.value = c;
             }
         });
 
@@ -129,8 +131,8 @@ export default class ClusterBaseEdges extends Line {
         this.geometry.boundingBox = new Box3();
         this.geometry.boundingSphere = new Sphere(new Vector3(), 1);
 
-        (lineMaterial as any).fade = 0;
-        (lineMaterial as any).fadeTo(1, 2000);
+        (lineMaterial as FadeMaterial<LineBasicMaterial>).fade = 0;
+        (lineMaterial as FadeMaterial<LineBasicMaterial>).fadeTo!(1, 2000);
     }
 
     setClusters(clusters: Record<string, InstanceType<typeof BaseCluster3D>>): void {
@@ -145,7 +147,7 @@ export default class ClusterBaseEdges extends Line {
                 pos = el.mHull.mBoundingBox!.getCenter(new Vector3());
         } else {
             if (el.mCollapsedClusterHull)
-                pos = (el.mCollapsedClusterHull as any).position.clone();
+                pos = el.mCollapsedClusterHull!.position.clone();
         }
 
         if (!pos) pos = new Vector3();

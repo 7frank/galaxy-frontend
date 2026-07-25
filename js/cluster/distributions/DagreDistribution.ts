@@ -46,7 +46,8 @@ export default class DagreDistribution extends BaseDistribution {
             });
         }
 
-        const g = new (dagre as any).graphlib.Graph();
+        const dagreLib = dagre as unknown as { graphlib: { Graph: new () => { setGraph: (o: Record<string, unknown>) => void; setDefaultEdgeLabel: (fn: () => Record<string, unknown>) => void; setNode: (id: string, o: Record<string, unknown>) => void; setEdge: (s: string, t: string) => void; nodes: () => string[]; node: (id: string) => { x: number; y: number; _n: DagreSimNode } } }; layout: (g: unknown) => void };
+        const g = new dagreLib.graphlib.Graph();
         g.setGraph({
             rankdir: this.rankdir,
             ranksep: this.mScale * 0.12,
@@ -67,7 +68,7 @@ export default class DagreDistribution extends BaseDistribution {
             if (si !== -1 && ti !== -1) g.setEdge(String(si), String(ti));
         });
 
-        (dagre as any).layout(g);
+        dagreLib.layout(g);
 
         const nodeIds: string[] = g.nodes();
         let cx = 0, cy = 0;

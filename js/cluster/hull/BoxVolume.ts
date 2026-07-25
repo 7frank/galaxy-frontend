@@ -15,7 +15,7 @@ export default class BoxVolume extends BaseVolume {
     constructor() {
         super();
         this.maxOpacity = 0.1;
-        (this.getMaterial() as any).transparent = true;
+        (this.getMaterial() as Material & { transparent?: boolean }).transparent = true;
     }
 
     transferFunction(x: number): number {
@@ -28,7 +28,7 @@ export default class BoxVolume extends BaseVolume {
         let y = this.transferFunction(newLOD)
         if (this.mesh && (this.mesh as Mesh).material) {
             const mat = (this.mesh as Mesh).material as Material;
-            (mat as any).opacity = this.maxOpacity * y;
+            (mat as Material & { opacity?: number }).opacity = this.maxOpacity * y;
 
             if (y <= 0)
                 mat.visible = false;

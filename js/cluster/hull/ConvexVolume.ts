@@ -4,6 +4,7 @@
 
 import BoxVolume from "./BoxVolume"
 import MaterialFadeMixin from "../../utils/MaterialFadeMixin"
+import type { FadeMaterial } from "../../utils/FadeMaterial"
 import { BackSide } from "three/src/constants.js";
 import { BoxGeometry } from "three/src/geometries/BoxGeometry.js";
 import { SphereGeometry } from "three/src/geometries/SphereGeometry.js";
@@ -60,12 +61,12 @@ export default class ConvexVolume extends BoxVolume {
             side: BackSide
         });
 
-        (mat as any).visible = this.canBeVisible();
-        this.mMaterial = mat as any;
+        (mat as FadeMaterial<MeshBasicMaterial>).visible = this.canBeVisible();
+        this.mMaterial = mat as unknown as typeof this.mMaterial;
 
         MaterialFadeMixin(mat);
-        (mat as any).fade = 0;
-        (mat as any).fadeTo(1, 2000);
+        (mat as FadeMaterial<MeshBasicMaterial>).fade = 0;
+        (mat as FadeMaterial<MeshBasicMaterial>).fadeTo!(1, 2000);
 
         return mat;
     }
@@ -105,7 +106,7 @@ export default class ConvexVolume extends BoxVolume {
         mesh.geometry.boundingSphere = boundingBox.getBoundingSphere(new Sphere());
 
         const rc = mesh.raycast.bind(mesh);
-        mesh.raycast = function (raycaster: any, intersects: any[]) {
+        mesh.raycast = function (raycaster, intersects) {
             if (this.geometry && this.geometry.attributes && !this.geometry.attributes.position)
                 return;
             return rc(raycaster, intersects);
@@ -143,14 +144,15 @@ export default class ConvexVolume extends BoxVolume {
 
     createVariousResolutionSubGeometry(name: string, resolution: number): BufferGeometry {
         const key = 'geometry' + name;
-        if (!(this as any)[key] || (this as any)[key].mTime != this.mTime) {
+        const self = this as typeof this & Record<string, BufferGeometry & { mTime?: number }>;
+        if (!self[key] || self[key].mTime != this.mTime) {
             const margin = this.mBoundingBox!.getSize(new Vector3()).length() / 10;
             const geo2 = this.smoothHullModifier(this.mGeometryZero!, resolution, margin);
             geo2.computeBoundingBox();
-            (geo2 as any).mTime = this.mTime;
-            (this as any)[key] = geo2;
+            (geo2 as BufferGeometry & { mTime?: number }).mTime = this.mTime;
+            self[key] = geo2;
         }
-        return (this as any)[key];
+        return self[key];
     }
 
     setLOD(l: number): void {
@@ -190,10 +192,10 @@ export default class ConvexVolume extends BoxVolume {
         const meshMaterial = (this.mesh as Mesh)?.material;
         if (meshMaterial && !Array.isArray(meshMaterial)) meshMaterial.dispose();
 
-        const g = this as any;
-        if (g.geometryLowPoly) g.geometryLowPoly.dispose();
-        if (g.geometryAveragePoly) g.geometryAveragePoly.dispose();
-        if (g.geometryHighPoly) g.geometryHighPoly.dispose();
+        const g = this as typeof this & Record<string, { dispose?: () => void }>;
+        if (g.geometryLowPoly) g.geometryLowPoly.dispose?.();
+        if (g.geometryAveragePoly) g.geometryAveragePoly.dispose?.();
+        if (g.geometryHighPoly) g.geometryHighPoly.dispose?.();
 
         if (this.parent) this.parent.remove(this);
     }

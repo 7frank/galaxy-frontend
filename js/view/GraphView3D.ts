@@ -19,6 +19,9 @@ import ConvexVolume from "../cluster/hull/ConvexVolume";
 import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";
 import BasicHullEffect from "../cluster/hull/effects/BasicHullEffect";
 import BoxHullEffect from "../cluster/hull/effects/BoxHullEffect";
+import type BaseHullEffect from "../cluster/hull/effects/BaseHullEffect";
+import type BaseCluster3D from "../cluster/BaseCluster3D";
+import type { ClusterSpec } from "../cluster/BaseCluster3D";
 import { BackSide } from "three/src/constants.js";
 import { BufferAttribute } from "three/src/core/BufferAttribute.js";
 import { BufferGeometry } from "three/src/core/BufferGeometry.js";
@@ -29,24 +32,30 @@ import { MeshPhongMaterial } from "three/src/materials/MeshPhongMaterial.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Group } from "three/src/objects/Group.js";
 import { Mesh } from "three/src/objects/Mesh.js";
+import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
+import { Box3 } from "three/src/math/Box3.js";
 import { initEdgeIndicatorOverlay } from "../gui/EdgeIndicatorOverlay.js";
-import type { ParticleNodeGroupOptions } from "../cluster/particles/ParticleNodeGroup";
+import type { ParticleNodeGroupOptions, GraphNode } from "../cluster/particles/ParticleNodeGroup";
+import type Datasource from "../data/Datasource";
+import type DefaultColorScheme from "../cluster/utils/DefaultColorScheme";
+import type BaseVolume from "../cluster/hull/BaseVolume";
+
+export type { ClusterSpec } from "../cluster/BaseCluster3D";
 
 export interface GraphView3DOptions extends ParticleNodeGroupOptions {
-    [key: string]: any
+    [key: string]: unknown
 }
 
 export default class GraphView3D extends View3D {
 
     mRootCluster: RootCluster | null
     mOptions: GraphView3DOptions
-    mSpeccs: any
-    mColorScheme: any
-    declare mBorderEffect: any
-    mSkyDome: any
+    mSpeccs: ClusterSpec[]
+    mColorScheme: DefaultColorScheme | null
+    mSkyDome: Group | null
     _clusterDepth: number | undefined
-    _hullOptions: any
-    _currentDatasource: any
+    _hullOptions: ClusterSpec['options'] | null
+    _currentDatasource: Datasource | null
 
     constructor(el: HTMLElement, options: GraphView3DOptions = {}) {
         super(el);
@@ -56,13 +65,14 @@ export default class GraphView3D extends View3D {
 
         var gl = this.mRenderer.getContext();
 
-        ;(window as any).test = {gl: gl, renderer: this.mRenderer}
+        (window as Window & { test?: unknown }).test = {gl: gl, renderer: this.mRenderer};
 
-        ;(this.mRenderer as any).debug = Object.assign((this.mRenderer as any).debug || {}, {
+        const renderer = this.mRenderer as WebGLRenderer & { debug?: Record<string, unknown> };
+        renderer.debug = Object.assign(renderer.debug || {}, {
             stencil: {
                 func: [[gl.ALWAYS, 1, 0xFF], [gl.GEQUAL, 1, 0xff]],
                 op: [[gl.REPLACE, gl.REPLACE, gl.REPLACE], [gl.KEEP, gl.KEEP, gl.KEEP]],
-                state: (b: any) => this.setStencil(b)
+                state: (b: boolean) => this.setStencil(b)
             }
         });
     }
@@ -77,12 +87,12 @@ export default class GraphView3D extends View3D {
             this.mRootCluster.mTextOverlay.enabled = visible;
     }
 
-    setSpeccs(speccs: any): this {
+    setSpeccs(speccs: ClusterSpec[]): this {
         this.mSpeccs = speccs;
         return this
     }
 
-    getSpeccs(): any {
+    getSpeccs(): ClusterSpec[] {
         return this.mSpeccs
     }
 
@@ -91,7 +101,7 @@ export default class GraphView3D extends View3D {
         return this;
     }
 
-    setHullOptions(options: any): this {
+    setHullOptions(options: ClusterSpec['options']): this {
         this._hullOptions = options;
         return this;
     }
@@ -102,14 +112,16 @@ export default class GraphView3D extends View3D {
     }
 
     setBorderStyle(style: string): Promise<this> {
-        const applyStyle = (makeEffect: (mode: any, c: any) => any, makeComposer: (v: any) => any) => {
+        type MakeEffect = (mode: string, composer: unknown) => BaseHullEffect;
+        type MakeComposer = (view: this) => unknown;
+        const applyStyle = (makeEffect: MakeEffect, makeComposer: MakeComposer) => {
             if (this.mBorderEffect) { this.mBorderEffect.dispose(); this.mBorderEffect = null; }
             const composer = makeComposer(this);
             if (this.mRootCluster) {
-                this.mRootCluster.findClusters("*").forEach((cluster: any) => {
+                this.mRootCluster.findClusters("*").forEach((cluster: BaseCluster3D) => {
                     if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
                     if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh);
-                    const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
+                    const mode: string = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
                     if (!cluster._hullMode) cluster._hullMode = mode;
                     const effect = makeEffect(mode, composer);
                     cluster._hullEffect = effect;
@@ -122,12 +134,12 @@ export default class GraphView3D extends View3D {
         if (style === "Outline") {
             return import("../cluster/hull/effects/OutlineHullEffect.js").then(({ default: OutlineHullEffect, OutlineComposer }) => {
                 return applyStyle(
-                    (mode: any, c: any) => new OutlineHullEffect(mode, c),
-                    (v: any) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; }
+                    (mode, c) => new OutlineHullEffect(mode as "hover" | "ambient" | "none", c as InstanceType<typeof OutlineComposer> | null),
+                    (v) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; }
                 );
             });
         }
-        const BORDERS: Record<string, any> = {
+        const BORDERS: Record<string, { makeEffect: MakeEffect; makeComposer: MakeComposer }> = {
             "None":  { makeEffect: () => new NoneHullEffect(),  makeComposer: () => null },
             "Basic": { makeEffect: () => new BasicHullEffect(), makeComposer: () => null },
             "Box":   { makeEffect: () => new BoxHullEffect(),   makeComposer: () => null },
@@ -140,7 +152,7 @@ export default class GraphView3D extends View3D {
 
     createSkyDome(): void {
 
-        var material: any = new MeshBasicMaterial();
+        var material: MeshBasicMaterial | MeshPhongMaterial = new MeshBasicMaterial();
 
         let scene = this.mScene;
 
@@ -172,13 +184,16 @@ export default class GraphView3D extends View3D {
 
         var hexaGroup = new Group();
 
-        var hexasphere = new (window as any).Hexasphere(radius, subDivisions, tileSize);
+        type HexaPoint = {x: number; y: number; z: number};
+        type HexaTile = {boundary: HexaPoint[]; getLatLon: (r: number) => void};
+        type HexaSphere = {tiles: HexaTile[]; radius: number};
+        var hexasphere = new (window as Window & { Hexasphere: new (r: number, s: number, t: number) => HexaSphere }).Hexasphere(radius, subDivisions, tileSize);
         for (var i = 0; i < hexasphere.tiles.length; i++) {
             var t = hexasphere.tiles[i];
             void t.getLatLon(hexasphere.radius);
 
             const bps = t.boundary;
-            const verts = bps.map((bp: any) => new Vector3(bp.x, bp.y, bp.z));
+            const verts = bps.map((bp: HexaPoint) => new Vector3(bp.x, bp.y, bp.z));
             const faceIndices: number[][] = [[0,1,2],[0,2,3],[0,3,4]];
             if (verts.length > 5) faceIndices.push([0,4,5]);
             const positions: number[] = [];
@@ -209,13 +224,13 @@ export default class GraphView3D extends View3D {
     }
 
 
-    addCompanyCountListenersToCluster(rootCluster: any): void {
+    addCompanyCountListenersToCluster(rootCluster: BaseCluster3D): void {
 
-        var visibleNodes: any[] = [];
+        var visibleNodes: BaseCluster3D[] = [];
         var _____skipFrames = 0;
 
-        function attachListeners(cluster: any) {
-            _.each(cluster.findClusters("*"), function (cluster: any) {
+        function attachListeners(cluster: BaseCluster3D) {
+            _.each(cluster.findClusters("*"), function (cluster: BaseCluster3D) {
                 cluster.on('before-render', function () {
 
                     if (_____skipFrames % 20 != 0) return;
@@ -244,7 +259,7 @@ export default class GraphView3D extends View3D {
         function onBeforeRender() {
             if (that.isMaximised()) {
                 if (_____skipFrames++ % 20 == 0) {
-                    let vl = _.flatten(visibleNodes.map((leaf: any) => leaf.mNodes))
+                    let vl = _.flatten(visibleNodes.map((leaf) => leaf.mNodes))
 
                     if (vl.length != 0)
                         GUI.updateFromVisibleNodes(vl);
@@ -255,7 +270,7 @@ export default class GraphView3D extends View3D {
     }
 
 
-    initClusterForView(rawGraphData: any, parentEl3D: any): any {
+    initClusterForView(rawGraphData: unknown, parentEl3D: { add: (o: unknown) => void }): RootCluster | undefined {
 
         if (!rawGraphData) return;
 
@@ -274,7 +289,7 @@ export default class GraphView3D extends View3D {
         const depth = this._clusterDepth || speccs.length;
         const hullOptions = this._hullOptions;
         const finalSpeccs = hullOptions
-            ? speccs.slice(0, depth).map((s: any) => ({ ...s, options: { ...s.options, ...hullOptions } }))
+            ? speccs.slice(0, depth).map((s) => ({ ...s, options: { ...s.options, ...hullOptions } }))
             : speccs.slice(0, depth);
         res.applyClustering(finalSpeccs);
 
@@ -284,13 +299,13 @@ export default class GraphView3D extends View3D {
     }
 
 
-    setData(mGraphData: any): void {
+    setData(mGraphData: unknown): void {
         this.initStatic();
 
         if (!this.mRootCluster) {
             this.mRootCluster = this.initClusterForView(mGraphData, this.mScene);
 
-            ;(window as any).test.root = this.mRootCluster
+            (window as Window & { test?: Record<string, unknown> }).test = Object.assign((window as Window & { test?: Record<string, unknown> }).test || {}, { root: this.mRootCluster })
 
             this.addCompanyCountListenersToCluster(this.mRootCluster);
 
@@ -300,7 +315,8 @@ export default class GraphView3D extends View3D {
                 console.log("todo implement key zoom")
             }
 
-            let mt = (window as any).Mousetrap(this.el)
+            type MousetrapInstance = { bind: (key: string, fn: () => void) => void };
+            let mt: MousetrapInstance = (window as Window & { Mousetrap?: (el: HTMLElement) => MousetrapInstance }).Mousetrap!(this.el)
             mt.bind("up", doZoom)
             mt.bind("down", doZoom)
             const _debugState = { mode: 0 };
@@ -323,14 +339,15 @@ export default class GraphView3D extends View3D {
                     grp.name = DEBUG_GROUP_NAME;
                     root.updateMatrixWorld(true);
 
-                    function addBoxes(cluster: any) {
-                        if (_debugState.mode === 1 && cluster.mHull && cluster.mHull.mBoundingBox) {
-                            const bbWorld = cluster.mHull.mBoundingBox.clone().applyMatrix4(cluster.matrixWorld);
-                            grp.add(new Box3Helper(bbWorld, 0xffff00));
+                    function addBoxes(cluster: BaseCluster3D) {
+                        const hull = cluster.mHull as (InstanceType<typeof BaseVolume> & { mBoundingBox?: Box3 }) | null;
+                        if (_debugState.mode === 1 && hull?.mBoundingBox) {
+                            const bbWorld = hull.mBoundingBox.clone().applyMatrix4(cluster.matrixWorld);
+                            grp!.add(new Box3Helper(bbWorld, 0xffff00));
                         }
-                        if (_debugState.mode === 2 && cluster.geometry && cluster.geometry.boundingBox) {
-                            const bbWorld = cluster.geometry.boundingBox.clone().applyMatrix4(cluster.matrixWorld);
-                            grp.add(new Box3Helper(bbWorld, 0xff0000));
+                        if (_debugState.mode === 2 && cluster.geometry && (cluster.geometry as BufferGeometry).boundingBox) {
+                            const bbWorld = (cluster.geometry as BufferGeometry).boundingBox!.clone().applyMatrix4(cluster.matrixWorld);
+                            grp!.add(new Box3Helper(bbWorld, 0xff0000));
                         }
                         if (cluster.mClusters)
                             Object.values(cluster.mClusters).forEach(addBoxes);
@@ -342,14 +359,14 @@ export default class GraphView3D extends View3D {
                 }
                 if (e.key !== 'F1') return;
                 e.preventDefault();
-                function v3(v: any) { return v ? `(${v.x.toFixed(0)},${v.y.toFixed(0)},${v.z.toFixed(0)})` : 'null'; }
-                function bbStr(bb: any) {
+                function v3(v: Vector3 | null | undefined) { return v ? `(${v.x.toFixed(0)},${v.y.toFixed(0)},${v.z.toFixed(0)})` : 'null'; }
+                function bbStr(bb: Box3 | null | undefined) {
                     if (!bb) return 'no-bb';
                     const c = bb.getCenter(new Vector3());
                     const s = bb.getSize(new Vector3());
                     return `center=${v3(c)} size=${v3(s)}`;
                 }
-                function dumpCluster(cluster: any, indent: string): string[] {
+                function dumpCluster(cluster: BaseCluster3D, indent: string): string[] {
                     const isLeaf = cluster.isLeaf ? cluster.isLeaf() : false;
                     const wp = new Vector3();
                     cluster.getWorldPosition(wp);
@@ -362,7 +379,7 @@ export default class GraphView3D extends View3D {
                         `${indent}  geometry.boundingBox: ${bbStr(geoBB)}`,
                     ];
                     if (cluster.mClusters) {
-                        Object.values(cluster.mClusters).forEach((c: any) => {
+                        Object.values(cluster.mClusters).forEach((c) => {
                             lines.push(...dumpCluster(c, indent + '  '));
                         });
                     }
@@ -381,7 +398,7 @@ export default class GraphView3D extends View3D {
 
         var that = this;
 
-        ds(null, function onSuccess(mGraphData: any) {
+        ds(null, function onSuccess(mGraphData: unknown) {
             console.log("data loaded");
             that.setData(mGraphData);
 
@@ -401,7 +418,7 @@ export default class GraphView3D extends View3D {
         return this
     }
 
-    loadDatasource(datasource: any): this {
+    loadDatasource(datasource: Datasource): this {
         var that = this;
         this._currentDatasource = datasource;
         if (that.mRootCluster) {
@@ -410,7 +427,7 @@ export default class GraphView3D extends View3D {
                 that.mRootCluster.mTextOverlay.el.remove();
             that.mRootCluster = null;
         }
-        datasource.load(function onSuccess(mGraphData: any) {
+        datasource.load(function onSuccess(mGraphData: unknown) {
             console.log("data loaded");
             that.setData(mGraphData);
             function triggerColorChange() {

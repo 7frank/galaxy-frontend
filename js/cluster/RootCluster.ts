@@ -2,6 +2,7 @@
  * Created by Frank on 06.06.2017.
  */
 import Cluster3DExtended from "./Cluster3DExtended"
+import type { ClusterSpec } from "./BaseCluster3D"
 
 import ClusterTextOverlay from "./text/ClusterTextOverlay"
 import DefaultColorScheme from "./utils/DefaultColorScheme"
@@ -25,7 +26,7 @@ export default class RootCluster extends Cluster3DExtended {
     mLock: boolean | undefined
     declare useClusterText: boolean
 
-    constructor(nodes: GraphNode[] | undefined, clusteringHandlers: Record<string, unknown>, view: View3D) {
+    constructor(nodes: GraphNode[] | undefined, clusteringHandlers: ClusterSpec[] | undefined, view: View3D) {
         super(nodes, clusteringHandlers, view)
 
         this.useClusterText = true;
@@ -143,7 +144,7 @@ export default class RootCluster extends Cluster3DExtended {
     }
 
 
-    applyClustering(mClusteringSpeccsArray: any[], overrideExpand: boolean = false): boolean | undefined {
+    applyClustering(mClusteringSpeccsArray: ClusterSpec[], overrideExpand: boolean = false): boolean | undefined {
         const result = super.applyClustering(mClusteringSpeccsArray, overrideExpand)
         this.resetTextOverlay()
         return result
