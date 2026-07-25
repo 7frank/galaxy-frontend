@@ -32,7 +32,8 @@ export default class ZoomUtil {
         let defaults = {
             complete: function () {
             },
-            distance: 400
+            distance: 400,
+            approachDirection: null
         }
         options = _.extend(defaults, options)
 
@@ -45,7 +46,7 @@ export default class ZoomUtil {
 
 
         let mesh = cluster;
-        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, options.distance, options.complete);
+        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, options.distance, options.complete, options.approachDirection);
 
 
     }
@@ -60,7 +61,7 @@ export default class ZoomUtil {
      */
 
     static moveToMesh(mesh, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
-    }) {
+    }, approachDirection = null) {
 
         var position = new Vector3();
         position.setFromMatrixPosition(mesh.matrixWorld);
@@ -74,7 +75,7 @@ export default class ZoomUtil {
         }
 
 
-        ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete)
+        ZoomUtil.moveToPosition(position, camera, controls, cameraDistanceToMesh, onComplete, approachDirection)
 
 
     }
@@ -90,7 +91,7 @@ export default class ZoomUtil {
      * @param onComplete: a callback function that is triggered when the animation fphase has ended and the camera is at the target location
      */
     static moveToPosition(position, camera, controls, cameraDistanceToMesh = 400, onComplete = function () {
-    }) {
+    }, approachDirection = null) {
 
 
         var mTimeout;
@@ -102,13 +103,10 @@ export default class ZoomUtil {
         var isComplete1 = false
         var isComplete2 = false
 
-        //  var vec3End = new Vector3();
-        //  vec3End.setFromMatrixPosition(mesh.matrixWorld);
         var vec3End = position
 
         //we want to have a fixed distance to a node when selecting
         var distVec = vec3End.clone().sub(vec3Start)
-        var len = distVec.length()
         distVec.normalize()
         distVec.multiplyScalar(cameraDistanceToMesh) //apply fixed distance to the target
 
@@ -118,7 +116,10 @@ export default class ZoomUtil {
         //rotate the vector to be orientated on 0,0,1   //this will have not much impact on the 3d zoom but will prevent the 2d zoom from rotating
         //TODO find an alternative solution
 
-        let distVec2d = new Vector3(0, 0, -1).multiplyScalar(distVec.length())
+        const dir = approachDirection
+            ? new Vector3(...approachDirection).normalize()
+            : new Vector3(0, 0, -1)
+        let distVec2d = dir.multiplyScalar(distVec.length())
         alteredVecEnd = vec3End.clone().sub(distVec2d)
 
         // -------------------------------------

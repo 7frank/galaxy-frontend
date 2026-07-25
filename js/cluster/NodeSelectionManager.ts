@@ -65,7 +65,12 @@ export default class NodeSelectionManager {
             this.highlight(node, emitHighlightNeighbours, emitHighlightEdges);
             node.show();
 
-            if (zoom) this._zoomToNode(node._bubble, onZoomEnd);
+            if (zoom) {
+                const leafEl = node.getParentCluster?.() as { getParentCluster?: () => { getClusterOptions?: () => { zoomDirection?: [number, number, number] } } | null } | null;
+                const cluster = leafEl?.getParentCluster?.() as { getClusterOptions?: () => { zoomDirection?: [number, number, number] } } | null;
+                const zoomDirection = cluster?.getClusterOptions?.()?.zoomDirection;
+                this._zoomToNode(node._bubble, onZoomEnd, 400, zoomDirection);
+            }
 
             node.addClass("basic-selection");
 
@@ -100,12 +105,12 @@ export default class NodeSelectionManager {
         this.lastDblClicked = isDeselect ? undefined : node;
     }
 
-    private _zoomToNode(mesh: Mesh, onEnd?: () => void, minMaxDistance = 400): void {
+    private _zoomToNode(mesh: Mesh, onEnd?: () => void, minMaxDistance = 400, approachDirection?: [number, number, number]): void {
         const viewEl = document.querySelector<HTMLElement & { _view3d?: unknown }>(".view-3d[hasFocus]")
             ?? document.querySelector<HTMLElement & { _view3d?: unknown }>(".view-3d.view-3d-maximised");
         const view = viewEl?._view3d as { mCamera?: unknown; mControls?: unknown } | null;
         if (!view) { console.warn("no view focused to be able to zoom"); return; }
-        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, minMaxDistance, onEnd);
+        ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, minMaxDistance, onEnd, approachDirection ?? null);
     }
 
     private _emitSelectionChanged(): void {

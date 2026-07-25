@@ -26,7 +26,8 @@ export default class Cluster3DExtended extends BaseCluster3D {
 
     zoomToCluster(defaultDistance: number = 400): void {
         const distance = this.getRadius(defaultDistance) * 3;
-        ZoomUtil.moveToCluster(this, { distance });
+        const zoomDirection = this.getClusterOptions().zoomDirection as [number, number, number] | undefined;
+        ZoomUtil.moveToCluster(this, { distance, approachDirection: zoomDirection ?? null });
     }
 
     addListeners(): void {

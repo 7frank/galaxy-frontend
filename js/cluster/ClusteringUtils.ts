@@ -26,13 +26,14 @@ export class ClusteringUtils {
     }
 
     static buildSpeccs(
-        levels: {
+        levels: (string | {
             key?: string
             distribution?: BaseDistribution
             hullOptions?: ClusterOptions
-        }[]
+        })[]
     ): ClusterSpec[] {
-        const specs: ClusterSpec[] = levels.map((level, i) => {
+        const specs: ClusterSpec[] = levels.map((levelRaw, i) => {
+            const level = typeof levelRaw === 'string' ? { key: levelRaw } : levelRaw;
             const scale = DEFAULT_DISTRIBUTION_SCALES[i] ?? DEFAULT_DISTRIBUTION_SCALES[DEFAULT_DISTRIBUTION_SCALES.length - 1];
             const dist = level.distribution ?? new ForceGraphDistribution(scale, 3);
             if (level.key) {

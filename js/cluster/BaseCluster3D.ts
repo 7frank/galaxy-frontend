@@ -60,6 +60,7 @@ export interface ClusterOptions {
     text?: () => string
     colors?: Record<string, [number, number]>
     edges?: typeof ClusterBaseEdges
+    zoomDirection?: [number, number, number]
     [key: string]: unknown
 }
 

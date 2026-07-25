@@ -38,7 +38,7 @@
 
       const graph = new GraphView3D(document.getElementById("app"), {
         nodeTexture: "assets/dot7.png",
-        nodeDefaultScale: 50,
+        nodeDefaultScale: 10,
         speccs: ClusteringUtils.buildSpeccs([
           {
             key: "group",
@@ -47,10 +47,23 @@
           },
           {
             key: "industry",
-             distribution: new GridDistribution(25000),   hullOptions: { minClusterSize: 15, hull: ConvexVolume, makeHullEffect: () => new CircleHullEffect(), hullBorderMode: 'hover' }
+            distribution: new GridDistribution(25000),
+            hullOptions: {
+              zoomDirection:  [0, -1, 0] ,
+              minClusterSize: 15,
+              hull: ConvexVolume,
+              makeHullEffect: () => new CircleHullEffect(),
+              hullBorderMode: "hover",
+            },
           },
           {
-             distribution: new CircleDistribution(8000),  hullOptions: {                    hull: ConvexVolume, makeHullEffect: () => new BasicHullEffect(),  hullBorderMode: 'ambient' }
+            distribution: new CircleDistribution(8000),
+            hullOptions: {
+              zoomDirection:  [0, -1, 0] ,
+              hull: ConvexVolume,
+              makeHullEffect: () => new BasicHullEffect(),
+              hullBorderMode: "ambient",
+            },
           },
         ]),
       });
