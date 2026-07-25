@@ -2,8 +2,8 @@
  * Created by Frank on 05.06.2017.
  */
 
-
 import BaseDistribution from "./BaseDistribution"
+import { BufferGeometry } from "three/src/core/BufferGeometry.js";
 
 /**
  * TODO stub
@@ -12,8 +12,7 @@ import BaseDistribution from "./BaseDistribution"
  **/
 
 export default class GeometryDistribution extends BaseDistribution {
-    constructor(geometry) {
+    constructor(_geometry: BufferGeometry) {
         super(1, 0);
     }
 }
-

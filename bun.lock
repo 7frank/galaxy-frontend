@@ -14,7 +14,7 @@
         "monotone-convex-hull-2d": "^1.0.1",
         "mousetrap": "^1.6.1",
         "papaparse": "^4.3.5",
-        "postprocessing": "https://github.com/pmndrs/postprocessing",
+        "postprocessing": "^6.39.3",
         "qwest": "^4.4.6",
         "rxjs": "^5.4.2",
         "socket.io": "^2.0.3",
@@ -1409,7 +1409,7 @@
 
     "postcss-zindex": ["postcss-zindex@2.2.0", "", { "dependencies": { "has": "^1.0.1", "postcss": "^5.0.4", "uniqs": "^2.0.0" } }, ""],
 
-    "postprocessing": ["postprocessing@github:pmndrs/postprocessing#18596ef", { "peerDependencies": { "three": ">= 0.168.0 < 0.186.0" } }, "pmndrs-postprocessing-18596ef"],
+    "postprocessing": ["postprocessing@6.39.3", "", { "peerDependencies": { "three": ">= 0.168.0 < 0.186.0" } }, "sha512-h5H1iuN96aRkU06CzJ8d/FqFe3Qs2bI7LiGHTzOI5T5mQqjzovi2t1EkRHb8qkHgoD9cTJDb4uA30AkSxsFB7A=="],
 
     "powershell-utils": ["powershell-utils@0.1.0", "", {}, "sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A=="],
 

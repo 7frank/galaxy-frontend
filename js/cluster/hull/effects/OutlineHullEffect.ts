@@ -1,29 +1,40 @@
-import { EffectComposer } from "postprocessing/src/core/EffectComposer.js";
-import { RenderPass } from "postprocessing/src/passes/RenderPass.js";
-import { EffectPass } from "postprocessing/src/passes/EffectPass.js";
-import { OutlineEffect } from "postprocessing/src/effects/OutlineEffect.js";
-import { SMAAEffect } from "postprocessing/src/effects/SMAAEffect.js";
-import { SMAAPreset } from "postprocessing/src/enums/SMAAPreset.js";
-import { EdgeDetectionMode } from "postprocessing/src/enums/EdgeDetectionMode.js";
-import { BlendFunction } from "postprocessing/src/enums/BlendFunction.js";
+import { EffectComposer, RenderPass, EffectPass, OutlineEffect, SMAAEffect, SMAAPreset, EdgeDetectionMode, BlendFunction } from "postprocessing";
 import { HalfFloatType, LinearSRGBColorSpace, FrontSide } from "three/src/constants.js";
 import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial.js";
 import { Color } from "three/src/math/Color.js";
 import { Mesh } from "three/src/objects/Mesh.js";
+import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
+import { Scene } from "three/src/scenes/Scene.js";
+import { Camera } from "three/src/cameras/Camera.js";
 import BaseHullEffect from "./BaseHullEffect";
+
+export type HullEffectMode = "hover" | "ambient" | "none"
+
+export interface OutlineComposerOptions {
+    enableSmaa?: boolean
+}
 
 /**
  * Shared outline composer — one per view, shared across all OutlineHullEffect instances.
- * Created lazily when the first OutlineHullEffect attaches to a view.
  */
 export class OutlineComposer {
 
-    constructor({ enableSmaa = false } = {}) {
+    enableSmaa: boolean
+    mMeshModes: Map<Mesh, HullEffectMode>
+    mComposer: InstanceType<typeof EffectComposer> | null = null
+    mRenderer: WebGLRenderer | null = null
+    mScene: Scene | null = null
+    mCamera: Camera | null = null
+    mPrevColorSpace: string | undefined
+    effectDim!: InstanceType<typeof OutlineEffect>
+    effectBright!: InstanceType<typeof OutlineEffect>
+
+    constructor({ enableSmaa = false }: OutlineComposerOptions = {}) {
         this.enableSmaa = enableSmaa;
         this.mMeshModes = new Map();
     }
 
-    init(renderer, scene, camera) {
+    init(renderer: WebGLRenderer, scene: Scene, camera: Camera): void {
         if (this.mComposer) return;
         this.mRenderer = renderer;
         this.mScene = scene;
@@ -64,46 +75,50 @@ export class OutlineComposer {
         }
     }
 
-    add(mesh, mode) {
+    add(mesh: Mesh, mode: HullEffectMode): void {
         this.mMeshModes.set(mesh, mode);
         if (mode === "ambient" || mode === "hover") this.effectDim.selection.add(mesh);
     }
 
-    remove(mesh) {
+    remove(mesh: Mesh): void {
         this.effectBright.selection.delete(mesh);
         this.effectDim.selection.delete(mesh);
         this.mMeshModes.delete(mesh);
     }
 
-    activate(mesh) {
+    activate(mesh: Mesh): void {
         if (this.mMeshModes.get(mesh) === "hover") {
             this.effectDim.selection.delete(mesh);
             this.effectBright.selection.add(mesh);
         }
     }
 
-    deactivate(mesh) {
+    deactivate(mesh: Mesh): void {
         if (this.mMeshModes.get(mesh) === "hover") {
             this.effectBright.selection.delete(mesh);
             this.effectDim.selection.add(mesh);
         }
     }
 
-    render() {
-        const { mRenderer: r, mScene: s, mCamera: c } = this;
+    render(): void {
+        const r = this.mRenderer!;
+        const s = this.mScene!;
+        const c = this.mCamera!;
         r.autoClear = false;
         r.autoClearStencil = false;
-        c.layers.set(0);
-        this.mComposer.render();
+        (c as any).layers.set(0);
+        this.mComposer!.render();
         r.autoClear = false;
-        c.layers.set(1);
+        (c as any).layers.set(1);
         r.render(s, c);
-        c.layers.enableAll();
+        (c as any).layers.enableAll();
     }
 
-    resize(w, h) { this.mComposer?.setSize(w, h); }
+    resize(w: number, h: number): void {
+        this.mComposer?.setSize(w, h);
+    }
 
-    dispose() {
+    dispose(): void {
         if (this.effectDim) this.effectDim.selection.clear();
         if (this.effectBright) this.effectBright.selection.clear();
         this.mMeshModes.clear();
@@ -115,7 +130,7 @@ export class OutlineComposer {
             this.mRenderer.autoClearStencil = true;
             if (this.mPrevColorSpace !== undefined)
                 this.mRenderer.outputColorSpace = this.mPrevColorSpace;
-            this.mCamera.layers.enableAll();
+            (this.mCamera as any).layers.enableAll();
         }
     }
 }
@@ -125,7 +140,13 @@ export class OutlineComposer {
  */
 export default class OutlineHullEffect extends BaseHullEffect {
 
-    constructor(mode = "hover", composer = null) {
+    mMode: HullEffectMode
+    mComposer: OutlineComposer | null
+    mMesh: Mesh | null
+    mFillMesh: Mesh | null
+    mFillMat: MeshBasicMaterial
+
+    constructor(mode: HullEffectMode = "hover", composer: OutlineComposer | null = null) {
         super();
         this.mMode = mode;
         this.mComposer = composer;
@@ -140,25 +161,25 @@ export default class OutlineHullEffect extends BaseHullEffect {
         });
     }
 
-    setComposer(composer) {
+    setComposer(composer: OutlineComposer): void {
         this.mComposer = composer;
         if (this.mMesh) this.mComposer.add(this.mMesh, this.mMode);
     }
 
-    onAttach(mesh) {
+    onAttach(mesh: Mesh): void {
         mesh.visible = true;
         this.mMesh = mesh;
         if (this.mComposer) this.mComposer.add(mesh, this.mMode);
         if (!this.mFillMesh) {
             this.mFillMesh = new Mesh(mesh.geometry, this.mFillMat);
             this.mFillMesh.layers.set(0);
-            mesh.parent.add(this.mFillMesh);
+            mesh.parent!.add(this.mFillMesh);
         } else {
             this.mFillMesh.geometry = mesh.geometry;
         }
     }
 
-    onDetach(mesh) {
+    onDetach(mesh: Mesh): void {
         if (this.mComposer) this.mComposer.remove(mesh);
         mesh.visible = false;
         if (this.mMesh) this.mMesh.layers.set(0);
@@ -167,17 +188,17 @@ export default class OutlineHullEffect extends BaseHullEffect {
         this.mMesh = null;
     }
 
-    onActive(mesh) {
+    onActive(mesh: Mesh): void {
         if (this.mComposer) this.mComposer.activate(mesh);
-        if (this.mFillMesh) this.mFillMesh.material.opacity = 0.45;
+        if (this.mFillMesh) (this.mFillMesh.material as MeshBasicMaterial).opacity = 0.45;
     }
 
-    onInactive(mesh) {
+    onInactive(mesh: Mesh): void {
         if (this.mComposer) this.mComposer.deactivate(mesh);
-        if (this.mFillMesh) this.mFillMesh.material.opacity = 0.25;
+        if (this.mFillMesh) (this.mFillMesh.material as MeshBasicMaterial).opacity = 0.25;
     }
 
-    dispose() {
+    dispose(): void {
         if (this.mMesh && this.mComposer) this.mComposer.remove(this.mMesh);
         if (this.mFillMesh && this.mFillMesh.parent) this.mFillMesh.parent.remove(this.mFillMesh);
         this.mFillMat.dispose();

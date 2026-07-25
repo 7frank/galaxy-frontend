@@ -87,7 +87,7 @@
     "monotone-convex-hull-2d": "^1.0.1",
     "mousetrap": "^1.6.1",
     "papaparse": "^4.3.5",
-    "postprocessing": "https://github.com/pmndrs/postprocessing",
+    "postprocessing": "^6.39.3",
     "qwest": "^4.4.6",
     "rxjs": "^5.4.2",
     "socket.io": "^2.0.3",

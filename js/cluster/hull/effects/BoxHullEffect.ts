@@ -5,17 +5,27 @@ import { Color } from "three/src/math/Color.js";
 import { Mesh } from "three/src/objects/Mesh.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import BaseHullEffect from "./BaseHullEffect";
+import type BaseVolume from "../BaseVolume";
+
+export interface BoxHullEffectOptions {
+    opacity?: number
+    hoverOpacity?: number
+}
 
 export default class BoxHullEffect extends BaseHullEffect {
 
-    constructor({ opacity = 0.15, hoverOpacity = 0.35 } = {}) {
+    mOpacity: number
+    mHoverOpacity: number
+    mOwnMeshes: Map<Mesh, Mesh>
+
+    constructor({ opacity = 0.15, hoverOpacity = 0.35 }: BoxHullEffectOptions = {}) {
         super();
         this.mOpacity = opacity;
         this.mHoverOpacity = hoverOpacity;
         this.mOwnMeshes = new Map();
     }
 
-    _makeMat() {
+    _makeMat(): MeshBasicMaterial {
         return new MeshBasicMaterial({
             color: new Color().setHSL(Math.random(), 0.7, 0.5),
             opacity: this.mOpacity,
@@ -25,8 +35,8 @@ export default class BoxHullEffect extends BaseHullEffect {
         });
     }
 
-    onAttach(hullMesh) {
-        const hull = hullMesh.parent;
+    onAttach(hullMesh: Mesh): void {
+        const hull = hullMesh.parent as (InstanceType<typeof BaseVolume> & Mesh) | null;
         const bb = hull && hull.mBoundingBox;
         if (!bb) return;
 
@@ -39,7 +49,7 @@ export default class BoxHullEffect extends BaseHullEffect {
             const mat = this._makeMat();
             own = new Mesh(geo, mat);
             own.layers.set(0);
-            hullMesh.parent.add(own);
+            hullMesh.parent!.add(own);
             this.mOwnMeshes.set(hullMesh, own);
         } else {
             own.geometry.dispose();
@@ -50,30 +60,30 @@ export default class BoxHullEffect extends BaseHullEffect {
         own.visible = true;
     }
 
-    onDetach(hullMesh) {
+    onDetach(hullMesh: Mesh): void {
         for (const [, own] of this.mOwnMeshes) {
             if (own.parent) own.parent.remove(own);
             own.geometry.dispose();
-            own.material.dispose();
+            (own.material as MeshBasicMaterial).dispose();
         }
         this.mOwnMeshes.clear();
     }
 
-    onActive(hullMesh) {
+    onActive(hullMesh: Mesh): void {
         const own = this.mOwnMeshes.get(hullMesh);
-        if (own) own.material.opacity = this.mHoverOpacity;
+        if (own) (own.material as MeshBasicMaterial).opacity = this.mHoverOpacity;
     }
 
-    onInactive(hullMesh) {
+    onInactive(hullMesh: Mesh): void {
         const own = this.mOwnMeshes.get(hullMesh);
-        if (own) own.material.opacity = this.mOpacity;
+        if (own) (own.material as MeshBasicMaterial).opacity = this.mOpacity;
     }
 
-    dispose() {
+    dispose(): void {
         for (const [, own] of this.mOwnMeshes) {
             if (own.parent) own.parent.remove(own);
             own.geometry.dispose();
-            own.material.dispose();
+            (own.material as MeshBasicMaterial).dispose();
         }
         this.mOwnMeshes.clear();
     }

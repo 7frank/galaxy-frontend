@@ -3,14 +3,16 @@ import ForceGraphDistribution from "../ForceGraphDistribution";
 
 export default class ForceLayoutEngine extends BaseLayoutEngine {
 
-    constructor(dimensions = 3) {
+    dimensions: number
+
+    constructor(dimensions: number = 3) {
         super();
         this.dimensions = dimensions;
     }
 
-    label() { return this.dimensions === 3 ? "3D" : "Plane"; }
+    label(): string { return this.dimensions === 3 ? "3D" : "Plane"; }
 
-    forLevel(levelIndex, scale) {
+    forLevel(_levelIndex: number, scale: number): ForceGraphDistribution {
         return new ForceGraphDistribution(scale, this.dimensions);
     }
 }

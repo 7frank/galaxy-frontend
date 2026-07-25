@@ -9,7 +9,10 @@
     "skipLibCheck": true,
     "outDir": "dist",
     "declaration": true,
-    "declarationDir": "dist"
+    "declarationDir": "dist",
+    "paths": {
+      "postprocessing": ["./node_modules/postprocessing/types/index.d.ts"]
+    }
   },
   "include": ["js/**/*"],
   "exclude": [

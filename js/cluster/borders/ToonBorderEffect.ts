@@ -1,11 +1,13 @@
 import { DataTexture } from "three/src/textures/DataTexture.js";
 import { MeshToonMaterial } from "three/src/materials/MeshToonMaterial.js";
+import { Material } from "three/src/materials/Material.js";
 import { RedFormat, UnsignedByteType } from "three/src/constants.js";
 import { Color } from "three/src/math/Color.js";
 import { FrontSide } from "three/src/constants.js";
-import BaseBorderEffect from "./BaseBorderEffect";
+import { Mesh } from "three/src/objects/Mesh.js";
+import BaseBorderEffect, { BorderEffectMode } from "./BaseBorderEffect";
 
-function buildGradientMap(steps) {
+function buildGradientMap(steps: number): DataTexture {
     const data = new Uint8Array(steps);
     for (let i = 0; i < steps; i++) {
         data[i] = Math.round((i / (steps - 1)) * 255);
@@ -15,9 +17,26 @@ function buildGradientMap(steps) {
     return tex;
 }
 
+export interface ToonBorderEffectOptions {
+    steps?: number
+    opacity?: number
+    color?: number
+    hoverOpacity?: number
+    hoverColor?: number
+}
+
 export default class ToonBorderEffect extends BaseBorderEffect {
 
-    constructor({ steps = 4, opacity = 0.15, color = 0xaaccff, hoverOpacity = 0.35, hoverColor = 0xffffff } = {}) {
+    mSteps: number
+    mOpacity: number
+    mColor: number
+    mHoverOpacity: number
+    mHoverColor: number
+    mGradientMap: DataTexture
+    mOriginalMaterials: Map<Mesh, Material>
+    mModeMap: Map<Mesh, BorderEffectMode>
+
+    constructor({ steps = 4, opacity = 0.15, color = 0xaaccff, hoverOpacity = 0.35, hoverColor = 0xffffff }: ToonBorderEffectOptions = {}) {
         super();
         console.log("[Toon] constructed");
         this.mSteps = steps;
@@ -30,11 +49,11 @@ export default class ToonBorderEffect extends BaseBorderEffect {
         this.mModeMap = new Map();
     }
 
-    onHullRegister(mesh, mode) {
+    onHullRegister(mesh: Mesh, mode: BorderEffectMode): void {
         if (mode === "none") return;
-        console.log("[Toon] register", mode, "mesh.visible=", mesh.visible, "mat.visible=", mesh.material.visible, mesh);
+        console.log("[Toon] register", mode, "mesh.visible=", mesh.visible, "mat.visible=", (mesh.material as Material).visible, mesh);
         this.mModeMap.set(mesh, mode);
-        this.mOriginalMaterials.set(mesh, mesh.material);
+        this.mOriginalMaterials.set(mesh, mesh.material as Material);
         const mat = new MeshToonMaterial({
             color: new Color(this.mColor),
             gradientMap: this.mGradientMap,
@@ -49,10 +68,10 @@ export default class ToonBorderEffect extends BaseBorderEffect {
         mesh.layers.set(0);
     }
 
-    onHullUnregister(mesh) {
+    onHullUnregister(mesh: Mesh): void {
         const original = this.mOriginalMaterials.get(mesh);
         if (original) {
-            mesh.material.dispose();
+            (mesh.material as Material).dispose();
             mesh.material = original;
             mesh.visible = original.visible;
             mesh.layers.enableAll();
@@ -61,28 +80,27 @@ export default class ToonBorderEffect extends BaseBorderEffect {
         this.mModeMap.delete(mesh);
     }
 
-    onHullActive(mesh) {
-        if (this.mModeMap.get(mesh) === "hover" && mesh.material.isMeshToonMaterial) {
-            mesh.material.color.set(this.mHoverColor);
-            mesh.material.opacity = this.mHoverOpacity;
+    onHullActive(mesh: Mesh): void {
+        if (this.mModeMap.get(mesh) === "hover" && (mesh.material as MeshToonMaterial).isMeshToonMaterial) {
+            (mesh.material as MeshToonMaterial).color.set(this.mHoverColor);
+            (mesh.material as MeshToonMaterial).opacity = this.mHoverOpacity;
         }
     }
 
-    onHullInactive(mesh) {
-        if (this.mModeMap.get(mesh) === "hover" && mesh.material.isMeshToonMaterial) {
-            mesh.material.color.set(this.mColor);
-            mesh.material.opacity = this.mOpacity;
+    onHullInactive(mesh: Mesh): void {
+        if (this.mModeMap.get(mesh) === "hover" && (mesh.material as MeshToonMaterial).isMeshToonMaterial) {
+            (mesh.material as MeshToonMaterial).color.set(this.mColor);
+            (mesh.material as MeshToonMaterial).opacity = this.mOpacity;
         }
     }
 
-    dispose() {
+    dispose(): void {
         this.mGradientMap.dispose();
         for (const [mesh, original] of this.mOriginalMaterials) {
-            mesh.material.dispose();
+            (mesh.material as Material).dispose();
             mesh.material = original;
         }
         this.mOriginalMaterials.clear();
         this.mModeMap.clear();
     }
-
 }

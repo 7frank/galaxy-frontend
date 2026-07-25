@@ -716,7 +716,7 @@ export default class BaseCluster3D extends BaseNode {
         let o = this.getClusterOptions()
 
         if (hull.canBeVisible()) {
-            hull.mesh.material.color = new ThreeColor(o.colors.hull[0])
+            (hull.mesh.material as any).color = new ThreeColor(o.colors.hull[0])
             hull.maxOpacity = o.colors.hull[1]
         }
     }
@@ -843,7 +843,7 @@ export default class BaseCluster3D extends BaseNode {
 
         let domEvents = this.getDOMEvents()
 
-        let viewOptions = (this.getView() && this.getView().mOptions) || {}
+        let viewOptions = (this.getView() && (this.getView() as any).mOptions) || {}
         let leaf = new ClusterLeafElement(this.mNodes, domEvents, viewOptions);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);
@@ -921,7 +921,7 @@ export default class BaseCluster3D extends BaseNode {
         return clusters
     }
 
-    getDOMElement(): Element | null {
+    getDOMElement(): HTMLElement | null {
         var view3d = this.getView();
         if (!view3d || !(view3d as any).domElement) {
             console.warn("attach graph to a view before using dom specific functions");

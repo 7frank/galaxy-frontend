@@ -3,9 +3,9 @@ import RandomDistribution from "../RandomDistribution";
 
 export default class RandomLayoutEngine extends BaseLayoutEngine {
 
-    label() { return "Random"; }
+    label(): string { return "Random"; }
 
-    forLevel(levelIndex, scale) {
+    forLevel(_levelIndex: number, scale: number): RandomDistribution {
         return new RandomDistribution(scale, 3);
     }
 }

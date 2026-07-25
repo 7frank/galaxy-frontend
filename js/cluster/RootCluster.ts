@@ -9,6 +9,7 @@ import DefaultColorScheme from "./utils/DefaultColorScheme"
 import {computeCompanyNodeColor, computeGroupNodeColorHelper} from "./refactor/SpecificDataUtils"
 import _ from "lodash";
 import type View3D from "../view/View3D";
+import type { GraphNode } from "./particles/ParticleNodeGroup";
 
 /**
  *
@@ -24,13 +25,13 @@ export default class RootCluster extends Cluster3DExtended {
     mLock: boolean | undefined
     declare useClusterText: boolean
 
-    constructor(...args: any[]) {
-        super(...args)
+    constructor(nodes: GraphNode[] | undefined, clusteringHandlers: Record<string, unknown>, view: View3D) {
+        super(nodes, clusteringHandlers, view)
 
         this.useClusterText = true;
 
         this.on("hull-updated", function (this: RootCluster) {
-            this.findClusters("*").forEach(function (cluster: any) {
+            this.findClusters("*").forEach(function (cluster: Cluster3DExtended & { useLOD?: boolean }) {
                 cluster.useLOD = true
             })
         })
@@ -42,7 +43,7 @@ export default class RootCluster extends Cluster3DExtended {
 
         super.addListeners();
 
-        this.on("u", (e: any) => {
+        this.on("u", (e: Event & { stopPropagation: () => void }) => {
             e.stopPropagation();
             this.useClusterText = !this.useClusterText;
             console.log("useClusterText", this.useClusterText)
@@ -65,13 +66,13 @@ export default class RootCluster extends Cluster3DExtended {
         var nodes = this.mNodes;
         var that = this
 
-        function getCountryNamesFromNodes(nodes: any[]) {
+        function getCountryNamesFromNodes(nodes: Array<GraphNode & { group?: string }>) {
             var res: Record<string, boolean> = {}
-            _.each(nodes, (n) => res[n.group] = true)
+            _.each(nodes, (n) => { if (n.group) res[n.group] = true })
             return Object.keys(res)
         }
 
-        function updateParticles(leaf: any) {
+        function updateParticles(leaf: { mParticles?: { updateColors: () => void } } | null) {
             if (leaf && leaf.mParticles) {
                 leaf.mParticles.updateColors();
             } else {
@@ -81,23 +82,24 @@ export default class RootCluster extends Cluster3DExtended {
 
         var countryNames: string[] | null = null;
 
-        window.addEventListener("node-color-change", function (e: any) {
-            var val = e.detail;
+        window.addEventListener("node-color-change", function (e: Event) {
+            const ce = e as CustomEvent<string>;
+            var val = ce.detail;
 
             if (!countryNames) countryNames = getCountryNamesFromNodes(nodes)
 
             var helper = computeGroupNodeColorHelper(countryNames)
 
             if (val == "group")
-                nodes.forEach(function (v: any) {
+                nodes.forEach(function (v: GraphNode & { group?: string }) {
                     v.color = helper.getColor(v.group)
                 });
             else
-                nodes.forEach(function (v: any) {
-                    v.color = computeCompanyNodeColor(parseInt(v.sent), val)
+                nodes.forEach(function (v: GraphNode & { sent?: string }) {
+                    v.color = computeCompanyNodeColor(parseInt(v.sent ?? "0"), val)
                 })
 
-            _.each(that.getLeafs(), function (leaf: any) {
+            _.each(that.getLeafs(), function (leaf: { mNodeParticles?: { update: () => void }; mParticles?: { updateColors: () => void } }) {
                 leaf.mNodeParticles.update()
                 updateParticles(leaf)
             })
@@ -141,8 +143,9 @@ export default class RootCluster extends Cluster3DExtended {
     }
 
 
-    applyClustering(mClusteringSpeccsArray: any, overrideExpand: boolean = false): any {
-        super.applyClustering(mClusteringSpeccsArray, overrideExpand)
+    applyClustering(mClusteringSpeccsArray: any[], overrideExpand: boolean = false): boolean | undefined {
+        const result = super.applyClustering(mClusteringSpeccsArray, overrideExpand)
         this.resetTextOverlay()
+        return result
     }
 }
