@@ -9,7 +9,11 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
-    "./dist/index.css": "./dist/index.css"
+    "./dist/index.css": "./dist/index.css",
+    "./hull": {
+      "import": "./dist/hull.mjs",
+      "require": "./dist/hull.js"
+    }
   },
   "files": [
     "dist/**/*.js",

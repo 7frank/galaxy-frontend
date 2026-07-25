@@ -3,10 +3,8 @@ import BaseCluster3D from "../BaseCluster3D";
 import {IndustrialSectorAbbreviation} from "../utils/IndustrialSectorIcon";
 import ConvexVolume from "../hull/ConvexVolume";
 import BaseVolume from "../hull/BaseVolume";
-import OutlineHullEffect, { OutlineComposer } from "../hull/effects/OutlineHullEffect";
 import NoneHullEffect from "../hull/effects/NoneHullEffect";
 import BasicHullEffect from "../hull/effects/BasicHullEffect";
-import BoxHullEffect from "../hull/effects/BoxHullEffect";
 
 import ForceGraphDistribution from "../distributions/ForceGraphDistribution";
 import ZoomUtil from "../../utils/ZoomUtil";
@@ -53,20 +51,6 @@ export default class Default3DGraphConfig {
 
         this._targetView = target;
 
-        if (target && target.mRenderer) {
-            if (!this.mOutlineComposer) {
-                this.mOutlineComposer = new OutlineComposer();
-                this.mOutlineComposer.init(target.mRenderer, target.mScene, target.mCamera);
-                target.setBorderEffect(this.mOutlineComposer);
-            }
-            const c = this.mOutlineComposer;
-            this.getSpeccs().forEach(spec => {
-                if (spec.options && spec.options.makeHullEffect) {
-                    const orig = spec.options.makeHullEffect;
-                    spec.options.makeHullEffect = () => { const e = orig(); if (e.setComposer) e.setComposer(c); return e; };
-                }
-            });
-        }
 
         return this
 
@@ -177,7 +161,7 @@ export default class Default3DGraphConfig {
                 options: {
                     minClusterSize: 15
                     , hull: ConvexVolume,
-                    makeHullEffect: () => new OutlineHullEffect("hover", null),
+                    makeHullEffect: () => new BasicHullEffect(),
                     hullBorderMode: "hover",
                     onHullCreated: function (volume) {
                     }
@@ -188,7 +172,7 @@ export default class Default3DGraphConfig {
                 distribution: nodesWithinIndustryDistribution,
                 options: {
                     hull: ConvexVolume,
-                    makeHullEffect: () => new OutlineHullEffect("ambient", null),
+                    makeHullEffect: () => new BasicHullEffect(),
                     hullBorderMode: "ambient",
 
                     text: function () {

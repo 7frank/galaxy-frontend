@@ -17,7 +17,6 @@ import {GUI} from "../cluster/refactor/SpecificDataUtils"
 import _ from "lodash";
 import ConvexVolume from "../cluster/hull/ConvexVolume";
 import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";
-import OutlineHullEffect, { OutlineComposer } from "../cluster/hull/effects/OutlineHullEffect";
 import BasicHullEffect from "../cluster/hull/effects/BasicHullEffect";
 import BoxHullEffect from "../cluster/hull/effects/BoxHullEffect";
 import { BackSide } from "three/src/constants.js";
@@ -102,30 +101,40 @@ export default class GraphView3D extends View3D {
         return this;
     }
 
-    setBorderStyle(style: string): this {
-        const BORDERS: Record<string, any> = {
-            "None":    { makeEffect: () => new NoneHullEffect(),                  makeComposer: () => null },
-            "Outline": { makeEffect: (mode: any, c: any) => new OutlineHullEffect(mode, c), makeComposer: (v: any) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; } },
-            "Basic":   { makeEffect: () => new BasicHullEffect(),                 makeComposer: () => null },
-            "Box":     { makeEffect: () => new BoxHullEffect(),                   makeComposer: () => null },
+    setBorderStyle(style: string): Promise<this> {
+        const applyStyle = (makeEffect: (mode: any, c: any) => any, makeComposer: (v: any) => any) => {
+            if (this.mBorderEffect) { this.mBorderEffect.dispose(); this.mBorderEffect = null; }
+            const composer = makeComposer(this);
+            if (this.mRootCluster) {
+                this.mRootCluster.findClusters("*").forEach((cluster: any) => {
+                    if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
+                    if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh);
+                    const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
+                    if (!cluster._hullMode) cluster._hullMode = mode;
+                    const effect = makeEffect(mode, composer);
+                    cluster._hullEffect = effect;
+                    effect.onAttach(cluster.mHull.mesh);
+                });
+            }
+            if (composer) this.setBorderEffect(composer);
+            return this;
         };
-        const entry = BORDERS[style];
-        if (!entry) { console.warn(`setBorderStyle: unknown style "${style}", use one of: ${Object.keys(BORDERS).join(", ")}`); return this; }
-        if (this.mBorderEffect) { this.mBorderEffect.dispose(); this.mBorderEffect = null; }
-        const composer = entry.makeComposer(this);
-        if (this.mRootCluster) {
-            this.mRootCluster.findClusters("*").forEach((cluster: any) => {
-                if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
-                if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh);
-                const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
-                if (!cluster._hullMode) cluster._hullMode = mode;
-                const effect = entry.makeEffect(mode, composer);
-                cluster._hullEffect = effect;
-                effect.onAttach(cluster.mHull.mesh);
+        if (style === "Outline") {
+            return import("../cluster/hull/effects/OutlineHullEffect.js").then(({ default: OutlineHullEffect, OutlineComposer }) => {
+                return applyStyle(
+                    (mode: any, c: any) => new OutlineHullEffect(mode, c),
+                    (v: any) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; }
+                );
             });
         }
-        if (composer) this.setBorderEffect(composer);
-        return this;
+        const BORDERS: Record<string, any> = {
+            "None":  { makeEffect: () => new NoneHullEffect(),  makeComposer: () => null },
+            "Basic": { makeEffect: () => new BasicHullEffect(), makeComposer: () => null },
+            "Box":   { makeEffect: () => new BoxHullEffect(),   makeComposer: () => null },
+        };
+        const entry = BORDERS[style];
+        if (!entry) { console.warn(`setBorderStyle: unknown style "${style}", use one of: Outline, ${Object.keys(BORDERS).join(", ")}`); return Promise.resolve(this); }
+        return Promise.resolve(applyStyle(entry.makeEffect, entry.makeComposer));
     }
 
 

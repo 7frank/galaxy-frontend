@@ -4,11 +4,6 @@ import Extended2DGraphConfig from "../cluster/configs/Extendend2DGraphConfig";
 import Default3DGraphConfig from "../cluster/configs/Default3DGraphConfig";
 import Default2DGraphConfig from "../cluster/configs/Default2DGraphConfig";
 
-import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";
-import BasicHullEffect from "../cluster/hull/effects/BasicHullEffect";
-import BoxHullEffect from "../cluster/hull/effects/BoxHullEffect";
-import OutlineHullEffect, { OutlineComposer } from "../cluster/hull/effects/OutlineHullEffect";
-import ConvexVolume from "../cluster/hull/ConvexVolume";
 
 import CsvDatasource from "../data/CsvDatasource";
 import GeneratorDatasource from "../data/GeneratorDatasource";
@@ -22,12 +17,7 @@ const MODES = {
     "2D+": () => new Extended2DGraphConfig(),
 };
 
-const BORDERS = {
-    "None":    { makeEffect: () => new NoneHullEffect(),                  makeComposer: () => null },
-    "Outline": { makeEffect: (mode, c) => new OutlineHullEffect(mode, c), makeComposer: (v) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; } },
-    "Basic":   { makeEffect: () => new BasicHullEffect(),                 makeComposer: () => null },
-    "Box":     { makeEffect: () => new BoxHullEffect(),                   makeComposer: () => null },
-};
+const BORDERS = ["None", "Outline", "Basic", "Box"];
 
 const SOURCES = {
     "CSV": () => new CsvDatasource("assets/realDataNodesv5_ticker.csv", "assets/realDataLinksv5.csv"),
@@ -110,26 +100,11 @@ export function initTweakpane() {
             MODES[value]().setView(view).setMode(() => { prevMode = value; });
         });
 
-    pane.addBinding(state, "border", { label: "Border", options: Object.fromEntries(Object.keys(BORDERS).map(k => [k, k])) })
+    pane.addBinding(state, "border", { label: "Border", options: Object.fromEntries(BORDERS.map(k => [k, k])) })
         .on("change", ({ value }) => {
             const view = getView();
             if (!view || !view.mRootCluster) return;
-            const entry = BORDERS[value];
-
-            if (view.mBorderEffect) { view.mBorderEffect.dispose(); view.mBorderEffect = null; }
-            const composer = entry.makeComposer(view);
-
-            view.mRootCluster.findClusters("*").forEach(cluster => {
-                if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
-                if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh);
-                const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
-                if (!cluster._hullMode) cluster._hullMode = mode;
-                const effect = entry.makeEffect(mode, composer);
-                cluster._hullEffect = effect;
-                effect.onAttach(cluster.mHull.mesh);
-            });
-
-            if (composer) view.setBorderEffect(composer);
+            view.setBorderStyle(value);
         });
 
     pane.addBinding(state, "source", { label: "Data", options: Object.fromEntries(Object.keys(SOURCES).map(k => [k, k])) })

@@ -31,10 +31,16 @@ export default defineConfig({
         'easy-color',
         'three.meshline',
     ],
-    esbuildOptions(options) {
+    esbuildOptions(options, context) {
         options.alias = {
             three: resolve('node_modules/three')
         };
+        if (context.format === 'esm' && options.entryPoints?.index || true) {
+            options.external = [
+                ...(options.external || []),
+                resolve('js/cluster/hull/effects/OutlineHullEffect.ts'),
+            ];
+        }
         options.loader = {
             '.glsl': 'text',
             '.vert': 'text',

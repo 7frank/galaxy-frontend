@@ -2,14 +2,13 @@ import "./ModeSelect.css";
 import NoneHullEffect from "../cluster/hull/effects/NoneHullEffect";
 import BasicHullEffect from "../cluster/hull/effects/BasicHullEffect";
 import BoxHullEffect from "../cluster/hull/effects/BoxHullEffect";
-import OutlineHullEffect, { OutlineComposer } from "../cluster/hull/effects/OutlineHullEffect";
 import ConvexVolume from "../cluster/hull/ConvexVolume";
 
 const EFFECTS = [
-    { label: "None",    makeEffect: () => new NoneHullEffect(),                        makeComposer: () => null },
-    { label: "Outline", makeEffect: (mode, c) => new OutlineHullEffect(mode, c),       makeComposer: (v) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; } },
-    { label: "Basic",   makeEffect: () => new BasicHullEffect(),                       makeComposer: () => null },
-    { label: "Box",     makeEffect: () => new BoxHullEffect(),                         makeComposer: () => null },
+    { label: "None",    makeEffect: () => new NoneHullEffect(),  makeComposer: () => null },
+    { label: "Outline", makeEffect: null, makeComposer: null, lazy: true },
+    { label: "Basic",   makeEffect: () => new BasicHullEffect(), makeComposer: () => null },
+    { label: "Box",     makeEffect: () => new BoxHullEffect(),   makeComposer: () => null },
 ];
 
 class BorderSelect extends HTMLElement {
@@ -34,31 +33,36 @@ class BorderSelect extends HTMLElement {
         const entry = EFFECTS.find(e => e.label === label);
         if (!entry) return;
 
-        if (view.mBorderEffect) {
-            view.mBorderEffect.dispose();
-            view.mBorderEffect = null;
-        }
-
-        const composer = entry.makeComposer(view);
-
-        view.mRootCluster.findClusters("*").forEach(cluster => {
-            if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
-
-            if (cluster._hullEffect) {
-                cluster._hullEffect.onDetach(cluster.mHull.mesh);
+        const apply = (makeEffect, makeComposer) => {
+            if (view.mBorderEffect) {
+                view.mBorderEffect.dispose();
+                view.mBorderEffect = null;
             }
+            const composer = makeComposer(view);
+            view.mRootCluster.findClusters("*").forEach(cluster => {
+                if (!cluster.mHull || !(cluster.mHull instanceof ConvexVolume) || !cluster.mHull.mesh) return;
+                if (cluster._hullEffect) cluster._hullEffect.onDetach(cluster.mHull.mesh);
+                const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
+                if (!cluster._hullMode) cluster._hullMode = mode;
+                const effect = makeEffect(mode, composer);
+                cluster._hullEffect = effect;
+                effect.onAttach(cluster.mHull.mesh);
+            });
+            if (composer) view.setBorderEffect(composer);
+            this.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
+            btn.classList.add("selected");
+        };
 
-            const mode = cluster._hullMode || (cluster._hullEffect && cluster._hullEffect.mMode) || "hover";
-            if (!cluster._hullMode) cluster._hullMode = mode;
-            const effect = entry.makeEffect(mode, composer);
-            cluster._hullEffect = effect;
-            effect.onAttach(cluster.mHull.mesh);
-        });
-
-        if (composer) view.setBorderEffect(composer);
-
-        this.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
-        btn.classList.add("selected");
+        if (entry.lazy) {
+            import("../cluster/hull/effects/OutlineHullEffect.js").then(({ default: OutlineHullEffect, OutlineComposer }) => {
+                apply(
+                    (mode, c) => new OutlineHullEffect(mode, c),
+                    (v) => { const c = new OutlineComposer(); c.init(v.mRenderer, v.mScene, v.mCamera); return c; }
+                );
+            });
+        } else {
+            apply(entry.makeEffect, entry.makeComposer);
+        }
     }
 }
 
