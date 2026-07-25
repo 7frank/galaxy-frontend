@@ -1,7 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      /* .view-3d {
+        position: relative;
+      } */
+
       body,
       html {
         margin: 0;
@@ -15,6 +25,25 @@
 
       .cluster-text-overlay-breadcrumb-item {
         color: white;
+      }
+
+      .graph-cluster-caption {
+        color: #ffffff;
+
+        padding: 2px 5px;
+        background: rgba(0, 0, 0, 0.5);
+
+        font-family: "Roboto", sans-serif;
+        font-size: 0.8em;
+        font-weight: 900;
+        opacity: 0.5;
+      }
+
+      .graph-cluster-caption:hover {
+        opacity: 0.6 !important;
+        color: darkslateblue;
+
+        text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;
       }
     </style>
   </head>
@@ -49,7 +78,7 @@
             key: "industry",
             distribution: new GridDistribution(25000),
             hullOptions: {
-              zoomDirection:  [0, -1, 0] ,
+              zoomDirection: [0, -1, 0],
               minClusterSize: 15,
               hull: ConvexVolume,
               makeHullEffect: () => new CircleHullEffect(),
@@ -59,7 +88,7 @@
           {
             distribution: new CircleDistribution(8000),
             hullOptions: {
-              zoomDirection:  [0, -1, 0] ,
+              zoomDirection: [0, -1, 0],
               hull: ConvexVolume,
               makeHullEffect: () => new BasicHullEffect(),
               hullBorderMode: "ambient",
