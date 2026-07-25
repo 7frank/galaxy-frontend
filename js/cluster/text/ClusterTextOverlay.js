@@ -327,7 +327,7 @@ export default class ClusterTextOverlay {
 
             },
             getCSSClasses: function () {
-                return 'graph-country-caption'
+                return 'graph-cluster-caption'
 
             },
             getNodePosition: function (node) {
