@@ -1,31 +1,70 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    body, html { margin: 0; width: 100%; height: 100%; }
-    #app { width: 100vw; height: 100vh; }
+  <head>
+    <style>
+      body,
+      html {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+      }
 
-    .cluster-text-overlay-breadcrumb-item{
-      color: white;
+      .cluster-text-overlay-breadcrumb-item {
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      import {
+        GraphView3D,
+        ClusteringUtils,
+        GeneratorDatasource,
+        CircleDistribution,
+        GridDistribution,
+        BoxHullEffect,
+        CircleHullEffect,
+        BasicHullEffect,
+        BaseVolume,
+        ConvexVolume,
+        NoneHullEffect,
+      } from "cluster-graph-3d";
+      import "cluster-graph-3d/dist/index.css";
 
-    }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
-  <script type="module">
-    import { GraphView3D, ClusteringUtils, GeneratorDatasource } from 'cluster-graph-3d'
-    import 'cluster-graph-3d/dist/index.css'
+      const graph = new GraphView3D(document.getElementById("app"), {
+        nodeTexture: "assets/dot7.png",
+        nodeDefaultScale: 50,
+        speccs: ClusteringUtils.buildSpeccs([
+          {
+            key: "group",
+            distribution: new CircleDistribution(90000),
+            hullOptions: { minClusterSize: 40 },
+          },
+          {
+            key: "industry",
+             distribution: new GridDistribution(25000),   hullOptions: { minClusterSize: 15, hull: ConvexVolume, makeHullEffect: () => new CircleHullEffect(), hullBorderMode: 'hover' }
+          },
+          {
+             distribution: new CircleDistribution(8000),  hullOptions: {                    hull: ConvexVolume, makeHullEffect: () => new BasicHullEffect(),  hullBorderMode: 'ambient' }
+          },
+        ]),
+      });
 
-    const graph = new GraphView3D(document.getElementById('app'), {
-      nodeTexture: 'assets/dot7.png',
-      nodeDefaultScale: 50,
-      speccs: ClusteringUtils.buildSpeccs(['group', 'industry'])
-    })
-
-    graph.edgeIndicator(true)
-    graph.loadDatasource(new GeneratorDatasource({ nodeCount: 5000, edgeCount: 2000, maxItemsPerNode: 50, clusterEdgeBias: 0.9 }))
-    graph.maximise()
-  </script>
-</body>
+      graph.edgeIndicator(true);
+      graph.loadDatasource(
+        new GeneratorDatasource({
+          nodeCount: 5000,
+          edgeCount: 2000,
+          maxItemsPerNode: 50,
+          clusterEdgeBias: 0.9,
+        })
+      );
+      graph.maximise();
+    </script>
+  </body>
 </html>

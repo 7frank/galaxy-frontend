@@ -1,4 +1,5 @@
 import ForceGraphDistribution from "./distributions/ForceGraphDistribution";
+import type BaseDistribution from "./distributions/BaseDistribution";
 import ConvexVolume from "./hull/ConvexVolume";
 import BaseVolume from "./hull/BaseVolume";
 import BasicHullEffect from "./hull/effects/BasicHullEffect";
@@ -12,7 +13,7 @@ export class ClusteringUtils {
 
     static clusterBy(
         key: string,
-        distribution?: InstanceType<typeof ForceGraphDistribution>,
+        distribution?: BaseDistribution,
         options?: ClusterOptions
     ): ClusterSpec {
         return {
@@ -25,32 +26,29 @@ export class ClusteringUtils {
     }
 
     static buildSpeccs(
-        keys: string[],
-        options: {
-            distributions?: InstanceType<typeof ForceGraphDistribution>[]
+        levels: {
+            key?: string
+            distribution?: BaseDistribution
             hullOptions?: ClusterOptions
-        } = {}
+        }[]
     ): ClusterSpec[] {
-        const { distributions, hullOptions } = options;
-
-        const specs: ClusterSpec[] = keys.map((key, i) => {
+        const specs: ClusterSpec[] = levels.map((level, i) => {
             const scale = DEFAULT_DISTRIBUTION_SCALES[i] ?? DEFAULT_DISTRIBUTION_SCALES[DEFAULT_DISTRIBUTION_SCALES.length - 1];
-            const dist = distributions?.[i] ?? new ForceGraphDistribution(scale, 3);
-            const defaultOptions: ClusterOptions = i === 0
-                ? { minClusterSize: 40, hull: BaseVolume, makeHullEffect: () => new NoneHullEffect() }
-                : { minClusterSize: 15, hull: ConvexVolume, makeHullEffect: () => new BasicHullEffect(), hullBorderMode: "hover" };
-            return ClusteringUtils.clusterBy(key, dist, hullOptions ?? defaultOptions);
-        });
-
-        const leafScale = DEFAULT_DISTRIBUTION_SCALES[keys.length] ?? DEFAULT_DISTRIBUTION_SCALES[DEFAULT_DISTRIBUTION_SCALES.length - 1];
-        const leafDist = distributions?.[keys.length] ?? new ForceGraphDistribution(leafScale, 3);
-        specs.push({
-            distribution: leafDist,
-            options: hullOptions ?? {
-                hull: ConvexVolume,
-                makeHullEffect: () => new BasicHullEffect(),
-                hullBorderMode: "ambient"
+            const dist = level.distribution ?? new ForceGraphDistribution(scale, 3);
+            if (level.key) {
+                const defaultOptions: ClusterOptions = i === 0
+                    ? { minClusterSize: 40, hull: BaseVolume, makeHullEffect: () => new NoneHullEffect() }
+                    : { minClusterSize: 15, hull: ConvexVolume, makeHullEffect: () => new BasicHullEffect(), hullBorderMode: "hover" };
+                return ClusteringUtils.clusterBy(level.key, dist, level.hullOptions ?? defaultOptions);
             }
+            return {
+                distribution: dist,
+                options: level.hullOptions ?? {
+                    hull: ConvexVolume,
+                    makeHullEffect: () => new BasicHullEffect(),
+                    hullBorderMode: "ambient"
+                }
+            };
         });
 
         return specs;

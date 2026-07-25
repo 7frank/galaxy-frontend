@@ -158,7 +158,11 @@ export class SampleClusterApplication extends HTMLElement {
         }
 
 
-        const speccs = ClusteringUtils.buildSpeccs(['group', 'industry']);
+        const speccs = ClusteringUtils.buildSpeccs([
+            { key: 'group' },
+            { key: 'industry' },
+            {},
+        ]);
 
         let views = [];
         let view = createView("force-graph", speccs, true).loadDatasource(that.datasource);
