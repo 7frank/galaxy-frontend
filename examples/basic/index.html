@@ -64,7 +64,9 @@
         GridDistribution,
         CircleHullEffect,
         BasicHullEffect,
+        BoxHullEffect,
         ConvexVolume,
+        BoxVolume,
         GraphSearchbar,
       } from "cluster-graph-3d";
       import "cluster-graph-3d/dist/index.css";
@@ -85,8 +87,8 @@
             hullOptions: {
               zoomDirection: [0, -1, 0],
               minClusterSize: 15,
-              hull: ConvexVolume,
-              makeHullEffect: () => new CircleHullEffect(),
+              hull: BoxVolume,
+              makeHullEffect: () => new BoxHullEffect(),
               hullBorderMode: "hover",
             },
           },
@@ -94,8 +96,8 @@
             distribution: new GridDistribution(8000),
             hullOptions: {
               zoomDirection: [0, -1, 0],
-              hull: ConvexVolume,
-              makeHullEffect: () => new BasicHullEffect(),
+              hull: BoxVolume,
+              makeHullEffect: () => new BoxHullEffect(),
               hullBorderMode: "ambient",
             },
           },
