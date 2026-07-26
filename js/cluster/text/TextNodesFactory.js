@@ -1,6 +1,7 @@
 import { Camera } from "three/src/cameras/Camera.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import * as _ from "lodash";
+import "./node-captions.css";
 
 /**
  * A factory to generate the 2.5D text feature.

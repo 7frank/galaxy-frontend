@@ -4,6 +4,7 @@
 
 
 import View3D, { type BorderEffect } from "./View3D"
+import "./graph-view.css"
 
 
 import RootCluster from "../cluster/RootCluster"
@@ -46,6 +47,7 @@ export interface GraphView3DOptions extends ParticleNodeGroupOptions {
     speccs?: ClusterSpec[]
     clusterDepth?: number
     hullOptions?: ClusterSpec['options']
+    showEdgeIndicator?: boolean
     [key: string]: unknown
 }
 
@@ -69,6 +71,7 @@ export default class GraphView3D extends View3D {
         if (options.speccs) this.setSpeccs(options.speccs);
         if (options.clusterDepth != null) this.setClusterDepth(options.clusterDepth);
         if (options.hullOptions) this.setHullOptions(options.hullOptions);
+        if (options.showEdgeIndicator) this.edgeIndicator(true);
 
         var gl = this.mRenderer.getContext();
 

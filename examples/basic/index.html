@@ -31,7 +31,7 @@
         color: #ffffff;
 
         padding: 2px 5px;
-        background: rgba(0, 0, 0, 0.5);
+        text-shadow: 0 0 0.5em black, 0 0 0.5em black, 0 0 0.5em black;
 
         font-family: "Roboto", sans-serif;
         font-size: 0.8em;
@@ -45,10 +45,19 @@
 
         text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;
       }
+
+      graph-searchbar {
+        position: absolute;
+        left: 300px;
+      }
     </style>
   </head>
   <body>
     <div id="app"></div>
+    <graph-searchbar
+      placeholder="Search nodes"
+      search-fields="name,id,group,industry"
+    ></graph-searchbar>
     <script type="module">
       import {
         GraphView3D,
@@ -56,18 +65,17 @@
         GeneratorDatasource,
         CircleDistribution,
         GridDistribution,
-        BoxHullEffect,
         CircleHullEffect,
         BasicHullEffect,
-        BaseVolume,
         ConvexVolume,
-        NoneHullEffect,
+        GraphSearchbar,
       } from "cluster-graph-3d";
       import "cluster-graph-3d/dist/index.css";
 
       const graph = new GraphView3D(document.getElementById("app"), {
         nodeTexture: "assets/dot7.png",
         nodeDefaultScale: 10,
+        showEdgeIndicator: true,
         speccs: ClusteringUtils.buildSpeccs([
           {
             key: "group",
@@ -97,7 +105,6 @@
         ]),
       });
 
-      graph.edgeIndicator(true);
       graph.loadDatasource(
         new GeneratorDatasource({
           nodeCount: 5000,

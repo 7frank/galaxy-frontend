@@ -1,51 +1,88 @@
-/**
- * the searchbar for the graph
- */
-
-import {doOnClickNode, highlightNodeElements, unhighlightNodeElements} from "../cluster/GraphElementExtension"
+import { doOnClickNode, highlightNodeElements, unhighlightNodeElements } from "../cluster/GraphElementExtension"
 import * as _ from "lodash";
+import Mousetrap from "mousetrap";
+import "./searchbar.css";
 
+function getNodes() {
+    const viewEl = document.querySelector(".view-3d.view-3d-maximised");
+    const view = viewEl ? viewEl._view3d : null;
+    return (view && view.mRootCluster && view.mRootCluster.mNodes) ? view.mRootCluster.mNodes : [];
+}
 
-document.addEventListener("DOMContentLoaded", function () {
+class GraphSearchbar extends HTMLElement {
 
-    function getNodes() {
-        let viewEl = document.querySelector(".view-3d.view-3d-maximised");
-        let view = viewEl ? viewEl._view3d : null;
-        return (view && view.mRootCluster && view.mRootCluster.mNodes) ? view.mRootCluster.mNodes : []
+    connectedCallback() {
+        this._filterResult = [];
+        this._lastResults = [];
+        this._build();
     }
 
-    var filterResult = [];
-    var lastResults = [];
-
-    var container = document.createElement("div");
-    container.className = "searchbar-container";
-    container.innerHTML = "<span><span class='searchbar-search'><span>";
-
-    var hudEl = document.querySelector("sample-cluster-application graph-hud");
-    if (hudEl) hudEl.appendChild(container);
-
-    var searchbarEl = document.createElement("input");
-    searchbarEl.placeholder = "Search company name, ticker, people, sector, country";
-    container.insertBefore(searchbarEl, container.firstChild);
-
-    var dropdown = document.createElement("ul");
-    dropdown.className = "searchbar-autocomplete-popup";
-    dropdown.style.display = "none";
-    container.appendChild(dropdown);
-
-    function showSuggestions(mResult) {
-        lastResults.forEach(v => unhighlightNodeElements.apply(v));
-        mResult.forEach(v => highlightNodeElements.apply(v, [true, false]));
-        lastResults = mResult;
+    disconnectedCallback() {
+        this._mousetrap?.reset();
     }
 
-    function doFilterList() {
-        filterResult.forEach(v => unhighlightNodeElements.apply(v));
+    _build() {
+        const container = document.createElement("div");
+        container.className = "searchbar-container";
 
-        var val = searchbarEl.value.toLowerCase();
-        if (!val) { filterResult = []; renderDropdown([]); return; }
+        const searchbarEl = document.createElement("input");
+        searchbarEl.placeholder = this.getAttribute("placeholder") ?? "Search…";
+        container.appendChild(searchbarEl);
 
-        filterResult = getNodes().filter(function (v) {
+        const icon = document.createElement("span");
+        icon.className = "searchbar-search";
+        container.appendChild(icon);
+
+        const dropdown = document.createElement("ul");
+        dropdown.className = "searchbar-autocomplete-popup";
+        dropdown.style.display = "none";
+        container.appendChild(dropdown);
+
+        this.appendChild(container);
+        this._container = container;
+        this._searchbarEl = searchbarEl;
+        this._dropdown = dropdown;
+
+        searchbarEl.addEventListener("keyup", () => this._doFilterList());
+
+        searchbarEl.addEventListener("blur", () => {
+            setTimeout(() => {
+                searchbarEl.value = "";
+                dropdown.style.display = "none";
+                this._showSuggestions([]);
+            }, 150);
+        });
+
+        window.addEventListener("keydown", (e) => {
+            if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) e.preventDefault();
+            if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 83)) e.preventDefault();
+        });
+
+        const toggleSearch = (e) => {
+            container.style.display = container.style.display === "none" ? "" : "none";
+            searchbarEl.focus();
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
+        this._mousetrap = new Mousetrap();
+        this._mousetrap.bind("ctrl+f", toggleSearch);
+        new Mousetrap(searchbarEl).bind("ctrl+f", toggleSearch);
+    }
+
+    _showSuggestions(results) {
+        this._lastResults.forEach(v => unhighlightNodeElements.apply(v));
+        results.forEach(v => highlightNodeElements.apply(v, [true, false]));
+        this._lastResults = results;
+    }
+
+    _doFilterList() {
+        this._filterResult.forEach(v => unhighlightNodeElements.apply(v));
+
+        const val = this._searchbarEl.value.toLowerCase();
+        if (!val) { this._filterResult = []; this._renderDropdown([]); return; }
+
+        this._filterResult = getNodes().filter(function (v) {
             var isName, isCountry, isId, isIndustry, isTicker;
             if (typeof v.name === "string") isName = v.name.toLowerCase().indexOf(val) === 0;
             if (typeof v.group === "string") isCountry = v.group.toLowerCase().indexOf(val) >= 0;
@@ -58,32 +95,31 @@ document.addEventListener("DOMContentLoaded", function () {
             return isName || isCountry || isId || isIndustry || isTicker;
         });
 
-        renderDropdown(filterResult.slice(0, 80));
+        this._renderDropdown(this._filterResult.slice(0, 80));
     }
 
-    function renderDropdown(items) {
+    _renderDropdown(items) {
+        const { _dropdown: dropdown, _searchbarEl: searchbarEl } = this;
         dropdown.innerHTML = "";
         if (items.length === 0) { dropdown.style.display = "none"; return; }
 
-        var val = searchbarEl.value;
-        var re = new RegExp(val, "gi");
+        const val = searchbarEl.value;
+        const re = new RegExp(val, "gi");
 
-        items.forEach(function (item) {
-            var tcr = item.ticker ? "Ticker:" + item.ticker : "";
-            var text = `${item.name} (${tcr})`;
-            var highlighted = text.replace(re, "<b>$&</b>");
+        items.forEach((item) => {
+            const tcr = item.ticker ? "Ticker:" + item.ticker : "";
+            const text = `${item.name} (${tcr})`;
+            const highlighted = text.replace(re, "<b>$&</b>");
 
-            var li = document.createElement("li");
+            const li = document.createElement("li");
             li.className = "searchbar-search-row";
             li.innerHTML = "<div>" + highlighted + "</div>";
 
-            li.addEventListener("mousedown", function (e) {
+            li.addEventListener("mousedown", (e) => {
                 e.preventDefault();
                 searchbarEl.value = item.name;
                 dropdown.style.display = "none";
-                doOnClickNode(item, false, function () {
-                    console.warn("TODO updateTextWhenCameraIsMoving2");
-                }, false, false, false, true);
+                doOnClickNode(item);
                 if (item.classList) item.classList.add("basic-selection");
             });
 
@@ -92,34 +128,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         dropdown.style.display = "";
         if (searchbarEl.classList.contains("darker")) {
-            var css = window.getComputedStyle(searchbarEl, null);
+            const css = window.getComputedStyle(searchbarEl, null);
             dropdown.style.backgroundColor = css.getPropertyValue("background-color");
             dropdown.style.color = css.getPropertyValue("color");
         }
     }
+}
 
-    searchbarEl.addEventListener("keyup", doFilterList);
+if (!customElements.get("graph-searchbar"))
+    customElements.define("graph-searchbar", GraphSearchbar);
 
-    searchbarEl.addEventListener("blur", function () {
-        setTimeout(function () {
-            searchbarEl.value = "";
-            dropdown.style.display = "none";
-            showSuggestions([]);
-        }, 150);
-    });
-
-    window.addEventListener("keydown", function (e) {
-        if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) e.preventDefault();
-        if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 83)) e.preventDefault();
-    });
-
-    function toggleSearch(e) {
-        container.style.display = container.style.display === "none" ? "" : "none";
-        searchbarEl.focus();
-        e.stopPropagation();
-        e.preventDefault();
-    }
-
-    Mousetrap.bind('ctrl+f', toggleSearch);
-    Mousetrap(searchbarEl).bind('ctrl+f', toggleSearch);
-});
+export { GraphSearchbar };

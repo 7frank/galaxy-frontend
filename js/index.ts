@@ -17,3 +17,5 @@ export { default as NoneHullEffect } from './cluster/hull/effects/NoneHullEffect
 export { default as BasicHullEffect } from './cluster/hull/effects/BasicHullEffect.js'
 export { default as BoxHullEffect } from './cluster/hull/effects/BoxHullEffect.js'
 export { default as CircleHullEffect } from './cluster/hull/effects/CircleHullEffect.js'
+
+export { GraphSearchbar } from './gui/searchbar.js'
