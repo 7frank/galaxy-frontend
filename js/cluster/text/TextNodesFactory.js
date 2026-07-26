@@ -92,7 +92,6 @@ export default function TextNodesFactory(env, options) {
         el.style.opacity = '0';
         el.style.transition = 'opacity 0.3s ease';
         el.innerHTML = _id;
-        el.addEventListener('mousewheel', e => e.preventDefault());
         el.addEventListener('selectstart', e => e.preventDefault());
         el.style.pointerEvents = options.interactable ? 'all' : 'none';
         node.text = el;

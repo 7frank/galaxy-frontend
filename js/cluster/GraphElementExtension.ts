@@ -20,8 +20,21 @@ export function removeSelections(): void {
 }
 
 let _radialMenuInstance: { menu: InstanceType<typeof RadialMenu>; node: HighlightNode } | null = null;
+let _mouseDownPos: { x: number; y: number } | null = null;
+
+document.addEventListener("mousedown", (e) => {
+    if (e.button === 2) _mouseDownPos = { x: e.clientX, y: e.clientY };
+}, true);
+
+function _isDrag(x: number, y: number): boolean {
+    if (!_mouseDownPos) return false;
+    const dx = x - _mouseDownPos.x;
+    const dy = y - _mouseDownPos.y;
+    return Math.sqrt(dx * dx + dy * dy) > 5;
+}
 
 function openNodeRadialMenu(node: HighlightNode, x: number, y: number): void {
+    if (_isDrag(x, y)) return;
     if (_radialMenuInstance) {
         _radialMenuInstance.menu.close();
         _radialMenuInstance = null;

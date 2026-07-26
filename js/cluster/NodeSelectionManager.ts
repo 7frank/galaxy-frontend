@@ -30,7 +30,9 @@ export default class NodeSelectionManager {
         node.hideHighlight?.();
         for (const child of node.linkedChildren) child.hideHighlight?.();
         for (const parent of node.linkedParents) parent.hideHighlight?.();
-        for (const edge of node.edges) removeArrow(edge as ArrowEdge);
+        if (!this.isPinned(node)) {
+            for (const edge of node.edges) removeArrow(edge as ArrowEdge);
+        }
     }
 
     clearAll(): void {
