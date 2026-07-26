@@ -235,39 +235,39 @@ export default class ClusterTextOverlay {
          *
          */
         function getNodesForLeaf() {
-            //return only the closest cluster
             that.selectedLeafCluster = null
 
             if (!that.possibleLeafClusters) return [];
 
-            // get closest leaf only
-
             var res = sortClusters(that.possibleLeafClusters)
 
-            //TODO nodes aren't in order so we should sort them also
-
-            //FIXME deplace overlay after changing 3d => 2d view or have an event to track changing leafs/clusters
-            //check for empty array which can happen if graph data changes and clusters get deleted
             if (!res[0] || !res[0].item) return [];
 
+            const eligible = res.filter(r => r.item.getRadius() >= r.distance);
+            if (eligible.length === 0) return [];
 
-            //(1)see below if changing the distance
-            let leaf1 = res[0].item;
-            if (leaf1.getRadius() < res[0].distance)
-                return [] // discard clostest leaf if it is too far away
+            that.selectedLeafCluster = eligible[0].item;
 
-            that.selectedLeafCluster = leaf1;
-            return leaf1.mNodes ? leaf1.mNodes : []
+            return eligible.flatMap(r => {
+                const nodes = r.item.mNodes ?? [];
+                nodes.forEach(n => { n._leafCluster = r.item; });
+                return nodes;
+            });
         }
 
         //the handler for the leaf text
         if (!this.tn)
             this.tn = TextNodesFactory(env, {
-                maxVisibleCount: 10,
+                maxVisibleCount: 50,
                 maxDistance: function (node) {
-                    //(1)see above if changing the distance
                     if (!that.selectedLeafCluster) return 0;
                     return that.selectedLeafCluster.getRadius()
+                },
+                getNodeStyle: function (node) {
+                    const isPrimary = node._leafCluster === that.selectedLeafCluster;
+                    return isPrimary
+                        ? { opacity: 1 }
+                        : { opacity: 0.35, cssClass: 'node-caption-secondary' };
                 },
                 onNodeText: (node) => node.name ? node.name : node.id,
                 getNodes: function () {

@@ -264,13 +264,34 @@ export default function TextNodesFactory(env, options) {
 
         for (var nodeInfo of nodeInfosCurrentBatch) {
             if (nodeInfo.node.text) {
-                const _minDistance = typeof options.minDistance == "function" ? options.minDistance(nodeInfo.node) : options.minDistance;
-                const _maxDistance = typeof options.maxDistance == "function" ? options.maxDistance(nodeInfo.node) : options.maxDistance;
-                const logMin = Math.log(_minDistance + 1);
-                const logMax = Math.log(_maxDistance + 1);
-                const logDist = Math.log(nodeInfo.distance + 1);
-                const t = Math.max(0, Math.min(1, (logDist - logMin) / (logMax - logMin)));
-                nodeInfo.node.text.style.opacity = String(_.round(1 - t, 3));
+                let opacity;
+                let cssClass = null;
+
+                if (typeof options.getNodeStyle == "function") {
+                    const style = options.getNodeStyle(nodeInfo.node, nodeInfo.distance);
+                    opacity = style?.opacity ?? 1;
+                    cssClass = style?.cssClass ?? null;
+                } else if (typeof options.getOpacity == "function") {
+                    opacity = options.getOpacity(nodeInfo.node, nodeInfo.distance);
+                } else {
+                    const _minDistance = typeof options.minDistance == "function" ? options.minDistance(nodeInfo.node) : options.minDistance;
+                    const _maxDistance = typeof options.maxDistance == "function" ? options.maxDistance(nodeInfo.node) : options.maxDistance;
+                    const logMin = Math.log(_minDistance + 1);
+                    const logMax = Math.log(_maxDistance + 1);
+                    const logDist = Math.log(nodeInfo.distance + 1);
+                    const t = Math.max(0, Math.min(1, (logDist - logMin) / (logMax - logMin)));
+                    opacity = 1 - t;
+                }
+
+                nodeInfo.node.text.style.opacity = String(_.round(opacity, 3));
+
+                const el = nodeInfo.node.text;
+                const prevClass = el._lastDynamicCssClass ?? null;
+                if (cssClass !== prevClass) {
+                    if (prevClass) el.classList.remove(prevClass);
+                    if (cssClass) el.classList.add(cssClass);
+                    el._lastDynamicCssClass = cssClass;
+                }
             }
 
             updatePos(nodeInfo.node, nodeInfo.distance);

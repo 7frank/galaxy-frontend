@@ -32,3 +32,8 @@
 	color: white !important;
 	text-shadow: 0 0 0.3em white, 0 0 0.3em white, 0 0 0.3em white;
 }
+
+.node-caption-secondary {
+	opacity: 0.35;
+	font-style: italic;
+}
