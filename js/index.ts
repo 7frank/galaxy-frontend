@@ -12,6 +12,7 @@ export { default as GridDistribution } from './cluster/distributions/GridDistrib
 export { default as DomEventsAlt } from './cluster/utils/DomEventsAlt.js'
 export { default as BaseVolume } from './cluster/hull/BaseVolume.js'
 export { default as ConvexVolume } from './cluster/hull/ConvexVolume.js'
+export { default as BoxVolume } from './cluster/hull/BoxVolume.js'
 
 export { default as NoneHullEffect } from './cluster/hull/effects/NoneHullEffect.js'
 export { default as BasicHullEffect } from './cluster/hull/effects/BasicHullEffect.js'
