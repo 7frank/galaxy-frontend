@@ -88,7 +88,8 @@ export default function TextNodesFactory(env, options) {
         el.setAttribute('unselectable', 'on');
         el.style.userSelect = 'none';
         el.style.position = 'absolute';
-        el.style.display = 'none';
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.3s ease';
         el.innerHTML = _id;
         el.addEventListener('mousewheel', e => e.preventDefault());
         el.addEventListener('selectstart', e => e.preventDefault());
@@ -229,7 +230,7 @@ export default function TextNodesFactory(env, options) {
                     left: centered
                 })*/
 
-            node.text.style.transform = 'translate(' + _.round(centered - dw, 2) + 'px, ' + _.round(adjustedTop, 2) + 'px)';
+            node.text.style.transform = 'translate(' + _.round(centered, 2) + 'px, ' + _.round(adjustedTop, 2) + 'px)';
 
 
         }
@@ -246,13 +247,10 @@ export default function TextNodesFactory(env, options) {
             {
 
                 if (typeof preNode.text != "undefined") {
-
-                    preNode.text.style.display = 'none';
-                    preNode.text.remove();
+                    const _el = preNode.text;
+                    _el.style.opacity = '0';
+                    _el.addEventListener('transitionend', function () { _el.remove(); }, { once: true });
                     delete (preNode.text)
-
-                    //FIXME elements wont disappear the way they are supposed to
-
                 }
 
             }
@@ -264,9 +262,15 @@ export default function TextNodesFactory(env, options) {
         previousVisibleNodes = newPreviousVisibleNodes.concat(nodesCurrentBatch)
 
         for (var nodeInfo of nodeInfosCurrentBatch) {
-            if (nodeInfo.node.text && !nodeInfo.node.text._marked_for_deletion_)
-
-                nodeInfo.node.text.style.display = '';
+            if (nodeInfo.node.text) {
+                const _minDistance = typeof options.minDistance == "function" ? options.minDistance(nodeInfo.node) : options.minDistance;
+                const _maxDistance = typeof options.maxDistance == "function" ? options.maxDistance(nodeInfo.node) : options.maxDistance;
+                const logMin = Math.log(_minDistance + 1);
+                const logMax = Math.log(_maxDistance + 1);
+                const logDist = Math.log(nodeInfo.distance + 1);
+                const t = Math.max(0, Math.min(1, (logDist - logMin) / (logMax - logMin)));
+                nodeInfo.node.text.style.opacity = String(_.round(1 - t, 3));
+            }
 
             updatePos(nodeInfo.node, nodeInfo.distance);
         }
