@@ -6,6 +6,7 @@ const SECTOR_COUNT = 24;
 const SECTOR_DEG = 360 / SECTOR_COUNT;
 
 let _viewOverride = null;
+let _pendingPinnedNodes = [];
 
 function getView() {
     if (_viewOverride) return _viewOverride;
@@ -41,6 +42,7 @@ export function initEdgeIndicatorOverlay(view = null) {
     document.body.appendChild(overlay);
 
     let activeNode = null;
+    let pinnedActiveNodes = [];
     let rafId = null;
     const indicators = new Map(); // sectorKey -> {el, nodes}
 
@@ -50,13 +52,33 @@ export function initEdgeIndicatorOverlay(view = null) {
         overlay.innerHTML = "";
     }
 
+    function getActiveNodes() {
+        const set = new Set();
+        if (activeNode) set.add(activeNode);
+        pinnedActiveNodes.forEach(n => set.add(n));
+        return [...set];
+    }
+
     window.addEventListener("node-clicked", ({ detail: node }) => {
         activeNode = node;
         clearAll();
         cancelAnimationFrame(rafId);
         rafId = null;
-        if (node) scheduleUpdate();
+        if (getActiveNodes().length > 0) scheduleUpdate();
     });
+
+    pinnedActiveNodes = _pendingPinnedNodes;
+
+    window.addEventListener("pinboard-edge-focus", ({ detail: nodes }) => {
+        _pendingPinnedNodes = nodes || [];
+        pinnedActiveNodes = _pendingPinnedNodes;
+        clearAll();
+        cancelAnimationFrame(rafId);
+        rafId = null;
+        if (getActiveNodes().length > 0) scheduleUpdate();
+    });
+
+    if (getActiveNodes().length > 0) scheduleUpdate();
 
     function scheduleUpdate() {
         cancelAnimationFrame(rafId);
@@ -64,7 +86,8 @@ export function initEdgeIndicatorOverlay(view = null) {
     }
 
     function update() {
-        if (!activeNode) return;
+        const activeNodes = getActiveNodes();
+        if (activeNodes.length === 0) return;
         const view = getView();
         if (!view || !view.mCamera) return;
 
@@ -73,14 +96,15 @@ export function initEdgeIndicatorOverlay(view = null) {
         const H = window.innerHeight;
         const padding = 52;
 
-        // project all neighbours
-        const projected = (activeNode.edges || []).map((edge) => {
-            const isOutgoing = edge.source === activeNode;
-            const neighbour = isOutgoing ? edge.target : edge.source;
+        // project all neighbours across all active nodes
+        const projected = activeNodes.flatMap(activeNode => {
+            const outgoing = (activeNode.linkedChildren || []).map(n => ({ neighbour: n, isOutgoing: true }));
+            const incoming = (activeNode.linkedParents || []).map(n => ({ neighbour: n, isOutgoing: false }));
+            return [...outgoing, ...incoming].map(({ neighbour, isOutgoing }) => {
             if (!neighbour || !neighbour._bubble) return null;
 
             const worldPos = new Vector3();
-            neighbour._bubble.getWorldPosition(worldPos);
+            worldPos.setFromMatrixPosition(neighbour._bubble.matrixWorld);
             const proj = worldPos.clone().project(camera);
             const behindCamera = proj.z > 1;
 
@@ -94,7 +118,8 @@ export function initEdgeIndicatorOverlay(view = null) {
             const clamped = clampToEdge(sx, sy, W, H, padding);
 
             return { neighbour, isOutgoing, offscreen, angle, sector, clamped, sx, sy };
-        }).filter(Boolean);
+            }).filter(Boolean);
+        });
 
         // bucket by sector
         const buckets = new Map();
