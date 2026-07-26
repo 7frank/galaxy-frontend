@@ -7,6 +7,7 @@ import type { Mesh } from "three/src/objects/Mesh.js";
 export default class NodeSelectionManager {
 
     private selectedNodes: HighlightNode[] = []
+    private pinnedNodes: HighlightNode[] = []
     private lastDblClicked: HighlightNode | undefined
 
     highlight(node: HighlightNode, showNeighbours = false, showEdgeArrows = true): void {
@@ -113,9 +114,42 @@ export default class NodeSelectionManager {
         ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, minMaxDistance, onEnd, approachDirection ?? null);
     }
 
+    isPinned(node: HighlightNode): boolean {
+        return this.pinnedNodes.indexOf(node) >= 0;
+    }
+
+    getPinned(): HighlightNode[] {
+        return this.pinnedNodes;
+    }
+
+    pin(node: HighlightNode): void {
+        if (this.isPinned(node)) return;
+        this.pinnedNodes.push(node);
+        node.addClass?.("node-pinned");
+        this._emitPinboardChanged();
+    }
+
+    unpin(node: HighlightNode): void {
+        const idx = this.pinnedNodes.indexOf(node);
+        if (idx < 0) return;
+        this.pinnedNodes.splice(idx, 1);
+        node.removeClass?.("node-pinned");
+        this._emitPinboardChanged();
+    }
+
+    togglePin(node: HighlightNode): void {
+        this.isPinned(node) ? this.unpin(node) : this.pin(node);
+    }
+
     private _emitSelectionChanged(): void {
         window.dispatchEvent(new CustomEvent("node-clicked", {
             detail: this.getLastSelected()
+        }));
+    }
+
+    private _emitPinboardChanged(): void {
+        window.dispatchEvent(new CustomEvent("pinboard-changed", {
+            detail: [...this.pinnedNodes]
         }));
     }
 }

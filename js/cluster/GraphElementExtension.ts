@@ -3,6 +3,8 @@ import type { ExtendedNode, NodeEnv, DomEvent } from "./Node3DClassRegistry";
 import * as _ from "lodash"
 import type { Mesh } from "three/src/objects/Mesh.js";
 import NodeSelectionManager from "./NodeSelectionManager";
+// @ts-ignore
+import RadialMenu from "../lib/RadialMenu.js";
 
 export interface HighlightNode extends ExtendedNode {
     edges: ArrowEdge[]
@@ -15,6 +17,59 @@ export const selectionManager = new NodeSelectionManager();
 
 export function removeSelections(): void {
     selectionManager.clearAll();
+}
+
+let _radialMenuInstance: { menu: InstanceType<typeof RadialMenu>; node: HighlightNode } | null = null;
+
+function openNodeRadialMenu(node: HighlightNode, x: number, y: number): void {
+    if (_radialMenuInstance) {
+        _radialMenuInstance.menu.close();
+        _radialMenuInstance = null;
+    }
+
+    const container = document.querySelector<HTMLElement>(".view-3d") ?? document.body;
+
+    const holder = document.createElement("div");
+    holder.style.position = "absolute";
+    holder.style.left = x + "px";
+    holder.style.top = y + "px";
+    holder.style.zIndex = "9999";
+    holder.style.transform = "translate(-50%, -50%)";
+    container.appendChild(holder);
+
+    const isPinned = selectionManager.isPinned(node);
+
+    const menu = new RadialMenu({
+        parent: holder,
+        size: 150,
+        closeOnClick: true,
+        menuItems: [
+            { id: isPinned ? "unpin" : "pin", title: isPinned ? "Unpin" : "Pin" },
+            { id: "focus", title: "Focus" },
+        ],
+        onClick: (item: { id: string }) => {
+            if (item.id === "pin" || item.id === "unpin") {
+                selectionManager.togglePin(node);
+            } else if (item.id === "focus") {
+                doOnClickNode(node, false, undefined, true, false, false, true);
+            }
+            holder.remove();
+            _radialMenuInstance = null;
+        }
+    });
+
+    _radialMenuInstance = { menu, node };
+    menu.open();
+
+    const onClickAway = (e: MouseEvent) => {
+        if (!holder.contains(e.target as Node)) {
+            menu.close();
+            holder.remove();
+            _radialMenuInstance = null;
+            document.removeEventListener("click", onClickAway, { capture: true });
+        }
+    };
+    setTimeout(() => document.addEventListener("click", onClickAway, { capture: true }), 0);
 }
 
 export function highlightNodeElements(this: HighlightNode, bShowOtherNodes = false, bShowEdgeArrows = true): void {
@@ -33,6 +88,7 @@ function extendElement(
         mouseleave?: (this: HighlightNode) => void
         click?: (e: DomEvent) => void
         dblclick?: (e: DomEvent) => void
+        contextmenu?: (e: DomEvent) => void
     },
     env: NodeEnv
 ): void {
@@ -46,7 +102,8 @@ function extendElement(
         mousemove: _TODO("mousemove"),
         mouseleave: _TODO("mouseleave"),
         click: _TODO("click"),
-        dblclick: _TODO("dblclick")
+        dblclick: _TODO("dblclick"),
+        contextmenu: null
     }, options);
 
     for (const el of elements) {
@@ -55,6 +112,9 @@ function extendElement(
 
         mDomEvents.addEventListener(meshParam, 'click', merged.click as (e: DomEvent) => void, false);
         mDomEvents.addEventListener(meshParam, 'dblclick', merged.dblclick as (e: DomEvent) => void, false);
+        if (merged.contextmenu) {
+            mDomEvents.addEventListener(meshParam, 'contextmenu', merged.contextmenu as (e: DomEvent) => void, false);
+        }
 
         mDomEvents.addEventListener(meshParam, 'mouseover', function (e: DomEvent) {
             const ctx = (e.target as { node?: HighlightNode }).node;
@@ -137,6 +197,13 @@ export function extendGraphElements(d3Nodes: HighlightNode[], d3Links: ArrowEdge
             e.stopPropagation();
             const node = (e.target as { node?: HighlightNode }).node!;
             selectionManager.handleDblClick(node);
+            return false;
+        },
+        contextmenu: function (e: DomEvent) {
+            e.stopPropagation();
+            e.origDomEvent?.preventDefault?.();
+            const node = (e.target as { node?: HighlightNode }).node!;
+            openNodeRadialMenu(node, e.origDomEvent?.clientX ?? 0, e.origDomEvent?.clientY ?? 0);
             return false;
         }
     }, env);

@@ -1,5 +1,7 @@
 // https://raw.githubusercontent.com/axln/radial-menu-js/refs/heads/master/js/RadialMenu.js
 
+import "./RadialMenu.css";
+
 'use strict';
 
 var DEFAULT_SIZE = 100;
@@ -577,3 +579,5 @@ RadialMenu.setClassAndWaitForTransition = function (node, newClass) {
 RadialMenu.nextTick = function (fn) {
     setTimeout(fn, 10);
 };
+
+export default RadialMenu;

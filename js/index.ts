@@ -20,3 +20,4 @@ export { default as BoxHullEffect } from './cluster/hull/effects/BoxHullEffect.j
 export { default as CircleHullEffect } from './cluster/hull/effects/CircleHullEffect.js'
 
 export { GraphSearchbar } from './gui/searchbar.js'
+export { GraphNodeList } from './gui/NodeListPanel.js'

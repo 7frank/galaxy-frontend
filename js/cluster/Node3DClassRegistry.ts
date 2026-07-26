@@ -42,7 +42,7 @@ export interface DomEvents {
 export interface DomEvent {
     stopPropagation(): void
     target: { node?: unknown; edge?: unknown }
-    origDomEvent?: { ctrlKey?: boolean }
+    origDomEvent?: { ctrlKey?: boolean; clientX?: number; clientY?: number; preventDefault?: () => void }
     intersect: { object: { node?: unknown } }
     type: string
 }
