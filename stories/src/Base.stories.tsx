@@ -17,9 +17,8 @@ export const Base = () => {
     graph.loadDatasource(
       new GeneratorDatasource({ nodeCount: 5000, edgeCount: 2000, maxItemsPerNode: 50, clusterEdgeBias: 0.9 })
     )
-    graph.maximise()
     return () => (graph as any).destroy?.()
   }, [])
 
-  return <div ref={ref} style={{ width: '100vw', height: '100vh' }} />
+  return <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }} />
 }

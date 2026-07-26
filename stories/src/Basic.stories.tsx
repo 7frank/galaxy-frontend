@@ -54,13 +54,12 @@ export const Basic = () => {
         clusterEdgeBias: 0.9,
       })
     )
-    graph.maximise()
     return () => (graph as any).destroy?.()
   }, [])
 
   return (
     <>
-      <div ref={ref} style={{ width: '100vw', height: '100vh' }} />
+      <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }} />
       <graph-searchbar placeholder="Search nodes" search-fields="name,id,group,industry" />
       <graph-node-list />
     </>

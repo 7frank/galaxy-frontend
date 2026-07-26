@@ -64,7 +64,6 @@ export const BoardOverlap = () => {
       setProgress(100)
       setStatus('Done')
       setTimeout(() => setLoaded(true), 300)
-      graph.maximise()
     })
 
     return () => (graph as any).destroy?.()
@@ -86,7 +85,7 @@ export const BoardOverlap = () => {
           <div style={{ opacity: 0.6, fontSize: '0.85em' }}>{status}</div>
         </div>
       )}
-      <div ref={ref} style={{ width: '100vw', height: '100vh' }} />
+      <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }} />
       <graph-searchbar placeholder="Search companies" search-fields="name,industry,group,info" />
       <graph-node-list />
     </>
