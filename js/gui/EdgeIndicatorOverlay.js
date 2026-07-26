@@ -159,8 +159,22 @@ export function initEdgeIndicatorOverlay(view = null) {
                 el.appendChild(label);
                 el.appendChild(list);
 
-                el.addEventListener("mousedown", (e) => { e.stopPropagation(); e.preventDefault(); });
-                el.addEventListener("mouseup",   (e) => { e.stopPropagation(); e.preventDefault(); });
+                el.addEventListener("mousedown", (e) => {
+                    if (e.button === 2) {
+                        el.style.pointerEvents = "none";
+                        return;
+                    }
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+                el.addEventListener("mouseup", (e) => {
+                    if (e.button === 2) {
+                        setTimeout(() => { el.style.pointerEvents = ""; }, 0);
+                        return;
+                    }
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
                 el.addEventListener("click", (e) => {
                     e.stopPropagation();
                     e.preventDefault();
