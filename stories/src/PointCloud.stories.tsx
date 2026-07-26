@@ -1,21 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body, html { margin: 0; width: 100%; height: 100%; }
-    #app { width: 100vw; height: 100vh; }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
-  <script type="module">
-    import { ClusterLeafElement, RandomDistribution, DomEventsAlt } from 'cluster-graph-3d'
-    import * as THREE from 'three'
+import { useEffect, useRef } from 'react'
+import { ClusterLeafElement, RandomDistribution, DomEventsAlt } from 'cluster-graph-3d'
+import * as THREE from 'three'
 
-    const W = window.innerWidth, H = window.innerHeight
+export default { title: 'Examples' }
+
+export const PointCloud = () => {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    const W = ref.current.clientWidth
+    const H = ref.current.clientHeight
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(W, H)
-    document.getElementById('app').appendChild(renderer.domElement)
+    ref.current.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(60, W / H, 1, 1000000)
@@ -30,26 +27,31 @@
         id: i, x: 0, y: 0, z: 0, color: 0x00aaff,
         edges: i > 0 ? [{ target: i - 1 }] : [],
         _bubble: bubble,
-        get3DRoot() { return bubble }
+        get3DRoot() { return bubble },
       }
       return node
     })
 
     const domEvents = new DomEventsAlt(camera, renderer.domElement, scene)
-    const leaf = new ClusterLeafElement(nodes, domEvents, { nodeTexture: '/node_modules/cluster-graph-3d/img/dot7.png' })
+    const leaf = new ClusterLeafElement(nodes, domEvents, { nodeTexture: '/dot7.png' })
     scene.add(leaf)
 
     const dist = new RandomDistribution(2000, 3)
     leaf.setDistributionHandler(dist, () => {
-      const pc = leaf.mNodeParticles.pointCloud
+      const pc = (leaf as any).mNodeParticles.pointCloud
       pc.geometry.computeBoundingBox()
       const box = new THREE.BoxHelper(pc, 0xffff00)
       scene.add(box)
     })
 
-    window.test = { scene, leaf, camera }
-
     renderer.setAnimationLoop(() => renderer.render(scene, camera))
-  </script>
-</body>
-</html>
+
+    return () => {
+      renderer.setAnimationLoop(null)
+      renderer.dispose()
+      ref.current?.removeChild(renderer.domElement)
+    }
+  }, [])
+
+  return <div ref={ref} style={{ width: '100vw', height: '100vh' }} />
+}

@@ -19,8 +19,6 @@
         "tweakpane": "^4.0.5",
       },
       "devDependencies": {
-        "@types/jasmine": "~2.5.53",
-        "@types/jasminewd2": "~2.0.2",
         "@types/lodash": "^4.17.0",
         "@types/node": "^20.0.0",
         "@types/three": "^0.185.0",
@@ -192,10 +190,6 @@
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.3", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg=="],
 
     "@types/estree": ["@types/estree@1.0.9", "", {}, "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg=="],
-
-    "@types/jasmine": ["@types/jasmine@2.5.53", "", {}, ""],
-
-    "@types/jasminewd2": ["@types/jasminewd2@2.0.2", "", { "dependencies": { "@types/jasmine": "*" } }, ""],
 
     "@types/lodash": ["@types/lodash@4.17.24", "", {}, "sha512-gIW7lQLZbue7lRSWEFql49QJJWThrTFFeIMJdp3eH4tKoxm1OvEPg02rm4wCCSHS0cL3/Fizimb35b7k8atwsQ=="],
 
