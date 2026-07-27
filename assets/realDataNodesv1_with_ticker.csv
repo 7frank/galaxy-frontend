@@ -1,0 +1,342 @@
+id,name,ticker,industry,country,sent,price,itemCount
+1,Sypris Solutions Inc.,NasdaqGM:SYPR,Consumer Discretionary,United States,64,12%,8
+2,Concho Resources Inc.,NYSE:CXO,Energy,United States,8,-6%,5
+3,ITC Holdings Corp. (a subsidiary of Fortis Inc.),Private:ITC Holdis Inc.),Utilities,United States,34,-6%,1
+4,AAR Corp.,NYSE:AIR,Industrials,United States,35,4%,6
+5,"Spartan Motors, Inc.",NasdaqGS:SPAR,Consumer Discretionary,United States,39,2%,1
+6,"Streamline Health Solutions, Inc.",NasdaqCM:STRM,Healthcare,United States,30,7%,5
+7,"Gulf Island Fabrication, Inc.",NasdaqGS:GIFI,Energy,United States,26,-5%,6
+8,"Surmodics, Inc.",NasdaqGS:SRDX,Healthcare,United States,66,8%,5
+9,Federal Signal Corporation,NYSE:FSS,Industrials,United States,26,3%,8
+10,Amgen Inc.,NasdaqGS:AMGN,Healthcare,United States,40,1%,8
+11,"DuPont Fabros Technology, Inc.",NYSE:DFT,Real Estate,United States,62,4%,6
+12,"EnerNOC, Inc.",NasdaqGS:ENOC,Information Technology,United States,55,4%,3
+13,Adeptus Health Inc.,NYSE:ADPT,Healthcare,United States,62,8%,1
+14,"Coffee Holding Company, Inc.",NasdaqCM:JVA,Consumer Staples,United States,90,8%,5
+15,Silicon Graphics International Corp. (a subsidiary of Hewlett Packard Enterprise Company),Private:Silicon Company),Information Technology,United States,65,-4%,6
+16,Exar Corporation,NYSE:EXAR,Information Technology,United States,60,-5%,1
+17,Steiner Leisure Limited,Private:Steinerle,Consumer Discretionary,Bahamas,46,3%,0
+18,"ICF International, Inc.",NasdaqGS:ICFI,Industrials,United States,90,-3%,4
+19,ViaSat Inc.,NasdaqGS:VSAT,Information Technology,United States,51,-2%,7
+20,"Armco Metals Holdings, Inc",OTCPK:AMCO,Industrials,United States,67,-1%,5
+21,"Microvision, Inc.",NasdaqGM:MVIS,Information Technology,United States,64,4%,4
+22,"United Natural Foods, Inc.",NasdaqGS:UNFI,Consumer Staples,United States,84,0%,4
+23,W&T Offshore Inc.,NYSE:WTI,Energy,United States,68,8%,5
+24,Tredegar Corporation,NYSE:TG,Materials,United States,8,-2%,0
+25,"InterDigital, Inc.",NasdaqGS:IDCC,Information Technology,United States,48,-5%,4
+26,"Cirrus Logic, Inc.",NasdaqGS:CRUS,Information Technology,United States,84,6%,3
+27,Skyworks Solutions Inc.,NasdaqGS:SWKS,Information Technology,United States,26,1%,2
+28,"InvenSense, Inc.",NYSE:INVN,Information Technology,United States,5,-2%,7
+29,Astronics Corporation,NasdaqGS:ATRO,Industrials,United States,97,-3%,4
+30,"Blackhawk Network Holdings, Inc.",NasdaqGS:HAWK,Information Technology,United States,65,-1%,2
+31,Dialog Semiconductor Plc,XTRA:DLG,Information Technology,United Kingdom,25,-2%,7
+32,"Freeze Tag, Inc.",OTCPK:FRZT,Information Technology,United States,5,1%,4
+33,GameLoft S.E.,ENXTPA:GFT,Information Technology,France,10,-4%,0
+34,Glu Mobile Inc.,NasdaqGS:GLUU,Information Technology,United States,85,3%,8
+35,QUALCOMM Incorporated,NasdaqGS:QCOM,Information Technology,United States,52,5%,0
+36,"Inteliquent, Inc.",NasdaqGS:IQNT,Telecommunication Services,United States,61,-4%,6
+37,ChipMOS TECHNOLOGIES INC.,NasdaqGS:IMOS,Information Technology,Taiwan,96,4%,8
+38,"PetroQuest Energy, Inc.",NYSE:PQ,Energy,United States,23,3%,8
+39,"Highpower International, Inc.",NasdaqGM:HPJ,Industrials,China,21,-2%,2
+40,Array BioPharma Inc.,NasdaqGM:ARRY,Healthcare,United States,22,5%,2
+41,Hexcel Corporation,NYSE:HXL,Industrials,United States,97,8%,0
+42,"CSS Industries, Inc.",NYSE:CSS,Consumer Discretionary,United States,85,-3%,7
+43,Dana Incorporated,NYSE:DAN,Consumer Discretionary,United States,5,-6%,4
+44,"Meritor, Inc.",NYSE:MTOR,Industrials,United States,17,8%,3
+45,Sistemas Corporation,Private:Sismas,Others,United States,65,3%,3
+46,Daimler AG,XTRA:DAI,Consumer Discretionary,Germany,73,-4%,8
+47,Northrop Grumman Corporation,NYSE:NOC,Industrials,United States,94,2%,3
+48,Eaton Corporation plc,NYSE:ETN,Industrials,Ireland,55,-6%,3
+49,Honeywell International Inc.,NYSE:HON,Industrials,United States,74,0%,0
+50,Lockheed Martin Corporation,NYSE:LMT,Industrials,United States,71,-7%,1
+51,#N/A,#N/A,#N/A,#N/A,28,-7%,6
+52,Australia Government,Private:Ausent,Government Institution,Australia,58,3%,4
+53,The Boeing Company,NYSE:BA,Industrials,United States,74,4%,1
+54,Ford Motor Company,NYSE:F,Consumer Discretionary,United States,17,8%,4
+55,Raytheon Company,NYSE:RTN,Industrials,United States,84,-2%,8
+56,HollyFrontier Corporation,NYSE:HFC,Energy,United States,97,8%,2
+57,"TCTM, L.P.","Private:TCTM, L.P.",Energy,United States,13,5%,2
+58,"Western Refining, Inc.",NYSE:WNR,Energy,United States,10,0%,2
+59,Spectra Energy Corp.,NYSE:SE,Energy,United States,62,-1%,5
+60,"Plains All American Pipeline, L.P.",NYSE:PAA,Energy,United States,57,8%,2
+61,Phillips 66,NYSE:PSX,Energy,United States,92,-4%,7
+62,Targa Resources Corp.,NYSE:TRGP,Energy,United States,72,3%,2
+63,ConocoPhillips,NYSE:COP,Energy,United States,5,1%,3
+64,DTE Energy Company,NYSE:DTE,Utilities,United States,95,6%,7
+65,CMS Energy Corporation,NYSE:CMS,Utilities,United States,19,8%,3
+66,Alliant Energy Corporation,NYSE:LNT,Utilities,United States,28,2%,5
+67,Grupo Aeromexico SAB de CV,BMV:AEROMEX *,Industrials,Mexico,51,0%,8
+68,Kenya Airways Ltd.,NASE:KQ.O,Industrials,Kenya,72,-2%,8
+69,"Thor Industries, Inc.",NYSE:THO,Consumer Discretionary,United States,46,2%,8
+70,"United Parcel Service, Inc.",NYSE:UPS,Industrials,United States,73,-6%,8
+71,BAE Systems plc,LSE:BA.,Industrials,United Kingdom,24,6%,0
+72,General Dynamics Corporation,NYSE:GD,Industrials,United States,94,-3%,0
+73,Newmark Security plc,AIM:NWT,Information Technology,United Kingdom,59,-8%,3
+74,"Fleetwood Motor Homes of Indiana, Inc.","Private:Fleetwoodana, Inc.",Consumer Discretionary,United States,34,-4%,7
+75,General Electric Company,NYSE:GE,Industrials,United States,18,0%,1
+76,5 Largest customers,Private:5 Laromers,0,0,0,-4%,8
+77,Montefiore Medical Center,Private:Monteenter,Others,United States,49,3%,4
+78,"FTI Consulting, Inc.",NYSE:FCN,Industrials,United States,13,-1%,2
+79,Md Anderson Cancer Center,Private:Md Anderser Center,Healthcare,United States,83,3%,0
+80,Texas Health Resources Inc.,Private:Texas Hearces Inc.,Healthcare,United States,69,7%,8
+81,Walter Oil & Gas Corporation,Private:Walteation,Energy,United States,56,2%,5
+82,Anadarko Petroleum Corporation,NYSE:APC,Energy,United States,65,7%,3
+83,Williams Partners L.P.,NYSE:WPZ,Energy,United States,1,2%,6
+84,Chevron Corporation,NYSE:CVX,Energy,United States,6,5%,5
+85,"Bluewater Industries, LP","Private:Bluewatertries, LP",Energy,United States,87,3%,3
+86,Eni SpA,NYSE:E,Energy,Italy,48,-7%,8
+87,"Daewoo Shipbuilding & Marine Engineering Co., Ltd.","Private:Daewoo So., Ltd.",Industrials,South Korea,43,-3%,5
+88,Keppel SLP Engineering Ltd.,Private:Keppel SLring Ltd.,Energy,Singapore,89,-7%,5
+89,Hess Corporation,NYSE:HES,Energy,United States,96,2%,2
+90,"American Electric Power Company, Inc.",NYSE:AEP,Utilities,United States,59,2%,0
+91,"Versabuild, LLC","Private:Versabuiluild, LLC",0,United States,69,7%,8
+92,Medtronic plc,NYSE:MDT,Healthcare,Ireland,79,-8%,3
+93,Abbott Laboratories,NYSE:ABT,Healthcare,United States,92,8%,0
+94,Boston Scientific Corporation,NYSE:BSX,Healthcare,United States,83,0%,0
+95,Cook Group Incorporated,Private:Cook rated,Healthcare,United States,79,-4%,1
+96,"Cardinal Health, Inc.",NYSE:CAH,Healthcare,United States,78,-3%,6
+97,Edwards Lifesciences Corporation,NYSE:EW,Healthcare,United States,93,0%,1
+98,Elixir Medical Corporation,Private:Elixiation,Healthcare,United States,80,0%,7
+99,OrbusNeich Medical Company Limited,Private:Orbusmited,Healthcare,Hong Kong,95,-4%,2
+100,The Spectranetics Corporation,NasdaqGS:SPNC,Healthcare,United States,44,6%,6
+101,"St. Jude Medical, Inc.",NYSE:STJ,Healthcare,United States,36,5%,8
+102,Johnson & Johnson,NYSE:JNJ,Healthcare,United States,49,-1%,7
+103,"Merck & Co., Inc.",NYSE:MRK,Healthcare,United States,100,3%,4
+104,NOW Inc.,NYSE:DNOW,Industrials,United States,90,-6%,8
+105,"MSC Industrial Direct Co., Inc.",NYSE:MSM,Industrials,United States,50,-1%,1
+106,AmerisourceBergen Corporation,NYSE:ABC,Healthcare,United States,40,-1%,0
+107,McKesson Corporation,NYSE:MCK,Healthcare,United States,28,-6%,1
+108,"Anthera Pharmaceuticals, Inc.",NasdaqGM:ANTH,Healthcare,United States,23,4%,8
+109,uniQure N.V.,NasdaqGS:QURE,Healthcare,Netherlands,54,0%,3
+110,"Tesaro, Inc.",NasdaqGS:TSRO,Healthcare,United States,75,-5%,4
+111,DaVita Inc.,NYSE:DVA,Healthcare,United States,100,2%,8
+112,Takeda Pharmaceutical Company Limited,TSE:4502,Healthcare,Japan,42,6%,7
+113,Sopharma AD,BUL:3JR,Healthcare,Bulgaria,24,-3%,5
+114,Fresenius Medical Care AG & Co. KGAA,DB:FME,Healthcare,Germany,89,3%,4
+115,GlaxoSmithKline plc,NYSE:GSK,Healthcare,United Kingdom,57,8%,0
+116,"Aegerion Pharmaceuticals, Inc.",NasdaqGS:AEGR,Healthcare,United States,8,2%,7
+117,"Atara Biotherapeutics, Inc.",NasdaqGS:ATRA,Healthcare,United States,4,1%,0
+118,"Celldex Therapeutics, Inc.",NasdaqGS:CLDX,Healthcare,United States,16,4%,0
+119,"Kite Pharma, Inc.",NasdaqGS:KITE,Healthcare,United States,47,5%,1
+120,"Regeneron Pharmaceuticals, Inc.",NasdaqGS:REGN,Healthcare,United States,89,-2%,5
+121,Pfizer Inc.,NYSE:PFE,Healthcare,United States,7,6%,7
+122,"Ono Pharmaceutical Co., Ltd.",TSE:4528,Healthcare,Japan,37,-1%,3
+123,Microsoft Corporation,NasdaqGS:MSFT,Information Technology,United States,24,0%,2
+124,"Facebook, Inc.",NasdaqGS:FB,Information Technology,United States,48,1%,3
+125,Yahoo! Inc.,NasdaqGS:YHOO,Information Technology,United States,6,-4%,0
+126,"Inception Parent, Inc.","Private:Inceptint, Inc.",Others,United States,82,8%,7
+127,"ServerCentral, Inc.",Private:Serve Inc.,Information Technology,United States,97,-7%,1
+128,Dropbox Inc.,Private:Dropb Inc.,Information Technology,United States,72,8%,5
+129,IAC/InterActiveCorp,NasdaqGS:IAC,Information Technology,United States,30,-1%,6
+130,Symantec Corporation,NasdaqGS:SYMC,Information Technology,United States,51,-3%,0
+131,UBS Group AG,NYSE:UBS,Financials,Switzerland,10,4%,5
+132,Sanofi,NYSE:SNY,Healthcare,France,15,8%,0
+133,GoDaddy Inc.,NYSE:GDDY,Information Technology,United States,18,2%,2
+134,Anexio Data Centers LLC,Private:Anexio Danters LLC,Industrials,United States,52,5%,3
+135,"Zynga, Inc.",NasdaqGS:ZNGA,Information Technology,United States,94,1%,3
+136,Net Data Centers,Private:Net Dnters,Information Technology,United States,45,7%,4
+137,"PJM Interconnection, L.L.C.",Private:PJM I.L.C.,Utilities,United States,92,-2%,2
+138,ISO New England Inc.,Private:ISO New Eland Inc.,Utilities,United States,100,0%,8
+139,Eversource Energy,NYSE:ES,Utilities,United States,44,5%,2
+140,"Walgreens Boots Alliance, Inc.",NasdaqGS:WBA,Consumer Staples,United States,98,-8%,7
+141,Boston Properties Inc.,NYSE:BXP,Real Estate,United States,91,-3%,4
+142,"Consolidated Edison, Inc.",NYSE:ED,Utilities,United States,47,-8%,5
+143,General Motors Company,NYSE:GM,Consumer Discretionary,United States,33,6%,2
+144,Kimberly-Clark Corporation,NYSE:KMB,Consumer Staples,United States,66,1%,8
+145,"Leggett & Platt, Incorporated",NYSE:LEG,Consumer Discretionary,United States,54,3%,8
+146,"Level 3 Communications, Inc.",NYSE:LVLT,Telecommunication Services,United States,35,-8%,6
+147,Morgan Stanley,NYSE:MS,Financials,United States,91,2%,6
+148,"U.S. Silica Holdings, Inc.",NYSE:SLCA,Energy,United States,37,-3%,4
+149,SUPERVALU Inc.,NYSE:SVU,Consumer Staples,United States,81,-8%,6
+150,AT&T Inc.,NYSE:T,Telecommunication Services,United States,38,8%,0
+151,Verizon Communications Inc.,NYSE:VZ,Telecommunication Services,United States,16,-6%,0
+152,Washington Real Estate Investment Trust,NYSE:WRE,Real Estate,United States,94,-5%,0
+153,"Tokyo Electric Power Company Holdings, Incorporated",TSE:9501,Utilities,Japan,96,-5%,8
+154,"BCBSM, Inc.",Private:BCBSM Inc.,Healthcare,United States,66,1%,6
+155,UnitedHealth Group Incorporated,NYSE:UNH,Healthcare,United States,38,5%,1
+156,Aetna Inc.,NYSE:AET,Healthcare,United States,77,6%,4
+157,Cigna Corporation,NYSE:CI,Healthcare,United States,91,8%,3
+158,Acorn Holdings B.V.,Private:Acorn Hngs B.V.,Others,Netherlands,59,-3%,8
+159,"DTS8 Coffee Company, Ltd.",OTCPK:BKCT,Consumer Staples,China,48,-3%,6
+160,"Amazon.com, Inc.",NasdaqGS:AMZN,Consumer Discretionary,United States,33,3%,1
+161,TOTAL S.A.,NYSE:TOT,Energy,France,41,-6%,6
+162,Future Electronics Inc.,Private:Futur Inc.,Information Technology,Canada,61,-5%,5
+163,"Arrow Electronics, Inc.",NYSE:ARW,Information Technology,United States,28,-5%,8
+164,Nokia Corporation,NYSE:NOK,Information Technology,Finland,21,2%,4
+165,Parrot S.A.,ENXTPA:PARRO,Information Technology,France,83,2%,7
+166,Hyundai Motor Company,KOSE:A005380,Consumer Discretionary,South Korea,5,-8%,4
+167,Samsung Electronics Co. Ltd.,KOSE:A005930,Information Technology,South Korea,24,-4%,6
+168,LG Electronics Inc.,KOSE:A066570,Consumer Discretionary,South Korea,32,5%,8
+169,"ADTRAN, Inc.",NasdaqGS:ADTN,Information Technology,United States,73,5%,3
+170,"Cisco Systems, Inc.",NasdaqGS:CSCO,Information Technology,United States,28,0%,3
+171,Dell Technologies Inc.,NYSE:DVMT,Information Technology,United States,49,3%,0
+172,HP Inc.,NYSE:HPQ,Information Technology,United States,57,-8%,3
+173,International Business Machines Corporation,NYSE:IBM,Information Technology,United States,60,-2%,3
+174,Teradata Corporation,NYSE:TDC,Information Technology,United States,36,-3%,1
+175,"Hangzhou Silan Microelectronics Co., Ltd",SHSE:600460,Information Technology,China,42,-8%,3
+176,ZTE Corp.,SZSE:000063,Information Technology,China,2,-4%,5
+177,Fujitsu Limited,OTCBB:FJTSY,Information Technology,Japan,39,-5%,4
+178,"WT Microelectronics Co., Ltd.",TSEC:3036,Information Technology,Taiwan,56,-3%,6
+179,Carnival Corporation,NYSE:CCL,Consumer Discretionary,United States,33,-6%,7
+180,Royal Caribbean Cruises Ltd.,NYSE:RCL,Consumer Discretionary,United States,21,2%,1
+181,Non U.S. Governments,Private:Nonnts,Government Institution,Others,58,3%,6
+182,Exelon Corporation,NYSE:EXC,Utilities,United States,5,3%,6
+183,Dish Network Corporation,NasdaqGS:DISH,Consumer Discretionary,United States,94,-3%,0
+184,Virgin America Inc.,NasdaqGS:VA,Industrials,United States,24,0%,3
+185,JetBlue Airways Corporation,NasdaqGS:JBLU,Industrials,United States,54,5%,7
+186,"KVH Industries, Inc.",NasdaqGS:KVHI,Information Technology,United States,59,2%,0
+187,Bredband2 i Skandinavien AB (publ),OM:BRE2,Telecommunication Services,Sweden,87,0%,2
+188,TOYO Corporation,TSE:8151,Information Technology,Japan,7,1%,1
+189,C-Com Satellite Systems Inc.,TSXV:CMI,Information Technology,Canada,79,4%,8
+190,Baosteel Group Corporation,Private:Baostation,Materials,China,91,2%,6
+191,Broad Max Holding Ltd.,Private:Broad Ltd.,Others,Hong Kong,87,0%,6
+192,Sundial Metals and Minerals Ltd.,Private:Sundi Ltd.,Others,Hong Kong,23,-6%,1
+193,"LianYunGang TongKe MaoYi Co., Ltd.",Private:LianY Ltd.,0,0,49,-5%,7
+194,"WuXi ZhuLian Renewable Co., Ltd.",Private:WuXi  Ltd.,0,0,84,8%,0
+195,"Lianyungang Jiaxin Resources Import & Export Co., Ltd.","Private:LianyungaCo., Ltd.",0,China,99,5%,8
+196,Henan Ruite,Private:Henan Ruinan Ruite,0,China,92,-3%,0
+197,"Jiangsu Shagang Group Co., Ltd.","Private:Jiangsu SCo., Ltd.",Materials,China,45,8%,1
+198,Jiangsu Provincial Trading Company,Private:Jiangsu Pg Company,0,China,41,3%,7
+199,"Shandong Luhua Group Co., Ltd.","Private:Shandong Co., Ltd.",Consumer Staples,China,55,3%,3
+200,Zhongji NingBo,Private:Zhongji Nji NingBo,0,China,71,7%,0
+201,"Shanxi Gangxu Trade Co., Ltd.","Private:Shanxi GaCo., Ltd.",0,China,47,3%,0
+202,"Sichuan Mingda Group Enterprises Co., Ltd","Private:Sichuan M Co., Ltd",0,China,76,-1%,3
+203,Sinosteel Corporation,Private:Sinosteelrporation,Materials,China,40,3%,6
+204,"Dafeng Hengmao Metal Renewable Co., Ltd","Private:Dafeng He Co., Ltd",0,China,64,3%,1
+205,"China-Base Ningbo Foreign Trade Co., Ltd.","Private:China-BasCo., Ltd.",0,China,72,-7%,0
+206,"Qingdao BaoSong Resources Co., Ltd.","Private:Qingdao BCo., Ltd.",0,China,11,6%,5
+207,"Shangdong Huaxin Industry Co., Ltd.","Private:ShangdongCo., Ltd.",0,China,36,4%,4
+208,"ZhongJin Renewable Resources (Tianjing) Investment Co., Ltd","Private:ZhongJin  Co., Ltd",0,China,98,-7%,6
+209,Jiangsu Shagang Co. Ltd.,SZSE:002075,Materials,China,38,1%,8
+210,"Derby Materials Co., Limited","Private:Derby Mat, Limited",Industrials,China,41,-8%,2
+211,"Ningbo Bonded Area Hanggang Foreign Trade Development Co., Ltd","Private:Ningbo Bo Co., Ltd",Industrials,China,23,3%,2
+212,CNBM International Corporation,Private:CNBM Interporation,Industrials,China,99,6%,5
+213,Sony Corporation,NYSE:SNE,Consumer Discretionary,Japan,8,-6%,2
+214,Vuzix Corporation,NasdaqCM:VUZI,Consumer Discretionary,United States,0,-8%,6
+215,"Whole Foods Market, Inc.",NasdaqGS:WFM,Consumer Staples,United States,65,1%,3
+216,The Kroger Co.,NYSE:KR,Consumer Staples,United States,50,7%,8
+217,"Natural Grocers by Vitamin Cottage, Inc.",NYSE:NGVC,Consumer Staples,United States,17,-1%,0
+218,Royal Dutch Shell plc,NYSE:RDS.A,Energy,Netherlands,63,0%,0
+219,Vitol Holding B.V.,Private:Vitol B.V.,Energy,Netherlands,42,2%,7
+220,JPMorgan Chase & Co.,NYSE:JPM,Financials,United States,26,0%,6
+221,BP p.l.c.,NYSE:BP,Energy,United Kingdom,3,7%,7
+222,Duke Energy Corporation,NYSE:DUK,Utilities,United States,54,4%,3
+223,The Procter & Gamble Company,NYSE:PG,Consumer Staples,United States,1,-2%,6
+224,Pegatron Corporation,TSEC:4938,Information Technology,Taiwan,56,4%,2
+225,Apple Inc.,NasdaqGS:AAPL,Information Technology,United States,56,-1%,1
+226,"Huawei Investment & Holding Co., Ltd.",Private:Huawe Ltd.,Information Technology,China,4,8%,4
+227,Intel Corporation,NasdaqGS:INTC,Information Technology,United States,62,-7%,7
+228,BlackBerry Limited,NasdaqGS:BBRY,Information Technology,Canada,62,6%,6
+229,HTC Corporation,TSEC:2498,Information Technology,Taiwan,40,-7%,2
+230,Sharp Corporation,TSE:6753,Consumer Discretionary,Japan,75,2%,3
+231,NEC Corporation,TSE:6701,Information Technology,Japan,60,-1%,5
+232,Arima Communications Corp.,TSEC:8101,Information Technology,Taiwan,17,7%,7
+233,Infineon Technologies AG,XTRA:IFX,Information Technology,Germany,12,3%,7
+234,"Avnet, Inc.",NYSE:AVT,Information Technology,United States,68,2%,6
+235,"Motorola Solutions, Inc.",NYSE:MSI,Information Technology,United States,52,5%,4
+236,LOUD Technologies Inc.,OTCPK:LTEC,Consumer Discretionary,United States,95,-8%,8
+237,"Foxconn Technology Co., Ltd.",TSEC:2354,Information Technology,Taiwan,63,4%,6
+238,WPG Holdings Limited,TSEC:3702,Information Technology,Taiwan,54,-6%,7
+239,ARRIS International plc,NasdaqGS:ARRS,Information Technology,United States,41,-1%,1
+240,Alphabet Inc.,NasdaqGS:GOOGL,Information Technology,United States,45,-5%,5
+241,"NETGEAR, Inc.",NasdaqGS:NTGR,Information Technology,United States,99,6%,6
+242,"Rockwell Collins, Inc.",NYSE:COL,Industrials,United States,47,-5%,6
+243,Telefonaktiebolaget LM Ericsson (publ),NasdaqGS:ERIC,Information Technology,Sweden,91,-6%,0
+244,Lenovo Group Limited,OTCBB:LNVGY,Information Technology,Hong Kong,69,-5%,5
+245,D-Link Corporation,TSEC:2332,Information Technology,Taiwan,78,-3%,8
+246,GH Development Holdings Limited,Private:GH Devel Limited,0,China,93,-8%,3
+247,Nintendo Co. Ltd.,TSE:7974,Information Technology,Japan,68,2%,7
+248,CompuDyne Corporation,Private:Compuation,Information Technology,United States,81,2%,1
+249,Acer Incorporated,TSEC:2353,Information Technology,Taiwan,6,8%,8
+250,"ASUSTeK Computer, Inc.",TSEC:2357,Information Technology,Taiwan,10,-4%,4
+251,Panasonic Corporation,TSE:6752,Consumer Discretionary,Japan,39,-4%,3
+252,Woolworths Limited,ASX:WOW,Consumer Staples,Australia,55,7%,4
+253,Koninklijke Ahold Delhaize N.V.,ENXTAM:AH,Consumer Staples,Netherlands,97,-3%,4
+254,Carrefour SA,ENXTPA:CA,Consumer Staples,France,47,-7%,4
+255,Wm. Morrison Supermarkets plc,LSE:MRW,Consumer Staples,United Kingdom,61,1%,1
+256,Tesco PLC,LSE:TSCO,Consumer Staples,United Kingdom,34,-8%,2
+257,Bed Bath & Beyond Inc.,NasdaqGS:BBBY,Consumer Discretionary,United States,2,-1%,4
+258,eBay Inc.,NasdaqGS:EBAY,Information Technology,United States,78,-5%,2
+259,"PayPal Holdings, Inc.",NasdaqGS:PYPL,Information Technology,United States,69,6%,4
+260,"Staples, Inc.",NasdaqGS:SPLS,Consumer Discretionary,United States,70,-4%,2
+261,"Best Buy Co., Inc.",NYSE:BBY,Consumer Discretionary,United States,11,-4%,7
+262,"The Home Depot, Inc.",NYSE:HD,Consumer Discretionary,United States,27,8%,7
+263,"J. C. Penney Company, Inc.",NYSE:JCP,Consumer Discretionary,United States,2,2%,8
+264,Kohl's Corporation,NYSE:KSS,Consumer Discretionary,United States,72,-2%,3
+265,"Lowe's Companies, Inc.",NYSE:LOW,Consumer Discretionary,United States,46,-7%,5
+266,Robert Bosch GmbH,Private:Rober GmbH,Consumer Discretionary,Germany,14,-8%,0
+267,Churchill Downs Incorporated,NasdaqGS:CHDN,Consumer Discretionary,United States,46,1%,6
+268,"RealNetworks, Inc.",NasdaqGS:RNWK,Information Technology,United States,57,4%,8
+269,Exent Technologies Ltd.,Private:Exent Ltd.,Information Technology,Israel,61,8%,8
+270,Avanquest SA,ENXTPA:AVQ,Information Technology,France,27,7%,2
+271,Wired Media,Private:Wirdia,Information Technology,United States,21,1%,7
+272, S.A.D,Private: S.A.D,0,0,10,-8%,0
+273,"Square Enix Holdings Co., Ltd.",TSE:9684,Information Technology,Japan,22,-2%,6
+274,G5 Entertainment AB (publ),OM:G5EN,Information Technology,Sweden,13,-7%,4
+275,"T-Mobile US, Inc.",NasdaqGS:TMUS,Telecommunication Services,United States,79,4%,0
+276,Sprint Corporation,NYSE:S,Telecommunication Services,United States,45,-7%,3
+277,Vodafone Group Plc,LSE:VOD,Telecommunication Services,United Kingdom,49,-8%,0
+278,China Techfaith Wireless Communication Technology Limited,NasdaqGS:CNTF,Information Technology,China,53,2%,2
+279,Inseego Corp.,NasdaqGS:INSG,Information Technology,United States,26,4%,0
+280,Texas Instruments Incorporated,NasdaqGS:TXN,Information Technology,United States,79,0%,3
+281,"Qingdao Haier Co., Ltd.",SHSE:600690,Consumer Discretionary,China,96,-7%,8
+282,Kyocera Corp.,TSE:6971,Information Technology,Japan,5,7%,2
+283,"Hon Hai Precision Industry Co., Ltd.",TSEC:2317,Information Technology,Taiwan,78,0%,6
+284,MediaTek Inc.,TSEC:2454,Information Technology,Taiwan,76,1%,0
+285,"Globalstar, Inc.",AMEX:GSAT,Telecommunication Services,United States,88,-5%,8
+286,PT Smartfren Telecom Tbk,JKSE:FREN,Telecommunication Services,Indonesia,88,5%,4
+287,"P.A.M. Transportation Services, Inc.",NasdaqGM:PTSI,Industrials,United States,44,-4%,3
+288,Swift Transportation Company,NYSE:SWFT,Industrials,United States,26,-5%,4
+289,"Teradyne, Inc.",NYSE:TER,Information Technology,United States,88,6%,8
+290,"Dingli Corp., Ltd.",SZSE:300050,Information Technology,China,97,-4%,2
+291,Giga Byte Technology Co. Ltd.,TSEC:2376,Information Technology,Taiwan,13,7%,2
+292,"Weikeng Industrial Co., Ltd.",TSEC:3033,Information Technology,Taiwan,81,-2%,4
+293,Intrinsyc Technologies Corporation,TSX:ITC,Information Technology,Canada,87,5%,1
+294,Novatek Microelectronics Corp.,TSEC:3034,Information Technology,Taiwan,56,5%,3
+295,"Micron Technology, Inc.",NasdaqGS:MU,Information Technology,United States,0,2%,4
+296,Winbond Electronics Corp.,TSEC:2344,Information Technology,Taiwan,34,-3%,6
+297,ProMOS Technologies Inc.,Private:ProMO Inc.,Information Technology,Taiwan,75,8%,0
+298,Macronix International Co. Ltd.,TSEC:2337,Information Technology,Taiwan,21,5%,8
+299,"Himax Technologies, Inc.",NasdaqGS:HIMX,Information Technology,Taiwan,60,7%,3
+300,Elite Semiconductor Memory Technology Inc,TSEC:3006,Information Technology,Taiwan,70,7%,3
+301,"Etron Technology, Inc.",GTSM:5351,Information Technology,Taiwan,100,0%,5
+302,Raydium Semiconductor Corporation,GTSM:3592,Information Technology,Taiwan,30,-8%,3
+303,Zentel Electronics Corp.,GTSM:3553,Information Technology,Taiwan,34,5%,8
+304,Cypress Semiconductor Corporation,NasdaqGS:CY,Information Technology,United States,96,-2%,4
+305,Powerchip Technology Corp.,Private:Powerchipogy Corp.,Information Technology,Taiwan,0,-8%,4
+306,Spire Inc.,NYSE:SR,Utilities,United States,100,-3%,6
+307,Martin Midstream Partners L.P.,NasdaqGS:MMLP,Energy,United States,88,-1%,0
+308,Texon LP,Private:Texonon LP,Energy,United States,51,4%,2
+309,"CVR Energy, Inc.",NYSE:CVI,Energy,United States,89,-1%,2
+310,Atmos Energy Corporation,NYSE:ATO,Utilities,United States,0,-2%,0
+311,Louis Dreyfus Commodities LLC.,Private:Lou.V.,Consumer Staples,United States,12,2%,5
+312,"EnLink Midstream Partners, LP",NYSE:ENLK,Energy,United States,95,1%,7
+313,DCP Midstream Partners LP,NYSE:DPM,Energy,United States,49,7%,0
+314,Cokinos Energy Corporation,Private:Cokinos Erporation,Energy,United States,40,7%,8
+315,Edgewell Personal Care Company,NYSE:EPC,Consumer Staples,United States,52,-6%,2
+316,Uniross Batteries (hk) Ltd,Private:Uniross B (hk) Ltd,0,Hong Kong,25,0%,4
+317,Costco Wholesale Corporation,NasdaqGS:COST,Consumer Staples,United States,46,3%,1
+318,"Cascadian Therapeutics, Inc.",NasdaqGS:CASC,Healthcare,United States,42,8%,7
+319,"Loxo Oncology, Inc.",NasdaqGM:LOXO,Healthcare,United States,87,-7%,5
+320,Novartis AG,NYSE:NVS,Healthcare,Switzerland,77,1%,7
+321,AstraZeneca PLC,NYSE:AZN,Healthcare,United Kingdom,67,0%,1
+322,Celgene Corporation,NasdaqGS:CELG,Healthcare,United States,93,-2%,2
+323,Roche Holding AG,SWX:ROG,Healthcare,Switzerland,29,-3%,7
+324,"VentiRx Pharmaceuticals, Inc.","Private:VentiRx Pals, Inc.",Healthcare,United States,18,7%,7
+325,Airbus Group SE,ENXTPA:AIR,Industrials,Netherlands,56,-5%,5
+326,Vestas Wind Systems A/S,CPSE:VWS,Industrials,Denmark,99,-6%,1
+327,Gamesa Corporación Tecnológica S.A.,BME:GAM,Industrials,Spain,20,-8%,4
+328,Embraer S.A.,NYSE:ERJ,Industrials,Brazil,87,7%,4
+329,Bayerische Motoren Werke Aktiengesellschaft,DB:BMW,Consumer Discretionary,Germany,22,-7%,1
+330,Solvay SA,ENXTBR:SOLB,Materials,Belgium,32,8%,7
+331,Safran SA,ENXTPA:SAF,Industrials,France,36,4%,8
+332,Zodiac Aerospace,ENXTPA:ZC,Industrials,France,64,-4%,3
+333,GKN plc,LSE:GKN,Consumer Discretionary,United Kingdom,34,0%,8
+334,"Orbital ATK, Inc.",NYSE:OA,Industrials,United States,87,-6%,4
+335,"Triumph Group, Inc.",NYSE:TGI,Industrials,United States,4,1%,0
+336,Textron Inc.,NYSE:TXT,Industrials,United States,74,-7%,2
+337,United Technologies Corporation,NYSE:UTX,Industrials,United States,82,-1%,7
+338,"Toray Industries, Inc.",TSE:3402,Materials,Japan,98,-2%,3
+339,Bombardier Inc.,TSX:BBD.B,Industrials,Canada,32,-2%,8
+340,"Wal-Mart Stores, Inc.",NYSE:WMT,Consumer Staples,United States,98,2%,4
+341,Target Corporation,NYSE:TGT,Consumer Discretionary,United States,68,8%,0

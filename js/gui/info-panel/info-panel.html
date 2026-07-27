@@ -1,0 +1,65 @@
+<style>
+
+    info-panel {
+        display: none;
+        width: 40%;
+
+        position: absolute;
+        top: 30%;
+        left: 30%;
+    }
+
+
+    info-panel > div {
+        background: mediumslateblue;
+        padding:1em;
+    }
+
+
+
+
+</style>
+
+<pre>
+    keymap
+    ------------------------------------
+    h ... toggle this help menu
+
+    s ... recluster hovered cluster/leaf
+    t ... toogle select current cluster
+    z/click ... zoom to cluster
+    u TODO toggle cluster text nodes ?
+    e ... toggle edges
+    ------------------------------------
+</pre>
+
+<div>
+
+    leafs
+    <select id="leafs">
+        <option>true</option>
+        <option>false</option>
+    </select><br><hr>
+
+    text
+    <select id="clusterTextVisible">
+        <option>true</option>
+        <option>false</option>
+    </select><br>
+    nodes
+    <select id="nodes">
+        <option>true</option>
+        <option>false</option>
+    </select><br>
+    edges
+    <select id="edges">
+        <option>true</option>
+        <option>false</option>
+    </select><br>
+
+    particles
+    <select id="particles">
+        <option>true</option>
+        <option>false</option>
+    </select><br>
+</div>

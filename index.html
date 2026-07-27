@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+</head>
+
+<body>
+
+    <div id="view" style="position:fixed;top:0;left:0;width:100vw;height:100vh;">
+        <graph-breadcrumb></graph-breadcrumb>
+        <graph-hud></graph-hud>
+        <graph-debug-hud></graph-debug-hud>
+        <graph-color-gradient left-label="Negative" right-label="Positive" color-modes="sentiment,priceRanges,group"></graph-color-gradient>
+        <graph-searchbar placeholder="Search nodes" search-fields="name,id,group,industry"></graph-searchbar>
+        <graph-node-list></graph-node-list>
+    </div>
+
+    <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "cluster-graph-3d-stories",
+  "private": true,
+  "scripts": {
+    "dev": "ladle serve",
+    "build": "ladle build"
+  },
+  "dependencies": {
+    "cluster-graph-3d": "file:..",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@ladle/react": "^5.1.1",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.5.0"
+  }
+}

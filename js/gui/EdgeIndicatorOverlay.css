@@ -1,0 +1,98 @@
+.edge-indicator-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 500;
+}
+
+.edge-indicator {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    pointer-events: all;
+    cursor: pointer;
+}
+
+.edge-indicator-arrow {
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 16px solid var(--arrow-color, white);
+    transform: rotate(var(--arrow-angle, 0deg));
+    transform-origin: center 66%;
+    filter: drop-shadow(0 0 4px var(--arrow-color, white));
+    transition: transform 0.1s;
+}
+
+.edge-indicator-label {
+    font-size: 11px;
+    font-family: 'roboto', sans-serif;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid currentColor;
+    opacity: 0.9;
+    transition: opacity 0.15s;
+}
+
+.edge-indicator:hover .edge-indicator-label {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.edge-indicator:hover .edge-indicator-arrow {
+    filter: drop-shadow(0 0 8px var(--arrow-color, white));
+}
+
+.edge-indicator-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    min-width: 120px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+
+.edge-indicator:hover .edge-indicator-list {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.edge-indicator.near-bottom .edge-indicator-list {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 4px;
+}
+
+.edge-indicator-list-item {
+    font-size: 11px;
+    font-family: 'roboto', sans-serif;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: background 0.1s;
+}
+
+.edge-indicator-list-item:hover {
+    background: rgba(255,255,255,0.15);
+}

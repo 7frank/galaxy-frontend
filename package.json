@@ -1,0 +1,70 @@
+{
+  "name": "cluster-graph-3d",
+  "version": "1.0.2",
+  "description": "contains a component to render node/edge data with threejs and different distribution algorithms like force graph",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./dist/index.css": "./dist/index.css",
+    "./dist/gui.css": "./dist/gui.css",
+    "./hull": {
+      "import": "./dist/hull.mjs",
+      "require": "./dist/hull.js"
+    },
+    "./gui": {
+      "import": "./dist/gui.mjs",
+      "require": "./dist/gui.js"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.mjs",
+    "dist/**/*.css",
+    "css"
+  ],
+  "sideEffects": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:lib",
+    "build:app": "vite build",
+    "build:lib": "tsup",
+    "analyze": "ANALYZE=true vite build",
+    "preview": "vite preview",
+    "start": "vite",
+    "prepublishOnly": "bun run build:lib"
+  },
+  "keywords": [],
+  "author": "7frank",
+  "license": "SEE LICENSE IN License.txt",
+  "homepage": "https://github.com/7frank",
+  "private": false,
+  "devDependencies": {
+    "@types/lodash": "^4.17.0",
+    "@types/node": "^20.0.0",
+    "@types/three": "^0.185.0",
+    "http-server": "^14.1.1",
+    "rollup-plugin-visualizer": "^7.0.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.5.0",
+    "vite": "^8.1.5"
+  },
+  "dependencies": {
+    "@tweenjs/tween.js": "^17.1.0",
+    "d3-force-3d": "^1.0.7",
+    "dagre": "^0.8.5",
+    "easy-color": "^1.0.4",
+    "hexasphere.js": "^0.2.2",
+    "lodash": "^4.17.4",
+    "monotone-convex-hull-2d": "^1.0.1",
+    "mousetrap": "^1.6.1",
+    "papaparse": "^4.3.5",
+    "postprocessing": "^6.39.3",
+    "three": "^0.185.1",
+    "three.meshline": "^1.4.0",
+    "tweakpane": "^4.0.5"
+  }
+}

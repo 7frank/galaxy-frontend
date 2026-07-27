@@ -1,0 +1,10 @@
+
+.idea/
+node_modules/
+npm-debug.log
+*.lyx~
+*.lyx#
+doc/assets/
+build/
+dist/
+.playwright-mcp/
