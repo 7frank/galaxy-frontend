@@ -53,6 +53,7 @@
     "vite": "^8.1.5"
   },
   "dependencies": {
+    "@jonobr1/force-directed-graph": "file:./force-directed-graph",
     "@tweenjs/tween.js": "^17.1.0",
     "d3-force-3d": "^1.0.7",
     "dagre": "^0.8.5",

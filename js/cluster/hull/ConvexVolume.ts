@@ -17,6 +17,18 @@ import { BufferGeometry } from "three/src/core/BufferGeometry.js";
 
 import { ConvexGeometry } from "../../lib/ConvexGeometry";
 
+function hasVolume(pts: Vector3[]): boolean {
+    if (pts.length < 4) return false;
+    const a = pts[1].clone().sub(pts[0]);
+    const b = pts[2].clone().sub(pts[0]);
+    const n = a.cross(b);
+    if (n.lengthSq() < 1e-10) return false;
+    for (let i = 3; i < pts.length; i++) {
+        if (Math.abs(n.dot(pts[i].clone().sub(pts[0]))) > 1e-6) return true;
+    }
+    return false;
+}
+
 /**
  * Implementation of a convex hull around a set of nodes in 3D space using {@link QuickHull} algorithm.
  */
@@ -47,6 +59,7 @@ export default class ConvexVolume extends BoxVolume {
             }
         }
 
+        if (allPoints.length < 4) return geometry instanceof BufferGeometry ? geometry : new BufferGeometry();
         return new ConvexGeometry(allPoints);
     }
 
@@ -93,10 +106,10 @@ export default class ConvexVolume extends BoxVolume {
             if (vertices[0].x == 0) vertices[0].x = 0.1;
             if (vertices[0].y == 0) vertices[0].y = 0.1;
             if (vertices[0].z == 0) vertices[0].z = 0.1;
+            if (vertices.length < 4 || !hasVolume(vertices)) throw new Error('too few / coplanar vertices');
             geo0 = this.mGeometryZero = new ConvexGeometry(vertices);
-        } catch (e) {
+        } catch (_e) {
             geo0 = this.mGeometryZero = this.createBoxGeometryFromBoundingBox(boundingBox);
-            console.warn(e, vertices);
         }
 
         this.mBoundingBox = boundingBox;

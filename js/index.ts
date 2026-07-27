@@ -1,6 +1,7 @@
 export { default as GraphView3D } from './view/GraphView3D.js'
 export { ClusteringUtils } from './cluster/ClusteringUtils.js'
 export { default as ForceGraphDistribution } from './cluster/distributions/ForceGraphDistribution.js'
+export { default as GPUForceGraphDistribution } from './cluster/distributions/GPUForceGraphDistribution.js'
 export { default as Default3DGraphConfig } from './cluster/configs/Default3DGraphConfig.js'
 export { default as Datasource } from './data/Datasource.js'
 export type { DatasourceNode, DatasourceResult, DatasourceCallback } from './data/Datasource.js'

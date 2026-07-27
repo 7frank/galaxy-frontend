@@ -10,7 +10,7 @@
 .graph-cluster-caption {
 	color: #ffffff;
 	padding: 2px 5px;
-	background: rgba(0, 0, 0, 0.5);
+	text-shadow: 0 0 0.5em black, 0 0 0.5em black, 0 0 0.5em black;
 	font-size: 0.8em;
 	font-weight: 900;
 	opacity: 0.5;

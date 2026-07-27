@@ -49,9 +49,9 @@ export default class ForceGraphDistribution extends BaseDistribution {
 
     static _queue: AnimationFrameBasedScheduler | undefined
 
-    constructor(scale: number = 50, dimensions: number = 1) {
+    constructor(scale: number = 50, dimensions: number = 1, initialEngineTicks: number = 200) {
         super(scale, dimensions);
-        this.initialEngineTicks = 200;
+        this.initialEngineTicks = initialEngineTicks;
         this.maxConvergeTime = 9000;
         this.maxConvergeFrames = 700;
     }
