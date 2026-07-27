@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   GraphView3D,
   ClusteringUtils,
@@ -10,64 +10,66 @@ import {
 } from 'cluster-graph-3d'
 import 'cluster-graph-3d/dist/index.css'
 import WikidataBoardDatasource from './WikidataBoardDatasource'
+import { useVanillaMount } from './useVanillaMount'
 
 export default { title: 'Examples' }
 
 export const BoardOverlap = () => {
-  const ref = useRef<HTMLDivElement>(null)
   const [status, setStatus] = useState('Querying SPARQL endpoint…')
   const [progress, setProgress] = useState(20)
   const [loaded, setLoaded] = useState(false)
 
-  useEffect(() => {
-    if (!ref.current) return
-    const graph = new GraphView3D(ref.current, {
-      nodeTexture: '/dot7.png',
-      nodeDefaultScale: 10,
-      showEdgeIndicator: true,
-      speccs: ClusteringUtils.buildSpeccs([
-        {
-          key: 'industry',
-          distribution: new CircleDistribution(90000),
-          hullOptions: { minClusterSize: 2 },
-        },
-        {
-          key: 'group',
-          distribution: new GridDistribution(25000),
-          hullOptions: {
-            zoomDirection: [0, -1, 0],
-            minClusterSize: 2,
-            hull: ConvexVolume,
-            makeHullEffect: () => new CircleHullEffect(),
-            hullBorderMode: 'hover',
+  const ref = useVanillaMount(
+    (el) => {
+      const graph = new GraphView3D(el, {
+        nodeTexture: '/dot7.png',
+        nodeDefaultScale: 10,
+        showEdgeIndicator: true,
+        speccs: ClusteringUtils.buildSpeccs([
+          {
+            key: 'group',
+            distribution: new CircleDistribution(90000),
+            hullOptions: { minClusterSize: 2 },
           },
-        },
-        {
-          distribution: new CircleDistribution(6000),
-          hullOptions: {
-            zoomDirection: [0, -1, 0],
-            hull: ConvexVolume,
-            makeHullEffect: () => new BasicHullEffect(),
-            hullBorderMode: 'ambient',
+          {
+            key: 'industry',
+            distribution: new GridDistribution(25000),
+            hullOptions: {
+              zoomDirection: [0, -1, 0],
+              minClusterSize: 2,
+              hull: ConvexVolume,
+              makeHullEffect: () => new CircleHullEffect(),
+              hullBorderMode: 'hover',
+            },
           },
-        },
-      ]),
-    })
+          {
+            distribution: new CircleDistribution(6000),
+            hullOptions: {
+              zoomDirection: [0, -1, 0],
+              hull: ConvexVolume,
+              makeHullEffect: () => new BasicHullEffect(),
+              hullBorderMode: 'ambient',
+            },
+          },
+        ]),
+      })
 
-    setProgress(50)
-    setStatus('Fetching board membership data…')
+      setProgress(50)
+      setStatus('Fetching board membership data…')
 
-    graph.loadDatasource(new WikidataBoardDatasource({ limit: 400, minOverlap: 1 }))
-    setProgress(80)
+      graph.loadDatasource(new WikidataBoardDatasource({ limit: 400, minOverlap: 1 }))
+      setProgress(80)
 
-    graph.addEventListener('loaded', () => {
-      setProgress(100)
-      setStatus('Done')
-      setTimeout(() => setLoaded(true), 300)
-    })
+      graph.addEventListener('loaded', () => {
+        setProgress(100)
+        setStatus('Done')
+        setTimeout(() => setLoaded(true), 300)
+      })
 
-    return () => (graph as any).destroy?.()
-  }, [])
+      return graph
+    },
+    (graph) => (graph as any).destroy?.()
+  )
 
   return (
     <>

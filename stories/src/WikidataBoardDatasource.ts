@@ -1,4 +1,4 @@
-import { Datasource } from "cluster-graph-3d";
+import { Datasource, type DatasourceCallback } from "cluster-graph-3d";
 
 const SPARQL_ENDPOINT = "https://query.wikidata.org/sparql";
 
@@ -26,7 +26,7 @@ export default class WikidataBoardDatasource extends Datasource {
         this.minOverlap = minOverlap;
     }
 
-    load(onSuccess: (data: any) => void, onError?: (err: Error) => void) {
+    load(onSuccess: DatasourceCallback, onError?: (err: Error) => void) {
         const query = QUERY(this.limit);
         const url = SPARQL_ENDPOINT + "?format=json&query=" + encodeURIComponent(query);
 
