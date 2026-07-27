@@ -4,7 +4,9 @@ import Mousetrap from "mousetrap";
 import "./searchbar.css";
 
 function getViewEl(el) {
-    return el.closest('[data-graph-id]') ?? el.parentElement?.querySelector('[data-graph-id]') ?? null;
+    const viewEl = el.closest('[data-graph-id]');
+    if (!viewEl) console.warn('graph-searchbar: no parent [data-graph-id] found. Mount inside a GraphView3D container.');
+    return viewEl;
 }
 
 function getNodes(el) {

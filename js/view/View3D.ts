@@ -243,23 +243,20 @@ export default class View3D extends EventTarget {
 
         this.createDomEvents();
 
-        this.mRenderer.domElement.addEventListener("mouseover", function (e) {
+        that.el.addEventListener("mouseover", function (e) {
 
             if (that.isMaximised()) return;
 
-            e.stopPropagation();
             that.setActive();
-
             that.el.setAttribute("hasFocus", "true");
-
-            that.mCaption!.style.opacity = "0"
+            that.mCaption!.style.opacity = "0";
         });
 
-        this.mRenderer.domElement.addEventListener("mouseout", function (e) {
+        that.el.addEventListener("mouseout", function (e) {
 
             if (that.isMaximised()) return;
 
-            e.stopPropagation();
+            if (that.el.contains(e.relatedTarget as Node)) return;
 
             that.el.removeAttribute("hasFocus");
             if (!that.el.classList.contains("view-3d-maximised")) {

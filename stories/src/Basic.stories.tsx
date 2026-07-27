@@ -58,9 +58,11 @@ export const Basic = () => {
 
   return (
     <>
-      <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }} />
-      <graph-searchbar placeholder="Search nodes" search-fields="name,id,group,industry" />
+      <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }} >
+        <graph-searchbar placeholder="Search nodes" search-fields="name,id,group,industry" />
       <graph-node-list />
+      </div>
+      
     </>
   )
 }
