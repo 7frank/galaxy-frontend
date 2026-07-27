@@ -26,6 +26,7 @@ export interface NodeEnv {
     sizeAccessor: (el: NodeEl) => number
     domEvents: DomEvents
     toolTipElem?: HTMLElement
+    selectionManager?: import("./NodeSelectionManager").default
 }
 
 export interface NodeEl {
@@ -139,12 +140,12 @@ export function _newClassViaFactory(className: string, env: NodeEnv, el: NodeEl)
     mMesh.onRemove = factory.onRemove;
     mMesh.set = function (attrName: string, options: unknown) {
         if (_.isObject(options)) {
-            if (_.isObject((mMesh as Record<string, unknown>)[attrName]))
-                Object.assign((mMesh as Record<string, unknown>)[attrName] as object, options);
+            if (_.isObject((mMesh as unknown as Record<string, unknown>)[attrName]))
+                Object.assign((mMesh as unknown as Record<string, unknown>)[attrName] as object, options);
             else
-                (mMesh as Record<string, unknown>)[attrName] = options;
+                (mMesh as unknown as Record<string, unknown>)[attrName] = options;
         } else {
-            (mMesh as Record<string, unknown>)[attrName] = options;
+            (mMesh as unknown as Record<string, unknown>)[attrName] = options;
         }
     };
 

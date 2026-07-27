@@ -4,7 +4,20 @@ import type { ArrowEdge } from "./edges/ArrowEdge";
 import { addArrow, removeArrow } from "./edges/ArrowEdge";
 import type { Mesh } from "three/src/objects/Mesh.js";
 
+export interface SelectionManagerView {
+    el: HTMLElement
+    mCamera?: unknown
+    mControls?: unknown
+    graphId?: string
+}
+
 export default class NodeSelectionManager {
+
+    private view: SelectionManagerView | null
+
+    constructor(view: SelectionManagerView | null = null) {
+        this.view = view;
+    }
 
     private selectedNodes: HighlightNode[] = []
     private pinnedNodes: HighlightNode[] = []
@@ -102,16 +115,16 @@ export default class NodeSelectionManager {
 
     handleDblClick(node: HighlightNode): void {
         const isDeselect = this.lastDblClicked === node;
-        window.dispatchEvent(new CustomEvent("node-selected", {
-            detail: isDeselect ? null : node
+        this._eventTarget().dispatchEvent(new CustomEvent("node-selected", {
+            detail: isDeselect ? null : node, bubbles: true
         }));
         this.lastDblClicked = isDeselect ? undefined : node;
     }
 
     private _zoomToNode(mesh: Mesh, onEnd?: () => void, minMaxDistance = 400, approachDirection?: [number, number, number]): void {
-        const viewEl = document.querySelector<HTMLElement & { _view3d?: unknown }>(".view-3d[hasFocus]")
-            ?? document.querySelector<HTMLElement & { _view3d?: unknown }>(".view-3d.view-3d-maximised");
-        const view = viewEl?._view3d as { mCamera?: unknown; mControls?: unknown } | null;
+        const view = this.view
+            ?? (document.querySelector<HTMLElement & { _view3d?: SelectionManagerView }>(".view-3d[hasFocus]"))?._view3d
+            ?? (document.querySelector<HTMLElement & { _view3d?: SelectionManagerView }>(".view-3d.view-3d-maximised"))?._view3d;
         if (!view) { console.warn("no view focused to be able to zoom"); return; }
         ZoomUtil.moveToMesh(mesh, view.mCamera, view.mControls, minMaxDistance, onEnd, approachDirection ?? null);
     }
@@ -143,15 +156,19 @@ export default class NodeSelectionManager {
         this.isPinned(node) ? this.unpin(node) : this.pin(node);
     }
 
+    private _eventTarget(): EventTarget {
+        return this.view?.el ?? window;
+    }
+
     private _emitSelectionChanged(): void {
-        window.dispatchEvent(new CustomEvent("node-clicked", {
-            detail: this.getLastSelected()
+        this._eventTarget().dispatchEvent(new CustomEvent("node-clicked", {
+            detail: this.getLastSelected(), bubbles: true
         }));
     }
 
     private _emitPinboardChanged(): void {
-        window.dispatchEvent(new CustomEvent("pinboard-changed", {
-            detail: [...this.pinnedNodes]
+        this._eventTarget().dispatchEvent(new CustomEvent("pinboard-changed", {
+            detail: [...this.pinnedNodes], bubbles: true
         }));
     }
 }

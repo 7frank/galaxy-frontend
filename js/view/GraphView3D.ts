@@ -36,6 +36,7 @@ import { Mesh } from "three/src/objects/Mesh.js";
 import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
 import { Box3 } from "three/src/math/Box3.js";
 import { initEdgeIndicatorOverlay } from "../gui/EdgeIndicatorOverlay.js";
+import NodeSelectionManager from "../cluster/NodeSelectionManager";
 import type { ParticleNodeGroupOptions, GraphNode } from "../cluster/particles/ParticleNodeGroup";
 import type Datasource from "../data/Datasource";
 import type { default as DefaultColorSchemeType } from "../cluster/utils/DefaultColorScheme";
@@ -61,12 +62,19 @@ export default class GraphView3D extends View3D {
     _clusterDepth: number | undefined
     _hullOptions: ClusterSpec['options'] | null
     _currentDatasource: Datasource | null
+    _destroyEdgeIndicator: (() => void) | null
+    selectionManager: NodeSelectionManager
+    graphId: string
 
     constructor(el: HTMLElement, options: GraphView3DOptions = {}) {
         super(el);
 
         this.mRootCluster = null;
         this.mOptions = options;
+        this._destroyEdgeIndicator = null;
+        this.graphId = crypto.randomUUID();
+        this.selectionManager = new NodeSelectionManager(this);
+        this.el.dataset.graphId = this.graphId;
 
         if (options.speccs) this.setSpeccs(options.speccs);
         if (options.clusterDepth != null) this.setClusterDepth(options.clusterDepth);
@@ -117,8 +125,14 @@ export default class GraphView3D extends View3D {
     }
 
     edgeIndicator(enabled: boolean): this {
-        if (enabled) initEdgeIndicatorOverlay(this);
+        this._destroyEdgeIndicator?.();
+        this._destroyEdgeIndicator = enabled ? initEdgeIndicatorOverlay(this) : null;
         return this;
+    }
+
+    destroy(): void {
+        this._destroyEdgeIndicator?.();
+        this._destroyEdgeIndicator = null;
     }
 
     setBorderStyle(style: string): Promise<this> {

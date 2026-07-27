@@ -1,5 +1,14 @@
-import { selectionManager, doOnClickNode } from "../cluster/GraphElementExtension.js";
+import { selectionManager as globalSelectionManager, doOnClickNode } from "../cluster/GraphElementExtension.js";
 import "./NodeListPanel.css";
+
+function getViewEl(el) {
+    return el.closest('[data-graph-id]') ?? el.parentElement?.querySelector('[data-graph-id]') ?? null;
+}
+
+function getSelectionManager(el) {
+    const viewEl = getViewEl(el);
+    return viewEl?._view3d?.selectionManager ?? globalSelectionManager;
+}
 
 class GraphNodeList extends HTMLElement {
 
@@ -10,10 +19,11 @@ class GraphNodeList extends HTMLElement {
         this._build();
         this._onPinboardChanged = (e) => {
             const nodes = e.detail || [];
+            const sm = getSelectionManager(this);
             const prev = new Set(this._edgesHighlighted);
             nodes.forEach(n => {
                 if (!prev.has(n)) {
-                    selectionManager.highlight(n, false, true);
+                    sm.highlight(n, false, true);
                     this._edgesHighlighted.add(n);
                 }
             });
@@ -23,11 +33,13 @@ class GraphNodeList extends HTMLElement {
             this._dispatchEdgeFocus();
             this._render(nodes);
         };
-        window.addEventListener("pinboard-changed", this._onPinboardChanged);
+        const viewEl = getViewEl(this);
+        this._eventTarget = viewEl ?? window;
+        this._eventTarget.addEventListener("pinboard-changed", this._onPinboardChanged);
     }
 
     disconnectedCallback() {
-        window.removeEventListener("pinboard-changed", this._onPinboardChanged);
+        this._eventTarget?.removeEventListener("pinboard-changed", this._onPinboardChanged);
     }
 
     _allHighlighted(nodes) {
@@ -71,12 +83,14 @@ class GraphNodeList extends HTMLElement {
         this._panel.appendChild(this._body);
 
         this.appendChild(this._panel);
-        this._render(selectionManager.getPinned());
+        this._render(getSelectionManager(this).getPinned());
     }
 
     _renderToolbar(nodes) {
         this._toolbar.innerHTML = "";
         if (!nodes || nodes.length === 0) return;
+
+        const sm = getSelectionManager(this);
 
         const allVis = this._allHighlighted(nodes);
         const showAllBtn = document.createElement("button");
@@ -85,11 +99,11 @@ class GraphNodeList extends HTMLElement {
         showAllBtn.title = allVis ? "Unhighlight all pinned nodes" : "Highlight all pinned nodes";
         showAllBtn.addEventListener("click", () => {
             if (this._allHighlighted(nodes)) {
-                nodes.forEach(n => { selectionManager.unhighlight(n); this._highlighted.delete(n); });
+                nodes.forEach(n => { sm.unhighlight(n); this._highlighted.delete(n); });
             } else {
-                nodes.forEach(n => { selectionManager.highlight(n, false, false); this._highlighted.add(n); });
+                nodes.forEach(n => { sm.highlight(n, false, false); this._highlighted.add(n); });
             }
-            this._render(selectionManager.getPinned());
+            this._render(sm.getPinned());
         });
 
         const allEdges = this._allEdgesHighlighted(nodes);
@@ -99,12 +113,12 @@ class GraphNodeList extends HTMLElement {
         edgesAllBtn.title = allEdges ? "Remove edge arrows for all" : "Show edge arrows for all";
         edgesAllBtn.addEventListener("click", () => {
             if (this._allEdgesHighlighted(nodes)) {
-                nodes.forEach(n => { selectionManager.unhighlight(n); this._edgesHighlighted.delete(n); });
+                nodes.forEach(n => { sm.unhighlight(n); this._edgesHighlighted.delete(n); });
             } else {
-                nodes.forEach(n => { selectionManager.highlight(n, false, true); this._edgesHighlighted.add(n); });
+                nodes.forEach(n => { sm.highlight(n, false, true); this._edgesHighlighted.add(n); });
             }
             this._dispatchEdgeFocus();
-            this._render(selectionManager.getPinned());
+            this._render(sm.getPinned());
         });
 
         this._toolbar.appendChild(showAllBtn);
@@ -122,6 +136,8 @@ class GraphNodeList extends HTMLElement {
             this._body.appendChild(empty);
             return;
         }
+
+        const sm = getSelectionManager(this);
 
         for (const node of nodes) {
             const label = node.name ?? node.id ?? "Node";
@@ -143,13 +159,13 @@ class GraphNodeList extends HTMLElement {
             highlightBtn.title = isHighlighted ? "Hide highlight" : "Show highlight";
             highlightBtn.addEventListener("click", () => {
                 if (this._highlighted.has(node)) {
-                    selectionManager.unhighlight(node);
+                    sm.unhighlight(node);
                     this._highlighted.delete(node);
                 } else {
-                    selectionManager.highlight(node, false, false);
+                    sm.highlight(node, false, false);
                     this._highlighted.add(node);
                 }
-                this._render(selectionManager.getPinned());
+                this._render(sm.getPinned());
             });
 
             const hasEdges = this._edgesHighlighted.has(node);
@@ -159,14 +175,14 @@ class GraphNodeList extends HTMLElement {
             edgesBtn.title = hasEdges ? "Hide edges" : "Show edges";
             edgesBtn.addEventListener("click", () => {
                 if (this._edgesHighlighted.has(node)) {
-                    selectionManager.unhighlight(node);
+                    sm.unhighlight(node);
                     this._edgesHighlighted.delete(node);
                 } else {
-                    selectionManager.highlight(node, false, true);
+                    sm.highlight(node, false, true);
                     this._edgesHighlighted.add(node);
                 }
                 this._dispatchEdgeFocus();
-                this._render(selectionManager.getPinned());
+                this._render(sm.getPinned());
             });
 
             const removeBtn = document.createElement("button");
@@ -176,7 +192,7 @@ class GraphNodeList extends HTMLElement {
             removeBtn.addEventListener("click", () => {
                 this._highlighted.delete(node);
                 this._edgesHighlighted.delete(node);
-                selectionManager.unpin(node);
+                sm.unpin(node);
             });
 
             item.appendChild(labelEl);
@@ -188,8 +204,10 @@ class GraphNodeList extends HTMLElement {
     }
 
     _dispatchEdgeFocus() {
-        window.dispatchEvent(new CustomEvent("pinboard-edge-focus", {
-            detail: [...this._edgesHighlighted]
+        const viewEl = getViewEl(this);
+        const target = viewEl ?? window;
+        target.dispatchEvent(new CustomEvent("pinboard-edge-focus", {
+            detail: [...this._edgesHighlighted], bubbles: true
         }));
     }
 }

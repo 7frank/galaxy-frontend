@@ -50,7 +50,8 @@ function openNodeRadialMenu(node: HighlightNode, x: number, y: number): void {
     holder.style.transform = "translate(-50%, -50%)";
     container.appendChild(holder);
 
-    const isPinned = selectionManager.isPinned(node);
+    const sm = (node as unknown as { _sm?: NodeSelectionManager })._sm ?? selectionManager;
+    const isPinned = sm.isPinned(node);
 
     const menu = new RadialMenu({
         parent: holder,
@@ -62,7 +63,7 @@ function openNodeRadialMenu(node: HighlightNode, x: number, y: number): void {
         ],
         onClick: (item: { id: string }) => {
             if (item.id === "pin" || item.id === "unpin") {
-                selectionManager.togglePin(node);
+                sm.togglePin(node);
             } else if (item.id === "focus") {
                 doOnClickNode(node, false, undefined, true, false, false, true);
             }
@@ -86,11 +87,13 @@ function openNodeRadialMenu(node: HighlightNode, x: number, y: number): void {
 }
 
 export function highlightNodeElements(this: HighlightNode, bShowOtherNodes = false, bShowEdgeArrows = true): void {
-    selectionManager.highlight(this, bShowOtherNodes, bShowEdgeArrows);
+    const sm = (this as unknown as { _sm?: NodeSelectionManager })._sm ?? selectionManager;
+    sm.highlight(this, bShowOtherNodes, bShowEdgeArrows);
 }
 
 export function unhighlightNodeElements(this: HighlightNode): void {
-    selectionManager.unhighlight(this);
+    const sm = (this as unknown as { _sm?: NodeSelectionManager })._sm ?? selectionManager;
+    sm.unhighlight(this);
 }
 
 function extendElement(
@@ -120,6 +123,7 @@ function extendElement(
     }, options);
 
     for (const el of elements) {
+        (el as unknown as { _sm?: NodeSelectionManager })._sm = env.selectionManager ?? selectionManager;
         const mesh = el[attrName] as unknown as Mesh;
         const meshParam = mesh as unknown as Parameters<NodeEnv['domEvents']['addEventListener']>[0];
 
@@ -166,13 +170,14 @@ export function doOnClickNode(
     doHighlighEdges = true,
     doZoomIn = true
 ): void {
+    const sm = (currNodeClicked as unknown as { _sm?: NodeSelectionManager })._sm ?? selectionManager;
     if (!isSelected) {
-        selectionManager.highlight(currNodeClicked, doHighlighNeighbours, doHighlighEdges);
+        sm.highlight(currNodeClicked, doHighlighNeighbours, doHighlighEdges);
         currNodeClicked.show();
         return;
     }
 
-    selectionManager.select(currNodeClicked, {
+    sm.select(currNodeClicked, {
         stack,
         zoom: doZoomIn,
         onZoomEnd: onAnimationEnd,
@@ -184,32 +189,34 @@ export function doOnClickNode(
 export function extendGraphElements(d3Nodes: HighlightNode[], d3Links: ArrowEdge[], env: NodeEnv): void {
     addGraphHierarchy(d3Nodes, d3Links);
 
+    const sm = env.selectionManager ?? selectionManager;
+
     extendElement(d3Nodes, "_bubble", {
         mousemove: function (this: HighlightNode) {
-            if (selectionManager.isSelected(this)) return;
-            selectionManager.highlight(this, true, false);
+            if (sm.isSelected(this)) return;
+            sm.highlight(this, true, false);
             const node = this as unknown as { name?: string; group?: string; info?: string; getParentCluster?: () => { getView?: () => { setTooltip(s: string): void } } | null };
             const info = [node.name, node.group, node.info].filter(Boolean).join(" ");
             if (info.trim()) node.getParentCluster?.()?.getView?.()?.setTooltip(info);
         },
         mouseleave: function (this: HighlightNode) {
-            if (selectionManager.isSelected(this)) return;
-            selectionManager.unhighlight(this);
+            if (sm.isSelected(this)) return;
+            sm.unhighlight(this);
         },
         click: function (e: DomEvent) {
             const currNodeClicked = (e.target as { node?: HighlightNode }).node!;
             e.stopPropagation();
 
-            for (const prev of selectionManager.getSelected())
-                if (prev !== currNodeClicked) selectionManager.unhighlight(prev);
+            for (const prev of sm.getSelected())
+                if (prev !== currNodeClicked) sm.unhighlight(prev);
 
-            doOnClickNode(currNodeClicked, e.origDomEvent?.ctrlKey ?? false);
+            sm.select(currNodeClicked, { stack: e.origDomEvent?.ctrlKey ?? false });
             return false;
         },
         dblclick: function (e: DomEvent) {
             e.stopPropagation();
             const node = (e.target as { node?: HighlightNode }).node!;
-            selectionManager.handleDblClick(node);
+            sm.handleDblClick(node);
             return false;
         },
         contextmenu: function (e: DomEvent) {

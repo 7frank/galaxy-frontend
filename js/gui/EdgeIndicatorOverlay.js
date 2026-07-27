@@ -37,14 +37,17 @@ function angleToSector(angle) {
 
 export function initEdgeIndicatorOverlay(view = null) {
     if (view) _viewOverride = view;
+
+    const containerEl = view ? view.el : document.body;
+
     const overlay = document.createElement("div");
     overlay.className = "edge-indicator-overlay";
-    document.body.appendChild(overlay);
+    containerEl.appendChild(overlay);
 
     let activeNode = null;
     let pinnedActiveNodes = [];
     let rafId = null;
-    const indicators = new Map(); // sectorKey -> {el, nodes}
+    const indicators = new Map();
 
     function clearAll() {
         indicators.forEach(({ el }) => el.remove());
@@ -59,24 +62,28 @@ export function initEdgeIndicatorOverlay(view = null) {
         return [...set];
     }
 
-    window.addEventListener("node-clicked", ({ detail: node }) => {
+    function onNodeClicked({ detail: node }) {
         activeNode = node;
         clearAll();
         cancelAnimationFrame(rafId);
         rafId = null;
         if (getActiveNodes().length > 0) scheduleUpdate();
-    });
+    }
 
-    pinnedActiveNodes = _pendingPinnedNodes;
-
-    window.addEventListener("pinboard-edge-focus", ({ detail: nodes }) => {
+    function onPinboardEdgeFocus({ detail: nodes }) {
         _pendingPinnedNodes = nodes || [];
         pinnedActiveNodes = _pendingPinnedNodes;
         clearAll();
         cancelAnimationFrame(rafId);
         rafId = null;
         if (getActiveNodes().length > 0) scheduleUpdate();
-    });
+    }
+
+    const eventTarget = containerEl !== document.body ? containerEl : window;
+    eventTarget.addEventListener("node-clicked", onNodeClicked);
+    eventTarget.addEventListener("pinboard-edge-focus", onPinboardEdgeFocus);
+
+    pinnedActiveNodes = _pendingPinnedNodes;
 
     if (getActiveNodes().length > 0) scheduleUpdate();
 
@@ -92,11 +99,10 @@ export function initEdgeIndicatorOverlay(view = null) {
         if (!view || !view.mCamera) return;
 
         const camera = view.mCamera;
-        const W = window.innerWidth;
-        const H = window.innerHeight;
+        const W = containerEl.clientWidth;
+        const H = containerEl.clientHeight;
         const padding = 52;
 
-        // project all neighbours across all active nodes
         const projected = activeNodes.flatMap(activeNode => {
             const outgoing = (activeNode.linkedChildren || []).map(n => ({ neighbour: n, isOutgoing: true }));
             const incoming = (activeNode.linkedParents || []).map(n => ({ neighbour: n, isOutgoing: false }));
@@ -121,14 +127,12 @@ export function initEdgeIndicatorOverlay(view = null) {
             }).filter(Boolean);
         });
 
-        // bucket by sector
         const buckets = new Map();
         projected.forEach(item => {
             if (!buckets.has(item.sector)) buckets.set(item.sector, []);
             buckets.get(item.sector).push(item);
         });
 
-        // remove stale indicators
         const activeSectors = new Set(buckets.keys());
         indicators.forEach((entry, key) => {
             if (!activeSectors.has(key)) { entry.el.remove(); indicators.delete(key); }
@@ -187,7 +191,6 @@ export function initEdgeIndicatorOverlay(view = null) {
                 indicators.set(sector, entry);
             }
 
-            // update position & style
             entry.primaryNode = primary.neighbour;
             const { el, arrow, label, list } = entry;
             const pos = anyOffscreen ? primary.clamped : { x: primary.sx, y: primary.sy };
@@ -204,7 +207,6 @@ export function initEdgeIndicatorOverlay(view = null) {
             if (rest.length > 0) label.textContent += ` +${rest.length}`;
             list.style.display = rest.length === 0 ? "none" : "flex";
 
-            // only rebuild list when contents changed
             const listKey = items.map(i => i.neighbour.id || i.neighbour.name).join(",");
             if (entry.listKey !== listKey) {
                 entry.listKey = listKey;
@@ -227,4 +229,12 @@ export function initEdgeIndicatorOverlay(view = null) {
 
         scheduleUpdate();
     }
+
+    return function destroy() {
+        cancelAnimationFrame(rafId);
+        eventTarget.removeEventListener("node-clicked", onNodeClicked);
+        eventTarget.removeEventListener("pinboard-edge-focus", onPinboardEdgeFocus);
+        overlay.remove();
+        if (_viewOverride === view) _viewOverride = null;
+    };
 }

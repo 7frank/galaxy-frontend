@@ -66,7 +66,8 @@ export default class GraphData {
             valAccessor: (n) => (n as unknown as NodeElement).size ?? 0,
             sizeAccessor: (n) => (n as unknown as NodeElement).size ?? 0,
             nodeRelSize: 4,
-            domEvents: view.mDomEvents
+            domEvents: view.mDomEvents,
+            selectionManager: (view as unknown as { selectionManager?: import("./NodeSelectionManager").default }).selectionManager
         });
 
         return { nodes, edges };

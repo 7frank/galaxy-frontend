@@ -3,10 +3,14 @@ import * as _ from "lodash";
 import Mousetrap from "mousetrap";
 import "./searchbar.css";
 
-function getNodes() {
-    const viewEl = document.querySelector(".view-3d.view-3d-maximised");
-    const view = viewEl ? viewEl._view3d : null;
-    return (view && view.mRootCluster && view.mRootCluster.mNodes) ? view.mRootCluster.mNodes : [];
+function getViewEl(el) {
+    return el.closest('[data-graph-id]') ?? el.parentElement?.querySelector('[data-graph-id]') ?? null;
+}
+
+function getNodes(el) {
+    const viewEl = getViewEl(el);
+    const view = viewEl?._view3d;
+    return view?.mRootCluster?.mNodes ?? [];
 }
 
 class GraphSearchbar extends HTMLElement {
@@ -82,17 +86,10 @@ class GraphSearchbar extends HTMLElement {
         const val = this._searchbarEl.value.toLowerCase();
         if (!val) { this._filterResult = []; this._renderDropdown([]); return; }
 
-        this._filterResult = getNodes().filter(function (v) {
-            var isName, isCountry, isId, isIndustry, isTicker;
-            if (typeof v.name === "string") isName = v.name.toLowerCase().indexOf(val) === 0;
-            if (typeof v.group === "string") isCountry = v.group.toLowerCase().indexOf(val) >= 0;
-            if (typeof v.industry === "string") isIndustry = v.industry.toLowerCase().indexOf(val) >= 0;
-            if (typeof v.ticker === "string") {
-                var offset = v.ticker.indexOf(":");
-                isTicker = v.ticker.toLowerCase().indexOf(val) >= 0 + offset;
-            }
-            if (typeof v.id === "string") isId = v.id.toLowerCase().indexOf(val) >= 0;
-            return isName || isCountry || isId || isIndustry || isTicker;
+        const fields = (this.getAttribute("search-fields") ?? "name,id").split(",");
+
+        this._filterResult = getNodes(this).filter(function (v) {
+            return fields.some(f => typeof v[f] === "string" && v[f].toLowerCase().includes(val));
         });
 
         this._renderDropdown(this._filterResult.slice(0, 80));
