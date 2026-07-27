@@ -37,6 +37,7 @@ import { WebGLRenderer } from "three/src/renderers/WebGLRenderer.js";
 import { Box3 } from "three/src/math/Box3.js";
 import { initEdgeIndicatorOverlay } from "../gui/EdgeIndicatorOverlay.js";
 import NodeSelectionManager from "../cluster/NodeSelectionManager";
+import { setCurrentGradient } from "../cluster/utils/ColorUtils";
 import type { ParticleNodeGroupOptions, GraphNode } from "../cluster/particles/ParticleNodeGroup";
 import type Datasource from "../data/Datasource";
 import type { default as DefaultColorSchemeType } from "../cluster/utils/DefaultColorScheme";
@@ -63,7 +64,7 @@ export default class GraphView3D extends View3D {
     _hullOptions: ClusterSpec['options'] | null
     _currentDatasource: Datasource | null
     _destroyEdgeIndicator: (() => void) | null
-    _onGradientChange: (() => void) | null
+    _onGradientChange: ((e: Event) => void) | null
     selectionManager: NodeSelectionManager
     graphId: string
 
@@ -83,7 +84,8 @@ export default class GraphView3D extends View3D {
         if (options.hullOptions) this.setHullOptions(options.hullOptions);
         if (options.showEdgeIndicator) this.edgeIndicator(true);
 
-        this._onGradientChange = () => {
+        this._onGradientChange = (e: CustomEvent) => {
+            if (Array.isArray(e.detail)) setCurrentGradient(e.detail);
             if (this.mRootCluster) {
                 this.mRootCluster.findClusters("*").forEach((cluster: BaseCluster3D) => cluster.updateIfIsLeaf());
             }

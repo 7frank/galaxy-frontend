@@ -27,6 +27,10 @@ export function getCurrentGradient(): number[] {
     return _currentGradientColors;
 }
 
+export function setCurrentGradient(colors: number[]): void {
+    _currentGradientColors = colors;
+}
+
 export function getAvailGradients(): { name: string; colors: number[] }[] {
     return _availGradients;
 }

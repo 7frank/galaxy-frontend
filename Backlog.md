@@ -1,9 +1,6 @@
 ### ...
 
-- storybook gadient select node colors not working
-- breadcrumb not working ion storybook 
-- 
-
+- publish new minor version and merge with main force clean
 
 ### Backlog
 
