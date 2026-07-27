@@ -99,7 +99,7 @@ export default function NodesParticleSystem(nodes, options) {
         var uniforms = {
 
             color: {type: "c", value: new Color(0xffffff)},
-            pointTexture: {type: "t", value: new TextureLoader().load("img/block.png")}
+            pointTexture: {type: "t", value: new TextureLoader().load(options.blockTexture || "img/block.png")}
 
         };
 
@@ -133,7 +133,8 @@ export default function NodesParticleSystem(nodes, options) {
        // increment: 5,
         duration: 1000,
         easing: TWEEN.Easing.Linear.None,
-        position: {x: 0, y: 50000, z: 50000}
+        position: {x: 0, y: 50000, z: 50000},
+        blockTexture: "img/block.png"
     }, options);
 
     /**

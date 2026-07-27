@@ -41,7 +41,7 @@ export const Basic: Story<BasicArgs> = ({
   const ref = useVanillaMount(
     (el) => {
       return new GraphView3D(el, {
-        nodeTexture: '/dot7.png',
+        nodeTexture: `${import.meta.env.BASE_URL}dot7.png`,
         nodeDefaultScale: 10,
         showEdgeIndicator: true,
         speccs: ClusteringUtils.buildSpeccs([

@@ -436,7 +436,8 @@ export default class ClusterLeafElement extends Mesh {
                     x: (_.random(0, 2) - 1) * _.random(50000, 150000),
                     y: (_.random(0, 2) - 1) * _.random(50000, 150000),
                     z: 0
-                }
+                },
+                ...(this.mOptions.blockTexture ? { blockTexture: this.mOptions.blockTexture } : {})
             };
 
             if (!nodes)

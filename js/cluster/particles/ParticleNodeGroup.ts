@@ -30,6 +30,7 @@ export interface ParticleNodeGroupOptions {
     nodeDefaultSize?: number
     nodeDefaultScale?: number
     nodeTexture?: string
+    blockTexture?: string
     baseColor?: number
 }
 
