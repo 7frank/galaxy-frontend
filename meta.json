@@ -1,0 +1,53 @@
+{
+  "about": {
+    "homepage": "https://www.ladle.dev",
+    "github": "https://github.com/tajo/ladle",
+    "version": 1
+  },
+  "stories": {
+    "examples--base": {
+      "name": "Base",
+      "levels": [
+        "Examples"
+      ],
+      "locStart": 8,
+      "locEnd": 24,
+      "filePath": "src/Base.stories.tsx",
+      "namedExport": "Base",
+      "meta": {}
+    },
+    "examples--basic": {
+      "name": "Basic",
+      "levels": [
+        "Examples"
+      ],
+      "locStart": 29,
+      "locEnd": 102,
+      "filePath": "src/Basic.stories.tsx",
+      "namedExport": "Basic",
+      "meta": {}
+    },
+    "examples--board-overlap": {
+      "name": "Board overlap",
+      "levels": [
+        "Examples"
+      ],
+      "locStart": 17,
+      "locEnd": 129,
+      "filePath": "src/BoardOverlap.stories.tsx",
+      "namedExport": "BoardOverlap",
+      "meta": {}
+    },
+    "examples--point-cloud": {
+      "name": "Point cloud",
+      "levels": [
+        "Examples"
+      ],
+      "locStart": 7,
+      "locEnd": 58,
+      "filePath": "src/PointCloud.stories.tsx",
+      "namedExport": "PointCloud",
+      "meta": {}
+    }
+  }
+}
