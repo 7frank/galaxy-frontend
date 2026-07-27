@@ -7,6 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '../..')
 
 export default defineConfig({
+  base: '/galaxy-frontend/',
   resolve: {
     alias: {
       'postprocessing/src': resolve(root, 'node_modules/postprocessing/src'),
