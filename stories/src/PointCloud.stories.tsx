@@ -32,7 +32,7 @@ export const PointCloud = () => {
       })
 
       const domEvents = new DomEventsAlt(camera, renderer.domElement, scene)
-      const leaf = new ClusterLeafElement(nodes, domEvents, { nodeTexture: `${import.meta.env.BASE_URL}dot7.png` })
+      const leaf = new ClusterLeafElement(nodes, domEvents)
       scene.add(leaf)
 
       const dist = new RandomDistribution(2000, 3)

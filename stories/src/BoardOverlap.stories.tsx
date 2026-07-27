@@ -22,7 +22,6 @@ export const BoardOverlap = () => {
   const ref = useVanillaMount(
     (el) => {
       const graph = new GraphView3D(el, {
-        nodeTexture: `${import.meta.env.BASE_URL}dot7.png`,
         nodeDefaultScale: 10,
         showEdgeIndicator: true,
         speccs: ClusteringUtils.buildSpeccs([

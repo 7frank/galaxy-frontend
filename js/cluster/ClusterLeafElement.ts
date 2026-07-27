@@ -12,6 +12,7 @@ import type BaseCluster3D from "./BaseCluster3D"
 import type { CrossClusterEdgeOptions } from "./BaseCluster3D"
 import type View3D from "../view/View3D"
 import ParticleNodeGroup, { GraphNode, BubbleNode, ParticleNodeGroupInstance, ParticleNodeGroupOptions } from "./particles/ParticleNodeGroup"
+import dot7Image from "../../img/dot7.png"
 
 
 import { computeCompanyNodeColor } from "./utils/ColorUtils"
@@ -414,7 +415,7 @@ export default class ClusterLeafElement extends Mesh {
         var elem = ParticleNodeGroup(this.mNodes, Object.assign({
             nodeDefaultSize: 10,
             nodeDefaultScale: 10,
-            nodeTexture: "img/dot7.png"
+            nodeTexture: dot7Image
         }, this.mOptions), domEvents);
 
         return elem

@@ -9,6 +9,7 @@ import { Sphere } from "three/src/math/Sphere.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Points } from "three/src/objects/Points.js";
 import type DomEventsAlt from "../utils/DomEventsAlt";
+import dot7Image from "../../../img/dot7.png";
 
 export interface GraphNode {
     x: number
@@ -62,7 +63,7 @@ export default function ParticleNodeGroup(nodes: GraphNode[], options: ParticleN
     const resolvedOptions = Object.assign({
         nodeDefaultSize: 10,
         nodeDefaultScale: 1,
-        nodeTexture: "img/dot7.png",
+        nodeTexture: dot7Image,
         baseColor: 0xFFFFFF
     }, options)
 

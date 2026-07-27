@@ -9,6 +9,7 @@ import { Sphere } from "three/src/math/Sphere.js";
 import { Vector3 } from "three/src/math/Vector3.js";
 import { Points } from "three/src/objects/Points.js";
 import * as _ from "lodash";
+import blockImage from "../../../img/block.png";
 
 
 /**
@@ -99,7 +100,7 @@ export default function NodesParticleSystem(nodes, options) {
         var uniforms = {
 
             color: {type: "c", value: new Color(0xffffff)},
-            pointTexture: {type: "t", value: new TextureLoader().load(options.blockTexture || "img/block.png")}
+            pointTexture: {type: "t", value: new TextureLoader().load(options.blockTexture || blockImage)}
 
         };
 
@@ -134,7 +135,7 @@ export default function NodesParticleSystem(nodes, options) {
         duration: 1000,
         easing: TWEEN.Easing.Linear.None,
         position: {x: 0, y: 50000, z: 50000},
-        blockTexture: "img/block.png"
+        blockTexture: blockImage
     }, options);
 
     /**
