@@ -1,4 +1,4 @@
-import{r as f,j as a}from"./index-C08QvreM.js";import{ae as C,u as O,G as P,C as _,aa as S,af as I,ag as j,ab as T,ah as z}from"./useVanillaMount-ClChpaKz.js";/* empty css              */const B="https://query.wikidata.org/sparql",q=p=>`
+import{r as f,j as a}from"./index-DfuPARXg.js";import{ae as C,u as O,G as P,C as _,aa as S,af as I,ag as j,ab as T,ah as z}from"./useVanillaMount-C1PDLIVZ.js";/* empty css              */const B="https://query.wikidata.org/sparql",q=p=>`
 SELECT ?company1 ?company1Label ?company2 ?company2Label
        ?person ?personLabel ?industry1 ?industry1Label ?country1 ?country1Label
 WHERE {
