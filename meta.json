@@ -11,7 +11,7 @@
         "Examples"
       ],
       "locStart": 8,
-      "locEnd": 24,
+      "locEnd": 23,
       "filePath": "src/Base.stories.tsx",
       "namedExport": "Base",
       "meta": {}
@@ -22,7 +22,7 @@
         "Examples"
       ],
       "locStart": 29,
-      "locEnd": 102,
+      "locEnd": 101,
       "filePath": "src/Basic.stories.tsx",
       "namedExport": "Basic",
       "meta": {}
@@ -33,7 +33,7 @@
         "Examples"
       ],
       "locStart": 17,
-      "locEnd": 129,
+      "locEnd": 128,
       "filePath": "src/BoardOverlap.stories.tsx",
       "namedExport": "BoardOverlap",
       "meta": {}
