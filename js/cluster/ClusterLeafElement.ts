@@ -33,6 +33,7 @@ export default class ClusterLeafElement extends Mesh {
     bEdgesVisible: boolean
     mNodeParticles: ParticleNodeGroupInstance
     mEdgesContainer: EdgesContainer | null
+    mCrossClusterEdgesContainer: EdgesContainer | null
     mNodeMeshes: Object3D | undefined
     mParticles: ReturnType<typeof NodesParticleSystem> | null
 
@@ -46,6 +47,7 @@ export default class ClusterLeafElement extends Mesh {
 
         this.bNodesVisible = true;
         this.bEdgesVisible = true;
+        this.mCrossClusterEdgesContainer = null;
         this.mNodeParticles = this.createParticleNodeCloud();
 
         this.addNodeCloudInteractions(this.mNodeParticles)
@@ -209,6 +211,10 @@ export default class ClusterLeafElement extends Mesh {
             ;(this.mEdgesContainer.mEdges.material as Material & { opacity: number }).opacity = 0.04
         }
 
+        if (this.mCrossClusterEdgesContainer) {
+            this.mCrossClusterEdgesContainer.visible = this.bEdgesVisible ? levelOfDetail > 0.75 : false;
+        }
+
         if (this.mNodeMeshes)
             this.mNodeMeshes.visible = levelOfDetail > 0.2;
 
@@ -242,6 +248,12 @@ export default class ClusterLeafElement extends Mesh {
             this.mEdgesContainer = null;
         }
 
+        if (this.mCrossClusterEdgesContainer) {
+            this.remove(this.mCrossClusterEdgesContainer);
+            this.mCrossClusterEdgesContainer.mEdges.geometry.dispose();
+            this.mCrossClusterEdgesContainer = null;
+        }
+
         if (this.mNodeMeshes && (this.mNodeMeshes as Mesh).geometry) {
             (this.mNodeMeshes as Mesh).geometry.dispose();
             this.mNodeMeshes = undefined;
@@ -272,6 +284,14 @@ export default class ClusterLeafElement extends Mesh {
         this.mEdgesContainer = new EdgesContainer();
         this.mEdgesContainer.setRenderMode(true, false, false).setSkipParams(30, 40).setFromNodes(nodes);
         this.add(this.mEdgesContainer)
+        this.createCrossClusterEdgesFromNodes(nodes);
+    }
+
+    createCrossClusterEdgesFromNodes(nodes: GraphNode[]): void {
+        this.mCrossClusterEdgesContainer = new EdgesContainer();
+        this.mCrossClusterEdgesContainer.setRenderMode(false, true, true).setSkipParams(1, 20).setFromNodes(nodes);
+        this.mCrossClusterEdgesContainer.visible = false;
+        this.add(this.mCrossClusterEdgesContainer);
     }
 
 
@@ -299,6 +319,8 @@ export default class ClusterLeafElement extends Mesh {
     updateEdges(): void {
         if (this.mEdgesContainer)
             this.mEdgesContainer.updateEdges();
+        if (this.mCrossClusterEdgesContainer)
+            this.mCrossClusterEdgesContainer.updateEdges();
     }
 
     updateDots(time: number): void {
