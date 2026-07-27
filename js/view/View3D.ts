@@ -65,6 +65,7 @@ export default class View3D extends EventTarget {
 
         this.el = el || document.createElement("div");
         this.el.classList.add("view-3d");
+        this.el.dataset.graphId = Math.random().toString(36).slice(2);
         (this.el as HTMLElement & { _view3d?: View3D })._view3d = this;
 
         this.isRunning = false;

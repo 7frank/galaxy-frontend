@@ -8,6 +8,7 @@ import {
   BoxVolume,
 } from 'cluster-graph-3d'
 import 'cluster-graph-3d/dist/index.css'
+import 'cluster-graph-3d/dist/gui.css'
 import 'cluster-graph-3d/gui'
 import { useVanillaMount } from './useVanillaMount'
 import type { Story } from '@ladle/react'
@@ -91,6 +92,7 @@ export const Basic: Story<BasicArgs> = ({
   return (
     <>
       <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }} >
+        <graph-breadcrumb></graph-breadcrumb>
         <graph-searchbar placeholder="Search nodes" search-fields="name,id,group,industry" />
         <graph-node-list />
         <graph-color-gradient left-label="Negative" right-label="Positive" />

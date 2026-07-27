@@ -110,8 +110,8 @@ export default class GraphView3D extends View3D {
         else if (newValue == "false") visible = false;
         else visible = Boolean(newValue)
 
-        if (this.mRootCluster && this.mRootCluster.mTextOverlay)
-            this.mRootCluster.mTextOverlay.enabled = visible;
+        const breadcrumb = this.el.parentElement?.querySelector('graph-breadcrumb') as any;
+        if (breadcrumb?._overlay) breadcrumb._overlay.enabled = visible;
     }
 
     setSpeccs(speccs: ClusterSpec[]): this {
@@ -402,8 +402,6 @@ export default class GraphView3D extends View3D {
         this._currentDatasource = datasource;
         if (that.mRootCluster) {
             that.mScene.remove(that.mRootCluster);
-            if (that.mRootCluster.mTextOverlay && that.mRootCluster.mTextOverlay.el)
-                that.mRootCluster.mTextOverlay.el.remove();
             that.mRootCluster = null;
         }
         datasource.load(function onSuccess(mGraphData: unknown) {
@@ -415,13 +413,6 @@ export default class GraphView3D extends View3D {
 
     resizeCanvas(): void {
         super.resizeCanvas()
-
-        var root = this.mRootCluster;
-
-        if (root && root.mParentView && root.mTextOverlay) {
-            root.mTextOverlay.el.style.height = root.mParentView.clientHeight + "px";
-            root.mTextOverlay.el.style.width = root.mParentView.clientWidth + "px";
-        }
     }
 
     /**

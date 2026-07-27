@@ -1,97 +1,60 @@
-- get frontend running again
-- migrate frontend to typescript
-- add data source port and adapter so that we can plug bakcnd or simple node lists to it
+### ...
 
-- maybe decouple force graph as only one alyout algorithm so that we can plug different
-
-
-- perf test comare to https://github.com/vasturiano/3d-force-graph it has 9k stars and is fast but not as fast as our solution
-
-- maybe we can optimize further, who knows whats possible
-- do we have an option where we somly dont render the edges? that woud massivly improve perf
+- storybook gadient select node colors not working
+- breadcrumb not working ion storybook 
+- 
 
 
-- convert demo app from 
-    - jquery
-    - querySelector("sample-cluster-application")
-    - webapp 
-into 
-    - standalone js component 
-    - annd react example app or svelte demo app
-    - with maybe some sharable ui elements like "search bar" or add this to samples
+### Backlog
 
+#### Architecture
 
-- migrate dependencies especially threejs, this should drastically reduce bundle size    
+* Get the frontend running again.
+* Migrate the frontend to TypeScript.
+* Add a data source port and adapter so we can plug in either a backend or simple in-memory Node lists.
+* Make the graph layout algorithm pluggable instead of coupling everything to the force graph implementation.
+* Support streamable data sources.
+* Review `/home/frank/Projects/7frank/galaxy/galaxy-frontend/js/cluster/refactor`, remove obsolete code, and refactor it into the new architecture.
+* Remove the remaining JavaScript files outside the `refactor` directory.
+* Review `js/cluster/refactor/SpecificDataUtils.ts` for use-case-specific coupling. Make the cluster library more generic and reusable.
 
+#### Performance
 
-- better hull with fresnel or rim shader
+* Benchmark performance against `https://github.com/vasturiano/3d-force-graph`. It has ~9k stars and is fast, but currently not as fast as our implementation.
+* Investigate further rendering and simulation optimizations.
+* Add an option to disable edge rendering to significantly improve performance for large graphs.
+* Investigate moving suitable computations to the GPU or WebAssembly.
+* Improve loading feedback for large graphs (e.g. 50k nodes), especially during the initial force simulation and distribution where stuttering currently occurs.
 
+#### Demo & Examples
 
-https://threejs.org/examples/?q=toon#webgl_materials_toon
-https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_toon.html
+* Convert the demo application from:
 
-https://github.com/pmndrs/postprocessing/blob/main/demo/src/demos/OutlineDemo.js
+  * jQuery
+  * `querySelector("sample-cluster-application")`
+  * a web app
+* Into:
 
+  * a standalone JavaScript component
+  * a React example application or a Svelte demo application
+  * shared UI components (e.g. a search bar) that can be reused across samples
+* Add a graph "Center" function (already available in the second example) and expose it through the API and a UI control.
 
-- any comutations that we can do in gpu or webassembly?
+#### Dependencies
 
+* Upgrade dependencies, especially Three.js, to reduce bundle size.
 
-remove f2  hotkeys logic we have a hull for tat
+#### Rendering & Visuals
 
+* Improve hull rendering using a Fresnel or rim shader.
+* Investigate toon shading:
 
-- streamable data sources 
+  * [https://threejs.org/examples/?q=toon#webgl_materials_toon](https://threejs.org/examples/?q=toon#webgl_materials_toon)
+  * [https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_toon.html](https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_toon.html)
+* Evaluate outline rendering:
 
+  * [https://github.com/pmndrs/postprocessing/blob/main/demo/src/demos/OutlineDemo.js](https://github.com/pmndrs/postprocessing/blob/main/demo/src/demos/OutlineDemo.js)
 
- loading weedback when 50 k nodes are for example initiall force graphed
- or when the initla distribution happens where we currently have stutters
+#### Cleanup
 
-/home/frank/Projects/7frank/galaxy/galaxy-frontend/js/cluster/refactor this is really old code lets se what we can do with it, where things are no longer necessary, what we do to refactor it into our new structure
-
-still some js files other than refactor
-
-- second example has a "center" function we shoud add this to graph and have siome ui element for centering the graph too
-
-  js/cluster/refactor/SpecificDataUtils.ts coupling specific use case? is this part of the core cluster and what tod do that the clsuter is more general usable
-
-
-
-
-  ---
-  What you already have to tune:
-
-  1. setSkipParams(skip, min) — already used for internal edges (30, 40). Increasing skip aggressively thins the
-  cross-cluster edges. E.g. setSkipParams(10, 5) shows only 1-in-10 edges with a max of 5 visible. This is the
-  cheapest win.
-  2. Opacity — currently 1.0. Dropping to 0.1–0.2 with transparent: true makes many overlapping lines readable as
-  a density field rather than individual lines. Internal edges use 0.04.
-  3. LOD threshold — currently > 0.75 (same as internal). You could raise it to e.g. > 0.9 so they only appear
-  when very close. Or fade opacity based on LOD.
-  4. depthTest — currently false (debug mode). Setting it true means lines behind geometry disappear, massively
-  reducing visual clutter.
-
-  ---
-  Best practices for large graphs (what tools like Gephi, Cosmograph, D3-force do):
-
-  5. Show only edges to/from a selected/hovered cluster — the most effective reduction. Most graph tools hide all
-  cross-cluster edges by default and only reveal them on hover/selection of a node or cluster.
-  6. Show only the N strongest edges — sort by link_strength (already on ClusterEdge) and only draw the top N per
-  leaf. Cuts noise dramatically.
-  7. Edge bundling — instead of individual node-to-node lines, draw one bundled bezier arc between the two cluster
-   centroids, scaled by edge count. This is what the aggregated ClusterBaseEdges already does at the cluster level
-   — the cross-cluster node-level edges would just be a finer version of that.
-  8. Only draw edges to adjacent clusters (clusters that share a parent) — avoids long "spaghetti" lines crossing
-  the whole scene.
-
-  ---
-  Recommended approach for your codebase:
-
-  The quickest high-impact changes:
-  - setSkipParams(10, 3) — show max ~3–5 representative edges per leaf
-  - opacity 0.15, depthTest: true
-  - LOD threshold > 0.9 (only at very close zoom)
-
-  The best long-term approach would be option 5: only show cross-cluster edges when the source cluster is 
-  selected/hovered, which your codebase already has selection/highlight infrastructure for (_sm,
-  showHighlight/hideHighlight on nodes, and the selection manager).
-
-  Would you like to go with the quick tuning approach, the selection-gated approach, or both?
+* Remove the F2 hotkey logic. The hull already provides this functionality.

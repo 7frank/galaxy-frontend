@@ -2,17 +2,10 @@ import { doOnClickNode, highlightNodeElements, unhighlightNodeElements } from ".
 import * as _ from "lodash";
 import Mousetrap from "mousetrap";
 import "./searchbar.css";
-
-function getViewEl(el) {
-    const viewEl = el.closest('[data-graph-id]');
-    if (!viewEl) console.warn('graph-searchbar: no parent [data-graph-id] found. Mount inside a GraphView3D container.');
-    return viewEl;
-}
+import { resolveView } from "./graphViewMixin.js";
 
 function getNodes(el) {
-    const viewEl = getViewEl(el);
-    const view = viewEl?._view3d;
-    return view?.mRootCluster?.mNodes ?? [];
+    return resolveView(el)?.mRootCluster?.mNodes ?? [];
 }
 
 class GraphSearchbar extends HTMLElement {

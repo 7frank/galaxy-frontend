@@ -1,15 +1,9 @@
 import { selectionManager as globalSelectionManager, doOnClickNode } from "../cluster/GraphElementExtension.js";
 import "./NodeListPanel.css";
-
-function getViewEl(el) {
-    const viewEl = el.closest('[data-graph-id]');
-    if (!viewEl) console.warn('graph-node-list: no parent [data-graph-id] found. Mount inside a GraphView3D container.');
-    return viewEl;
-}
+import { resolveView } from "./graphViewMixin.js";
 
 function getSelectionManager(el) {
-    const viewEl = getViewEl(el);
-    return viewEl?._view3d?.selectionManager ?? globalSelectionManager;
+    return resolveView(el)?.selectionManager ?? globalSelectionManager;
 }
 
 class GraphNodeList extends HTMLElement {
@@ -35,8 +29,7 @@ class GraphNodeList extends HTMLElement {
             this._dispatchEdgeFocus();
             this._render(nodes);
         };
-        const viewEl = getViewEl(this);
-        this._eventTarget = viewEl ?? window;
+        this._eventTarget = this.closest('[data-graph-id]') ?? window;
         this._eventTarget.addEventListener("pinboard-changed", this._onPinboardChanged);
     }
 
@@ -206,9 +199,7 @@ class GraphNodeList extends HTMLElement {
     }
 
     _dispatchEdgeFocus() {
-        const viewEl = getViewEl(this);
-        const target = viewEl ?? window;
-        target.dispatchEvent(new CustomEvent("pinboard-edge-focus", {
+        this.dispatchEvent(new CustomEvent("pinboard-edge-focus", {
             detail: [...this._edgesHighlighted], bubbles: true
         }));
     }

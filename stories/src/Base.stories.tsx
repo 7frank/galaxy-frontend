@@ -1,5 +1,6 @@
 import { GraphView3D, ClusteringUtils, GeneratorDatasource } from 'cluster-graph-3d'
 import 'cluster-graph-3d/dist/index.css'
+import 'cluster-graph-3d/dist/gui.css'
 import { useVanillaMount } from './useVanillaMount'
 
 export default { title: 'Examples' }

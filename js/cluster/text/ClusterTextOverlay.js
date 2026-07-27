@@ -4,8 +4,6 @@
 
 
 import TextNodesFactory from "./TextNodesFactory"
-import GraphView3D from "../../view/GraphView3D"
-
 import Cluster3DExtended from "../Cluster3DExtended"
 
 import "./cluster-text-overlay.css"
@@ -44,7 +42,7 @@ export default class ClusterTextOverlay {
      */
 
     init(view) {
-        if (!(view instanceof GraphView3D))
+        if (!view || typeof view.addEventListener !== 'function')
             throw new Error("parent must be instance of GraphView3D");
 
 
@@ -357,7 +355,7 @@ export default class ClusterTextOverlay {
 
                 }
                 else
-                    newSize = 12 + Math.ceil(Math.log2(node.nodes.length) - 5);
+                    newSize = 12 + Math.ceil(Math.log2((node.mNodes ?? node.nodes ?? []).length || 1) - 5);
 
                 newSize = _.round(newSize / 12, 3) + "em";
 

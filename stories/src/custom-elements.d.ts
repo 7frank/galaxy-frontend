@@ -1,5 +1,6 @@
 declare namespace JSX {
   interface IntrinsicElements {
+    'graph-breadcrumb': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>
     'graph-searchbar': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
       placeholder?: string
       'search-fields'?: string

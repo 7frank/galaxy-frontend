@@ -4,7 +4,6 @@
 import Cluster3DExtended from "./Cluster3DExtended"
 import type { ClusterSpec } from "./BaseCluster3D"
 
-import ClusterTextOverlay from "./text/ClusterTextOverlay"
 import DefaultColorScheme from "./utils/DefaultColorScheme"
 
 import type View3D from "../view/View3D";
@@ -19,7 +18,6 @@ import type { GraphNode } from "./particles/ParticleNodeGroup";
 export default class RootCluster extends Cluster3DExtended {
 
     declare mParentView: View3D
-    mTextOverlay: InstanceType<typeof ClusterTextOverlay>
     mColorScheme: InstanceType<typeof DefaultColorScheme> | undefined
     mLock: boolean | undefined
     declare useClusterText: boolean
@@ -77,16 +75,6 @@ export default class RootCluster extends Cluster3DExtended {
     }
 
 
-    resetTextOverlay(): void {
-        if (this.mTextOverlay) this.mTextOverlay.el.remove()
-
-        this.mTextOverlay = new ClusterTextOverlay();
-        this.mTextOverlay.init(this.mParentView);
-
-        this.mParentView.el.appendChild(this.mTextOverlay.el)
-    }
-
-
     isLocked(): boolean {
         return this.mLock == true
     }
@@ -97,8 +85,6 @@ export default class RootCluster extends Cluster3DExtended {
 
 
     applyClustering(mClusteringSpeccsArray: ClusterSpec[], overrideExpand: boolean = false): boolean | undefined {
-        const result = super.applyClustering(mClusteringSpeccsArray, overrideExpand)
-        this.resetTextOverlay()
-        return result
+        return super.applyClustering(mClusteringSpeccsArray, overrideExpand)
     }
 }

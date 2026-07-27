@@ -8,7 +8,14 @@
 
 <body>
 
-    <div id="app" style="position:fixed;top:0;left:0;width:100vw;height:100vh;"></div>
+    <div id="view" style="position:fixed;top:0;left:0;width:100vw;height:100vh;">
+        <graph-breadcrumb></graph-breadcrumb>
+        <graph-hud></graph-hud>
+        <graph-debug-hud></graph-debug-hud>
+        <graph-color-gradient left-label="Negative" right-label="Positive" color-modes="sentiment,priceRanges,group"></graph-color-gradient>
+        <graph-searchbar placeholder="Search nodes" search-fields="name,id,group,industry"></graph-searchbar>
+        <graph-node-list></graph-node-list>
+    </div>
 
     <script type="module" src="./src/main.ts"></script>
 </body>

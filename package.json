@@ -10,6 +10,7 @@
       "require": "./dist/index.js"
     },
     "./dist/index.css": "./dist/index.css",
+    "./dist/gui.css": "./dist/gui.css",
     "./hull": {
       "import": "./dist/hull.mjs",
       "require": "./dist/hull.js"

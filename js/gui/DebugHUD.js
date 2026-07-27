@@ -1,4 +1,5 @@
 import { Pane } from "tweakpane";
+import { resolveView } from "./graphViewMixin.js";
 
 import Extended2DGraphConfig from "../cluster/configs/Extendend2DGraphConfig";
 import Default3DGraphConfig from "../cluster/configs/Default3DGraphConfig";
@@ -57,15 +58,9 @@ class GraphDebugHUD extends HTMLElement {
         if (this._pane) this._pane.dispose();
     }
 
-    setView(view) {
-        this._view = view;
-    }
+    setView(view) { this._view = view; return this; }
 
-    _getView() {
-        if (this._view) return this._view;
-        const el = document.querySelector('.view-3d.view-3d-maximised');
-        return el ? el._view3d : null;
-    }
+    _getView() { return resolveView(this); }
 
     _init() {
         const pane = new Pane({ title: "Controls", expanded: true, container: this });

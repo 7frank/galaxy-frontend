@@ -10,43 +10,6 @@
     pointer-events: none
 }
 
-.graph-captions-container > .cluster-text-overlay-breadcrumb {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 0.4em 0.8em;
-    font-size: 0.85em;
-    color: rgba(255,255,255,0.9);
-    background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);
-    letter-spacing: 0.05em;
-    pointer-events: all;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-
-
-.graph-captions-container  .cluster-text-overlay-breadcrumb-item {
-    display: inline;
-    opacity: 0.75;
-    cursor: pointer;
-    transition: opacity 0.15s;
-}
-
-
-
-.graph-captions-container  .cluster-text-overlay-breadcrumb-item:hover {
-
-    opacity: 0.6 !important;
-    color:darkslateblue;
-
-
-    text-shadow: 0 0 0.5em white, 0 0 0.5em white, 0 0 0.5em white;
-
-
-}
 
 
 
