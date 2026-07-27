@@ -87,11 +87,14 @@ export default class Cluster3DExtended extends BaseCluster3D {
             }
 
             if (this.isLeaf()) {
-                if (_activeLeafCluster && _activeLeafCluster !== this) {
-                    _activeLeafCluster.hideCrossClusterEdges();
+                const mode = this.getClusterOptions().crossClusterEdges?.mode ?? 'hover';
+                if (mode === 'hover') {
+                    if (_activeLeafCluster && _activeLeafCluster !== this) {
+                        _activeLeafCluster.hideCrossClusterEdges();
+                    }
+                    _activeLeafCluster = this;
+                    this.showCrossClusterEdges();
                 }
-                _activeLeafCluster = this;
-                this.showCrossClusterEdges();
             }
 
             const name = (this.name ? this.name : this.id);
@@ -119,8 +122,11 @@ export default class Cluster3DExtended extends BaseCluster3D {
             if (!stillInside) {
                 if (this.mHull) this.mHull.setInactive();
                 if (this.isLeaf()) {
-                    this.hideCrossClusterEdges();
-                    if (_activeLeafCluster === this) _activeLeafCluster = null;
+                    const mode = this.getClusterOptions().crossClusterEdges?.mode ?? 'hover';
+                    if (mode === 'hover') {
+                        this.hideCrossClusterEdges();
+                        if (_activeLeafCluster === this) _activeLeafCluster = null;
+                    }
                 }
                 this.getView()!.setTooltip("");
             }

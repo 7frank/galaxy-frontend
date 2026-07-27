@@ -9,6 +9,7 @@ import NodesParticleSystem from "./particles/NodesParticleSystem"
 import DomEventsAlt from "./utils/DomEventsAlt"
 import type BaseDistribution from "./distributions/BaseDistribution"
 import type BaseCluster3D from "./BaseCluster3D"
+import type { CrossClusterEdgeOptions } from "./BaseCluster3D"
 import type View3D from "../view/View3D"
 import ParticleNodeGroup, { GraphNode, BubbleNode, ParticleNodeGroupInstance, ParticleNodeGroupOptions } from "./particles/ParticleNodeGroup"
 
@@ -28,7 +29,7 @@ import * as _ from "lodash";
 export default class ClusterLeafElement extends Mesh {
 
     mDomEvents: InstanceType<typeof DomEventsAlt> | null
-    mOptions: ParticleNodeGroupOptions
+    mOptions: ParticleNodeGroupOptions & { crossClusterEdges?: CrossClusterEdgeOptions }
     mNodes: GraphNode[]
     bNodesVisible: boolean
     bEdgesVisible: boolean
@@ -40,7 +41,7 @@ export default class ClusterLeafElement extends Mesh {
     mNodeMeshes: Object3D | undefined
     mParticles: ReturnType<typeof NodesParticleSystem> | null
 
-    constructor(nodes: GraphNode[], domEvents: InstanceType<typeof DomEventsAlt> | null, options: ParticleNodeGroupOptions = {}) {
+    constructor(nodes: GraphNode[], domEvents: InstanceType<typeof DomEventsAlt> | null, options: ParticleNodeGroupOptions & { crossClusterEdges?: CrossClusterEdgeOptions } = {}) {
         super();
 
         this.mDomEvents = domEvents
@@ -201,7 +202,8 @@ export default class ClusterLeafElement extends Mesh {
         const start = performance.now();
         const tick = () => {
             if (this._crossEdgeFadeGen !== gen) return;
-            const t = Math.min(1, (performance.now() - start) / 200);
+            const fadeDuration = this.mOptions.crossClusterEdges?.fadeDuration ?? 200;
+            const t = Math.min(1, (performance.now() - start) / fadeDuration);
             mat.opacity = startOpacity + (target - startOpacity) * t;
             if (t < 1) requestAnimationFrame(tick);
         };
@@ -215,9 +217,10 @@ export default class ClusterLeafElement extends Mesh {
         const mat = c.mEdges.material as import("three/src/materials/LineBasicMaterial.js").LineBasicMaterial;
         const from = mat.opacity;
         const start = performance.now();
+        const fadeDuration = this.mOptions.crossClusterEdges?.fadeDuration ?? 200;
         const tick = () => {
             if (this._crossEdgeFadeGen !== gen) return;
-            const t = Math.min(1, (performance.now() - start) / 200);
+            const t = Math.min(1, (performance.now() - start) / fadeDuration);
             mat.opacity = from * (1 - t);
             if (t < 1) requestAnimationFrame(tick);
             else c.visible = false;
@@ -332,21 +335,33 @@ export default class ClusterLeafElement extends Mesh {
             this.mCrossClusterEdgesContainer.mEdges.geometry.dispose();
             this.mCrossClusterEdgesContainer = null;
         }
-        const targetMax = 30;
+        const opts = this.mOptions.crossClusterEdges ?? {};
+        const targetMax = opts.maxEdges ?? 30;
         const totalEdges = EdgeUtil.getEdgesForNodes(nodes as Parameters<typeof EdgeUtil.getEdgesForNodes>[0], false, true, true).length;
         const skipEdges = Math.max(1, Math.ceil(totalEdges / targetMax));
         const drawnCount = Math.max(1, Math.ceil(totalEdges / skipEdges));
-        const opacity = Math.max(0.3, Math.min(0.9, 0.9 * (targetMax / drawnCount)));
+        const defaultOpacity = Math.max(0.3, Math.min(0.9, 0.9 * (targetMax / drawnCount)));
+        const opacity = opts.opacity ?? defaultOpacity;
         const container = new EdgesContainer();
         container.setOwner(this).setRenderMode(false, true, true).setSkipParams(skipEdges, targetMax).setFromNodes(nodes);
         container.visible = false;
         const mat = container.mEdges.material as import("three/src/materials/LineBasicMaterial.js").LineBasicMaterial;
-        mat.color.set(0x88BBDD);
+        if (typeof opts.color === 'number') {
+            mat.color.set(opts.color);
+        } else {
+            mat.color.set(0x88BBDD);
+        }
+        if (typeof opts.color === 'function') {
+            container.setColorCallback(opts.color);
+        }
         mat.opacity = opacity;
         mat.depthTest = false;
         this.mCrossClusterEdgesTargetOpacity = opacity;
         this.mCrossClusterEdgesContainer = container;
         this.add(container);
+        if ((opts.mode ?? 'hover') === 'always') {
+            container.visible = true;
+        }
     }
 
 

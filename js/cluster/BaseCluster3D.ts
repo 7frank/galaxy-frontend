@@ -49,6 +49,14 @@ export interface ClusterSpec {
     options?: ClusterOptions
 }
 
+export interface CrossClusterEdgeOptions {
+    mode?: 'hover' | 'always' | 'none'
+    color?: number | ((node: GraphNode) => number)
+    maxEdges?: number
+    opacity?: number
+    fadeDuration?: number
+}
+
 export interface ClusterOptions {
     hull?: typeof BaseVolume
     makeHullEffect?: () => BaseHullEffect
@@ -61,6 +69,7 @@ export interface ClusterOptions {
     colors?: Record<string, [number, number]>
     edges?: typeof ClusterBaseEdges
     zoomDirection?: [number, number, number]
+    crossClusterEdges?: CrossClusterEdgeOptions
     [key: string]: unknown
 }
 
@@ -887,6 +896,8 @@ export default class BaseCluster3D extends BaseNode {
         let domEvents = this.getDOMEvents()
 
         let viewOptions = (this.getView() && (this.getView() as View3D & { mOptions?: Record<string, unknown> }).mOptions) || {}
+        const crossClusterEdges = this.getClusterOptions().crossClusterEdges;
+        if (crossClusterEdges) viewOptions = Object.assign({}, viewOptions, { crossClusterEdges });
         let leaf = new ClusterLeafElement(this.mNodes, domEvents, viewOptions);
         this.mLeaf = leaf;
         this.mExpandedGroup.add(leaf);

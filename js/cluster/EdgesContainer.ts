@@ -8,6 +8,7 @@ import type { ClusterEdge, EdgeNode } from "./EdgeUtil"
 import { BufferAttribute } from "three/src/core/BufferAttribute.js";
 import { BufferGeometry } from "three/src/core/BufferGeometry.js";
 import { Object3D } from "three/src/core/Object3D.js";
+import { Color } from "three/src/math/Color.js";
 import { LineBasicMaterial } from "three/src/materials/LineBasicMaterial.js";
 import { Matrix4 } from "three/src/math/Matrix4.js";
 import { Vector3 } from "three/src/math/Vector3.js";
@@ -35,6 +36,7 @@ export default class EdgesContainer extends Object3D {
 
     mExternalNodesHelpers: ExternalNodeHelper[]
     _vertexList: Vector3[]
+    _colorList: number[]
     mEdges: LineSegments
     skipEdges: number
     numDefaultMinimum: number
@@ -42,12 +44,15 @@ export default class EdgesContainer extends Object3D {
     drawOutgoingEdges: boolean
     drawIngoingEdges: boolean
     mOwner: Object3D | null
+    mColorCallback: ((node: GraphNode) => number) | null
 
     constructor() {
         super();
         this.mExternalNodesHelpers = [];
         this._vertexList = [];
+        this._colorList = [];
         this.mEdges = null!;
+        this.mColorCallback = null;
         this.skipEdges = 1;
         this.numDefaultMinimum = 20;
         this.drawInternalEdges = true;
@@ -69,6 +74,13 @@ export default class EdgesContainer extends Object3D {
 
     setOwner(owner: Object3D): this {
         this.mOwner = owner;
+        return this;
+    }
+
+    setColorCallback(fn: ((node: GraphNode) => number) | null): this {
+        this.mColorCallback = fn;
+        (this.mEdges.material as LineBasicMaterial).vertexColors = fn !== null;
+        (this.mEdges.material as LineBasicMaterial).needsUpdate = true;
         return this;
     }
 
@@ -105,6 +117,9 @@ export default class EdgesContainer extends Object3D {
         const trg = _edge.target as BubbleNode;
         const newEdge = new BaseEdge(src._bubble.position, trg._bubble.position);
 
+        const srcColor = this.mColorCallback ? this.mColorCallback(_edge.source as GraphNode) : 0xffffff;
+        const trgColor = this.mColorCallback ? this.mColorCallback(_edge.target as GraphNode) : 0xffffff;
+
         if (!_edge.isSrcInternalNode) {
             const helper = createExternalNodeHelper(src);
             this.mExternalNodesHelpers.push(helper);
@@ -112,6 +127,7 @@ export default class EdgesContainer extends Object3D {
         } else {
             this._vertexList.push(newEdge.getStart());
         }
+        this._colorList.push(srcColor);
 
         if (!_edge.isTrgInternalNode) {
             const helper = createExternalNodeHelper(trg);
@@ -120,6 +136,7 @@ export default class EdgesContainer extends Object3D {
         } else {
             this._vertexList.push(newEdge.getEnd());
         }
+        this._colorList.push(trgColor);
 
         return newEdge;
     }
@@ -135,8 +152,18 @@ export default class EdgesContainer extends Object3D {
             arr[i * 3 + 1] = verts[i].y;
             arr[i * 3 + 2] = verts[i].z;
         }
-        const attr = new BufferAttribute(arr, 3);
-        this.mEdges.geometry.setAttribute('position', attr);
+        this.mEdges.geometry.setAttribute('position', new BufferAttribute(arr, 3));
+
+        if (this.mColorCallback && this._colorList.length === verts.length) {
+            const col = new Color();
+            const cArr = new Float32Array(verts.length * 3);
+            for (let i = 0; i < this._colorList.length; i++) {
+                col.set(this._colorList[i]);
+                cArr[i * 3] = col.r; cArr[i * 3 + 1] = col.g; cArr[i * 3 + 2] = col.b;
+            }
+            this.mEdges.geometry.setAttribute('color', new BufferAttribute(cArr, 3));
+        }
+
         (this.mEdges.geometry.attributes.position as BufferAttribute).needsUpdate = true;
     }
 
