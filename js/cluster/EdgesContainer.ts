@@ -17,7 +17,7 @@ import type { GraphNode, BubbleNode as BaseBubbleNode } from "./particles/Partic
 
 interface BubbleNode extends Omit<BaseBubbleNode, '_bubble'> {
     _bubble: { position: Vector3; matrixWorld: Matrix4 }
-    getParentCluster: () => { matrixWorld: Matrix4 } | null
+    _parent: { parent: { matrixWorld: Matrix4; updateWorldMatrix: (updateParents: boolean, updateChildren: boolean) => void } | null } | null
 }
 
 interface ExternalNodeHelper {
@@ -41,6 +41,7 @@ export default class EdgesContainer extends Object3D {
     drawInternalEdges: boolean
     drawOutgoingEdges: boolean
     drawIngoingEdges: boolean
+    mOwner: Object3D | null
 
     constructor() {
         super();
@@ -52,6 +53,7 @@ export default class EdgesContainer extends Object3D {
         this.drawInternalEdges = true;
         this.drawOutgoingEdges = true;
         this.drawIngoingEdges = true;
+        this.mOwner = null;
 
         this.initLineMesh();
         this.setSkipParams(1);
@@ -65,6 +67,11 @@ export default class EdgesContainer extends Object3D {
         return this;
     }
 
+    setOwner(owner: Object3D): this {
+        this.mOwner = owner;
+        return this;
+    }
+
     setRenderMode(drawInternalEdges: boolean, drawOutgoingEdges: boolean, drawIngoingEdges: boolean): this {
         this.drawInternalEdges = drawInternalEdges;
         this.drawOutgoingEdges = drawOutgoingEdges;
@@ -73,31 +80,33 @@ export default class EdgesContainer extends Object3D {
     }
 
     addEdge(_edge: ClusterEdge): BaseEdge {
-        function createExternalNodeHelper(node: BubbleNode, internalOtherNode: BubbleNode): ExternalNodeHelper {
-            const nPos = node._bubble.position;
-            const adjustedPos = new Vector3();
+        const owner = this.mOwner;
 
+        const createExternalNodeHelper = (node: BubbleNode): ExternalNodeHelper => {
+            const localPos = new Vector3();
+            const externalLeaf = node._parent?.parent ?? null;
             return {
-                position: adjustedPos,
+                position: localPos,
                 update: function () {
-                    if (!node.getParentCluster()) return;
-                    if (!internalOtherNode.getParentCluster()) return;
-
-                    adjustedPos.setFromMatrixPosition(node.getParentCluster().matrixWorld);
-                    adjustedPos.add(nPos);
-                    const other = new Vector3();
-                    other.setFromMatrixPosition(internalOtherNode.getParentCluster().matrixWorld);
-                    adjustedPos.sub(other);
+                    localPos.copy(node._bubble.position);
+                    if (externalLeaf) {
+                        externalLeaf.updateWorldMatrix(true, false);
+                        localPos.applyMatrix4(externalLeaf.matrixWorld);
+                    }
+                    if (owner) {
+                        owner.updateWorldMatrix(true, false);
+                        owner.worldToLocal(localPos);
+                    }
                 }
             };
-        }
+        };
 
         const src = _edge.source as BubbleNode;
         const trg = _edge.target as BubbleNode;
         const newEdge = new BaseEdge(src._bubble.position, trg._bubble.position);
 
         if (!_edge.isSrcInternalNode) {
-            const helper = createExternalNodeHelper(src, trg);
+            const helper = createExternalNodeHelper(src);
             this.mExternalNodesHelpers.push(helper);
             this._vertexList.push(helper.position);
         } else {
@@ -105,7 +114,7 @@ export default class EdgesContainer extends Object3D {
         }
 
         if (!_edge.isTrgInternalNode) {
-            const helper = createExternalNodeHelper(trg, src);
+            const helper = createExternalNodeHelper(trg);
             this.mExternalNodesHelpers.push(helper);
             this._vertexList.push(helper.position);
         } else {

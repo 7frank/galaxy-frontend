@@ -11,8 +11,9 @@ import ZoomUtil from "../utils/ZoomUtil"
 import type { GraphNode } from "./particles/ParticleNodeGroup"
 import type ClusterLeafElement from "./ClusterLeafElement"
 import type View3D from "../view/View3D"
-import { Mesh } from "three/src/objects/Mesh.js";
 import { Object3D } from "three/src/core/Object3D.js";
+
+let _activeLeafCluster: Cluster3DExtended | null = null;
 
 export default class Cluster3DExtended extends BaseCluster3D {
 
@@ -85,6 +86,14 @@ export default class Cluster3DExtended extends BaseCluster3D {
                 this.mHull.setActive();
             }
 
+            if (this.isLeaf()) {
+                if (_activeLeafCluster && _activeLeafCluster !== this) {
+                    _activeLeafCluster.hideCrossClusterEdges();
+                }
+                _activeLeafCluster = this;
+                this.showCrossClusterEdges();
+            }
+
             const name = (this.name ? this.name : this.id);
             const parents = this.getParents();
 
@@ -100,10 +109,21 @@ export default class Cluster3DExtended extends BaseCluster3D {
 
         this.on("mouseout", function (this: Cluster3DExtended, e: Event) {
             e.stopPropagation();
-            if (this.mHull) {
-                this.mHull.setInactive();
+            const domEvents = this.getDOMEvents();
+            const newSelected = (domEvents as unknown as { _selected?: import("three/src/core/Object3D.js").Object3D })._selected;
+            let stillInside = false;
+            if (newSelected) {
+                let p: import("three/src/core/Object3D.js").Object3D | null = newSelected;
+                while (p) { if (p === this) { stillInside = true; break; } p = p.parent; }
             }
-            this.getView()!.setTooltip("");
+            if (!stillInside) {
+                if (this.mHull) this.mHull.setInactive();
+                if (this.isLeaf()) {
+                    this.hideCrossClusterEdges();
+                    if (_activeLeafCluster === this) _activeLeafCluster = null;
+                }
+                this.getView()!.setTooltip("");
+            }
         });
 
         this.on("t", function (this: Cluster3DExtended, e: Event) {

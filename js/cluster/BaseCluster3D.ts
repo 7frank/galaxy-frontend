@@ -197,6 +197,16 @@ export default class BaseCluster3D extends BaseNode {
         this.getLeafs().forEach(l => l.setNodesVisible(bVisible))
     }
 
+    showCrossClusterEdges(): void {
+        if (this.mLeaf) { this.mLeaf.showCrossClusterEdges(); return; }
+        this.getLeafs().forEach(l => l.showCrossClusterEdges())
+    }
+
+    hideCrossClusterEdges(): void {
+        if (this.mLeaf) { this.mLeaf.hideCrossClusterEdges(); return; }
+        this.getLeafs().forEach(l => l.hideCrossClusterEdges())
+    }
+
     setEdgesVisible(bVisible: boolean): void {
         this.findClusters("*").forEach(function (c) {
             c.bClusterEdgesVisible = bVisible;

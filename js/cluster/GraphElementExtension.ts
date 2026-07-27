@@ -186,6 +186,7 @@ export function doOnClickNode(
     });
 }
 
+
 export function extendGraphElements(d3Nodes: HighlightNode[], d3Links: ArrowEdge[], env: NodeEnv): void {
     addGraphHierarchy(d3Nodes, d3Links);
 

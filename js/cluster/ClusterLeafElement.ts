@@ -4,6 +4,7 @@
 
 
 import EdgesContainer from "./EdgesContainer"
+import EdgeUtil from "./EdgeUtil"
 import NodesParticleSystem from "./particles/NodesParticleSystem"
 import DomEventsAlt from "./utils/DomEventsAlt"
 import type BaseDistribution from "./distributions/BaseDistribution"
@@ -34,6 +35,8 @@ export default class ClusterLeafElement extends Mesh {
     mNodeParticles: ParticleNodeGroupInstance
     mEdgesContainer: EdgesContainer | null
     mCrossClusterEdgesContainer: EdgesContainer | null
+    mCrossClusterEdgesTargetOpacity: number
+    _crossEdgeFadeGen: number
     mNodeMeshes: Object3D | undefined
     mParticles: ReturnType<typeof NodesParticleSystem> | null
 
@@ -48,6 +51,8 @@ export default class ClusterLeafElement extends Mesh {
         this.bNodesVisible = true;
         this.bEdgesVisible = true;
         this.mCrossClusterEdgesContainer = null;
+        this.mCrossClusterEdgesTargetOpacity = 0;
+        this._crossEdgeFadeGen = 0;
         this.mNodeParticles = this.createParticleNodeCloud();
 
         this.addNodeCloudInteractions(this.mNodeParticles)
@@ -184,6 +189,42 @@ export default class ClusterLeafElement extends Mesh {
         this.mEdgesContainer.visible = bVisible;
     }
 
+    showCrossClusterEdges(): void {
+        const c = this.mCrossClusterEdgesContainer;
+        if (!c) return;
+        const gen = ++this._crossEdgeFadeGen;
+        c.updateEdges();
+        c.visible = true;
+        const mat = c.mEdges.material as import("three/src/materials/LineBasicMaterial.js").LineBasicMaterial;
+        const target = this.mCrossClusterEdgesTargetOpacity;
+        const startOpacity = mat.opacity;
+        const start = performance.now();
+        const tick = () => {
+            if (this._crossEdgeFadeGen !== gen) return;
+            const t = Math.min(1, (performance.now() - start) / 200);
+            mat.opacity = startOpacity + (target - startOpacity) * t;
+            if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    }
+
+    hideCrossClusterEdges(): void {
+        const c = this.mCrossClusterEdgesContainer;
+        if (!c || !c.visible) return;
+        const gen = ++this._crossEdgeFadeGen;
+        const mat = c.mEdges.material as import("three/src/materials/LineBasicMaterial.js").LineBasicMaterial;
+        const from = mat.opacity;
+        const start = performance.now();
+        const tick = () => {
+            if (this._crossEdgeFadeGen !== gen) return;
+            const t = Math.min(1, (performance.now() - start) / 200);
+            mat.opacity = from * (1 - t);
+            if (t < 1) requestAnimationFrame(tick);
+            else c.visible = false;
+        };
+        requestAnimationFrame(tick);
+    }
+
     getView(): View3D | null {
         return this.getParentCluster()?.getView() ?? null
     }
@@ -211,9 +252,6 @@ export default class ClusterLeafElement extends Mesh {
             ;(this.mEdgesContainer.mEdges.material as Material & { opacity: number }).opacity = 0.04
         }
 
-        if (this.mCrossClusterEdgesContainer) {
-            this.mCrossClusterEdgesContainer.visible = this.bEdgesVisible ? levelOfDetail > 0.75 : false;
-        }
 
         if (this.mNodeMeshes)
             this.mNodeMeshes.visible = levelOfDetail > 0.2;
@@ -249,7 +287,8 @@ export default class ClusterLeafElement extends Mesh {
         }
 
         if (this.mCrossClusterEdgesContainer) {
-            this.remove(this.mCrossClusterEdgesContainer);
+            if (this.mCrossClusterEdgesContainer.parent)
+                this.mCrossClusterEdgesContainer.parent.remove(this.mCrossClusterEdgesContainer);
             this.mCrossClusterEdgesContainer.mEdges.geometry.dispose();
             this.mCrossClusterEdgesContainer = null;
         }
@@ -284,14 +323,30 @@ export default class ClusterLeafElement extends Mesh {
         this.mEdgesContainer = new EdgesContainer();
         this.mEdgesContainer.setRenderMode(true, false, false).setSkipParams(30, 40).setFromNodes(nodes);
         this.add(this.mEdgesContainer)
-        this.createCrossClusterEdgesFromNodes(nodes);
     }
 
     createCrossClusterEdgesFromNodes(nodes: GraphNode[]): void {
-        this.mCrossClusterEdgesContainer = new EdgesContainer();
-        this.mCrossClusterEdgesContainer.setRenderMode(false, true, true).setSkipParams(1, 20).setFromNodes(nodes);
-        this.mCrossClusterEdgesContainer.visible = false;
-        this.add(this.mCrossClusterEdgesContainer);
+        if (this.mCrossClusterEdgesContainer) {
+            if (this.mCrossClusterEdgesContainer.parent)
+                this.mCrossClusterEdgesContainer.parent.remove(this.mCrossClusterEdgesContainer);
+            this.mCrossClusterEdgesContainer.mEdges.geometry.dispose();
+            this.mCrossClusterEdgesContainer = null;
+        }
+        const targetMax = 30;
+        const totalEdges = EdgeUtil.getEdgesForNodes(nodes as Parameters<typeof EdgeUtil.getEdgesForNodes>[0], false, true, true).length;
+        const skipEdges = Math.max(1, Math.ceil(totalEdges / targetMax));
+        const drawnCount = Math.max(1, Math.ceil(totalEdges / skipEdges));
+        const opacity = Math.max(0.3, Math.min(0.9, 0.9 * (targetMax / drawnCount)));
+        const container = new EdgesContainer();
+        container.setOwner(this).setRenderMode(false, true, true).setSkipParams(skipEdges, targetMax).setFromNodes(nodes);
+        container.visible = false;
+        const mat = container.mEdges.material as import("three/src/materials/LineBasicMaterial.js").LineBasicMaterial;
+        mat.color.set(0x88BBDD);
+        mat.opacity = opacity;
+        mat.depthTest = false;
+        this.mCrossClusterEdgesTargetOpacity = opacity;
+        this.mCrossClusterEdgesContainer = container;
+        this.add(container);
     }
 
 
@@ -310,6 +365,7 @@ export default class ClusterLeafElement extends Mesh {
         }, function _onStep() {
             onStep()
         }, function () {
+            that.createCrossClusterEdgesFromNodes(that.mNodes);
             that.updateEdges();
             setTimeout(() => that._initDotParticles(), 50);
             onComplete()

@@ -83,7 +83,7 @@ export default class GraphView3D extends View3D {
 
         var gl = this.mRenderer.getContext();
 
-        (window as Window & { test?: unknown }).test = {gl: gl, renderer: this.mRenderer};
+        (window as Window & { test?: unknown }).test = {gl: gl, renderer: this.mRenderer,that:this};
 
         const renderer = this.mRenderer as unknown as StencilRenderer;
         renderer.debug = Object.assign(renderer.debug || {}, {
