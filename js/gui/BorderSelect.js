@@ -13,6 +13,8 @@ const EFFECTS = [
 
 class BorderSelect extends HTMLElement {
 
+    setView(view) { this._view = view; return this; }
+
     connectedCallback() {
         this.innerHTML = `<label>Border:</label>`;
 
@@ -26,8 +28,7 @@ class BorderSelect extends HTMLElement {
     }
 
     _select(btn, label) {
-        const app = document.querySelector("sample-cluster-application");
-        const view = app && app.getCurrentView();
+        const view = this._view;
         if (!view || !view.mRootCluster) return;
 
         const entry = EFFECTS.find(e => e.label === label);

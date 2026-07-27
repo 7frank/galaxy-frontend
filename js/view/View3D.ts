@@ -58,7 +58,7 @@ export default class View3D extends EventTarget {
     maxFPS: number
     mLastFrameTime: number
     mFrameId: number
-    name: string
+    name: string ="foo"
     _inited_static_: boolean
 
     constructor(el: HTMLElement) {

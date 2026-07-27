@@ -13,6 +13,8 @@ const SOURCES = [
 
 class DataSourceSelect extends HTMLElement {
 
+    setView(view) { this._view = view; return this; }
+
     connectedCallback() {
         this.innerHTML = `<label>Data:</label>`;
 
@@ -26,8 +28,7 @@ class DataSourceSelect extends HTMLElement {
     }
 
     _select(btn, label) {
-        const app = document.querySelector("sample-cluster-application");
-        const view = app && app.getCurrentView();
+        const view = this._view;
         if (!view) return;
 
         const entry = SOURCES.find(s => s.label === label);

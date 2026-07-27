@@ -4,15 +4,15 @@ class InfoPanel extends HTMLElement {
 
     constructor(...args) {
         super(...args);
-
-
     }
+
+    setView(view) { this._view = view; return this; }
 
     connectedCallback() {
 
         this.innerHTML = template;
 
-        const getView = () => document.querySelector("sample-cluster-application").getView();
+        const getView = () => this._view;
 
         this.querySelector("#clusterTextVisible").addEventListener("change", function () {
             getView().setTextVisible(this.value);

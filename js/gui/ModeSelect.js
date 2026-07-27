@@ -8,9 +8,9 @@ class ModeSelect extends HTMLElement {
 
     constructor(...args) {
         super(...args);
-
     }
 
+    setView(view) { this._view = view; return this; }
 
     addModeBtn(caption, mode, bSelected) {
 
@@ -35,12 +35,9 @@ class ModeSelect extends HTMLElement {
 
         function onModeClick() {
 
-            let main = document.querySelector("sample-cluster-application")
+            if (that.prevMode == caption) return;
 
-            if (that.prevMode == caption) return;//  prevMode = mode;
-
-
-            mode.setView(main.getCurrentView()).setMode(function () {
+            mode.setView(that._view).setMode(function () {
 
                 that.prevMode = caption
 

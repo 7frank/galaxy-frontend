@@ -35,12 +35,7 @@ const LAYOUTS = {
     "Dagre TB": new DagreLayoutEngine("TB"),
 };
 
-function getView() {
-    const app = document.querySelector("sample-cluster-application");
-    return app && app.getCurrentView();
-}
-
-function initStatsPane(container) {
+function initStatsPane(container, getView) {
     const stats = new Pane({ title: "Stats", expanded: true, container });
 
     const data = { fps: 0, clusters: 0, nodes: 0, relations: 0 };
@@ -71,7 +66,7 @@ function initStatsPane(container) {
     return stats;
 }
 
-export function initTweakpane() {
+export function initTweakpane(getView) {
     const pane = new Pane({ title: "Controls", expanded: true });
     pane.element.parentElement.style.zIndex = "100";
 
@@ -94,8 +89,7 @@ export function initTweakpane() {
     pane.addBinding(state, "mode", { label: "Graph", options: Object.fromEntries(Object.keys(MODES).map(k => [k, k])) })
         .on("change", ({ value }) => {
             if (value === prevMode) return;
-            const app = document.querySelector("sample-cluster-application");
-            const view = app && app.getCurrentView();
+            const view = getView();
             if (!view) return;
             MODES[value]().setView(view).setMode(() => { prevMode = value; });
         });
@@ -142,7 +136,7 @@ export function initTweakpane() {
     const spacer = document.createElement("div");
     spacer.style.height = "1em";
     pane.element.parentElement.appendChild(spacer);
-    initStatsPane(pane.element.parentElement);
+    initStatsPane(pane.element.parentElement, getView);
 
     const spacer2 = document.createElement("div");
     spacer2.style.height = "1em";

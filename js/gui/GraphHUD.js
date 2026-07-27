@@ -10,10 +10,19 @@ class GraphHUD extends HTMLElement {
         super(...args);
     }
 
+    setView(view) {
+        this._view = view;
+        if (this._tweakpane) return;
+        return this;
+    }
+
     connectedCallback() {
         this.innerHTML = template;
-        initTweakpane();
-        initEdgeIndicatorOverlay();
+        const getView = () => this._view;
+        this._tweakpane = initTweakpane(getView);
+        this._destroyEdgeOverlay = initEdgeIndicatorOverlay(this._view);
+        const infoPanel = this.querySelector("info-panel");
+        if (infoPanel) infoPanel.setView(this._view);
     }
 }
 

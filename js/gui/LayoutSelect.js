@@ -12,6 +12,8 @@ const ENGINES = [
 
 class LayoutSelect extends HTMLElement {
 
+    setView(view) { this._view = view; return this; }
+
     connectedCallback() {
         this.innerHTML = `<label>Layout:</label>`;
 
@@ -25,8 +27,7 @@ class LayoutSelect extends HTMLElement {
     }
 
     _select(btn, engine) {
-        const app = document.querySelector("sample-cluster-application");
-        const view = app && app.getCurrentView();
+        const view = this._view;
         if (!view || !view._currentDatasource) return;
 
         const speccs = view.getSpeccs();
