@@ -221,7 +221,7 @@ export default class View3D extends EventTarget {
         this.createTooltip();
 
         this.mFPS = 0.5;
-        this.minFPS = this.minFPS || 0;
+        this.minFPS = this.minFPS || 1;
         this.maxFPS = this.maxFPS || 144;
 
         this.mLastFrameTime = -1;

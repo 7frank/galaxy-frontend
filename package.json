@@ -13,6 +13,10 @@
     "./hull": {
       "import": "./dist/hull.mjs",
       "require": "./dist/hull.js"
+    },
+    "./gui": {
+      "import": "./dist/gui.mjs",
+      "require": "./dist/gui.js"
     }
   },
   "files": [

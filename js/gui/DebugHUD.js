@@ -1,0 +1,185 @@
+import { Pane } from "tweakpane";
+
+import Extended2DGraphConfig from "../cluster/configs/Extendend2DGraphConfig";
+import Default3DGraphConfig from "../cluster/configs/Default3DGraphConfig";
+import Default2DGraphConfig from "../cluster/configs/Default2DGraphConfig";
+
+import CsvDatasource from "../data/CsvDatasource";
+import GeneratorDatasource from "../data/GeneratorDatasource";
+
+import ForceLayoutEngine from "../cluster/distributions/engines/ForceLayoutEngine";
+import DagreLayoutEngine from "../cluster/distributions/engines/DagreLayoutEngine";
+
+const MODES = {
+    "3D":  () => new Default3DGraphConfig(),
+    "2D":  () => new Default2DGraphConfig(),
+    "2D+": () => new Extended2DGraphConfig(),
+};
+
+const BORDERS = ["None", "Outline", "Basic", "Box"];
+
+const SOURCES = {
+    "CSV": () => new CsvDatasource("assets/realDataNodesv5_ticker.csv", "assets/realDataLinksv5.csv"),
+    "1k":  () => new GeneratorDatasource({ nodeCount: 1000,  edgeCount: 2000 }),
+    "5k":  () => new GeneratorDatasource({ nodeCount: 5000,  edgeCount: 10000 }),
+    "10k": () => new GeneratorDatasource({ nodeCount: 10000, edgeCount: 20000 }),
+    "20k": () => new GeneratorDatasource({ nodeCount: 20000, edgeCount: 40000 }),
+    "50k": () => new GeneratorDatasource({ nodeCount: 50000, edgeCount: 100000 }),
+};
+
+const LAYOUTS = {
+    "3D":       new ForceLayoutEngine(3),
+    "Plane":    new ForceLayoutEngine(2),
+    "Dagre LR": new DagreLayoutEngine("LR"),
+    "Dagre TB": new DagreLayoutEngine("TB"),
+};
+
+const DEPTHS = {
+    "Flat":      1,
+    "Countries": 2,
+    "Full":      3,
+};
+
+class GraphDebugHUD extends HTMLElement {
+    constructor(...args) {
+        super(...args);
+        this._view = null;
+        this._pane = null;
+        this._statsInterval = null;
+    }
+
+    connectedCallback() {
+        this._init();
+    }
+
+    disconnectedCallback() {
+        if (this._statsInterval) clearInterval(this._statsInterval);
+        if (this._pane) this._pane.dispose();
+    }
+
+    setView(view) {
+        this._view = view;
+    }
+
+    _getView() {
+        if (this._view) return this._view;
+        const el = document.querySelector('.view-3d.view-3d-maximised');
+        return el ? el._view3d : null;
+    }
+
+    _init() {
+        const pane = new Pane({ title: "Controls", expanded: true, container: this });
+        pane.element.parentElement.style.zIndex = "100";
+        this._pane = pane;
+
+        let prevMode = "3D";
+        const state = { mode: "3D", border: "Outline", source: "CSV", layout: "3D", depth: "Full" };
+
+        pane.addBinding(state, "mode", { label: "Graph", options: Object.fromEntries(Object.keys(MODES).map(k => [k, k])) })
+            .on("change", ({ value }) => {
+                if (value === prevMode) return;
+                const view = this._getView();
+                if (!view) return;
+                MODES[value]().setView(view).setMode(() => { prevMode = value; });
+            });
+
+        pane.addBinding(state, "border", { label: "Border", options: Object.fromEntries(BORDERS.map(k => [k, k])) })
+            .on("change", ({ value }) => {
+                const view = this._getView();
+                if (!view || !view.mRootCluster) return;
+                view.setBorderStyle(value);
+            });
+
+        pane.addBinding(state, "source", { label: "Data", options: Object.fromEntries(Object.keys(SOURCES).map(k => [k, k])) })
+            .on("change", ({ value }) => {
+                const view = this._getView();
+                if (!view) return;
+                view.loadDatasource(SOURCES[value]());
+            });
+
+        pane.addBinding(state, "layout", { label: "Layout", options: Object.fromEntries(Object.keys(LAYOUTS).map(k => [k, k])) })
+            .on("change", ({ value }) => {
+                const view = this._getView();
+                if (!view || !view._currentDatasource) return;
+                const engine = LAYOUTS[value];
+                const speccs = view.getSpeccs();
+                if (!speccs) return;
+                speccs.forEach((spec, i) => {
+                    const scale = spec.distribution ? spec.distribution.mScale : null;
+                    if (scale !== null) spec.distribution = engine.forLevel(i, scale);
+                });
+                view.loadDatasource(view._currentDatasource);
+            });
+
+        pane.addBinding(state, "depth", { label: "Depth", options: Object.fromEntries(Object.keys(DEPTHS).map(k => [k, k])) })
+            .on("change", ({ value }) => {
+                const view = this._getView();
+                if (!view || !view._currentDatasource) return;
+                view._clusterDepth = DEPTHS[value];
+                view.loadDatasource(view._currentDatasource);
+            });
+
+        this._initStats();
+        this._initNodePane();
+    }
+
+    _initStats() {
+        const spacer = document.createElement("div");
+        spacer.style.height = "1em";
+        this.appendChild(spacer);
+
+        const stats = new Pane({ title: "Stats", expanded: true, container: this });
+        const data = { fps: 0, clusters: 0, nodes: 0, relations: 0 };
+
+        stats.addBinding(data, "fps",       { label: "FPS",       readonly: true, view: "graph", series: 0, min: 0, max: 144 });
+        stats.addBinding(data, "clusters",  { label: "Clusters",  readonly: true });
+        stats.addBinding(data, "nodes",     { label: "Nodes",     readonly: true });
+        stats.addBinding(data, "relations", { label: "Relations", readonly: true });
+
+        this._statsInterval = setInterval(() => {
+            const view = this._getView();
+            if (!view) return;
+            data.fps = view.mActualFPS || 0;
+            const root = view.mRootCluster;
+            if (root) {
+                const leafs = root.getLeafs();
+                data.clusters = root.findClusters("*").length;
+                data.nodes = leafs.reduce((sum, l) => sum + (l.mNodes ? l.mNodes.length : 0), 0);
+                data.relations = leafs.reduce((sum, l) => sum + (l.mNodes ? l.mNodes.reduce((s, n) => s + (n.edges ? n.edges.length : 0), 0) : 0), 0);
+            }
+            stats.refresh();
+        }, 1000);
+    }
+
+    _initNodePane() {
+        const spacer = document.createElement("div");
+        spacer.style.height = "1em";
+        this.appendChild(spacer);
+
+        const nodePane = new Pane({ title: "Selected Node", expanded: true, container: this });
+        nodePane.element.style.display = "none";
+
+        const data = { name: "", ticker: "", country: "", industry: "", price: "", sent: "" };
+        nodePane.addBinding(data, "name",     { label: "Name",      readonly: true });
+        nodePane.addBinding(data, "ticker",   { label: "Ticker",    readonly: true });
+        nodePane.addBinding(data, "country",  { label: "Country",   readonly: true });
+        nodePane.addBinding(data, "industry", { label: "Industry",  readonly: true });
+        nodePane.addBinding(data, "price",    { label: "Price",     readonly: true });
+        nodePane.addBinding(data, "sent",     { label: "Sentiment", readonly: true });
+
+        window.addEventListener("node-selected", ({ detail: node }) => {
+            if (!node) { nodePane.element.style.display = "none"; return; }
+            data.name     = node.name     || "";
+            data.ticker   = node.ticker   || "";
+            data.country  = node.group    || "";
+            data.industry = node.industry || "";
+            data.price    = node.price    != null ? String(node.price) : "";
+            data.sent     = node.sent     != null ? String(node.sent)  : "";
+            nodePane.element.style.display = "";
+            nodePane.refresh();
+        });
+    }
+}
+
+if (!customElements.get('graph-debug-hud'))
+    customElements.define('graph-debug-hud', GraphDebugHUD);

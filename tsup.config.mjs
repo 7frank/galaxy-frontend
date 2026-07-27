@@ -6,6 +6,7 @@ export default defineConfig({
     entry: {
         index: 'js/index.ts',
         hull: 'js/hull.ts',
+        gui: 'js/gui.js',
     },
     format: ['esm', 'cjs'],
     outDir: 'dist',

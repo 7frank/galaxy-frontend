@@ -14,6 +14,7 @@ import type View3D from "../view/View3D"
 import ParticleNodeGroup, { GraphNode, BubbleNode, ParticleNodeGroupInstance, ParticleNodeGroupOptions } from "./particles/ParticleNodeGroup"
 
 
+import { computeCompanyNodeColor } from "./utils/ColorUtils"
 import {TWEEN} from "../lib/Tween"
 import type { Raycaster, Intersection } from "three/src/core/Raycaster.js";
 import { Object3D } from "three/src/core/Object3D.js";
@@ -456,8 +457,12 @@ export default class ClusterLeafElement extends Mesh {
 
 
     updateDotParticlesColor(): void {
-        if (this.mParticles) {
-            this.mParticles.updateColors();
-        }
+        this.mNodes.forEach((node: any, i: number) => {
+            if (typeof node.sent === 'number') {
+                node.color = computeCompanyNodeColor(node.sent, 'sent');
+            }
+            this.mNodeParticles?.updateNodeColor?.(i);
+        });
+        this.mParticles?.updateColors?.();
     }
 }

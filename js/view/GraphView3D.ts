@@ -63,6 +63,7 @@ export default class GraphView3D extends View3D {
     _hullOptions: ClusterSpec['options'] | null
     _currentDatasource: Datasource | null
     _destroyEdgeIndicator: (() => void) | null
+    _onGradientChange: (() => void) | null
     selectionManager: NodeSelectionManager
     graphId: string
 
@@ -72,6 +73,7 @@ export default class GraphView3D extends View3D {
         this.mRootCluster = null;
         this.mOptions = options;
         this._destroyEdgeIndicator = null;
+        this._onGradientChange = null;
         this.graphId = crypto.randomUUID();
         this.selectionManager = new NodeSelectionManager(this);
         this.el.dataset.graphId = this.graphId;
@@ -80,6 +82,13 @@ export default class GraphView3D extends View3D {
         if (options.clusterDepth != null) this.setClusterDepth(options.clusterDepth);
         if (options.hullOptions) this.setHullOptions(options.hullOptions);
         if (options.showEdgeIndicator) this.edgeIndicator(true);
+
+        this._onGradientChange = () => {
+            if (this.mRootCluster) {
+                this.mRootCluster.findClusters("*").forEach((cluster: BaseCluster3D) => cluster.updateIfIsLeaf());
+            }
+        };
+        window.addEventListener('gradient-change', this._onGradientChange);
 
         var gl = this.mRenderer.getContext();
 
@@ -133,6 +142,10 @@ export default class GraphView3D extends View3D {
     destroy(): void {
         this._destroyEdgeIndicator?.();
         this._destroyEdgeIndicator = null;
+        if (this._onGradientChange) {
+            window.removeEventListener('gradient-change', this._onGradientChange);
+            this._onGradientChange = null;
+        }
     }
 
     setBorderStyle(style: string): Promise<this> {

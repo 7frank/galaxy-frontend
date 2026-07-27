@@ -5,21 +5,34 @@ const _priceRangesInPct = [[18, Number.MAX_SAFE_INTEGER], [18, 15], [12, 15], [9
 
 let _currentGradientColors = [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729];
 
-const _availGradients: number[][] = [
-    [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729],
-    [0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0xff0000, 0x00ff00, 0x0000ff, 0xffffff],
-    [0xffffff, 0x0000ff, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111]
+const _availGradients: { name: string; colors: number[] }[] = [
+    { name: 'Default',  colors: [0x218D20, 0x439229, 0x8CCB84, 0x14B0BF, 0x9DC9CA, 0xCAB81A, 0xBBC42D, 0xC8A6BF, 0xCF73B4, 0x816365, 0x7D5C53, 0xAE5E29, 0xB62729] },
+    { name: 'RGB',      colors: [0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0xff0000, 0x00ff00, 0x0000ff, 0xffffff] },
+    { name: 'Inverse',  colors: [0xffffff, 0x0000ff, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111, 0x111111] },
 ];
 
 let _gradientIndex = 0;
 
 export function cycleGradient(): number[] {
     _gradientIndex = ++_gradientIndex % _availGradients.length;
-    return _currentGradientColors = _availGradients[_gradientIndex];
+    return _currentGradientColors = _availGradients[_gradientIndex].colors;
+}
+
+export function setGradientByIndex(index: number): number[] {
+    _gradientIndex = ((index % _availGradients.length) + _availGradients.length) % _availGradients.length;
+    return _currentGradientColors = _availGradients[_gradientIndex].colors;
 }
 
 export function getCurrentGradient(): number[] {
     return _currentGradientColors;
+}
+
+export function getAvailGradients(): { name: string; colors: number[] }[] {
+    return _availGradients;
+}
+
+export function addGradient(name: string, colors: number[]): void {
+    _availGradients.push({ name, colors });
 }
 
 export function computeCompanyNodeColor(val = 0, attr = "sent"): number {

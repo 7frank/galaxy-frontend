@@ -24,7 +24,7 @@ function changeGradientBar(colorArray: number[]): void {
 }
 
 function getBody(): Element | null {
-    return document.querySelector("sample-cluster-application graph-hud");
+    return document.querySelector("graph-hud") ?? document.body;
 }
 
 function makeDraggable(element: HTMLElement): void {
