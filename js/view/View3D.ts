@@ -50,7 +50,6 @@ export default class View3D extends EventTarget {
     mControls: InstanceType<typeof TrackballControls>
     mDomEvents: InstanceType<typeof DomEventsAlt>
     mBorderEffect: BorderEffect | null
-    mCaption: HTMLSpanElement | undefined
     toolTipElem: HTMLDivElement | undefined
     mouse: Vector2 | undefined
     mFPS: number
@@ -195,22 +194,6 @@ export default class View3D extends EventTarget {
 
 
     /**
-     * sets the value of a text element that functions as a caption.
-     */
-    setCaption(text: string): this {
-
-        if (!this.mCaption) {
-            this.mCaption = document.createElement("span");
-            this.mCaption.className = "view-3d-caption";
-            this.el.appendChild(this.mCaption);
-        }
-
-        this.mCaption.textContent = text;
-        return this
-    }
-
-
-    /**
      * set up controls, scene, renderer, animation
      */
     initStatic(): this | undefined {
@@ -225,8 +208,6 @@ export default class View3D extends EventTarget {
         this.maxFPS = this.maxFPS || 144;
 
         this.mLastFrameTime = -1;
-
-        this.setCaption(this.name)
 
         this.mScene = new Scene();
 
@@ -249,7 +230,6 @@ export default class View3D extends EventTarget {
 
             that.setActive();
             that.el.setAttribute("hasFocus", "true");
-            that.mCaption!.style.opacity = "0";
         });
 
         that.el.addEventListener("mouseout", function (e) {
@@ -260,7 +240,6 @@ export default class View3D extends EventTarget {
 
             that.el.removeAttribute("hasFocus");
             if (!that.el.classList.contains("view-3d-maximised")) {
-                that.mCaption!.style.opacity = "1";
                 that.setInactive();
             }
         });
@@ -388,8 +367,6 @@ export default class View3D extends EventTarget {
      */
     maximise(): void {
         this.el.classList.add("view-3d-maximised");
-
-        if (this.mCaption) this.mCaption.style.opacity = "0";
 
         this.setActive()
     }

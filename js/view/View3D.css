@@ -9,16 +9,3 @@
 }
 
 
-.view-3d-caption {
-pointer-events: none;
-position: relative;
-padding: 1em;
-font-size: 2em;
-top: 30%;
-height: 3em;
-width: 100%;
-background: rgba(255,255,255,0.3);
-left: 0px;
-z-index: 1;
-
-}

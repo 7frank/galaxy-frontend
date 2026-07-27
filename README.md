@@ -100,7 +100,7 @@ Inherited from `View3D`:
 | `set2D()` / `set3D()` | Switch between orthographic and perspective camera |
 | `add(object3D)` | Add a raw Three.js object to the scene |
 | `maximise()` / `undoMaximise()` | Expand/collapse the canvas within its container |
-| `setCaption(text)` | Set a text caption overlay on the canvas |
+
 | `scene()` | Access the internal `THREE.Scene` |
 | `camera()` | Access the internal camera |
 | `renderer()` | Access the internal `WebGLRenderer` |
